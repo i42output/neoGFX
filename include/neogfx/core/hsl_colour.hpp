@@ -23,40 +23,40 @@
 
 namespace neogfx
 {
-	class colour;
+    class colour;
 
-	class hsl_colour
-	{
-	public:
-		hsl_colour();
-		hsl_colour(double aHue, double aSaturation, double aLightness, double aAlpha = 1.0);
-		hsl_colour(const colour& aColour);
-	public:
-		double hue() const;
-		double saturation() const;
-		double lightness() const;
-		double alpha() const;
-		void set_hue(double aHue);
-		void set_saturation(double aSaturation);
-		void set_lightness(double aLightness);
-		void set_alpha(double aAlpha);
-		bool hue_undefined() const;
-	public:
-		hsl_colour with_lightness(double aNewLightness) const;
-		hsl_colour lighter(double aDelta) const;
-		hsl_colour lighter(double aCoeffecient, double aDelta) const;
-		colour to_rgb() const;
-		static hsl_colour from_rgb(const colour& aColour);
-	public:
-		static double undefined_hue();
-	public:
-		bool operator==(const hsl_colour& aOther) const;
-		bool operator!=(const hsl_colour& aOther) const;
-		bool operator<(const hsl_colour& aOther) const;
-	private:
-		double iHue;
-		double iSaturation;
-		double iLightness;
-		double iAlpha;
-	};
+    class hsl_colour
+    {
+    public:
+        hsl_colour();
+        hsl_colour(double aHue, double aSaturation, double aLightness, double aAlpha = 1.0);
+        hsl_colour(const colour& aColour);
+    public:
+        double hue() const;
+        double saturation() const;
+        double lightness() const;
+        double alpha() const;
+        void set_hue(double aHue);
+        void set_saturation(double aSaturation);
+        void set_lightness(double aLightness);
+        void set_alpha(double aAlpha);
+        bool hue_undefined() const;
+    public:
+        hsl_colour with_lightness(double aNewLightness) const;
+        hsl_colour lighter(double aDelta) const;
+        hsl_colour lighter(double aCoeffecient, double aDelta) const;
+        colour to_rgb() const;
+        static hsl_colour from_rgb(const colour& aColour);
+    public:
+        static double undefined_hue();
+    public:
+        bool operator==(const hsl_colour& aOther) const;
+        bool operator!=(const hsl_colour& aOther) const;
+        bool operator<(const hsl_colour& aOther) const;
+    private:
+        double iHue;
+        double iSaturation;
+        double iLightness;
+        double iAlpha;
+    };
 }

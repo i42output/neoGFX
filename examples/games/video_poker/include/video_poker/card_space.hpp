@@ -34,54 +34,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace video_poker
 {
-	using namespace neogames::card_games;
+    using namespace neogames::card_games;
 
-	class card_widget : public neogfx::widget
-	{
-	public:
-		card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures);
-	protected:
-		neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
-		neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
-	protected:
-		void paint(neogfx::graphics_context& aGraphicsContext) const override;
-	public:
-		bool has_card() const;
-		video_poker::card& card() const;
-		void set_card(video_poker::card& aCard);
-		void clear_card();
-	private:
-		void update_sprite_geometry();
-		void toggle_hold();
-	private:
-		neogfx::game::canvas& iCanvas;
-		const i_card_textures& iCardTextures;
-		neogfx::sink iSink;
-		video_poker::card* iCard;
-		neogfx::game::entity_id iCardSprite;
-	};
+    class card_widget : public neogfx::widget
+    {
+    public:
+        card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures);
+    protected:
+        neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
+        neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
+    protected:
+        void paint(neogfx::graphics_context& aGraphicsContext) const override;
+    public:
+        bool has_card() const;
+        video_poker::card& card() const;
+        void set_card(video_poker::card& aCard);
+        void clear_card();
+    private:
+        void update_sprite_geometry();
+        void toggle_hold();
+    private:
+        neogfx::game::canvas& iCanvas;
+        const i_card_textures& iCardTextures;
+        neogfx::sink iSink;
+        video_poker::card* iCard;
+        neogfx::game::entity_id iCardSprite;
+    };
 
-	class card_space : neogfx::widget
-	{
-	public:
-		struct no_card : std::runtime_error { no_card() : std::runtime_error("video_poker::card_space::no_card") {} };
-	public:
-		card_space(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, i_table& aTable);
-	public:
-		bool has_card() const;
-		const video_poker::card& card() const;
-		video_poker::card& card();
-		void set_card(video_poker::card& aCard);
-		void clear_card();
-	private:
-		void update_widgets();
-	public:
-		neogfx::game::canvas& iCanvas;
-		i_table& iTable;
-		neogfx::vertical_layout iVerticalLayout;
-		card_widget iCardWidget;
-		flashing_button iHoldButton;
-		video_poker::card* iCard;
-		neogfx::sink iSink;
-	};
+    class card_space : neogfx::widget
+    {
+    public:
+        struct no_card : std::runtime_error { no_card() : std::runtime_error("video_poker::card_space::no_card") {} };
+    public:
+        card_space(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, i_table& aTable);
+    public:
+        bool has_card() const;
+        const video_poker::card& card() const;
+        video_poker::card& card();
+        void set_card(video_poker::card& aCard);
+        void clear_card();
+    private:
+        void update_widgets();
+    public:
+        neogfx::game::canvas& iCanvas;
+        i_table& iTable;
+        neogfx::vertical_layout iVerticalLayout;
+        card_widget iCardWidget;
+        flashing_button iHoldButton;
+        video_poker::card* iCard;
+        neogfx::sink iSink;
+    };
 }

@@ -25,35 +25,35 @@
 
 namespace neogfx
 {
-	class i_display;
-	class i_native_clipboard;
-	class i_shared_menu_bar;
+    class i_display;
+    class i_native_clipboard;
+    class i_shared_menu_bar;
 
-	enum class platform
-	{
-		Windows,
-		Mac,
-		Kde,
-		Gnome
-	};
+    enum class platform
+    {
+        Windows,
+        Mac,
+        Kde,
+        Gnome
+    };
 
-	class i_basic_services
-	{
-	public:
-		struct bad_display_index : std::logic_error { bad_display_index() : std::logic_error("neogfx::i_basic_services::bad_display_index") {} };
-		struct no_system_menu_bar : std::logic_error { no_system_menu_bar() : std::logic_error("neogfx::i_basic_services::no_system_menu_bar") {} };
-	public:
-		virtual ~i_basic_services() {}
-	public:
-		virtual neogfx::platform platform() const = 0;
-		virtual neolib::async_task& app_task() = 0;
-		virtual void system_beep() = 0;
-		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
-		virtual uint32_t display_count() const = 0;
-		virtual i_display& display(uint32_t aDisplayIndex = 0) const = 0;
-		virtual bool has_system_clipboard() const = 0;
-		virtual i_native_clipboard& system_clipboard() = 0;
-		virtual bool has_system_menu_bar() const = 0;
-		virtual i_shared_menu_bar& system_menu_bar() = 0;
-	};
+    class i_basic_services
+    {
+    public:
+        struct bad_display_index : std::logic_error { bad_display_index() : std::logic_error("neogfx::i_basic_services::bad_display_index") {} };
+        struct no_system_menu_bar : std::logic_error { no_system_menu_bar() : std::logic_error("neogfx::i_basic_services::no_system_menu_bar") {} };
+    public:
+        virtual ~i_basic_services() {}
+    public:
+        virtual neogfx::platform platform() const = 0;
+        virtual neolib::async_task& app_task() = 0;
+        virtual void system_beep() = 0;
+        virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
+        virtual uint32_t display_count() const = 0;
+        virtual i_display& display(uint32_t aDisplayIndex = 0) const = 0;
+        virtual bool has_system_clipboard() const = 0;
+        virtual i_native_clipboard& system_clipboard() = 0;
+        virtual bool has_system_menu_bar() const = 0;
+        virtual i_shared_menu_bar& system_menu_bar() = 0;
+    };
 }

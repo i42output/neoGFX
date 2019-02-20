@@ -24,5 +24,5 @@
 
 namespace neogfx
 {
-	typedef hsv_colour hsv_color;
+    typedef hsv_colour hsv_color;
 }

@@ -35,82 +35,84 @@ namespace ng = neogfx;
 
 int main(int argc, char* argv[])
 {
-	ng::app app(argc, argv, "neoGFX GUI Designer (neoGUI)");
-	try
-	{
-		ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
-		app.current_style().palette().set_colour(ng::colour{ 64, 64, 64 });
-		app.current_style().set_spacing(ng::size{ 4.0 });
+    ng::app app(argc, argv, "neoGFX App/Game Designer Tool (neoGUI)");
+    try
+    {
+        ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
+        ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
+        
+        app.current_style().palette().set_colour(ng::colour{ 64, 64, 64 });
+        app.current_style().set_spacing(ng::size{ 4.0 });
 
-		ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect() * ng::size{ 0.5, 0.5 } };
-		ng::i_layout& mainLayout = mainWindow.client_layout();
-		mainLayout.set_margins(ng::margins{});
-		mainLayout.set_spacing(ng::size{});
+        ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect() * ng::size{ 0.5, 0.5 } };
+        ng::i_layout& mainLayout = mainWindow.client_layout();
+        mainLayout.set_margins(ng::margins{});
+        mainLayout.set_spacing(ng::size{});
 
-		ng::menu_bar mainMenu{ mainWindow.menu_layout() };
+        ng::menu_bar mainMenu{ mainWindow.menu_layout() };
 
-		auto& fileMenu = app.add_standard_menu(mainMenu, ng::standard_menu::File);
-		auto& editMenu = app.add_standard_menu(mainMenu, ng::standard_menu::Edit);
+        auto& fileMenu = app.add_standard_menu(mainMenu, ng::standard_menu::File);
+        auto& editMenu = app.add_standard_menu(mainMenu, ng::standard_menu::Edit);
 
-		app.action_file_new().triggered([&]()
-		{
-			neogui::new_project_dialog dialog{ mainWindow };
-			if (dialog.exec() == ng::dialog_result::Accepted)
-			{
-				// todo
-			}
-		});
+        app.action_file_new().triggered([&]()
+        {
+            neogui::new_project_dialog dialog{ mainWindow };
+            if (dialog.exec() == ng::dialog_result::Accepted)
+            {
+                // todo
+            }
+        });
 
-		ng::toolbar toolbar{ mainWindow.toolbar_layout() };
-		toolbar.set_button_image_extents(mainWindow.dpi_scale(ng::size{ 16.0, 16.0 }));
-		toolbar.add_action(app.action_file_new());
-		toolbar.add_action(app.action_file_open());
-		toolbar.add_action(app.action_file_save());
-		toolbar.add_separator();
-		toolbar.add_action(app.action_undo());
-		toolbar.add_action(app.action_redo());
-		toolbar.add_separator();
-		toolbar.add_action(app.action_cut());
-		toolbar.add_action(app.action_copy());
-		toolbar.add_action(app.action_paste());
+        ng::toolbar toolbar{ mainWindow.toolbar_layout() };
+        toolbar.set_button_image_extents(mainWindow.dpi_scale(ng::size{ 16.0, 16.0 }));
+        toolbar.add_action(app.action_file_new());
+        toolbar.add_action(app.action_file_open());
+        toolbar.add_action(app.action_file_save());
+        toolbar.add_separator();
+        toolbar.add_action(app.action_undo());
+        toolbar.add_action(app.action_redo());
+        toolbar.add_separator();
+        toolbar.add_action(app.action_cut());
+        toolbar.add_action(app.action_copy());
+        toolbar.add_action(app.action_paste());
 
-		ng::status_bar statusBar{ mainWindow.status_bar_layout() };
+        ng::status_bar statusBar{ mainWindow.status_bar_layout() };
 
-		ng::horizontal_layout workspaceLayout{ mainLayout };
-		ng::view_container workspace{ workspaceLayout };
+        ng::horizontal_layout workspaceLayout{ mainLayout };
+        ng::view_container workspace{ workspaceLayout };
 
-		workspace.view_stack().painting([&workspace](ng::graphics_context& aGc)
-		{
-			static ng::texture sBackgroundTexture1{ ng::image{ ":/neoGUI/resource/neoGFX.png" } };
-			static ng::texture sBackgroundTexture2{ ng::image{ ":/neoGUI/resource/logo_i42.png" } };
-			auto rc = workspace.view_stack().client_rect();
-			aGc.draw_texture(
-				ng::point{ (rc.extents() - sBackgroundTexture1.extents()) / 2.0 },
-				sBackgroundTexture1,
-				ng::colour::White.with_alpha(32));
-			aGc.draw_texture(
-				ng::point{ rc.bottom_right() - sBackgroundTexture2.extents() },
-				sBackgroundTexture2,
-				ng::colour::White.with_alpha(32));
-		});
+        workspace.view_stack().painting([&workspace](ng::graphics_context& aGc)
+        {
+            static ng::texture sBackgroundTexture1{ ng::image{ ":/neoGUI/resource/neoGFX.png" } };
+            static ng::texture sBackgroundTexture2{ ng::image{ ":/neoGUI/resource/logo_i42.png" } };
+            auto rc = workspace.view_stack().client_rect();
+            aGc.draw_texture(
+                ng::point{ (rc.extents() - sBackgroundTexture1.extents()) / 2.0 },
+                sBackgroundTexture1,
+                ng::colour::White.with_alpha(32));
+            aGc.draw_texture(
+                ng::point{ rc.bottom_right() - sBackgroundTexture2.extents() },
+                sBackgroundTexture2,
+                ng::colour::White.with_alpha(32));
+        });
 
-//		ng::css css{"test.css"};
+//        ng::css css{"test.css"};
 
-		return app.exec();
-	}
-	catch (std::exception& e)
-	{
-		app.halt();
-		std::cerr << "neoGUI: terminating with exception: " << e.what() << std::endl;
-		ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
-		std::exit(EXIT_FAILURE);
-	}
-	catch (...)
-	{
-		app.halt();
-		std::cerr << "neoGUI: terminating with unknown exception" << std::endl;
-		ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
-		std::exit(EXIT_FAILURE);
-	}
+        return app.exec();
+    }
+    catch (std::exception& e)
+    {
+        app.halt();
+        std::cerr << "neoGUI: terminating with exception: " << e.what() << std::endl;
+        ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
+        std::exit(EXIT_FAILURE);
+    }
+    catch (...)
+    {
+        app.halt();
+        std::cerr << "neoGUI: terminating with unknown exception" << std::endl;
+        ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
+        std::exit(EXIT_FAILURE);
+    }
 }
 

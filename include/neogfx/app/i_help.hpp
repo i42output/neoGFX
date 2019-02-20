@@ -24,36 +24,36 @@
 
 namespace neogfx
 {
-	enum class help_type
-	{
-		Action
-	};
+    enum class help_type
+    {
+        Action
+    };
 
-	class i_help_source
-	{
-	public:
-		virtual ~i_help_source() {}
-	public:
-		virtual bool help_active() const = 0;
-		virtual neogfx::help_type help_type() const = 0;
-		virtual std::string help_text() const = 0;
-	};
+    class i_help_source
+    {
+    public:
+        virtual ~i_help_source() {}
+    public:
+        virtual bool help_active() const = 0;
+        virtual neogfx::help_type help_type() const = 0;
+        virtual std::string help_text() const = 0;
+    };
 
-	class i_help
-	{
-	public:
-		struct help_not_active : std::logic_error { help_not_active() : std::logic_error("neogfx::i_help::help_not_active") {} };
-		struct invalid_help_source : std::logic_error { invalid_help_source() : std::logic_error("neogfx::i_help::invalid_help_source") {} };
-	public:
-		event<const i_help_source&> help_activated;
-		event<const i_help_source&> help_deactivated;
-	public:
-		virtual ~i_help() {}
-	public:
-		virtual bool help_active() const = 0;
-		virtual const i_help_source& active_help() const = 0;
-	public:
-		virtual void activate(const i_help_source& aSource) = 0;
-		virtual void deactivate(const i_help_source& aSource) = 0;
-	};
+    class i_help
+    {
+    public:
+        struct help_not_active : std::logic_error { help_not_active() : std::logic_error("neogfx::i_help::help_not_active") {} };
+        struct invalid_help_source : std::logic_error { invalid_help_source() : std::logic_error("neogfx::i_help::invalid_help_source") {} };
+    public:
+        event<const i_help_source&> help_activated;
+        event<const i_help_source&> help_deactivated;
+    public:
+        virtual ~i_help() {}
+    public:
+        virtual bool help_active() const = 0;
+        virtual const i_help_source& active_help() const = 0;
+    public:
+        virtual void activate(const i_help_source& aSource) = 0;
+        virtual void deactivate(const i_help_source& aSource) = 0;
+    };
 }

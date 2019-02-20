@@ -28,49 +28,49 @@
 
 namespace neogfx
 {
-	class i_rendering_engine;
-	class i_graphics_context;
-	class i_widget;
+    class i_rendering_engine;
+    class i_graphics_context;
+    class i_widget;
 
-	class i_native_surface : public i_object, public i_render_target
-	{
-	public:
-		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };
-		struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
-		struct no_invalidated_area : std::logic_error { no_invalidated_area() : std::logic_error("neogfx::i_native_surface::no_invalidated_area") {} };
-	public:
-		virtual ~i_native_surface() {}
-	public:
-		virtual bool has_parent() const = 0;
-		virtual const i_native_surface& parent() const = 0;
-		virtual i_native_surface& parent() = 0;
-	public:
-		virtual bool pump_event() = 0;
-		virtual void close(bool aForce = false) = 0;
-	public:
-		virtual void handle_dpi_changed() = 0;
-	public:
-		virtual bool initialising() const = 0;
-		virtual void* handle() const = 0;
-		virtual void* native_handle() const = 0;
-		virtual point surface_position() const = 0;
-		virtual void move_surface(const point& aPosition) = 0;
-		virtual size surface_size() const = 0;
-		virtual void resize_surface(const size& aSize) = 0;
-	public:
-		virtual uint64_t frame_counter() const = 0;
-		virtual double fps() const = 0;
-	public:
-		virtual void invalidate(const rect& aInvalidatedRect) = 0;
-		virtual bool has_invalidated_area() const = 0;
-		virtual const rect& invalidated_area() const = 0;
-		virtual rect validate() = 0;
-		virtual bool can_render() const = 0;
-		virtual void render(bool aOOBRequest = false) = 0;
-		virtual void pause() = 0;
-		virtual void resume() = 0;
-		virtual bool is_rendering() const = 0;
-		using i_render_target::create_graphics_context;
-		virtual std::unique_ptr<i_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
-	};
+    class i_native_surface : public i_object, public i_render_target
+    {
+    public:
+        struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };
+        struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
+        struct no_invalidated_area : std::logic_error { no_invalidated_area() : std::logic_error("neogfx::i_native_surface::no_invalidated_area") {} };
+    public:
+        virtual ~i_native_surface() {}
+    public:
+        virtual bool has_parent() const = 0;
+        virtual const i_native_surface& parent() const = 0;
+        virtual i_native_surface& parent() = 0;
+    public:
+        virtual bool pump_event() = 0;
+        virtual void close(bool aForce = false) = 0;
+    public:
+        virtual void handle_dpi_changed() = 0;
+    public:
+        virtual bool initialising() const = 0;
+        virtual void* handle() const = 0;
+        virtual void* native_handle() const = 0;
+        virtual point surface_position() const = 0;
+        virtual void move_surface(const point& aPosition) = 0;
+        virtual size surface_size() const = 0;
+        virtual void resize_surface(const size& aSize) = 0;
+    public:
+        virtual uint64_t frame_counter() const = 0;
+        virtual double fps() const = 0;
+    public:
+        virtual void invalidate(const rect& aInvalidatedRect) = 0;
+        virtual bool has_invalidated_area() const = 0;
+        virtual const rect& invalidated_area() const = 0;
+        virtual rect validate() = 0;
+        virtual bool can_render() const = 0;
+        virtual void render(bool aOOBRequest = false) = 0;
+        virtual void pause() = 0;
+        virtual void resume() = 0;
+        virtual bool is_rendering() const = 0;
+        using i_render_target::create_graphics_context;
+        virtual std::unique_ptr<i_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
+    };
 }

@@ -27,96 +27,96 @@
 
 namespace neogfx
 {
-	typedef neolib::cookie transition_id;
+    typedef neolib::cookie transition_id;
 
-	class i_animator;
+    class i_animator;
 
-	class i_transition : public neolib::i_cookie_jar_item
-	{
-	public:
-		virtual ~i_transition() {}
-	public:
-		virtual i_animator& animator() const = 0;
-		virtual bool enabled() const = 0;
-		virtual bool disable_when_finished() const = 0;
-		virtual void enable(bool aDisableWhenFinished = false) = 0;
-		virtual void disable() = 0;
-		virtual easing easing_function() const = 0;
-		virtual double duration() const = 0;
-		virtual double start_time() const = 0;
-		virtual double mix_value() const = 0;
-		virtual bool finished() const = 0;
-	public:
-		virtual void reset() = 0;
-		virtual void apply() = 0;
-	};
+    class i_transition : public neolib::i_cookie_jar_item
+    {
+    public:
+        virtual ~i_transition() {}
+    public:
+        virtual i_animator& animator() const = 0;
+        virtual bool enabled() const = 0;
+        virtual bool disable_when_finished() const = 0;
+        virtual void enable(bool aDisableWhenFinished = false) = 0;
+        virtual void disable() = 0;
+        virtual easing easing_function() const = 0;
+        virtual double duration() const = 0;
+        virtual double start_time() const = 0;
+        virtual double mix_value() const = 0;
+        virtual bool finished() const = 0;
+    public:
+        virtual void reset() = 0;
+        virtual void apply() = 0;
+    };
 
-	class transition;
+    class transition;
 
-	class i_animator
-	{
-		friend class neogfx::transition;
-	public:
-		virtual i_transition& transition(transition_id aTransitionId) = 0;
-		virtual transition_id add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true) = 0;
-		virtual void remove_transition(transition_id aTransitionId) = 0;
-	public:
-		virtual double animation_time() const = 0;
-	protected:
-		virtual transition_id allocate_id() = 0;
-	};
+    class i_animator
+    {
+        friend class neogfx::transition;
+    public:
+        virtual i_transition& transition(transition_id aTransitionId) = 0;
+        virtual transition_id add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true) = 0;
+        virtual void remove_transition(transition_id aTransitionId) = 0;
+    public:
+        virtual double animation_time() const = 0;
+    protected:
+        virtual transition_id allocate_id() = 0;
+    };
 
-	template <typename T>
-	inline T mix(double, const T& aLhs, const T&)
-	{
-		return aLhs;
-	}
+    template <typename T>
+    inline T mix(double, const T& aLhs, const T&)
+    {
+        return aLhs;
+    }
 
-	template <typename T1, typename T2>
-	inline T1 mix(double, const T1& aLhs, const T2&)
-	{
-		return aLhs;
-	}
-	
-	template <typename T>
-	inline T mix(double aMixValue, const std::optional<T>& aLhs, const std::optional<T>& aRhs)
-	{
-		if (!aLhs.has_value() && !aRhs.has_value())
-			return std::optional<T>{};
-		else if (aLhs.has_value() && !aRhs.has_value())
-			return aLhs;
-		else if (!aLhs.has_value() && aRhs.has_value())
-			return aRhs;
-		else
-			return mix(aMixValue, *aLhs, *aRhs);
-	}
+    template <typename T1, typename T2>
+    inline T1 mix(double, const T1& aLhs, const T2&)
+    {
+        return aLhs;
+    }
+    
+    template <typename T>
+    inline T mix(double aMixValue, const std::optional<T>& aLhs, const std::optional<T>& aRhs)
+    {
+        if (!aLhs.has_value() && !aRhs.has_value())
+            return std::optional<T>{};
+        else if (aLhs.has_value() && !aRhs.has_value())
+            return aLhs;
+        else if (!aLhs.has_value() && aRhs.has_value())
+            return aRhs;
+        else
+            return mix(aMixValue, *aLhs, *aRhs);
+    }
 
-	inline double mix(double aMixValue, double aLhs, double aRhs)
-	{
-		return (aRhs - aLhs) * aMixValue + aLhs;
-	}
+    inline double mix(double aMixValue, double aLhs, double aRhs)
+    {
+        return (aRhs - aLhs) * aMixValue + aLhs;
+    }
 
-	inline point mix(double aMixValue, const point& aLhs, const point& aRhs)
-	{
-		return point{ mix(aMixValue, aLhs.x, aRhs.x), mix(aMixValue, aLhs.y, aRhs.y) };
-	}
+    inline point mix(double aMixValue, const point& aLhs, const point& aRhs)
+    {
+        return point{ mix(aMixValue, aLhs.x, aRhs.x), mix(aMixValue, aLhs.y, aRhs.y) };
+    }
 
-	inline vec2 mix(double aMixValue, const vec2& aLhs, const vec2& aRhs)
-	{
-		return vec2{ mix(aMixValue, aLhs.x, aRhs.x), mix(aMixValue, aLhs.y, aRhs.y) };
-	}
+    inline vec2 mix(double aMixValue, const vec2& aLhs, const vec2& aRhs)
+    {
+        return vec2{ mix(aMixValue, aLhs.x, aRhs.x), mix(aMixValue, aLhs.y, aRhs.y) };
+    }
 
-	inline vec3 mix(double aMixValue, const vec3& aLhs, const vec3& aRhs)
-	{
-		return vec3{ mix(aMixValue, aLhs.x, aRhs.x), mix(aMixValue, aLhs.y, aRhs.y), mix(aMixValue, aLhs.z, aRhs.z) };
-	}
+    inline vec3 mix(double aMixValue, const vec3& aLhs, const vec3& aRhs)
+    {
+        return vec3{ mix(aMixValue, aLhs.x, aRhs.x), mix(aMixValue, aLhs.y, aRhs.y), mix(aMixValue, aLhs.z, aRhs.z) };
+    }
 
-	inline colour mix(double aMixValue, const colour& aLhs, const colour& aRhs)
-	{
-		return vec4{ 
-			mix(aMixValue, aLhs.red<double>(), aRhs.red<double>()), 
-			mix(aMixValue, aLhs.green<double>(), aRhs.green<double>()), 
-			mix(aMixValue, aLhs.blue<double>(), aRhs.blue<double>()), 
-			mix(aMixValue, aLhs.alpha<double>(), aRhs.alpha<double>()) };
-	}
+    inline colour mix(double aMixValue, const colour& aLhs, const colour& aRhs)
+    {
+        return vec4{ 
+            mix(aMixValue, aLhs.red<double>(), aRhs.red<double>()), 
+            mix(aMixValue, aLhs.green<double>(), aRhs.green<double>()), 
+            mix(aMixValue, aLhs.blue<double>(), aRhs.blue<double>()), 
+            mix(aMixValue, aLhs.alpha<double>(), aRhs.alpha<double>()) };
+    }
 }

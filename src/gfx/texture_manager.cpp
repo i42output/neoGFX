@@ -24,114 +24,114 @@
 
 namespace neogfx
 {
-	neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry)
-	{
-		return aEntry.first->id();
-	}
+    neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry)
+    {
+        return aEntry.first->id();
+    }
 
-	texture_id texture_manager::allocate_texture_id()
-	{
-		return textures().next_cookie();
-	}
+    texture_id texture_manager::allocate_texture_id()
+    {
+        return textures().next_cookie();
+    }
 
-	std::shared_ptr<i_texture> texture_manager::find_texture(texture_id aId) const
-	{
-		return textures()[aId].first;
-	}
+    std::shared_ptr<i_texture> texture_manager::find_texture(texture_id aId) const
+    {
+        return textures()[aId].first;
+    }
 
-	void texture_manager::clear_textures()
-	{
-		textures().clear();
-	}
+    void texture_manager::clear_textures()
+    {
+        textures().clear();
+    }
 
-	void texture_manager::add_ref(texture_id aId)
-	{
-		++textures()[aId].second;
-	}
+    void texture_manager::add_ref(texture_id aId)
+    {
+        ++textures()[aId].second;
+    }
 
-	void texture_manager::release(texture_id aId)
-	{
-		if (textures()[aId].second == 0u)
-			throw invalid_release();
-		if (--textures()[aId].second == 0u)
-		{
-			if (textures()[aId].first.use_count() == 1)
-				textures().remove(aId);
-		}
-	}
+    void texture_manager::release(texture_id aId)
+    {
+        if (textures()[aId].second == 0u)
+            throw invalid_release();
+        if (--textures()[aId].second == 0u)
+        {
+            if (textures()[aId].first.use_count() == 1)
+                textures().remove(aId);
+        }
+    }
 
-	long texture_manager::use_count(texture_id aId) const
-	{
-		return textures()[aId].second;
-	}
+    long texture_manager::use_count(texture_id aId) const
+    {
+        return textures()[aId].second;
+    }
 
-	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
-	{
-		return std::make_unique<texture_atlas>(aSize);
-	}
+    std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
+    {
+        return std::make_unique<texture_atlas>(aSize);
+    }
 
-	void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)
-	{
-		textures().add(texture_list_entry{ texture_pointer{ texture_pointer{}, &aSubTexture }, 0u });
-	}
+    void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)
+    {
+        textures().add(texture_list_entry{ texture_pointer{ texture_pointer{}, &aSubTexture }, 0u });
+    }
 
-	void texture_manager::remove_sub_texture(i_sub_texture& aSubTexture)
-	{
-		textures().remove(aSubTexture.id());
-	}
+    void texture_manager::remove_sub_texture(i_sub_texture& aSubTexture)
+    {
+        textures().remove(aSubTexture.id());
+    }
 
-	const texture_manager::texture_list& texture_manager::textures() const
-	{
-		return iTextures;
-	}
+    const texture_manager::texture_list& texture_manager::textures() const
+    {
+        return iTextures;
+    }
 
-	texture_manager::texture_list& texture_manager::textures()
-	{
-		return iTextures;
-	}
+    texture_manager::texture_list& texture_manager::textures()
+    {
+        return iTextures;
+    }
 
-	texture_manager::texture_list::const_iterator texture_manager::find_texture(const i_image& aImage) const
-	{
-		for (auto i = textures().begin(); i != textures().end(); ++i)
-		{
-			auto& texture = *i;
-			if (texture.first->type() != texture_type::Texture)
-				continue;
-			if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
-				return i;
-		}
-		return textures().end();
-	}
+    texture_manager::texture_list::const_iterator texture_manager::find_texture(const i_image& aImage) const
+    {
+        for (auto i = textures().begin(); i != textures().end(); ++i)
+        {
+            auto& texture = *i;
+            if (texture.first->type() != texture_type::Texture)
+                continue;
+            if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
+                return i;
+        }
+        return textures().end();
+    }
 
-	texture_manager::texture_list::iterator texture_manager::find_texture(const i_image& aImage)
-	{
-		for (auto i = textures().begin(); i != textures().end(); ++i)
-		{
-			auto& texture = *i;
-			if (texture.first->type() != texture_type::Texture)
-				continue;
-			if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
-				return i;
-		}
-		return textures().end();
-	}
+    texture_manager::texture_list::iterator texture_manager::find_texture(const i_image& aImage)
+    {
+        for (auto i = textures().begin(); i != textures().end(); ++i)
+        {
+            auto& texture = *i;
+            if (texture.first->type() != texture_type::Texture)
+                continue;
+            if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
+                return i;
+        }
+        return textures().end();
+    }
 
-	std::shared_ptr<i_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
-	{
-		// cleanup opportunity
-		cleanup();
-		return textures().add(texture_list_entry{ aTexture, 0u })->first;
-	}
+    std::shared_ptr<i_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
+    {
+        // cleanup opportunity
+        cleanup();
+        return textures().add(texture_list_entry{ aTexture, 0u })->first;
+    }
 
-	void texture_manager::cleanup()
-	{
-		for (auto i = textures().begin(); i != textures().end();)
-		{
-			auto& texture = *i;
-			if (texture.first->type() == texture_type::Texture && texture.first.use_count() == 1 && texture.second == 0u)
-				i = textures().remove(*i);
-			else
-				++i;
-		}
-	}
+    void texture_manager::cleanup()
+    {
+        for (auto i = textures().begin(); i != textures().end();)
+        {
+            auto& texture = *i;
+            if (texture.first->type() == texture_type::Texture && texture.first.use_count() == 1 && texture.second == 0u)
+                i = textures().remove(*i);
+            else
+                ++i;
+        }
+    }
 }

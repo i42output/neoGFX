@@ -26,8 +26,8 @@
 
 namespace neogfx
 {
-	typedef colour color;
-	typedef optional_colour optional_color;
-	typedef colour_or_gradient color_or_gradient;
-	typedef optional_colour_or_gradient optional_color_or_gradient;
+    typedef colour color;
+    typedef optional_colour optional_color;
+    typedef colour_or_gradient color_or_gradient;
+    typedef optional_colour_or_gradient optional_color_or_gradient;
 }

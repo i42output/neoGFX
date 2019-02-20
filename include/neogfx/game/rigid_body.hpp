@@ -26,68 +26,68 @@
 
 namespace neogfx::game
 {
-	struct rigid_body
-	{
-		vec3 position;
-		scalar mass;
-		vec3 velocity;
-		vec3 acceleration;
-		vec3 angle;
-		vec3 spin;
-		vec3 centreOfMass;
-		scalar drag;
+    struct rigid_body
+    {
+        vec3 position;
+        scalar mass;
+        vec3 velocity;
+        vec3 acceleration;
+        vec3 angle;
+        vec3 spin;
+        vec3 centreOfMass;
+        scalar drag;
 
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0xf0481779, 0xc203, 0x4c7c, 0x9d8d, { 0x9d, 0x3d, 0xaf, 0x34, 0x71, 0x58 } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Rigid Body";
-				return sName;
-			}
-			static uint32_t field_count()
-			{ 
-				return 8; 
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return component_data_field_type::Vec3;
-				case 1:
-					return component_data_field_type::Scalar;
-				case 2:
-				case 3:
-				case 4:
-				case 5:
-				case 6:
-					return component_data_field_type::Vec3;
-				case 7:
-					return component_data_field_type::Scalar;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] = 
-				{
-					"Position",
-					"Mass",
-					"Velocity",
-					"Acceleration",
-					"Angle",
-					"Spin",
-					"Centre Of Mass",
-					"Drag"
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
-	};
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0xf0481779, 0xc203, 0x4c7c, 0x9d8d, { 0x9d, 0x3d, 0xaf, 0x34, 0x71, 0x58 } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Rigid Body";
+                return sName;
+            }
+            static uint32_t field_count()
+            { 
+                return 8; 
+            }
+            static component_data_field_type field_type(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Vec3;
+                case 1:
+                    return component_data_field_type::Scalar;
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                    return component_data_field_type::Vec3;
+                case 7:
+                    return component_data_field_type::Scalar;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            {
+                static const neolib::string sFieldNames[] = 
+                {
+                    "Position",
+                    "Mass",
+                    "Velocity",
+                    "Acceleration",
+                    "Angle",
+                    "Spin",
+                    "Centre Of Mass",
+                    "Drag"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 }

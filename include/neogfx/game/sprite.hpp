@@ -26,44 +26,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::game
 {
-	struct sprite
-	{
-		vertices_t path;
+    struct sprite
+    {
+        vertices_t path;
 
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0xd61d920b, 0xde71, 0x400d, 0x9532, { 0x3b, 0x76, 0x1f, 0x26, 0x65, 0x56 } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Sprite";
-				return sName;
-			}
-			static uint32_t field_count()
-			{
-				return 1;
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return component_data_field_type::Vec3 | component_data_field_type::Array;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] =
-				{
-					"Path"
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
-	};
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0xd61d920b, 0xde71, 0x400d, 0x9532, { 0x3b, 0x76, 0x1f, 0x26, 0x65, 0x56 } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Sprite";
+                return sName;
+            }
+            static uint32_t field_count()
+            {
+                return 1;
+            }
+            static component_data_field_type field_type(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Vec3 | component_data_field_type::Array;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            {
+                static const neolib::string sFieldNames[] =
+                {
+                    "Path"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 }

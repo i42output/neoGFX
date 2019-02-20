@@ -25,48 +25,48 @@
 
 namespace neogfx::game
 {
-	entity_archetype::entity_archetype(const entity_archetype_id& aId, const std::string& aName, std::initializer_list<component_id> aComponents) :
-		iId{ aId }, iName{ aName }, iComponents{ aComponents }
-	{
-	}
-	
-	entity_archetype::entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents) :
-		iId{ neolib::generate_uuid() }, iName{ aName }, iComponents{ aComponents }
-	{
-	}
-	
-	entity_archetype::entity_archetype(const entity_archetype& aOther) :
-		iId{ aOther.iId }, iName{ aOther.iName }, iComponents{ aOther.iComponents }
-	{
-	}
+    entity_archetype::entity_archetype(const entity_archetype_id& aId, const std::string& aName, std::initializer_list<component_id> aComponents) :
+        iId{ aId }, iName{ aName }, iComponents{ aComponents }
+    {
+    }
+    
+    entity_archetype::entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents) :
+        iId{ neolib::generate_uuid() }, iName{ aName }, iComponents{ aComponents }
+    {
+    }
+    
+    entity_archetype::entity_archetype(const entity_archetype& aOther) :
+        iId{ aOther.iId }, iName{ aOther.iName }, iComponents{ aOther.iComponents }
+    {
+    }
 
-	entity_archetype::entity_archetype(entity_archetype&& aOther) :
-		iId{ aOther.iId }, iName{ std::move(aOther.iName) }, iComponents{ std::move(aOther.iComponents) }
-	{
-	}
+    entity_archetype::entity_archetype(entity_archetype&& aOther) :
+        iId{ aOther.iId }, iName{ std::move(aOther.iName) }, iComponents{ std::move(aOther.iComponents) }
+    {
+    }
 
-	const entity_archetype_id& entity_archetype::id() const
-	{
-		return iId;
-	}
+    const entity_archetype_id& entity_archetype::id() const
+    {
+        return iId;
+    }
 
-	const neolib::i_string& entity_archetype::name() const
-	{
-		return iName;
-	}
+    const neolib::i_string& entity_archetype::name() const
+    {
+        return iName;
+    }
 
-	const neolib::i_set<component_id>& entity_archetype::components() const
-	{
-		return iComponents;
-	}
+    const neolib::i_set<component_id>& entity_archetype::components() const
+    {
+        return iComponents;
+    }
 
-	neolib::i_set<component_id>& entity_archetype::components()
-	{
-		return iComponents;
-	}
+    neolib::i_set<component_id>& entity_archetype::components()
+    {
+        return iComponents;
+    }
 
-	void entity_archetype::populate_default_components(i_ecs&, entity_id)
-	{
-		// nothing to do.
-	}
+    void entity_archetype::populate_default_components(i_ecs&, entity_id)
+    {
+        // nothing to do.
+    }
 }

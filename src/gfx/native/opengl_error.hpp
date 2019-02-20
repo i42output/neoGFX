@@ -33,8 +33,8 @@ GLenum glCheckError(const char* file, unsigned int line);
 
 namespace neogfx
 {
-	struct opengl_error : std::runtime_error
-	{
-		opengl_error(const std::string& aMessage) : std::runtime_error("neogfx::opengl_error: " + aMessage) {};
-	};
+    struct opengl_error : std::runtime_error
+    {
+        opengl_error(const std::string& aMessage) : std::runtime_error("neogfx::opengl_error: " + aMessage) {};
+    };
 }

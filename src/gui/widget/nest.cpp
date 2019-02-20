@@ -23,45 +23,45 @@
 
 namespace neogfx
 {
-	nest::nest(i_widget& aWidget) :
-		iWidget{ aWidget }
-	{
-	}
+    nest::nest(i_widget& aWidget) :
+        iWidget{ aWidget }
+    {
+    }
 
-	std::size_t nest::nested_window_count() const
-	{
-		return iNestedWindows.size();
-	}
+    std::size_t nest::nested_window_count() const
+    {
+        return iNestedWindows.size();
+    }
 
-	const i_nested_window& nest::nested_window(std::size_t aIndex) const
-	{
-		return *iNestedWindows[aIndex];
-	}
+    const i_nested_window& nest::nested_window(std::size_t aIndex) const
+    {
+        return *iNestedWindows[aIndex];
+    }
 
-	i_nested_window& nest::nested_window(std::size_t aIndex)
-	{
-		return *iNestedWindows[aIndex];
-	}
+    i_nested_window& nest::nested_window(std::size_t aIndex)
+    {
+        return *iNestedWindows[aIndex];
+    }
 
-	void nest::add(i_nested_window& aWindow)
-	{
-		iNestedWindows.push_back(&aWindow);
-		as_widget().update();
-	}
+    void nest::add(i_nested_window& aWindow)
+    {
+        iNestedWindows.push_back(&aWindow);
+        as_widget().update();
+    }
 
-	void nest::remove(i_nested_window& aWindow)
-	{
-		iNestedWindows.erase(std::find(iNestedWindows.begin(), iNestedWindows.end(), &aWindow));
-		as_widget().update();
-	}
+    void nest::remove(i_nested_window& aWindow)
+    {
+        iNestedWindows.erase(std::find(iNestedWindows.begin(), iNestedWindows.end(), &aWindow));
+        as_widget().update();
+    }
 
-	const i_widget& nest::as_widget() const
-	{
-		return iWidget;
-	}
+    const i_widget& nest::as_widget() const
+    {
+        return iWidget;
+    }
 
-	i_widget& nest::as_widget() 
-	{
-		return iWidget;
-	}
+    i_widget& nest::as_widget() 
+    {
+        return iWidget;
+    }
 }

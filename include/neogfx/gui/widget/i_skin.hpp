@@ -25,18 +25,18 @@
 
 namespace neogfx
 {
-	class i_skin
-	{
-	public:
-		virtual const std::string& name() const = 0;
-		virtual bool has_fallback() const = 0;
-		virtual i_skin& fallback() = 0;
-	public:
-		virtual void activate() = 0;
-		virtual void deactivate() = 0;
-	public:
-		virtual void paint_non_client(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
-		virtual void paint_non_client_after(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
-		virtual void paint(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
-	};
+    class i_skin
+    {
+    public:
+        virtual const std::string& name() const = 0;
+        virtual bool has_fallback() const = 0;
+        virtual i_skin& fallback() = 0;
+    public:
+        virtual void activate() = 0;
+        virtual void deactivate() = 0;
+    public:
+        virtual void paint_non_client(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
+        virtual void paint_non_client_after(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
+        virtual void paint(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
+    };
 }

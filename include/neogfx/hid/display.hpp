@@ -26,36 +26,36 @@
 
 namespace neogfx
 {
-	class display : public i_display, public i_device_metrics
-	{
-	public:
-		display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle);
-		~display();
-	public:
-		uint32_t index() const override;
-	public:
-		const i_device_metrics& metrics() const override;
-		void update_dpi() override;
-	public:
-		neogfx::rect rect() const override;
-		neogfx::rect desktop_rect() const override;
-		colour read_pixel(const point& aPosition) const override;
-	public:
-		neogfx::subpixel_format subpixel_format() const override;
-	public:
-		bool metrics_available() const override;
-		size extents() const override;
-		dimension horizontal_dpi() const override;
-		dimension vertical_dpi() const override;
-		dimension ppi() const override;
-		dimension em_size() const override;
-	private:
-		uint32_t iIndex;
-		neogfx::size iPixelDensityDpi;
-		mutable neogfx::rect iRect;
-		mutable neogfx::rect iDesktopRect;
-		neogfx::subpixel_format iSubpixelFormat;
-		void* iNativeDisplayHandle;
-		void* iNativeDeviceContextHandle;
-	};
+    class display : public i_display, public i_device_metrics
+    {
+    public:
+        display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle);
+        ~display();
+    public:
+        uint32_t index() const override;
+    public:
+        const i_device_metrics& metrics() const override;
+        void update_dpi() override;
+    public:
+        neogfx::rect rect() const override;
+        neogfx::rect desktop_rect() const override;
+        colour read_pixel(const point& aPosition) const override;
+    public:
+        neogfx::subpixel_format subpixel_format() const override;
+    public:
+        bool metrics_available() const override;
+        size extents() const override;
+        dimension horizontal_dpi() const override;
+        dimension vertical_dpi() const override;
+        dimension ppi() const override;
+        dimension em_size() const override;
+    private:
+        uint32_t iIndex;
+        neogfx::size iPixelDensityDpi;
+        mutable neogfx::rect iRect;
+        mutable neogfx::rect iDesktopRect;
+        neogfx::subpixel_format iSubpixelFormat;
+        void* iNativeDisplayHandle;
+        void* iNativeDeviceContextHandle;
+    };
 }

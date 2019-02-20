@@ -24,27 +24,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace video_poker
 {
-	class flashing_button : public neogfx::push_button
-	{
-	public:
-		flashing_button(neogfx::i_layout& aLayout, const std::string aText) :
-			push_button{ aLayout, aText }
-		{
-			neogfx::service<neogfx::i_rendering_engine>().register_frame_counter(*this, 250);
-		}
-		~flashing_button()
-		{
-			neogfx::service<neogfx::i_rendering_engine>().unregister_frame_counter(*this, 250);
-		}
-	public:
-		neogfx::colour animation_colour() const override
-		{
-			neogfx::colour faceColour = push_button::animation_colour();
-			faceColour = faceColour.with_lightness(
-				effectively_enabled() && 
-				(push_button::is_checked() || neogfx::service<neogfx::i_rendering_engine>().frame_counter(250) % 2 == 1) ? 0.9 : 0.5);
-			return faceColour;
-		}
-	private:
-	};
+    class flashing_button : public neogfx::push_button
+    {
+    public:
+        flashing_button(neogfx::i_layout& aLayout, const std::string aText) :
+            push_button{ aLayout, aText }
+        {
+            neogfx::service<neogfx::i_rendering_engine>().register_frame_counter(*this, 250);
+        }
+        ~flashing_button()
+        {
+            neogfx::service<neogfx::i_rendering_engine>().unregister_frame_counter(*this, 250);
+        }
+    public:
+        neogfx::colour animation_colour() const override
+        {
+            neogfx::colour faceColour = push_button::animation_colour();
+            faceColour = faceColour.with_lightness(
+                effectively_enabled() && 
+                (push_button::is_checked() || neogfx::service<neogfx::i_rendering_engine>().frame_counter(250) % 2 == 1) ? 0.9 : 0.5);
+            return faceColour;
+        }
+    private:
+    };
 }

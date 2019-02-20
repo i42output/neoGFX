@@ -25,31 +25,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class check_box : public button
-	{
-	private:
-		class box : public widget
-		{
-		public:
-			box(check_box& aParent);
-		public:
-			size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-			size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-		public:
-			void paint(graphics_context& aGraphicsContext) const override;
-		};
-	public:
-		check_box(const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
-		check_box(i_widget& aParent, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
-		check_box(i_layout& aLayout, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
-	public:
-		neogfx::size_policy size_policy() const override;
-	protected:
-		void paint(graphics_context& aGraphicsContext) const override;
-	protected:
-		void mouse_entered(const point& aPosition) override;
-		void mouse_left() override;
-	private:
-		box iBox;
-	};
+    class check_box : public button
+    {
+    private:
+        class box : public widget
+        {
+        public:
+            box(check_box& aParent);
+        public:
+            size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+            size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        public:
+            void paint(graphics_context& aGraphicsContext) const override;
+        };
+    public:
+        check_box(const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+        check_box(i_widget& aParent, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+        check_box(i_layout& aLayout, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+    public:
+        neogfx::size_policy size_policy() const override;
+    protected:
+        void paint(graphics_context& aGraphicsContext) const override;
+    protected:
+        void mouse_entered(const point& aPosition) override;
+        void mouse_left() override;
+    private:
+        box iBox;
+    };
 }

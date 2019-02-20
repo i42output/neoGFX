@@ -26,28 +26,28 @@
 
 namespace neogfx
 {
-	class list_view : public item_view
-	{
-	public:
-		list_view(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
-		list_view(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
-		list_view(i_layout& aLayout, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
-		~list_view();
-	public:
-		bool can_defer_layout() const;
-		bool is_managing_layout() const;
-	protected:
-		void model_changed() override;
-		void presentation_model_changed() override;
-		void selection_model_changed() override;
-	protected:
-		rect item_display_rect() const override;
-		size total_item_area(const i_units_context& aUnitsContext) const override;
-		dimension column_width(uint32_t aColumn) const override;
-	protected:
-		neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
-	private:
-		vertical_layout iLayout;
-		vertical_spacer iSpacer;
-	};
+    class list_view : public item_view
+    {
+    public:
+        list_view(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
+        list_view(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
+        list_view(i_layout& aLayout, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
+        ~list_view();
+    public:
+        bool can_defer_layout() const;
+        bool is_managing_layout() const;
+    protected:
+        void model_changed() override;
+        void presentation_model_changed() override;
+        void selection_model_changed() override;
+    protected:
+        rect item_display_rect() const override;
+        size total_item_area(const i_units_context& aUnitsContext) const override;
+        dimension column_width(uint32_t aColumn) const override;
+    protected:
+        neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
+    private:
+        vertical_layout iLayout;
+        vertical_spacer iSpacer;
+    };
 }

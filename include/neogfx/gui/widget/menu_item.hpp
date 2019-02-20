@@ -24,31 +24,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_menu;
+    class i_menu;
 
-	class menu_item : public i_menu_item
-	{
-	private:
-		typedef std::shared_ptr<i_action> action_pointer;
-		typedef std::shared_ptr<i_menu> menu_pointer;
-		typedef neolib::variant<action_pointer, menu_pointer> contents;
-	public:
-		menu_item(i_action& aAction);
-		menu_item(std::shared_ptr<i_action> aAction);
-		menu_item(i_menu& aSubMenu);
-		menu_item(std::shared_ptr<i_menu> aSubMenu);
-	public:
-		type_e type() const override;
-		const i_action& action() const override;
-		i_action& action() override;
-		const i_menu& sub_menu() const override;
-		i_menu& sub_menu() override;
-	public:
-		bool available() const override;
-		void select(bool aOpenAnySubMenu = true) override;
-		bool open_any_sub_menu() const override;
-	private:
-		contents iContents;
-		bool iOpenAnySubMenu;
-	};
+    class menu_item : public i_menu_item
+    {
+    private:
+        typedef std::shared_ptr<i_action> action_pointer;
+        typedef std::shared_ptr<i_menu> menu_pointer;
+        typedef neolib::variant<action_pointer, menu_pointer> contents;
+    public:
+        menu_item(i_action& aAction);
+        menu_item(std::shared_ptr<i_action> aAction);
+        menu_item(i_menu& aSubMenu);
+        menu_item(std::shared_ptr<i_menu> aSubMenu);
+    public:
+        type_e type() const override;
+        const i_action& action() const override;
+        i_action& action() override;
+        const i_menu& sub_menu() const override;
+        i_menu& sub_menu() override;
+    public:
+        bool available() const override;
+        void select(bool aOpenAnySubMenu = true) override;
+        bool open_any_sub_menu() const override;
+    private:
+        contents iContents;
+        bool iOpenAnySubMenu;
+    };
 }

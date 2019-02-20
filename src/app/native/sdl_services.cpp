@@ -28,40 +28,40 @@
 
 namespace neogfx
 {
-	template<> i_basic_services& service<i_basic_services>() 
-	{ 
-		static sdl_basic_services sSdlBasicServices{ service<neolib::async_task>() }; 
-		return sSdlBasicServices; 
-	}
+    template<> i_basic_services& service<i_basic_services>() 
+    { 
+        static sdl_basic_services sSdlBasicServices{ service<neolib::async_task>() }; 
+        return sSdlBasicServices; 
+    }
 
-	template<> i_keyboard& service<i_keyboard>()
-	{ 
-		static sdl_keyboard sSdlKeyboard; 
-		return sSdlKeyboard; 
-	}
+    template<> i_keyboard& service<i_keyboard>()
+    { 
+        static sdl_keyboard sSdlKeyboard; 
+        return sSdlKeyboard; 
+    }
 
-	template<> i_rendering_engine& service<i_rendering_engine>()
-	{ 
-		auto const& programOptions = service<i_app>().program_options();
-		static sdl_renderer sSdlRenderer{ programOptions.renderer(), programOptions.double_buffering(), service<i_basic_services>(), service<i_keyboard>() };
-		return sSdlRenderer; 
-	}
+    template<> i_rendering_engine& service<i_rendering_engine>()
+    { 
+        auto const& programOptions = service<i_app>().program_options();
+        static sdl_renderer sSdlRenderer{ programOptions.renderer(), programOptions.double_buffering(), service<i_basic_services>(), service<i_keyboard>() };
+        return sSdlRenderer; 
+    }
 
-	template<> i_window_manager& service<i_window_manager>()
-	{
-		static sdl_window_manager sSdlWindowManager;
-		return sSdlWindowManager;
-	}
+    template<> i_window_manager& service<i_window_manager>()
+    {
+        static sdl_window_manager sSdlWindowManager;
+        return sSdlWindowManager;
+    }
 
-	template<> i_audio& service<i_audio>()
-	{
-		static sdl_audio sSdlAudio;
-		return sSdlAudio;
-	};
+    template<> i_audio& service<i_audio>()
+    {
+        static sdl_audio sSdlAudio;
+        return sSdlAudio;
+    };
 
-	template<> i_clipboard& service<i_clipboard>()
-	{
-		static clipboard sClipboard{ service<i_basic_services>().system_clipboard() };
-		return sClipboard;
-	}
+    template<> i_clipboard& service<i_clipboard>()
+    {
+        static clipboard sClipboard{ service<i_basic_services>().system_clipboard() };
+        return sClipboard;
+    }
 }

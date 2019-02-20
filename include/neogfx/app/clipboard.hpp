@@ -24,29 +24,29 @@
 
 namespace neogfx
 {
-	class i_native_clipboard;
+    class i_native_clipboard;
 
-	class clipboard : public i_clipboard
-	{
-	public:
-		clipboard(i_native_clipboard& aSystemClipboard);
-	public:
-		virtual bool sink_active() const;
-		virtual i_clipboard_sink& active_sink();
-		virtual void activate(i_clipboard_sink& aSink);
-		virtual void deactivate(i_clipboard_sink& aSink);
-	public:
-		virtual bool has_text() const;
-		virtual std::string text() const;
-		virtual void set_text(const std::string& aText);
-	public:
-		virtual void cut();
-		virtual void copy();
-		virtual void paste();
-		virtual void delete_selected();
-		virtual void select_all();
-	private:
-		i_native_clipboard& iSystemClipboard;
-		i_clipboard_sink* iActiveSink;
-	};
+    class clipboard : public i_clipboard
+    {
+    public:
+        clipboard(i_native_clipboard& aSystemClipboard);
+    public:
+        virtual bool sink_active() const;
+        virtual i_clipboard_sink& active_sink();
+        virtual void activate(i_clipboard_sink& aSink);
+        virtual void deactivate(i_clipboard_sink& aSink);
+    public:
+        virtual bool has_text() const;
+        virtual std::string text() const;
+        virtual void set_text(const std::string& aText);
+    public:
+        virtual void cut();
+        virtual void copy();
+        virtual void paste();
+        virtual void delete_selected();
+        virtual void select_all();
+    private:
+        i_native_clipboard& iSystemClipboard;
+        i_clipboard_sink* iActiveSink;
+    };
 }

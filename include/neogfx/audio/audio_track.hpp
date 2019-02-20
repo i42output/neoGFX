@@ -24,24 +24,24 @@
 
 namespace neogfx
 {
-	class audio_track : public i_audio_track
-	{
-	public:
-		audio_track(const audio_spec& aSpec);
-	public:
-		const audio_spec& spec() const override;
-	public:
-		void add_sample(i_audio_sample& aSample) override;
-		void add_sample(std::shared_ptr<i_audio_sample> aSample) override;
-		void add_silence(double aDuration) override;
-		void repeat_start(uint32_t aRepeatCount) override;
-		void repeat_end() override;
-	public:
-		item_index item_count() const override;
-		const value_type& item(item_index aItemIndex) const override;
-		value_type& item(item_index aItemIndex) override;
-	private:
-		audio_spec iSpec;
-		std::vector<value_type> iItems;
-	};
+    class audio_track : public i_audio_track
+    {
+    public:
+        audio_track(const audio_spec& aSpec);
+    public:
+        const audio_spec& spec() const override;
+    public:
+        void add_sample(i_audio_sample& aSample) override;
+        void add_sample(std::shared_ptr<i_audio_sample> aSample) override;
+        void add_silence(double aDuration) override;
+        void repeat_start(uint32_t aRepeatCount) override;
+        void repeat_end() override;
+    public:
+        item_index item_count() const override;
+        const value_type& item(item_index aItemIndex) const override;
+        value_type& item(item_index aItemIndex) override;
+    private:
+        audio_spec iSpec;
+        std::vector<value_type> iItems;
+    };
 }

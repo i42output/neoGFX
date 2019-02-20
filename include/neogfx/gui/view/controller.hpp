@@ -24,24 +24,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class controller : public i_controller
-	{
-	public:
-		controller(i_model& aModel, i_view_container& aContainer);
-	public:
-		virtual const i_model& model() const;
-		virtual i_model& model();
-	public:
-		virtual void add_view(i_view& aView);
-		virtual void add_view(std::shared_ptr<i_view> aView);
-		virtual void remove_view(i_view& aView);
-		virtual bool only_weak_views() const;
-	public:
-		virtual const i_view_container& container() const;
-		virtual i_view_container& container();
-	private:
-		i_model& iModel;
-		i_view_container& iContainer;
-		std::vector<std::shared_ptr<i_view>> iViews;
-	};
+    class controller : public i_controller
+    {
+    public:
+        controller(i_model& aModel, i_view_container& aContainer);
+    public:
+        virtual const i_model& model() const;
+        virtual i_model& model();
+    public:
+        virtual void add_view(i_view& aView);
+        virtual void add_view(std::shared_ptr<i_view> aView);
+        virtual void remove_view(i_view& aView);
+        virtual bool only_weak_views() const;
+    public:
+        virtual const i_view_container& container() const;
+        virtual i_view_container& container();
+    private:
+        i_model& iModel;
+        i_view_container& iContainer;
+        std::vector<std::shared_ptr<i_view>> iViews;
+    };
 }

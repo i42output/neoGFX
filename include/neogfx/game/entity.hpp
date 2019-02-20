@@ -24,26 +24,26 @@
 
 namespace neogfx::game
 {
-	class entity
-	{
-	public:
-		entity(i_ecs& aEcs, entity_id aId);
-		entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId);
-		template <typename... ComponentData>
-		entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId, ComponentData&&... aComponentData) :
-			entity{ aEcs, aEcs.create_entity(aArchetypeId, aComponentData...) } {}
-		~entity();
-	public:
-		entity(const entity& aOther) = delete;
-		entity& operator=(const entity& aOther) = delete;
-	public:
-		i_ecs& ecs() const;
-		entity_id id() const;
-		bool detached_or_destroyed() const;
-		entity_id detach();
-	private:
-		i_ecs& iEcs;
-		entity_id iId;
-		sink iSink;
-	};
+    class entity
+    {
+    public:
+        entity(i_ecs& aEcs, entity_id aId);
+        entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId);
+        template <typename... ComponentData>
+        entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId, ComponentData&&... aComponentData) :
+            entity{ aEcs, aEcs.create_entity(aArchetypeId, aComponentData...) } {}
+        ~entity();
+    public:
+        entity(const entity& aOther) = delete;
+        entity& operator=(const entity& aOther) = delete;
+    public:
+        i_ecs& ecs() const;
+        entity_id id() const;
+        bool detached_or_destroyed() const;
+        entity_id detach();
+    private:
+        i_ecs& iEcs;
+        entity_id iId;
+        sink iSink;
+    };
 }

@@ -24,5 +24,5 @@
 
 namespace neogfx
 {
-	typedef hsl_colour hsl_color;
+    typedef hsl_colour hsl_color;
 }

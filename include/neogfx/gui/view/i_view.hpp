@@ -26,23 +26,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_view
-	{
-	public:
-		event<> activated;
-		event<> deactivated;
-	public:
-		virtual const i_widget& as_widget() const = 0;
-		virtual i_widget& as_widget() = 0;
-	public:
-		virtual const i_model& model() const = 0;
-		virtual i_model& model() = 0;
-		virtual void update() = 0;
-	public:
-		virtual bool is_strong() const = 0;
-		virtual bool is_weak() const = 0;
-		virtual bool is_active() const = 0;
-		virtual void activate() = 0;
-		virtual void deactivate() = 0;
-	};
+    class i_view
+    {
+    public:
+        event<> activated;
+        event<> deactivated;
+    public:
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
+    public:
+        virtual const i_model& model() const = 0;
+        virtual i_model& model() = 0;
+        virtual void update() = 0;
+    public:
+        virtual bool is_strong() const = 0;
+        virtual bool is_weak() const = 0;
+        virtual bool is_active() const = 0;
+        virtual void activate() = 0;
+        virtual void deactivate() = 0;
+    };
 }

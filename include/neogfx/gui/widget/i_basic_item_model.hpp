@@ -24,18 +24,18 @@
 
 namespace neogfx
 {
-	template <typename T>
-	class i_basic_item_model : public i_item_model
-	{
-	public:
-		typedef T value_type;
-	public:
-		virtual iterator insert_item(const_iterator aPosition, const value_type& aValue) = 0;
-		virtual iterator insert_item(const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) = 0;
-		virtual iterator append_item(const_iterator aParent, const value_type& aValue) = 0;
-		virtual iterator append_item(const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) = 0;
-	public:
-		virtual value_type& item(const item_model_index& aIndex) = 0;
-		virtual const value_type& item(const item_model_index& aIndex) const = 0;
-	};
+    template <typename T>
+    class i_basic_item_model : public i_item_model
+    {
+    public:
+        typedef T value_type;
+    public:
+        virtual iterator insert_item(const_iterator aPosition, const value_type& aValue) = 0;
+        virtual iterator insert_item(const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) = 0;
+        virtual iterator append_item(const_iterator aParent, const value_type& aValue) = 0;
+        virtual iterator append_item(const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) = 0;
+    public:
+        virtual value_type& item(const item_model_index& aIndex) = 0;
+        virtual const value_type& item(const item_model_index& aIndex) const = 0;
+    };
 }

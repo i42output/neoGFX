@@ -24,9 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_shared_menu_bar : public i_menu
-	{
-	public:
-		virtual void use(const i_menu& aSourceMenu) = 0;
-	};
+    class i_shared_menu_bar : public i_menu
+    {
+    public:
+        virtual void use(const i_menu& aSourceMenu) = 0;
+    };
 }

@@ -24,14 +24,14 @@
 
 namespace neogfx
 {
-	class i_resource_manager
-	{
-	public:
-		virtual void add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
-		virtual void add_module_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
-		virtual i_resource::pointer load_resource(const std::string& aUri) = 0;
-	public:
-		virtual void cleanup() = 0;
-		virtual void clean() = 0;
-	};
+    class i_resource_manager
+    {
+    public:
+        virtual void add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
+        virtual void add_module_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
+        virtual i_resource::pointer load_resource(const std::string& aUri) = 0;
+    public:
+        virtual void cleanup() = 0;
+        virtual void clean() = 0;
+    };
 }

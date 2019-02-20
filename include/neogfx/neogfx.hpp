@@ -29,9 +29,9 @@ using namespace boost::multiprecision;
 
 namespace neogfx
 {
-	using namespace neolib::stdint_suffix;
-	using namespace std::string_literals;
+    using namespace neolib::stdint_suffix;
+    using namespace std::string_literals;
 
-	template <typename Component>
-	Component& service();
+    template <typename Component>
+    Component& service();
 }

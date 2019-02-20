@@ -26,29 +26,29 @@
 
 namespace neogfx
 {
-	class skin_manager : public i_skin_manager
-	{
-	private:
-		typedef std::unordered_set<i_skin*> skin_list;
-		typedef std::unordered_set<i_skinnable_item*, boost::hash<i_skinnable_item*>, std::equal_to<i_skinnable_item*>, boost::fast_pool_allocator<i_skinnable_item*>> item_list;
-	public:
-		skin_manager();
-	public:
-		uint32_t skin_count() const override;
-		const i_skin& skin(uint32_t aIndex) const override;
-		i_skin& skin(uint32_t aIndex) override;
-		void register_skin(i_skin& aSkin) override;
-		void unregister_skin(i_skin& aSkin) override;
-	public:
-		const i_skin& active_skin() const override;
-		i_skin& active_skin() override;
-		void activate_skin(i_skin& aSkin) override;
-	public:
-		bool is_item_registered(const i_skinnable_item& aItem) const override;
-		void register_item(i_skinnable_item& aItem) override;
-		void unregister_item(i_skinnable_item& aItem) override;
-	private:
-		skin_list iSkins;
-		item_list iItems;
-	};
+    class skin_manager : public i_skin_manager
+    {
+    private:
+        typedef std::unordered_set<i_skin*> skin_list;
+        typedef std::unordered_set<i_skinnable_item*, boost::hash<i_skinnable_item*>, std::equal_to<i_skinnable_item*>, boost::fast_pool_allocator<i_skinnable_item*>> item_list;
+    public:
+        skin_manager();
+    public:
+        uint32_t skin_count() const override;
+        const i_skin& skin(uint32_t aIndex) const override;
+        i_skin& skin(uint32_t aIndex) override;
+        void register_skin(i_skin& aSkin) override;
+        void unregister_skin(i_skin& aSkin) override;
+    public:
+        const i_skin& active_skin() const override;
+        i_skin& active_skin() override;
+        void activate_skin(i_skin& aSkin) override;
+    public:
+        bool is_item_registered(const i_skinnable_item& aItem) const override;
+        void register_item(i_skinnable_item& aItem) override;
+        void unregister_item(i_skinnable_item& aItem) override;
+    private:
+        skin_list iSkins;
+        item_list iItems;
+    };
 }

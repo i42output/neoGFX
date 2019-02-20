@@ -27,23 +27,23 @@
 
 namespace neogfx
 {
-	class i_rendering_engine;
+    class i_rendering_engine;
 
-	class i_graphics_context
-	{
-	public:
-		struct texture_not_resident : std::runtime_error { texture_not_resident() : std::runtime_error("neogfx::i_graphics_context::texture_not_resident") {} };
-	public:
-		virtual ~i_graphics_context() {}
-		virtual std::unique_ptr<i_graphics_context> clone() const = 0;
-	public:
-		virtual i_rendering_engine& rendering_engine() = 0;
-		virtual const i_render_target& render_target() const = 0;
-		virtual const i_render_target& render_target() = 0;
-		virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
-		virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
-		virtual void flush() = 0;
-	public:
-		virtual neogfx::logical_coordinates logical_coordinates() const = 0;
-	};
+    class i_graphics_context
+    {
+    public:
+        struct texture_not_resident : std::runtime_error { texture_not_resident() : std::runtime_error("neogfx::i_graphics_context::texture_not_resident") {} };
+    public:
+        virtual ~i_graphics_context() {}
+        virtual std::unique_ptr<i_graphics_context> clone() const = 0;
+    public:
+        virtual i_rendering_engine& rendering_engine() = 0;
+        virtual const i_render_target& render_target() const = 0;
+        virtual const i_render_target& render_target() = 0;
+        virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
+        virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
+        virtual void flush() = 0;
+    public:
+        virtual neogfx::logical_coordinates logical_coordinates() const = 0;
+    };
 }

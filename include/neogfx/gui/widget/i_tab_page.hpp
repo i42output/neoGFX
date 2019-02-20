@@ -25,19 +25,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_tab;
+    class i_tab;
 
-	class i_tab_page
-	{
-	public:
-		event<> selected;
-		event<> deselected;
-	public:
-		virtual ~i_tab_page() {}
-	public:
-		virtual const i_tab& tab() const = 0;
-		virtual i_tab& tab() = 0;
-		virtual const i_widget& as_widget() const = 0;
-		virtual i_widget& as_widget() = 0;
-	};
+    class i_tab_page
+    {
+    public:
+        event<> selected;
+        event<> deselected;
+    public:
+        virtual ~i_tab_page() {}
+    public:
+        virtual const i_tab& tab() const = 0;
+        virtual i_tab& tab() = 0;
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
+    };
 }

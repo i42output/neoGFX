@@ -24,19 +24,19 @@
 
 namespace neogfx
 {
-	class sdl_audio : public i_audio
-	{
-	public:
-		sdl_audio();
-		~sdl_audio();
-	public:
-		void initialize(bool aOpenDefaultPlaybackDevice = true) override;
-		void uninitialize() override;
-		bool have_audio_playback_device() const override;
-		uint32_t audio_playback_device_count() const override;
-		i_audio_playback_device& audio_playback_device(uint32_t aDeviceIndex) override;
-	private:
-		bool iInitialized;
-		std::vector<std::unique_ptr<i_audio_playback_device>> iAudioPlaybackDevices;
-	};
+    class sdl_audio : public i_audio
+    {
+    public:
+        sdl_audio();
+        ~sdl_audio();
+    public:
+        void initialize(bool aOpenDefaultPlaybackDevice = true) override;
+        void uninitialize() override;
+        bool have_audio_playback_device() const override;
+        uint32_t audio_playback_device_count() const override;
+        i_audio_playback_device& audio_playback_device(uint32_t aDeviceIndex) override;
+    private:
+        bool iInitialized;
+        std::vector<std::unique_ptr<i_audio_playback_device>> iAudioPlaybackDevices;
+    };
 }

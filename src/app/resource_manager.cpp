@@ -23,59 +23,59 @@
 #include <neogfx/app/resource.hpp>
 
 namespace neogfx
-{	
-	resource_manager::resource_manager()
-	{
-	}
-	
-	resource_manager& resource_manager::instance()
-	{
-		static resource_manager sInstance;
-		return sInstance;
-	}
+{    
+    resource_manager::resource_manager()
+    {
+    }
+    
+    resource_manager& resource_manager::instance()
+    {
+        static resource_manager sInstance;
+        return sInstance;
+    }
 
-	void resource_manager::add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize)
-	{
-		iResources[aUri] = i_resource::pointer(std::make_shared<resource>(*this, aUri, aResourceData, aResourceSize));
-	}
+    void resource_manager::add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize)
+    {
+        iResources[aUri] = i_resource::pointer(std::make_shared<resource>(*this, aUri, aResourceData, aResourceSize));
+    }
 
-	void resource_manager::add_module_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize)
-	{
-		iResources[aUri] = i_resource::pointer(std::make_shared<module_resource>(aUri, aResourceData, aResourceSize));
-	}
+    void resource_manager::add_module_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize)
+    {
+        iResources[aUri] = i_resource::pointer(std::make_shared<module_resource>(aUri, aResourceData, aResourceSize));
+    }
 
-	i_resource::pointer resource_manager::load_resource(const std::string& aUri)
-	{
-		auto existing = iResources.find(aUri);
-		if (existing != iResources.end())
-		{
-			if (std::holds_alternative<i_resource::pointer>(existing->second))
-				return std::get<i_resource::pointer>(existing->second);
-			i_resource::weak_pointer ptr = static_variant_cast<i_resource::weak_pointer>(existing->second);
-			if (!ptr.expired())
-				return ptr.lock();
-		}
-		i_resource::pointer newResource = std::make_shared<resource>(*this, aUri);
-		iResources[aUri] = i_resource::weak_pointer(newResource);
-		return newResource;
-	}
+    i_resource::pointer resource_manager::load_resource(const std::string& aUri)
+    {
+        auto existing = iResources.find(aUri);
+        if (existing != iResources.end())
+        {
+            if (std::holds_alternative<i_resource::pointer>(existing->second))
+                return std::get<i_resource::pointer>(existing->second);
+            i_resource::weak_pointer ptr = static_variant_cast<i_resource::weak_pointer>(existing->second);
+            if (!ptr.expired())
+                return ptr.lock();
+        }
+        i_resource::pointer newResource = std::make_shared<resource>(*this, aUri);
+        iResources[aUri] = i_resource::weak_pointer(newResource);
+        return newResource;
+    }
 
-	void resource_manager::cleanup()
-	{
-		for (auto i = iResources.begin(); i != iResources.end();)
-		{
-			if (std::holds_alternative<i_resource::weak_pointer>(i->second) && std::get<i_resource::weak_pointer>(i->second).expired())
-				i = iResources.erase(i);
-			else
-				++i;
-		}
-	}
+    void resource_manager::cleanup()
+    {
+        for (auto i = iResources.begin(); i != iResources.end();)
+        {
+            if (std::holds_alternative<i_resource::weak_pointer>(i->second) && std::get<i_resource::weak_pointer>(i->second).expired())
+                i = iResources.erase(i);
+            else
+                ++i;
+        }
+    }
 
-	void resource_manager::clean()
-	{
-		decltype(iResources) resources;
-		resources.swap(iResources);
-		decltype(iResourceArchives) resourceArchives;
-		resourceArchives.swap(iResourceArchives);
-	}
+    void resource_manager::clean()
+    {
+        decltype(iResources) resources;
+        resources.swap(iResources);
+        decltype(iResourceArchives) resourceArchives;
+        resourceArchives.swap(iResourceArchives);
+    }
 }

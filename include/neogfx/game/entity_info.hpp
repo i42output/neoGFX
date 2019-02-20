@@ -27,48 +27,48 @@
 
 namespace neogfx::game
 {
-	struct entity_info
-	{
-		neolib::uuid archetypeId;
-		int64_t creationTime;
+    struct entity_info
+    {
+        neolib::uuid archetypeId;
+        int64_t creationTime;
 
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x867e30c2, 0xaf8e, 0x452e, 0xa542, { 0xd, 0xd0, 0xd1, 0x1, 0xe4, 0x2d } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Entity Info";
-				return sName;
-			}
-			static uint32_t field_count()
-			{ 
-				return 2; 
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return component_data_field_type::Uuid;
-				case 1:
-					return component_data_field_type::Int64;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] = 
-				{
-					"Archetype Id",
-					"Creation Time",
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
-	};
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x867e30c2, 0xaf8e, 0x452e, 0xa542, { 0xd, 0xd0, 0xd1, 0x1, 0xe4, 0x2d } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Entity Info";
+                return sName;
+            }
+            static uint32_t field_count()
+            { 
+                return 2; 
+            }
+            static component_data_field_type field_type(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Uuid;
+                case 1:
+                    return component_data_field_type::Int64;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            {
+                static const neolib::string sFieldNames[] = 
+                {
+                    "Archetype Id",
+                    "Creation Time",
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 }

@@ -1,6 +1,6 @@
 <nrc>
-	<resource prefix="neoGUI">
-		<file>resource/neoGFX.png</file>
-		<file>resource/logo_i42.png</file>
-	</resource>
+    <resource prefix="neoGUI">
+        <file>resource/neoGFX.png</file>
+        <file>resource/logo_i42.png</file>
+    </resource>
 </nrc>

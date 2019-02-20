@@ -25,46 +25,46 @@
 
 namespace neogfx
 {
-	template <typename T>
-	struct crack_shader_array_data_type;
+    template <typename T>
+    struct crack_shader_array_data_type;
 
-	template <>
-	struct crack_shader_array_data_type<unsigned char> 
-	{ 
-		static constexpr texture_data_format DATA_FORMAT = texture_data_format::Red;
-		static constexpr texture_data_type DATA_TYPE = texture_data_type::UnsignedByte; 
-	};
-	template <>
-	struct crack_shader_array_data_type<float> 
-	{ 
-		static constexpr texture_data_format DATA_FORMAT = texture_data_format::Red;
-		static constexpr texture_data_type DATA_TYPE = texture_data_type::Float;
-	};
-	template <>
-	struct crack_shader_array_data_type<std::array<float, 4>> 
-	{ 
-		static constexpr texture_data_format DATA_FORMAT = texture_data_format::RGBA;
-		static constexpr texture_data_type DATA_TYPE = texture_data_type::Float; 
-	};
+    template <>
+    struct crack_shader_array_data_type<unsigned char> 
+    { 
+        static constexpr texture_data_format DATA_FORMAT = texture_data_format::Red;
+        static constexpr texture_data_type DATA_TYPE = texture_data_type::UnsignedByte; 
+    };
+    template <>
+    struct crack_shader_array_data_type<float> 
+    { 
+        static constexpr texture_data_format DATA_FORMAT = texture_data_format::Red;
+        static constexpr texture_data_type DATA_TYPE = texture_data_type::Float;
+    };
+    template <>
+    struct crack_shader_array_data_type<std::array<float, 4>> 
+    { 
+        static constexpr texture_data_format DATA_FORMAT = texture_data_format::RGBA;
+        static constexpr texture_data_type DATA_TYPE = texture_data_type::Float; 
+    };
 
-	template <typename T>
-	class shader_array
-	{		
-	public:
-		shader_array(const size_u32& aInitialSize) : 
-			iTexture{ aInitialSize, 1.0, texture_sampling::Data, crack_shader_array_data_type<T>::DATA_FORMAT, crack_shader_array_data_type<T>::DATA_TYPE }
-		{
-		}
-	public:
-		const i_texture& data() const
-		{
-			return iTexture;
-		}
-		i_texture& data()
-		{
-			return iTexture;
-		}
-	private:
-		texture iTexture;
-	};
+    template <typename T>
+    class shader_array
+    {        
+    public:
+        shader_array(const size_u32& aInitialSize) : 
+            iTexture{ aInitialSize, 1.0, texture_sampling::Data, crack_shader_array_data_type<T>::DATA_FORMAT, crack_shader_array_data_type<T>::DATA_TYPE }
+        {
+        }
+    public:
+        const i_texture& data() const
+        {
+            return iTexture;
+        }
+        i_texture& data()
+        {
+            return iTexture;
+        }
+    private:
+        texture iTexture;
+    };
 }

@@ -24,41 +24,41 @@
 
 namespace neogfx
 {
-	class i_layout;
-	class i_widget;
-	class i_layout_item_proxy;
+    class i_layout;
+    class i_widget;
+    class i_layout_item_proxy;
 
-	class i_layout_item : public i_geometry
-	{
-	public:
-		struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::i_layout_item::not_a_layout") {} };
-		struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::i_layout_item::not_a_widget") {} };
-		struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::i_layout_item::no_parent_layout") {} };
-		struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::i_layout_item::no_layout_owner") {} };
-	public:
-		virtual ~i_layout_item() {}
-	public:
-		virtual bool is_layout() const = 0;
-		virtual const i_layout& as_layout() const = 0;
-		virtual i_layout& as_layout() = 0;
-		virtual bool is_widget() const = 0;
-		virtual const i_widget& as_widget() const = 0;
-		virtual i_widget& as_widget() = 0;
-	public:
-		virtual bool has_parent_layout() const = 0;
-		virtual const i_layout& parent_layout() const = 0;
-		virtual i_layout& parent_layout() = 0;
-		virtual void set_parent_layout(i_layout* aParentLayout) = 0;
-		virtual bool has_layout_owner() const = 0;
-		virtual const i_widget& layout_owner() const = 0;
-		virtual i_widget& layout_owner() = 0;
-		virtual void set_layout_owner(i_widget* aOwner) = 0;
-		virtual bool is_proxy() const = 0;
-		virtual const i_layout_item_proxy& layout_item_proxy() const = 0;
-		virtual i_layout_item_proxy& layout_item_proxy() = 0;
-	public:
-		virtual void layout_as(const point& aPosition, const size& aSize) = 0;
-	public:
-		virtual bool visible() const = 0;
-	};
+    class i_layout_item : public i_geometry
+    {
+    public:
+        struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::i_layout_item::not_a_layout") {} };
+        struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::i_layout_item::not_a_widget") {} };
+        struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::i_layout_item::no_parent_layout") {} };
+        struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::i_layout_item::no_layout_owner") {} };
+    public:
+        virtual ~i_layout_item() {}
+    public:
+        virtual bool is_layout() const = 0;
+        virtual const i_layout& as_layout() const = 0;
+        virtual i_layout& as_layout() = 0;
+        virtual bool is_widget() const = 0;
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
+    public:
+        virtual bool has_parent_layout() const = 0;
+        virtual const i_layout& parent_layout() const = 0;
+        virtual i_layout& parent_layout() = 0;
+        virtual void set_parent_layout(i_layout* aParentLayout) = 0;
+        virtual bool has_layout_owner() const = 0;
+        virtual const i_widget& layout_owner() const = 0;
+        virtual i_widget& layout_owner() = 0;
+        virtual void set_layout_owner(i_widget* aOwner) = 0;
+        virtual bool is_proxy() const = 0;
+        virtual const i_layout_item_proxy& layout_item_proxy() const = 0;
+        virtual i_layout_item_proxy& layout_item_proxy() = 0;
+    public:
+        virtual void layout_as(const point& aPosition, const size& aSize) = 0;
+    public:
+        virtual bool visible() const = 0;
+    };
 }

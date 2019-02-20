@@ -25,57 +25,57 @@
 
 namespace neogfx
 {
-	class push_button : public button, public i_push_button
-	{
-	public:
-		static const uint32_t kMaxAnimationFrame = 10;
-	public:
-		push_button(push_button_style aStyle = push_button_style::Normal);
-		push_button(const std::string& aText, push_button_style aStyle = push_button_style::Normal);
-		push_button(const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-		push_button(const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_widget& aParent, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_widget& aParent, const std::string& aText, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_widget& aParent, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_widget& aParent, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_layout& aLayout, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-		push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-		// button
-	public:
-		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-	public:
-		void paint_non_client(graphics_context& aGraphicsContext) const override;
-		void paint(graphics_context& aGraphicsContext) const override;
-	public:
-		void mouse_entered(const point& aPosition) override;
-		void mouse_left() override;
-		// i_push_button
-	public:
-		push_button_style style() const override;
-		// push_button
-	protected:
-		virtual rect path_bounding_rect() const;
-		virtual neogfx::path path() const;
-		virtual bool spot_colour() const;
-		virtual colour border_mid_colour() const;
-		virtual bool perform_hover_animation() const;
-		virtual bool has_hover_colour() const;
-		virtual colour hover_colour() const;
-		virtual void set_hover_colour(const optional_colour& aHoverColour = optional_colour());
-		virtual void animate();
-		virtual bool finished_animation() const;
-		virtual colour animation_colour() const;
-		virtual colour animation_colour(uint32_t aAnimationFrame) const;
-	private:
-		void init();
-	private:
-		neolib::callback_timer iAnimator;
-		uint32_t iAnimationFrame;
-		push_button_style iStyle;
-		optional_colour iHoverColour;
-		mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
-	};
+    class push_button : public button, public i_push_button
+    {
+    public:
+        static const uint32_t kMaxAnimationFrame = 10;
+    public:
+        push_button(push_button_style aStyle = push_button_style::Normal);
+        push_button(const std::string& aText, push_button_style aStyle = push_button_style::Normal);
+        push_button(const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        push_button(const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_widget& aParent, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_widget& aParent, const std::string& aText, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_widget& aParent, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_widget& aParent, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_layout& aLayout, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        // button
+    public:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+    public:
+        void paint_non_client(graphics_context& aGraphicsContext) const override;
+        void paint(graphics_context& aGraphicsContext) const override;
+    public:
+        void mouse_entered(const point& aPosition) override;
+        void mouse_left() override;
+        // i_push_button
+    public:
+        push_button_style style() const override;
+        // push_button
+    protected:
+        virtual rect path_bounding_rect() const;
+        virtual neogfx::path path() const;
+        virtual bool spot_colour() const;
+        virtual colour border_mid_colour() const;
+        virtual bool perform_hover_animation() const;
+        virtual bool has_hover_colour() const;
+        virtual colour hover_colour() const;
+        virtual void set_hover_colour(const optional_colour& aHoverColour = optional_colour());
+        virtual void animate();
+        virtual bool finished_animation() const;
+        virtual colour animation_colour() const;
+        virtual colour animation_colour(uint32_t aAnimationFrame) const;
+    private:
+        void init();
+    private:
+        neolib::callback_timer iAnimator;
+        uint32_t iAnimationFrame;
+        push_button_style iStyle;
+        optional_colour iHoverColour;
+        mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
+    };
 }

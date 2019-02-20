@@ -24,30 +24,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_menu;
+    class i_menu;
 
-	class i_menu_item
-	{
-	public:
-		event<> selected;
-		event<> deselected;
-	public:
-		enum type_e
-		{
-			Action,
-			SubMenu,
-		};
-	public:
-		struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::i_menu_item::wrong_type") {} };
-	public:
-		virtual type_e type() const = 0;
-		virtual const i_action& action() const = 0;
-		virtual i_action& action() = 0;
-		virtual const i_menu& sub_menu() const = 0;
-		virtual i_menu& sub_menu() = 0;
-	public:
-		virtual bool available() const = 0;
-		virtual void select(bool aOpenAnySubMenu = true) = 0;
-		virtual bool open_any_sub_menu() const = 0;
-	};
+    class i_menu_item
+    {
+    public:
+        event<> selected;
+        event<> deselected;
+    public:
+        enum type_e
+        {
+            Action,
+            SubMenu,
+        };
+    public:
+        struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::i_menu_item::wrong_type") {} };
+    public:
+        virtual type_e type() const = 0;
+        virtual const i_action& action() const = 0;
+        virtual i_action& action() = 0;
+        virtual const i_menu& sub_menu() const = 0;
+        virtual i_menu& sub_menu() = 0;
+    public:
+        virtual bool available() const = 0;
+        virtual void select(bool aOpenAnySubMenu = true) = 0;
+        virtual bool open_any_sub_menu() const = 0;
+    };
 }

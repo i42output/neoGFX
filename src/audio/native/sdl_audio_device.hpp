@@ -24,18 +24,18 @@
 
 namespace neogfx
 {
-	class sdl_audio_device : public audio_device
-	{
-	public:
-		sdl_audio_device(const std::string& aName);
-		~sdl_audio_device();
-	public:
-		bool is_open() const override;
-		void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) override;
-		void close() override;
-	private:
-		static void callback(void *userdata, Uint8* stream, int len);
-	private:
-		SDL_AudioDeviceID iId;
-	};
+    class sdl_audio_device : public audio_device
+    {
+    public:
+        sdl_audio_device(const std::string& aName);
+        ~sdl_audio_device();
+    public:
+        bool is_open() const override;
+        void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) override;
+        void close() override;
+    private:
+        static void callback(void *userdata, Uint8* stream, int len);
+    private:
+        SDL_AudioDeviceID iId;
+    };
 }

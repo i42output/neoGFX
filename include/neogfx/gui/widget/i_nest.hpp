@@ -22,19 +22,19 @@
 
 namespace neogfx
 {
-	class i_widget;
-	class i_nested_window;
+    class i_widget;
+    class i_nested_window;
 
-	class i_nest
-	{
-	public:
-		virtual std::size_t nested_window_count() const = 0;
-		virtual const i_nested_window& nested_window(std::size_t aIndex) const = 0;
-		virtual i_nested_window& nested_window(std::size_t aIndex) = 0;
-		virtual void add(i_nested_window& aWindow) = 0;
-		virtual void remove(i_nested_window& aWindow) = 0;
-	public:
-		virtual const i_widget& as_widget() const = 0;	
-		virtual i_widget& as_widget() = 0;
-	};
+    class i_nest
+    {
+    public:
+        virtual std::size_t nested_window_count() const = 0;
+        virtual const i_nested_window& nested_window(std::size_t aIndex) const = 0;
+        virtual i_nested_window& nested_window(std::size_t aIndex) = 0;
+        virtual void add(i_nested_window& aWindow) = 0;
+        virtual void remove(i_nested_window& aWindow) = 0;
+    public:
+        virtual const i_widget& as_widget() const = 0;    
+        virtual i_widget& as_widget() = 0;
+    };
 }

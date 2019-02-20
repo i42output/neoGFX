@@ -23,19 +23,19 @@
 
 namespace neogfx
 {
-	event_processing_context::event_processing_context(neolib::async_task& aParent, const std::string& aName) :
-		iContext{ aParent.have_message_queue() ?
-			aParent.message_queue() :
-			aParent.create_message_queue([]()
-			{
-				return service<i_app>().process_events(service<i_app>().app_message_queue_context());
-			}) },
-		iName{ aName }
-	{
-	}
+    event_processing_context::event_processing_context(neolib::async_task& aParent, const std::string& aName) :
+        iContext{ aParent.have_message_queue() ?
+            aParent.message_queue() :
+            aParent.create_message_queue([]()
+            {
+                return service<i_app>().process_events(service<i_app>().app_message_queue_context());
+            }) },
+        iName{ aName }
+    {
+    }
 
-	const std::string& event_processing_context::name() const
-	{
-		return iName;
-	}
+    const std::string& event_processing_context::name() const
+    {
+        return iName;
+    }
 }

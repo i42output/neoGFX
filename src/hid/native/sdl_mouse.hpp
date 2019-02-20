@@ -24,54 +24,54 @@
 
 namespace neogfx
 {
-	inline mouse_button convert_mouse_button(Uint32 aButton)
-	{
-		mouse_button result = mouse_button::None;
-		if (aButton & SDL_BUTTON(SDL_BUTTON_LEFT))
-			result = static_cast<mouse_button>(result | mouse_button::Left);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_RIGHT))
-			result = static_cast<mouse_button>(result | mouse_button::Right);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_MIDDLE))
-			result = static_cast<mouse_button>(result | mouse_button::Middle);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_X1))
-			result = static_cast<mouse_button>(result | mouse_button::X1);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_X2))
-			result = static_cast<mouse_button>(result | mouse_button::X2);
-		return result;
-	}
+    inline mouse_button convert_mouse_button(Uint32 aButton)
+    {
+        mouse_button result = mouse_button::None;
+        if (aButton & SDL_BUTTON(SDL_BUTTON_LEFT))
+            result = static_cast<mouse_button>(result | mouse_button::Left);
+        if (aButton & SDL_BUTTON(SDL_BUTTON_RIGHT))
+            result = static_cast<mouse_button>(result | mouse_button::Right);
+        if (aButton & SDL_BUTTON(SDL_BUTTON_MIDDLE))
+            result = static_cast<mouse_button>(result | mouse_button::Middle);
+        if (aButton & SDL_BUTTON(SDL_BUTTON_X1))
+            result = static_cast<mouse_button>(result | mouse_button::X1);
+        if (aButton & SDL_BUTTON(SDL_BUTTON_X2))
+            result = static_cast<mouse_button>(result | mouse_button::X2);
+        return result;
+    }
 
-	inline mouse_button convert_mouse_button(Uint8 aButtonIndex)
-	{
-		switch (aButtonIndex)
-		{
-		case SDL_BUTTON_LEFT:
-			return mouse_button::Left;
-		case SDL_BUTTON_RIGHT:
-			return mouse_button::Right;
-		case SDL_BUTTON_MIDDLE:
-			return mouse_button::Middle;
-		case SDL_BUTTON_X1:
-			return mouse_button::X1;
-		case SDL_BUTTON_X2:
-			return mouse_button::X2;
-		default:
-			return mouse_button::Left;
-		}
-	}
+    inline mouse_button convert_mouse_button(Uint8 aButtonIndex)
+    {
+        switch (aButtonIndex)
+        {
+        case SDL_BUTTON_LEFT:
+            return mouse_button::Left;
+        case SDL_BUTTON_RIGHT:
+            return mouse_button::Right;
+        case SDL_BUTTON_MIDDLE:
+            return mouse_button::Middle;
+        case SDL_BUTTON_X1:
+            return mouse_button::X1;
+        case SDL_BUTTON_X2:
+            return mouse_button::X2;
+        default:
+            return mouse_button::Left;
+        }
+    }
 
-	inline Uint32 convert_mouse_button(mouse_button aButton)
-	{
-		Uint32 result = 0u;
-		if ((aButton & mouse_button::Left) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_LEFT);
-		if ((aButton & mouse_button::Right) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_RIGHT);
-		if ((aButton & mouse_button::Middle) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_MIDDLE);
-		if ((aButton & mouse_button::X1) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_X1);
-		if ((aButton & mouse_button::X2) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_X2);
-		return result;
-	}
+    inline Uint32 convert_mouse_button(mouse_button aButton)
+    {
+        Uint32 result = 0u;
+        if ((aButton & mouse_button::Left) != mouse_button::None)
+            result = result | SDL_BUTTON(SDL_BUTTON_LEFT);
+        if ((aButton & mouse_button::Right) != mouse_button::None)
+            result = result | SDL_BUTTON(SDL_BUTTON_RIGHT);
+        if ((aButton & mouse_button::Middle) != mouse_button::None)
+            result = result | SDL_BUTTON(SDL_BUTTON_MIDDLE);
+        if ((aButton & mouse_button::X1) != mouse_button::None)
+            result = result | SDL_BUTTON(SDL_BUTTON_X1);
+        if ((aButton & mouse_button::X2) != mouse_button::None)
+            result = result | SDL_BUTTON(SDL_BUTTON_X2);
+        return result;
+    }
 }

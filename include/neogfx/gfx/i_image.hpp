@@ -26,25 +26,25 @@
 
 namespace neogfx
 {
-	enum class colour_format
-	{
-		RGBA8
-	};
+    enum class colour_format
+    {
+        RGBA8
+    };
 
-	class i_image : public i_resource
-	{
-	public:
-		struct unknown_image_format : std::runtime_error { unknown_image_format() : std::runtime_error("neogfx::i_image::unknown_image_format") {} };
-	public:
-		virtual ~i_image() {}
-	public:
-		virtual dimension dpi_scale_factor() const = 0;
-		virtual neogfx::colour_format colour_format() const = 0;
-		virtual texture_sampling sampling() const = 0;
-		virtual texture_data_format data_format() const = 0;
-		virtual const neogfx::size& extents() const = 0;
-		virtual void resize(const neogfx::size& aNewSize) = 0;
-		virtual colour get_pixel(const point& aPoint) const = 0;
-		virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
-	};
+    class i_image : public i_resource
+    {
+    public:
+        struct unknown_image_format : std::runtime_error { unknown_image_format() : std::runtime_error("neogfx::i_image::unknown_image_format") {} };
+    public:
+        virtual ~i_image() {}
+    public:
+        virtual dimension dpi_scale_factor() const = 0;
+        virtual neogfx::colour_format colour_format() const = 0;
+        virtual texture_sampling sampling() const = 0;
+        virtual texture_data_format data_format() const = 0;
+        virtual const neogfx::size& extents() const = 0;
+        virtual void resize(const neogfx::size& aNewSize) = 0;
+        virtual colour get_pixel(const point& aPoint) const = 0;
+        virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
+    };
 }

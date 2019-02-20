@@ -22,60 +22,60 @@
 
 namespace neogfx
 {
-	audio_beeper_sample::audio_beeper_sample(const audio_spec& aSpec) : 
-		iSpec{ aSpec }
-	{
-	}
+    audio_beeper_sample::audio_beeper_sample(const audio_spec& aSpec) : 
+        iSpec{ aSpec }
+    {
+    }
 
-	const audio_spec& audio_beeper_sample::spec() const
-	{
-		return iSpec;
-	}
+    const audio_spec& audio_beeper_sample::spec() const
+    {
+        return iSpec;
+    }
 
-	audio_beeper_sample::frame_index audio_beeper_sample::total_frames() const
-	{
-		// todo
-		return 0;
-	}
+    audio_beeper_sample::frame_index audio_beeper_sample::total_frames() const
+    {
+        // todo
+        return 0;
+    }
 
-	audio_beeper_sample::frame_index audio_beeper_sample::read(frame_index aPosition, void* aBuffer, frame_index aBufferSize) const
-	{
-		// todo
-		return 0;
-	}
+    audio_beeper_sample::frame_index audio_beeper_sample::read(frame_index aPosition, void* aBuffer, frame_index aBufferSize) const
+    {
+        // todo
+        return 0;
+    }
 
-	audio_beeper_sample::frame_index audio_beeper_sample::write(frame_index aPosition, const void* aBuffer, frame_index aBufferSize)
-	{
-		throw unsupported_operation();
-	}
+    audio_beeper_sample::frame_index audio_beeper_sample::write(frame_index aPosition, const void* aBuffer, frame_index aBufferSize)
+    {
+        throw unsupported_operation();
+    }
 
-	void audio_beeper_sample::beep(double aDuration, double aFrequency)
-	{
-		iItems.push_back(item_beep{ aDuration, aFrequency });
-	}
+    void audio_beeper_sample::beep(double aDuration, double aFrequency)
+    {
+        iItems.push_back(item_beep{ aDuration, aFrequency });
+    }
 
-	void audio_beeper_sample::beep(const audio_envelope& aEnvelope, double aFrequency)
-	{
-		iItems.push_back(item_envelope{ aEnvelope, aFrequency });
-	}
+    void audio_beeper_sample::beep(const audio_envelope& aEnvelope, double aFrequency)
+    {
+        iItems.push_back(item_envelope{ aEnvelope, aFrequency });
+    }
 
-	void audio_beeper_sample::silence(double aDuration)
-	{
-		iItems.push_back(item_silence{ aDuration });
-	}
+    void audio_beeper_sample::silence(double aDuration)
+    {
+        iItems.push_back(item_silence{ aDuration });
+    }
 
-	void audio_beeper_sample::repeat_start(uint32_t aRepeatCount)
-	{
-		iItems.push_back(item_repeat_start{ aRepeatCount });
-	}
+    void audio_beeper_sample::repeat_start(uint32_t aRepeatCount)
+    {
+        iItems.push_back(item_repeat_start{ aRepeatCount });
+    }
 
-	void audio_beeper_sample::repeat_end()
-	{
-		iItems.push_back(item_repeat_end{});
-	}
+    void audio_beeper_sample::repeat_end()
+    {
+        iItems.push_back(item_repeat_end{});
+    }
 
-	void audio_beeper_sample::clear()
-	{
-		iItems.clear();
-	}
+    void audio_beeper_sample::clear()
+    {
+        iItems.clear();
+    }
 }

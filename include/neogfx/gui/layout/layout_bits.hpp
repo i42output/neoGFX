@@ -23,12 +23,12 @@
 
 namespace neogfx
 {
-	enum class layout_position
-	{
-		Top,
-		Left,
-		Centre,
-		Right,
-		Bottom
-	};
+    enum class layout_position
+    {
+        Top,
+        Left,
+        Centre,
+        Right,
+        Bottom
+    };
 }

@@ -25,14 +25,14 @@
 
 namespace neogfx
 {
-	class i_object
-	{
-	public:
-		virtual neolib::i_lifetime& as_lifetime() = 0;
-	public:
-		virtual void property_changed(i_property& aProperty) = 0;
-	public:
-		virtual const i_properties& properties() const = 0;
-		virtual i_properties& properties() = 0;
-	};
+    class i_object
+    {
+    public:
+        virtual neolib::i_lifetime& as_lifetime() = 0;
+    public:
+        virtual void property_changed(i_property& aProperty) = 0;
+    public:
+        virtual const i_properties& properties() const = 0;
+        virtual i_properties& properties() = 0;
+    };
 }

@@ -24,36 +24,36 @@
 
 namespace neogfx::game
 {
-	class canvas : public widget
-	{
-	public:
-		event<graphics_context&> rendering_entities;
-		event<graphics_context&> entities_rendered;
-		event<entity_id> entity_clicked;
-	public:
-		canvas();
-		canvas(game::i_ecs& aEcs);
-		canvas(std::shared_ptr<game::i_ecs> aEcs);
-		canvas(i_widget& aParent);
-		canvas(i_widget& aParent, game::i_ecs& aEcs);
-		canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs);
-		canvas(i_layout& aLayout);
-		canvas(i_layout& aLayout, game::i_ecs& aEcs);
-		canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs);
-		~canvas();
-	public:
-		game::i_ecs& ecs() const;
-	public:
-		neogfx::logical_coordinate_system logical_coordinate_system() const override;
-		void paint(graphics_context& aGraphicsContext) const override;
-	public:
-		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-	private:
-		void init();
-	private:
-		std::shared_ptr<game::i_ecs> iEcs;
-		sink iSink;
-		std::optional<neolib::callback_timer> iUpdater;
-		bool iEcsPaused;
-	};
+    class canvas : public widget
+    {
+    public:
+        event<graphics_context&> rendering_entities;
+        event<graphics_context&> entities_rendered;
+        event<entity_id> entity_clicked;
+    public:
+        canvas();
+        canvas(game::i_ecs& aEcs);
+        canvas(std::shared_ptr<game::i_ecs> aEcs);
+        canvas(i_widget& aParent);
+        canvas(i_widget& aParent, game::i_ecs& aEcs);
+        canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs);
+        canvas(i_layout& aLayout);
+        canvas(i_layout& aLayout, game::i_ecs& aEcs);
+        canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs);
+        ~canvas();
+    public:
+        game::i_ecs& ecs() const;
+    public:
+        neogfx::logical_coordinate_system logical_coordinate_system() const override;
+        void paint(graphics_context& aGraphicsContext) const override;
+    public:
+        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+    private:
+        void init();
+    private:
+        std::shared_ptr<game::i_ecs> iEcs;
+        sink iSink;
+        std::optional<neolib::callback_timer> iUpdater;
+        bool iEcsPaused;
+    };
 }

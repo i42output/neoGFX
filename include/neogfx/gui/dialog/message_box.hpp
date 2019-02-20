@@ -24,63 +24,63 @@
 
 namespace neogfx
 {
-	class message_box : public dialog
-	{
-	public:
-		struct no_response : std::logic_error { no_response() : std::logic_error("neogfx::message_box::no_response") {} };
-	public:
-		message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-	public:
-		static standard_button information(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button information(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button information(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button information(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button question(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button question(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button question(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button question(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button warning(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button warning(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button stop(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button stop(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button error(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button error(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button error(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button error(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button critical(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button critical(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		static standard_button critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-	public:
-		const image_widget& icon() const;
-		image_widget& icon();
-		const text_widget& text() const;
-		text_widget& text();
-		const text_widget& detailed_text() const;
-		text_widget& detailed_text();
-	public:
-		bool has_response() const;
-		standard_button response() const;
-		void set_response(standard_button aResponse);
-	public:
-		dialog_result exec() override;
-	protected:
-		size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-	private:
-		void init();
-	private:
-		horizontal_layout iLayout1;
-		image_widget iIcon;
-		vertical_layout iLayout2;
-		text_widget iText;
-		text_widget iDetailedText;
-		std::optional<standard_button> iResponse;
-	};
+    class message_box : public dialog
+    {
+    public:
+        struct no_response : std::logic_error { no_response() : std::logic_error("neogfx::message_box::no_response") {} };
+    public:
+        message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+    public:
+        static standard_button information(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button information(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button information(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button information(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button question(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button question(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button question(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button question(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button warning(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button warning(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button stop(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button stop(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button error(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button error(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button error(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button error(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button critical(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button critical(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+        static standard_button critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+    public:
+        const image_widget& icon() const;
+        image_widget& icon();
+        const text_widget& text() const;
+        text_widget& text();
+        const text_widget& detailed_text() const;
+        text_widget& detailed_text();
+    public:
+        bool has_response() const;
+        standard_button response() const;
+        void set_response(standard_button aResponse);
+    public:
+        dialog_result exec() override;
+    protected:
+        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+    private:
+        void init();
+    private:
+        horizontal_layout iLayout1;
+        image_widget iIcon;
+        vertical_layout iLayout2;
+        text_widget iText;
+        text_widget iDetailedText;
+        std::optional<standard_button> iResponse;
+    };
 }

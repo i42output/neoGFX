@@ -22,25 +22,25 @@
 
 namespace neogfx
 {
-	line_edit::line_edit(frame_style aFrameStyle) :
-		text_edit{ SingleLine, aFrameStyle }
-	{
-	}
+    line_edit::line_edit(frame_style aFrameStyle) :
+        text_edit{ SingleLine, aFrameStyle }
+    {
+    }
 
-	line_edit::line_edit(i_widget& aParent, frame_style aFrameStyle) :
-		text_edit{ aParent, SingleLine, aFrameStyle }
-	{
-	}
+    line_edit::line_edit(i_widget& aParent, frame_style aFrameStyle) :
+        text_edit{ aParent, SingleLine, aFrameStyle }
+    {
+    }
 
-	line_edit::line_edit(i_layout& aLayout, frame_style aFrameStyle) :
-		text_edit{ aLayout, SingleLine, aFrameStyle }
-	{
-	}
+    line_edit::line_edit(i_layout& aLayout, frame_style aFrameStyle) :
+        text_edit{ aLayout, SingleLine, aFrameStyle }
+    {
+    }
 
-	neogfx::size_policy line_edit::size_policy() const
-	{
-		if (text_edit::has_size_policy())
-			return text_edit::size_policy();
-		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
-	}
+    neogfx::size_policy line_edit::size_policy() const
+    {
+        if (text_edit::has_size_policy())
+            return text_edit::size_policy();
+        return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+    }
 }

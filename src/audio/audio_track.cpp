@@ -22,57 +22,57 @@
 
 namespace neogfx
 {
-	audio_track::audio_track(const audio_spec& aSpec) : 
-		iSpec{ aSpec }
-	{
-	}
+    audio_track::audio_track(const audio_spec& aSpec) : 
+        iSpec{ aSpec }
+    {
+    }
 
-	const audio_spec& audio_track::spec() const
-	{
-		return iSpec;
-	}
+    const audio_spec& audio_track::spec() const
+    {
+        return iSpec;
+    }
 
-	void audio_track::add_sample(i_audio_sample& aSample)
-	{
-		iItems.push_back(item_sample{ std::shared_ptr<i_audio_sample>{std::shared_ptr<i_audio_sample>{}, &aSample} });
-	}
+    void audio_track::add_sample(i_audio_sample& aSample)
+    {
+        iItems.push_back(item_sample{ std::shared_ptr<i_audio_sample>{std::shared_ptr<i_audio_sample>{}, &aSample} });
+    }
 
-	void audio_track::add_sample(std::shared_ptr<i_audio_sample> aSample)
-	{
-		iItems.push_back(item_sample{ aSample });
-	}
+    void audio_track::add_sample(std::shared_ptr<i_audio_sample> aSample)
+    {
+        iItems.push_back(item_sample{ aSample });
+    }
 
-	void audio_track::add_silence(double aDuration)
-	{
-		iItems.push_back(item_silence{ aDuration });
-	}
+    void audio_track::add_silence(double aDuration)
+    {
+        iItems.push_back(item_silence{ aDuration });
+    }
 
-	void audio_track::repeat_start(uint32_t aRepeatCount)
-	{
-		iItems.push_back(item_repeat_start{ aRepeatCount });
-	}
+    void audio_track::repeat_start(uint32_t aRepeatCount)
+    {
+        iItems.push_back(item_repeat_start{ aRepeatCount });
+    }
 
-	void audio_track::repeat_end()
-	{
-		iItems.push_back(item_repeat_end{});
-	}
+    void audio_track::repeat_end()
+    {
+        iItems.push_back(item_repeat_end{});
+    }
 
-	audio_track::item_index audio_track::item_count() const
-	{
-		return iItems.size();
-	}
+    audio_track::item_index audio_track::item_count() const
+    {
+        return iItems.size();
+    }
 
-	const audio_track::value_type& audio_track::item(item_index aItemIndex) const
-	{
-		if (aItemIndex < iItems.size())
-			return iItems[aItemIndex];
-		throw bad_item_index();
-	}
+    const audio_track::value_type& audio_track::item(item_index aItemIndex) const
+    {
+        if (aItemIndex < iItems.size())
+            return iItems[aItemIndex];
+        throw bad_item_index();
+    }
 
-	audio_track::value_type& audio_track::item(item_index aItemIndex)
-	{
-		if (aItemIndex < iItems.size())
-			return iItems[aItemIndex];
-		throw bad_item_index();
-	}
+    audio_track::value_type& audio_track::item(item_index aItemIndex)
+    {
+        if (aItemIndex < iItems.size())
+            return iItems[aItemIndex];
+        throw bad_item_index();
+    }
 }

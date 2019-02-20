@@ -24,13 +24,13 @@
 
 namespace neogfx
 {
-	class line_edit : public text_edit
-	{
-	public:
-		line_edit(frame_style aFrameStyle = frame_style::SolidFrame);
-		line_edit(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame);
-		line_edit(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame);
-	protected:
-		neogfx::size_policy size_policy() const override;
-	};
+    class line_edit : public text_edit
+    {
+    public:
+        line_edit(frame_style aFrameStyle = frame_style::SolidFrame);
+        line_edit(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame);
+        line_edit(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame);
+    protected:
+        neogfx::size_policy size_policy() const override;
+    };
 }

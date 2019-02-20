@@ -22,22 +22,22 @@
 
 namespace neogfx
 {
-	struct audio_envelope
-	{
-		double attack;
-		double decay;
-		double sustain;
-		double release;
-	};
+    struct audio_envelope
+    {
+        double attack;
+        double decay;
+        double sustain;
+        double release;
+    };
 
-	class i_audio_beeper
-	{
-	public:
-		virtual void beep(double aDuration, double aFrequency) = 0;
-		virtual void beep(const audio_envelope& aEnvelope, double aFrequency) = 0;
-		virtual void silence(double aDuration) = 0;
-		virtual void repeat_start(uint32_t aRepeatCount) = 0;
-		virtual void repeat_end() = 0;
-		virtual void clear() = 0;
-	};
+    class i_audio_beeper
+    {
+    public:
+        virtual void beep(double aDuration, double aFrequency) = 0;
+        virtual void beep(const audio_envelope& aEnvelope, double aFrequency) = 0;
+        virtual void silence(double aDuration) = 0;
+        virtual void repeat_start(uint32_t aRepeatCount) = 0;
+        virtual void repeat_end() = 0;
+        virtual void clear() = 0;
+    };
 }

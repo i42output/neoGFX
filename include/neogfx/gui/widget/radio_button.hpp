@@ -24,47 +24,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class radio_button : public button
-	{
-	public:
-		event<> on;
-		event<> off;
-	private:
-		class disc : public widget
-		{
-		public:
-			disc(radio_button& aParent);
-		public:
-			size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-			size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-		public:
-			void paint(graphics_context& aGraphicsContext) const override;
-		};
-	public:
-		radio_button(const std::string& aText = std::string());
-		radio_button(i_widget& aParent, const std::string& aText = std::string());
-		radio_button(i_layout& aLayout, const std::string& aText = std::string());
-	public:
-		bool is_on() const;
-		bool is_off() const;
-		void set_on();
-	public:
-		neogfx::size_policy size_policy() const override;
-	protected:
-		void paint(graphics_context& aGraphicsContext) const override;
-	protected:
-		void mouse_entered(const point& aPosition) override;
-		void mouse_left() override;
-	protected:
-		void handle_clicked() override;
-	protected:
-		bool can_toggle() const override;
-		bool set_checked_state(const std::optional<bool>& aCheckedState) override;
-	protected:
-		virtual const radio_button* next_radio_button() const;
-		virtual radio_button* next_radio_button();
-		virtual bool any_siblings_on() const;
-	private:
-		disc iDisc;
-	};
+    class radio_button : public button
+    {
+    public:
+        event<> on;
+        event<> off;
+    private:
+        class disc : public widget
+        {
+        public:
+            disc(radio_button& aParent);
+        public:
+            size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+            size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        public:
+            void paint(graphics_context& aGraphicsContext) const override;
+        };
+    public:
+        radio_button(const std::string& aText = std::string());
+        radio_button(i_widget& aParent, const std::string& aText = std::string());
+        radio_button(i_layout& aLayout, const std::string& aText = std::string());
+    public:
+        bool is_on() const;
+        bool is_off() const;
+        void set_on();
+    public:
+        neogfx::size_policy size_policy() const override;
+    protected:
+        void paint(graphics_context& aGraphicsContext) const override;
+    protected:
+        void mouse_entered(const point& aPosition) override;
+        void mouse_left() override;
+    protected:
+        void handle_clicked() override;
+    protected:
+        bool can_toggle() const override;
+        bool set_checked_state(const std::optional<bool>& aCheckedState) override;
+    protected:
+        virtual const radio_button* next_radio_button() const;
+        virtual radio_button* next_radio_button();
+        virtual bool any_siblings_on() const;
+    private:
+        disc iDisc;
+    };
 }

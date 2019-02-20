@@ -25,120 +25,120 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogames
 {
-	namespace card_games
-	{
-		template <typename GameTraits>
-		class basic_deck
-		{
-		public:
-			typedef typename GameTraits game_traits;
-			typedef basic_card<game_traits> card_type;
-			typedef typename card_type::value card_value;
-			typedef typename card_type::suit card_suit;
-		private:
-			typedef std::vector<card_type> cards;
-		public:
-			struct deck_empty : std::runtime_error { deck_empty() : std::runtime_error("neogames::card_games::basic_deck::deck_empty") {} };
-		public:
-			basic_deck() :
-				iCards{
-					{ card_value::Ace,		card_suit::Club },
-					{ card_value::Two,		card_suit::Club },
-					{ card_value::Three,	card_suit::Club },
-					{ card_value::Four,		card_suit::Club },
-					{ card_value::Five,		card_suit::Club },
-					{ card_value::Six,		card_suit::Club },
-					{ card_value::Seven,	card_suit::Club },
-					{ card_value::Eight,	card_suit::Club },
-					{ card_value::Nine,		card_suit::Club },
-					{ card_value::Ten,		card_suit::Club },
-					{ card_value::Jack,		card_suit::Club },
-					{ card_value::Queen,	card_suit::Club },
-					{ card_value::King,		card_suit::Club },
-					{ card_value::Ace,		card_suit::Diamond },
-					{ card_value::Two,		card_suit::Diamond },
-					{ card_value::Three,	card_suit::Diamond },
-					{ card_value::Four,		card_suit::Diamond },
-					{ card_value::Five,		card_suit::Diamond },
-					{ card_value::Six,		card_suit::Diamond },
-					{ card_value::Seven,	card_suit::Diamond },
-					{ card_value::Eight,	card_suit::Diamond },
-					{ card_value::Nine,		card_suit::Diamond },
-					{ card_value::Ten,		card_suit::Diamond },
-					{ card_value::Jack,		card_suit::Diamond },
-					{ card_value::Queen,	card_suit::Diamond },
-					{ card_value::King,		card_suit::Diamond },
-					{ card_value::Ace,		card_suit::Heart },
-					{ card_value::Two,		card_suit::Heart },
-					{ card_value::Three,	card_suit::Heart },
-					{ card_value::Four,		card_suit::Heart },
-					{ card_value::Five,		card_suit::Heart },
-					{ card_value::Six,		card_suit::Heart },
-					{ card_value::Seven,	card_suit::Heart },
-					{ card_value::Eight,	card_suit::Heart },
-					{ card_value::Nine,		card_suit::Heart },
-					{ card_value::Ten,		card_suit::Heart },
-					{ card_value::Jack,		card_suit::Heart },
-					{ card_value::Queen,	card_suit::Heart },
-					{ card_value::King,		card_suit::Heart },
-					{ card_value::Ace,		card_suit::Spade },
-					{ card_value::Two,		card_suit::Spade },
-					{ card_value::Three,	card_suit::Spade },
-					{ card_value::Four,		card_suit::Spade },
-					{ card_value::Five,		card_suit::Spade },
-					{ card_value::Six,		card_suit::Spade },
-					{ card_value::Seven,	card_suit::Spade },
-					{ card_value::Eight,	card_suit::Spade },
-					{ card_value::Nine,		card_suit::Spade },
-					{ card_value::Ten,		card_suit::Spade },
-					{ card_value::Jack,		card_suit::Spade },
-					{ card_value::Queen,	card_suit::Spade },
-					{ card_value::King,		card_suit::Spade }
-				}
-			{
-				if (game_traits::jokers_present::value)
-					iCards.insert(iCards.end(), 2, card_type{ card_value::Joker, card_suit::Joker });
-			}
-		public:
-			void shuffle()
-			{
-				// todo: this is probably OK as the shuffle will be using less than 624 outputs of the mersenne twister but move to a CSPRNG such as HC-128 instead.
-				std::random_device rd;
-				std::mt19937 g(rd());
-				std::shuffle(iCards.begin(), iCards.end(), g);
-			}
-			card_type deal_card()
-			{
-				if (iCards.empty())
-					throw deck_empty();
-				auto newCard = iCards.back();
-				iCards.pop_back();
-				return newCard;
-			}
-		public:
-			template <typename HandType>
-			void deal_hand(HandType& aHand)
-			{
-				while (!aHand.fully_dealt())
-					aHand.pick(*this);
-			}
-			template <typename HandIter>
-			void deal_hands(HandIter aFirstHand, HandIter aLastHand)
-			{
-				for (uint32_t i = 0; i < game_traits::hand_size; ++i)
-					for (auto hand = aFirstHand; hand != aLastHand; ++hand)
-						hand->pick(*this);
-			}
-			template <typename HandType>
-			void exchange_cards(HandType& aHand)
-			{
-				while (aHand.pick(*this))
-					;
-			}
-		private:
-			cards iCards;
-		};
+    namespace card_games
+    {
+        template <typename GameTraits>
+        class basic_deck
+        {
+        public:
+            typedef typename GameTraits game_traits;
+            typedef basic_card<game_traits> card_type;
+            typedef typename card_type::value card_value;
+            typedef typename card_type::suit card_suit;
+        private:
+            typedef std::vector<card_type> cards;
+        public:
+            struct deck_empty : std::runtime_error { deck_empty() : std::runtime_error("neogames::card_games::basic_deck::deck_empty") {} };
+        public:
+            basic_deck() :
+                iCards{
+                    { card_value::Ace,        card_suit::Club },
+                    { card_value::Two,        card_suit::Club },
+                    { card_value::Three,    card_suit::Club },
+                    { card_value::Four,        card_suit::Club },
+                    { card_value::Five,        card_suit::Club },
+                    { card_value::Six,        card_suit::Club },
+                    { card_value::Seven,    card_suit::Club },
+                    { card_value::Eight,    card_suit::Club },
+                    { card_value::Nine,        card_suit::Club },
+                    { card_value::Ten,        card_suit::Club },
+                    { card_value::Jack,        card_suit::Club },
+                    { card_value::Queen,    card_suit::Club },
+                    { card_value::King,        card_suit::Club },
+                    { card_value::Ace,        card_suit::Diamond },
+                    { card_value::Two,        card_suit::Diamond },
+                    { card_value::Three,    card_suit::Diamond },
+                    { card_value::Four,        card_suit::Diamond },
+                    { card_value::Five,        card_suit::Diamond },
+                    { card_value::Six,        card_suit::Diamond },
+                    { card_value::Seven,    card_suit::Diamond },
+                    { card_value::Eight,    card_suit::Diamond },
+                    { card_value::Nine,        card_suit::Diamond },
+                    { card_value::Ten,        card_suit::Diamond },
+                    { card_value::Jack,        card_suit::Diamond },
+                    { card_value::Queen,    card_suit::Diamond },
+                    { card_value::King,        card_suit::Diamond },
+                    { card_value::Ace,        card_suit::Heart },
+                    { card_value::Two,        card_suit::Heart },
+                    { card_value::Three,    card_suit::Heart },
+                    { card_value::Four,        card_suit::Heart },
+                    { card_value::Five,        card_suit::Heart },
+                    { card_value::Six,        card_suit::Heart },
+                    { card_value::Seven,    card_suit::Heart },
+                    { card_value::Eight,    card_suit::Heart },
+                    { card_value::Nine,        card_suit::Heart },
+                    { card_value::Ten,        card_suit::Heart },
+                    { card_value::Jack,        card_suit::Heart },
+                    { card_value::Queen,    card_suit::Heart },
+                    { card_value::King,        card_suit::Heart },
+                    { card_value::Ace,        card_suit::Spade },
+                    { card_value::Two,        card_suit::Spade },
+                    { card_value::Three,    card_suit::Spade },
+                    { card_value::Four,        card_suit::Spade },
+                    { card_value::Five,        card_suit::Spade },
+                    { card_value::Six,        card_suit::Spade },
+                    { card_value::Seven,    card_suit::Spade },
+                    { card_value::Eight,    card_suit::Spade },
+                    { card_value::Nine,        card_suit::Spade },
+                    { card_value::Ten,        card_suit::Spade },
+                    { card_value::Jack,        card_suit::Spade },
+                    { card_value::Queen,    card_suit::Spade },
+                    { card_value::King,        card_suit::Spade }
+                }
+            {
+                if (game_traits::jokers_present::value)
+                    iCards.insert(iCards.end(), 2, card_type{ card_value::Joker, card_suit::Joker });
+            }
+        public:
+            void shuffle()
+            {
+                // todo: this is probably OK as the shuffle will be using less than 624 outputs of the mersenne twister but move to a CSPRNG such as HC-128 instead.
+                std::random_device rd;
+                std::mt19937 g(rd());
+                std::shuffle(iCards.begin(), iCards.end(), g);
+            }
+            card_type deal_card()
+            {
+                if (iCards.empty())
+                    throw deck_empty();
+                auto newCard = iCards.back();
+                iCards.pop_back();
+                return newCard;
+            }
+        public:
+            template <typename HandType>
+            void deal_hand(HandType& aHand)
+            {
+                while (!aHand.fully_dealt())
+                    aHand.pick(*this);
+            }
+            template <typename HandIter>
+            void deal_hands(HandIter aFirstHand, HandIter aLastHand)
+            {
+                for (uint32_t i = 0; i < game_traits::hand_size; ++i)
+                    for (auto hand = aFirstHand; hand != aLastHand; ++hand)
+                        hand->pick(*this);
+            }
+            template <typename HandType>
+            void exchange_cards(HandType& aHand)
+            {
+                while (aHand.pick(*this))
+                    ;
+            }
+        private:
+            cards iCards;
+        };
 
-		typedef basic_deck<default_game_traits> deck;
-	}
+        typedef basic_deck<default_game_traits> deck;
+    }
 }

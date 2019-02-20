@@ -26,82 +26,82 @@
 
 namespace neogfx
 {
-	template size layout::do_minimum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
-	template size layout::do_maximum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
-	template void layout::do_layout_items<layout::column_major<flow_layout>>(const point& aPosition, const size& aSize);
+    template size layout::do_minimum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+    template size layout::do_maximum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+    template void layout::do_layout_items<layout::column_major<flow_layout>>(const point& aPosition, const size& aSize);
 
-	template size layout::do_minimum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
-	template size layout::do_maximum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
-	template void layout::do_layout_items<layout::row_major<flow_layout>>(const point& aPosition, const size& aSize);
+    template size layout::do_minimum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+    template size layout::do_maximum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+    template void layout::do_layout_items<layout::row_major<flow_layout>>(const point& aPosition, const size& aSize);
 
-	flow_layout::flow_layout(flow_direction_e aFlowDirection) :
-		layout(), iFlowDirection(aFlowDirection)
-	{
-	}
+    flow_layout::flow_layout(flow_direction_e aFlowDirection) :
+        layout(), iFlowDirection(aFlowDirection)
+    {
+    }
 
-	flow_layout::flow_layout(i_widget& aParent, flow_direction_e aFlowDirection) :
-		layout(aParent), iFlowDirection(aFlowDirection)
-	{
-	}
+    flow_layout::flow_layout(i_widget& aParent, flow_direction_e aFlowDirection) :
+        layout(aParent), iFlowDirection(aFlowDirection)
+    {
+    }
 
-	flow_layout::flow_layout(i_layout& aParent, flow_direction_e aFlowDirection) :
-		layout(aParent), iFlowDirection(aFlowDirection)
-	{
-	}
+    flow_layout::flow_layout(i_layout& aParent, flow_direction_e aFlowDirection) :
+        layout(aParent), iFlowDirection(aFlowDirection)
+    {
+    }
 
-	i_spacer& flow_layout::add_spacer()
-	{
-		return add_spacer_at(count());
-	}
+    i_spacer& flow_layout::add_spacer()
+    {
+        return add_spacer_at(count());
+    }
 
-	i_spacer& flow_layout::add_spacer_at(item_index aPosition)
-	{
-		if (iFlowDirection == FlowDirectionHorizontal)
-		{
-			auto s = std::make_shared<horizontal_spacer>();
-			add_at(aPosition, s);
-			return *s;
-		}
-		else
-		{
-			auto s = std::make_shared<vertical_spacer>();
-			add_at(aPosition, s);
-			return *s;
-		}
-	}
+    i_spacer& flow_layout::add_spacer_at(item_index aPosition)
+    {
+        if (iFlowDirection == FlowDirectionHorizontal)
+        {
+            auto s = std::make_shared<horizontal_spacer>();
+            add_at(aPosition, s);
+            return *s;
+        }
+        else
+        {
+            auto s = std::make_shared<vertical_spacer>();
+            add_at(aPosition, s);
+            return *s;
+        }
+    }
 
-	size flow_layout::minimum_size(const optional_size& aAvailableSpace) const
-	{
-		if (iFlowDirection == FlowDirectionHorizontal)
-			return do_minimum_size<layout::column_major<flow_layout>>(aAvailableSpace);
-		else
-			return do_minimum_size<layout::row_major<flow_layout>>(aAvailableSpace);
-	}
+    size flow_layout::minimum_size(const optional_size& aAvailableSpace) const
+    {
+        if (iFlowDirection == FlowDirectionHorizontal)
+            return do_minimum_size<layout::column_major<flow_layout>>(aAvailableSpace);
+        else
+            return do_minimum_size<layout::row_major<flow_layout>>(aAvailableSpace);
+    }
 
-	size flow_layout::maximum_size(const optional_size& aAvailableSpace) const
-	{
-		if (iFlowDirection == FlowDirectionHorizontal)
-			return do_maximum_size<layout::column_major<flow_layout>>(aAvailableSpace);
-		else
-			return do_maximum_size<layout::row_major<flow_layout>>(aAvailableSpace);
-	}
+    size flow_layout::maximum_size(const optional_size& aAvailableSpace) const
+    {
+        if (iFlowDirection == FlowDirectionHorizontal)
+            return do_maximum_size<layout::column_major<flow_layout>>(aAvailableSpace);
+        else
+            return do_maximum_size<layout::row_major<flow_layout>>(aAvailableSpace);
+    }
 
-	void flow_layout::layout_items(const point& aPosition, const size& aSize)
-	{
-		if (!enabled())
-			return;
-		if (debug == this)
-			std::cerr << "flow_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
-		if (has_layout_owner())
-			layout_owner().layout_items_started();
-		next_layout_id();
-		validate();
-		if (iFlowDirection == FlowDirectionHorizontal)
-			do_layout_items<layout::column_major<flow_layout>>(aPosition, aSize);
-		else
-			do_layout_items<layout::row_major<flow_layout>>(aPosition, aSize);
-		if (has_layout_owner())
-			layout_owner().layout_items_completed();
-		layout_completed.trigger();
-	}
+    void flow_layout::layout_items(const point& aPosition, const size& aSize)
+    {
+        if (!enabled())
+            return;
+        if (debug == this)
+            std::cerr << "flow_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+        if (has_layout_owner())
+            layout_owner().layout_items_started();
+        next_layout_id();
+        validate();
+        if (iFlowDirection == FlowDirectionHorizontal)
+            do_layout_items<layout::column_major<flow_layout>>(aPosition, aSize);
+        else
+            do_layout_items<layout::row_major<flow_layout>>(aPosition, aSize);
+        if (has_layout_owner())
+            layout_owner().layout_items_completed();
+        layout_completed.trigger();
+    }
 }

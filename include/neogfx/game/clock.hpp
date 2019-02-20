@@ -27,47 +27,47 @@
 
 namespace neogfx::game
 {
-	struct clock
-	{
-		int64_t time;
-		int64_t timeStep;
+    struct clock
+    {
+        int64_t time;
+        int64_t timeStep;
 
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x4c463f47, 0xede9, 0x4cc2, 0xb8f1, { 0x71, 0x2, 0x9e, 0x78, 0xb6, 0x1e } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Clock";
-				return sName;
-			}
-			static uint32_t field_count()
-			{ 
-				return 2; 
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-				case 1:
-					return component_data_field_type::Int64;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] = 
-				{
-					"Time",
-					"Time Step",
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
-	};
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x4c463f47, 0xede9, 0x4cc2, 0xb8f1, { 0x71, 0x2, 0x9e, 0x78, 0xb6, 0x1e } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Clock";
+                return sName;
+            }
+            static uint32_t field_count()
+            { 
+                return 2; 
+            }
+            static component_data_field_type field_type(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                case 1:
+                    return component_data_field_type::Int64;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            {
+                static const neolib::string sFieldNames[] = 
+                {
+                    "Time",
+                    "Time Step",
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 }

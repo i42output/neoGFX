@@ -24,53 +24,53 @@
 
 namespace neogfx
 {
-	audio_playback_device::audio_playback_device()
-	{
-	}
+    audio_playback_device::audio_playback_device()
+    {
+    }
 
-	i_audio_sample& audio_playback_device::load_sample(const std::string& aUri)
-	{
-		// todo
-		throw std::logic_error("audio_playback_device::load_sample: not yet implemented");
-	}
+    i_audio_sample& audio_playback_device::load_sample(const std::string& aUri)
+    {
+        // todo
+        throw std::logic_error("audio_playback_device::load_sample: not yet implemented");
+    }
 
-	i_audio_sample& audio_playback_device::create_sample(double aDuration)
-	{
-		// todo
-		throw std::logic_error("audio_playback_device::create_sample: not yet implemented");
-	}
+    i_audio_sample& audio_playback_device::create_sample(double aDuration)
+    {
+        // todo
+        throw std::logic_error("audio_playback_device::create_sample: not yet implemented");
+    }
 
-	void audio_playback_device::destroy_sample(i_audio_sample& aSample)
-	{
-		for (auto i = iSamples.begin(); i != iSamples.end(); ++i)
-			if (&**i == &aSample)
-			{
-				iSamples.erase(i);
-				return;
-			}
-	}
+    void audio_playback_device::destroy_sample(i_audio_sample& aSample)
+    {
+        for (auto i = iSamples.begin(); i != iSamples.end(); ++i)
+            if (&**i == &aSample)
+            {
+                iSamples.erase(i);
+                return;
+            }
+    }
 
-	i_audio_track& audio_playback_device::create_track()
-	{
-		auto newTrack = std::make_shared<audio_track>(spec());
-		iTracks.push_back(newTrack);
-		return *newTrack;
-	}
+    i_audio_track& audio_playback_device::create_track()
+    {
+        auto newTrack = std::make_shared<audio_track>(spec());
+        iTracks.push_back(newTrack);
+        return *newTrack;
+    }
 
-	void audio_playback_device::destroy_track(i_audio_track& aTrack)
-	{
-		for (auto i = iTracks.begin(); i != iTracks.end(); ++i)
-			if (&**i == &aTrack)
-			{
-				iTracks.erase(i);
-				return;
-			}
-	}
+    void audio_playback_device::destroy_track(i_audio_track& aTrack)
+    {
+        for (auto i = iTracks.begin(); i != iTracks.end(); ++i)
+            if (&**i == &aTrack)
+            {
+                iTracks.erase(i);
+                return;
+            }
+    }
 
-	i_audio_beeper& audio_playback_device::beeper()
-	{
-		if (iBeeper == nullptr)
-			iBeeper = std::make_unique<audio_beeper>(*this);
-		return *iBeeper;
-	}
+    i_audio_beeper& audio_playback_device::beeper()
+    {
+        if (iBeeper == nullptr)
+            iBeeper = std::make_unique<audio_beeper>(*this);
+        return *iBeeper;
+    }
 }

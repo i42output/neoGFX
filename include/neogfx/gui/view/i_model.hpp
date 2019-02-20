@@ -23,16 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_controller;
+    class i_controller;
 
-	class i_model
-	{
-	public:
-		event<> modified;
-	public:
-		virtual bool dirty() const = 0;
-		virtual bool controller_registered(i_controller& aController) = 0;
-		virtual void add_controller(i_controller& aContainer) = 0;
-		virtual void remove_controller(i_controller& aContainer) = 0;
-	};
+    class i_model
+    {
+    public:
+        event<> modified;
+    public:
+        virtual bool dirty() const = 0;
+        virtual bool controller_registered(i_controller& aController) = 0;
+        virtual void add_controller(i_controller& aContainer) = 0;
+        virtual void remove_controller(i_controller& aContainer) = 0;
+    };
 }

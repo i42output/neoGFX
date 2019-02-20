@@ -31,78 +31,78 @@
 
 namespace neogfx::game
 {
-	struct texture
-	{
-		neolib::cookie_auto_ref id;
-		texture_type type;
-		texture_sampling sampling;
-		scalar dpiScalingFactor;
-		vec2 extents;
-		optional_aabb_2d subTexture;
+    struct texture
+    {
+        neolib::cookie_auto_ref id;
+        texture_type type;
+        texture_sampling sampling;
+        scalar dpiScalingFactor;
+        vec2 extents;
+        optional_aabb_2d subTexture;
 
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x9f08230d, 0x25f, 0x4466, 0x9aab, { 0x1, 0x8d, 0x3, 0x29, 0x2e, 0xdc } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Texture";
-				return sName;
-			}
-			static uint32_t field_count()
-			{
-				return 6;
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return component_data_field_type::Id;
-				case 1:
-				case 2:
-					return component_data_field_type::Enum | component_data_field_type::Uint32;
-				case 3:
-					return component_data_field_type::Scalar;
-				case 4:
-					return component_data_field_type::Vec2;
-				case 5:
-					return component_data_field_type::Aabb2d | component_data_field_type::Optional;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static neolib::uuid field_type_id(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-				case 1:
-				case 2:
-				case 3:
-				case 4:
-				case 5:
-					return neolib::uuid{};
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] =
-				{
-					"Id",
-					"Type",
-					"Sampling",
-					"DPI Scale Factor",
-					"Extents",
-					"Sub Texture"
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
-	};
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x9f08230d, 0x25f, 0x4466, 0x9aab, { 0x1, 0x8d, 0x3, 0x29, 0x2e, 0xdc } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Texture";
+                return sName;
+            }
+            static uint32_t field_count()
+            {
+                return 6;
+            }
+            static component_data_field_type field_type(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Id;
+                case 1:
+                case 2:
+                    return component_data_field_type::Enum | component_data_field_type::Uint32;
+                case 3:
+                    return component_data_field_type::Scalar;
+                case 4:
+                    return component_data_field_type::Vec2;
+                case 5:
+                    return component_data_field_type::Aabb2d | component_data_field_type::Optional;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static neolib::uuid field_type_id(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    return neolib::uuid{};
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            {
+                static const neolib::string sFieldNames[] =
+                {
+                    "Id",
+                    "Type",
+                    "Sampling",
+                    "DPI Scale Factor",
+                    "Extents",
+                    "Sub Texture"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 }

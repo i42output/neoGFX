@@ -28,62 +28,62 @@
 
 namespace neogfx::game
 {
-	struct patch
-	{
-		material material;
-		faces_t faces;
+    struct patch
+    {
+        material material;
+        faces_t faces;
 
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x2a4e96aa, 0x2e1e, 0x48d7, 0xa384, { 0xb, 0xe8, 0x79, 0x3a, 0x7e, 0x94 } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Patch";
-				return sName;
-			}
-			static uint32_t field_count()
-			{
-				return 2;
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return component_data_field_type::ComponentData;
-				case 1:
-					return component_data_field_type::Face | component_data_field_type::Array;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static neolib::uuid field_type_id(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return material::meta::id();
-				case 1:
-					return neolib::uuid{};
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] =
-				{
-					"Material",
-					"Faces"
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
-	};
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x2a4e96aa, 0x2e1e, 0x48d7, 0xa384, { 0xb, 0xe8, 0x79, 0x3a, 0x7e, 0x94 } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Patch";
+                return sName;
+            }
+            static uint32_t field_count()
+            {
+                return 2;
+            }
+            static component_data_field_type field_type(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::ComponentData;
+                case 1:
+                    return component_data_field_type::Face | component_data_field_type::Array;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static neolib::uuid field_type_id(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return material::meta::id();
+                case 1:
+                    return neolib::uuid{};
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            {
+                static const neolib::string sFieldNames[] =
+                {
+                    "Material",
+                    "Faces"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 
-	typedef std::vector<patch> patches_t;
+    typedef std::vector<patch> patches_t;
 }

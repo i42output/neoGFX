@@ -24,11 +24,11 @@
 
 namespace neogfx::game
 {
-	class renderable_entity_archetype : public entity_archetype
-	{
-	public:
-		using entity_archetype::entity_archetype;
-	public:
-		void populate_default_components(i_ecs& aEcs, entity_id aEntity) override;
-	};
+    class renderable_entity_archetype : public entity_archetype
+    {
+    public:
+        using entity_archetype::entity_archetype;
+    public:
+        void populate_default_components(i_ecs& aEcs, entity_id aEntity) override;
+    };
 }

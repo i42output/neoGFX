@@ -25,47 +25,47 @@
 
 namespace neogfx::game
 {
-	entity::entity(i_ecs& aEcs, entity_id aId) :
-		iEcs{ aEcs }, iId{ aId }
-	{
-		iSink += ecs().entity_destroyed([this](entity_id aId)
-		{
-			if (aId == iId)
-				iId = null_entity;
-		});
-	}
+    entity::entity(i_ecs& aEcs, entity_id aId) :
+        iEcs{ aEcs }, iId{ aId }
+    {
+        iSink += ecs().entity_destroyed([this](entity_id aId)
+        {
+            if (aId == iId)
+                iId = null_entity;
+        });
+    }
 
-	entity::entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId) :
-		entity{ aEcs, aEcs.create_entity(aArchetypeId) }
-	{
-	}
+    entity::entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId) :
+        entity{ aEcs, aEcs.create_entity(aArchetypeId) }
+    {
+    }
 
-	entity::~entity()
-	{
-		if (!detached_or_destroyed())
-			ecs().destroy_entity(iId);
-	}
+    entity::~entity()
+    {
+        if (!detached_or_destroyed())
+            ecs().destroy_entity(iId);
+    }
 
-	i_ecs& entity::ecs() const
-	{
-		return iEcs;
-	}
+    i_ecs& entity::ecs() const
+    {
+        return iEcs;
+    }
 
-	entity_id entity::id() const
-	{
-		return iId;
-	}
+    entity_id entity::id() const
+    {
+        return iId;
+    }
 
-	bool entity::detached_or_destroyed() const
-	{
-		return iId == null_entity;
-	}
+    bool entity::detached_or_destroyed() const
+    {
+        return iId == null_entity;
+    }
 
-	entity_id entity::detach()
-	{
-		ecs().archetype(ecs().component<entity_info>().entity_record(id()).archetypeId).populate_default_components(ecs(), id());
-		auto id = iId;
-		iId = null_entity;
-		return id;
-	}
+    entity_id entity::detach()
+    {
+        ecs().archetype(ecs().component<entity_info>().entity_record(id()).archetypeId).populate_default_components(ecs(), id());
+        auto id = iId;
+        iId = null_entity;
+        return id;
+    }
 }

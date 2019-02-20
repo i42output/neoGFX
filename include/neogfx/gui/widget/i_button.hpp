@@ -24,25 +24,25 @@
 
 namespace neogfx
 {
-	enum class button_checkable
-	{
-		NotCheckable,
-		BiState,
-		TriState
-	};
+    enum class button_checkable
+    {
+        NotCheckable,
+        BiState,
+        TriState
+    };
 
-	class i_button : public virtual i_skinnable_item
-	{
-	public:
-		virtual button_checkable checkable() const = 0;
-		virtual void set_checkable(button_checkable aCheckable = button_checkable::BiState) = 0;
-		virtual bool is_checked() const = 0;
-		virtual bool is_unchecked() const = 0;
-		virtual bool is_indeterminate() const = 0;
-		virtual void check() = 0;
-		virtual void uncheck() = 0;
-		virtual void set_indeterminate() = 0;
-		virtual void set_checked(bool aChecked) = 0;
-		virtual void toggle() = 0;
-	};
+    class i_button : public virtual i_skinnable_item
+    {
+    public:
+        virtual button_checkable checkable() const = 0;
+        virtual void set_checkable(button_checkable aCheckable = button_checkable::BiState) = 0;
+        virtual bool is_checked() const = 0;
+        virtual bool is_unchecked() const = 0;
+        virtual bool is_indeterminate() const = 0;
+        virtual void check() = 0;
+        virtual void uncheck() = 0;
+        virtual void set_indeterminate() = 0;
+        virtual void set_checked(bool aChecked) = 0;
+        virtual void toggle() = 0;
+    };
 }

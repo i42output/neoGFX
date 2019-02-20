@@ -23,22 +23,22 @@
 
 namespace neogfx
 {
-	class audio_playback_device : public i_audio_playback_device
-	{
-	public:
-		audio_playback_device();
-	public:
-		i_audio_sample& load_sample(const std::string& aUri) override;
-		i_audio_sample& create_sample(double aDuration) override;
-		void destroy_sample(i_audio_sample& aSample) override;
-	public:
-		i_audio_track& create_track() override;
-		void destroy_track(i_audio_track& aTrack) override;
-	public:
-		i_audio_beeper& beeper() override;
-	private:
-		std::vector<std::shared_ptr<i_audio_sample>> iSamples;
-		std::vector<std::shared_ptr<i_audio_track>> iTracks;
-		std::unique_ptr<i_audio_beeper> iBeeper;
-	};
+    class audio_playback_device : public i_audio_playback_device
+    {
+    public:
+        audio_playback_device();
+    public:
+        i_audio_sample& load_sample(const std::string& aUri) override;
+        i_audio_sample& create_sample(double aDuration) override;
+        void destroy_sample(i_audio_sample& aSample) override;
+    public:
+        i_audio_track& create_track() override;
+        void destroy_track(i_audio_track& aTrack) override;
+    public:
+        i_audio_beeper& beeper() override;
+    private:
+        std::vector<std::shared_ptr<i_audio_sample>> iSamples;
+        std::vector<std::shared_ptr<i_audio_track>> iTracks;
+        std::unique_ptr<i_audio_beeper> iBeeper;
+    };
 }

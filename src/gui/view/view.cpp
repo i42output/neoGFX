@@ -24,55 +24,55 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	view::view(i_controller& aController, i_model& aModel) :
-		scrollable_widget{ 
-			aController.container().as_widget(),
-			scrollbar_style::Normal, 
-			aController.container().style() != view_container_style::MDI ? frame_style::NoFrame : frame_style::WindowFrame },
-		iController(aController), iModel(aModel), iActive(false)
-	{
-	}
-	
-	const i_widget& view::as_widget() const
-	{
-		return *this;
-	}
-	
-	i_widget& view::as_widget()
-	{
-		return *this;
-	}
-	
-	const i_model& view::model() const
-	{
-		return iModel;
-	}
-	
-	i_model& view::model()
-	{
-		return iModel;
-	}
-	
-	bool view::is_active() const
-	{
-		return iActive;
-	}
-	
-	void view::activate()
-	{
-		if (!iActive)
-		{
-			iActive = true;
-			activated.trigger();
-		}
-	}
-	
-	void view::deactivate()
-	{
-		if (iActive)
-		{
-			iActive = false;
-			deactivated.trigger();
-		}
-	}
+    view::view(i_controller& aController, i_model& aModel) :
+        scrollable_widget{ 
+            aController.container().as_widget(),
+            scrollbar_style::Normal, 
+            aController.container().style() != view_container_style::MDI ? frame_style::NoFrame : frame_style::WindowFrame },
+        iController(aController), iModel(aModel), iActive(false)
+    {
+    }
+    
+    const i_widget& view::as_widget() const
+    {
+        return *this;
+    }
+    
+    i_widget& view::as_widget()
+    {
+        return *this;
+    }
+    
+    const i_model& view::model() const
+    {
+        return iModel;
+    }
+    
+    i_model& view::model()
+    {
+        return iModel;
+    }
+    
+    bool view::is_active() const
+    {
+        return iActive;
+    }
+    
+    void view::activate()
+    {
+        if (!iActive)
+        {
+            iActive = true;
+            activated.trigger();
+        }
+    }
+    
+    void view::deactivate()
+    {
+        if (iActive)
+        {
+            iActive = false;
+            deactivated.trigger();
+        }
+    }
 }

@@ -25,41 +25,41 @@
 
 namespace neogfx
 {
-	class window_manager : public i_window_manager
-	{
-	private:
-		struct window_sorter
-		{
-			bool operator()(i_window* left, i_window* right) const
-			{
-				if (left->is_owner_of(*right))
-					return true;
-				else if (right->is_owner_of(*left))
-					return false;
-				else
-					return std::less<i_window*>{}(left, right);
-			}
-		};
-		typedef std::vector<i_window*> window_list;
-	public:
-		window_manager();
-		~window_manager();
-	public:
-		void add_window(i_window& aWindow) override;
-		void remove_window(i_window& aWindow) override;
-		bool has_window(i_window& aWindow) const override;
-		std::size_t window_count() const override;
-		i_window& window(std::size_t aIndex) override;
-		bool any_strong_windows() const override;
-	public:
-		rect desktop_rect(const i_window& aWindow, bool aIgnoreNesting = false) const override;
-		rect window_rect(const i_window& aWindow, bool aIgnoreNesting = false) const override;
-		void move_window(i_window& aWindow, const point& aPosition) override;
-		void resize_window(i_window& aWindow, const size& aExtents) override;
-	public:
-		bool window_activated() const override;
-		i_window& active_window() const override;
-	private:
-		window_list iWindows;
-	};
+    class window_manager : public i_window_manager
+    {
+    private:
+        struct window_sorter
+        {
+            bool operator()(i_window* left, i_window* right) const
+            {
+                if (left->is_owner_of(*right))
+                    return true;
+                else if (right->is_owner_of(*left))
+                    return false;
+                else
+                    return std::less<i_window*>{}(left, right);
+            }
+        };
+        typedef std::vector<i_window*> window_list;
+    public:
+        window_manager();
+        ~window_manager();
+    public:
+        void add_window(i_window& aWindow) override;
+        void remove_window(i_window& aWindow) override;
+        bool has_window(i_window& aWindow) const override;
+        std::size_t window_count() const override;
+        i_window& window(std::size_t aIndex) override;
+        bool any_strong_windows() const override;
+    public:
+        rect desktop_rect(const i_window& aWindow, bool aIgnoreNesting = false) const override;
+        rect window_rect(const i_window& aWindow, bool aIgnoreNesting = false) const override;
+        void move_window(i_window& aWindow, const point& aPosition) override;
+        void resize_window(i_window& aWindow, const size& aExtents) override;
+    public:
+        bool window_activated() const override;
+        i_window& active_window() const override;
+    private:
+        window_list iWindows;
+    };
 }

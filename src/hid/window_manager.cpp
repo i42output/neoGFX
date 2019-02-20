@@ -27,99 +27,99 @@
 
 namespace neogfx
 {
-	window_manager::window_manager()
-	{
-	}
+    window_manager::window_manager()
+    {
+    }
 
-	window_manager::~window_manager()
-	{
-	}
+    window_manager::~window_manager()
+    {
+    }
 
-	void window_manager::add_window(i_window& aWindow)
-	{
-		iWindows.push_back(&aWindow);
-		std::sort(iWindows.begin(), iWindows.end(), window_sorter{});
-	}
+    void window_manager::add_window(i_window& aWindow)
+    {
+        iWindows.push_back(&aWindow);
+        std::sort(iWindows.begin(), iWindows.end(), window_sorter{});
+    }
 
-	void window_manager::remove_window(i_window& aWindow)
-	{
-		auto existing = std::find(iWindows.begin(), iWindows.end(), &aWindow);
-		if (existing == iWindows.end())
-			throw window_not_found();
-		iWindows.erase(existing);
-	}
+    void window_manager::remove_window(i_window& aWindow)
+    {
+        auto existing = std::find(iWindows.begin(), iWindows.end(), &aWindow);
+        if (existing == iWindows.end())
+            throw window_not_found();
+        iWindows.erase(existing);
+    }
 
-	bool window_manager::has_window(i_window& aWindow) const
-	{
-		auto query = std::find(iWindows.begin(), iWindows.end(), &aWindow);
-		return query != iWindows.end();
-	}
+    bool window_manager::has_window(i_window& aWindow) const
+    {
+        auto query = std::find(iWindows.begin(), iWindows.end(), &aWindow);
+        return query != iWindows.end();
+    }
 
-	std::size_t window_manager::window_count() const
-	{
-		return iWindows.size();
-	}
+    std::size_t window_manager::window_count() const
+    {
+        return iWindows.size();
+    }
 
-	i_window& window_manager::window(std::size_t aIndex)
-	{
-		if (aIndex >= iWindows.size())
-			throw window_not_found();
-		return **std::next(iWindows.begin(), aIndex);
-	}
+    i_window& window_manager::window(std::size_t aIndex)
+    {
+        if (aIndex >= iWindows.size())
+            throw window_not_found();
+        return **std::next(iWindows.begin(), aIndex);
+    }
 
-	bool window_manager::any_strong_windows() const
-	{
-		for (auto const& w : iWindows)
-			if (w->is_strong())
-				return true;
-		return false;
-	}
+    bool window_manager::any_strong_windows() const
+    {
+        for (auto const& w : iWindows)
+            if (w->is_strong())
+                return true;
+        return false;
+    }
 
-	rect window_manager::desktop_rect(const i_window& aWindow, bool aIgnoreNesting) const
-	{
-		if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
-			return service<i_surface_manager>().desktop_rect(aWindow.surface());
-		else
-			return rect{ point{}, window_rect(aWindow.nest().as_widget().root()).extents() };
-	}
+    rect window_manager::desktop_rect(const i_window& aWindow, bool aIgnoreNesting) const
+    {
+        if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
+            return service<i_surface_manager>().desktop_rect(aWindow.surface());
+        else
+            return rect{ point{}, window_rect(aWindow.nest().as_widget().root()).extents() };
+    }
 
-	rect window_manager::window_rect(const i_window& aWindow, bool aIgnoreNesting) const
-	{
-		if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
-			return rect{ aWindow.surface().surface_position(), aWindow.surface().surface_size() };
-		else
-			return rect{ aWindow.as_widget().position(), aWindow.as_widget().extents() };
-	}
+    rect window_manager::window_rect(const i_window& aWindow, bool aIgnoreNesting) const
+    {
+        if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
+            return rect{ aWindow.surface().surface_position(), aWindow.surface().surface_size() };
+        else
+            return rect{ aWindow.as_widget().position(), aWindow.as_widget().extents() };
+    }
 
-	void window_manager::move_window(i_window& aWindow, const point& aPosition)
-	{
-		if (!aWindow.is_nested())
-			aWindow.surface().move_surface(aPosition);
-		else
-			aWindow.as_widget().move(aPosition);
-	}
+    void window_manager::move_window(i_window& aWindow, const point& aPosition)
+    {
+        if (!aWindow.is_nested())
+            aWindow.surface().move_surface(aPosition);
+        else
+            aWindow.as_widget().move(aPosition);
+    }
 
-	void window_manager::resize_window(i_window& aWindow, const size& aExtents)
-	{
-		if (!aWindow.is_nested())
-			aWindow.surface().resize_surface(aExtents);
-		else
-			aWindow.as_widget().resize(aExtents);
-	}
+    void window_manager::resize_window(i_window& aWindow, const size& aExtents)
+    {
+        if (!aWindow.is_nested())
+            aWindow.surface().resize_surface(aExtents);
+        else
+            aWindow.as_widget().resize(aExtents);
+    }
 
-	bool window_manager::window_activated() const
-	{
-		for (auto const& w : iWindows)
-			if (w->is_active())
-				return true;
-		return false;
-	}
+    bool window_manager::window_activated() const
+    {
+        for (auto const& w : iWindows)
+            if (w->is_active())
+                return true;
+        return false;
+    }
 
-	i_window& window_manager::active_window() const
-	{
-		for (auto const& w : iWindows)
-			if (w->is_active())
-				return *w;
-		throw no_window_active();
-	}
+    i_window& window_manager::active_window() const
+    {
+        for (auto const& w : iWindows)
+            if (w->is_active())
+                return *w;
+        throw no_window_active();
+    }
 }

@@ -23,11 +23,11 @@
 
 namespace neogfx
 {
-	class i_event_processing_context
-	{
-	public:
-		virtual ~i_event_processing_context() {}
-	public:
-		virtual const std::string& name() const = 0;
-	};
+    class i_event_processing_context
+    {
+    public:
+        virtual ~i_event_processing_context() {}
+    public:
+        virtual const std::string& name() const = 0;
+    };
 }

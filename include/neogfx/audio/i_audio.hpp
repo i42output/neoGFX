@@ -23,16 +23,16 @@
 
 namespace neogfx
 {
-	class i_audio
-	{
-	public:
-		struct failed_to_initialize_audio : std::runtime_error { failed_to_initialize_audio(const std::string& aReason) : std::runtime_error{"neogfx::i_audio::failed_to_initialize_audio: " + aReason} {} };
-		struct bad_audio_device_index : std::logic_error { bad_audio_device_index() : std::logic_error{ "neogfx::i_audio::bad_audio_device_index" } {} };
-	public:
-		virtual void initialize(bool aOpenDefaultPlaybackDevice = true) = 0;
-		virtual void uninitialize() = 0;
-		virtual bool have_audio_playback_device() const = 0;
-		virtual uint32_t audio_playback_device_count() const = 0;
-		virtual i_audio_playback_device& audio_playback_device(uint32_t aDeviceIndex) = 0;
-	};
+    class i_audio
+    {
+    public:
+        struct failed_to_initialize_audio : std::runtime_error { failed_to_initialize_audio(const std::string& aReason) : std::runtime_error{"neogfx::i_audio::failed_to_initialize_audio: " + aReason} {} };
+        struct bad_audio_device_index : std::logic_error { bad_audio_device_index() : std::logic_error{ "neogfx::i_audio::bad_audio_device_index" } {} };
+    public:
+        virtual void initialize(bool aOpenDefaultPlaybackDevice = true) = 0;
+        virtual void uninitialize() = 0;
+        virtual bool have_audio_playback_device() const = 0;
+        virtual uint32_t audio_playback_device_count() const = 0;
+        virtual i_audio_playback_device& audio_playback_device(uint32_t aDeviceIndex) = 0;
+    };
 }

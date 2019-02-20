@@ -27,41 +27,41 @@
 
 namespace neogfx
 {
-	class font_dialog : public dialog
-	{
-	public:
-		event<> selection_changed;
-	public:
-		font_dialog(const neogfx::font& aCurrentFont = neogfx::font{});
-		font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{});
-		~font_dialog();
-	public:
-		neogfx::font current_font() const;
-		neogfx::font selected_font() const;
-		void select_font(const neogfx::font& aFont);
-	protected:
-		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-	private:
-		void init();
-		void update_selected_font(const i_widget& aUpdatingWidget);
-	private:
-		sink iSink;
-		bool iUpdating;
-		neogfx::font iCurrentFont;
-		neogfx::font iSelectedFont;
-		horizontal_layout iLayout0;
-		vertical_layout iLayout1;
-		label iFamilyLabel;
-		drop_list iFamilyPicker;
-		vertical_layout iLayout2;
-		horizontal_layout iLayout3;
-		vertical_layout iLayout4;
-		label iStyleLabel;
-		drop_list iStylePicker;
-		vertical_layout iLayout5;
-		label iSizeLabel;
-		drop_list iSizePicker;
-		group_box iSampleBox;
-		text_widget iSample;
-	};
+    class font_dialog : public dialog
+    {
+    public:
+        event<> selection_changed;
+    public:
+        font_dialog(const neogfx::font& aCurrentFont = neogfx::font{});
+        font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{});
+        ~font_dialog();
+    public:
+        neogfx::font current_font() const;
+        neogfx::font selected_font() const;
+        void select_font(const neogfx::font& aFont);
+    protected:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+    private:
+        void init();
+        void update_selected_font(const i_widget& aUpdatingWidget);
+    private:
+        sink iSink;
+        bool iUpdating;
+        neogfx::font iCurrentFont;
+        neogfx::font iSelectedFont;
+        horizontal_layout iLayout0;
+        vertical_layout iLayout1;
+        label iFamilyLabel;
+        drop_list iFamilyPicker;
+        vertical_layout iLayout2;
+        horizontal_layout iLayout3;
+        vertical_layout iLayout4;
+        label iStyleLabel;
+        drop_list iStylePicker;
+        vertical_layout iLayout5;
+        label iSizeLabel;
+        drop_list iSizePicker;
+        group_box iSampleBox;
+        text_widget iSample;
+    };
 }

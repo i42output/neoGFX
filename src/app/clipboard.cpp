@@ -23,80 +23,80 @@
 
 namespace neogfx
 {
-	clipboard::clipboard(i_native_clipboard& aSystemClipboard) : iSystemClipboard(aSystemClipboard), iActiveSink(nullptr)
-	{
-	}
+    clipboard::clipboard(i_native_clipboard& aSystemClipboard) : iSystemClipboard(aSystemClipboard), iActiveSink(nullptr)
+    {
+    }
 
-	bool clipboard::sink_active() const
-	{
-		return iActiveSink != nullptr;
-	}
+    bool clipboard::sink_active() const
+    {
+        return iActiveSink != nullptr;
+    }
 
-	i_clipboard_sink& clipboard::active_sink()
-	{
-		if (!sink_active())
-			throw no_active_sink();
-		return *iActiveSink;
-	}
+    i_clipboard_sink& clipboard::active_sink()
+    {
+        if (!sink_active())
+            throw no_active_sink();
+        return *iActiveSink;
+    }
 
-	void clipboard::activate(i_clipboard_sink& aSink)
-	{
-		if (sink_active())
-			deactivate(*iActiveSink);
-		iActiveSink = &aSink;
-		sink_activated.trigger();
-	}
+    void clipboard::activate(i_clipboard_sink& aSink)
+    {
+        if (sink_active())
+            deactivate(*iActiveSink);
+        iActiveSink = &aSink;
+        sink_activated.trigger();
+    }
 
-	void clipboard::deactivate(i_clipboard_sink& aSink)
-	{
-		if (iActiveSink != &aSink)
-			throw sink_not_active();
-		iActiveSink = nullptr;
-		sink_deactivated.trigger();
-	}
+    void clipboard::deactivate(i_clipboard_sink& aSink)
+    {
+        if (iActiveSink != &aSink)
+            throw sink_not_active();
+        iActiveSink = nullptr;
+        sink_deactivated.trigger();
+    }
 
-	bool clipboard::has_text() const
-	{
-		return iSystemClipboard.has_text();
-	}
+    bool clipboard::has_text() const
+    {
+        return iSystemClipboard.has_text();
+    }
 
-	std::string clipboard::text() const
-	{
-		return iSystemClipboard.text();
-	}
+    std::string clipboard::text() const
+    {
+        return iSystemClipboard.text();
+    }
 
-	void clipboard::set_text(const std::string& aText)
-	{
-		iSystemClipboard.set_text(aText);
-	}
+    void clipboard::set_text(const std::string& aText)
+    {
+        iSystemClipboard.set_text(aText);
+    }
 
-	void clipboard::cut()
-	{
-		if (sink_active())
-			active_sink().cut(*this);
-	}
+    void clipboard::cut()
+    {
+        if (sink_active())
+            active_sink().cut(*this);
+    }
 
-	void clipboard::copy()
-	{
-		if (sink_active())
-			active_sink().copy(*this);
-	}
+    void clipboard::copy()
+    {
+        if (sink_active())
+            active_sink().copy(*this);
+    }
 
-	void clipboard::paste()
-	{
-		if (sink_active())
-			active_sink().paste(*this);
-	}
+    void clipboard::paste()
+    {
+        if (sink_active())
+            active_sink().paste(*this);
+    }
 
-	void clipboard::delete_selected()
-	{
-		if (sink_active())
-			active_sink().delete_selected(*this);
-	}
+    void clipboard::delete_selected()
+    {
+        if (sink_active())
+            active_sink().delete_selected(*this);
+    }
 
-	void clipboard::select_all()
-	{
-		if (sink_active())
-			active_sink().select_all(*this);
-	}
+    void clipboard::select_all()
+    {
+        if (sink_active())
+            active_sink().select_all(*this);
+    }
 }

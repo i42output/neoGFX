@@ -22,29 +22,29 @@
 
 namespace neogfx
 {
-	class video_mode
-	{
-	public:
-		video_mode(uint32_t aWidth, uint32_t aHeight, uint32_t aBitsPerPixel = 32) : 
-			iWidth(aWidth), iHeight(aHeight), iBitsPerPixel(aBitsPerPixel)
-		{
-		};
-	public:
-		uint32_t width() const
-		{
-			return iWidth;
-		}
-		uint32_t height() const
-		{
-			return iHeight;
-		}
-		uint32_t bits_per_pixel() const
-		{
-			return iBitsPerPixel;
-		}
-	private:
-		uint32_t iWidth;
-		uint32_t iHeight;
-		uint32_t iBitsPerPixel;
-	};
+    class video_mode
+    {
+    public:
+        video_mode(uint32_t aWidth, uint32_t aHeight, uint32_t aBitsPerPixel = 32) : 
+            iWidth(aWidth), iHeight(aHeight), iBitsPerPixel(aBitsPerPixel)
+        {
+        };
+    public:
+        uint32_t width() const
+        {
+            return iWidth;
+        }
+        uint32_t height() const
+        {
+            return iHeight;
+        }
+        uint32_t bits_per_pixel() const
+        {
+            return iBitsPerPixel;
+        }
+    private:
+        uint32_t iWidth;
+        uint32_t iHeight;
+        uint32_t iBitsPerPixel;
+    };
 }

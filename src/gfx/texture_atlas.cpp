@@ -25,82 +25,82 @@
 
 namespace neogfx
 {
-	texture_atlas::texture_atlas(const size& aPageSize) :
-		iTextureManager{ service<i_texture_manager>() }, iPageSize{ aPageSize }
-	{
-	}
+    texture_atlas::texture_atlas(const size& aPageSize) :
+        iTextureManager{ service<i_texture_manager>() }, iPageSize{ aPageSize }
+    {
+    }
 
-	const i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId) const
-	{
-		auto iterEntry = iEntries.find(aSubTextureId);
-		if (iterEntry == iEntries.end())
-			throw sub_texture_not_found();
-		return iterEntry->second.second;
-	}
+    const i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId) const
+    {
+        auto iterEntry = iEntries.find(aSubTextureId);
+        if (iterEntry == iEntries.end())
+            throw sub_texture_not_found();
+        return iterEntry->second.second;
+    }
 
-	i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId)
-	{
-		auto iterEntry = iEntries.find(aSubTextureId);
-		if (iterEntry == iEntries.end())
-			throw sub_texture_not_found();
-		return iterEntry->second.second;
-	}
+    i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId)
+    {
+        auto iterEntry = iEntries.find(aSubTextureId);
+        if (iterEntry == iEntries.end())
+            throw sub_texture_not_found();
+        return iterEntry->second.second;
+    }
 
-	i_sub_texture& texture_atlas::create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
-	{
-		auto newSpace = allocate_space(aSize, aDpiScaleFactor, aSampling, aDataFormat);
-		auto nextId = iTextureManager.allocate_texture_id();
-		auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aSize })));
-		iTextureManager.add_sub_texture(entry.first->second.second);
-		return entry.first->second.second;
-	}
+    i_sub_texture& texture_atlas::create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
+    {
+        auto newSpace = allocate_space(aSize, aDpiScaleFactor, aSampling, aDataFormat);
+        auto nextId = iTextureManager.allocate_texture_id();
+        auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aSize })));
+        iTextureManager.add_sub_texture(entry.first->second.second);
+        return entry.first->second.second;
+    }
 
-	i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage)
-	{
-		auto newSpace = allocate_space(aImage.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
-		auto nextId = iTextureManager.allocate_texture_id();
-		auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aImage.extents() })));
-		entry.first->second.second.set_pixels(aImage);
-		iTextureManager.add_sub_texture(entry.first->second.second);
-		return entry.first->second.second;
-	}
+    i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage)
+    {
+        auto newSpace = allocate_space(aImage.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
+        auto nextId = iTextureManager.allocate_texture_id();
+        auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aImage.extents() })));
+        entry.first->second.second.set_pixels(aImage);
+        iTextureManager.add_sub_texture(entry.first->second.second);
+        return entry.first->second.second;
+    }
 
-	void texture_atlas::destroy_sub_texture(i_sub_texture& aSubTexture)
-	{
-		auto iterEntry = iEntries.find(aSubTexture.atlas_id());
-		if (iterEntry == iEntries.end() || &aSubTexture != &iterEntry->second.second)
-			throw sub_texture_not_found();
-		auto rectEntry = iterEntry->second.second.atlas_location();
-		auto space = iterEntry->second.first->second.used.find(rectEntry);
-		if (space != iterEntry->second.first->second.used.end())
-			iterEntry->second.first->second.used.erase(space);
-		iterEntry->second.first->second.freed.insert(rectEntry);
-		iTextureManager.remove_sub_texture(aSubTexture);
-		iEntries.erase(iterEntry);
-	}
+    void texture_atlas::destroy_sub_texture(i_sub_texture& aSubTexture)
+    {
+        auto iterEntry = iEntries.find(aSubTexture.atlas_id());
+        if (iterEntry == iEntries.end() || &aSubTexture != &iterEntry->second.second)
+            throw sub_texture_not_found();
+        auto rectEntry = iterEntry->second.second.atlas_location();
+        auto space = iterEntry->second.first->second.used.find(rectEntry);
+        if (space != iterEntry->second.first->second.used.end())
+            iterEntry->second.first->second.used.erase(space);
+        iterEntry->second.first->second.freed.insert(rectEntry);
+        iTextureManager.remove_sub_texture(aSubTexture);
+        iEntries.erase(iterEntry);
+    }
 
-	const size& texture_atlas::page_size() const
-	{
-		return iPageSize;
-	}
+    const size& texture_atlas::page_size() const
+    {
+        return iPageSize;
+    }
 
-	texture_atlas::pages::iterator texture_atlas::create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
-	{
-		return iPages.insert(iPages.end(), page{ texture{ page_size(), aDpiScaleFactor, aSampling, aDataFormat }, fragments{ page_size() } });
-	}
+    texture_atlas::pages::iterator texture_atlas::create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
+    {
+        return iPages.insert(iPages.end(), page{ texture{ page_size(), aDpiScaleFactor, aSampling, aDataFormat }, fragments{ page_size() } });
+    }
 
-	std::pair<texture_atlas::pages::iterator, rect> texture_atlas::allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
-	{
-		if (iPages.empty())
-			create_page(aDpiScaleFactor, aSampling, aDataFormat);
-		rect result;
-		for (auto iterPage = iPages.begin(); iterPage != iPages.end(); ++iterPage)
-			if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->first.data_format() == aDataFormat && iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
-				return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
-		auto iterPage = create_page(aDpiScaleFactor, aSampling, aDataFormat);
-		if (iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
-			return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
-		iPages.erase(iterPage);
-		throw texture_too_big_for_atlas();
-	}
+    std::pair<texture_atlas::pages::iterator, rect> texture_atlas::allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
+    {
+        if (iPages.empty())
+            create_page(aDpiScaleFactor, aSampling, aDataFormat);
+        rect result;
+        for (auto iterPage = iPages.begin(); iterPage != iPages.end(); ++iterPage)
+            if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->first.data_format() == aDataFormat && iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
+                return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
+        auto iterPage = create_page(aDpiScaleFactor, aSampling, aDataFormat);
+        if (iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
+            return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
+        iPages.erase(iterPage);
+        throw texture_too_big_for_atlas();
+    }
 }

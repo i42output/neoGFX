@@ -1,5 +1,5 @@
 <nrc ref="neogfx_resources">
-	<resource prefix="neogfx">
-		<file>resources/icons/neoGFX.png</file>
-	</resource>
+    <resource prefix="neogfx">
+        <file>resources/icons/neoGFX.png</file>
+    </resource>
 </nrc>

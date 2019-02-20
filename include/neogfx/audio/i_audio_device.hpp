@@ -23,18 +23,18 @@
 
 namespace neogfx
 {
-	class i_audio_device
-	{
-	public:
-		struct already_open : std::logic_error { already_open() : std::logic_error("neogfx::i_audio_device::already_open") {} };
-		struct not_open : std::logic_error { not_open() : std::logic_error("neogfx::i_audio_device::not_open") {} };
-	public:
-		virtual const std::string& name() const = 0;
-	public:
-		virtual bool is_open() const = 0;
-		virtual void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) = 0;
-		virtual void close() = 0;
-	public:
-		virtual const audio_spec& spec() const = 0;
-	};
+    class i_audio_device
+    {
+    public:
+        struct already_open : std::logic_error { already_open() : std::logic_error("neogfx::i_audio_device::already_open") {} };
+        struct not_open : std::logic_error { not_open() : std::logic_error("neogfx::i_audio_device::not_open") {} };
+    public:
+        virtual const std::string& name() const = 0;
+    public:
+        virtual bool is_open() const = 0;
+        virtual void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) = 0;
+        virtual void close() = 0;
+    public:
+        virtual const audio_spec& spec() const = 0;
+    };
 }

@@ -24,23 +24,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_tab_page_container : public i_tab_container
-	{
-	public:
-		event<i_tab_page&> selected_tab_page_changed;
-	public:
-		typedef uint32_t tab_index;
-	public:
-		struct tab_page_not_found : std::logic_error { tab_page_not_found() : std::logic_error("neogfx::i_tab_page_container::tab_page_not_found") {} };
-	public:
-		virtual const i_tab_page& tab_page(tab_index aTabIndex) const = 0;
-		virtual i_tab_page& tab_page(tab_index aTabIndex) = 0;
-		virtual const i_tab_page& selected_tab_page() const = 0;
-		virtual i_tab_page& selected_tab_page() = 0;
-		virtual i_tab_page& add_tab_page(const std::string& aTabText) = 0;
-		virtual i_tab_page& insert_tab_page(tab_index aTabIndex, const std::string& aTabText) = 0;
-		virtual i_tab_page& add_tab_page(i_tab& aTab) = 0;
-		virtual i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) = 0;
-		virtual i_tab_page& add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget) = 0;
-	};
+    class i_tab_page_container : public i_tab_container
+    {
+    public:
+        event<i_tab_page&> selected_tab_page_changed;
+    public:
+        typedef uint32_t tab_index;
+    public:
+        struct tab_page_not_found : std::logic_error { tab_page_not_found() : std::logic_error("neogfx::i_tab_page_container::tab_page_not_found") {} };
+    public:
+        virtual const i_tab_page& tab_page(tab_index aTabIndex) const = 0;
+        virtual i_tab_page& tab_page(tab_index aTabIndex) = 0;
+        virtual const i_tab_page& selected_tab_page() const = 0;
+        virtual i_tab_page& selected_tab_page() = 0;
+        virtual i_tab_page& add_tab_page(const std::string& aTabText) = 0;
+        virtual i_tab_page& insert_tab_page(tab_index aTabIndex, const std::string& aTabText) = 0;
+        virtual i_tab_page& add_tab_page(i_tab& aTab) = 0;
+        virtual i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) = 0;
+        virtual i_tab_page& add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget) = 0;
+    };
 }

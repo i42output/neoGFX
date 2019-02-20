@@ -25,52 +25,52 @@
 
 namespace neogfx::game
 {
-	class i_ecs;
+    class i_ecs;
 
-	class i_component_base
-	{
-	public:
-		virtual ~i_component_base() {}
-	public:
-		virtual game::i_ecs& ecs() const = 0;
-		virtual const component_id& id() const = 0;
-	public:
-		virtual bool is_data_optional() const = 0;
-		virtual const neolib::i_string& name() const = 0;
-		virtual uint32_t field_count() const = 0;
-		virtual component_data_field_type field_type(uint32_t aFieldIndex) const = 0;
-		virtual neolib::uuid field_type_id(uint32_t aFieldIndex) const = 0;
-		virtual const neolib::i_string& field_name(uint32_t aFieldIndex) const = 0;
-	};
+    class i_component_base
+    {
+    public:
+        virtual ~i_component_base() {}
+    public:
+        virtual game::i_ecs& ecs() const = 0;
+        virtual const component_id& id() const = 0;
+    public:
+        virtual bool is_data_optional() const = 0;
+        virtual const neolib::i_string& name() const = 0;
+        virtual uint32_t field_count() const = 0;
+        virtual component_data_field_type field_type(uint32_t aFieldIndex) const = 0;
+        virtual neolib::uuid field_type_id(uint32_t aFieldIndex) const = 0;
+        virtual const neolib::i_string& field_name(uint32_t aFieldIndex) const = 0;
+    };
 
-	class i_shared_component : public i_component_base
-	{
-	public:
-		virtual void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) = 0;
-		template <typename ComponentData>
-		void* populate(const std::string& aName, ComponentData&& aComponentData)
-		{
-			return populate(aName, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
-		}
-	};
+    class i_shared_component : public i_component_base
+    {
+    public:
+        virtual void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) = 0;
+        template <typename ComponentData>
+        void* populate(const std::string& aName, ComponentData&& aComponentData)
+        {
+            return populate(aName, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
+        }
+    };
 
-	class i_component : public i_component_base
-	{
-	public:
-		virtual bool has_entity_record(entity_id aEntity) const = 0;
-		virtual void destroy_entity_record(entity_id aEntity) = 0;
-	public:
-		virtual void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) = 0;
-		template <typename ComponentData>
-		void* populate(entity_id aEntity, ComponentData&& aComponentData)
-		{
-			return populate(aEntity, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
-		}
-	};
+    class i_component : public i_component_base
+    {
+    public:
+        virtual bool has_entity_record(entity_id aEntity) const = 0;
+        virtual void destroy_entity_record(entity_id aEntity) = 0;
+    public:
+        virtual void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) = 0;
+        template <typename ComponentData>
+        void* populate(entity_id aEntity, ComponentData&& aComponentData)
+        {
+            return populate(aEntity, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
+        }
+    };
 
-	template <typename ComponentData>
-	class static_component;
+    template <typename ComponentData>
+    class static_component;
 
-	template <typename ComponentData>
-	class static_shared_component;
+    template <typename ComponentData>
+    class static_shared_component;
 }

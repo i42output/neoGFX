@@ -25,38 +25,38 @@
 
 namespace neogfx
 {
-	class i_window;
+    class i_window;
 
-	class i_window_manager
-	{
-	public:
-		struct window_not_found : std::logic_error { window_not_found() : std::logic_error("neogfx::i_surface_manager::window_not_found") {} };
-		struct no_window_active : std::logic_error { no_window_active() : std::logic_error("neogfx::i_surface_manager::no_window_active") {} };
-	public:
-		virtual ~i_window_manager() {}
-	public:
-		virtual void add_window(i_window& aWindow) = 0;
-		virtual void remove_window(i_window& aWindow) = 0;
-		virtual bool has_window(i_window& aWindow) const = 0;
-		virtual std::size_t window_count() const = 0;
-		virtual i_window& window(std::size_t aIndex) = 0;
-		virtual bool any_strong_windows() const = 0;
-	public:
-		virtual rect desktop_rect(const i_window& aWindow, bool aIgnoreNesting = false) const = 0;
-		virtual rect window_rect(const i_window& aWindow, bool aIgnoreNesting = false) const = 0;
-		virtual void move_window(i_window& aWindow, const point& aPosition) = 0;
-		virtual void resize_window(i_window& aWindow, const size& aExtents) = 0;
-	public:
-		virtual bool window_activated() const = 0;
-		virtual i_window& active_window() const = 0;
-	public:
-		virtual point mouse_position() const = 0;
-		virtual point mouse_position(const i_window& aWindow) const = 0;
-		virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;
-	public:
-		virtual void save_mouse_cursor() = 0;
-		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
-		virtual void restore_mouse_cursor(const i_window& aWindow) = 0;
-		virtual void update_mouse_cursor(const i_window& aWindow) = 0;
-	};
+    class i_window_manager
+    {
+    public:
+        struct window_not_found : std::logic_error { window_not_found() : std::logic_error("neogfx::i_surface_manager::window_not_found") {} };
+        struct no_window_active : std::logic_error { no_window_active() : std::logic_error("neogfx::i_surface_manager::no_window_active") {} };
+    public:
+        virtual ~i_window_manager() {}
+    public:
+        virtual void add_window(i_window& aWindow) = 0;
+        virtual void remove_window(i_window& aWindow) = 0;
+        virtual bool has_window(i_window& aWindow) const = 0;
+        virtual std::size_t window_count() const = 0;
+        virtual i_window& window(std::size_t aIndex) = 0;
+        virtual bool any_strong_windows() const = 0;
+    public:
+        virtual rect desktop_rect(const i_window& aWindow, bool aIgnoreNesting = false) const = 0;
+        virtual rect window_rect(const i_window& aWindow, bool aIgnoreNesting = false) const = 0;
+        virtual void move_window(i_window& aWindow, const point& aPosition) = 0;
+        virtual void resize_window(i_window& aWindow, const size& aExtents) = 0;
+    public:
+        virtual bool window_activated() const = 0;
+        virtual i_window& active_window() const = 0;
+    public:
+        virtual point mouse_position() const = 0;
+        virtual point mouse_position(const i_window& aWindow) const = 0;
+        virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;
+    public:
+        virtual void save_mouse_cursor() = 0;
+        virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
+        virtual void restore_mouse_cursor(const i_window& aWindow) = 0;
+        virtual void update_mouse_cursor(const i_window& aWindow) = 0;
+    };
 }

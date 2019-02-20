@@ -1,6 +1,6 @@
 <nrc>
-	<resource prefix="video_poker">
-		<file>resources/neoGFX.png</file>
+    <resource prefix="video_poker">
+        <file>resources/neoGFX.png</file>
     <file>resources/icon.png</file>
     <file>resources/club.png</file>
     <file>resources/spade.png</file>

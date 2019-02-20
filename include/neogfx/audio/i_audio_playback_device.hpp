@@ -26,16 +26,16 @@
 
 namespace neogfx
 {
-	class i_audio_playback_device : public i_audio_device
-	{
-	public:
-		virtual i_audio_sample& load_sample(const std::string& aUri) = 0;
-		virtual i_audio_sample& create_sample(double aDuration) = 0;
-		virtual void destroy_sample(i_audio_sample& aSample) = 0;
-	public:
-		virtual i_audio_track& create_track() = 0;
-		virtual void destroy_track(i_audio_track& aTrack) = 0;
-	public:
-		virtual i_audio_beeper& beeper() = 0;
-	};
+    class i_audio_playback_device : public i_audio_device
+    {
+    public:
+        virtual i_audio_sample& load_sample(const std::string& aUri) = 0;
+        virtual i_audio_sample& create_sample(double aDuration) = 0;
+        virtual void destroy_sample(i_audio_sample& aSample) = 0;
+    public:
+        virtual i_audio_track& create_track() = 0;
+        virtual void destroy_track(i_audio_track& aTrack) = 0;
+    public:
+        virtual i_audio_beeper& beeper() = 0;
+    };
 }

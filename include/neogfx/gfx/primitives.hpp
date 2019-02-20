@@ -38,321 +38,321 @@
 
 namespace neogfx
 {
-	enum class blending_mode
-	{
-		None,
-		Default, // todo
-		Blit
-	};
+    enum class blending_mode
+    {
+        None,
+        Default, // todo
+        Blit
+    };
 
-	enum class smoothing_mode
-	{
-		None,
-		AntiAlias
-	};
+    enum class smoothing_mode
+    {
+        None,
+        AntiAlias
+    };
 
-	enum class logical_operation
-	{
-		None,
-		Xor
-	};
+    enum class logical_operation
+    {
+        None,
+        Xor
+    };
 
-	enum class shader_effect
-	{
-		None				= 0,
-		Colourize			= 1,
-		ColourizeAverage	= Colourize,
-		Colorize			= Colourize,
-		ColorizeAverage		= ColourizeAverage,
-		ColourizeMaximum	= 2,
-		ColorizeMaximum		= ColourizeMaximum,
-		ColourizeSpot		= 3,
-		ColorizeSpot		= ColourizeSpot,
-		Monochrome			= 4
-	};
+    enum class shader_effect
+    {
+        None                = 0,
+        Colourize            = 1,
+        ColourizeAverage    = Colourize,
+        Colorize            = Colourize,
+        ColorizeAverage        = ColourizeAverage,
+        ColourizeMaximum    = 2,
+        ColorizeMaximum        = ColourizeMaximum,
+        ColourizeSpot        = 3,
+        ColorizeSpot        = ColourizeSpot,
+        Monochrome            = 4
+    };
 
-	enum class blurring_algorithm
-	{
-		None,
-		Gaussian
-	};
+    enum class blurring_algorithm
+    {
+        None,
+        Gaussian
+    };
 
-	typedef neolib::variant<colour, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
+    typedef neolib::variant<colour, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
 
-	inline brush to_brush(const colour_or_gradient& aEffectColour)
-	{
-		if (std::holds_alternative<colour>(aEffectColour))
-			return std::get<colour>(aEffectColour);
-		else if (std::holds_alternative<gradient>(aEffectColour))
-			return std::get<gradient>(aEffectColour);
-		else
-			return colour{};
-	}
+    inline brush to_brush(const colour_or_gradient& aEffectColour)
+    {
+        if (std::holds_alternative<colour>(aEffectColour))
+            return std::get<colour>(aEffectColour);
+        else if (std::holds_alternative<gradient>(aEffectColour))
+            return std::get<gradient>(aEffectColour);
+        else
+            return colour{};
+    }
 
-	class text_colour : public colour_or_gradient
-	{
-	public:
-		text_colour() : colour_or_gradient{}
-		{
-		}
-		text_colour(const text_colour& aOther) : colour_or_gradient{ aOther }
-		{
-		}
-		text_colour(text_colour&& aOther) : colour_or_gradient{ std::move(aOther) }
-		{
-		}
-		template <typename T>
-		text_colour(T&& aOther) : colour_or_gradient{ std::forward<T>(aOther) }
-		{
-		}
-	public:
-		text_colour& operator=(const text_colour& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			colour_or_gradient::operator=(aOther);
-			return *this;
-		}
-		text_colour& operator=(text_colour&& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			colour_or_gradient::operator=(std::move(aOther));
-			return *this;
-		}
-		template <typename T>
-		text_colour& operator=(T&& aOther)
-		{
-			colour_or_gradient::operator=(std::forward<T>(aOther));
-			return *this;
-		}
-	public:
-		colour::component alpha() const
-		{
-			if (std::holds_alternative<colour>(*this))
-				return std::get<colour>(*this).alpha();
-			else
-				return 255;
-		}
-		text_colour with_alpha(colour::component aAlpha) const
-		{
-			if (std::holds_alternative<colour>(*this))
-				return std::get<colour>(*this).with_alpha(aAlpha);
-			if (std::holds_alternative<gradient>(*this))
-				return std::get<gradient>(*this).with_combined_alpha(aAlpha);
-			else
-				return text_colour{};
-		}
-	};
-	typedef std::optional<text_colour> optional_text_colour;
+    class text_colour : public colour_or_gradient
+    {
+    public:
+        text_colour() : colour_or_gradient{}
+        {
+        }
+        text_colour(const text_colour& aOther) : colour_or_gradient{ aOther }
+        {
+        }
+        text_colour(text_colour&& aOther) : colour_or_gradient{ std::move(aOther) }
+        {
+        }
+        template <typename T>
+        text_colour(T&& aOther) : colour_or_gradient{ std::forward<T>(aOther) }
+        {
+        }
+    public:
+        text_colour& operator=(const text_colour& aOther)
+        {
+            if (&aOther == this)
+                return *this;
+            colour_or_gradient::operator=(aOther);
+            return *this;
+        }
+        text_colour& operator=(text_colour&& aOther)
+        {
+            if (&aOther == this)
+                return *this;
+            colour_or_gradient::operator=(std::move(aOther));
+            return *this;
+        }
+        template <typename T>
+        text_colour& operator=(T&& aOther)
+        {
+            colour_or_gradient::operator=(std::forward<T>(aOther));
+            return *this;
+        }
+    public:
+        colour::component alpha() const
+        {
+            if (std::holds_alternative<colour>(*this))
+                return std::get<colour>(*this).alpha();
+            else
+                return 255;
+        }
+        text_colour with_alpha(colour::component aAlpha) const
+        {
+            if (std::holds_alternative<colour>(*this))
+                return std::get<colour>(*this).with_alpha(aAlpha);
+            if (std::holds_alternative<gradient>(*this))
+                return std::get<gradient>(*this).with_combined_alpha(aAlpha);
+            else
+                return text_colour{};
+        }
+    };
+    typedef std::optional<text_colour> optional_text_colour;
 
-	enum class text_effect_type : uint32_t
-	{
-		None,
-		Outline,
-		Glow,
-		Shadow
-	};
+    enum class text_effect_type : uint32_t
+    {
+        None,
+        Outline,
+        Glow,
+        Shadow
+    };
 
-	class text_effect
-	{
-	public:
-		typedef double auxiliary_parameter;
-		typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
-	public:
-		text_effect(text_effect_type aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) :
-			iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
-		{
-		}
-	public:
-		text_effect& operator=(const text_effect& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			iType = aOther.iType;
-			iColour = aOther.iColour;
-			iWidth = aOther.iWidth;
-			iAux1 = aOther.iAux1;
-			return *this;
-		}
-	public:
-		bool operator==(const text_effect& aOther) const
-		{
-			return iType == aOther.iType && iColour == aOther.iColour && iWidth == aOther.iWidth && iAux1 == aOther.iAux1;
-		}
-		bool operator!=(const text_effect& aOther) const
-		{
-			return iType != aOther.iType || iColour != aOther.iColour || iWidth != aOther.iWidth || iAux1 != aOther.iAux1;
-		}
-		bool operator<(const text_effect& aRhs) const
-		{
-			return std::tie(iType, iColour, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth, aRhs.iAux1);
-		}
-	public:
-		text_effect_type type() const
-		{
-			return iType;
-		}
-		const text_colour& colour() const
-		{
-			return iColour;
-		}
-		dimension width() const
-		{
-			if (iWidth != std::nullopt)
-				return *iWidth;
-			switch (type())
-			{
-			case text_effect_type::None:
-			default:
-				return 0.0;
-			case text_effect_type::Outline:
-				return 1.0;
-			case text_effect_type::Glow:
-			case text_effect_type::Shadow:
-				return 4.0;
-			}
-		}
-		double aux1() const
-		{
-			if (iAux1 != std::nullopt)
-				return *iAux1;
-			switch (type())
-			{
-			case text_effect_type::None:
-			default:
-				return 0.0;
-			case text_effect_type::Outline:
-				return 0.0;
-			case text_effect_type::Glow:
-			case text_effect_type::Shadow:
-				return 1.0;
-			}
-		}
-		text_effect with_alpha(colour::component aAlpha) const
-		{
-			return text_effect{ iType, iColour.with_alpha(aAlpha), iWidth, iAux1 };
-		}
-		text_effect with_alpha(double aAlpha) const
-		{
-			return with_alpha(static_cast<colour::component>(aAlpha * 255));
-		}
-	private:
-		text_effect_type iType;
-		text_colour iColour;
-		optional_dimension iWidth;
-		optional_auxiliary_parameter iAux1;
-	};
-	typedef std::optional<text_effect> optional_text_effect;
+    class text_effect
+    {
+    public:
+        typedef double auxiliary_parameter;
+        typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
+    public:
+        text_effect(text_effect_type aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) :
+            iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
+        {
+        }
+    public:
+        text_effect& operator=(const text_effect& aOther)
+        {
+            if (&aOther == this)
+                return *this;
+            iType = aOther.iType;
+            iColour = aOther.iColour;
+            iWidth = aOther.iWidth;
+            iAux1 = aOther.iAux1;
+            return *this;
+        }
+    public:
+        bool operator==(const text_effect& aOther) const
+        {
+            return iType == aOther.iType && iColour == aOther.iColour && iWidth == aOther.iWidth && iAux1 == aOther.iAux1;
+        }
+        bool operator!=(const text_effect& aOther) const
+        {
+            return iType != aOther.iType || iColour != aOther.iColour || iWidth != aOther.iWidth || iAux1 != aOther.iAux1;
+        }
+        bool operator<(const text_effect& aRhs) const
+        {
+            return std::tie(iType, iColour, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth, aRhs.iAux1);
+        }
+    public:
+        text_effect_type type() const
+        {
+            return iType;
+        }
+        const text_colour& colour() const
+        {
+            return iColour;
+        }
+        dimension width() const
+        {
+            if (iWidth != std::nullopt)
+                return *iWidth;
+            switch (type())
+            {
+            case text_effect_type::None:
+            default:
+                return 0.0;
+            case text_effect_type::Outline:
+                return 1.0;
+            case text_effect_type::Glow:
+            case text_effect_type::Shadow:
+                return 4.0;
+            }
+        }
+        double aux1() const
+        {
+            if (iAux1 != std::nullopt)
+                return *iAux1;
+            switch (type())
+            {
+            case text_effect_type::None:
+            default:
+                return 0.0;
+            case text_effect_type::Outline:
+                return 0.0;
+            case text_effect_type::Glow:
+            case text_effect_type::Shadow:
+                return 1.0;
+            }
+        }
+        text_effect with_alpha(colour::component aAlpha) const
+        {
+            return text_effect{ iType, iColour.with_alpha(aAlpha), iWidth, iAux1 };
+        }
+        text_effect with_alpha(double aAlpha) const
+        {
+            return with_alpha(static_cast<colour::component>(aAlpha * 255));
+        }
+    private:
+        text_effect_type iType;
+        text_colour iColour;
+        optional_dimension iWidth;
+        optional_auxiliary_parameter iAux1;
+    };
+    typedef std::optional<text_effect> optional_text_effect;
 
-	class text_appearance
-	{
-	public:
-		struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
-		struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
-	public:
-		template <typename InkType, typename PaperType>
-		text_appearance(const InkType& aInk, const PaperType& aPaper, const optional_text_effect& aEffect) :
-			iInk{ aInk },
-			iPaper{ aPaper },
-			iEffect{ aEffect },
-			iOnlyCalculateEffect{ false }
-		{
-		}
-		template <typename InkType, typename PaperType>
-		text_appearance(const InkType& aInk, const PaperType& aPaper, const text_effect& aEffect) :
-			iInk{ aInk },
-			iPaper{ aPaper },
-			iEffect{ aEffect },
-			iOnlyCalculateEffect{ false }
-		{
-		}
-		template <typename InkType>
-		text_appearance(const InkType& aInk, const optional_text_effect& aEffect) :
-			iInk{ aInk },
-			iEffect{ aEffect },
-			iOnlyCalculateEffect{ false }
-		{
-		}
-		template <typename InkType>
-		text_appearance(const InkType& aInk, const text_effect& aEffect) :
-			iInk{ aInk },
-			iEffect{ aEffect },
-			iOnlyCalculateEffect{ false }
-		{
-		}
-		template <typename InkType, typename PaperType>
-		text_appearance(const InkType& aInk, const PaperType& aPaper) :
-			iInk{ aInk },
-			iPaper{ aPaper },
-			iOnlyCalculateEffect{ false }
-		{
-		}
-		template <typename InkType>
-		text_appearance(const InkType& aInk) :
-			iInk{ aInk },
-			iOnlyCalculateEffect{ false }
-		{
-		}
-	public:
-		bool operator==(const text_appearance& aRhs) const
-		{
-			return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iEffect == aRhs.iEffect;
-		}
-		bool operator!=(const text_appearance& aRhs) const
-		{
-			return !(*this == aRhs);
-		}
-	public:
-		const text_colour& ink() const
-		{
-			return iInk;
-		}
-		bool has_paper() const
-		{
-			return iPaper != std::nullopt;
-		}
-		const text_colour& paper() const
-		{
-			if (has_paper())
-				return *iPaper;
-			throw no_paper();
-		}
-		bool has_effect() const
-		{
-			return iEffect != std::nullopt;
-		}
-		const text_effect& effect() const
-		{
-			if (has_effect())
-				return *iEffect;
-			throw no_effect();
-		}
-		bool only_calculate_effect() const
-		{
-			return iOnlyCalculateEffect;
-		}
-	public:
-		text_appearance with_alpha(colour::component aAlpha) const
-		{
-			return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
-		}
-		text_appearance with_alpha(double aAlpha) const
-		{
-			return with_alpha(static_cast<colour::component>(aAlpha * 255));
-		}
-		text_appearance with_only_effect_calculation() const
-		{
-			auto copy = *this;
-			copy.iOnlyCalculateEffect = true;
-			return copy;
-		}
-	private:
-		text_colour iInk;
-		optional_text_colour iPaper;
-		optional_text_effect iEffect;
-		bool iOnlyCalculateEffect;
-	};
+    class text_appearance
+    {
+    public:
+        struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
+        struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
+    public:
+        template <typename InkType, typename PaperType>
+        text_appearance(const InkType& aInk, const PaperType& aPaper, const optional_text_effect& aEffect) :
+            iInk{ aInk },
+            iPaper{ aPaper },
+            iEffect{ aEffect },
+            iOnlyCalculateEffect{ false }
+        {
+        }
+        template <typename InkType, typename PaperType>
+        text_appearance(const InkType& aInk, const PaperType& aPaper, const text_effect& aEffect) :
+            iInk{ aInk },
+            iPaper{ aPaper },
+            iEffect{ aEffect },
+            iOnlyCalculateEffect{ false }
+        {
+        }
+        template <typename InkType>
+        text_appearance(const InkType& aInk, const optional_text_effect& aEffect) :
+            iInk{ aInk },
+            iEffect{ aEffect },
+            iOnlyCalculateEffect{ false }
+        {
+        }
+        template <typename InkType>
+        text_appearance(const InkType& aInk, const text_effect& aEffect) :
+            iInk{ aInk },
+            iEffect{ aEffect },
+            iOnlyCalculateEffect{ false }
+        {
+        }
+        template <typename InkType, typename PaperType>
+        text_appearance(const InkType& aInk, const PaperType& aPaper) :
+            iInk{ aInk },
+            iPaper{ aPaper },
+            iOnlyCalculateEffect{ false }
+        {
+        }
+        template <typename InkType>
+        text_appearance(const InkType& aInk) :
+            iInk{ aInk },
+            iOnlyCalculateEffect{ false }
+        {
+        }
+    public:
+        bool operator==(const text_appearance& aRhs) const
+        {
+            return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iEffect == aRhs.iEffect;
+        }
+        bool operator!=(const text_appearance& aRhs) const
+        {
+            return !(*this == aRhs);
+        }
+    public:
+        const text_colour& ink() const
+        {
+            return iInk;
+        }
+        bool has_paper() const
+        {
+            return iPaper != std::nullopt;
+        }
+        const text_colour& paper() const
+        {
+            if (has_paper())
+                return *iPaper;
+            throw no_paper();
+        }
+        bool has_effect() const
+        {
+            return iEffect != std::nullopt;
+        }
+        const text_effect& effect() const
+        {
+            if (has_effect())
+                return *iEffect;
+            throw no_effect();
+        }
+        bool only_calculate_effect() const
+        {
+            return iOnlyCalculateEffect;
+        }
+    public:
+        text_appearance with_alpha(colour::component aAlpha) const
+        {
+            return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
+        }
+        text_appearance with_alpha(double aAlpha) const
+        {
+            return with_alpha(static_cast<colour::component>(aAlpha * 255));
+        }
+        text_appearance with_only_effect_calculation() const
+        {
+            auto copy = *this;
+            copy.iOnlyCalculateEffect = true;
+            return copy;
+        }
+    private:
+        text_colour iInk;
+        optional_text_colour iPaper;
+        optional_text_effect iEffect;
+        bool iOnlyCalculateEffect;
+    };
 
-	typedef std::optional<text_appearance> optional_text_appearance;
+    typedef std::optional<text_appearance> optional_text_appearance;
 }

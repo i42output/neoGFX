@@ -29,73 +29,73 @@
 
 namespace neogfx
 {
-	class gradient_dialog : public dialog
-	{
-		class preview_box;
-	public:
-		gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient);
-		~gradient_dialog();
-	public:
-		const neogfx::gradient& gradient() const;
-		void set_gradient(const neogfx::gradient& aGradient);
-		const gradient_widget& gradient_selector() const;
-		gradient_widget& gradient_selector();
-	private:
-		void init();
-		void update_widgets();
-	private:
-		vertical_layout iLayout;
-		horizontal_layout iLayout2;
-		vertical_layout iLayout3;
-		vertical_layout iLayout4;
-		group_box iSelectorGroupBox;
-		gradient_widget iGradientSelector;
-		group_box iSmoothnessGroupBox;
-		double_spin_box iSmoothnessSpinBox;
-		double_slider iSmoothnessSlider;
-		group_box iDirectionGroupBox;
-		radio_button iDirectionHorizontalRadioButton;
-		radio_button iDirectionVerticalRadioButton;
-		radio_button iDirectionDiagonalRadioButton;
-		radio_button iDirectionRectangularRadioButton;
-		radio_button iDirectionRadialRadioButton;
-		horizontal_layout iLayout5;
-		group_box iOrientationGroupBox;
-		group_box iStartingFromGroupBox;
-		radio_button iTopLeftRadioButton;
-		radio_button iTopRightRadioButton;
-		radio_button iBottomRightRadioButton;
-		radio_button iBottomLeftRadioButton;
-		radio_button iAngleRadioButton;
-		vertical_layout iLayout6;
-		group_box iAngleGroupBox;
-		label iAngle;
-		double_spin_box iAngleSpinBox;
-		double_slider iAngleSlider;
-		group_box iSizeGroupBox;
-		radio_button iSizeClosestSideRadioButton;
-		radio_button iSizeFarthestSideRadioButton;
-		radio_button iSizeClosestCornerRadioButton;
-		radio_button iSizeFarthestCornerRadioButton;
-		group_box iShapeGroupBox;
-		radio_button iShapeEllipseRadioButton;
-		radio_button iShapeCircleRadioButton;
-		group_box iExponentGroupBox;
-		check_box iLinkedExponents;
-		label iMExponent;
-		double_spin_box iMExponentSpinBox;
-		label iNExponent;
-		double_spin_box iNExponentSpinBox;
-		group_box iCentreGroupBox;
-		label iXCentre;
-		double_spin_box iXCentreSpinBox;
-		label iYCentre;
-		double_spin_box iYCentreSpinBox;
-		horizontal_spacer iSpacer2;
-		vertical_spacer iSpacer3;
-		group_box iPreviewGroupBox;
-		std::shared_ptr<i_widget> iPreview;
-		vertical_spacer iSpacer4;
-		bool iUpdatingWidgets;
-	};
+    class gradient_dialog : public dialog
+    {
+        class preview_box;
+    public:
+        gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient);
+        ~gradient_dialog();
+    public:
+        const neogfx::gradient& gradient() const;
+        void set_gradient(const neogfx::gradient& aGradient);
+        const gradient_widget& gradient_selector() const;
+        gradient_widget& gradient_selector();
+    private:
+        void init();
+        void update_widgets();
+    private:
+        vertical_layout iLayout;
+        horizontal_layout iLayout2;
+        vertical_layout iLayout3;
+        vertical_layout iLayout4;
+        group_box iSelectorGroupBox;
+        gradient_widget iGradientSelector;
+        group_box iSmoothnessGroupBox;
+        double_spin_box iSmoothnessSpinBox;
+        double_slider iSmoothnessSlider;
+        group_box iDirectionGroupBox;
+        radio_button iDirectionHorizontalRadioButton;
+        radio_button iDirectionVerticalRadioButton;
+        radio_button iDirectionDiagonalRadioButton;
+        radio_button iDirectionRectangularRadioButton;
+        radio_button iDirectionRadialRadioButton;
+        horizontal_layout iLayout5;
+        group_box iOrientationGroupBox;
+        group_box iStartingFromGroupBox;
+        radio_button iTopLeftRadioButton;
+        radio_button iTopRightRadioButton;
+        radio_button iBottomRightRadioButton;
+        radio_button iBottomLeftRadioButton;
+        radio_button iAngleRadioButton;
+        vertical_layout iLayout6;
+        group_box iAngleGroupBox;
+        label iAngle;
+        double_spin_box iAngleSpinBox;
+        double_slider iAngleSlider;
+        group_box iSizeGroupBox;
+        radio_button iSizeClosestSideRadioButton;
+        radio_button iSizeFarthestSideRadioButton;
+        radio_button iSizeClosestCornerRadioButton;
+        radio_button iSizeFarthestCornerRadioButton;
+        group_box iShapeGroupBox;
+        radio_button iShapeEllipseRadioButton;
+        radio_button iShapeCircleRadioButton;
+        group_box iExponentGroupBox;
+        check_box iLinkedExponents;
+        label iMExponent;
+        double_spin_box iMExponentSpinBox;
+        label iNExponent;
+        double_spin_box iNExponentSpinBox;
+        group_box iCentreGroupBox;
+        label iXCentre;
+        double_spin_box iXCentreSpinBox;
+        label iYCentre;
+        double_spin_box iYCentreSpinBox;
+        horizontal_spacer iSpacer2;
+        vertical_spacer iSpacer3;
+        group_box iPreviewGroupBox;
+        std::shared_ptr<i_widget> iPreview;
+        vertical_spacer iSpacer4;
+        bool iUpdatingWidgets;
+    };
 }

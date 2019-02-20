@@ -23,53 +23,53 @@
 
 namespace neogfx::game
 {
-	namespace shape
-	{
-		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents) :
-			entity{ aEcs, archetype(aEcs).id() }
-		{
-			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-		}
+    namespace shape
+    {
+        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents) :
+            entity{ aEcs, archetype(aEcs).id() }
+        {
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
+        }
 
-		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::colour& aColour) :
-			entity{ aEcs, archetype(aEcs).id() }
-		{
-			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ colour{ aColour.to_vec4() }, {}, {} });
-		}
+        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::colour& aColour) :
+            entity{ aEcs, archetype(aEcs).id() }
+        {
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
+            aEcs.component<material>().populate(id(), material{ colour{ aColour.to_vec4() }, {}, {} });
+        }
 
-		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :
-			entity{ aEcs, archetype(aEcs).id() }
-		{
-			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aTexture) });
-		}
+        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :
+            entity{ aEcs, archetype(aEcs).id() }
+        {
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
+            aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aTexture) });
+        }
 
-		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage) :
-			entity{ aEcs, archetype(aEcs).id() }
-		{
-			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aImage) });
-		}
+        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage) :
+            entity{ aEcs, archetype(aEcs).id() }
+        {
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
+            aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aImage) });
+        }
 
-		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect) :
-			entity{ aEcs, archetype(aEcs).id() }
-		{
-			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aTexture, aTextureRect) });
-		}
+        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect) :
+            entity{ aEcs, archetype(aEcs).id() }
+        {
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
+            aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aTexture, aTextureRect) });
+        }
 
-		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect) :
-			entity{ aEcs, archetype(aEcs).id() }
-		{
-			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aImage, aTextureRect) });
-		}
+        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect) :
+            entity{ aEcs, archetype(aEcs).id() }
+        {
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
+            aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aImage, aTextureRect) });
+        }
 
-		rectangle::rectangle(const rectangle& aOther) :
-			entity{ aOther.ecs(), archetype(aOther.ecs()).id() }
-		{
-			// todo: clone entity
-		}
-	}
+        rectangle::rectangle(const rectangle& aOther) :
+            entity{ aOther.ecs(), archetype(aOther.ecs()).id() }
+        {
+            // todo: clone entity
+        }
+    }
 }

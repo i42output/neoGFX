@@ -25,71 +25,71 @@
 
 namespace neogfx
 {
-	enum class mesh_type
-	{
-		TriangleFan,
-		Triangles,
-		Outline
-	};
+    enum class mesh_type
+    {
+        TriangleFan,
+        Triangles,
+        Outline
+    };
 
-	struct unsupported_mesh_type : std::logic_error { unsupported_mesh_type() : std::logic_error("neogfx::unsupported_mesh_type") {} };
+    struct unsupported_mesh_type : std::logic_error { unsupported_mesh_type() : std::logic_error("neogfx::unsupported_mesh_type") {} };
 
-	template <std::size_t VertexCount>
-	using temp_vec3_buffer = neolib::vecarray<vec3, VertexCount, VertexCount, neolib::check<neolib::vecarray_overflow>, std::allocator<vec3>>;
+    template <std::size_t VertexCount>
+    using temp_vec3_buffer = neolib::vecarray<vec3, VertexCount, VertexCount, neolib::check<neolib::vecarray_overflow>, std::allocator<vec3>>;
 
-	template <std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-	inline void calc_rect_vertices(temp_vec3_buffer<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
-	{
-		aResult.clear();
-		switch(aType)
-		{
-		case mesh_type::TriangleFan:
-			aResult.push_back(aRect.centre().to_vec3(aZpos));
-			aResult.push_back(aRect.top_left().to_vec3(aZpos));
-			aResult.push_back(aRect.top_right().to_vec3(aZpos));
-			aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
-			aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
-			aResult.push_back(aRect.top_left().to_vec3(aZpos));
-			break;
-		case mesh_type::Triangles:
-			aResult.push_back(aRect.top_left().to_vec3(aZpos));
-			aResult.push_back(aRect.top_right().to_vec3(aZpos));
-			aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
-			aResult.push_back(aRect.top_right().to_vec3(aZpos));
-			aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
-			aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
-			break;
-		case mesh_type::Outline:
-			aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust, aZpos });
-			aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust, aZpos });
-			aResult.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y, aZpos });
-			aResult.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y, aZpos });
-			aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust, aZpos });
-			aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust, aZpos });
-			aResult.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y, aZpos });
-			aResult.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y, aZpos });
-			break;
-		}
-	}
+    template <std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline void calc_rect_vertices(temp_vec3_buffer<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
+    {
+        aResult.clear();
+        switch(aType)
+        {
+        case mesh_type::TriangleFan:
+            aResult.push_back(aRect.centre().to_vec3(aZpos));
+            aResult.push_back(aRect.top_left().to_vec3(aZpos));
+            aResult.push_back(aRect.top_right().to_vec3(aZpos));
+            aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
+            aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
+            aResult.push_back(aRect.top_left().to_vec3(aZpos));
+            break;
+        case mesh_type::Triangles:
+            aResult.push_back(aRect.top_left().to_vec3(aZpos));
+            aResult.push_back(aRect.top_right().to_vec3(aZpos));
+            aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
+            aResult.push_back(aRect.top_right().to_vec3(aZpos));
+            aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
+            aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
+            break;
+        case mesh_type::Outline:
+            aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust, aZpos });
+            aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust, aZpos });
+            aResult.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y, aZpos });
+            aResult.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y, aZpos });
+            break;
+        }
+    }
 
-	template <typename Container, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-	inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
-	{
-		temp_vec3_buffer<8> temp;
-		calc_rect_vertices(temp, aRect, aPixelAdjust, aType, aZpos);
-		return aResult.insert(aResult.end(), temp.begin(), temp.end());
-	}
+    template <typename Container, typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
+    {
+        temp_vec3_buffer<8> temp;
+        calc_rect_vertices(temp, aRect, aPixelAdjust, aType, aZpos);
+        return aResult.insert(aResult.end(), temp.begin(), temp.end());
+    }
 
-	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-	vertices_t rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
-	{
-		vertices_t result;
-		result.reserve(16);
-		back_insert_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
-		return std::move(result);
-	};
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    vertices_t rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
+    {
+        vertices_t result;
+        result.reserve(16);
+        back_insert_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
+        return std::move(result);
+    };
 
-	vertices_t arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);
-	vertices_t circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
-	vertices_t rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments = 0);
+    vertices_t arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);
+    vertices_t circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
+    vertices_t rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments = 0);
 }

@@ -29,60 +29,60 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::game
 {
-	struct animation
-	{
-		std::vector<scalar> frameDurations;
-		std::vector<mesh_filter> frameFilters;
+    struct animation
+    {
+        std::vector<scalar> frameDurations;
+        std::vector<mesh_filter> frameFilters;
 
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x57fe17a3, 0x4f8, 0x4386, 0x8dad, { 0xf2, 0x1d, 0x5f, 0xd8, 0xe2, 0x6b } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Animation";
-				return sName;
-			}
-			static uint32_t field_count()
-			{
-				return 2;
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return component_data_field_type::Scalar | component_data_field_type::Array;
-				case 1:
-					return component_data_field_type::ComponentData | component_data_field_type::Array;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static neolib::uuid field_type_id(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return neolib::uuid{};
-				case 1:
-					return mesh_filter::meta::id();
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] =
-				{
-					"Frame Durations",
-					"Frame Filters"
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
-	};
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x57fe17a3, 0x4f8, 0x4386, 0x8dad, { 0xf2, 0x1d, 0x5f, 0xd8, 0xe2, 0x6b } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Animation";
+                return sName;
+            }
+            static uint32_t field_count()
+            {
+                return 2;
+            }
+            static component_data_field_type field_type(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Scalar | component_data_field_type::Array;
+                case 1:
+                    return component_data_field_type::ComponentData | component_data_field_type::Array;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static neolib::uuid field_type_id(uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return neolib::uuid{};
+                case 1:
+                    return mesh_filter::meta::id();
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            {
+                static const neolib::string sFieldNames[] =
+                {
+                    "Frame Durations",
+                    "Frame Filters"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 }

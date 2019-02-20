@@ -23,11 +23,11 @@
 
 namespace neogfx
 {
-	class i_native_clipboard
-	{
-	public:
-		virtual bool has_text() const = 0;
-		virtual std::string text() const = 0;
-		virtual void set_text(const std::string& aText) = 0;
-	};
+    class i_native_clipboard
+    {
+    public:
+        virtual bool has_text() const = 0;
+        virtual std::string text() const = 0;
+        virtual void set_text(const std::string& aText) = 0;
+    };
 }

@@ -26,52 +26,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	std::unique_ptr<popup_menu> context_menu::sWidget;
+    std::unique_ptr<popup_menu> context_menu::sWidget;
 
-	context_menu::context_menu(const point& aPosition, window_style aStyle)
-		: iMenu{ new neogfx::menu{} }, iParent{ nullptr }, iPosition{ aPosition }, iStyle{ aStyle }
-	{
-	}
+    context_menu::context_menu(const point& aPosition, window_style aStyle)
+        : iMenu{ new neogfx::menu{} }, iParent{ nullptr }, iPosition{ aPosition }, iStyle{ aStyle }
+    {
+    }
 
-	context_menu::context_menu(i_widget& aParent, const point& aPosition, window_style aStyle)
-		: iMenu{ new neogfx::menu{} }, iParent{ &aParent }, iPosition{ aPosition }, iStyle{ aStyle }
-	{
-	}
+    context_menu::context_menu(i_widget& aParent, const point& aPosition, window_style aStyle)
+        : iMenu{ new neogfx::menu{} }, iParent{ &aParent }, iPosition{ aPosition }, iStyle{ aStyle }
+    {
+    }
 
-	context_menu::~context_menu()
-	{
-	}
+    context_menu::~context_menu()
+    {
+    }
 
-	i_menu& context_menu::menu()
-	{
-		return *iMenu;
-	}
+    i_menu& context_menu::menu()
+    {
+        return *iMenu;
+    }
 
-	popup_menu& context_menu::root_widget()
-	{
-		if (sWidget == nullptr)
-			throw widget_not_created_yet();
-		return *sWidget;
-	}
+    popup_menu& context_menu::root_widget()
+    {
+        if (sWidget == nullptr)
+            throw widget_not_created_yet();
+        return *sWidget;
+    }
 
-	void context_menu::exec()
-	{
-		bool finished = false;
-		menu().set_modal(true);
-		menu().closed([&finished]()
-		{
-			finished = true;
-		});
-		if (sWidget != nullptr)
-			sWidget = nullptr;
-		sWidget = (iParent != nullptr ?
-			std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
-			std::make_unique<popup_menu>(iPosition, menu(), iStyle));
-		event_processing_context epc{ service<neolib::async_task>(), "neogfx::context_menu" };
-		while (!finished)
-		{
-			service<i_app>().process_events(epc);
-		}
-		sWidget = nullptr;
-	}
+    void context_menu::exec()
+    {
+        bool finished = false;
+        menu().set_modal(true);
+        menu().closed([&finished]()
+        {
+            finished = true;
+        });
+        if (sWidget != nullptr)
+            sWidget = nullptr;
+        sWidget = (iParent != nullptr ?
+            std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
+            std::make_unique<popup_menu>(iPosition, menu(), iStyle));
+        event_processing_context epc{ service<neolib::async_task>(), "neogfx::context_menu" };
+        while (!finished)
+        {
+            service<i_app>().process_events(epc);
+        }
+        sWidget = nullptr;
+    }
 }

@@ -22,21 +22,21 @@
 
 namespace neogfx
 {
-	class nest : public i_nest
-	{
-	public:
-		nest(i_widget& aWidget);
-	public:
-		std::size_t nested_window_count() const override;
-		const i_nested_window& nested_window(std::size_t aIndex) const override;
-		i_nested_window& nested_window(std::size_t aIndex) override;
-		void add(i_nested_window& aWindow) override;
-		void remove(i_nested_window& aWindow) override;
-	public:
-		const i_widget& as_widget() const override;
-		i_widget& as_widget() override;
-	private:
-		i_widget& iWidget;
-		std::vector<i_nested_window*> iNestedWindows;
-	};
+    class nest : public i_nest
+    {
+    public:
+        nest(i_widget& aWidget);
+    public:
+        std::size_t nested_window_count() const override;
+        const i_nested_window& nested_window(std::size_t aIndex) const override;
+        i_nested_window& nested_window(std::size_t aIndex) override;
+        void add(i_nested_window& aWindow) override;
+        void remove(i_nested_window& aWindow) override;
+    public:
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
+    private:
+        i_widget& iWidget;
+        std::vector<i_nested_window*> iNestedWindows;
+    };
 }

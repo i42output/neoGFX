@@ -24,21 +24,21 @@
 
 namespace neogfx
 {
-	enum class push_button_style
-	{
-		Normal,
-		ButtonBox,
-		ItemViewHeader,
-		Tab,
-		DropList,
-		SpinBox,
-		TitleBar,
-		Toolbar
-	};
+    enum class push_button_style
+    {
+        Normal,
+        ButtonBox,
+        ItemViewHeader,
+        Tab,
+        DropList,
+        SpinBox,
+        TitleBar,
+        Toolbar
+    };
 
-	class i_push_button : public virtual i_button
-	{
-	public:
-		virtual push_button_style style() const = 0;
-	};
+    class i_push_button : public virtual i_button
+    {
+    public:
+        virtual push_button_style style() const = 0;
+    };
 }

@@ -22,32 +22,32 @@
 
 namespace neogfx
 {
-	glyph_texture::glyph_texture(const i_sub_texture& aTexture, bool aSubpixel, const point& aPlacement, glyph_pixel_mode aPixelMode) :
-		iTexture(aTexture), iSubpixel{ aSubpixel }, iPlacement{ aPlacement }, iPixelMode{ aPixelMode }
-	{
-	}
+    glyph_texture::glyph_texture(const i_sub_texture& aTexture, bool aSubpixel, const point& aPlacement, glyph_pixel_mode aPixelMode) :
+        iTexture(aTexture), iSubpixel{ aSubpixel }, iPlacement{ aPlacement }, iPixelMode{ aPixelMode }
+    {
+    }
 
-	glyph_texture::~glyph_texture()
-	{
-	}
+    glyph_texture::~glyph_texture()
+    {
+    }
 
-	const i_sub_texture& glyph_texture::texture() const
-	{
-		return iTexture;
-	}
+    const i_sub_texture& glyph_texture::texture() const
+    {
+        return iTexture;
+    }
 
-	bool glyph_texture::subpixel() const
-	{
-		return iSubpixel && iPixelMode == glyph_pixel_mode::LCD;
-	}
+    bool glyph_texture::subpixel() const
+    {
+        return iSubpixel && iPixelMode == glyph_pixel_mode::LCD;
+    }
 
-	const point& glyph_texture::placement() const
-	{
-		return iPlacement;
-	}
+    const point& glyph_texture::placement() const
+    {
+        return iPlacement;
+    }
 
-	glyph_pixel_mode glyph_texture::pixel_mode() const
-	{
-		return iPixelMode;
-	}
+    glyph_pixel_mode glyph_texture::pixel_mode() const
+    {
+        return iPixelMode;
+    }
 }

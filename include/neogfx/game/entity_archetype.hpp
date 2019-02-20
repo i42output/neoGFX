@@ -29,24 +29,24 @@
 
 namespace neogfx::game
 {
-	class entity_archetype : public i_entity_archetype
-	{
-	private:
-		typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
-	public:
-		entity_archetype(const entity_archetype_id& aId, const std::string& aName, std::initializer_list<component_id> aComponents);
-		entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents);
-		entity_archetype(const entity_archetype& aOther);
-		entity_archetype(entity_archetype&& aOther);
-	public:
-		const entity_archetype_id& id() const override;
-		const neolib::i_string& name() const override;
-		const neolib::i_set<component_id>& components() const override;
-		neolib::i_set<component_id>& components() override;
-		void populate_default_components(i_ecs& aEcs, entity_id aEntity) override;
-	private:
-		entity_archetype_id iId;
-		neolib::string iName;
-		component_list iComponents;
-	};
+    class entity_archetype : public i_entity_archetype
+    {
+    private:
+        typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
+    public:
+        entity_archetype(const entity_archetype_id& aId, const std::string& aName, std::initializer_list<component_id> aComponents);
+        entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents);
+        entity_archetype(const entity_archetype& aOther);
+        entity_archetype(entity_archetype&& aOther);
+    public:
+        const entity_archetype_id& id() const override;
+        const neolib::i_string& name() const override;
+        const neolib::i_set<component_id>& components() const override;
+        neolib::i_set<component_id>& components() override;
+        void populate_default_components(i_ecs& aEcs, entity_id aEntity) override;
+    private:
+        entity_archetype_id iId;
+        neolib::string iName;
+        component_list iComponents;
+    };
 }

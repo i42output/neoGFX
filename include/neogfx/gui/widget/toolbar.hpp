@@ -27,36 +27,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class toolbar : public widget
-	{
-	private:
-		typedef std::unique_ptr<toolbar_button> button_pointer;
-		typedef std::vector<button_pointer> button_list;
-	public:
-		typedef uint32_t button_index;
-	public:
-		struct bad_button_index : std::logic_error { bad_button_index() : std::logic_error("neogfx::toolbar::bad_button_index") {} };
-	public:
-		toolbar();
-		toolbar(i_widget& aParent);
-		toolbar(i_layout& aLayout);
-	public:
-		neogfx::size_policy size_policy() const override;
-	public:
-		virtual size button_image_extents() const;
-		virtual void set_button_image_extents(const optional_size& aExtents);
-		virtual uint32_t button_count() const;
-		virtual const toolbar_button& button(button_index aButtonIndex) const;
-		virtual toolbar_button& button(button_index aButtonIndex);
-		virtual i_action& add_action(i_action& aAction);
-		virtual void add_separator();
-		virtual i_action& insert_action(button_index aButtonIndex, i_action& aAction);
-		virtual void insert_separator(button_index aButtonIndex);
-	private:
-		size iButtonSize = size{ 32.0, 32.0 };
-		flow_layout iLayout;
-		button_list iButtons;
-		action iSeparator;
-		optional_size iButtonImageExtents;
-	};
+    class toolbar : public widget
+    {
+    private:
+        typedef std::unique_ptr<toolbar_button> button_pointer;
+        typedef std::vector<button_pointer> button_list;
+    public:
+        typedef uint32_t button_index;
+    public:
+        struct bad_button_index : std::logic_error { bad_button_index() : std::logic_error("neogfx::toolbar::bad_button_index") {} };
+    public:
+        toolbar();
+        toolbar(i_widget& aParent);
+        toolbar(i_layout& aLayout);
+    public:
+        neogfx::size_policy size_policy() const override;
+    public:
+        virtual size button_image_extents() const;
+        virtual void set_button_image_extents(const optional_size& aExtents);
+        virtual uint32_t button_count() const;
+        virtual const toolbar_button& button(button_index aButtonIndex) const;
+        virtual toolbar_button& button(button_index aButtonIndex);
+        virtual i_action& add_action(i_action& aAction);
+        virtual void add_separator();
+        virtual i_action& insert_action(button_index aButtonIndex, i_action& aAction);
+        virtual void insert_separator(button_index aButtonIndex);
+    private:
+        size iButtonSize = size{ 32.0, 32.0 };
+        flow_layout iLayout;
+        button_list iButtons;
+        action iSeparator;
+        optional_size iButtonImageExtents;
+    };
 }

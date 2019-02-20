@@ -26,71 +26,71 @@
 
 namespace neogfx::game
 {
-	system::system(game::i_ecs& aEcs) :
-		iEcs{ aEcs }, iPaused{ 0u }
-	{
-	}
+    system::system(game::i_ecs& aEcs) :
+        iEcs{ aEcs }, iPaused{ 0u }
+    {
+    }
 
-	system::system(const system& aOther) :
-		iEcs{ aOther.iEcs }, iComponents{ aOther.iComponents }, iPaused{ 0u }
-	{
-	}
+    system::system(const system& aOther) :
+        iEcs{ aOther.iEcs }, iComponents{ aOther.iComponents }, iPaused{ 0u }
+    {
+    }
 
-	system::system(system&& aOther) :
-		iEcs{ aOther.iEcs }, iComponents{ std::move(aOther.iComponents) }, iPaused{ 0u }
-	{
-	}
+    system::system(system&& aOther) :
+        iEcs{ aOther.iEcs }, iComponents{ std::move(aOther.iComponents) }, iPaused{ 0u }
+    {
+    }
 
-	game::i_ecs& system::ecs() const
-	{
-		return iEcs;
-	}
+    game::i_ecs& system::ecs() const
+    {
+        return iEcs;
+    }
 
-	const neolib::i_set<component_id>& system::components() const
-	{
-		return iComponents;
-	}
+    const neolib::i_set<component_id>& system::components() const
+    {
+        return iComponents;
+    }
 
-	neolib::i_set<component_id>& system::components()
-	{
-		return iComponents;
-	}
+    neolib::i_set<component_id>& system::components()
+    {
+        return iComponents;
+    }
 
-	const i_component& system::component(component_id aComponentId) const
-	{
-		return ecs().component(aComponentId);
-	}
+    const i_component& system::component(component_id aComponentId) const
+    {
+        return ecs().component(aComponentId);
+    }
 
-	i_component& system::component(component_id aComponentId)
-	{
-		return ecs().component(aComponentId);
-	}
+    i_component& system::component(component_id aComponentId)
+    {
+        return ecs().component(aComponentId);
+    }
 
-	bool system::paused() const
-	{
-		return iPaused != 0u;
-	}
+    bool system::paused() const
+    {
+        return iPaused != 0u;
+    }
 
-	void system::pause()
-	{
-		++iPaused;
-	}
+    void system::pause()
+    {
+        ++iPaused;
+    }
 
-	void system::resume()
-	{
-		--iPaused;
-	}
+    void system::resume()
+    {
+        --iPaused;
+    }
 
-	void system::terminate()
-	{
-		// do nothing
-	}
+    void system::terminate()
+    {
+        // do nothing
+    }
 
-	void system::yield()
-	{
-		if (service<i_rendering_engine>().game_mode())
-			neolib::thread::yield();
-		else
-			neolib::thread::sleep(1);
-	}
+    void system::yield()
+    {
+        if (service<i_rendering_engine>().game_mode())
+            neolib::thread::yield();
+        else
+            neolib::thread::sleep(1);
+    }
 }

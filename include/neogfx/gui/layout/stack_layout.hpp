@@ -23,20 +23,20 @@
 
 namespace neogfx
 {
-	class stack_layout : public layout
-	{
-	public:
-		stack_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-		stack_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-		stack_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-	public:
-		using layout::add_spacer;
-		virtual i_spacer& add_spacer();
-		virtual i_spacer& add_spacer_at(item_index aPosition);
-	public:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
-	public:
-		virtual void layout_items(const point& aPosition, const size& aSize);
-	};
+    class stack_layout : public layout
+    {
+    public:
+        stack_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        stack_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        stack_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+    public:
+        using layout::add_spacer;
+        virtual i_spacer& add_spacer();
+        virtual i_spacer& add_spacer_at(item_index aPosition);
+    public:
+        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+        virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+    public:
+        virtual void layout_items(const point& aPosition, const size& aSize);
+    };
 }

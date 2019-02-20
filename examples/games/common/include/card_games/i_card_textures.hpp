@@ -23,21 +23,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogames
 {
-	namespace card_games
-	{
-		template <typename GameTraits>
-		class i_basic_card_textures
-		{
-		public:
-			typedef basic_card<GameTraits> card_type;
-		public:
-			struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogames::card_games::i_basic_card_textures::texture_not_found") {} };
-		public:
-			virtual const neogfx::i_texture& value_texture(const card_type& aCard) const = 0;
-			virtual const neogfx::i_texture& suit_texture(const card_type& aCard) const = 0;
-			virtual const neogfx::i_texture& face_texture(const card_type& aCard) const = 0;
-		};
+    namespace card_games
+    {
+        template <typename GameTraits>
+        class i_basic_card_textures
+        {
+        public:
+            typedef basic_card<GameTraits> card_type;
+        public:
+            struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogames::card_games::i_basic_card_textures::texture_not_found") {} };
+        public:
+            virtual const neogfx::i_texture& value_texture(const card_type& aCard) const = 0;
+            virtual const neogfx::i_texture& suit_texture(const card_type& aCard) const = 0;
+            virtual const neogfx::i_texture& face_texture(const card_type& aCard) const = 0;
+        };
 
-		typedef i_basic_card_textures<default_game_traits> i_card_textures;
-	}
+        typedef i_basic_card_textures<default_game_traits> i_card_textures;
+    }
 }

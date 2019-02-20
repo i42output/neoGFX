@@ -24,33 +24,33 @@
 
 namespace neogfx
 {
-	sdl_audio_playback_device::sdl_audio_playback_device(const std::string& aName) : 
-		sdl_audio_device{ aName }
-	{
-	}
+    sdl_audio_playback_device::sdl_audio_playback_device(const std::string& aName) : 
+        sdl_audio_device{ aName }
+    {
+    }
 
-	const std::string& sdl_audio_playback_device::name() const
-	{
-		return sdl_audio_device::name();
-	}
+    const std::string& sdl_audio_playback_device::name() const
+    {
+        return sdl_audio_device::name();
+    }
 
-	bool sdl_audio_playback_device::is_open() const
-	{
-		return sdl_audio_device::is_open();
-	}
+    bool sdl_audio_playback_device::is_open() const
+    {
+        return sdl_audio_device::is_open();
+    }
 
-	void sdl_audio_playback_device::open(const audio_spec& aAudioSpec, audio_spec_requirements aRequirements)
-	{
-		sdl_audio_device::open(aAudioSpec, aRequirements);
-	}
+    void sdl_audio_playback_device::open(const audio_spec& aAudioSpec, audio_spec_requirements aRequirements)
+    {
+        sdl_audio_device::open(aAudioSpec, aRequirements);
+    }
 
-	void sdl_audio_playback_device::close()
-	{
-		sdl_audio_device::close();
-	}
+    void sdl_audio_playback_device::close()
+    {
+        sdl_audio_device::close();
+    }
 
-	const audio_spec& sdl_audio_playback_device::spec() const
-	{
-		return sdl_audio_device::spec();
-	}
+    const audio_spec& sdl_audio_playback_device::spec() const
+    {
+        return sdl_audio_device::spec();
+    }
 }

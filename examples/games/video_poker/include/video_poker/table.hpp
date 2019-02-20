@@ -38,65 +38,65 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace video_poker
 {
-	using namespace neogames::card_games;
+    using namespace neogames::card_games;
 
-	typedef int32_t credit_t;
+    typedef int32_t credit_t;
 
-	class outcome;
+    class outcome;
 
-	class table : public neogfx::widget, public i_table, private i_card_textures
-	{
-	private:
-		typedef std::shared_ptr<card_space> card_space_pointer;
-	public:
-		table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas);
-		~table();
-	public:
-		table_state state() const override;
-	public:
-		const i_card_textures& textures() const override;
-	private:
-		const neogfx::i_texture& value_texture(const card& aCard) const override;
-		const neogfx::i_texture& suit_texture(const card& aCard) const override;
-		const neogfx::i_texture& face_texture(const card& aCard) const override;
-	private:
-		void bet(credit_t aBet);
-		void deal();
-		void win(credit_t aWinnings);
-		void no_win();
-		void change_state(table_state aNewState);
-		void update_widgets();
-	private:
-		table_state iState;
-		credit_t iCredits;
-		credit_t iStake;
-		boost::optional<deck> iDeck;
-		boost::optional<hand> iHand;
-		neogfx::game::canvas& iCanvas;
-		neogfx::vertical_layout iMainLayout;
-		neogfx::label iLabelTitle;
-		neogfx::vertical_spacer iSpacer1;
-		neogfx::horizontal_layout iSpacesLayout;
-		neogfx::horizontal_spacer iSpacer2;
-		std::array<card_space_pointer, 5> iSpaces;
-		neogfx::horizontal_spacer iSpacer3;
-		neogfx::vertical_spacer iSpacer4;
-		neogfx::horizontal_layout iGambleLayout;
-		flashing_button iBetMinus;
-		flashing_button iBetPlus;
-		flashing_button iBetMax;
-		neogfx::horizontal_spacer iSpacerGamble;
-		flashing_button iDeal;
-		neogfx::horizontal_layout iInfoBarLayout;
-		neogfx::label iLabelCredits;
-		neogfx::label iLabelCreditsValue;
-		neogfx::horizontal_spacer iSpacer5;
-		neogfx::label iLabelStake;
-		neogfx::label iLabelStakeValue;
-		std::unique_ptr<neogfx::i_texture_atlas> iTextures;
-		std::map<card::value, neogfx::sub_texture> iValueTextures;
-		std::map<card::suit, neogfx::sub_texture> iSuitTextures;
-		std::map<card::value, neogfx::sub_texture> iFaceTextures;
-		std::unique_ptr<outcome> iOutcome;
-	};
+    class table : public neogfx::widget, public i_table, private i_card_textures
+    {
+    private:
+        typedef std::shared_ptr<card_space> card_space_pointer;
+    public:
+        table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas);
+        ~table();
+    public:
+        table_state state() const override;
+    public:
+        const i_card_textures& textures() const override;
+    private:
+        const neogfx::i_texture& value_texture(const card& aCard) const override;
+        const neogfx::i_texture& suit_texture(const card& aCard) const override;
+        const neogfx::i_texture& face_texture(const card& aCard) const override;
+    private:
+        void bet(credit_t aBet);
+        void deal();
+        void win(credit_t aWinnings);
+        void no_win();
+        void change_state(table_state aNewState);
+        void update_widgets();
+    private:
+        table_state iState;
+        credit_t iCredits;
+        credit_t iStake;
+        boost::optional<deck> iDeck;
+        boost::optional<hand> iHand;
+        neogfx::game::canvas& iCanvas;
+        neogfx::vertical_layout iMainLayout;
+        neogfx::label iLabelTitle;
+        neogfx::vertical_spacer iSpacer1;
+        neogfx::horizontal_layout iSpacesLayout;
+        neogfx::horizontal_spacer iSpacer2;
+        std::array<card_space_pointer, 5> iSpaces;
+        neogfx::horizontal_spacer iSpacer3;
+        neogfx::vertical_spacer iSpacer4;
+        neogfx::horizontal_layout iGambleLayout;
+        flashing_button iBetMinus;
+        flashing_button iBetPlus;
+        flashing_button iBetMax;
+        neogfx::horizontal_spacer iSpacerGamble;
+        flashing_button iDeal;
+        neogfx::horizontal_layout iInfoBarLayout;
+        neogfx::label iLabelCredits;
+        neogfx::label iLabelCreditsValue;
+        neogfx::horizontal_spacer iSpacer5;
+        neogfx::label iLabelStake;
+        neogfx::label iLabelStakeValue;
+        std::unique_ptr<neogfx::i_texture_atlas> iTextures;
+        std::map<card::value, neogfx::sub_texture> iValueTextures;
+        std::map<card::suit, neogfx::sub_texture> iSuitTextures;
+        std::map<card::value, neogfx::sub_texture> iFaceTextures;
+        std::unique_ptr<outcome> iOutcome;
+    };
 }

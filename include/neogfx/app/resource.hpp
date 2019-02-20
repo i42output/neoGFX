@@ -26,30 +26,30 @@
 
 namespace neogfx
 {
-	class resource : public i_resource
-	{
-	public:
-		resource() = delete;
-		resource(i_resource_manager& aManager, const std::string& aUri);
-		resource(i_resource_manager& aManager, const std::string& aUri, const void* aData, std::size_t aSize);
-		~resource();
-	public:
-		virtual bool available() const;
-		virtual std::pair<bool, double> downloading() const;
-		virtual bool error() const;
-		virtual const std::string& error_string() const;
-	public:
-		virtual const std::string& uri() const;
-		virtual const void* cdata() const;
-		virtual const void* data() const;
-		virtual void* data();
-		virtual std::size_t size() const;
-		virtual hash_digest_type hash() const;
-	private:
-		i_resource_manager& iManager;
-		std::string iUri;
-		std::optional<std::string> iError;
-		std::size_t iSize;
-		std::vector<uint8_t> iData;
-	};
+    class resource : public i_resource
+    {
+    public:
+        resource() = delete;
+        resource(i_resource_manager& aManager, const std::string& aUri);
+        resource(i_resource_manager& aManager, const std::string& aUri, const void* aData, std::size_t aSize);
+        ~resource();
+    public:
+        virtual bool available() const;
+        virtual std::pair<bool, double> downloading() const;
+        virtual bool error() const;
+        virtual const std::string& error_string() const;
+    public:
+        virtual const std::string& uri() const;
+        virtual const void* cdata() const;
+        virtual const void* data() const;
+        virtual void* data();
+        virtual std::size_t size() const;
+        virtual hash_digest_type hash() const;
+    private:
+        i_resource_manager& iManager;
+        std::string iUri;
+        std::optional<std::string> iError;
+        std::size_t iSize;
+        std::vector<uint8_t> iData;
+    };
 }

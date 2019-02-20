@@ -22,39 +22,39 @@
 
 namespace neogfx
 {
-	audio_beeper::audio_beeper(i_audio_playback_device& aDevice) : 
-		iDevice{ aDevice }, iTrack{ aDevice.create_track() }, iSample{ aDevice.spec() }
-	{
-		iTrack.add_sample(iSample);
-	}
+    audio_beeper::audio_beeper(i_audio_playback_device& aDevice) : 
+        iDevice{ aDevice }, iTrack{ aDevice.create_track() }, iSample{ aDevice.spec() }
+    {
+        iTrack.add_sample(iSample);
+    }
 
-	void audio_beeper::beep(double aDuration, double aFrequency)
-	{
-		iSample.beep(aDuration, aFrequency);
-	}
+    void audio_beeper::beep(double aDuration, double aFrequency)
+    {
+        iSample.beep(aDuration, aFrequency);
+    }
 
-	void audio_beeper::beep(const audio_envelope& aEnvelope, double aFrequency)
-	{
-		iSample.beep(aEnvelope, aFrequency);
-	}
+    void audio_beeper::beep(const audio_envelope& aEnvelope, double aFrequency)
+    {
+        iSample.beep(aEnvelope, aFrequency);
+    }
 
-	void audio_beeper::silence(double aDuration)
-	{
-		iSample.silence(aDuration);
-	}
+    void audio_beeper::silence(double aDuration)
+    {
+        iSample.silence(aDuration);
+    }
 
-	void audio_beeper::repeat_start(uint32_t aRepeatCount)
-	{
-		iSample.repeat_start(aRepeatCount);
-	}
+    void audio_beeper::repeat_start(uint32_t aRepeatCount)
+    {
+        iSample.repeat_start(aRepeatCount);
+    }
 
-	void audio_beeper::repeat_end()
-	{
-		iSample.repeat_end();
-	}
+    void audio_beeper::repeat_end()
+    {
+        iSample.repeat_end();
+    }
 
-	void audio_beeper::clear()
-	{
-		iSample.clear();
-	}
+    void audio_beeper::clear()
+    {
+        iSample.clear();
+    }
 }

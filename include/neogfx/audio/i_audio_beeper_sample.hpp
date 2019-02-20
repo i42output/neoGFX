@@ -24,8 +24,8 @@
 
 namespace neogfx
 {
-	class i_audio_beeper_sample : public i_audio_sample, public i_audio_beeper
-	{
-	public:
-	};
+    class i_audio_beeper_sample : public i_audio_sample, public i_audio_beeper
+    {
+    public:
+    };
 }

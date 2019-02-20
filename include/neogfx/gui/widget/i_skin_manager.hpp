@@ -26,26 +26,26 @@
 
 namespace neogfx
 {
-	class i_skin_manager
-	{
-	public:
-		event<i_skin&> skin_registered;
-		event<i_skin&> skin_unregistered;
-		event<i_skinnable_item&> item_registered;
-		event<i_skinnable_item&> item_unregistered;
-	public:
-		virtual uint32_t skin_count() const = 0;
-		virtual const i_skin& skin(uint32_t aIndex) const = 0;
-		virtual i_skin& skin(uint32_t aIndex) = 0;
-		virtual void register_skin(i_skin& aSkin) = 0;
-		virtual void unregister_skin(i_skin& aSkin) = 0;
-	public:
-		virtual const i_skin& active_skin() const = 0;
-		virtual i_skin& active_skin() = 0;
-		virtual void activate_skin(i_skin& aSkin) = 0;
-	public:
-		virtual bool is_item_registered(const i_skinnable_item& aItem) const = 0;
-		virtual void register_item(i_skinnable_item& aItem) = 0;
-		virtual void unregister_item(i_skinnable_item& aItem) = 0;
-	};
+    class i_skin_manager
+    {
+    public:
+        event<i_skin&> skin_registered;
+        event<i_skin&> skin_unregistered;
+        event<i_skinnable_item&> item_registered;
+        event<i_skinnable_item&> item_unregistered;
+    public:
+        virtual uint32_t skin_count() const = 0;
+        virtual const i_skin& skin(uint32_t aIndex) const = 0;
+        virtual i_skin& skin(uint32_t aIndex) = 0;
+        virtual void register_skin(i_skin& aSkin) = 0;
+        virtual void unregister_skin(i_skin& aSkin) = 0;
+    public:
+        virtual const i_skin& active_skin() const = 0;
+        virtual i_skin& active_skin() = 0;
+        virtual void activate_skin(i_skin& aSkin) = 0;
+    public:
+        virtual bool is_item_registered(const i_skinnable_item& aItem) const = 0;
+        virtual void register_item(i_skinnable_item& aItem) = 0;
+        virtual void unregister_item(i_skinnable_item& aItem) = 0;
+    };
 }

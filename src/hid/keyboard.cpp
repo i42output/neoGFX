@@ -22,77 +22,77 @@
 
 namespace neogfx
 {
-	keyboard_grabber::keyboard_grabber(keyboard& aKeyboard) : iKeyboard(aKeyboard)
-	{
-	}
+    keyboard_grabber::keyboard_grabber(keyboard& aKeyboard) : iKeyboard(aKeyboard)
+    {
+    }
 
-	bool keyboard_grabber::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
-	{
-		for (auto& g : iKeyboard.iGrabs)
-			if (g->key_pressed(aScanCode, aKeyCode, aKeyModifiers))
-				return true;
-		return false;
-	}
+    bool keyboard_grabber::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    {
+        for (auto& g : iKeyboard.iGrabs)
+            if (g->key_pressed(aScanCode, aKeyCode, aKeyModifiers))
+                return true;
+        return false;
+    }
 
-	bool keyboard_grabber::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
-	{
-		for (auto& g : iKeyboard.iGrabs)
-			if (g->key_released(aScanCode, aKeyCode, aKeyModifiers))
-				return true;
-		return false;
-	}
+    bool keyboard_grabber::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    {
+        for (auto& g : iKeyboard.iGrabs)
+            if (g->key_released(aScanCode, aKeyCode, aKeyModifiers))
+                return true;
+        return false;
+    }
 
-	bool keyboard_grabber::text_input(const std::string& aText)
-	{
-		for (auto& g : iKeyboard.iGrabs)
-			if (g->text_input(aText))
-				return true;
-		return false;
-	}
+    bool keyboard_grabber::text_input(const std::string& aText)
+    {
+        for (auto& g : iKeyboard.iGrabs)
+            if (g->text_input(aText))
+                return true;
+        return false;
+    }
 
-	bool keyboard_grabber::sys_text_input(const std::string& aText)
-	{
-		for (auto& g : iKeyboard.iGrabs)
-			if (g->sys_text_input(aText))
-				return true;
-		return false;
-	}
+    bool keyboard_grabber::sys_text_input(const std::string& aText)
+    {
+        for (auto& g : iKeyboard.iGrabs)
+            if (g->sys_text_input(aText))
+                return true;
+        return false;
+    }
 
-	keyboard::keyboard() : iGrabber(*this)
-	{
-	}
+    keyboard::keyboard() : iGrabber(*this)
+    {
+    }
 
-	bool keyboard::is_keyboard_grabbed() const
-	{
-		return !iGrabs.empty();
-	}
+    bool keyboard::is_keyboard_grabbed() const
+    {
+        return !iGrabs.empty();
+    }
 
-	bool keyboard::is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const
-	{
-		return std::find(iGrabs.begin(), iGrabs.end(), &aKeyboardHandler) != iGrabs.end();
-	}
+    bool keyboard::is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const
+    {
+        return std::find(iGrabs.begin(), iGrabs.end(), &aKeyboardHandler) != iGrabs.end();
+    }
 
-	bool keyboard::is_front_grabber(i_keyboard_handler& aKeyboardHandler) const
-	{
-		return !iGrabs.empty() && &**iGrabs.begin() == &aKeyboardHandler;
-	}
+    bool keyboard::is_front_grabber(i_keyboard_handler& aKeyboardHandler) const
+    {
+        return !iGrabs.empty() && &**iGrabs.begin() == &aKeyboardHandler;
+    }
 
-	void keyboard::grab_keyboard(i_keyboard_handler& aKeyboardHandler)
-	{
-		if (is_keyboard_grabbed_by(aKeyboardHandler))
-			throw already_grabbed();
-		iGrabs.push_front(&aKeyboardHandler);
-	}
+    void keyboard::grab_keyboard(i_keyboard_handler& aKeyboardHandler)
+    {
+        if (is_keyboard_grabbed_by(aKeyboardHandler))
+            throw already_grabbed();
+        iGrabs.push_front(&aKeyboardHandler);
+    }
 
-	void keyboard::ungrab_keyboard(i_keyboard_handler& aKeyboardHandler)
-	{
-		auto grab = std::find(iGrabs.begin(), iGrabs.end(), &aKeyboardHandler);
-		if (grab != iGrabs.end())
-			iGrabs.erase(grab);
-	}
+    void keyboard::ungrab_keyboard(i_keyboard_handler& aKeyboardHandler)
+    {
+        auto grab = std::find(iGrabs.begin(), iGrabs.end(), &aKeyboardHandler);
+        if (grab != iGrabs.end())
+            iGrabs.erase(grab);
+    }
 
-	i_keyboard_handler& keyboard::grabber() const
-	{
-		return iGrabber;
-	}
+    i_keyboard_handler& keyboard::grabber() const
+    {
+        return iGrabber;
+    }
 }

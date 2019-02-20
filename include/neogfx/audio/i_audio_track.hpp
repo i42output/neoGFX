@@ -24,28 +24,28 @@
 
 namespace neogfx
 {
-	class i_audio_track
-	{
-	public:
-		struct item_sample { std::shared_ptr<i_audio_sample> sample; };
-		struct item_silence { double duration; };
-		struct item_repeat_start { uint32_t repeatCount; };
-		struct item_repeat_end {};
-		typedef neolib::variant<item_sample, item_silence, item_repeat_start, item_repeat_end> value_type;
-		typedef uint32_t item_index;
-	public:
-		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_audio_track::bad_item_index") {} };
-	public:
-		virtual const audio_spec& spec() const = 0;
-	public:
-		virtual void add_sample(i_audio_sample& aSample) = 0;
-		virtual void add_sample(std::shared_ptr<i_audio_sample> aSample) = 0;
-		virtual void add_silence(double aDuration) = 0;
-		virtual void repeat_start(uint32_t aRepeatCount) = 0;
-		virtual void repeat_end() = 0;
-	public:
-		virtual item_index item_count() const = 0;
-		virtual const value_type& item(item_index aItemIndex) const = 0;
-		virtual value_type& item(item_index aItemIndex) = 0;
-	};
+    class i_audio_track
+    {
+    public:
+        struct item_sample { std::shared_ptr<i_audio_sample> sample; };
+        struct item_silence { double duration; };
+        struct item_repeat_start { uint32_t repeatCount; };
+        struct item_repeat_end {};
+        typedef neolib::variant<item_sample, item_silence, item_repeat_start, item_repeat_end> value_type;
+        typedef uint32_t item_index;
+    public:
+        struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_audio_track::bad_item_index") {} };
+    public:
+        virtual const audio_spec& spec() const = 0;
+    public:
+        virtual void add_sample(i_audio_sample& aSample) = 0;
+        virtual void add_sample(std::shared_ptr<i_audio_sample> aSample) = 0;
+        virtual void add_silence(double aDuration) = 0;
+        virtual void repeat_start(uint32_t aRepeatCount) = 0;
+        virtual void repeat_end() = 0;
+    public:
+        virtual item_index item_count() const = 0;
+        virtual const value_type& item(item_index aItemIndex) const = 0;
+        virtual value_type& item(item_index aItemIndex) = 0;
+    };
 }

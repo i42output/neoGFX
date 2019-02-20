@@ -25,16 +25,16 @@
 
 namespace neogfx
 {
-	class i_widget;
+    class i_widget;
 
-	class i_skinnable_item : public virtual i_object
-	{
-	public:
-		virtual bool is_widget() const = 0;
-		virtual const i_widget& as_widget() const = 0;
-		virtual i_widget& as_widget() = 0;
-	public:
-		virtual rect non_client_rect() const = 0;
-		virtual rect client_rect(bool aIncludeMargins = true) const = 0;
-	};
+    class i_skinnable_item : public virtual i_object
+    {
+    public:
+        virtual bool is_widget() const = 0;
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
+    public:
+        virtual rect non_client_rect() const = 0;
+        virtual rect client_rect(bool aIncludeMargins = true) const = 0;
+    };
 }

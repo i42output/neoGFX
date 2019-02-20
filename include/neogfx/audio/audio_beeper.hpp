@@ -25,20 +25,20 @@
 
 namespace neogfx
 {
-	class audio_beeper : public i_audio_beeper
-	{
-	public:
-		audio_beeper(i_audio_playback_device& aDevice);
-	public:
-		void beep(double aDuration, double aFrequency) override;
-		void beep(const audio_envelope& aEnvelope, double aFrequency) override;
-		void silence(double aDuration) override;
-		void repeat_start(uint32_t aRepeatCount) override;
-		void repeat_end() override;
-		void clear() override;
-	private:
-		i_audio_playback_device& iDevice;
-		i_audio_track& iTrack;
-		audio_beeper_sample iSample;
-	};
+    class audio_beeper : public i_audio_beeper
+    {
+    public:
+        audio_beeper(i_audio_playback_device& aDevice);
+    public:
+        void beep(double aDuration, double aFrequency) override;
+        void beep(const audio_envelope& aEnvelope, double aFrequency) override;
+        void silence(double aDuration) override;
+        void repeat_start(uint32_t aRepeatCount) override;
+        void repeat_end() override;
+        void clear() override;
+    private:
+        i_audio_playback_device& iDevice;
+        i_audio_track& iTrack;
+        audio_beeper_sample iSample;
+    };
 }

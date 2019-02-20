@@ -27,51 +27,51 @@
 
 namespace neogfx
 {
-	class surface_manager : public i_surface_manager
-	{
-	public:
-		struct already_rendering_surfaces : std::logic_error { already_rendering_surfaces() : std::logic_error("neogfx::surface_manager::already_rendering_surfaces") {} };
-	private:
-		struct surface_sorter
-		{
-			bool operator()(i_surface* left, i_surface* right) const
-			{
-				if (left->is_owner_of(*right))
-					return true;
-				else if (right->is_owner_of(*left)) 
-					return false;
-				else
-					return std::less<i_surface*>{}(left, right);
-			}
-		};
-		typedef std::set<i_surface*, surface_sorter> surface_list;
-	public:
-		surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);
-	public:
-		bool initialising_surface() const override;
-		void add_surface(i_surface& aSurface) override;
-		void remove_surface(i_surface& aSurface) override;
-		std::size_t surface_count() const override;
-		i_surface& surface(std::size_t aIndex) override;
-		bool any_strong_surfaces() const override;
-		bool process_events(bool& aLastWindowClosed) override;
-		void layout_surfaces() override;
-		void invalidate_surfaces() override;
-		void render_surfaces() override;
-		void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
-		void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const override;
-		uint32_t display_count() const override;
-		i_display& display(uint32_t aDisplayIndex = 0) const override;
-		i_display& display(const i_surface& aSurface) const override;
-		rect desktop_rect(uint32_t aDisplayIndex = 0) const override;
-		rect desktop_rect(const i_surface& aSurface) const override;
-	public:
-		bool is_surface_attached(void* aNativeSurfaceHandle) const override;
-		i_surface& attached_surface(void* aNativeSurfaceHandle) override;
-	private:
-		i_basic_services& iBasicServices;
-		i_rendering_engine& iRenderingEngine;
-		surface_list iSurfaces;
-		bool iRenderingSurfaces;
-	};
+    class surface_manager : public i_surface_manager
+    {
+    public:
+        struct already_rendering_surfaces : std::logic_error { already_rendering_surfaces() : std::logic_error("neogfx::surface_manager::already_rendering_surfaces") {} };
+    private:
+        struct surface_sorter
+        {
+            bool operator()(i_surface* left, i_surface* right) const
+            {
+                if (left->is_owner_of(*right))
+                    return true;
+                else if (right->is_owner_of(*left)) 
+                    return false;
+                else
+                    return std::less<i_surface*>{}(left, right);
+            }
+        };
+        typedef std::set<i_surface*, surface_sorter> surface_list;
+    public:
+        surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);
+    public:
+        bool initialising_surface() const override;
+        void add_surface(i_surface& aSurface) override;
+        void remove_surface(i_surface& aSurface) override;
+        std::size_t surface_count() const override;
+        i_surface& surface(std::size_t aIndex) override;
+        bool any_strong_surfaces() const override;
+        bool process_events(bool& aLastWindowClosed) override;
+        void layout_surfaces() override;
+        void invalidate_surfaces() override;
+        void render_surfaces() override;
+        void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
+        void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const override;
+        uint32_t display_count() const override;
+        i_display& display(uint32_t aDisplayIndex = 0) const override;
+        i_display& display(const i_surface& aSurface) const override;
+        rect desktop_rect(uint32_t aDisplayIndex = 0) const override;
+        rect desktop_rect(const i_surface& aSurface) const override;
+    public:
+        bool is_surface_attached(void* aNativeSurfaceHandle) const override;
+        i_surface& attached_surface(void* aNativeSurfaceHandle) override;
+    private:
+        i_basic_services& iBasicServices;
+        i_rendering_engine& iRenderingEngine;
+        surface_list iSurfaces;
+        bool iRenderingSurfaces;
+    };
 }

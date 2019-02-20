@@ -24,13 +24,13 @@
 
 namespace neogfx
 {
-	class i_sub_texture : public i_texture
-	{
-	public:
-		struct bad_rectangle : std::logic_error { bad_rectangle() : std::logic_error("neogfx::i_sub_texture::bad_rectangle") {} };
-	public:
-		virtual texture_id atlas_id() const = 0;
-		virtual i_texture& atlas_texture() const = 0;
-		virtual const rect& atlas_location() const = 0;
-	};
+    class i_sub_texture : public i_texture
+    {
+    public:
+        struct bad_rectangle : std::logic_error { bad_rectangle() : std::logic_error("neogfx::i_sub_texture::bad_rectangle") {} };
+    public:
+        virtual texture_id atlas_id() const = 0;
+        virtual i_texture& atlas_texture() const = 0;
+        virtual const rect& atlas_location() const = 0;
+    };
 }

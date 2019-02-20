@@ -23,78 +23,78 @@
 
 namespace neogfx
 {
-	enum class text_widget_type
-	{
-		SingleLine,
-		MultiLine
-	};
+    enum class text_widget_type
+    {
+        SingleLine,
+        MultiLine
+    };
 
-	enum class text_widget_flags
-	{
-		None = 0x00,
-		HideOnEmpty = 0x01,
-		TakesSpaceWhenEmpty = 0x02
-	};
+    enum class text_widget_flags
+    {
+        None = 0x00,
+        HideOnEmpty = 0x01,
+        TakesSpaceWhenEmpty = 0x02
+    };
 
-	inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)
-	{
-		return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-	}
+    inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)
+    {
+        return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
 
-	inline constexpr text_widget_flags operator&(text_widget_flags aLhs, text_widget_flags aRhs)
-	{
-		return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-	}
+    inline constexpr text_widget_flags operator&(text_widget_flags aLhs, text_widget_flags aRhs)
+    {
+        return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
 
-	class text_widget : public widget
-	{
-	public:
-		event<> text_changed;
-	public:
-		text_widget(const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-		text_widget(i_widget& aParent, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-		text_widget(i_layout& aLayout, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-		~text_widget();
-	public:
-		neogfx::size_policy size_policy() const override;
-		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-	public:
-		void paint(graphics_context& aGraphicsContext) const override;
-	public:
-		void set_font(const optional_font& aFont) override;
-	public:
-		bool visible() const override;
-	public:
-		const std::string& text() const;
-		void set_text(const std::string& aText);
-		void set_size_hint(const std::string& aSizeHint);
-		bool multi_line() const;
-		text_widget_flags flags() const;
-		void set_flags(text_widget_flags aFlags);
-		neogfx::alignment alignment() const;
-		void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
-		bool has_text_colour() const;
-		colour text_colour() const;
-		void set_text_colour(const optional_colour& aTextColour);
-		bool has_text_appearance() const;
-		neogfx::text_appearance text_appearance() const;
-		void set_text_appearance(const optional_text_appearance& aTextAppearance);
-	protected:
-		size text_extent() const;
-		size size_hint_extent() const;
-	private:
-		void init();
-		const neogfx::glyph_text& glyph_text() const;
-	private:
-		sink iSink;
-		std::string iText;
-		mutable neogfx::glyph_text iGlyphText;
-		mutable optional_size iTextExtent;
-		std::string iSizeHint;
-		mutable optional_size iSizeHintExtent;
-		text_widget_type iType;
-		text_widget_flags iFlags;
-		neogfx::alignment iAlignment;
-		optional_text_appearance iTextAppearance;
-	};
+    class text_widget : public widget
+    {
+    public:
+        event<> text_changed;
+    public:
+        text_widget(const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(i_widget& aParent, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(i_layout& aLayout, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        ~text_widget();
+    public:
+        neogfx::size_policy size_policy() const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+    public:
+        void paint(graphics_context& aGraphicsContext) const override;
+    public:
+        void set_font(const optional_font& aFont) override;
+    public:
+        bool visible() const override;
+    public:
+        const std::string& text() const;
+        void set_text(const std::string& aText);
+        void set_size_hint(const std::string& aSizeHint);
+        bool multi_line() const;
+        text_widget_flags flags() const;
+        void set_flags(text_widget_flags aFlags);
+        neogfx::alignment alignment() const;
+        void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
+        bool has_text_colour() const;
+        colour text_colour() const;
+        void set_text_colour(const optional_colour& aTextColour);
+        bool has_text_appearance() const;
+        neogfx::text_appearance text_appearance() const;
+        void set_text_appearance(const optional_text_appearance& aTextAppearance);
+    protected:
+        size text_extent() const;
+        size size_hint_extent() const;
+    private:
+        void init();
+        const neogfx::glyph_text& glyph_text() const;
+    private:
+        sink iSink;
+        std::string iText;
+        mutable neogfx::glyph_text iGlyphText;
+        mutable optional_size iTextExtent;
+        std::string iSizeHint;
+        mutable optional_size iSizeHintExtent;
+        text_widget_type iType;
+        text_widget_flags iFlags;
+        neogfx::alignment iAlignment;
+        optional_text_appearance iTextAppearance;
+    };
 }

@@ -27,62 +27,62 @@
 
 namespace neogfx
 {
-	class scrollbar : public i_scrollbar
-	{
-	public:
-		scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
-	public:
-		scrollbar_type type() const override;
-		scrollbar_style style() const override;
-		void show() override;
-		void hide() override;
-		bool visible() const override;
-		value_type position() const override;
-		bool set_position(value_type aPosition) override;
-		value_type minimum() const override;
-		void set_minimum(value_type aMinimum) override;
-		value_type maximum() const override;
-		void set_maximum(value_type aMaximum) override;
-		value_type step() const override;
-		void set_step(value_type aStep) override;
-		value_type page() const override;
-		void set_page(value_type aPage) override;
-	public:
-		dimension width(const i_units_context& aContext) const override;
-		void render(graphics_context& aGraphicsContext) const override;
-	public:
-		rect element_geometry(const i_units_context& aContext, element_e aElement) const override;
-		element_e element_at(const i_units_context& aContext, const point& aPosition) const override;
-	public:
-		void update(const i_units_context& aContext, const update_params_t& aUpdateParams = update_params_t()) override;
-		element_e clicked_element() const override;
-		void click_element(element_e aElement) override;
-		void unclick_element() override;
-		void hover_element(element_e aElement) override;
-		void unhover_element() override;
-		void pause() override;
-		void resume() override;
-		void track() override;
-		void untrack() override;
-	public:
-		static dimension width(scrollbar_style aStyle, const i_units_context& aContext);
-	private:
-		i_scrollbar_container& iContainer;
-		scrollbar_type iType;
-		scrollbar_style iStyle;
-		bool iIntegerPositions;
-		bool iVisible;
-		value_type iPosition;
-		value_type iMinimum;
-		value_type iMaximum;
-		value_type iStep;
-		value_type iPage;
-		element_e iClickedElement;
-		element_e iHoverElement;
-		std::optional<std::shared_ptr<neolib::callback_timer>> iTimer;
-		bool iPaused;
-		point iThumbClickedPosition;
-		value_type iThumbClickedValue;
-		optional_point iScrollTrackPosition;
-	};
+    class scrollbar : public i_scrollbar
+    {
+    public:
+        scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
+    public:
+        scrollbar_type type() const override;
+        scrollbar_style style() const override;
+        void show() override;
+        void hide() override;
+        bool visible() const override;
+        value_type position() const override;
+        bool set_position(value_type aPosition) override;
+        value_type minimum() const override;
+        void set_minimum(value_type aMinimum) override;
+        value_type maximum() const override;
+        void set_maximum(value_type aMaximum) override;
+        value_type step() const override;
+        void set_step(value_type aStep) override;
+        value_type page() const override;
+        void set_page(value_type aPage) override;
+    public:
+        dimension width(const i_units_context& aContext) const override;
+        void render(graphics_context& aGraphicsContext) const override;
+    public:
+        rect element_geometry(const i_units_context& aContext, element_e aElement) const override;
+        element_e element_at(const i_units_context& aContext, const point& aPosition) const override;
+    public:
+        void update(const i_units_context& aContext, const update_params_t& aUpdateParams = update_params_t()) override;
+        element_e clicked_element() const override;
+        void click_element(element_e aElement) override;
+        void unclick_element() override;
+        void hover_element(element_e aElement) override;
+        void unhover_element() override;
+        void pause() override;
+        void resume() override;
+        void track() override;
+        void untrack() override;
+    public:
+        static dimension width(scrollbar_style aStyle, const i_units_context& aContext);
+    private:
+        i_scrollbar_container& iContainer;
+        scrollbar_type iType;
+        scrollbar_style iStyle;
+        bool iIntegerPositions;
+        bool iVisible;
+        value_type iPosition;
+        value_type iMinimum;
+        value_type iMaximum;
+        value_type iStep;
+        value_type iPage;
+        element_e iClickedElement;
+        element_e iHoverElement;
+        std::optional<std::shared_ptr<neolib::callback_timer>> iTimer;
+        bool iPaused;
+        point iThumbClickedPosition;
+        value_type iThumbClickedValue;
+        optional_point iScrollTrackPosition;
+    };
 }

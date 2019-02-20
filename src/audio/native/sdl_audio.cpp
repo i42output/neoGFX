@@ -24,54 +24,54 @@
 
 namespace neogfx
 {
-	sdl_audio::sdl_audio() : iInitialized{ false }
-	{
-	}
+    sdl_audio::sdl_audio() : iInitialized{ false }
+    {
+    }
 
-	sdl_audio::~sdl_audio()
-	{
-		uninitialize();
-	}
+    sdl_audio::~sdl_audio()
+    {
+        uninitialize();
+    }
 
-	void sdl_audio::initialize(bool aOpenDefaultPlaybackDevice)
-	{
-		if (!iInitialized)
-		{
-			if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
-				throw failed_to_initialize_audio(SDL_GetError());
-			int deviceCount = SDL_GetNumAudioDevices(0);
-			for (int device = 0; device < deviceCount; ++device)
-				iAudioPlaybackDevices.push_back(std::make_unique<sdl_audio_playback_device>(SDL_GetAudioDeviceName(device, 0)));
-			iInitialized = true;
-			if (aOpenDefaultPlaybackDevice && have_audio_playback_device())
-				audio_playback_device(0).open();
-		}
-	}
+    void sdl_audio::initialize(bool aOpenDefaultPlaybackDevice)
+    {
+        if (!iInitialized)
+        {
+            if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
+                throw failed_to_initialize_audio(SDL_GetError());
+            int deviceCount = SDL_GetNumAudioDevices(0);
+            for (int device = 0; device < deviceCount; ++device)
+                iAudioPlaybackDevices.push_back(std::make_unique<sdl_audio_playback_device>(SDL_GetAudioDeviceName(device, 0)));
+            iInitialized = true;
+            if (aOpenDefaultPlaybackDevice && have_audio_playback_device())
+                audio_playback_device(0).open();
+        }
+    }
 
-	void sdl_audio::uninitialize()
-	{
-		if (iInitialized)
-		{
-			iAudioPlaybackDevices.clear();
-			SDL_QuitSubSystem(SDL_INIT_AUDIO);
-			iInitialized = false;
-		}
-	}
+    void sdl_audio::uninitialize()
+    {
+        if (iInitialized)
+        {
+            iAudioPlaybackDevices.clear();
+            SDL_QuitSubSystem(SDL_INIT_AUDIO);
+            iInitialized = false;
+        }
+    }
 
-	bool sdl_audio::have_audio_playback_device() const
-	{
-		return !iAudioPlaybackDevices.empty();
-	}
+    bool sdl_audio::have_audio_playback_device() const
+    {
+        return !iAudioPlaybackDevices.empty();
+    }
 
-	uint32_t sdl_audio::audio_playback_device_count() const
-	{
-		return iAudioPlaybackDevices.size();
-	}
+    uint32_t sdl_audio::audio_playback_device_count() const
+    {
+        return iAudioPlaybackDevices.size();
+    }
 
-	i_audio_playback_device& sdl_audio::audio_playback_device(uint32_t aDeviceIndex)
-	{
-		if (aDeviceIndex < iAudioPlaybackDevices.size())
-			return *iAudioPlaybackDevices[aDeviceIndex];
-		throw bad_audio_device_index();
-	}
+    i_audio_playback_device& sdl_audio::audio_playback_device(uint32_t aDeviceIndex)
+    {
+        if (aDeviceIndex < iAudioPlaybackDevices.size())
+            return *iAudioPlaybackDevices[aDeviceIndex];
+        throw bad_audio_device_index();
+    }
 }

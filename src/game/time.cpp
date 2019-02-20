@@ -26,43 +26,43 @@
 
 namespace neogfx::game
 {
-	time::time(game::i_ecs& aEcs) :
-		system{ aEcs }
-	{
-		if (!ecs().shared_component_registered<clock>())
-		{
-			ecs().register_shared_component<clock>();
-			ecs().populate_shared<clock>("World Clock", clock{ 0ll, chrono::to_flicks(0.010).count() });
-			apply();
-		}
-	}
+    time::time(game::i_ecs& aEcs) :
+        system{ aEcs }
+    {
+        if (!ecs().shared_component_registered<clock>())
+        {
+            ecs().register_shared_component<clock>();
+            ecs().populate_shared<clock>("World Clock", clock{ 0ll, chrono::to_flicks(0.010).count() });
+            apply();
+        }
+    }
 
-	const system_id& time::id() const
-	{
-		return meta::id();
-	}
+    const system_id& time::id() const
+    {
+        return meta::id();
+    }
 
-	const neolib::i_string& time::name() const
-	{
-		return meta::name();
-	}
+    const neolib::i_string& time::name() const
+    {
+        return meta::name();
+    }
 
-	void time::apply()
-	{
-	}
+    void time::apply()
+    {
+    }
 
-	step_time time::system_time() const
-	{
-		auto& worldClock = ecs().shared_component<clock>()[0];
-		auto systemTime = to_step_time(chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), worldClock.timeStep);
-		if (iSystemTimeOffset == std::nullopt)
-			iSystemTimeOffset = systemTime;
-		return systemTime - *iSystemTimeOffset;
-	}
+    step_time time::system_time() const
+    {
+        auto& worldClock = ecs().shared_component<clock>()[0];
+        auto systemTime = to_step_time(chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), worldClock.timeStep);
+        if (iSystemTimeOffset == std::nullopt)
+            iSystemTimeOffset = systemTime;
+        return systemTime - *iSystemTimeOffset;
+    }
 
-	step_time time::world_time() const
-	{
-		auto& worldClock = ecs().shared_component<clock>()[0];
-		return worldClock.time;
-	}
+    step_time time::world_time() const
+    {
+        auto& worldClock = ecs().shared_component<clock>()[0];
+        return worldClock.time;
+    }
 }

@@ -26,74 +26,74 @@
 
 namespace neogfx
 {
-	typedef game::id_t texture_id;
+    typedef game::id_t texture_id;
 
-	class i_native_texture;
+    class i_native_texture;
 
-	enum class texture_type : uint32_t
-	{
-		Texture,
-		SubTexture
-	};
+    enum class texture_type : uint32_t
+    {
+        Texture,
+        SubTexture
+    };
 
-	enum class texture_sampling : uint32_t
-	{
-		Normal,
-		NormalMipmap,
-		Nearest,
-		Data,
-		Multisample,
-		Multisample4x,
-		Multisample8x,
-		Multisample16x,
-		Multisample32x
-	};
+    enum class texture_sampling : uint32_t
+    {
+        Normal,
+        NormalMipmap,
+        Nearest,
+        Data,
+        Multisample,
+        Multisample4x,
+        Multisample8x,
+        Multisample16x,
+        Multisample32x
+    };
 
-	enum class texture_data_format : uint32_t
-	{
-		// todo: add remaining GL texture data formats
-		RGBA		= 0x01,
-		Red			= 0x02,
-		SubPixel	= 0x03
-	};
+    enum class texture_data_format : uint32_t
+    {
+        // todo: add remaining GL texture data formats
+        RGBA        = 0x01,
+        Red            = 0x02,
+        SubPixel    = 0x03
+    };
 
-	enum class texture_data_type : uint32_t
-	{
-		// todo: add remaining GL texture data types
-		UnsignedByte,
-		Float
-	};
+    enum class texture_data_type : uint32_t
+    {
+        // todo: add remaining GL texture data types
+        UnsignedByte,
+        Float
+    };
 
-	class i_sub_texture;
-	class i_image;
+    class i_sub_texture;
+    class i_image;
 
-	class i_texture
-	{
-	public:
-		struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
-		struct not_sub_texture : std::logic_error { not_sub_texture() : std::logic_error("neogfx::i_texture::not_sub_texture") {} };
-	public:
-		virtual ~i_texture() {}
-	public:
-		virtual texture_id id() const = 0;
-		virtual texture_type type() const = 0;
-		virtual bool is_render_target() const = 0;
-		virtual const i_sub_texture& as_sub_texture() const = 0;
-		virtual dimension dpi_scale_factor() const = 0;
-		virtual texture_sampling sampling() const = 0;
-		virtual uint32_t samples() const = 0;
-		virtual texture_data_format data_format() const = 0;
-		virtual texture_data_type data_type() const = 0;
-		virtual bool is_empty() const = 0;
-		virtual size extents() const = 0;
-		virtual size storage_extents() const = 0;
-		virtual void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) = 0;
-		virtual void set_pixels(const i_image& aImage) = 0;
-		virtual void set_pixel(const point& aPosition, const colour& aColour) = 0;
-		virtual colour get_pixel(const point& aPosition) const = 0;
-	public:
-		virtual int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const = 0;
-	public:
-		virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
-	};
+    class i_texture
+    {
+    public:
+        struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
+        struct not_sub_texture : std::logic_error { not_sub_texture() : std::logic_error("neogfx::i_texture::not_sub_texture") {} };
+    public:
+        virtual ~i_texture() {}
+    public:
+        virtual texture_id id() const = 0;
+        virtual texture_type type() const = 0;
+        virtual bool is_render_target() const = 0;
+        virtual const i_sub_texture& as_sub_texture() const = 0;
+        virtual dimension dpi_scale_factor() const = 0;
+        virtual texture_sampling sampling() const = 0;
+        virtual uint32_t samples() const = 0;
+        virtual texture_data_format data_format() const = 0;
+        virtual texture_data_type data_type() const = 0;
+        virtual bool is_empty() const = 0;
+        virtual size extents() const = 0;
+        virtual size storage_extents() const = 0;
+        virtual void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) = 0;
+        virtual void set_pixels(const i_image& aImage) = 0;
+        virtual void set_pixel(const point& aPosition, const colour& aColour) = 0;
+        virtual colour get_pixel(const point& aPosition) const = 0;
+    public:
+        virtual int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const = 0;
+    public:
+        virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
+    };
 }

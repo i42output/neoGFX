@@ -23,15 +23,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogames
 {
-	namespace card_games
-	{
-		struct poker_game_traits
-		{
-			static const uint32_t hand_size = 5;
-			typedef std::true_type ace_high;
-			typedef std::false_type jokers_present;
-		};
+    namespace card_games
+    {
+        struct poker_game_traits
+        {
+            static const uint32_t hand_size = 5;
+            typedef std::true_type ace_high;
+            typedef std::false_type jokers_present;
+        };
 
-		typedef poker_game_traits default_game_traits;
-	}
+        typedef poker_game_traits default_game_traits;
+    }
 }

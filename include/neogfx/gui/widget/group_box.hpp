@@ -27,49 +27,49 @@
 
 namespace neogfx
 {
-	class group_box : public widget
-	{
-	private:
-		typedef std::unique_ptr<neogfx::label> label_ptr;
-		typedef std::unique_ptr<neogfx::check_box> check_box_ptr;
-	public:
-		struct not_checkable : std::logic_error { not_checkable() : std::logic_error("neogfx::group_box::not_checkable") {} };
-	public:
-		group_box(const std::string& aText = std::string());
-		group_box(i_widget& aParent, const std::string& aText = std::string());
-		group_box(i_layout& aLayout, const std::string& aText = std::string());
-	public:
-		bool is_checkable() const;
-		void set_checkable(bool aCheckable);
-		const neogfx::label& label() const;
-		neogfx::label& label();
-		bool has_check_box() const;
-		const neogfx::check_box& check_box() const;
-		neogfx::check_box& check_box();
-		void set_item_layout(i_layout& aItemLayout);
-		void set_item_layout(std::shared_ptr<i_layout> aItemLayout);
-		const i_layout& item_layout() const;
-		i_layout& item_layout();
-		template <typename LayoutT, typename... Args>
-		LayoutT& with_item_layout(Args... args)
-		{
-			set_item_layout(std::make_shared<LayoutT>(args...));
-			return static_cast<LayoutT&>(item_layout());
-		}
-	public:
-		virtual neogfx::size_policy size_policy() const;
-	public:
-		virtual void paint(graphics_context& aGraphicsContext) const;
-	public:
-		virtual colour border_colour() const;
-		virtual colour fill_colour() const;
-		virtual colour background_colour() const;
-	private:
-		void init();
-	private:
-		vertical_layout iLayout;
-		neolib::variant<label_ptr, check_box_ptr> iTitle;
-		std::shared_ptr<i_layout> iItemLayout;
-		sink iSink;
-	};
+    class group_box : public widget
+    {
+    private:
+        typedef std::unique_ptr<neogfx::label> label_ptr;
+        typedef std::unique_ptr<neogfx::check_box> check_box_ptr;
+    public:
+        struct not_checkable : std::logic_error { not_checkable() : std::logic_error("neogfx::group_box::not_checkable") {} };
+    public:
+        group_box(const std::string& aText = std::string());
+        group_box(i_widget& aParent, const std::string& aText = std::string());
+        group_box(i_layout& aLayout, const std::string& aText = std::string());
+    public:
+        bool is_checkable() const;
+        void set_checkable(bool aCheckable);
+        const neogfx::label& label() const;
+        neogfx::label& label();
+        bool has_check_box() const;
+        const neogfx::check_box& check_box() const;
+        neogfx::check_box& check_box();
+        void set_item_layout(i_layout& aItemLayout);
+        void set_item_layout(std::shared_ptr<i_layout> aItemLayout);
+        const i_layout& item_layout() const;
+        i_layout& item_layout();
+        template <typename LayoutT, typename... Args>
+        LayoutT& with_item_layout(Args... args)
+        {
+            set_item_layout(std::make_shared<LayoutT>(args...));
+            return static_cast<LayoutT&>(item_layout());
+        }
+    public:
+        virtual neogfx::size_policy size_policy() const;
+    public:
+        virtual void paint(graphics_context& aGraphicsContext) const;
+    public:
+        virtual colour border_colour() const;
+        virtual colour fill_colour() const;
+        virtual colour background_colour() const;
+    private:
+        void init();
+    private:
+        vertical_layout iLayout;
+        neolib::variant<label_ptr, check_box_ptr> iTitle;
+        std::shared_ptr<i_layout> iItemLayout;
+        sink iSink;
+    };
 }

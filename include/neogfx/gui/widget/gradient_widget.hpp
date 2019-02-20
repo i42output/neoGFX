@@ -28,61 +28,61 @@
 
 namespace neogfx
 {
-	class gradient_dialog;
+    class gradient_dialog;
 
-	class gradient_widget : public widget
-	{
-	public:
-		event<> gradient_changed;
-	private:
-		typedef neolib::variant<neogfx::gradient::colour_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
-		typedef neolib::variant<neogfx::gradient::colour_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
-	public:
-		gradient_widget(const neogfx::gradient& aGradient = neogfx::gradient{});
-		gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient = neogfx::gradient{});
-		gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
-		gradient_widget(gradient_dialog& aParent, i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
-	public:
-		const neogfx::gradient& gradient() const;
-		void set_gradient(const neogfx::gradient& aGradient);
-		const std::optional<colour_dialog::custom_colour_list>& custom_colours() const;
-		std::optional<colour_dialog::custom_colour_list>& custom_colours();
-	public:
-		virtual neogfx::size_policy size_policy() const;
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-	public:
-		virtual void paint(graphics_context& aGraphicsContext) const;
-	public:
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-		virtual void mouse_moved(const point& aPosition);
-		virtual neogfx::mouse_cursor mouse_cursor() const;
-	private:
-		rect contents_rect() const;
-		stop_const_iterator stop_at(const point& aPosition) const;
-		stop_iterator stop_at(const point& aPosition);
-		rect colour_stop_rect(const neogfx::gradient::colour_stop& aColourStop) const;
-		rect alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const;
-		void draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
-		void draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
-	private:
-		dimension stop_width() const;
-		dimension stop_height() const;
-		dimension control_height() const;
-		dimension alpha_pattern_size() const;
-		dimension small_alpha_pattern_size() const;
-		dimension border_thickness() const;
-		dimension border_spacer_thickness() const;
-	private:
-		bool iInGradientDialog;
-		neogfx::gradient iSelection;
-		std::optional<point> iClicked;
-		std::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;
-		std::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
-		bool iTracking;
-		std::unique_ptr<context_menu> iMenu;
-		mutable std::map<i_resource::hash_digest_type, texture> iStopTextures;
-		std::optional<colour_dialog::custom_colour_list> iCustomColours;
-	};
+    class gradient_widget : public widget
+    {
+    public:
+        event<> gradient_changed;
+    private:
+        typedef neolib::variant<neogfx::gradient::colour_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
+        typedef neolib::variant<neogfx::gradient::colour_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
+    public:
+        gradient_widget(const neogfx::gradient& aGradient = neogfx::gradient{});
+        gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient = neogfx::gradient{});
+        gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
+        gradient_widget(gradient_dialog& aParent, i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
+    public:
+        const neogfx::gradient& gradient() const;
+        void set_gradient(const neogfx::gradient& aGradient);
+        const std::optional<colour_dialog::custom_colour_list>& custom_colours() const;
+        std::optional<colour_dialog::custom_colour_list>& custom_colours();
+    public:
+        virtual neogfx::size_policy size_policy() const;
+        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+    public:
+        virtual void paint(graphics_context& aGraphicsContext) const;
+    public:
+        virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+        virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+        virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+        virtual void mouse_moved(const point& aPosition);
+        virtual neogfx::mouse_cursor mouse_cursor() const;
+    private:
+        rect contents_rect() const;
+        stop_const_iterator stop_at(const point& aPosition) const;
+        stop_iterator stop_at(const point& aPosition);
+        rect colour_stop_rect(const neogfx::gradient::colour_stop& aColourStop) const;
+        rect alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const;
+        void draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
+        void draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
+    private:
+        dimension stop_width() const;
+        dimension stop_height() const;
+        dimension control_height() const;
+        dimension alpha_pattern_size() const;
+        dimension small_alpha_pattern_size() const;
+        dimension border_thickness() const;
+        dimension border_spacer_thickness() const;
+    private:
+        bool iInGradientDialog;
+        neogfx::gradient iSelection;
+        std::optional<point> iClicked;
+        std::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;
+        std::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
+        bool iTracking;
+        std::unique_ptr<context_menu> iMenu;
+        mutable std::map<i_resource::hash_digest_type, texture> iStopTextures;
+        std::optional<colour_dialog::custom_colour_list> iCustomColours;
+    };
 }

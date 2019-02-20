@@ -26,13 +26,13 @@
 
 namespace neogfx
 {
-	class i_native_texture : public i_texture, public i_render_target
-	{
-	public:
-		virtual void* handle() const = 0;
-		virtual bool is_resident() const = 0;
-		virtual const std::string& uri() const = 0;
-	public:
-		virtual size extents() const = 0;
-	};
+    class i_native_texture : public i_texture, public i_render_target
+    {
+    public:
+        virtual void* handle() const = 0;
+        virtual bool is_resident() const = 0;
+        virtual const std::string& uri() const = 0;
+    public:
+        virtual size extents() const = 0;
+    };
 }

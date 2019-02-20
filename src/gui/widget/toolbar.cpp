@@ -22,81 +22,81 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	toolbar::toolbar() : 
-		iLayout{ *this }
-	{
-	}
+    toolbar::toolbar() : 
+        iLayout{ *this }
+    {
+    }
 
-	toolbar::toolbar(i_widget& aParent) : 
-		widget{ aParent }, iLayout{ *this }
-	{
-	}
+    toolbar::toolbar(i_widget& aParent) : 
+        widget{ aParent }, iLayout{ *this }
+    {
+    }
 
-	toolbar::toolbar(i_layout& aLayout) : 
-		widget{ aLayout }, iLayout{ *this }
-	{
-	}
+    toolbar::toolbar(i_layout& aLayout) : 
+        widget{ aLayout }, iLayout{ *this }
+    {
+    }
 
-	neogfx::size_policy toolbar::size_policy() const
-	{
-		if (widget::has_size_policy())
-			return widget::size_policy();
-		return neogfx::size_policy::Minimum;
-	}
+    neogfx::size_policy toolbar::size_policy() const
+    {
+        if (widget::has_size_policy())
+            return widget::size_policy();
+        return neogfx::size_policy::Minimum;
+    }
 
-	size toolbar::button_image_extents() const
-	{
-		if (iButtonImageExtents != std::nullopt)
-			return *iButtonImageExtents;
-		return dpi_scale(iButtonSize);
-	}
+    size toolbar::button_image_extents() const
+    {
+        if (iButtonImageExtents != std::nullopt)
+            return *iButtonImageExtents;
+        return dpi_scale(iButtonSize);
+    }
 
-	void toolbar::set_button_image_extents(const optional_size& aExtents)
-	{
-		iButtonImageExtents = aExtents;
-	}
+    void toolbar::set_button_image_extents(const optional_size& aExtents)
+    {
+        iButtonImageExtents = aExtents;
+    }
 
-	uint32_t toolbar::button_count() const
-	{
-		return iButtons.size();
-	}
+    uint32_t toolbar::button_count() const
+    {
+        return iButtons.size();
+    }
 
-	const toolbar_button& toolbar::button(button_index aButtonIndex) const
-	{
-		if (aButtonIndex >= button_count())
-			throw bad_button_index();
-		return *iButtons[aButtonIndex];
-	}
+    const toolbar_button& toolbar::button(button_index aButtonIndex) const
+    {
+        if (aButtonIndex >= button_count())
+            throw bad_button_index();
+        return *iButtons[aButtonIndex];
+    }
 
-	toolbar_button& toolbar::button(button_index aButtonIndex)
-	{
-		return const_cast<toolbar_button&>(const_cast<const toolbar*>(this)->button(aButtonIndex));
-	}
+    toolbar_button& toolbar::button(button_index aButtonIndex)
+    {
+        return const_cast<toolbar_button&>(const_cast<const toolbar*>(this)->button(aButtonIndex));
+    }
 
     i_action& toolbar::add_action(i_action& aAction)
-	{
-		insert_action(button_count(), aAction);
+    {
+        insert_action(button_count(), aAction);
         return aAction;
-	}
+    }
 
-	void toolbar::add_separator()
-	{
-		insert_separator(button_count());
-	}
+    void toolbar::add_separator()
+    {
+        insert_separator(button_count());
+    }
 
     i_action& toolbar::insert_action(button_index aButtonIndex, i_action& aAction)
-	{
-		if (aButtonIndex > iButtons.size())
-			throw bad_button_index();
-		iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), aAction));
-		iButtons[aButtonIndex]->image().set_fixed_size(button_image_extents());
+    {
+        if (aButtonIndex > iButtons.size())
+            throw bad_button_index();
+        iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), aAction));
+        iButtons[aButtonIndex]->image().set_fixed_size(button_image_extents());
         return aAction;
-	}
+    }
 
-	void toolbar::insert_separator(button_index aButtonIndex)
-	{
-		if (aButtonIndex > iButtons.size())
-			throw bad_button_index();
-		iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), iSeparator));
-	}
+    void toolbar::insert_separator(button_index aButtonIndex)
+    {
+        if (aButtonIndex > iButtons.size())
+            throw bad_button_index();
+        iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), iSeparator));
+    }
 }

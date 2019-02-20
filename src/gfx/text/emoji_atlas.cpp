@@ -30,94 +30,94 @@
 
 namespace neogfx
 {
-	emoji_atlas::emoji_atlas() : 
-		kFilePath{ neolib::program_directory() + "/emoji.zip" },
-		iTextureAtlas{ service<i_texture_manager>().create_texture_atlas(size{ 1024.0, 1024.0}) }
-	{
-		try
-		{
-			neolib::zip zipFile(kFilePath);
-			std::istringstream metaDataFile{ zipFile.extract_to_string(zipFile.index_of("meta.json")) };
-			boost::property_tree::ptree metaData;
-			boost::property_tree::read_json(metaDataFile, metaData);
-			for (auto const& set : metaData.get_child("sets"))
-			{
-				dimension size = set.second.get<dimension>("size");
-				std::string location = set.second.get<std::string>("location");
-				std::string prefix = set.second.get<std::string>("prefix", "");
-				std::string separator = set.second.get<std::string>("separator", "-");
-				for (std::size_t i = 0; i < zipFile.file_count(); ++i)
-				{
-					auto const& filePath = zipFile.file_path(i);
-					if (filePath.find(location) == 0)
-					{
-						std::u32string codePoints;
-						std::vector<std::string> hexCodePoints;
-						auto filename = boost::filesystem::path(filePath).stem().string();
-						if (filename.size() <= prefix.size() || (!prefix.empty() && filename.find(prefix) != 0))
-							continue;
-						neolib::tokens(filename.substr(prefix.size()), separator, hexCodePoints);
-						for (auto const& hexCodePoint : hexCodePoints)
-						{
-							std::stringstream ss;
-							ss << std::hex << hexCodePoint;
-							uint32_t x;
-							ss >> x;
-							if (x < 256)
-								break;
-							codePoints.push_back(x);
-						}
-						if (!codePoints.empty())
-						{
-							iEmojis[codePoints][size] = filePath;
-							iEmojiMap[codePoints] = std::optional<emoji_id>{};
-						}
-					}
-				}
-			}
-		}
-		catch (...)
-		{
-		}
-	}
+    emoji_atlas::emoji_atlas() : 
+        kFilePath{ neolib::program_directory() + "/emoji.zip" },
+        iTextureAtlas{ service<i_texture_manager>().create_texture_atlas(size{ 1024.0, 1024.0}) }
+    {
+        try
+        {
+            neolib::zip zipFile(kFilePath);
+            std::istringstream metaDataFile{ zipFile.extract_to_string(zipFile.index_of("meta.json")) };
+            boost::property_tree::ptree metaData;
+            boost::property_tree::read_json(metaDataFile, metaData);
+            for (auto const& set : metaData.get_child("sets"))
+            {
+                dimension size = set.second.get<dimension>("size");
+                std::string location = set.second.get<std::string>("location");
+                std::string prefix = set.second.get<std::string>("prefix", "");
+                std::string separator = set.second.get<std::string>("separator", "-");
+                for (std::size_t i = 0; i < zipFile.file_count(); ++i)
+                {
+                    auto const& filePath = zipFile.file_path(i);
+                    if (filePath.find(location) == 0)
+                    {
+                        std::u32string codePoints;
+                        std::vector<std::string> hexCodePoints;
+                        auto filename = boost::filesystem::path(filePath).stem().string();
+                        if (filename.size() <= prefix.size() || (!prefix.empty() && filename.find(prefix) != 0))
+                            continue;
+                        neolib::tokens(filename.substr(prefix.size()), separator, hexCodePoints);
+                        for (auto const& hexCodePoint : hexCodePoints)
+                        {
+                            std::stringstream ss;
+                            ss << std::hex << hexCodePoint;
+                            uint32_t x;
+                            ss >> x;
+                            if (x < 256)
+                                break;
+                            codePoints.push_back(x);
+                        }
+                        if (!codePoints.empty())
+                        {
+                            iEmojis[codePoints][size] = filePath;
+                            iEmojiMap[codePoints] = std::optional<emoji_id>{};
+                        }
+                    }
+                }
+            }
+        }
+        catch (...)
+        {
+        }
+    }
 
-	bool emoji_atlas::is_emoji(char32_t aCodePoint) const
-	{
-		std::u32string str;
-		str += aCodePoint;
-		return is_emoji(str);
-	}
+    bool emoji_atlas::is_emoji(char32_t aCodePoint) const
+    {
+        std::u32string str;
+        str += aCodePoint;
+        return is_emoji(str);
+    }
 
-	bool emoji_atlas::is_emoji(const std::u32string& aCodePoints) const
-	{
-		return iEmojiMap.find(aCodePoints) != iEmojiMap.end();
-	}
+    bool emoji_atlas::is_emoji(const std::u32string& aCodePoints) const
+    {
+        return iEmojiMap.find(aCodePoints) != iEmojiMap.end();
+    }
 
-	emoji_atlas::emoji_id emoji_atlas::emoji(char32_t aCodePoint, dimension aDesiredSize) const
-	{
-		std::u32string str;
-		str += aCodePoint;
-		return emoji(str, aDesiredSize);
-	}
+    emoji_atlas::emoji_id emoji_atlas::emoji(char32_t aCodePoint, dimension aDesiredSize) const
+    {
+        std::u32string str;
+        str += aCodePoint;
+        return emoji(str, aDesiredSize);
+    }
 
-	emoji_atlas::emoji_id emoji_atlas::emoji(const std::u32string& aCodePoints, dimension aDesiredSize) const
-	{
-		auto iterEmoji = iEmojiMap.find(aCodePoints);
-		if (iterEmoji == iEmojiMap.end())
-			throw emoji_not_found();
-		if (iterEmoji->second == std::nullopt)
-		{
-			auto emojiFiles = iEmojis.find(aCodePoints);
-			auto emojiFile = emojiFiles->second.lower_bound(aDesiredSize);
-			if (emojiFile == emojiFiles->second.end())
-				--emojiFile;
-			iterEmoji->second = iTextureAtlas->create_sub_texture(neogfx::image{ "file:///" + kFilePath + "#" + emojiFile->second }).atlas_id();
-		}
-		return *iterEmoji->second;
-	}
+    emoji_atlas::emoji_id emoji_atlas::emoji(const std::u32string& aCodePoints, dimension aDesiredSize) const
+    {
+        auto iterEmoji = iEmojiMap.find(aCodePoints);
+        if (iterEmoji == iEmojiMap.end())
+            throw emoji_not_found();
+        if (iterEmoji->second == std::nullopt)
+        {
+            auto emojiFiles = iEmojis.find(aCodePoints);
+            auto emojiFile = emojiFiles->second.lower_bound(aDesiredSize);
+            if (emojiFile == emojiFiles->second.end())
+                --emojiFile;
+            iterEmoji->second = iTextureAtlas->create_sub_texture(neogfx::image{ "file:///" + kFilePath + "#" + emojiFile->second }).atlas_id();
+        }
+        return *iterEmoji->second;
+    }
 
-	const i_texture& emoji_atlas::emoji_texture(emoji_id aId) const
-	{
-		return iTextureAtlas->sub_texture(aId);
-	}
+    const i_texture& emoji_atlas::emoji_texture(emoji_id aId) const
+    {
+        return iTextureAtlas->sub_texture(aId);
+    }
 }

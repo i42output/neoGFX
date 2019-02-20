@@ -24,39 +24,39 @@
 
 namespace neogfx::game
 {
-	class simple_physics : public system
-	{
-	private:
-		class thread;
-	public:
-		simple_physics(game::i_ecs& aEcs);
-		~simple_physics();
-	public:
-		const system_id& id() const override;
-		const neolib::i_string& name() const override;
-	public:
-		void apply() override;
-		void terminate() override;
-	public:
-		bool universal_gravitation_enabled() const;
-		void enable_universal_gravitation();
-		void disable_universal_gravitation();
-	public:
-		struct meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8,{ 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Simple Physics";
-				return sName;
-			}
-		};
-	private:
-		std::unique_ptr<thread> iThread;
-		bool iUniversalGravitationEnabled;
-	};
+    class simple_physics : public system
+    {
+    private:
+        class thread;
+    public:
+        simple_physics(game::i_ecs& aEcs);
+        ~simple_physics();
+    public:
+        const system_id& id() const override;
+        const neolib::i_string& name() const override;
+    public:
+        void apply() override;
+        void terminate() override;
+    public:
+        bool universal_gravitation_enabled() const;
+        void enable_universal_gravitation();
+        void disable_universal_gravitation();
+    public:
+        struct meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8,{ 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Simple Physics";
+                return sName;
+            }
+        };
+    private:
+        std::unique_ptr<thread> iThread;
+        bool iUniversalGravitationEnabled;
+    };
 }

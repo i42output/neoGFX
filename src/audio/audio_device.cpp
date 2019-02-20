@@ -22,29 +22,29 @@
 
 namespace neogfx
 {
-	audio_device::audio_device(const std::string& aName) : 
-		iName{ aName }
-	{
-	}
+    audio_device::audio_device(const std::string& aName) : 
+        iName{ aName }
+    {
+    }
 
-	audio_device::~audio_device()
-	{
-	}
+    audio_device::~audio_device()
+    {
+    }
 
-	const std::string& audio_device::name() const
-	{
-		return iName;
-	}
+    const std::string& audio_device::name() const
+    {
+        return iName;
+    }
 
-	const audio_spec& audio_device::spec() const
-	{
-		if (!is_open())
-			throw not_open();
-		return *iSpec;
-	}
+    const audio_spec& audio_device::spec() const
+    {
+        if (!is_open())
+            throw not_open();
+        return *iSpec;
+    }
 
-	void audio_device::set_spec(const optional_audio_spec& aSpec)
-	{
-		iSpec = aSpec;
-	}
+    void audio_device::set_spec(const optional_audio_spec& aSpec)
+    {
+        iSpec = aSpec;
+    }
 }

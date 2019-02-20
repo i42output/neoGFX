@@ -25,66 +25,66 @@
 
 namespace neogfx
 {
-	class action : public i_action
-	{
-	public:
-		action();
-		action(const std::string& aText);
-		action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
-		action(const std::string& aText, const i_texture& aImage);
-		action(const std::string& aText, const i_image& aImage);
-	public:
-		virtual bool is_enabled() const;
-		virtual bool is_disabled() const;
-		virtual bool is_checkable() const;
-		virtual bool is_checked() const;
-		virtual bool is_unchecked() const;
-		virtual uint32_t group() const;
-		virtual bool is_separator() const;
-		virtual std::string text() const;
-		virtual std::string menu_text() const;
-		virtual std::string button_text() const;
-		virtual std::string tool_tip_text() const;
-		virtual std::string help_text() const;
-		virtual const i_texture& image() const;
-		virtual const i_texture& checked_image() const;
-		virtual const optional_key_sequence& shortcut() const;
-		virtual i_action& enable();
-		virtual i_action& disable();
-		virtual i_action& set_checkable(bool aCheckable);
-		virtual i_action& check();
-		virtual i_action& uncheck();
-		virtual i_action& set_group(uint32_t aGroup);
-		virtual i_action& set_separator(bool aIsSeparator);
-		virtual i_action& set_text(const optional_text& aText = optional_text());
-		virtual i_action& set_menu_text(const optional_text& aMenuText = optional_text());
-		virtual i_action& set_button_text(const optional_text& aButtonText = optional_text());
-		virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text());
-		virtual i_action& set_help_text(const optional_text& aHelpText = optional_text());
-		virtual i_action& set_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
-		virtual i_action& set_image(const i_image& aImage);
-		virtual i_action& set_image(const i_texture& aTexture);
-		virtual i_action& set_checked_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
-		virtual i_action& set_checked_image(const i_image& aImage);
-		virtual i_action& set_checked_image(const i_texture& aTexture);
-		virtual i_action& set_shortcut(const optional_key_sequence& aShortcut);
-		virtual i_action& set_shortcut(const std::string& aShortcut);
-	protected:
-		virtual void set_enabled(bool aEnabled);
-		virtual void set_checked(bool aChecked);
-	private:
-		bool iEnabled;
-		bool iCheckable;
-		bool iChecked;
-		uint32_t iGroup;
-		bool iSeparator;
-		optional_text iText;
-		optional_text iMenuText;
-		optional_text iButtonText;
-		optional_text iToolTipText;
-		optional_text iHelpText;
-		texture iImage;
-		texture iCheckedTexture;
-		optional_key_sequence iShortcut;
-	};
+    class action : public i_action
+    {
+    public:
+        action();
+        action(const std::string& aText);
+        action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
+        action(const std::string& aText, const i_texture& aImage);
+        action(const std::string& aText, const i_image& aImage);
+    public:
+        virtual bool is_enabled() const;
+        virtual bool is_disabled() const;
+        virtual bool is_checkable() const;
+        virtual bool is_checked() const;
+        virtual bool is_unchecked() const;
+        virtual uint32_t group() const;
+        virtual bool is_separator() const;
+        virtual std::string text() const;
+        virtual std::string menu_text() const;
+        virtual std::string button_text() const;
+        virtual std::string tool_tip_text() const;
+        virtual std::string help_text() const;
+        virtual const i_texture& image() const;
+        virtual const i_texture& checked_image() const;
+        virtual const optional_key_sequence& shortcut() const;
+        virtual i_action& enable();
+        virtual i_action& disable();
+        virtual i_action& set_checkable(bool aCheckable);
+        virtual i_action& check();
+        virtual i_action& uncheck();
+        virtual i_action& set_group(uint32_t aGroup);
+        virtual i_action& set_separator(bool aIsSeparator);
+        virtual i_action& set_text(const optional_text& aText = optional_text());
+        virtual i_action& set_menu_text(const optional_text& aMenuText = optional_text());
+        virtual i_action& set_button_text(const optional_text& aButtonText = optional_text());
+        virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text());
+        virtual i_action& set_help_text(const optional_text& aHelpText = optional_text());
+        virtual i_action& set_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
+        virtual i_action& set_image(const i_image& aImage);
+        virtual i_action& set_image(const i_texture& aTexture);
+        virtual i_action& set_checked_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
+        virtual i_action& set_checked_image(const i_image& aImage);
+        virtual i_action& set_checked_image(const i_texture& aTexture);
+        virtual i_action& set_shortcut(const optional_key_sequence& aShortcut);
+        virtual i_action& set_shortcut(const std::string& aShortcut);
+    protected:
+        virtual void set_enabled(bool aEnabled);
+        virtual void set_checked(bool aChecked);
+    private:
+        bool iEnabled;
+        bool iCheckable;
+        bool iChecked;
+        uint32_t iGroup;
+        bool iSeparator;
+        optional_text iText;
+        optional_text iMenuText;
+        optional_text iButtonText;
+        optional_text iToolTipText;
+        optional_text iHelpText;
+        texture iImage;
+        texture iCheckedTexture;
+        optional_key_sequence iShortcut;
+    };
 }

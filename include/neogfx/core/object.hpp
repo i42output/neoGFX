@@ -26,41 +26,41 @@
 
 namespace neogfx
 {
-	template <typename Base>
-	class object : public Base, public i_properties, protected virtual neolib::lifetime
-	{
-		// i_object
-	public:
-		neolib::i_lifetime& as_lifetime() override
-		{
-			return *this;
-		}
-	public:
-		void property_changed(i_property&) override
-		{
-			// default is to do nothing
-		}
-	public:
-		const i_properties& properties() const override
-		{
-			return *this;
-		}
-		i_properties& properties() override
-		{
-			return *this;
-		}
-		// i_properties
-	public:
-		void register_property(i_property& aProperty) override
-		{
-			iProperties.emplace(aProperty.name(), &aProperty);
-		}
-		const property_map& map() const override
-		{
-			return iProperties;
-		}
-		// state
-	private:
-		property_map iProperties;
-	};
+    template <typename Base>
+    class object : public Base, public i_properties, protected virtual neolib::lifetime
+    {
+        // i_object
+    public:
+        neolib::i_lifetime& as_lifetime() override
+        {
+            return *this;
+        }
+    public:
+        void property_changed(i_property&) override
+        {
+            // default is to do nothing
+        }
+    public:
+        const i_properties& properties() const override
+        {
+            return *this;
+        }
+        i_properties& properties() override
+        {
+            return *this;
+        }
+        // i_properties
+    public:
+        void register_property(i_property& aProperty) override
+        {
+            iProperties.emplace(aProperty.name(), &aProperty);
+        }
+        const property_map& map() const override
+        {
+            return iProperties;
+        }
+        // state
+    private:
+        property_map iProperties;
+    };
 }

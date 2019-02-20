@@ -24,9 +24,9 @@
 
 namespace neogfx
 {
-	using neolib::event;
-	using neolib::event_handle;
-	using neolib::sink;
-	using neolib::async_event_queue;
-	using neolib::event_trigger_type;
+    using neolib::event;
+    using neolib::event_handle;
+    using neolib::sink;
+    using neolib::async_event_queue;
+    using neolib::event_trigger_type;
 }

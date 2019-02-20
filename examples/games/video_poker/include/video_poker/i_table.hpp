@@ -23,23 +23,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace video_poker
 {
-	using namespace neogames::card_games;
+    using namespace neogames::card_games;
 
-	enum class table_state
-	{
-		TakeBet,
-		DealtFirst,
-		DealtSecond,
-		GameOver
-	};
+    enum class table_state
+    {
+        TakeBet,
+        DealtFirst,
+        DealtSecond,
+        GameOver
+    };
 
-	class i_table
-	{
-	public:
-		neogfx::event<table_state> state_changed;
-	public:
-		virtual table_state state() const = 0;
-	public:
-		virtual const i_card_textures& textures() const = 0;
-	};
+    class i_table
+    {
+    public:
+        neogfx::event<table_state> state_changed;
+    public:
+        virtual table_state state() const = 0;
+    public:
+        virtual const i_card_textures& textures() const = 0;
+    };
 }

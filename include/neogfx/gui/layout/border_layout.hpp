@@ -30,47 +30,47 @@
 
 namespace neogfx
 {
-	class border_layout : public layout, protected virtual neolib::lifetime
-	{
-	public:
-		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::border_layout::not_implemented") {} };
-	public:
-		border_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-		border_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-		border_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-		~border_layout();
-	public:
-		const i_layout& part(layout_position aPosition) const;
-		i_layout& part(layout_position aPosition);
-		const vertical_layout& top() const;
-		vertical_layout& top();
-		const vertical_layout& left() const;
-		vertical_layout& left();
-		const stack_layout& centre() const;
-		stack_layout& centre();
-		const vertical_layout& right() const;
-		vertical_layout& right();
-		const vertical_layout& bottom() const;
-		vertical_layout& bottom();
-	public:
-		i_spacer& add_spacer() override;
-		i_spacer& add_spacer_at(item_index aPosition) override;
-	public:
-		void invalidate() override;
-	public:
-		void layout_items(const point& aPosition, const size& aSize) override;
-	public:
-		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-	private:
-		void init();
-	private:
-		vertical_layout iRows;
-		vertical_layout iTop;
-		horizontal_layout iMiddle;
-		vertical_layout iLeft;
-		stack_layout iCentre;
-		vertical_layout iRight;
-		vertical_layout iBottom;
-	};
+    class border_layout : public layout, protected virtual neolib::lifetime
+    {
+    public:
+        struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::border_layout::not_implemented") {} };
+    public:
+        border_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        border_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        border_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        ~border_layout();
+    public:
+        const i_layout& part(layout_position aPosition) const;
+        i_layout& part(layout_position aPosition);
+        const vertical_layout& top() const;
+        vertical_layout& top();
+        const vertical_layout& left() const;
+        vertical_layout& left();
+        const stack_layout& centre() const;
+        stack_layout& centre();
+        const vertical_layout& right() const;
+        vertical_layout& right();
+        const vertical_layout& bottom() const;
+        vertical_layout& bottom();
+    public:
+        i_spacer& add_spacer() override;
+        i_spacer& add_spacer_at(item_index aPosition) override;
+    public:
+        void invalidate() override;
+    public:
+        void layout_items(const point& aPosition, const size& aSize) override;
+    public:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+    private:
+        void init();
+    private:
+        vertical_layout iRows;
+        vertical_layout iTop;
+        horizontal_layout iMiddle;
+        vertical_layout iLeft;
+        stack_layout iCentre;
+        vertical_layout iRight;
+        vertical_layout iBottom;
+    };
 }

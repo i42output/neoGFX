@@ -25,46 +25,46 @@
 
 namespace neogfx
 {
-	class i_native_font;
+    class i_native_font;
 
-	class glyph;
-	class i_glyph_texture;
+    class glyph;
+    class i_glyph_texture;
 
-	class i_native_font_face
-	{
-	public:
-		struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::i_native_font_face::no_fallback_font") {} };
-		struct bad_fixed_size_index : std::logic_error { bad_fixed_size_index() : std::logic_error("neogfx::i_native_font_face::bad_fixed_size_index") {} };
-	public:
-		virtual ~i_native_font_face() {}
-	public:
-		virtual font_id id() const = 0;
-		virtual i_native_font& native_font() = 0;
-		virtual const std::string& family_name() const = 0;
-		virtual font_style style() const = 0;
-		virtual const std::string& style_name() const = 0;
-		virtual font::point_size size() const = 0;
-		virtual dimension horizontal_dpi() const = 0;
-		virtual dimension vertical_dpi() const = 0;
-		virtual dimension height() const = 0;
-		virtual dimension descender() const = 0;
-		virtual dimension underline_position() const = 0;
-		virtual dimension underline_thickness() const = 0;
-		virtual dimension line_spacing() const = 0;
-		virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const = 0;
-		virtual bool is_bitmap_font() const = 0;
-		virtual uint32_t num_fixed_sizes() const = 0;
-		virtual font::point_size fixed_size(uint32_t aFixedSizeIndex) const = 0;
-		virtual bool has_fallback() const = 0;
-		virtual bool fallback_cached() const = 0;
-		virtual i_native_font_face& fallback() const = 0;
-		virtual void* handle() const = 0;
-		virtual void update_handle(void* aHandle) = 0;
-		virtual void* aux_handle() const = 0;
-		virtual uint32_t glyph_index(char32_t aCodePoint) const = 0;
-		virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const = 0;
-	public:
-		virtual void add_ref() = 0;
-		virtual void release() = 0;
-	};
+    class i_native_font_face
+    {
+    public:
+        struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::i_native_font_face::no_fallback_font") {} };
+        struct bad_fixed_size_index : std::logic_error { bad_fixed_size_index() : std::logic_error("neogfx::i_native_font_face::bad_fixed_size_index") {} };
+    public:
+        virtual ~i_native_font_face() {}
+    public:
+        virtual font_id id() const = 0;
+        virtual i_native_font& native_font() = 0;
+        virtual const std::string& family_name() const = 0;
+        virtual font_style style() const = 0;
+        virtual const std::string& style_name() const = 0;
+        virtual font::point_size size() const = 0;
+        virtual dimension horizontal_dpi() const = 0;
+        virtual dimension vertical_dpi() const = 0;
+        virtual dimension height() const = 0;
+        virtual dimension descender() const = 0;
+        virtual dimension underline_position() const = 0;
+        virtual dimension underline_thickness() const = 0;
+        virtual dimension line_spacing() const = 0;
+        virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const = 0;
+        virtual bool is_bitmap_font() const = 0;
+        virtual uint32_t num_fixed_sizes() const = 0;
+        virtual font::point_size fixed_size(uint32_t aFixedSizeIndex) const = 0;
+        virtual bool has_fallback() const = 0;
+        virtual bool fallback_cached() const = 0;
+        virtual i_native_font_face& fallback() const = 0;
+        virtual void* handle() const = 0;
+        virtual void update_handle(void* aHandle) = 0;
+        virtual void* aux_handle() const = 0;
+        virtual uint32_t glyph_index(char32_t aCodePoint) const = 0;
+        virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const = 0;
+    public:
+        virtual void add_ref() = 0;
+        virtual void release() = 0;
+    };
 }

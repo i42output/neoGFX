@@ -1,11 +1,11 @@
 <nrc>
-	<resource prefix="test">
-		<file>resources/neoGFX.png</file>
-		<file>resources/channel.png</file>
-		<file>resources/channel_32.png</file>
-		<file>resources/channel_128.png</file>
-		<file>resources/channel_256.png</file>	
-		<file>resources/orca.png</file>
+    <resource prefix="test">
+        <file>resources/neoGFX.png</file>
+        <file>resources/channel.png</file>
+        <file>resources/channel_32.png</file>
+        <file>resources/channel_128.png</file>
+        <file>resources/channel_256.png</file>    
+        <file>resources/orca.png</file>
     <file>resources/explosion.png</file>
     <file>resources/icon.png</file>
   </resource>

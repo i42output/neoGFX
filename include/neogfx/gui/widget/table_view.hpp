@@ -26,32 +26,32 @@
 
 namespace neogfx
 {
-	class table_view : public item_view
-	{
-	public:
-		table_view();
-		table_view(i_widget& aParent);
-		table_view(i_layout& aLayout);
-		~table_view();
-	public:
-		bool can_defer_layout() const;
-		bool is_managing_layout() const;
-	public:
-		const header_view& column_header() const;
-		header_view& column_header();
-	protected:
-		void model_changed() override;
-		void presentation_model_changed() override;
-		void selection_model_changed() override;
-	protected:
-		rect item_display_rect() const override;
-		size total_item_area(const i_units_context& aUnitsContext) const override;
-		dimension column_width(uint32_t aColumn) const override;
-	protected:
-		neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
-	private:
-		vertical_layout iLayout;
-		header_view iColumnHeader;
-		vertical_spacer iSpacer;
-	};
+    class table_view : public item_view
+    {
+    public:
+        table_view();
+        table_view(i_widget& aParent);
+        table_view(i_layout& aLayout);
+        ~table_view();
+    public:
+        bool can_defer_layout() const;
+        bool is_managing_layout() const;
+    public:
+        const header_view& column_header() const;
+        header_view& column_header();
+    protected:
+        void model_changed() override;
+        void presentation_model_changed() override;
+        void selection_model_changed() override;
+    protected:
+        rect item_display_rect() const override;
+        size total_item_area(const i_units_context& aUnitsContext) const override;
+        dimension column_width(uint32_t aColumn) const override;
+    protected:
+        neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
+    private:
+        vertical_layout iLayout;
+        header_view iColumnHeader;
+        vertical_spacer iSpacer;
+    };
 }

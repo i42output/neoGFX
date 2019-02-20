@@ -31,55 +31,55 @@
 
 namespace neogfx
 {
-	class i_native_texture;
+    class i_native_texture;
 
-	class texture_atlas : public i_texture_atlas
-	{
-	private:
-		struct fragments
-		{
-			struct fragment_less_than
-			{
-				bool operator()(const rect& aLhs, const rect& aRhs) const
-				{
-					return std::forward_as_tuple(aLhs.width() * aLhs.height(), aLhs.top_left()) <
-						std::forward_as_tuple(aRhs.width() * aRhs.height(), aRhs.top_left());
-				}
-			};
-			rect_pack pack;
-			std::set<rect, fragment_less_than> used;
-			std::set<rect, fragment_less_than> freed; // todo: use this when bin pack is full
-			bool insert(const size& aSize, rect& aResult)
-			{
-				if (pack.insert(aSize, aResult))
-				{
-					used.insert(aResult);
-					return true;
-				}
-				else
-					return false;
-			}
-		};
-		typedef std::pair<texture, fragments> page;
-		typedef std::list<page> pages;
-		typedef std::pair<pages::iterator, neogfx::sub_texture> entry;
-		typedef std::unordered_map<texture_id, entry> entries;
-	public:
-		texture_atlas(const size& aPageSize);
-	public:
-		virtual const i_sub_texture& sub_texture(texture_id aSubTextureId) const;
-		virtual i_sub_texture& sub_texture(texture_id aSubTextureId);
-		virtual i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat = texture_data_format::RGBA);
-		virtual i_sub_texture& create_sub_texture(const i_image& aImage);
-		virtual void destroy_sub_texture(i_sub_texture& aSubTexture);
-	private:
-		const size& page_size() const;
-		pages::iterator create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
-		std::pair<pages::iterator, rect> allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
-	private:
-		i_texture_manager& iTextureManager;
-		size iPageSize;
-		pages iPages;
-		entries iEntries;
-	};
+    class texture_atlas : public i_texture_atlas
+    {
+    private:
+        struct fragments
+        {
+            struct fragment_less_than
+            {
+                bool operator()(const rect& aLhs, const rect& aRhs) const
+                {
+                    return std::forward_as_tuple(aLhs.width() * aLhs.height(), aLhs.top_left()) <
+                        std::forward_as_tuple(aRhs.width() * aRhs.height(), aRhs.top_left());
+                }
+            };
+            rect_pack pack;
+            std::set<rect, fragment_less_than> used;
+            std::set<rect, fragment_less_than> freed; // todo: use this when bin pack is full
+            bool insert(const size& aSize, rect& aResult)
+            {
+                if (pack.insert(aSize, aResult))
+                {
+                    used.insert(aResult);
+                    return true;
+                }
+                else
+                    return false;
+            }
+        };
+        typedef std::pair<texture, fragments> page;
+        typedef std::list<page> pages;
+        typedef std::pair<pages::iterator, neogfx::sub_texture> entry;
+        typedef std::unordered_map<texture_id, entry> entries;
+    public:
+        texture_atlas(const size& aPageSize);
+    public:
+        virtual const i_sub_texture& sub_texture(texture_id aSubTextureId) const;
+        virtual i_sub_texture& sub_texture(texture_id aSubTextureId);
+        virtual i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat = texture_data_format::RGBA);
+        virtual i_sub_texture& create_sub_texture(const i_image& aImage);
+        virtual void destroy_sub_texture(i_sub_texture& aSubTexture);
+    private:
+        const size& page_size() const;
+        pages::iterator create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
+        std::pair<pages::iterator, rect> allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
+    private:
+        i_texture_manager& iTextureManager;
+        size iPageSize;
+        pages iPages;
+        entries iEntries;
+    };
 }

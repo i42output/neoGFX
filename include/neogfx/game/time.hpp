@@ -24,34 +24,34 @@
 
 namespace neogfx::game
 {
-	class time : public system
-	{
+    class time : public system
+    {
 
-	public:
-		time(game::i_ecs& aEcs);
-	public:
-		const system_id& id() const override;
-		const neolib::i_string& name() const override;
-	public:
-		void apply() override;
-	public:
-		step_time system_time() const;
-		step_time world_time() const;
-	public:
-		struct meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x714a0e4a, 0xd0be, 0x4737, 0xbd25, { 0xe8, 0x3e, 0x2a, 0x5c, 0xd7, 0x65 } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Time";
-				return sName;
-			}
-		};
-	private:
-		mutable optional_step_time iSystemTimeOffset;
-	};
+    public:
+        time(game::i_ecs& aEcs);
+    public:
+        const system_id& id() const override;
+        const neolib::i_string& name() const override;
+    public:
+        void apply() override;
+    public:
+        step_time system_time() const;
+        step_time world_time() const;
+    public:
+        struct meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x714a0e4a, 0xd0be, 0x4737, 0xbd25, { 0xe8, 0x3e, 0x2a, 0x5c, 0xd7, 0x65 } };
+                return sId;
+            }
+            static const neolib::i_string& name()
+            {
+                static const neolib::string sName = "Time";
+                return sName;
+            }
+        };
+    private:
+        mutable optional_step_time iSystemTimeOffset;
+    };
 }

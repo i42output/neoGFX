@@ -26,14 +26,14 @@
 
 namespace neogfx
 {
-	class event_processing_context : public i_event_processing_context
-	{
-	public:
-		event_processing_context(neolib::async_task& aParent, const std::string& aName = std::string{});
-	public:
-		virtual const std::string& name() const;
-	private:
-		neolib::message_queue::scoped_context iContext;
-		std::string iName;
-	};
+    class event_processing_context : public i_event_processing_context
+    {
+    public:
+        event_processing_context(neolib::async_task& aParent, const std::string& aName = std::string{});
+    public:
+        virtual const std::string& name() const;
+    private:
+        neolib::message_queue::scoped_context iContext;
+        std::string iName;
+    };
 }

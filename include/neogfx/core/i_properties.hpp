@@ -24,32 +24,32 @@
 
 namespace neogfx
 {
-	class i_property;
+    class i_property;
 
-	typedef std::map<std::string, i_property*> property_map;
+    typedef std::map<std::string, i_property*> property_map;
 
-	class i_properties
-	{
-	public:
-		virtual void register_property(i_property& aProperty) = 0;
-		virtual const property_map& map() const = 0;
-		// helpers
-	public:
-		uint32_t count() const
-		{
-			return property_map().size();
-		}
-		std::string name(uint32_t aIndex) const
-		{
-			return std::next(property_map().begin(), aIndex)->first;
-		}
-		const i_property& property(uint32_t aIndex) const
-		{
-			return *std::next(property_map().begin(), aIndex)->second;
-		}
-		i_property& property(uint32_t aIndex)
-		{
-			return *std::next(property_map().begin(), aIndex)->second;
-		}
-	};
+    class i_properties
+    {
+    public:
+        virtual void register_property(i_property& aProperty) = 0;
+        virtual const property_map& map() const = 0;
+        // helpers
+    public:
+        uint32_t count() const
+        {
+            return property_map().size();
+        }
+        std::string name(uint32_t aIndex) const
+        {
+            return std::next(property_map().begin(), aIndex)->first;
+        }
+        const i_property& property(uint32_t aIndex) const
+        {
+            return *std::next(property_map().begin(), aIndex)->second;
+        }
+        i_property& property(uint32_t aIndex)
+        {
+            return *std::next(property_map().begin(), aIndex)->second;
+        }
+    };
 }
