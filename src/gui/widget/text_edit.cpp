@@ -1859,7 +1859,7 @@ namespace neogfx
     {
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
-        colour::component alpha = partitioned_ease(easing::InOutQuint, easing::One, easing::InvertedInOutQuint, easing::Zero, (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0)) * 0xFF;
+        colour::component alpha = partitioned_ease(easing::One, easing::InvertedInOutQuint, easing::Zero, easing::InOutQuint, (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0)) * 0xFF;
         auto cursorColour = cursor().colour();
         if (cursorColour == neolib::none && cursor().style() == cursor_style::Standard)
             cursorColour = default_text_colour();
