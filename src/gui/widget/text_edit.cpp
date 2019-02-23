@@ -1859,23 +1859,24 @@ namespace neogfx
     {
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
-        colour::component alpha = partitioned_ease(easing::One, easing::InvertedInOutQuint, easing::Zero, easing::InOutQuint, (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0)) * 0xFF;
+        auto const frameTime_ms = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
+        colour::component cursorAlpha = partitioned_ease(easing::One, easing::InvertedInOutQuint, easing::Zero, easing::InOutQuint, frameTime_ms) * 0xFF;
         auto cursorColour = cursor().colour();
         if (cursorColour == neolib::none && cursor().style() == cursor_style::Standard)
             cursorColour = default_text_colour();
         if (cursorColour == neolib::none)
         {
             aGraphicsContext.push_logical_operation(logical_operation::Xor);
-            aGraphicsContext.fill_rect(cursor_rect(), colour::White * (alpha / 255.0));
+            aGraphicsContext.fill_rect(cursor_rect(), colour::White * (cursorAlpha / 255.0));
             aGraphicsContext.pop_logical_operation();
         }
         else if (std::holds_alternative<colour>(cursorColour))
         {
-            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const colour&>(cursorColour).with_combined_alpha(alpha));
+            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const colour&>(cursorColour).with_combined_alpha(cursorAlpha));
         }
         else if (std::holds_alternative<gradient>(cursorColour))
         {
-            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColour).with_combined_alpha(alpha));
+            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColour).with_combined_alpha(cursorAlpha));
         }
     }
 
