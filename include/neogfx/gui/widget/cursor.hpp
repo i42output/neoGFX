@@ -29,6 +29,12 @@ namespace neogfx
 {
     class i_document;
 
+    enum class cursor_style
+    {
+        Standard,
+        Xor
+    };
+
     class cursor
     {
     public:
@@ -76,6 +82,8 @@ namespace neogfx
         void set_anchor(position_type aAnchor);
         const colour_or_gradient& colour() const;
         void set_colour(const colour_or_gradient& aColour);
+        cursor_style style() const;
+        void set_style(cursor_style aStyle);
         dimension width() const;
         void set_width(dimension aWidth);
         std::chrono::milliseconds flash_interval() const;
@@ -85,6 +93,7 @@ namespace neogfx
         position_type iPosition;
         position_type iAnchor;
         colour_or_gradient iColour;
+        cursor_style iStyle;
         dimension iWidth;
         std::chrono::milliseconds iFlashInterval;
     };

@@ -24,12 +24,12 @@
 namespace neogfx
 {
     cursor::cursor() :
-        iDocument{}, iPosition{}, iAnchor{}, iWidth{1.0}, iFlashInterval{ 1000 }
+        iDocument{}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iWidth{ 1.0 }, iFlashInterval{ 1000 }
     {
     }
 
     cursor::cursor(i_document& aDocument) :
-        iDocument{&aDocument}, iPosition{}, iAnchor{}, iWidth{1.0}, iFlashInterval{ 1000 }
+        iDocument{&aDocument}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iWidth{1.0}, iFlashInterval{ 1000 }
     {
     }
 
@@ -94,6 +94,16 @@ namespace neogfx
             iColour = aColour;
             appearance_changed.trigger();
         }
+    }
+
+    cursor_style cursor::style() const
+    {
+        return iStyle;
+    }
+
+    void cursor::set_style(cursor_style aStyle)
+    {
+        iStyle = aStyle;
     }
 
     dimension cursor::width() const
