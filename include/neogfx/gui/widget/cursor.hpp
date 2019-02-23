@@ -78,11 +78,14 @@ namespace neogfx
         void set_colour(const colour_or_gradient& aColour);
         dimension width() const;
         void set_width(dimension aWidth);
+        std::chrono::milliseconds flash_interval() const;
+        void set_flash_interval(std::chrono::milliseconds aInterval);
     private:
         i_document* iDocument;
         position_type iPosition;
         position_type iAnchor;
         colour_or_gradient iColour;
         dimension iWidth;
+        std::chrono::milliseconds iFlashInterval;
     };
 }

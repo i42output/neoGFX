@@ -24,12 +24,12 @@
 namespace neogfx
 {
     cursor::cursor() :
-        iDocument{}, iPosition{}, iAnchor{}, iWidth{1.0}
+        iDocument{}, iPosition{}, iAnchor{}, iWidth{1.0}, iFlashInterval{ 1000 }
     {
     }
 
     cursor::cursor(i_document& aDocument) :
-        iDocument{&aDocument}, iPosition{}, iAnchor{}, iWidth{1.0}
+        iDocument{&aDocument}, iPosition{}, iAnchor{}, iWidth{1.0}, iFlashInterval{ 1000 }
     {
     }
 
@@ -108,5 +108,15 @@ namespace neogfx
             iWidth = aWidth;
             appearance_changed.trigger();
         }
+    }
+
+    std::chrono::milliseconds cursor::flash_interval() const
+    {
+        return iFlashInterval;
+    }
+
+    void cursor::set_flash_interval(std::chrono::milliseconds aInterval)
+    {
+        iFlashInterval = aInterval;
     }
 }

@@ -25,6 +25,7 @@
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
+#include <neogfx/core/easing.hpp>
 
 namespace neogfx
 {
@@ -1856,29 +1857,23 @@ namespace neogfx
 
     void text_edit::draw_cursor(const graphics_context& aGraphicsContext) const
     {
-        if (((neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
+        auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
+        auto const flashInterval_ms = cursor().flash_interval().count();
+        colour::component alpha = partitioned_ease(easing::InOutQuint, easing::One, easing::InvertedInOutQuint, easing::Zero, (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0)) * 0xFF;
+        auto const& cursorColour = colour_or_gradient{ colour::White };
+        if (cursorColour == neolib::none)
         {
-            auto elapsed = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime) % 1000;
-            colour::component alpha = 
-                elapsed < 500 ? 
-                    255 : 
-                    elapsed < 750 ? 
-                        static_cast<colour::component>((249 - (elapsed - 500) % 250) * 255 / 249) : 
-                        0;
-            if (cursor().colour() == neolib::none)
-            {
-                aGraphicsContext.push_logical_operation(logical_operation::Xor);
-                aGraphicsContext.fill_rect(cursor_rect(), colour::White.with_alpha(alpha));
-                aGraphicsContext.pop_logical_operation();
-            }
-            else if (std::holds_alternative<colour>(cursor().colour()))
-            {
-                aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha));
-            }
-            else if (std::holds_alternative<gradient>(cursor().colour()))
-            {
-                aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursor().colour()).with_combined_alpha(alpha));
-            }
+            aGraphicsContext.push_logical_operation(logical_operation::Xor);
+            aGraphicsContext.fill_rect(cursor_rect(), colour::White * (alpha / 255.0));
+            aGraphicsContext.pop_logical_operation();
+        }
+        else if (std::holds_alternative<colour>(cursorColour))
+        {
+            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const colour&>(cursorColour).with_combined_alpha(alpha));
+        }
+        else if (std::holds_alternative<gradient>(cursorColour))
+        {
+            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColour).with_combined_alpha(alpha));
         }
     }
 

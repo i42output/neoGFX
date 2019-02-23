@@ -794,6 +794,11 @@ namespace neogfx
         return ret;
     }
 
+    inline colour operator*(const colour& aLeft, double aCoefficient)
+    {
+        return aLeft.to_vec4() * vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 };
+    }
+
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const colour& aColour)
     {
