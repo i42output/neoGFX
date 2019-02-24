@@ -659,15 +659,23 @@ namespace neogfx
     }
         
     template <typename T>
-    inline T partitioned_ease(easing e1, easing e2, T t)
+    inline T partitioned_ease(easing e1, easing e2, T t, double w1 = 1.0, double w2 = 1.0)
     {
-        return t < 0.5 ? ease(e1, t / 0.5) : ease(e2, (t - 0.5) / 0.5);
+        auto const wTotal = w1 + w2;
+        return t < w1 / wTotal ? ease(e1, t / (w1 / wTotal)) : ease(e2, (t - (w1 / wTotal)) / (w2 / wTotal));
     }
 
     template <typename T>
-    inline T partitioned_ease(easing e1, easing e2, easing e3, easing e4, T t)
+    inline T partitioned_ease(easing e1, easing e2, easing e3, easing e4, T t, double w1 = 1.0, double w2 = 1.0, double w3 = 1.0, double w4 = 1.0)
     {
-        return t < 0.25 ? ease(e1, t / 0.25) : t < 0.5 ? ease(e2, (t - 0.25) / 0.25) : t < 0.75 ? ease(e3, (t - 0.5) / 0.25) : ease(e4, (t - 0.75) / 0.25);
+        auto const wTotal = w1 + w2 + w3 + w4;
+        return t < w1 / wTotal ? 
+            ease(e1, t / (w1 / wTotal)) : 
+            t < (w1 + w2) / wTotal ? 
+                ease(e2, (t - w1 / wTotal) / (w2 / wTotal)) : 
+                t < (w1 + w2 + w3) / wTotal ? 
+                    ease(e3, (t - (w1 + w2) / wTotal) / (w3 / wTotal)) : 
+                    ease(e4, (t - (w1 + w2 + w3) / wTotal) / (w4 / wTotal));
     }
 
     inline const std::string& to_string(easing e)
