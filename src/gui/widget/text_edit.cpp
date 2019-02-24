@@ -1863,7 +1863,7 @@ namespace neogfx
         colour::component cursorAlpha = partitioned_ease(easing::One, easing::InvertedInOutQuint, easing::Zero, easing::InOutQuint, normalizedFrameTime) * 0xFF;
         auto cursorColour = cursor().colour();
         if (cursorColour == neolib::none && cursor().style() == cursor_style::Standard)
-            cursorColour = default_text_colour();
+            cursorColour = service<i_app>().current_style().palette().text_colour_for_widget(*this);
         if (cursorColour == neolib::none)
         {
             aGraphicsContext.push_logical_operation(logical_operation::Xor);
