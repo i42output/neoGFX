@@ -173,7 +173,7 @@ namespace neogfx
         {
             iAnimator.again();
             animate();
-        }, 40 },
+        }, 16 },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotfiyTextChanged{ 0u },
         iOutOfMemory{ false }
@@ -192,7 +192,7 @@ namespace neogfx
         {
             iAnimator.again();
             animate();
-        }, 40 },
+        }, 16 },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotfiyTextChanged{ 0u },
         iOutOfMemory{ false }
@@ -211,7 +211,7 @@ namespace neogfx
         {
             iAnimator.again();
             animate();
-        }, 40 },
+        }, 16 },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotfiyTextChanged{ 0u },
         iOutOfMemory{ false }
