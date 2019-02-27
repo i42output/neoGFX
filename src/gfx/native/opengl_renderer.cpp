@@ -291,8 +291,10 @@ namespace neogfx
 
     opengl_renderer::~opengl_renderer()
     {
+        // We explictly destroy these OpenGL objects here when context should still exist
         iVertexArrays.reset();
         iGradientDataCacheQueue.clear();
+        iGradientDataCacheMap.clear();
         iGradientDataCache.clear();
         iUncachedGradient.reset();
     }
