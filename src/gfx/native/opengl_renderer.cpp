@@ -913,30 +913,37 @@ namespace neogfx
         };
         if (aGradient.use_cache())
         {
-            auto result = iGradientDataCache.try_emplace(aGradient);
-            auto data = result.first;
-            bool newGradient = result.second;
+            auto mapResult = iGradientDataCacheMap.try_emplace(aGradient, iGradientDataCache.end());
+            auto mapEntry = mapResult.first;
+            bool newGradient = mapResult.second;
             if (!newGradient)
             {
-                auto queueEntry = std::find(iGradientDataCacheQueue.begin(), iGradientDataCacheQueue.end(), data);
+                auto queueEntry = std::find(iGradientDataCacheQueue.begin(), iGradientDataCacheQueue.end(), mapEntry);
                 if (queueEntry != std::prev(iGradientDataCacheQueue.end()))
                 {
                     iGradientDataCacheQueue.erase(queueEntry);
-                    iGradientDataCacheQueue.push_back(data);
+                    iGradientDataCacheQueue.push_back(mapEntry);
                 }
             }
             else
             {
-                iGradientDataCacheQueue.push_back(data);
-                if (iGradientDataCacheQueue.size() > GRADIENT_DATA_CACHE_QUEUE_SIZE)
+                if (iGradientDataCache.size() < GRADIENT_DATA_CACHE_QUEUE_SIZE)
                 {
-                    iGradientDataCache.erase(iGradientDataCacheQueue.front());
-                    iGradientDataCacheQueue.pop_front();
+                    iGradientDataCache.emplace_back();
+                    mapEntry->second = std::prev(iGradientDataCache.end());
                 }
+                else
+                {
+                    auto data = iGradientDataCacheQueue.front()->second;
+                    iGradientDataCacheMap.erase(iGradientDataCacheQueue.front());
+                    iGradientDataCacheQueue.pop_front();
+                    mapEntry->second = data;
+                }
+                iGradientDataCacheQueue.push_back(mapEntry);
             }
             if (newGradient)
-                instantiate_gradient(data->second);
-            return data->second;
+                instantiate_gradient(*mapEntry->second);
+            return *mapEntry->second;
         }
         else
         {

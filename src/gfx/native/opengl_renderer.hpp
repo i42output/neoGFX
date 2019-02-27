@@ -104,8 +104,9 @@ namespace neogfx
     private:
         typedef std::vector<std::pair<std::string, GLenum>> shaders;
         typedef std::list<shader_program> shader_programs;
-        typedef std::map<gradient, neogfx::gradient_shader_data> gradient_data_cache_t;
-        typedef std::deque<gradient_data_cache_t::const_iterator> gradient_data_cache_queue_t;
+        typedef std::list<neogfx::gradient_shader_data> gradient_data_cache_t;
+        typedef std::map<gradient, gradient_data_cache_t::iterator> gradient_data_cache_map_t;
+        typedef std::deque<gradient_data_cache_map_t::iterator> gradient_data_cache_queue_t;
         typedef std::map<std::pair<texture_sampling, size>, texture> ping_pong_buffers_t;
     private:
         static constexpr std::size_t GRADIENT_DATA_CACHE_QUEUE_SIZE = 64;
@@ -178,6 +179,7 @@ namespace neogfx
         std::vector<float> iGradientStopPositions;
         std::vector<std::array<float, 4>> iGradientStopColours;
         gradient_data_cache_t iGradientDataCache;
+        gradient_data_cache_map_t iGradientDataCacheMap;
         gradient_data_cache_queue_t iGradientDataCacheQueue;
         std::optional<neogfx::gradient_shader_data> iUncachedGradient;
         mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
