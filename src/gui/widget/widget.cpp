@@ -119,7 +119,12 @@ namespace neogfx
 
     bool widget::device_metrics_available() const
     {
-        return has_surface();
+        if (iDeviceMetricsAvailable == std::nullopt && has_surface())
+            iDeviceMetricsAvailable = true;
+        if (iDeviceMetricsAvailable != std::nullopt)
+            return *iDeviceMetricsAvailable;
+        else
+            return false;
     }
 
     const i_device_metrics& widget::device_metrics() const
@@ -163,8 +168,6 @@ namespace neogfx
 
     bool widget::has_root() const
     {
-        if (is_root())
-            return true;
         if (iRoot == std::nullopt)
         {
             const i_widget* w = this;
@@ -173,7 +176,7 @@ namespace neogfx
             if (w->is_root())
                 iRoot = &w->root();
         }
-        return *iRoot != nullptr;
+        return iRoot != std::nullopt;
     }
 
     const i_window& widget::root() const
@@ -213,6 +216,7 @@ namespace neogfx
             iParent = &aParent;
         else
             aParent.add(*this);
+        iDeviceMetricsAvailable = std::nullopt;
     }
 
     void widget::parent_changed()

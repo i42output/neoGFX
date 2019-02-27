@@ -859,6 +859,8 @@ namespace neogfx
         gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection = Vertical);
         // operations
     public:
+        bool use_cache() const;
+        void set_cache_usage(bool aUseCache);
         colour_stop_list::const_iterator colour_begin() const;
         colour_stop_list::const_iterator colour_end() const;
         alpha_stop_list::const_iterator alpha_begin() const;
@@ -923,6 +925,7 @@ namespace neogfx
         void fix();
         // attributes
     private:
+        bool iUseCache;
         colour_stop_list iColourStops;
         alpha_stop_list iAlphaStops;
         direction_e iDirection;

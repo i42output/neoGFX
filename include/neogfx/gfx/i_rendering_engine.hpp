@@ -49,8 +49,10 @@ namespace neogfx
     };
 
     static const uint32_t GRADIENT_FILTER_SIZE = 15;
-    struct gradient_arrays
+    struct gradient_shader_data
     {
+        //todo: use a mini atlas for the this
+        uint32_t stopCount;
         shader_array<float> stops = { size_u32{gradient::MaxStops, 1} };
         shader_array<std::array<float, 4>> stopColours = { size_u32{gradient::MaxStops, 1} };
         shader_array<float> filter = { size_u32{GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE} };
@@ -143,7 +145,7 @@ namespace neogfx
         virtual void subpixel_rendering_on() = 0;
         virtual void subpixel_rendering_off() = 0;
     public:
-        virtual neogfx::gradient_arrays& gradient_arrays() = 0;
+        virtual neogfx::gradient_shader_data& gradient_shader_data(const gradient& aGradient) = 0;
     public:
         virtual void render_now() = 0;
         virtual bool frame_rate_limited() const = 0;

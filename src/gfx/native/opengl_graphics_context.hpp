@@ -144,8 +144,6 @@ namespace neogfx
         mutable optional_rect iScissorRect;
         GLint iPreviousTexture;
         bool iLineStippleActive;
-        std::vector<float> iGradientStopPositions;
-        std::vector<std::array<float, 4>> iGradientStopColours;
         font iLastDrawGlyphFallbackFont;
         std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
         vertices_2d_t iTempTextureCoords;

@@ -104,7 +104,11 @@ namespace neogfx
     private:
         typedef std::vector<std::pair<std::string, GLenum>> shaders;
         typedef std::list<shader_program> shader_programs;
+        typedef std::map<gradient, neogfx::gradient_shader_data> gradient_data_cache_t;
+        typedef std::deque<gradient_data_cache_t::const_iterator> gradient_data_cache_queue_t;
         typedef std::map<std::pair<texture_sampling, size>, texture> ping_pong_buffers_t;
+    private:
+        static constexpr std::size_t GRADIENT_DATA_CACHE_QUEUE_SIZE = 64;
     public:
         opengl_renderer(neogfx::renderer aRenderer);
         ~opengl_renderer();
@@ -144,7 +148,7 @@ namespace neogfx
         uint32_t frame_rate_limit() const override;
         void set_frame_rate_limit(uint32_t aFps) override;
     public:
-        neogfx::gradient_arrays& gradient_arrays() override;
+        neogfx::gradient_shader_data& gradient_shader_data(const gradient& aGradient) override;
     public:
         bool process_events() override;
     public:
@@ -171,7 +175,11 @@ namespace neogfx
         bool iLimitFrameRate;
         uint32_t iFrameRateLimit;
         bool iSubpixelRendering;
-        mutable std::optional<neogfx::gradient_arrays> iGradientArrays;
+        std::vector<float> iGradientStopPositions;
+        std::vector<std::array<float, 4>> iGradientStopColours;
+        gradient_data_cache_t iGradientDataCache;
+        gradient_data_cache_queue_t iGradientDataCacheQueue;
+        std::optional<neogfx::gradient_shader_data> iUncachedGradient;
         mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
         uint64_t iLastGameRenderTime;
         std::map<uint32_t, neogfx::frame_counter> iFrameCounters;

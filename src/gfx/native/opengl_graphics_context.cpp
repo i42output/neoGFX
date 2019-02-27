@@ -739,23 +739,9 @@ namespace neogfx
         rendering_engine().gradient_shader_program().set_uniform_variable("exponents", gradientExponents.x, gradientExponents.y);
         basic_point<float> gradientCentre = (aGradient.centre() != std::nullopt ? *aGradient.centre() : point{});
         rendering_engine().gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
-        auto combinedStops = aGradient.combined_stops();
-        iGradientStopPositions.reserve(combinedStops.size());
-        iGradientStopColours.reserve(combinedStops.size());
-        iGradientStopPositions.clear();
-        iGradientStopColours.clear();
-        for (const auto& stop : combinedStops)
-        {
-            iGradientStopPositions.push_back(static_cast<float>(stop.first));
-            iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
-        }
-        rendering_engine().gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(iGradientStopPositions.size()));
         rendering_engine().gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(GRADIENT_FILTER_SIZE));
-        auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
-        auto& gradientArrays = iRenderingEngine.gradient_arrays(); 
-        gradientArrays.stops.data().set_pixels(rect{ point{}, size_u32{ iGradientStopPositions.size(), 1 } }, &iGradientStopPositions[0]);
-        gradientArrays.stopColours.data().set_pixels(rect{ point{}, size_u32{ iGradientStopColours.size(), 1 } }, &iGradientStopColours[0]);
-        gradientArrays.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filter[0][0]);
+        auto& gradientArrays = iRenderingEngine.gradient_shader_data(aGradient); 
+        rendering_engine().gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(gradientArrays.stopCount));
         gradientArrays.stops.data().bind(2);
         gradientArrays.stopColours.data().bind(3);
         gradientArrays.filter.data().bind(4);

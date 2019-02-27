@@ -292,7 +292,9 @@ namespace neogfx
     opengl_renderer::~opengl_renderer()
     {
         iVertexArrays.reset();
-        iGradientArrays.reset();
+        iGradientDataCacheQueue.clear();
+        iGradientDataCache.clear();
+        iUncachedGradient.reset();
     }
 
     const i_device_metrics& opengl_renderer::default_screen_metrics() const
@@ -889,11 +891,60 @@ namespace neogfx
         iFrameRateLimit = aFps;
     }
 
-    neogfx::gradient_arrays& opengl_renderer::gradient_arrays()
+    gradient_shader_data& opengl_renderer::gradient_shader_data(const gradient& aGradient)
     {
-        if (iGradientArrays == std::nullopt)
-            iGradientArrays.emplace();
-        return *iGradientArrays;
+        auto instantiate_gradient = [this, &aGradient](neogfx::gradient_shader_data& aData)
+        {
+            auto combinedStops = aGradient.combined_stops();
+            iGradientStopPositions.reserve(combinedStops.size());
+            iGradientStopColours.reserve(combinedStops.size());
+            iGradientStopPositions.clear();
+            iGradientStopColours.clear();
+            for (const auto& stop : combinedStops)
+            {
+                iGradientStopPositions.push_back(static_cast<float>(stop.first));
+                iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
+            }
+            aData.stopCount = combinedStops.size();
+            aData.stops.data().set_pixels(rect{ point{}, size_u32{ iGradientStopPositions.size(), 1 } }, &iGradientStopPositions[0]);
+            aData.stopColours.data().set_pixels(rect{ point{}, size_u32{ iGradientStopColours.size(), 1 } }, &iGradientStopColours[0]);
+            auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
+            aData.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filter[0][0]);
+        };
+        if (aGradient.use_cache())
+        {
+            auto result = iGradientDataCache.try_emplace(aGradient);
+            auto data = result.first;
+            bool newGradient = result.second;
+            if (!newGradient)
+            {
+                auto queueEntry = std::find(iGradientDataCacheQueue.begin(), iGradientDataCacheQueue.end(), data);
+                if (queueEntry != std::prev(iGradientDataCacheQueue.end()))
+                {
+                    iGradientDataCacheQueue.erase(queueEntry);
+                    iGradientDataCacheQueue.push_back(data);
+                }
+            }
+            else
+            {
+                iGradientDataCacheQueue.push_back(data);
+                if (iGradientDataCacheQueue.size() > GRADIENT_DATA_CACHE_QUEUE_SIZE)
+                {
+                    iGradientDataCache.erase(iGradientDataCacheQueue.front());
+                    iGradientDataCacheQueue.pop_front();
+                }
+            }
+            if (newGradient)
+                instantiate_gradient(data->second);
+            return data->second;
+        }
+        else
+        {
+            if (iUncachedGradient == std::nullopt)
+                iUncachedGradient.emplace();
+            instantiate_gradient(*iUncachedGradient);
+            return *iUncachedGradient;
+        }
     }
 
     bool opengl_renderer::process_events()

@@ -531,7 +531,7 @@ int main(int argc, char* argv[])
         doubleSpinBox.set_step(0.5);
         ng::horizontal_layout layout2(layoutButtons);
         ng::label label1(layout2, "Label 1:");
-        bool colourCycle = true;
+        bool colourCycle = false;
         ng::push_button button6(layout2, "RGB <-> HSV\ncolour space\nconversion test");
         button6.clicked([&colourCycle]() { colourCycle = !colourCycle; });
         layout2.add_spacer().set_weight(ng::size(2.0f));
