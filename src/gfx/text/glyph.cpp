@@ -37,7 +37,7 @@ namespace neogfx
         if (cache().find(aFontId) == cache().end())
         {
             auto& fontService = service<i_font_manager>();
-            cache().emplace(aFontId, cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFontId }, fontService.font_from_id(aFontId) });
+            cache().emplace(aFontId, cache_entry{ neolib::small_cookie_ref_ptr{ fontService, aFontId }, fontService.font_from_id(aFontId) });
         }
     }
 
@@ -46,7 +46,7 @@ namespace neogfx
         if (cache().find(aFont.id()) == cache().end())
         {
             auto& fontService = service<i_font_manager>();
-            cache().emplace(aFont.id(), cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFont.id() }, aFont });
+            cache().emplace(aFont.id(), cache_entry{ neolib::small_cookie_ref_ptr{ fontService, aFont.id() }, aFont });
         }
     }
 

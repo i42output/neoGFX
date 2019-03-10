@@ -127,7 +127,7 @@ namespace neogfx
     {
         return game::texture
         {
-            neolib::cookie_auto_ref{ service<i_texture_manager>(), aTexture.id() },
+            neolib::cookie_ref_ptr{ service<i_texture_manager>(), aTexture.id() },
             aTexture.type(),
             aTexture.sampling(),
             aTexture.dpi_scale_factor(),
@@ -140,7 +140,7 @@ namespace neogfx
     {
         return game::texture
         {
-            neolib::cookie_auto_ref{ service<i_texture_manager>(), aTexture.id() },
+            neolib::cookie_ref_ptr{ service<i_texture_manager>(), aTexture.id() },
             aTexture.type(),
             aTexture.sampling(),
             aTexture.dpi_scale_factor(),
@@ -154,7 +154,7 @@ namespace neogfx
         texture newTexture{ aImage };
         return game::texture
         {
-            neolib::cookie_auto_ref{ service<i_texture_manager>(), newTexture.id() },
+            neolib::cookie_ref_ptr{ service<i_texture_manager>(), newTexture.id() },
             newTexture.type(),
             newTexture.sampling(),
             newTexture.dpi_scale_factor(),
@@ -168,7 +168,7 @@ namespace neogfx
         texture newTexture{ aImage };
         return game::texture
         {
-            neolib::cookie_auto_ref{ service<i_texture_manager>(), newTexture.id() },
+            neolib::cookie_ref_ptr{ service<i_texture_manager>(), newTexture.id() },
             newTexture.type(),
             newTexture.sampling(),
             newTexture.dpi_scale_factor(),

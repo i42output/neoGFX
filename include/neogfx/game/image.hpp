@@ -31,7 +31,7 @@ namespace neogfx::game
 {
     struct image
     {
-        neolib::cookie_auto_ref id;
+        neolib::cookie_ref_ptr id;
         std::string uri;
         scalar dpiScaleFactor;
         texture_sampling textureSampling;

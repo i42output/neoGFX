@@ -365,7 +365,7 @@ namespace neogfx
     class glyph_font_cache : public i_glyph_font_cache
     {
     private:
-        typedef std::pair<neolib::small_cookie_auto_ref, font> cache_entry;
+        typedef std::pair<neolib::small_cookie_ref_ptr, font> cache_entry;
         typedef std::unordered_map<font_id, cache_entry, std::hash<font_id>, std::equal_to<font_id>, neolib::fast_pool_allocator<std::pair<const font_id, cache_entry>>> font_cache;
     public:
         struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_font_cache::cached_font_not_found") {} };
