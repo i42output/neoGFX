@@ -65,7 +65,7 @@ namespace neogfx
 
     uint32_t sdl_audio::audio_playback_device_count() const
     {
-        return iAudioPlaybackDevices.size();
+        return static_cast<uint32_t>(iAudioPlaybackDevices.size());
     }
 
     i_audio_playback_device& sdl_audio::audio_playback_device(uint32_t aDeviceIndex)

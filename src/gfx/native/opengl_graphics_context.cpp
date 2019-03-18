@@ -45,7 +45,7 @@ namespace neogfx
             typedef T value_type;
         public:
             skip_iterator(const value_type* aBegin, const value_type* aEnd, std::size_t aSkipAmount = 2u, std::size_t aPasses = 1) :
-                iBegin{ aBegin }, iEnd{ aEnd }, iSkipAmount{ std::max(1u, std::min<std::size_t>(aEnd - aBegin, aSkipAmount)) }, iPasses{ aPasses }, iNext{ aBegin }, iSkipPass{ 1u }, iPass{ 1u }
+                iBegin{ aBegin }, iEnd{ aEnd }, iSkipAmount{ std::max<std::size_t>(1u, std::min<std::size_t>(aEnd - aBegin, aSkipAmount)) }, iPasses{ aPasses }, iNext{ aBegin }, iSkipPass{ 1u }, iPass{ 1u }
             {
             }
             skip_iterator() :
@@ -1078,7 +1078,7 @@ namespace neogfx
             gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
         {
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 2u * 3u * (aFillRectOps.second - aFillRectOps.first)};
+            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
 
             for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
             {
@@ -1375,12 +1375,12 @@ namespace neogfx
                     auto const need = (pass == 3 ? 6u * glyphCount : 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * glyphCount);
 
                     bool const useTextureBarrier = firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
-                    use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, useTextureBarrier };
+                    use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, static_cast<std::size_t>(need), useTextureBarrier };
 
                     auto const scanlineOffsets = (pass == 2 ? static_cast<uint32_t>(firstOp.appearance.effect().width()) * 2u + 1u : 1u);
                     auto const offsets = scanlineOffsets * scanlineOffsets;
                     point const offsetOrigin{ pass == 2 ? -firstOp.appearance.effect().width() : 0.0, pass == 2 ? -firstOp.appearance.effect().width() : 0.0 };
-                    for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, glyphCount / 2u, offsets }; op != aDrawGlyphOps.second; ++op)
+                    for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, static_cast<std::size_t>(glyphCount / 2u), static_cast<std::size_t>(offsets) }; op != aDrawGlyphOps.second; ++op)
                     {
                         auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
@@ -1446,7 +1446,7 @@ namespace neogfx
                         glCheck(glActiveTexture(GL_TEXTURE2));
                         glCheck(glBindTexture(
                             render_target().target_texture().sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE,
-                            reinterpret_cast<GLuint>(render_target().target_texture().native_texture()->handle())));
+                            static_cast<GLuint>(reinterpret_cast<std::intptr_t>(render_target().target_texture().native_texture()->handle()))));
                         glCheck(glActiveTexture(GL_TEXTURE1));
                     }
 
@@ -1461,7 +1461,7 @@ namespace neogfx
                                     vertexArrays.instance()[2].xyz[0],
                                     vertexArrays.instance()[2].xyz[1]} });
 
-                    glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
+                    glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(firstGlyphTexture.texture().native_texture()->handle()))));
 
                     disable_anti_alias daa{ *this };
 
@@ -1542,7 +1542,7 @@ namespace neogfx
                 glCheck(glActiveTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
 
                 glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
-                glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(texture.native_texture()->handle())));
+                glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(texture.native_texture()->handle()))));
                 if (texture.sampling() != texture_sampling::Multisample)
                 {
                     glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.sampling() != texture_sampling::Nearest && texture.sampling() != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));

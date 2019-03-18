@@ -102,10 +102,10 @@ namespace neogfx::game
         return bounding_rect(aMesh.vertices);
     }
 
-    inline faces_t default_faces(const vertices_t& aVertices, std::size_t aOffset = 0)
+    inline faces_t default_faces(const vertices_t& aVertices, uint32_t aOffset = 0u)
     {
         faces_t faces;
-        for (std::size_t i = aOffset; i < aVertices.size() + aOffset; i += 3)
+        for (uint32_t i = aOffset; i < static_cast<uint32_t>(aVertices.size()) + aOffset; i += 3u)
             faces.push_back(face{ i, i + 1u, i + 2u });
         return faces;
     }

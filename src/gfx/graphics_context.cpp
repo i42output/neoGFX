@@ -1177,7 +1177,7 @@ namespace neogfx
                             reversed.push_back(*(ch - 1));
                         }
                     }
-                    hb_buffer_add_utf32(iBuf, &*reversed.begin(), reversed.size(), 0, reversed.size());
+                    hb_buffer_add_utf32(iBuf, &*reversed.begin(), static_cast<int>(reversed.size()), 0u, static_cast<int>(reversed.size()));
                 }
                 hb_shape(iFont, iBuf, NULL, 0);
                 unsigned int glyphCount = 0;
@@ -1299,7 +1299,7 @@ namespace neogfx
     public:
         uint32_t glyph_count() const
         {
-            return iResults.size();
+            return static_cast<uint32_t>(iResults.size());
         }
         const hb_glyph_info_t& glyph_info(uint32_t aIndex) const
         {
@@ -1556,7 +1556,7 @@ namespace neogfx
 
         for (std::size_t i = 1; i < runs.size(); ++i)
         {
-            int j = i - 1;
+            std::size_t j = i - 1;
             auto startDirection = std::get<2>(runs[j]);
             do
             {
@@ -1618,7 +1618,7 @@ namespace neogfx
                     size{ font.height(), 0.0 };
                 result.emplace_back(textDirections[startCluster],
                     shapes.glyph_info(j).codepoint,
-                    glyph::source_type(startCluster, endCluster), 
+                    glyph::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
                     result,
                     font,
                     advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0));
@@ -1694,7 +1694,7 @@ namespace neogfx
                     {
                         auto g = *i;
                         g.set_value(service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
-                        g.set_source(glyph::source_type{ g.source().first, g.source().first + sequence.size() });
+                        g.set_source(glyph::source_type{ g.source().first, g.source().first + static_cast<uint32_t>(sequence.size()) });
                         emojiResult.push_back(g);
                         i = j - 1;
                     }
@@ -1702,7 +1702,7 @@ namespace neogfx
                         emojiResult.push_back(*i);
                     if (absorbNext)
                     {
-                        emojiResult.back().set_source(glyph::source_type{ emojiResult.back().source().first, emojiResult.back().source().first + sequence.size() + 1 });
+                        emojiResult.back().set_source(glyph::source_type{ emojiResult.back().source().first, emojiResult.back().source().first + static_cast<uint32_t>(sequence.size()) + 1u });
                         ++i;
                     }
                 }

@@ -59,7 +59,7 @@ namespace neogfx
 
     audio_track::item_index audio_track::item_count() const
     {
-        return iItems.size();
+        return static_cast<item_index>(iItems.size());
     }
 
     const audio_track::value_type& audio_track::item(item_index aItemIndex) const

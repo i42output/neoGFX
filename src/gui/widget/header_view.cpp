@@ -280,7 +280,7 @@ namespace neogfx
 
     uint32_t header_view::section_count() const
     {
-        return iSectionWidths.size();
+        return static_cast<uint32_t>(iSectionWidths.size());
     }
 
     dimension header_view::section_width(uint32_t aSectionIndex, bool aForHeaderButton) const
@@ -376,10 +376,10 @@ namespace neogfx
             layout().add(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
         if (iButtonSinks.size() < layout().count())
             iButtonSinks.resize(layout().count());
-        for (std::size_t i = 0; i < layout().count(); ++i)
+        for (uint32_t i = 0u; i < layout().count(); ++i)
         {
             push_button& button = layout().get_widget_at<push_button>(i);
-            if (i == 0)
+            if (i == 0u)
             {
                 auto m = button.margins();
                 m.left = separator_width() / 2.0 + 1.0;

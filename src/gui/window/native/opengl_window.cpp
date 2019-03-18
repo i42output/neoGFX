@@ -62,7 +62,7 @@ namespace neogfx
         {
             iFrameBufferTexture = std::nullopt;
             iFrameBufferTexture.emplace(iFrameBufferExtents, 1.0, texture_sampling::Multisample);
-            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iFrameBufferTexture->native_texture()->handle()), 0));
+            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(iFrameBufferTexture->native_texture()->handle())), 0));
         }
         return *iFrameBufferTexture;
     }
@@ -98,11 +98,11 @@ namespace neogfx
             }
             else
                 queryResult = 0;
-            if (queryResult != reinterpret_cast<GLint>(iFrameBufferTexture->native_texture()->handle()))
+            if (queryResult != static_cast<GLint>(reinterpret_cast<std::intptr_t>(iFrameBufferTexture->native_texture()->handle())))
             {
-                glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iFrameBufferTexture->native_texture()->handle()), 0));
+                glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(iFrameBufferTexture->native_texture()->handle())), 0));
             }
-            glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(target_texture().native_texture()->handle())));
+            glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(target_texture().native_texture()->handle()))));
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
             glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
@@ -295,7 +295,7 @@ namespace neogfx
         else
         {
             glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
-            glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(target_texture().native_texture()->handle())));
+            glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(target_texture().native_texture()->handle()))));
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
         }
         glCheck(glClear(GL_DEPTH_BUFFER_BIT));

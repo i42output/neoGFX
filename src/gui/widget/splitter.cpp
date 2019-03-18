@@ -174,11 +174,11 @@ namespace neogfx
     {
     }
 
-    std::optional<std::pair<std::size_t, std::size_t>> splitter::separator_at(const point& aPosition) const
+    std::optional<splitter::separator_type> splitter::separator_at(const point& aPosition) const
     {
-        for (std::size_t i = 1; i < layout().count(); ++i)
+        for (uint32_t i = 1u; i < layout().count(); ++i)
         {
-            rect r1(layout().get_widget_at(i - 1).position(), layout().get_widget_at(i - 1).extents());
+            rect r1(layout().get_widget_at(i - 1u).position(), layout().get_widget_at(i - 1u).extents());
             rect r2(layout().get_widget_at(i).position(), layout().get_widget_at(i).extents());
             if (iType == HorizontalSplitter)
             {
@@ -187,7 +187,7 @@ namespace neogfx
                 r4.x -= r3.width();
                 r4.cx *= 3.0;
                 if (r4.contains(aPosition))
-                    return separator_type(i - 1, i);
+                    return separator_type{ i - 1u, i };
             }
             else
             {
@@ -196,7 +196,7 @@ namespace neogfx
                 r4.y -= r3.height();
                 r4.cy *= 3.0;
                 if (r4.contains(aPosition))
-                    return separator_type(i - 1, i);
+                    return separator_type{ i - 1u, i };
             }
         }
         return std::optional<separator_type>();

@@ -143,7 +143,7 @@ namespace neogfx
 
     uint32_t view_container::tab_container::tab_count() const
     {
-        return iTabs.size();
+        return static_cast<uint32_t>(iTabs.size());
     }
 
     view_container::tab_container::tab_index view_container::tab_container::index_of(const i_tab& aTab) const

@@ -813,7 +813,7 @@ namespace neogfx
     {
         // constants
     public:
-        static const std::size_t MaxStops = 256;
+        static const std::uint32_t MaxStops = 256;
         // types
     public:
         enum direction_e

@@ -699,16 +699,16 @@ namespace neogfx
             iWindow{ aWindow },
             iStyle{ aStyle }
         {
-            DWORD style = GetWindowLongPtr(iWindow, GWL_STYLE);
+            DWORD style = GetWindowLong(iWindow, GWL_STYLE);
             if ((style & iStyle) == iStyle)
-                SetWindowLongPtr(iWindow, GWL_STYLE, style & ~iStyle);
+                SetWindowLong(iWindow, GWL_STYLE, style & ~iStyle);
             else
                 iStyle = 0;
         }
         ~suppress_style()
         {
-            DWORD style = GetWindowLongPtr(iWindow, GWL_STYLE);
-            SetWindowLongPtr(iWindow, GWL_STYLE, style | iStyle);
+            DWORD style = GetWindowLong(iWindow, GWL_STYLE);
+            SetWindowLong(iWindow, GWL_STYLE, style | iStyle);
         }
     private:
         HWND iWindow;
@@ -1091,7 +1091,7 @@ namespace neogfx
                 {
                     const RECT referenceClientRect = { 0, 0, 256, 256 };
                     RECT referenceWindowRect = referenceClientRect;
-                    AdjustWindowRectEx(&referenceWindowRect, GetWindowLongPtr(hwnd, GWL_STYLE), false, GetWindowLongPtr(hwnd, GWL_EXSTYLE));
+                    AdjustWindowRectEx(&referenceWindowRect, GetWindowLong(hwnd, GWL_STYLE), false, GetWindowLong(hwnd, GWL_EXSTYLE));
                     self.iExtents += size{
                         basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
                         basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
@@ -1108,7 +1108,7 @@ namespace neogfx
             }
             break;
         case WM_MOUSEACTIVATE:
-            if (GetWindowLongPtr(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
+            if (GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
                 result = MA_NOACTIVATE;
             else
                 result = wndproc(hwnd, msg, wparam, lparam);
@@ -1164,7 +1164,7 @@ namespace neogfx
         SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);
 //        if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
 //            SetClassLongPtr(hwnd, GCL_STYLE, GetClassLongPtr(hwnd, GCL_STYLE) | CS_DROPSHADOW); // doesn't work well with OpenGL
-        DWORD existingStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
+        DWORD existingStyle = GetWindowLong(hwnd, GWL_STYLE);
         DWORD newStyle = existingStyle;
         if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
             newStyle |= WS_EX_TOPMOST;
@@ -1186,17 +1186,17 @@ namespace neogfx
             }
         }
         if (newStyle != existingStyle)
-            SetWindowLongPtr(hwnd, GWL_STYLE, newStyle);
-        DWORD existingExtendedStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_STYLE, newStyle);
+        DWORD existingExtendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
         DWORD newExtendedStyle = existingExtendedStyle;
         if ((iStyle & window_style::NoActivate) == window_style::NoActivate)
             newExtendedStyle |= (WS_EX_NOACTIVATE | WS_EX_TOPMOST);
         if ((iStyle & window_style::TitleBar) == window_style::TitleBar)
             newExtendedStyle |= WS_EX_WINDOWEDGE;
         if (newExtendedStyle != existingExtendedStyle)
-            SetWindowLongPtr(hwnd, GWL_EXSTYLE, newExtendedStyle);
+            SetWindowLong(hwnd, GWL_EXSTYLE, newExtendedStyle);
         if (iParent != nullptr)
-            SetWindowLongPtr(hwnd, GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));
+            SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, static_cast<LONG>(reinterpret_cast<std::intptr_t>(iParent->native_handle())));
         SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 #endif
     }
@@ -1337,7 +1337,7 @@ namespace neogfx
 #ifdef WIN32
             RECT borderThickness;
             SetRectEmpty(&borderThickness);
-            AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_THICKFRAME & ~WS_CAPTION, FALSE, NULL);
+            AdjustWindowRectEx(&borderThickness, GetWindowLong(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_THICKFRAME & ~WS_CAPTION, FALSE, NULL);
             borderThickness.left *= -1;
             borderThickness.top *= -1;
             iBorderThickness = basic_margins<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };

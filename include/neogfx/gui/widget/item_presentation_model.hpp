@@ -133,25 +133,25 @@ namespace neogfx
     public:
         uint32_t rows() const override
         {
-            return iRows.size();
+            return static_cast<uint32_t>(iRows.size());
         } 
         uint32_t columns() const override
         {
-            return iColumns.size();
+            return static_cast<uint32_t>(iColumns.size());
         }
         uint32_t columns(const item_presentation_model_index& aIndex) const override
         {
-            return iRows[aIndex.row()].second.size();
+            return static_cast<uint32_t>(iRows[aIndex.row()].second.size());
         }
         dimension column_width(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext, bool aIncludeMargins = true) const override
         {
-            if (iColumns.size() < aColumnIndex + 1)
+            if (iColumns.size() < aColumnIndex + 1u)
                 return 0.0;
             auto& columnWidth = iColumns[aColumnIndex].width;
             if (columnWidth != std::nullopt)
                 return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
             columnWidth = 0.0;
-            for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+            for (item_presentation_model_index::row_type row = 0u; row < iRows.size(); ++row)
             {
                 auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
                 if (modelIndex.column() >= item_model().columns(modelIndex))
@@ -163,7 +163,7 @@ namespace neogfx
         }
         const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
         {
-            if (iColumns.size() < aColumnIndex + 1)
+            if (iColumns.size() < aColumnIndex + 1u)
                 throw bad_column_index();
             if (iColumns[aColumnIndex].headingText != std::nullopt)
                 return *iColumns[aColumnIndex].headingText;
@@ -172,7 +172,7 @@ namespace neogfx
         }
         size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const graphics_context& aGraphicsContext) const override
         {
-            if (iColumns.size() < aColumnIndex + 1)
+            if (iColumns.size() < aColumnIndex + 1u)
                 throw bad_column_index();
             if (iColumns[aColumnIndex].headingFont != font{})
             {
@@ -189,7 +189,7 @@ namespace neogfx
         }
         void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, const std::string& aHeadingText) override
         {
-            if (iColumns.size() < aColumnIndex + 1)
+            if (iColumns.size() < aColumnIndex + 1u)
                 throw bad_column_index();
             iColumns[aColumnIndex].headingText = aHeadingText;
             iColumns[aColumnIndex].headingExtents = std::nullopt;
@@ -197,13 +197,13 @@ namespace neogfx
         }
         item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const override
         {
-            if (iColumns.size() < aColumnIndex + 1)
+            if (iColumns.size() < aColumnIndex + 1u)
                 throw bad_column_index();
             return iColumns[aColumnIndex].editable;
         }
         void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_cell_editable aEditable) override
         {
-            if (iColumns.size() < aColumnIndex + 1)
+            if (iColumns.size() < aColumnIndex + 1u)
                 throw bad_column_index();
             iColumns[aColumnIndex].editable = aEditable;
         }
@@ -322,7 +322,7 @@ namespace neogfx
         std::pair<item_presentation_model_index::row_type, coordinate> item_at(double aPosition, const i_units_context& aUnitsContext) const override
         {
             if (iRows.size() == 0)
-                return std::pair<item_presentation_model_index::row_type, coordinate>(0, 0.0);
+                return std::pair<item_presentation_model_index::row_type, coordinate>{ 0u, 0.0 };
             auto pred = [](const optional_position& lhs, const optional_position& rhs) -> bool
             {
                 if (lhs == std::nullopt && rhs == std::nullopt)
@@ -352,7 +352,7 @@ namespace neogfx
                 if ((i == iPositions.end() || (*i != std::nullopt && **i > aPosition)) && i != iPositions.begin())
                     --i;
             }
-            return std::pair<item_presentation_model_index::row_type, coordinate>(std::distance(iPositions.begin(), i), static_cast<coordinate>(**i - aPosition));
+            return std::pair<item_presentation_model_index::row_type, coordinate>{ static_cast<item_presentation_model_index::row_type>(std::distance(iPositions.begin(), i)), static_cast<coordinate>(**i - aPosition) };
         }
     public:
         const cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const override
@@ -743,7 +743,7 @@ namespace neogfx
             iRows.push_back(std::make_pair(aItemIndex.row(), row_container_type{ aItemModel.columns() }));
             if (!iInitializing)
             {
-                notify_observers(i_item_presentation_model_subscriber::NotifyItemAdded, item_presentation_model_index{ iRows.size() - 1, 0 });
+                notify_observers(i_item_presentation_model_subscriber::NotifyItemAdded, item_presentation_model_index{ static_cast<uint32_t>(iRows.size() - 1u), 0u });
                 reset_maps();
                 reset_position_meta(0);
                 execute_sort();
@@ -754,7 +754,7 @@ namespace neogfx
             if (!iInitializing)
             {
                 bool newColumns = false;
-                for (item_model_index::column_type col = iColumns.size(); col < item_model().columns(); ++col)
+                for (item_model_index::column_type col = static_cast<item_model_index::column_type>(iColumns.size()); col < item_model().columns(); ++col)
                 {
                     iColumns.push_back(column_info{ col });
                     newColumns = true;

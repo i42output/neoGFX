@@ -95,7 +95,7 @@ namespace neogfx
 
     void* opengl_renderer::shader_program::handle() const
     {
-        return reinterpret_cast<void*>(iHandle);
+        return reinterpret_cast<void*>(static_cast<intptr_t>(iHandle));
     }
 
     bool opengl_renderer::shader_program::has_projection_matrix() const
@@ -164,7 +164,7 @@ namespace neogfx
         auto v = iVariables.find(aVariableName);
         if (v == iVariables.end())
             throw variable_not_found();
-        return reinterpret_cast<void*>(v->second);
+        return reinterpret_cast<void*>(static_cast<intptr_t>(v->second));
     }
 
     void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, float aValue)
@@ -753,7 +753,7 @@ namespace neogfx
                 if (iActiveProgram != i)
                 {
                     iActiveProgram = i;
-                    glCheck(glUseProgram(reinterpret_cast<GLuint>(iActiveProgram->handle())));
+                    glCheck(glUseProgram(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(iActiveProgram->handle()))));
                 }
                 if (iActiveProgram->has_projection_matrix())
                     iActiveProgram->set_projection_matrix(aGraphicsContext, aProjectionMatrix);
@@ -907,9 +907,9 @@ namespace neogfx
                 iGradientStopPositions.push_back(static_cast<float>(stop.first));
                 iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
             }
-            aData.stopCount = combinedStops.size();
-            aData.stops.data().set_pixels(rect{ point{}, size_u32{ iGradientStopPositions.size(), 1 } }, &iGradientStopPositions[0]);
-            aData.stopColours.data().set_pixels(rect{ point{}, size_u32{ iGradientStopColours.size(), 1 } }, &iGradientStopColours[0]);
+            aData.stopCount = static_cast<uint32_t>(combinedStops.size());
+            aData.stops.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopPositions.size()), 1u } }, &iGradientStopPositions[0]);
+            aData.stopColours.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopColours.size()), 1u } }, &iGradientStopColours[0]);
             auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
             aData.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filter[0][0]);
         };
@@ -1051,7 +1051,7 @@ namespace neogfx
                 GLint buflen;
                 glCheck(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &buflen));
                 std::vector<GLchar> buf(buflen);
-                glCheck(glGetShaderInfoLog(shader, buf.size(), NULL, &buf[0]));
+                glCheck(glGetShaderInfoLog(shader, static_cast<GLsizei>(buf.size()), NULL, &buf[0]));
                 std::string error(&buf[0]);
                 throw failed_to_create_shader_program(error);
             }

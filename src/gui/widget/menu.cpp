@@ -99,7 +99,7 @@ namespace neogfx
 
     uint32_t menu::count() const
     {
-        return iItems.size();
+        return static_cast<uint32_t>(iItems.size());
     }
 
     const i_menu_item& menu::item_at(item_index aItemIndex) const

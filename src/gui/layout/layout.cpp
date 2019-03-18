@@ -204,7 +204,7 @@ namespace neogfx
 
     i_layout_item& layout::add(std::shared_ptr<i_layout_item> aItem)
     {
-        return add_at(iItems.size(), aItem);
+        return add_at(static_cast<item_index>(iItems.size()), aItem);
     }
 
     i_layout_item& layout::add_at(item_index aPosition, std::shared_ptr<i_layout_item> aItem)
@@ -271,7 +271,7 @@ namespace neogfx
 
     layout::item_index layout::count() const
     {
-        return iItems.size();
+        return static_cast<item_index>(iItems.size());
     }
 
     layout::optional_item_index layout::find(const i_layout_item& aItem) const

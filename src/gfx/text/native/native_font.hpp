@@ -48,16 +48,16 @@ namespace neogfx
         native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes);
         ~native_font();
     public:
-        virtual const std::string& family_name() const;
-        virtual bool has_style(font_style aStyle) const;
-        virtual std::size_t style_count() const;
-        virtual font_style style(std::size_t aStyleIndex) const;
-        virtual const std::string& style_name(std::size_t aStyleIndex) const;
-        virtual i_native_font_face& create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice);
-        virtual i_native_font_face& create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);
+        const std::string& family_name() const override;
+        bool has_style(font_style aStyle) const override;
+        uint32_t style_count() const override;
+        font_style style(uint32_t aStyleIndex) const override;
+        const std::string& style_name(uint32_t aStyleIndex) const override;
+        i_native_font_face& create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
+        i_native_font_face& create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
     public:
-        virtual void add_ref(i_native_font_face& aFace);
-        virtual void release(i_native_font_face& aFace);
+        void add_ref(i_native_font_face& aFace) override;
+        void release(i_native_font_face& aFace) override;
     private:
         void register_face(FT_Long aFaceIndex);
         FT_Face open_face(FT_Long aFaceIndex);

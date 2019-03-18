@@ -111,7 +111,7 @@ namespace neogfx
 #ifdef WIN32
                 std::string windowsDirectory;
                 windowsDirectory.resize(MAX_PATH);
-                GetWindowsDirectoryA(&windowsDirectory[0], windowsDirectory.size());
+                GetWindowsDirectoryA(&windowsDirectory[0], static_cast<UINT>(windowsDirectory.size()));
                 windowsDirectory.resize(std::strlen(windowsDirectory.c_str()));
                 return windowsDirectory + "\\fonts";
 #else
@@ -324,7 +324,7 @@ namespace neogfx
 
     uint32_t font_manager::font_family_count() const
     {
-        return iFontFamilies.size();
+        return static_cast<uint32_t>(iFontFamilies.size());
     }
 
     std::string font_manager::font_family(uint32_t aFamilyIndex) const
@@ -400,7 +400,7 @@ namespace neogfx
         std::multimap<uint32_t, native_font_list::iterator> matches;
         for (auto& f : family->second)
         {
-            for (std::size_t s = 0; s < f->style_count(); ++s)
+            for (uint32_t s = 0; s < f->style_count(); ++s)
                 if (neolib::make_ci_string(f->style_name(s)) == neolib::make_ci_string(aStyleName))
                     return *f;
         }
@@ -436,7 +436,7 @@ namespace neogfx
         uint32_t pos = std::numeric_limits<uint32_t>::max();
         for (auto& f : family->second)
         {
-            for (std::size_t s = 0; s < f->style_count(); ++s)
+            for (uint32_t s = 0; s < f->style_count(); ++s)
                 matches.insert(std::make_pair(std::make_pair(matching_bits(static_cast<uint32_t>(f->style(s)), static_cast<uint32_t>(aStyle)), pos--), f));
         }
         if (matches.empty())

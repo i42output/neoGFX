@@ -204,15 +204,15 @@ namespace neogfx
                 glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
             }
             GLuint index;
-            glCheck(index = glGetAttribLocation(reinterpret_cast<GLuint>(aShaderProgram.handle()), aVariableName.c_str()));
+            glCheck(index = glGetAttribLocation(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(aShaderProgram.handle())), aVariableName.c_str()));
             if (index != -1)
             {
                 glCheck(glVertexAttribPointer(
                     index,
-                    arity,
+                    static_cast<GLint>(arity),
                     opengl_attrib_data_type<value_type>::type,
                     aNormalized ? GL_TRUE : GL_FALSE,
-                    aStride,
+                    static_cast<GLsizei>(aStride),
                     reinterpret_cast<const GLvoid*>(aOffset)));
                 glCheck(glEnableVertexAttribArray(index));
             }

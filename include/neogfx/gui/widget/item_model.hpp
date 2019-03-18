@@ -171,26 +171,26 @@ namespace neogfx
     public:
         uint32_t rows() const override
         {
-            return iItems.size();
+            return static_cast<uint32_t>(iItems.size());
         }
         uint32_t columns() const override
         {
-            return iColumns.size();
+            return static_cast<uint32_t>(iColumns.size());
         }
         uint32_t columns(const item_model_index& aIndex) const override
         {
-            return iItems[aIndex.row()].second.size();
+            return static_cast<uint32_t>(iItems[aIndex.row()].second.size());
         }
         const std::string& column_name(item_model_index::value_type aColumnIndex) const override
         {
-            if (iColumns.size() < aColumnIndex + 1)
+            if (iColumns.size() < aColumnIndex + 1u)
                 throw bad_column_index();
             return iColumns[aColumnIndex].name;
         }
         void set_column_name(item_model_index::value_type aColumnIndex, const std::string& aName) override
         {
-            if (iColumns.size() < aColumnIndex + 1)
-                iColumns.resize(aColumnIndex + 1);
+            if (iColumns.size() < aColumnIndex + 1u)
+                iColumns.resize(aColumnIndex + 1u);
             iColumns[aColumnIndex].name = aName;
             notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
         }
@@ -346,7 +346,7 @@ namespace neogfx
         }
         uint32_t capacity() const override
         {
-            return iItems.capacity();
+            return static_cast<uint32_t>(iItems.capacity());
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue) override
         {

@@ -37,7 +37,7 @@ namespace neogfx
     public:
         uint32_t count() const
         {
-            return property_map().size();
+            return static_cast<uint32_t>(property_map().size());
         }
         std::string name(uint32_t aIndex) const
         {

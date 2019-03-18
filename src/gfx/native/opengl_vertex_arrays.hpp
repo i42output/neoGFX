@@ -195,7 +195,7 @@ namespace neogfx
             }
             void draw(std::size_t aCount, std::size_t aSkipCount = 1u)
             {
-                aSkipCount = std::max(aSkipCount, 1u);
+                aSkipCount = std::max<std::size_t>(aSkipCount, 1u);
                 if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
                     throw invalid_draw_count();
                 if (static_cast<std::size_t>(iStart) == vertices().size())
@@ -207,7 +207,7 @@ namespace neogfx
                 if (!iUseBarrier && mode() == translated_mode())
                 {
                     glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
-                    iStart += aCount;
+                    iStart += static_cast<GLint>(aCount);
                 }
                 else
                 {
@@ -221,7 +221,7 @@ namespace neogfx
                     {
                         auto amount = std::min(chunk, aCount);
                         glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(amount)));
-                        iStart += amount;
+                        iStart += static_cast<GLint>(amount);
                         aCount -= amount;
                         if (iUseBarrier)
                         {

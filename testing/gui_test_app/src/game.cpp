@@ -127,7 +127,7 @@ void create_game(ng::i_layout& aLayout)
             asteroidMesh.vertices.push_back(ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }) * ng::vec3{ w + prng(10.0) - 5.0, 0.0, 0.0 });
         for (uint32_t i = 1; i < asteroidMesh.vertices.size() - 1; ++i)
             asteroidMesh.faces.push_back(ng::game::face{ 0u, i, i + 1u });
-        asteroidMesh.faces.push_back(ng::game::face{ 0u, 1u, asteroidMesh.vertices.size() - 1u });
+        asteroidMesh.faces.push_back(ng::game::face{ 0u, 1u, static_cast<uint32_t>(asteroidMesh.vertices.size()) - 1u });
         return asteroidMesh;
     };
 

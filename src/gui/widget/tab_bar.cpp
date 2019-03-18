@@ -80,9 +80,9 @@ namespace neogfx
         return !iTabs.empty();
     }
 
-    tab_bar::tab_list::size_type tab_bar::tab_count() const
+    uint32_t tab_bar::tab_count() const
     {
-        return iTabs.size();
+        return static_cast<uint32_t>(iTabs.size());
     }
 
     tab_bar::tab_index tab_bar::index_of(const i_tab& aTab) const

@@ -31,7 +31,7 @@ namespace neogfx
         typedef std::unique_ptr<tab_button> tab_pointer;
         typedef std::vector<tab_pointer> tab_list;
     public:
-        typedef tab_list::size_type tab_index;
+        typedef i_tab_container::tab_index tab_index;
     public:
         tab_bar(i_tab_container& aContainer, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
         tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);

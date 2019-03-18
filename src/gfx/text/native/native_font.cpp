@@ -58,17 +58,17 @@ namespace neogfx
         return iStyleMap.find(aStyle) != iStyleMap.end();
     }
 
-    std::size_t native_font::style_count() const
+    uint32_t native_font::style_count() const
     {
-        return iStyleMap.size();
+        return static_cast<uint32_t>(iStyleMap.size());
     }
 
-    font_style native_font::style(std::size_t aStyleIndex) const
+    font_style native_font::style(uint32_t aStyleIndex) const
     {
         return std::next(iStyleMap.begin(), aStyleIndex)->first;
     }
 
-    const std::string& native_font::style_name(std::size_t aStyleIndex) const
+    const std::string& native_font::style_name(uint32_t aStyleIndex) const
     {
         return std::next(iStyleMap.begin(), aStyleIndex)->second.first;
     }
@@ -199,7 +199,7 @@ namespace neogfx
             FT_Error error = FT_New_Memory_Face(
                 iFontLib,
                 static_cast<const FT_Byte*>(&iCache[0]),
-                iCache.size(),
+                static_cast<FT_Long>(iCache.size()),
                 aFaceIndex,
                 &face);
             if (error)
@@ -210,7 +210,7 @@ namespace neogfx
             FT_Error error = FT_New_Memory_Face(
                 iFontLib,
                 static_cast<const FT_Byte*>(static_variant_cast<const memory_block_type&>(iSource).first),
-                static_variant_cast<const memory_block_type&>(iSource).second,
+                static_cast<FT_Long>(static_variant_cast<const memory_block_type&>(iSource).second),
                 aFaceIndex,
                 &face);
             if (error)
