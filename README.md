@@ -28,10 +28,10 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 
 Version | ETA           | Features
 --------|---------------|---------------------------------------------------
-v0.99   | Winter 2018   | Windows OpenGL; widget library feature complete; GUI designer tool
-v1.00   | Summer 2019   | Linux OpenGL; Vulkan; scripting engine
-v1.10   | Winter 2019   | Android support; physics engine
-v1.20   | Summer 2020   | macOS support
+v0.99   | Winter 2019   | Windows OpenGL; widget library feature complete; GUI designer tool
+v1.00   | Summer 2020   | Linux OpenGL; Vulkan; scripting engine
+v1.10   | Winter 2020   | Android support; physics engine
+v1.20   | Summer 2021   | macOS support
 
 # Implementation Progress
 
