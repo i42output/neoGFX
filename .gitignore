@@ -251,3 +251,15 @@ Debug
 /3rdparty/freetype/freetype-2.9/lib/freetyped.lib
 /examples/games/video_poker/build/win32/vs2017/video_poker.aps
 /testing/gui_test_app/build/win32/vs2017/Report20181027-2228.vspx
+/3rdparty/lib/SDL2-static.lib
+/3rdparty/lib/SDL2-staticd.lib
+/3rdparty/lib/freetype.lib
+/3rdparty/lib/freetyped.lib
+/3rdparty/lib/harfbuzz.lib
+/3rdparty/lib/harfbuzzd.lib
+/3rdparty/lib/libglew32.lib
+/3rdparty/lib/libglew32d.lib
+/3rdparty/lib/libpng16_static.lib
+/3rdparty/lib/libpng16_staticd.lib
+/3rdparty/lib/zlibstatic.lib
+/3rdparty/lib/zlibstaticd.lib
