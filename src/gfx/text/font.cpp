@@ -367,7 +367,7 @@ namespace neogfx
         if (iFallbackFont == std::nullopt)
         {
             if (has_fallback_font())
-                iFallbackFont = font{ service<i_font_manager>().create_fallback_font(*iNativeFontFace) };
+                iFallbackFont = font{ service<i_font_manager>().create_fallback_font(native_font_face()) };
             else
                 throw no_fallback_font();
         }

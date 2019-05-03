@@ -135,6 +135,13 @@ namespace neogfx
     {
     }
 
+    bool fallback_font_info::has_fallback_for(const std::string& aFontFamilyName) const
+    {
+        if (iFallbackFontFamilies.empty())
+            return false;
+        return std::find(iFallbackFontFamilies.begin(), iFallbackFontFamilies.end(), aFontFamilyName) != std::prev(iFallbackFontFamilies.end());
+    }
+
     const std::string& fallback_font_info::fallback_for(const std::string& aFontFamilyName) const
     {
         auto f = std::find(iFallbackFontFamilies.begin(), iFallbackFontFamilies.end(), aFontFamilyName);
@@ -142,7 +149,7 @@ namespace neogfx
             return *iFallbackFontFamilies.begin();
         ++f;
         if (f == iFallbackFontFamilies.end())
-            --f;
+            throw no_fallback();
         return *f;
     }
 
@@ -210,12 +217,13 @@ namespace neogfx
 
     bool font_manager::has_fallback_font(const i_native_font_face& aExistingFont) const
     {
-        auto fallbackFontFamilyName = default_fallback_font_info().fallback_for(aExistingFont.family_name());
-        return aExistingFont.family_name() != fallbackFontFamilyName && iFontFamilies.find(neolib::make_ci_string(fallbackFontFamilyName)) != iFontFamilies.end();
+        return default_fallback_font_info().has_fallback_for(aExistingFont.family_name());
     }
         
     std::shared_ptr<i_native_font_face> font_manager::create_fallback_font(const i_native_font_face& aExistingFont)
     {
+        if (!has_fallback_font(aExistingFont))
+            throw no_fallback_font();
         if (aExistingFont.fallback_cached())
             return std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aExistingFont.fallback()));
         struct : i_device_resolution

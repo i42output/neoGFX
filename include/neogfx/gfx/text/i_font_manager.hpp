@@ -36,6 +36,9 @@ namespace neogfx
     class i_fallback_font_info
     {
     public:
+        struct no_fallback : std::logic_error { no_fallback() : std::logic_error("neogfx::i_fallback_font_info::no_fallback") {} };
+    public:
+        virtual bool has_fallback_for(const std::string& aFontFamilyName) const = 0;
         virtual const std::string& fallback_for(const std::string& aFontFamilyName) const = 0;
     };
 
@@ -45,6 +48,7 @@ namespace neogfx
     public:
         struct bad_font_family_index : std::logic_error { bad_font_family_index() : std::logic_error("neogfx::i_font_manager::bad_font_family_index") {} };
         struct bad_font_style_index : std::logic_error { bad_font_style_index() : std::logic_error("neogfx::i_font_manager::bad_font_style_index") {} };
+        struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::i_font_manager::no_fallback_font") {} };
     public:
         virtual void* font_library_handle() const = 0;
         virtual const font_info& default_system_font_info() const = 0;

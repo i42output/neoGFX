@@ -38,7 +38,8 @@ namespace neogfx
     public:
         fallback_font_info(std::vector<std::string> aFallbackFontFamilies);
     public:
-        virtual const std::string& fallback_for(const std::string& aFontFamilyName) const;
+        bool has_fallback_for(const std::string& aFontFamilyName) const override;
+        const std::string& fallback_for(const std::string& aFontFamilyName) const override;
     private:
         std::vector<std::string> iFallbackFontFamilies;
     };
