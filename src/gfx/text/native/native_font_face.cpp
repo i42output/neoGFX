@@ -167,7 +167,7 @@ namespace neogfx
         return 0;
     }
 
-    dimension native_font_face::kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const
+    dimension native_font_face::kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const
     {
         if (!iHasKerning)
             return 0.0;
@@ -241,7 +241,7 @@ namespace neogfx
         return &*iAuxHandle;
     }
 
-    uint32_t native_font_face::glyph_index(char32_t aCodePoint) const
+    native_font_face::glyph_index_t native_font_face::glyph_index(char32_t aCodePoint) const
     {
         return FT_Get_Char_Index(iHandle, aCodePoint);
     }

@@ -72,9 +72,10 @@ namespace neogfx
     class native_font_face : public i_native_font_face
     {
     private:
-        typedef std::unordered_map<uint32_t, neogfx::glyph_texture, boost::hash<uint32_t>> glyph_map;
-        typedef std::unordered_map<std::pair<uint32_t, uint32_t>, dimension, boost::hash<std::pair<uint32_t, uint32_t>>, std::equal_to<std::pair<uint32_t, uint32_t>>, 
-            boost::fast_pool_allocator<std::pair<const std::pair<uint32_t, uint32_t>, dimension>>> kerning_table;
+        typedef std::unordered_map<glyph_index_t, neogfx::glyph_texture> glyph_map;
+        typedef std::pair<glyph_index_t, glyph_index_t> kerning_pair;
+        typedef std::unordered_map<kerning_pair, dimension, boost::hash<kerning_pair>, std::equal_to<kerning_pair>,
+            boost::fast_pool_allocator<std::pair<const kerning_pair, dimension>>> kerning_table;
     public:
         struct hb_handle
         {
@@ -113,7 +114,7 @@ namespace neogfx
         dimension underline_position() const override;
         dimension underline_thickness() const override;
         dimension line_spacing() const override;
-        dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const override;
+        dimension kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const override;
         bool is_bitmap_font() const override;
         uint32_t num_fixed_sizes() const override;
         font::point_size fixed_size(uint32_t aFixedSizeIndex) const override;
@@ -123,7 +124,7 @@ namespace neogfx
         void* handle() const override;
         void update_handle(void* aHandle) override;
         void* aux_handle() const override;
-        uint32_t glyph_index(char32_t aCodePoint) const override;
+        glyph_index_t glyph_index(char32_t aCodePoint) const override;
         i_glyph_texture& glyph_texture(const glyph& aGlyph) const override;
     public:
         void add_ref() override;
