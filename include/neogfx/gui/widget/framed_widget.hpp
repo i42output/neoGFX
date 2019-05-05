@@ -59,12 +59,12 @@ namespace neogfx
         void paint(graphics_context& aGraphicsContext) const override;
     public:
         void set_frame_style(frame_style aStyle);
-    protected:
+    public:
         virtual bool has_frame_colour() const;
         virtual colour frame_colour() const;
         virtual void set_frame_colour(const optional_colour& aFrameColour = optional_colour{});
         virtual colour inner_frame_colour() const;
-    protected:
+    public:
         dimension line_width() const;
         dimension effective_frame_width() const;
     private:

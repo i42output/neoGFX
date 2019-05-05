@@ -63,9 +63,10 @@ namespace neogfx
         void init();
     private:
         sink iSink;
+        text_field_placement iPlacement;
         vertical_layout iLayout;
-        horizontal_layout iInputLayout;
         neogfx::label iLabel;
+        horizontal_layout iInputLayout;
         input_box_container iInputBoxContainer;
         horizontal_layout iInputBoxContainerLayout;
         line_edit iInputBox;

@@ -37,9 +37,10 @@ namespace neogfx
 
     text_field::text_field(const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
         widget{},
+        iPlacement{ aPlacement },
         iLayout{ *this },
+        iLabel{ iLayout, aLabel },
         iInputLayout{ iLayout },
-        iLabel{ aPlacement == text_field_placement::LabelAbove ? static_cast<i_layout&>(iLayout) : static_cast<i_layout&>(iInputLayout), aLabel },
         iInputBoxContainer{ iInputLayout, aFrameStyle },
         iInputBoxContainerLayout{ iInputBoxContainer },
         iInputBox{ iInputBoxContainerLayout, frame_style::NoFrame },
@@ -52,9 +53,10 @@ namespace neogfx
 
     text_field::text_field(i_widget& aParent, const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
         widget{ aParent },
+        iPlacement{ aPlacement },
         iLayout{ *this },
+        iLabel{ iLayout, aLabel },
         iInputLayout{ iLayout },
-        iLabel{ aPlacement == text_field_placement::LabelAbove ? static_cast<i_layout&>(iLayout) : static_cast<i_layout&>(iInputLayout), aLabel },
         iInputBoxContainer{ iInputLayout, aFrameStyle },
         iInputBoxContainerLayout{ iInputBoxContainer },
         iInputBox{ iInputBoxContainerLayout, frame_style::NoFrame },
@@ -67,9 +69,10 @@ namespace neogfx
 
     text_field::text_field(i_layout& aLayout, const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
         widget{ aLayout },
+        iPlacement{ aPlacement },
         iLayout{ *this },
+        iLabel{ iLayout, aLabel },
         iInputLayout{ iLayout },
-        iLabel{ aPlacement == text_field_placement::LabelAbove ? static_cast<i_layout&>(iLayout) : static_cast<i_layout&>(iInputLayout), aLabel },
         iInputBoxContainer{ iInputLayout, aFrameStyle },
         iInputBoxContainerLayout{ iInputBoxContainer },
         iInputBox{ iInputBoxContainerLayout, frame_style::NoFrame },
@@ -139,11 +142,24 @@ namespace neogfx
 
     void text_field::init()
     {
+        if (iPlacement == text_field_placement::LabelLeft)
+            iInputLayout.add_at(0, iLabel);
+
         set_margins(neogfx::margins{});
         iLayout.set_margins(neogfx::margins{});
         iInputLayout.set_margins(neogfx::margins{});
         iInputBoxContainer.set_margins(iInputBox.margins());
         iInputBoxContainerLayout.set_margins(neogfx::margins{});
+        auto label_margin_updater = [this](const neogfx::optional_margins&)
+        {
+            if (iPlacement == text_field_placement::LabelAbove)
+                iLabel.set_margins(neogfx::margins{ iInputBoxContainer.margins().left + iInputBoxContainer.effective_frame_width(), 0.0 });
+            else
+                iLabel.set_margins(neogfx::optional_margins{});
+        };
+        iInputBoxContainer.Margins.changed(label_margin_updater);
+        label_margin_updater(iInputBoxContainer.Margins);
+        iLabel.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
         iInputBox.set_margins(neogfx::margins{});
         iInputBoxLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
         iInputBoxLayout.set_margins(neogfx::margins{});

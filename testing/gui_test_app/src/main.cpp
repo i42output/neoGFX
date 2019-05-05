@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
                 windowObject.emplace(ng::video_mode{ fullscreenResolution->first, fullscreenResolution->second });
         }
         else
-            windowObject.emplace(ng::size{ 768, 688 } * ng::service<ng::i_surface_manager>().display().metrics().horizontal_dpi() / 96.0);
+            windowObject.emplace(ng::size{ 800, 800 } * ng::service<ng::i_surface_manager>().display().metrics().horizontal_dpi() / 96.0);
         ng::window& window = *windowObject;
 
         ng::status_bar statusBar{ window.status_bar_layout() };
@@ -485,8 +485,12 @@ int main(int argc, char* argv[])
         smallTextEdit.set_maximum_width(100);
         smallTextEdit.set_alignment(ng::alignment::Right);
         ng::horizontal_layout layoutLineEdits(layoutButtons);
-        ng::text_field textField1(layoutLineEdits, "Field 1:", "Enter text", ng::text_field_placement::LabelLeft);
-        ng::text_field textField2(layoutLineEdits, "Field 2:", "Enter text", ng::text_field_placement::LabelLeft);
+        ng::vertical_layout layoutLineEdits2(layoutLineEdits);
+        ng::vertical_layout layoutLineEdits3(layoutLineEdits);
+        ng::text_field textField1(layoutLineEdits2, "Field 1:", "Enter text", ng::text_field_placement::LabelLeft);
+        ng::text_field textField2(layoutLineEdits2, "Field 2:", "Enter text", ng::text_field_placement::LabelLeft);
+        ng::text_field textField3(layoutLineEdits3, "Field 3", "Enter text", ng::text_field_placement::LabelAbove);
+        ng::text_field textField4(layoutLineEdits3, "Field 4", "Enter text", ng::text_field_placement::LabelAbove);
         textField1.input_box().text_changed([&button1, &textField1]()
         {
             button1.text().set_text(textField1.input_box().text());
@@ -497,16 +501,19 @@ int main(int argc, char* argv[])
             oss << "textEdit size: " << size;
             textField1.input_box().set_text(oss.str());
         });
-        ng::double_spin_box spinBox(layoutLineEdits);
+        ng::vertical_layout layoutSpinners(layoutLineEdits);
+        ng::horizontal_layout layoutSpinners2(layoutSpinners);
+        ng::vertical_spacer spacerSpinners(layoutSpinners);
+        ng::double_spin_box spinBox(layoutSpinners2);
         spinBox.set_minimum(-100.0);
         spinBox.set_maximum(100.0);
         spinBox.set_step(0.1);
-        ng::double_slider slider(layoutLineEdits);
+        ng::double_slider slider(layoutSpinners2);
         slider.set_minimum(-100.0);
         slider.set_maximum(100.0);
         slider.set_step(0.1);
         spinBox.value_changed([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
-        ng::double_spin_box doubleSpinBox(layoutLineEdits);
+        ng::double_spin_box doubleSpinBox(layoutSpinners2);
         doubleSpinBox.set_minimum(-10);
         doubleSpinBox.set_maximum(20);
         doubleSpinBox.set_step(0.5);
