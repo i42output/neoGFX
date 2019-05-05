@@ -23,11 +23,13 @@
 #include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
+#include <neogfx/gui/layout/anchorable_object.hpp>
+#include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
-    class widget : public object<i_widget>
+    class widget : public anchorable_object<i_widget>
     {
     public:
         widget();
@@ -284,5 +286,6 @@ namespace neogfx
         define_property(property_category::font, optional_font, Font)
         define_property(property_category::other, bool, IgnoreMouseEvents, false)
         define_property(property_category::other, bool, IgnoreNonClientMouseEvents, true)
+        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, optional_size)
     };
 }

@@ -1031,6 +1031,42 @@ namespace neogfx
 
 namespace std 
 {
+    template <typename CoordinateType>
+    inline neogfx::basic_delta<CoordinateType> min(const neogfx::basic_delta<CoordinateType>& lhs, const neogfx::basic_delta<CoordinateType>& rhs)
+    {
+        return lhs.min(rhs);
+    }
+
+    template <typename CoordinateType>
+    inline neogfx::basic_delta<CoordinateType> max(const neogfx::basic_delta<CoordinateType>& lhs, const neogfx::basic_delta<CoordinateType>& rhs)
+    {
+        return lhs.max(rhs);
+    }
+
+    template <typename CoordinateType>
+    inline neogfx::basic_size<CoordinateType> min(const neogfx::basic_size<CoordinateType>& lhs, const neogfx::basic_size<CoordinateType>& rhs)
+    {
+        return lhs.min(rhs);
+    }
+
+    template <typename CoordinateType>
+    inline neogfx::basic_size<CoordinateType> max(const neogfx::basic_size<CoordinateType>& lhs, const neogfx::basic_size<CoordinateType>& rhs)
+    {
+        return lhs.max(rhs);
+    }
+
+    template <typename CoordinateType>
+    inline neogfx::basic_point<CoordinateType> min(const neogfx::basic_point<CoordinateType>& lhs, const neogfx::basic_point<CoordinateType>& rhs)
+    {
+        return lhs.min(rhs);
+    }
+
+    template <typename CoordinateType>
+    inline neogfx::basic_point<CoordinateType> max(const neogfx::basic_point<CoordinateType>& lhs, const neogfx::basic_point<CoordinateType>& rhs)
+    {
+        return lhs.max(rhs);
+    }
+
     template <> struct hash<neogfx::rect>
     {
         size_t operator()(const neogfx::rect& aRect) const

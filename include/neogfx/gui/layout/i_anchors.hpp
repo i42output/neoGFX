@@ -1,4 +1,4 @@
-// i_properties.hpp
+// i_anchors.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -24,32 +24,32 @@
 
 namespace neogfx
 {
-    class i_property;
+    class i_anchor_base;
 
-    typedef std::map<std::string, i_property*> property_map;
+    typedef std::map<std::string, i_anchor_base*> anchor_map;
 
-    class i_properties
+    class i_anchors
     {
     public:
-        virtual void register_property(i_property& aProperty) = 0;
-        virtual const neogfx::property_map& property_map() const = 0;
+        virtual void register_anchor(i_anchor_base& aAnchor) = 0;
+        virtual const anchor_map& anchor_map() const = 0;
         // helpers
     public:
         uint32_t count() const
         {
-            return static_cast<uint32_t>(property_map().size());
+            return static_cast<uint32_t>(anchor_map().size());
         }
         std::string name(uint32_t aIndex) const
         {
-            return std::next(property_map().begin(), aIndex)->first;
+            return std::next(anchor_map().begin(), aIndex)->first;
         }
-        const i_property& property(uint32_t aIndex) const
+        const i_anchor_base& anchor(uint32_t aIndex) const
         {
-            return *std::next(property_map().begin(), aIndex)->second;
+            return *std::next(anchor_map().begin(), aIndex)->second;
         }
-        i_property& property(uint32_t aIndex)
+        i_anchor_base& anchor(uint32_t aIndex)
         {
-            return *std::next(property_map().begin(), aIndex)->second;
+            return *std::next(anchor_map().begin(), aIndex)->second;
         }
     };
 }

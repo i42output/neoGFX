@@ -864,6 +864,21 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widgets.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchors.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchorable_object.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable_object.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">

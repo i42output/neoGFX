@@ -1,4 +1,4 @@
-// object.hpp
+// anchorable_object.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -20,48 +20,35 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/lifetime.hpp>
-#include <neogfx/core/i_object.hpp>
-#include <neogfx/core/i_properties.hpp>
-#include <neogfx/core/i_property.hpp>
+#include <neogfx/core/object.hpp>
+#include <neogfx/gui/layout/i_anchors.hpp>
 
 namespace neogfx
 {
     template <typename Base>
-    class object : public Base, public i_properties, protected virtual neolib::lifetime
+    class anchorable_object : public object<Base>, public i_anchors
     {
-        // i_object
     public:
-        neolib::i_lifetime& as_lifetime() override
+        const i_anchors& anchors() const override
         {
             return *this;
         }
-    public:
-        void property_changed(i_property&) override
-        {
-            // default is to do nothing
-        }
-    public:
-        const i_properties& properties() const override
-        {
-            return *this;
-        }
-        i_properties& properties() override
+        i_anchors& anchors() override
         {
             return *this;
         }
         // i_properties
     public:
-        void register_property(i_property& aProperty) override
+        void register_anchor(i_anchor_base& aAnchor) override
         {
-            iProperties.emplace(aProperty.name(), &aProperty);
+            iAnchors.emplace(aAnchor.name(), &aAnchor);
         }
-        const neogfx::property_map& property_map() const override
+        const neogfx::anchor_map& anchor_map() const override
         {
-            return iProperties;
+            return iAnchors;
         }
         // state
     private:
-        neogfx::property_map iProperties;
+        neogfx::anchor_map iAnchors;
     };
 }
