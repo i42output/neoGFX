@@ -175,4 +175,23 @@ namespace neogfx
             set_maximum_size(newSize, aUpdateLayout);
         }
     };
+
+    struct size_hint
+    {
+        std::string primaryHint;
+        std::string secondaryHint;
+
+        operator bool() const
+        {
+            return !primaryHint.empty() || !secondaryHint.empty();
+        }
+        bool operator==(const size_hint& aOther) const
+        {
+            return primaryHint == aOther.primaryHint && secondaryHint == aOther.secondaryHint;
+        }
+        bool operator!=(const size_hint& aOther) const
+        {
+            return !(*this == aOther);
+        }
+    };
 }

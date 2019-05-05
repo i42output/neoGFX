@@ -137,35 +137,38 @@ namespace neogfx
             std::cerr << "layout::do_minimum_size(";
             if (aAvailableSpace != std::nullopt)
                 std::cerr << *aAvailableSpace;
-            std::cerr << ")" << std::endl;
+            std::cerr << "): ";
         }
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
-        if (itemsVisible == 0)
-            return size{};
-        auto availableSpaceForChildren = aAvailableSpace;
-        if (availableSpaceForChildren != std::nullopt)
-            *availableSpaceForChildren -= margins().size();
         size result;
-        uint32_t itemsZeroSized = 0;
-        for (const auto& item : items())
+        if (itemsVisible != 0)
         {
-            if (!item.visible())
-                continue;
-            const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
-            if (!item.is_spacer() && (AxisPolicy::cx(itemMinSize) == 0.0 || AxisPolicy::cy(itemMinSize) == 0.0))
+            auto availableSpaceForChildren = aAvailableSpace;
+            if (availableSpaceForChildren != std::nullopt)
+                *availableSpaceForChildren -= margins().size();
+            uint32_t itemsZeroSized = 0;
+            for (const auto& item : items())
             {
-                ++itemsZeroSized;
-                continue;
+                if (!item.visible())
+                    continue;
+                const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
+                if (!item.is_spacer() && (AxisPolicy::cx(itemMinSize) == 0.0 || AxisPolicy::cy(itemMinSize) == 0.0))
+                {
+                    ++itemsZeroSized;
+                    continue;
+                }
+                AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(itemMinSize));
+                AxisPolicy::cx(result) += AxisPolicy::cx(itemMinSize);
             }
-            AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(itemMinSize));
-            AxisPolicy::cx(result) += AxisPolicy::cx(itemMinSize);
+            AxisPolicy::cx(result) += AxisPolicy::cx(margins());
+            AxisPolicy::cy(result) += AxisPolicy::cy(margins());
+            if (itemsVisible - itemsZeroSized > 0)
+                AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
+            AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
+            AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
         }
-        AxisPolicy::cx(result) += AxisPolicy::cx(margins());
-        AxisPolicy::cy(result) += AxisPolicy::cy(margins());
-        if (itemsVisible - itemsZeroSized > 0)
-            AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
-        AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
-        AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
+        if (debug == this)
+            std::cerr << result << std::endl;
         return result;
     }
 

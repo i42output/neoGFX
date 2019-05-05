@@ -38,9 +38,9 @@ namespace neogfx::game
                     aAlignment,
                     { &font },
                     { to_ecs_component(aAppearance.ink()) },
-                    aAppearance.has_effect() ? aAppearance.effect().type() : text_effect_type::None,
-                    { to_ecs_component(aAppearance.effect().colour()) },
-                    aAppearance.has_effect() ? aAppearance.effect().width() : 0.0
+                    aAppearance.effect() ? aAppearance.effect()->type() : text_effect_type::None,
+                    { aAppearance.effect() ? to_ecs_component(aAppearance.effect()->colour()) : game::material{} },
+                    aAppearance.effect() ? aAppearance.effect()->width() : 0.0
                 });
             game::text_mesh::meta::update(textMesh, aEcs, aGraphicsContext, id());
         }

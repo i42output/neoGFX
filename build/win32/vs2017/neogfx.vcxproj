@@ -352,6 +352,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\view\i_controller.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\controller.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widgets.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
@@ -413,6 +414,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_page_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_edit.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_field.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar.hpp" />
@@ -603,6 +605,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\tab_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tab_page_container.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\text_edit.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\text_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\toolbar.cpp" />

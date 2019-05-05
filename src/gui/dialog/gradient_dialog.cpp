@@ -216,26 +216,26 @@ namespace neogfx
         iMExponentSpinBox.set_step(0.1);
         iMExponentSpinBox.set_format("%.2f");
         iMExponentSpinBox.text_box().set_alignment(alignment::Right);
-        iMExponentSpinBox.text_box().set_hint("00.00");
+        iMExponentSpinBox.text_box().set_size_hint(size_hint{ "00.00" });
         iNExponentSpinBox.set_minimum(0.0);
         iNExponentSpinBox.set_maximum(std::numeric_limits<double>::max());
         iNExponentSpinBox.set_step(0.1);
         iNExponentSpinBox.set_format("%.2f");
         iNExponentSpinBox.text_box().set_alignment(alignment::Right);
-        iNExponentSpinBox.text_box().set_hint("00.00");
+        iNExponentSpinBox.text_box().set_size_hint(size_hint{ "00.00" });
         iCentreGroupBox.set_checkable(true);
         iXCentreSpinBox.set_minimum(-1.0);
         iXCentreSpinBox.set_maximum(1.0);
         iXCentreSpinBox.set_step(0.001);
         iXCentreSpinBox.set_format("%.3f");
         iXCentreSpinBox.text_box().set_alignment(alignment::Right);
-        iXCentreSpinBox.text_box().set_hint("-0.000");
+        iXCentreSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
         iYCentreSpinBox.set_minimum(-1.0);
         iYCentreSpinBox.set_maximum(1.0);
         iYCentreSpinBox.set_step(0.001);
         iYCentreSpinBox.set_format("%.3f");
         iYCentreSpinBox.text_box().set_alignment(alignment::Right);
-        iYCentreSpinBox.text_box().set_hint("-0.000");
+        iYCentreSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
 
         iGradientSelector.set_fixed_size(size{ dpi_scale(256.0), iGradientSelector.minimum_size().cy });
 

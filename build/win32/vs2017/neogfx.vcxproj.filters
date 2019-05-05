@@ -858,6 +858,12 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl_vertex_arrays.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_field.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widgets.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
@@ -1260,6 +1266,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\text\glyph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

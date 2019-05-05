@@ -308,25 +308,13 @@ namespace neogfx
         {
             return iInk;
         }
-        bool has_paper() const
+        const optional_text_colour& paper() const
         {
-            return iPaper != std::nullopt;
+            return iPaper;
         }
-        const text_colour& paper() const
+        const optional_text_effect& effect() const
         {
-            if (has_paper())
-                return *iPaper;
-            throw no_paper();
-        }
-        bool has_effect() const
-        {
-            return iEffect != std::nullopt;
-        }
-        const text_effect& effect() const
-        {
-            if (has_effect())
-                return *iEffect;
-            throw no_effect();
+            return iEffect;
         }
         bool only_calculate_effect() const
         {

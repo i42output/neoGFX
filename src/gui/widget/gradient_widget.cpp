@@ -85,7 +85,7 @@ namespace neogfx
                 iSlider.set_minimum(0);
                 iSlider.set_maximum(255);
                 iSlider.set_step(1);
-                iSpinBox.text_box().set_hint("255");
+                iSpinBox.text_box().set_size_hint(size_hint{ "255" });
                 iSpinBox.set_minimum(0);
                 iSpinBox.set_maximum(255);
                 iSpinBox.set_step(1);

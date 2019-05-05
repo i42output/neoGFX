@@ -20,13 +20,13 @@
 
 #include <neogfx/neogfx.hpp>
 #include <string>
-#include <neogfx/gui/widget/nested_window.hpp>
+#include <neogfx/gui/widget/i_nested_window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/title_bar.hpp>
 
 namespace neogfx
 {
-    class mdi_window : public nested_window
+    class mdi_window : public i_nested_window
     {
     public:
         mdi_window(i_widget& aParent, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);

@@ -38,6 +38,7 @@ namespace neogfx
     public:
         event<const std::string&, bool&> text_filter;
         event<> text_changed;
+        event<> default_style_changed;
     public:
         enum type_e
         {
@@ -512,8 +513,8 @@ namespace neogfx
         const column_info& column(std::size_t aColumnIndex) const;
         void set_column(std::size_t aColumnIndex, const column_info& aColumn);
     public:
-        bool has_hint() const;
-        void set_hint(const std::string& aHint);
+        const neogfx::size_hint& size_hint() const;
+        void set_size_hint(const neogfx::size_hint& aSizeHint);
         dimension tab_stops() const;
         void set_tab_stop_hint(const std::string& aTabStopHint = "0000");
         void set_tab_stops(const optional_dimension& aTabStops);
@@ -590,7 +591,7 @@ namespace neogfx
         mutable std::optional<find_in_paragraph_cache::iterator> iCharacterToParagraphCacheLastAccess;
         mutable find_in_paragraph_cache iGlyphToParagraphCache;
         mutable std::optional<find_in_paragraph_cache::iterator> iGlyphToParagraphCacheLastAccess;
-        std::string iHint;
+        neogfx::size_hint iSizeHint;
         mutable std::optional<std::pair<neogfx::font, size>> iHintedSize;
         optional_dimension iTabStops;
         std::string iTabStopHint;

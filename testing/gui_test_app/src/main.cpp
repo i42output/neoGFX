@@ -5,32 +5,15 @@
 #include <neolib/random.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
-#include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
-#include <neogfx/gui/widget/table_view.hpp>
-#include <neogfx/gui/widget/radio_button.hpp>
-#include <neogfx/gui/widget/check_box.hpp>
-#include <neogfx/gui/widget/item_model.hpp>
-#include <neogfx/gui/widget/item_presentation_model.hpp>
-#include <neogfx/gui/widget/tab_page_container.hpp>
 #include <neogfx/hid/i_surface.hpp>
-#include <neogfx/gui/widget/image_widget.hpp>
-#include <neogfx/gui/widget/toolbar.hpp>
-#include <neogfx/gui/widget/menu_bar.hpp>
-#include <neogfx/gui/widget/text_edit.hpp>
-#include <neogfx/gui/widget/line_edit.hpp>
-#include <neogfx/gui/widget/spin_box.hpp>
-#include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/gui/dialog/colour_dialog.hpp>
-#include <neogfx/gui/widget/gradient_widget.hpp>
-#include <neogfx/gui/widget/group_box.hpp>
-#include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
-#include <neogfx/gui/widget/status_bar.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
+#include <neogfx/gui/widgets.hpp>
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_animator.hpp>
 
@@ -502,20 +485,18 @@ int main(int argc, char* argv[])
         smallTextEdit.set_maximum_width(100);
         smallTextEdit.set_alignment(ng::alignment::Right);
         ng::horizontal_layout layoutLineEdits(layoutButtons);
-        ng::line_edit lineEdit(layoutLineEdits);
-        lineEdit.set_text("Line edit");
-        lineEdit.text_changed([&button1, &lineEdit]()
+        ng::text_field textField1(layoutLineEdits, "Field 1:", "Enter text", ng::text_field_placement::LabelLeft);
+        ng::text_field textField2(layoutLineEdits, "Field 2:", "Enter text", ng::text_field_placement::LabelLeft);
+        textField1.input_box().text_changed([&button1, &textField1]()
         {
-            button1.text().set_text(lineEdit.text());
+            button1.text().set_text(textField1.input_box().text());
         });
-        textEdit.Size.changed([&lineEdit](const ng::size& size)
+        textEdit.Size.changed([&textField1](const ng::size& size)
         {
             std::ostringstream oss;
             oss << "textEdit size: " << size;
-            lineEdit.set_text(oss.str());
+            textField1.input_box().set_text(oss.str());
         });
-        ng::line_edit lineEditPassword(layoutLineEdits);
-        lineEditPassword.set_text("Password");
         ng::double_spin_box spinBox(layoutLineEdits);
         spinBox.set_minimum(-100.0);
         spinBox.set_maximum(100.0);
@@ -603,13 +584,15 @@ int main(int argc, char* argv[])
             textEdit.set_word_wrap(false);
         });
         ng::check_box password(layoutRadiosAndChecks, "Password");
-        password.checked([&lineEditPassword]()
+        password.checked([&textField2]()
         {
-            lineEditPassword.set_password(true);
+            textField2.hint().set_text("Enter password");
+            textField2.input_box().set_password(true);
         });
-        password.unchecked([&lineEditPassword]()
+        password.unchecked([&textField2]()
         {
-            lineEditPassword.set_password(false);
+            textField2.hint().set_text("Enter text");
+            textField2.input_box().set_password(false);
         });
         ng::check_box columns(layoutRadiosAndChecks, "Columns");
         ng::check_box groupBoxCheckable(layoutRadiosAndChecks, "Group Box Checkable");
@@ -796,8 +779,8 @@ int main(int argc, char* argv[])
             {
                 sInk = colourPicker.selected_colour();
                 textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
-                lineEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
-                lineEditPassword.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+                textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+                textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
             }
             sCustomColours = colourPicker.custom_colours();
         });

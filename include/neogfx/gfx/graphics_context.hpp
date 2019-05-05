@@ -317,8 +317,8 @@ namespace neogfx
     template <typename Iter>
     inline void draw_glyph_text(const graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
-        if (aAppearance.has_effect() && aAppearance.effect().type() == text_effect_type::Glow)
-            draw_glyph_text_glow(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect().colour(), aAppearance.effect().width());
+        if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Glow)
+            draw_glyph_text_glow(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->colour(), aAppearance.effect()->width());
         draw_glyph_text_normal(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance);
     }
 

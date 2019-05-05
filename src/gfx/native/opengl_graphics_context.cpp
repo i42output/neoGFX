@@ -1301,8 +1301,8 @@ namespace neogfx
         {
             need = 6u;
             auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
-            if (drawGlyphOp.appearance.has_effect() && drawGlyphOp.appearance.effect().type() == text_effect_type::Outline)
-                need += 6u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
+            if (drawGlyphOp.appearance.effect() && drawGlyphOp.appearance.effect()->type() == text_effect_type::Outline)
+                need += 6u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect()->width() * 2 + 1) * (drawGlyphOp.appearance.effect()->width() * 2 + 1)));
         }
         return rendering_engine().vertex_arrays().capacity() / need;
     }
@@ -1314,8 +1314,8 @@ namespace neogfx
         if (firstOp.glyph.is_emoji())
         {
             use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
-            if (firstOp.appearance.has_paper())
-                fill_rect(rect{ point{ firstOp.point }, glyph_extents(firstOp) }, to_brush(firstOp.appearance.paper()), firstOp.point.z);
+            if (firstOp.appearance.paper())
+                fill_rect(rect{ point{ firstOp.point }, glyph_extents(firstOp) }, to_brush(*firstOp.appearance.paper()), firstOp.point.z);
             auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
             auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
             draw_mesh(
@@ -1334,7 +1334,7 @@ namespace neogfx
 
         const i_glyph_texture& firstGlyphTexture = glyph_texture(firstOp);
 
-        bool renderEffects = !firstOp.appearance.only_calculate_effect() && firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline;
+        bool renderEffects = !firstOp.appearance.only_calculate_effect() && firstOp.appearance.effect() && firstOp.appearance.effect()->type() == text_effect_type::Outline;
 
         for (uint32_t pass = 1; pass <= 3; ++pass)
         {
@@ -1349,11 +1349,11 @@ namespace neogfx
                     {
                         auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
-                        if (!drawOp.appearance.has_paper())
+                        if (!drawOp.appearance.paper())
                             continue;
 
                         const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
-                        graphics_operation::fill_rect nextOp{ rect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } }, to_brush(drawOp.appearance.paper()), drawOp.point.z };
+                        graphics_operation::fill_rect nextOp{ rect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } }, to_brush(*drawOp.appearance.paper()), drawOp.point.z };
                         if (!rects.empty() && !batchable(rects.back(), nextOp))
                         {
                             fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
@@ -1372,14 +1372,14 @@ namespace neogfx
                         continue;
 
                     auto const glyphCount = std::count_if(aDrawGlyphOps.first, aDrawGlyphOps.second, [](const graphics_operation::operation& op) { return !static_variant_cast<const graphics_operation::draw_glyph&>(op).glyph.is_whitespace(); });
-                    auto const need = (pass == 3 ? 6u * glyphCount : 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * glyphCount);
+                    auto const need = (pass == 3 ? 6u * glyphCount : 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect()->width() * 2 + 1) * (firstOp.appearance.effect()->width() * 2 + 1))) * glyphCount);
 
                     bool const useTextureBarrier = firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
                     use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, static_cast<std::size_t>(need), useTextureBarrier };
 
-                    auto const scanlineOffsets = (pass == 2 ? static_cast<uint32_t>(firstOp.appearance.effect().width()) * 2u + 1u : 1u);
+                    auto const scanlineOffsets = (pass == 2 ? static_cast<uint32_t>(firstOp.appearance.effect()->width()) * 2u + 1u : 1u);
                     auto const offsets = scanlineOffsets * scanlineOffsets;
-                    point const offsetOrigin{ pass == 2 ? -firstOp.appearance.effect().width() : 0.0, pass == 2 ? -firstOp.appearance.effect().width() : 0.0 };
+                    point const offsetOrigin{ pass == 2 ? -firstOp.appearance.effect()->width() : 0.0, pass == 2 ? -firstOp.appearance.effect()->width() : 0.0 };
                     for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, static_cast<std::size_t>(glyphCount / 2u), static_cast<std::size_t>(offsets) }; op != aDrawGlyphOps.second; ++op)
                     {
                         auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
@@ -1407,12 +1407,12 @@ namespace neogfx
 
                         if (pass == 2)
                         {
-                            passColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
+                            passColour = std::holds_alternative<colour>(drawOp.appearance.effect()->colour()) ?
                                 vec4f{{
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha<float>()}} :
+                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).red<float>(),
+                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).green<float>(),
+                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).blue<float>(),
+                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).alpha<float>()}} :
                                 vec4f{};
                         }
                         else

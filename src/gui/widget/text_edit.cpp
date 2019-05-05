@@ -240,20 +240,21 @@ namespace neogfx
         if (has_minimum_size())
             return scrollable_widget::minimum_size(aAvailableSpace);
         scoped_units su{ *this, units::Pixels };
-        auto result = scrollable_widget::minimum_size(aAvailableSpace);
-        if (iHint.empty())
-            result += size{ font().height() };
+        auto childLayoutSize = has_layout() ? layout().minimum_size(aAvailableSpace) : size{};
+        auto result = scrollable_widget::minimum_size(aAvailableSpace) - childLayoutSize;
+        if (!size_hint())
+            result += size{ font().height() }.max(childLayoutSize);
         else
         {
             if (iHintedSize == std::nullopt || iHintedSize->first != font())
             {
                 iHintedSize.emplace(font(), size{});
                 graphics_context gc{ *this, graphics_context::type::Unattached };
-                iHintedSize->second = gc.text_extent(iHint, font());
+                iHintedSize->second = gc.text_extent(size_hint().primaryHint, font()).max(gc.text_extent(size_hint().secondaryHint, font()));
                 if (iHintedSize->second.cy == 0.0)
                     iHintedSize->second.cy = font().height();
             }
-            result += iHintedSize->second;
+            result += iHintedSize->second.max(childLayoutSize);
         }
         return convert_units(*this, su.saved_units(), result);
     }
@@ -947,6 +948,7 @@ namespace neogfx
         if (oldFont != font() || oldEffect != (iDefaultStyle.text_effect() == std::nullopt))
             refresh_paragraph(iText.begin(), 0);
         iPersistDefaultStyle = aPersist;
+        default_style_changed.trigger();
         update();
     }
 
@@ -1307,16 +1309,16 @@ namespace neogfx
         }
     }
 
-    bool text_edit::has_hint() const
-    {
-        return !iHint.empty();
+    const neogfx::size_hint& text_edit::size_hint() const
+    {       
+        return iSizeHint;
     }
 
-    void text_edit::set_hint(const std::string& aHint)
+    void text_edit::set_size_hint(const neogfx::size_hint& aHint)
     {
-        if (iHint != aHint)
+        if (iSizeHint != aHint)
         {
-            iHint = aHint;
+            iSizeHint = aHint;
             iHintedSize = std::nullopt;
             if (has_managing_layout())
                 managing_layout().layout_items(true);

@@ -63,19 +63,19 @@ namespace neogfx
     {
         iLayout.add(std::make_shared<separator>());
         auto insertLock = std::make_shared<label>();
-        insertLock->text().set_size_hint("Insert");
+        insertLock->text().set_size_hint(size_hint{ "Insert" });
         iLayout.add(insertLock);
         iLayout.add(std::make_shared<separator>());
         auto capsLock = std::make_shared<label>();
-        capsLock->text().set_size_hint("CAP");
+        capsLock->text().set_size_hint(size_hint{ "CAP" });
         iLayout.add(capsLock);
         iLayout.add(std::make_shared<separator>());
         auto numLock = std::make_shared<label>();
-        numLock->text().set_size_hint("NUM");
+        numLock->text().set_size_hint(size_hint{ "NUM" });
         iLayout.add(numLock);
         iLayout.add(std::make_shared<separator>());
         auto scrlLock = std::make_shared<label>();
-        scrlLock->text().set_size_hint("SCRL");
+        scrlLock->text().set_size_hint(size_hint{ "SCRL" });
         iLayout.add(scrlLock);
         iUpdater = std::make_unique<neolib::callback_timer>(service<neolib::async_task>(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
         {

@@ -85,7 +85,7 @@ namespace neogfx
     {
         if (framed_widget::has_size_policy())
             return framed_widget::size_policy();
-        return neogfx::size_policy{ text_box().has_hint() ? neogfx::size_policy::Minimum : neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ text_box().size_hint() ? neogfx::size_policy::Minimum : neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
     }
 
     template <typename T>

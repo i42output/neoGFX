@@ -67,7 +67,7 @@ namespace neogfx
     public:
         const std::string& text() const;
         void set_text(const std::string& aText);
-        void set_size_hint(const std::string& aSizeHint);
+        void set_size_hint(const size_hint& aSizeHint);
         bool multi_line() const;
         text_widget_flags flags() const;
         void set_flags(text_widget_flags aFlags);
@@ -90,7 +90,7 @@ namespace neogfx
         std::string iText;
         mutable neogfx::glyph_text iGlyphText;
         mutable optional_size iTextExtent;
-        std::string iSizeHint;
+        size_hint iSizeHint;
         mutable optional_size iSizeHintExtent;
         text_widget_type iType;
         text_widget_flags iFlags;

@@ -109,9 +109,9 @@ namespace neogfx
                      return false;
                 if (left.appearance.ink().index() != right.appearance.ink().index() || !std::holds_alternative<colour>(left.appearance.ink()))
                     return false;
-                if (left.appearance.has_effect() != right.appearance.has_effect())
+                if (!!left.appearance.effect() != !!right.appearance.effect())
                     return false;
-                if (left.appearance.has_effect() && (left.appearance.effect().type() != right.appearance.effect().type() || left.appearance.effect().width() != right.appearance.effect().width()))
+                if (!!left.appearance.effect() && (left.appearance.effect()->type() != right.appearance.effect()->type() || left.appearance.effect()->width() != right.appearance.effect()->width()))
                     return false;
                 if (left.glyph.subpixel() != right.glyph.subpixel())
                     return false;
