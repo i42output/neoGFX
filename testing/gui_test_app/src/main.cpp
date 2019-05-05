@@ -487,10 +487,11 @@ int main(int argc, char* argv[])
         ng::horizontal_layout layoutLineEdits(layoutButtons);
         ng::vertical_layout layoutLineEdits2(layoutLineEdits);
         ng::vertical_layout layoutLineEdits3(layoutLineEdits);
-        ng::text_field textField1(layoutLineEdits2, "Field 1:", "Enter text", ng::text_field_placement::LabelLeft);
-        ng::text_field textField2(layoutLineEdits2, "Field 2:", "Enter text", ng::text_field_placement::LabelLeft);
-        ng::text_field textField3(layoutLineEdits3, "Field 3", "Enter text", ng::text_field_placement::LabelAbove);
-        ng::text_field textField4(layoutLineEdits3, "Field 4", "Enter text", ng::text_field_placement::LabelAbove);
+        ng::text_field textField1(layoutLineEdits2, "First field:", "Enter text", ng::text_field_placement::LabelLeft);
+        ng::text_field textField2(layoutLineEdits2, "Second field:", "Enter text", ng::text_field_placement::LabelLeft);
+        ng::text_field textField3(layoutLineEdits3, "Third field (label above)", "Enter text", ng::text_field_placement::LabelAbove);
+        ng::text_field textField4(layoutLineEdits3, "Fourth field (label above)", "Enter text", ng::text_field_placement::LabelAbove);
+        ng::layout_as_same_size(textField1.label(), textField2.label());
         textField1.input_box().text_changed([&button1, &textField1]()
         {
             button1.text().set_text(textField1.input_box().text());

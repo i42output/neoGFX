@@ -47,7 +47,7 @@ namespace neogfx
         {
             return iName;
         }
-        value_type value(GetterArgs&&... aArguments) const override
+        value_type value(GetterArgs... aArguments) const override
         {
             return iValueGetter(std::forward<GetterArgs>(aArguments)...);
         }
@@ -59,7 +59,7 @@ namespace neogfx
         {
             iConstraints.push_back(constraint_entry_t{ aConstraint, aOtherAnchor });
         }
-        value_type evaluate_constraints(GetterArgs&&... aArguments) const override
+        value_type evaluate_constraints(GetterArgs... aArguments) const override
         {
             auto result = value(std::forward<GetterArgs>(aArguments)...);
             for (auto const& c : iConstraints)
@@ -72,6 +72,14 @@ namespace neogfx
         value_getter_t iValueGetter;
         constraint_entries_t iConstraints;
     };
+
+    inline void layout_as_same_size(i_anchorable_object& aFirst, i_anchorable_object& aSecond)
+    {
+        auto& first = *aFirst.anchors().anchor_map().find("MinimumSize")->second;
+        auto& second = *aSecond.anchors().anchor_map().find("MinimumSize")->second;
+        first.as<size, optional_size>().add_constraint(anchor_constraint<size>::max, second.as<size, optional_size>());
+        second.as<size, optional_size>().add_constraint(anchor_constraint<size>::max, first.as<size, optional_size>());
+    }
 
     #define define_anchor( name, getter, ... ) neogfx::anchor<__VA_ARGS__> Anchor_##name = { *this, #name ##s, getter };
 }

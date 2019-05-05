@@ -70,10 +70,10 @@ namespace neogfx
         typedef T value_type;
         typedef anchor_constraint<value_type> constraint;
     public:
-        virtual value_type value(GetterArgs&&... aArguments) const = 0;
+        virtual value_type value(GetterArgs... aArguments) const = 0;
         virtual void add_constraint(constraint aConstraint, self_type& aOtherAnchor) = 0;
         virtual void add_constraint(constraint aConstraint, std::shared_ptr<self_type> aOtherAnchor) = 0;
-        virtual value_type evaluate_constraints(GetterArgs&&... aArguments) const = 0;
+        virtual value_type evaluate_constraints(GetterArgs... aArguments) const = 0;
     };
 
     template <typename T, typename... GetterArgs>

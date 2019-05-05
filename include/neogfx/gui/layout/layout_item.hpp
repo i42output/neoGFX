@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gui/layout/i_anchor.hpp>
 #include <neogfx/gui/layout/i_layout_item_proxy.hpp>
 
 namespace neogfx
@@ -96,5 +97,6 @@ namespace neogfx
         mutable std::pair<uint32_t, uint32_t> iLayoutId;
         mutable size iMinimumSize;
         mutable size iMaximumSize;
+        mutable std::optional<i_anchor<size, optional_size>*> iMinimumSizeAnchor;
     };
 }

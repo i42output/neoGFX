@@ -286,6 +286,6 @@ namespace neogfx
         define_property(property_category::font, optional_font, Font)
         define_property(property_category::other, bool, IgnoreMouseEvents, false)
         define_property(property_category::other, bool, IgnoreNonClientMouseEvents, true)
-        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, optional_size)
+        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, const optional_size&)
     };
 }

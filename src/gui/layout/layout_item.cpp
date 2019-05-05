@@ -21,6 +21,7 @@
 #include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
@@ -273,7 +274,12 @@ namespace neogfx
             return iMinimumSize;
         else
         {
-            iMinimumSize = subject().minimum_size(aAvailableSpace);
+            if (iMinimumSizeAnchor == std::nullopt)
+                iMinimumSizeAnchor = is_widget() ? static_cast<i_anchor<size, optional_size>*>(&*as_widget().anchors().anchor_map().find("MinimumSize")->second) : nullptr;
+            if (*iMinimumSizeAnchor == nullptr)
+                iMinimumSize = subject().minimum_size(aAvailableSpace);
+            else
+                iMinimumSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
             if (size_policy().maintain_aspect_ratio())
             {
                 const auto& aspectRatio = size_policy().aspect_ratio();
