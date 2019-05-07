@@ -64,6 +64,9 @@ namespace neogfx
         texture_data_format data_format() const override;
         const neogfx::size& extents() const override;
         void resize(const neogfx::size& aNewSize) override;
+        const void* cpixels() const override;
+        const void* pixels() const override;
+        void* pixels() override;
         colour get_pixel(const point& aPoint) const override;
         void set_pixel(const point& aPoint, const colour& aColour) override;
     private:

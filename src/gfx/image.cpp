@@ -216,6 +216,21 @@ namespace neogfx
         iData.resize(static_cast<std::size_t>(iSize.cx * iSize.cy * 4));
     }
 
+    const void* image::cpixels() const
+    {
+        return cdata();
+    }
+
+    const void* image::pixels() const
+    {
+        return data();
+    }
+
+    void* image::pixels()
+    {
+        return data();
+    }
+
     colour image::get_pixel(const point& aPoint) const
     {
         switch (iColourFormat)

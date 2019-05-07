@@ -136,7 +136,7 @@ namespace neogfx
 
     void texture::set_pixels(const i_image& aImage)
     {
-        set_pixels(rect{ point{}, aImage.extents() }, aImage.cdata());
+        set_pixels(rect{ point{}, aImage.extents() }, aImage.cpixels());
     }
 
     void texture::set_pixel(const point& aPosition, const colour& aColour)

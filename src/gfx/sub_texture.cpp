@@ -123,7 +123,7 @@ namespace neogfx
         {
         case colour_format::RGBA8:
             {
-                const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cdata());
+                const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
                 std::vector<uint8_t> data(imageExtents.cx * 4 * imageExtents.cy);
                 for (std::size_t y = 0; y < imageExtents.cy; ++y)
                     for (std::size_t x = 0; x < imageExtents.cx; ++x)

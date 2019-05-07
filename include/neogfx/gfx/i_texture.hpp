@@ -53,7 +53,7 @@ namespace neogfx
     {
         // todo: add remaining GL texture data formats
         RGBA        = 0x01,
-        Red            = 0x02,
+        Red         = 0x02,
         SubPixel    = 0x03
     };
 

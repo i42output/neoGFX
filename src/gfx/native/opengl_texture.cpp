@@ -198,7 +198,7 @@ namespace neogfx
             {
             case colour_format::RGBA8:
                 {
-                    const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cdata());
+                    const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
                     std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
                     for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                         for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
@@ -350,7 +350,7 @@ namespace neogfx
 
     void opengl_texture::set_pixels(const i_image& aImage)
     {
-        set_pixels(rect{ point{ 1.0, 1.0 }, aImage.extents() }, aImage.cdata());
+        set_pixels(rect{ point{ 1.0, 1.0 }, aImage.extents() }, aImage.cpixels());
     }
 
     void opengl_texture::set_pixel(const point& aPosition, const colour& aColour)

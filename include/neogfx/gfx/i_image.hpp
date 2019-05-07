@@ -44,6 +44,9 @@ namespace neogfx
         virtual texture_data_format data_format() const = 0;
         virtual const neogfx::size& extents() const = 0;
         virtual void resize(const neogfx::size& aNewSize) = 0;
+        virtual const void* cpixels() const = 0;
+        virtual const void* pixels() const = 0;
+        virtual void* pixels() = 0;
         virtual colour get_pixel(const point& aPoint) const = 0;
         virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
     };
