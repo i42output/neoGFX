@@ -496,12 +496,6 @@ int main(int argc, char* argv[])
         {
             button1.text().set_text(textField1.input_box().text());
         });
-        textEdit.Size.changed([&textField1](const ng::size& size)
-        {
-            std::ostringstream oss;
-            oss << "textEdit size: " << size;
-            textField1.input_box().set_text(oss.str());
-        });
         ng::vertical_layout layoutSpinners(layoutLineEdits);
         ng::horizontal_layout layoutSpinners2(layoutSpinners);
         ng::vertical_spacer spacerSpinners(layoutSpinners);
