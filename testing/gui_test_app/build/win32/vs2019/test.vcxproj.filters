@@ -33,6 +33,12 @@
     <ClCompile Include="x64\Release\GeneratedFiles\toolbar.nrc.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\GeneratedFiles\test.nrc.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\GeneratedFiles\toolbar.nrc.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\test.nrc">

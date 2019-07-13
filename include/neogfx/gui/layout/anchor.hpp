@@ -77,8 +77,8 @@ namespace neogfx
     {
         auto& first = *aFirst.anchors().anchor_map().find("MinimumSize")->second;
         auto& second = *aSecond.anchors().anchor_map().find("MinimumSize")->second;
-        first.as<size, optional_size>().add_constraint(anchor_constraint<size>::max, second.as<size, optional_size>());
-        second.as<size, optional_size>().add_constraint(anchor_constraint<size>::max, first.as<size, optional_size>());
+        first.as<size, const optional_size&>().add_constraint(anchor_constraint<size>::max, second.as<size, const optional_size&>());
+        second.as<size, const optional_size&>().add_constraint(anchor_constraint<size>::max, first.as<size, const optional_size&>());
     }
 
     #define define_anchor( name, getter, ... ) neogfx::anchor<__VA_ARGS__> Anchor_##name = { *this, #name ##s, getter };

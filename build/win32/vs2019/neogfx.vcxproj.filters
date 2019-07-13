@@ -887,7 +887,9 @@
     <CustomBuild Include="..\..\..\..\src\assets\neoGFX\icons.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\resources.nrc" />
+    <CustomBuild Include="..\..\..\src\resources.nrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\app\resource.cpp">
@@ -1151,18 +1153,6 @@
     <ClCompile Include="..\..\..\src\core\html.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Release\GeneratedFiles\icons.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\GeneratedFiles\icons.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\GeneratedFiles\resources.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\GeneratedFiles\resources.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\title_bar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1285,6 +1275,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\icons.nrc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\resources.nrc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\icons.nrc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\resources.nrc.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

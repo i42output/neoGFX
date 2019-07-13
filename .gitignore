@@ -263,3 +263,9 @@ Debug
 /3rdparty/lib/libpng16_staticd.lib
 /3rdparty/lib/zlibstatic.lib
 /3rdparty/lib/zlibstaticd.lib
+/testing/gui_test_app/build/win32/vs2019/.vs
+/build/win32/vs2019/.vs
+/build/win32/vs2019/neogfx.vcxproj.user
+/testing/gui_test_app/build/win32/vs2019/test.vcxproj.user
+/tools/glsl2hpp/build/win32/vs2019/glsl2hpp.vcxproj.user
+/tools/nrc/build/win32/vs2019/nrc.vcxproj.user

@@ -89,7 +89,7 @@ namespace neogfx
     {
         for (auto i = iTabs.begin(); i != iTabs.end(); ++i)
             if (&**i == &aTab)
-                return i - iTabs.begin();
+                return static_cast<tab_index>(i - iTabs.begin());
         throw tab_not_found();
     }
 

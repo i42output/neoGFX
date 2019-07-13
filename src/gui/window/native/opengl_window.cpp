@@ -135,7 +135,8 @@ namespace neogfx
         {
             scoped_render_target srt{ *this };
             std::array<uint8_t, 4> pixel;
-            glCheck(glReadPixels(aPosition.x, aPosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel));
+            basic_point<GLint> pos{ aPosition };
+            glCheck(glReadPixels(pos.x, pos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel));
             return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
         }
         else

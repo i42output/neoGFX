@@ -583,7 +583,8 @@ namespace neogfx
         {
             scoped_render_target srt{ *this };
             std::array<uint8_t, 4> pixel;
-            glCheck(glReadPixels(aPosition.x + 1, aPosition.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), &pixel));
+            basic_point<GLint> pos{ aPosition };
+            glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), &pixel));
             return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
         }
         else

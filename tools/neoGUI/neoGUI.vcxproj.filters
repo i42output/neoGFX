@@ -24,10 +24,10 @@
     <ClCompile Include="neoGUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\GeneratedFiles\neoGUI.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\neoGUI.nrc.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Release\GeneratedFiles\neoGUI.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\neoGUI.nrc.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>

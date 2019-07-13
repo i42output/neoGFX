@@ -547,7 +547,7 @@ namespace neogfx
         {
             glCheck(glEnable(GL_SCISSOR_TEST));
             GLint x = static_cast<GLint>(std::ceil(sr->x));
-            GLint y = logical_coordinates().is_gui_orientation() ? static_cast<GLint>(std::ceil(rendering_area(false).cy - sr->cy - sr->y)) : sr->y;
+            GLint y = static_cast<GLint>(logical_coordinates().is_gui_orientation() ? std::ceil(rendering_area(false).cy - sr->cy - sr->y) : sr->y);
             GLsizei cx = static_cast<GLsizei>(std::ceil(sr->cx));
             GLsizei cy = static_cast<GLsizei>(std::ceil(sr->cy));
             glCheck(glScissor(x, y, cx, cy));
@@ -727,7 +727,7 @@ namespace neogfx
     {
         basic_rect<float> boundingBox{ aBoundingBox };
         iShaderProgramStack.emplace_back(*this, iRenderingEngine, rendering_engine().gradient_shader_program());
-        rendering_engine().gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates().bottomLeft.y));
+        rendering_engine().gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(~logical_coordinates().bottomLeft.y));
         rendering_engine().gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
         rendering_engine().gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
         rendering_engine().gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));

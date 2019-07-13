@@ -1147,7 +1147,7 @@ namespace neogfx
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
                 std::vector<uint32_t> reversed;
                 if (std::get<2>(aGlyphRun) != text_direction::None_RTL)
-                    hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun), 0, std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
+                    hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)), 0, static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)));
                 else
                 {
                     reversed.reserve(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
@@ -1186,7 +1186,7 @@ namespace neogfx
                 iGlyphCount = glyphCount;
                 if (std::get<2>(aGlyphRun) == text_direction::None_RTL)
                     for (uint32_t i = 0; i < iGlyphCount; ++i)
-                        iGlyphInfo[i].cluster = std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun) - 1 - iGlyphInfo[i].cluster;
+                        iGlyphInfo[i].cluster = static_cast<uint32_t>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun) - 1 - iGlyphInfo[i].cluster);
             }
             ~glyphs()
             {
@@ -1317,7 +1317,7 @@ namespace neogfx
         {
             if (!using_fallback(aIndex))
                 throw not_using_fallback();
-            return std::distance(iGlyphsList.begin(), iResults[aIndex].first) - 1;
+            return static_cast<uint32_t>(std::distance(iGlyphsList.begin(), iResults[aIndex].first) - 1);
         }
     private:
         glyphs_list iGlyphsList;

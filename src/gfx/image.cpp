@@ -40,9 +40,9 @@ namespace neogfx
         iSampling{ aSampling }
     {
         resize(aSize);
-        for (std::size_t y = 0; y < aSize.cx; ++y)
-            for (std::size_t x = 0; x < aSize.cx; ++x)
-                set_pixel(point(x, y), aColour);
+        for (coordinate y = 0.0; y < aSize.cx; ++y)
+            for (coordinate x = 0.0; x < aSize.cx; ++x)
+                set_pixel(point{ x, y }, aColour);
     }
 
     image::image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling) :

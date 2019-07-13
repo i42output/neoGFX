@@ -68,9 +68,9 @@ namespace neogui
             iNew2DGame.enable(false);
             iNew25DGame.enable(false);
             iNew3DGame.enable(false);
-            iName.set_hint("Medium sized project name");
+            iName.set_size_hint(neogfx::size_hint{ "Medium sized project name" });
             iName.set_focus();
-            iNamespace.set_hint("Medium sized namespace name");
+            iNamespace.set_size_hint(neogfx::size_hint{ "Medium sized namespace name" });
             centre_on_parent();
             auto updateNamespace = [this]()
             {
