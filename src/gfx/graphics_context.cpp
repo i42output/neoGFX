@@ -369,7 +369,7 @@ namespace neogfx
     {
         if (aFill != neolib::none)
             fill_shape(aShape, aFill);
-        vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+        vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_shape{
                 mat44{ 
@@ -382,7 +382,7 @@ namespace neogfx
 
     void graphics_context::draw_entities(game::i_ecs& aEcs) const
     {
-        vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+        vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_entities{ 
                 aEcs, 
@@ -432,7 +432,7 @@ namespace neogfx
 
     void graphics_context::fill_shape(const game::mesh& aShape, const brush& aFill) const
     {
-        vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+        vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::fill_shape{
                 mat44{ 
@@ -1112,7 +1112,7 @@ namespace neogfx
 
     void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation) const
     {
-        vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+        vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_mesh{
                 aMesh,
@@ -1209,7 +1209,7 @@ namespace neogfx
             {
                 for (uint32_t i = 0; i < glyph_count(); ++i)
                 {
-                    auto tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
+                    auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
                     if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
                         return true;
                 }
@@ -1248,7 +1248,7 @@ namespace neogfx
                     break;
                 }
             }
-            auto g = iGlyphsList.begin();
+            auto const g = iGlyphsList.begin();
             iResults.reserve(g->glyph_count());
             for (uint32_t i = 0; i < g->glyph_count();)
             {
@@ -1274,7 +1274,7 @@ namespace neogfx
                         {
                             if (fallbackGlyphs.glyph_info(j).codepoint != 0)
                             {
-                                auto c = std::find(clusters.begin(), clusters.end(), fallbackGlyphs.glyph_info(j).cluster);
+                                auto const c = std::find(clusters.begin(), clusters.end(), fallbackGlyphs.glyph_info(j).cluster);
                                 if (c != clusters.end())
                                 {
                                     iResults.push_back(std::make_pair(currentFallback, j));
@@ -1385,7 +1385,7 @@ namespace neogfx
 
         for (std::size_t codePointIndex = 0; codePointIndex <= lastCodePointIndex; ++codePointIndex)
         {
-            font currentFont = aFontSelector(codePointIndex);
+            font const currentFont = aFontSelector(codePointIndex);
             switch (codePoints[codePointIndex])
             {
             case PDF:
