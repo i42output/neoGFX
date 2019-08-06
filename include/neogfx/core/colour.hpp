@@ -709,6 +709,7 @@ namespace neogfx
         // construction
     public:
         colour();
+        colour(const colour& aOther);
         explicit colour(argb aValue);
         colour(component aRed, component aGreen, component aBlue, component aAlpha = 0xFF);
         template <typename T>
@@ -853,7 +854,9 @@ namespace neogfx
         // construction
     public:
         gradient();
-        gradient(const colour& aColour, direction_e aDirection = Vertical);
+        gradient(const gradient& aOther);
+        explicit gradient(const colour& aColour);
+        gradient(const colour& aColour, direction_e aDirection);
         gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection = Vertical);
         gradient(const colour_stop_list& aColourStops, direction_e aDirection = Vertical);
         gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection = Vertical);

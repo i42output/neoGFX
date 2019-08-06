@@ -686,7 +686,10 @@ int main(int argc, char* argv[])
         effectWidthSlider.value_changed([&]()
         {
             auto s = textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, s.text_effect()->colour(), effectWidthSlider.value(), s.text_effect()->aux1() });
+            auto& textEffect = s.text_effect();
+            if (textEffect == std::nullopt)
+                return;
+            s.set_text_effect(ng::text_effect{ editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->colour(), effectWidthSlider.value(), textEffect->aux1() });
             textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
@@ -699,7 +702,10 @@ int main(int argc, char* argv[])
         {
             editGlow.check();
             auto s = textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, s.text_effect()->colour(), s.text_effect()->width(), effectAux1Slider.value() });
+            auto& textEffect = s.text_effect();
+            if (textEffect == std::nullopt)
+                return;
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->colour(), textEffect->width(), effectAux1Slider.value() });
             textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
@@ -1143,10 +1149,9 @@ int main(int argc, char* argv[])
                         aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::colour::Goldenrod);
 
             // easing function demo
-            ng::scalar t = app.program_elapsed_us();
-            auto d = 1000000.0;
-            auto x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
-//            auto x = ng::ease(ng::easing_class::Linear, ng::easing_class::Bounce, int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
+            ng::scalar t = static_cast<ng::scalar>(app.program_elapsed_us());
+            auto const d = 1000000.0;
+            auto const x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
             aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
             auto texLocation = ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();

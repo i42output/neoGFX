@@ -327,7 +327,7 @@ namespace neogfx
         if (useSubpixelFiltering)
         {
             // sub-pixel FIR filter.
-            static double coefficients[] = { 1.5 / 16.0, 3.0 / 16.0, 7.0 / 16.0, 3.0 / 16.0, 1.5 / 16.0 };
+            static double coefficients[] = { 0.5 / 16.0, 4.0 / 16.0, 7.0 / 16.0, 4.0 / 16.0, 0.5 / 16.0 };
             for (uint32_t y = 0; y < bitmap.rows; y++)
             {
                 for (uint32_t x = 0; x < bitmap.width; x++)

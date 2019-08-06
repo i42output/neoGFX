@@ -476,9 +476,9 @@ namespace neogfx
         return static_cast<easing>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
     }
 
-    inline constexpr const std::array<easing, 43>& standard_easings()
+    inline constexpr const std::array<easing, 43> standard_easings()
     {
-        static constexpr std::array<easing, 43> STANDARD_EASINGS =
+        constexpr std::array<easing, 43> STANDARD_EASINGS =
         { {
             easing::Linear,
             easing::InQuad,

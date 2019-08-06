@@ -42,6 +42,10 @@ namespace neogfx
     {
     }
 
+    colour::colour(const colour& aOther) : iValue{ aOther.iValue }
+    {
+    }
+
     colour::colour(argb aValue) : iValue{ aValue }
     {
     }
@@ -397,62 +401,74 @@ namespace neogfx
 
     gradient::gradient() :
         iUseCache{ true },
-        iColourStops{{0.0, colour::Black}, {1.0, colour::Black}},
-        iAlphaStops{{0.0, 255_u8}, {1.0, 255_u8}},
-        iDirection(Horizontal),
-        iOrientation(TopLeft),
-        iShape(Ellipse),
-        iSize(FarthestCorner),
-        iSmoothness{0.0}
+        iColourStops{ {0.0, colour::Black}, {1.0, colour::Black} },
+        iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
+        iDirection{ Horizontal },
+        iOrientation{ TopLeft },
+        iShape{ Ellipse },
+        iSize{ FarthestCorner },
+        iSmoothness{ 0.0 }
+    {
+    }
+
+    gradient::gradient(const gradient& aOther) : 
+        iUseCache{ aOther.iUseCache },
+        iColourStops{ aOther.iColourStops },
+        iAlphaStops{ aOther.iAlphaStops },
+        iDirection{ aOther.iDirection },
+        iOrientation{ aOther.iOrientation },
+        iShape{ aOther.iShape },
+        iSize{ aOther.iSize },
+        iExponents{ aOther.iExponents },
+        iCentre{ aOther.iCentre },
+        iSmoothness{ aOther.iSmoothness }
+    {
+    }
+
+    gradient::gradient(const colour& aColour) :
+        gradient{ aColour, Vertical }
     {
     }
 
     gradient::gradient(const colour& aColour, direction_e aDirection) :
-        iUseCache{ true },
-        iColourStops{{0.0, aColour}, {1.0, aColour}},
-        iAlphaStops{{0.0, 255_u8}, {1.0, 255_u8}},
-        iDirection(aDirection),
-        iOrientation(TopLeft),
-        iShape(Ellipse),
-        iSize(FarthestCorner),
-        iSmoothness{0.0}
+        gradient{ aColour, aColour, aDirection }
     {
     }
 
     gradient::gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection) :
         iUseCache{ true },
-        iColourStops{{0.0, aColour1}, {1.0, aColour2}},
-        iAlphaStops{{0.0, 255_u8}, {1.0, 255_u8}},
-        iDirection(aDirection),
-        iOrientation(TopLeft),
-        iShape(Ellipse),
-        iSize(FarthestCorner),
-        iSmoothness{0.0}
-    {
+        iColourStops{ {0.0, aColour1}, {1.0, aColour2} },
+        iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
+        iDirection{ aDirection },
+        iOrientation{ TopLeft },
+        iShape{ Ellipse },
+        iSize{ FarthestCorner },
+        iSmoothness{ 0.0 }
+    { 
     }
 
     gradient::gradient(const colour_stop_list& aColourStops, direction_e aDirection) :
         iUseCache{ true },
-        iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
-        iAlphaStops{{{0.0, 255_u8}, {1.0, 255_u8}}},
-        iDirection(aDirection),
-        iOrientation(TopLeft),
-        iShape(Ellipse),
-        iSize(FarthestCorner),
-        iSmoothness{0.0}
+        iColourStops{ !aColourStops.empty() ? aColourStops : colour_stop_list{ {0.0, colour::Black}, {1.0, colour::Black} } },
+        iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
+        iDirection{ aDirection },
+        iOrientation{ TopLeft },
+        iShape{ Ellipse },
+        iSize{ FarthestCorner },
+        iSmoothness{ 0.0 }
     {
         fix();
     }
 
     gradient::gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection) :
         iUseCache{ true },
-        iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
-        iAlphaStops{!aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{{0.0, 255_u8}, {1.0, 255_u8}}},
-        iDirection(aDirection),
-        iOrientation(TopLeft),
-        iShape(Ellipse),
-        iSize(FarthestCorner),
-        iSmoothness{0.0}
+        iColourStops{ !aColourStops.empty() ? aColourStops : colour_stop_list{ {0.0, colour::Black}, {1.0, colour::Black} } },
+        iAlphaStops{ !aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{ {0.0, 255_u8}, {1.0, 255_u8} } },
+        iDirection{ aDirection },
+        iOrientation{ TopLeft },
+        iShape{ Ellipse },
+        iSize{ FarthestCorner },
+        iSmoothness{ 0.0 }
     {
         fix();
     }
