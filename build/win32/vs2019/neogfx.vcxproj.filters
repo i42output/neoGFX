@@ -887,9 +887,6 @@
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\..\src\assets\neoGFX\icons.nrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\resources.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
@@ -1307,6 +1304,9 @@
     </None>
     <None Include="..\..\..\include\neogfx\gfx\path.inl">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\src\icons.nrc">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
 </Project>

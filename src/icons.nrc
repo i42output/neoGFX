@@ -1,0 +1,7 @@
+{
+    resource: {
+        ref: icons
+        prefix: neogfx
+        file: resources/icons.naa
+    }
+}
