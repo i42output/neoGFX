@@ -1,5 +1,7 @@
-<nrc ref="neogfx_resources">
-    <resource prefix="neogfx">
-        <file>resources/icons/neoGFX.png</file>
-    </resource>
-</nrc>
+{
+    resource: {
+        ref: resources
+        prefix: neogfx
+        file: resources/icons/neoGFX.png
+    }
+}

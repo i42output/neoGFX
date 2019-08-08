@@ -17,10 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neolib/neolib.hpp>
 #include <fstream>
 #include <iostream>
 #include <boost/filesystem.hpp>
-#include <neolib/xml.hpp>
+#include <neolib/json.hpp>
 
 struct invalid_file : std::runtime_error 
 { 
@@ -50,11 +51,13 @@ int main(int argc, char* argv[])
         {
             throw bad_usage();
         }
-        std::string inputFileName(files[0]);
+
+        std::string inputFileName{ files[0] };
         std::cout << "Resource meta file: " << inputFileName << std::endl;
-        neolib::xml input(inputFileName);
-        if (!input.got_root() || input.root().name() != "nrc")
+        neolib::rjson input{ inputFileName };
+        if (!input.has_root())
             throw invalid_file("bad root node");
+
         std::string outputFileName;
         if (files.size() > 1)
             outputFileName = files[1];
@@ -83,27 +86,30 @@ int main(int argc, char* argv[])
         }
         if (options.empty() || options[0] == "-embed")
         {
-            std::ofstream output(outputFileName);
+            std::ofstream output{ outputFileName };
             output << "// This is a automatically generated file, do not edit!" << std::endl;
             output << "#include <neogfx/app/resource_manager.hpp>" << std::endl << std::endl;
             output << "namespace nrc" << std::endl << "{" << std::endl;
             output << "namespace" << std::endl << "{" << std::endl;
             std::vector<std::string> resourcePaths;
+            std::vector<neolib::rjson_string> symbols;
             uint32_t resourceIndex = 0;
-            for (const auto& resource : input.root())
+            for (const auto& item : input.root())
             {
-                if (resource.name() == "resource")
+                if (item.name() == "resource")
                 {
-                    for (const auto& file : resource)
+                    auto const& resource = item.as<neolib::rjson_object>();
+                    auto const& resourcePrefix = resource.has("prefix") ? resource.at("prefix").text() : "";
+                    for (const auto& resourceItem : item)
                     {
-                        if (file.name() == "file")
+                        auto process_file = [&](const neolib::rjson_string& aFile)
                         {
-                            std::cout << "Processing " << std::string(file.text()) << "..." << std::endl;
-                            resourcePaths.push_back((resource.has_attribute("prefix") ? std::string(resource.attribute_value("prefix")) + "/" : "") + std::string(file.text()));
+                            std::cout << "Processing " << aFile << "..." << std::endl;
+                            resourcePaths.push_back((!resourcePrefix.empty() ? resourcePrefix + "/" : "") + aFile);
                             std::string resourcePath = boost::filesystem::path(inputFileName).parent_path().string();
                             if (!resourcePath.empty())
                                 resourcePath += "/";
-                            resourcePath += std::string(file.text());
+                            resourcePath += aFile;
                             std::ifstream resourceFile(resourcePath, std::ios_base::in | std::ios_base::binary);
                             output << "\tconst unsigned char resource_" << resourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
                             const std::size_t kBufferSize = 32;
@@ -139,24 +145,34 @@ int main(int argc, char* argv[])
                                 throw failed_to_read_resource_file(resourcePath);
                             output << "\t};" << std::endl;
                             ++resourceIndex;
-                        }
+                        };
+                        if (resourceItem.name() == "file")
+                            process_file(resourceItem.text());
+                        else if (resourceItem.name() == "files")
+                            for(auto const& fileItem : resourceItem)
+                                process_file(fileItem.text());
                     }
+                    output << "\n\tstruct register_data" << std::endl << "\t{" << std::endl;
+                    output << "\t\tregister_data()" << std::endl << "\t\t{" << std::endl;
+                    for (std::size_t i = 0; i < resourcePaths.size(); ++i)
+                    {
+                        output << "\t\t\tneogfx::resource_manager::instance().add_module_resource("
+                            << "\":/" << resourcePaths[i] << "\", " << "resource_" << i << "_data, " << "sizeof(resource_" << i << "_data)"
+                            << ");" << std::endl;
+                    }
+                    output << "\t\t}" << std::endl;
+                    auto const& resourceRef = resource.has("ref") ? resource.at("ref").text() : "";
+                    auto symbol = resourcePrefix;
+                    if (!symbol.empty() && !resourceRef.empty())
+                        symbol += "_";
+                    symbol += resourceRef;
+                    output << "\t} " << symbol << ";" << std::endl;
+                    symbols.push_back(symbol);
                 }
             }
-            output << "\tstruct register_data" << std::endl << "\t{" << std::endl;
-            output << "\t\tregister_data()" << std::endl << "\t\t{" << std::endl;
-            for (std::size_t i = 0; i < resourcePaths.size(); ++i)
-            {
-                output << "\t\t\tneogfx::resource_manager::instance().add_module_resource("
-                    << "\":/" << resourcePaths[i] << "\", " << "resource_" << i << "_data, " << "sizeof(resource_" << i << "_data)"
-                    << ");" << std::endl;
-            }
-            output << "\t\t}" << std::endl;
-            output << "\t} sData;" << std::endl;
-            output << "}" << std::endl;
-            if (input.root().has_attribute("ref"))
-                output << "void* " << input.root().attribute_value("ref") << " = &sData;" << std::endl;
-            output << "}" << std::endl;
+            output << "}" << std::endl << "}" << std::endl << std::endl;
+            for (auto const& symbol : symbols)
+                output << "extern \"C\" void* nrc_" << symbol << " = &nrc::" << symbol << ";" << std::endl;
         }
     }
     catch (const bad_usage&)

@@ -1,12 +1,15 @@
-<nrc>
-    <resource prefix="test">
-        <file>resources/neoGFX.png</file>
-        <file>resources/channel.png</file>
-        <file>resources/channel_32.png</file>
-        <file>resources/channel_128.png</file>
-        <file>resources/channel_256.png</file>    
-        <file>resources/orca.png</file>
-    <file>resources/explosion.png</file>
-    <file>resources/icon.png</file>
-  </resource>
-</nrc>
+{
+    resource: {
+        prefix: test
+        files: [
+            resources/neoGFX.png
+            resources/channel.png
+            resources/channel_32.png
+            resources/channel_128.png
+            resources/channel_256.png
+            resources/orca.png
+            resources/explosion.png
+            resources/icon.png
+        ]
+    }
+}

@@ -33,6 +33,11 @@
 #include <neogfx/app/i_mnemonic.hpp>
 #include <neogfx/app/i_help.hpp>
 
+#ifdef _WIN32
+#pragma comment(linker, "/include:nrc_neogfx_icons")
+#pragma comment(linker, "/include:nrc_neogfx_resources")
+#endif
+
 namespace neogfx
 {
     class program_options : public i_program_options

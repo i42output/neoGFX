@@ -241,4 +241,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties _1_1_4_1_1_4_1_1_4src_4test_1nrc__JsonSchema="http://json.schemastore.org/chrome-manifest" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

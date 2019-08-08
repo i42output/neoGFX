@@ -25,6 +25,9 @@
     <Filter Include="Game\Source Files">
       <UniqueIdentifier>{116b0a7b-b514-4f31-a00d-0f792944974c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI Files">
+      <UniqueIdentifier>{0a6d76fe-1c36-4df9-865d-7e0edd3713a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

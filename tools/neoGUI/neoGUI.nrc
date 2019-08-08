@@ -1,6 +1,7 @@
-<nrc>
-    <resource prefix="neoGUI">
-        <file>resource/neoGFX.png</file>
-        <file>resource/logo_i42.png</file>
-    </resource>
-</nrc>
+{
+    resource: {
+        prefix: neoGUI
+        file: resource/neoGFX.png
+        file: resource/logo_i42.png
+    }
+}
