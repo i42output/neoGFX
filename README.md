@@ -9,7 +9,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - use of standard non-proprietary C++ data types including using standard string classes (UTF-8 encoding) and containers from the C++ standard library;
 - simple, easy to use multi-threaded event system (an improvement over traditional signals and slots);
 - no baggage: neoGFX primarily contains only the GUI and graphics related functionality needed for creating apps and games;
-- full library of widgets and layout managers specifiable in XML using the included GUI designer tool;
+- full library of widgets and layout managers specifiable in RJSON (Relaxed JSON) using the included GUI designer tool;
 - CSS3 style sheet support with support for custom skins;
 - scripting engine, neos, that will be able to support a wide range of scripting languages (on release: neoscript, JavaScript and Lua);
 - sub-pixel text rendering;
