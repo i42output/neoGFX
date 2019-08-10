@@ -2,14 +2,165 @@
     resource: {
         prefix: test
         files: [
-            resources/neoGFX.png
-            resources/channel.png
-            resources/channel_32.png
-            resources/channel_128.png
-            resources/channel_256.png
-            resources/orca.png
-            resources/explosion.png
-            resources/icon.png
+            resources/neoGFX.png // a comment
+            resources/channel.png// another comment
+            /* another comment */ resources/channel_32.png
+            /* another comment */resources/channel_128.png
+            resources/channel_256.png /* another comment */
+            resources/orca.png/* another comment */
+            resources/explosion.png /* another comment */// another comment
+            resources/icon.png /* another comment */ // another comment
         ]
+    }
+
+    ui: {
+        app: {
+            id: app
+            name: "neoGFX Test App"
+            default_window_icon: ":/test/resources/icon.png"
+            action: {
+                id: goldenrodStyleAction
+                text: "Goldenrod Style"
+                shortcut: "Ctrl+Alt+Shift+G"
+            }
+            action: {
+                id: contactsAction
+                text: "&Contacts..."
+                image_uri: ":/closed/resources/caw_toolbar.naa#contacts.png"
+                shortcut: "Alt+C"
+            }
+            action: {
+                id: addFavouriteAction
+                text: "Add Favourite..."
+                image_uri: ":/closed/resources/caw_toolbar.naa#add_favourite.png"
+            }
+            action: {
+                id: organizeFavouritesAction
+                text: "Organize Favourites..."
+                image_uri: ":/closed/resources/caw_toolbar.naa#organize_favourites.png"
+                shortcut: "Alt+C"
+            }
+            action: {
+                id: muteAction
+                text: "Mute/&Unmute Sound"
+                image_uri: ":/closed/resources/caw_toolbar.naa#mute.png"
+                checkable: true
+                checked_image_uri: ":/closed/resources/caw_toolbar.naa#unmute.png"
+            }
+            action: {
+                id: pasteAndGoAction
+                text: "Paste and Go"
+                image_uri: ":/closed/resources/caw_toolbar.naa#paste_and_go.png"
+                shortcut: "Ctrl+Shift+V"
+            }
+            window: {
+                id: window
+                default_width: 800
+                default_height: 800
+                status_bar: {
+                    id: statusBar
+                }
+                menu_bar: {
+                    id: menu
+                    menu: {
+                        title: "&File"
+                        action: app.action_file_new()
+                        action: app.action_file_open()
+                        action: separator
+                        action: app.action_file_close()
+                        action: separator
+                        action: app.action_file_save()
+                        action: separator
+                        action: app.action_file_exit()
+                    }
+                    menu: {
+                        title: "&Edit"
+                        action: app.action_undo()
+                        action: app.action_redo()
+                        action: separator
+                        action: app.action_cut()
+                        action: app.action_copy()
+                        action: app.action_paste()
+                        action: pasteAndGoAction
+                        action: app.action_delete()
+                        action: separator
+                        action: app.action_select_all()
+                    }
+                    menu: {
+                        title: "&View"
+                    }
+                    menu: {
+                        title: "F&avourites"
+                        action: addFavouriteAction
+                        action: organizeFavouritesAction
+                        action: separator
+                        action: { text: "Alice" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Bob" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Carlos" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Dave" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        menu: {
+                            title: "Silent Running Drones"
+                            image_uri: ":/closed/resources/caw_toolbar.naa#folder.png"
+                            action: { text: "Dewey" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                            action: { text: "Huey" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                            action: { text: "Louie" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        }
+                        menu: {
+                            title: "DC (TM) Characters"
+                            image_uri: ":/closed/resources/caw_toolbar.naa#folder.png"
+                        }
+                        menu: {
+                            title: "Marvel (TM) Characters"
+                            image_uri: ":/closed/resources/caw_toolbar.naa#folder.png"
+                        }
+                        action: separator
+                    }
+                    action: contactsAction
+                    action: muteAction
+                    action: { text: "&Xyzzy..." image_uri: ":/neogfx/resources/icons.naa#eyedropper.png" }
+                    menu: {
+                        id: testMenu
+                        title: "&Test"
+                        action: {
+                            id: emacsStyleSequence1
+                            title: "Emacs style sequence #1"
+                            shortcut: "Ctrl+K, Ctrl+B"
+                        }
+                        action: {
+                            id: emacsStyleSequence2
+                            title: "Emacs style sequence #2"
+                            shortcut: "Ctrl+K, Ctrl+K"
+                        }
+                        action: contactsAction
+                        action: muteAction
+                        action: muteAction
+                        action: muteAction
+                        action: muteAction
+                        action: {
+                            id: colourAction
+                            title: "Colour Dialog..."
+                        }
+                    }
+                    menu: {
+                        id: windowMenu
+                        title: "&Window"
+                        action: {
+                            id: nextTabAction
+                            title: "Next Tab"
+                            shortcut: "Ctrl+Tab"
+                        }
+                        action: {
+                            id: previousTabAction
+                            title: "Previous Tab"
+                            shortcut: "Shift+Ctrl+Tab"
+                        }
+                    }
+                    menu: {
+                        id: helpMenu
+                        title: "&Help"
+                    }
+                }
+            }
+        }
     }
 }

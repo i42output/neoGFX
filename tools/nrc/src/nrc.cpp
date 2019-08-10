@@ -33,6 +33,7 @@ struct failed_to_read_resource_file : std::runtime_error
     failed_to_read_resource_file(const std::string& aPath) : std::runtime_error("Failed to read resource file '" + aPath + "'!") {}
 };
 struct bad_usage : std::runtime_error { bad_usage() : std::runtime_error("Bad usage") {} };
+struct not_yet_implemented : std::runtime_error { not_yet_implemented() : std::runtime_error("Not yet implemented") {} };
 
 int main(int argc, char* argv[])
 {
@@ -52,57 +53,43 @@ int main(int argc, char* argv[])
             throw bad_usage();
         }
 
-        std::string inputFileName{ files[0] };
+        boost::filesystem::path const inputFileName{ files[0] };
         std::cout << "Resource meta file: " << inputFileName << std::endl;
-        neolib::rjson input{ inputFileName };
+        neolib::fjson const input{ inputFileName.string() };
         if (!input.has_root())
             throw invalid_file("bad root node");
 
-        std::string outputFileName;
-        if (files.size() > 1)
-            outputFileName = files[1];
-        if (outputFileName.empty())
-        {
-            outputFileName = inputFileName;
-            std::string::size_type dot = outputFileName.rfind('.');
-            if (options.empty() || options[0] == "-embed")
-            {
-                if (dot == std::string::npos)
-                    outputFileName += ".cpp";
-                else
-                    outputFileName = outputFileName.substr(0, dot) + ".cpp";
-            }
-            else if (options[0] == "-archive")
-            {
-                if (dot == std::string::npos)
-                    outputFileName += ".na";
-                else
-                    outputFileName = outputFileName.substr(0, dot) + ".na";
-            }
-            else
-            {
-                throw bad_usage();
-            }
-        }
+        std::string const outputDirectory{ files.size() > 1 ? files[1] : boost::filesystem::current_path().string() };
+         
+        std::string resourceFileName; 
+        if (options.empty() || options[0] == "-embed")
+            resourceFileName = inputFileName.filename().stem().string() + ".nrc.cpp";
+        else if (options[0] == "-archive")
+            throw not_yet_implemented();
+        else
+            throw bad_usage();
+
         if (options.empty() || options[0] == "-embed")
         {
-            std::ofstream output{ outputFileName };
+            auto resourceOutputPath = outputDirectory + "/" + resourceFileName;
+            std::cout << "Creating " << resourceOutputPath << "..." << std::endl;
+            std::ofstream output{ resourceOutputPath };
             output << "// This is a automatically generated file, do not edit!" << std::endl;
             output << "#include <neogfx/app/resource_manager.hpp>" << std::endl << std::endl;
             output << "namespace nrc" << std::endl << "{" << std::endl;
             output << "namespace" << std::endl << "{" << std::endl;
             std::vector<std::string> resourcePaths;
-            std::vector<neolib::rjson_string> symbols;
+            std::vector<neolib::fjson_string> symbols;
             uint32_t resourceIndex = 0;
             for (const auto& item : input.root())
             {
                 if (item.name() == "resource")
                 {
-                    auto const& resource = item.as<neolib::rjson_object>();
+                    auto const& resource = item.as<neolib::fjson_object>();
                     auto const& resourcePrefix = resource.has("prefix") ? resource.at("prefix").text() : "";
                     for (const auto& resourceItem : item)
                     {
-                        auto process_file = [&](const neolib::rjson_string& aFile)
+                        auto process_file = [&](const neolib::fjson_string& aFile)
                         {
                             std::cout << "Processing " << aFile << "..." << std::endl;
                             resourcePaths.push_back((!resourcePrefix.empty() ? resourcePrefix + "/" : "") + aFile);
@@ -177,7 +164,7 @@ int main(int argc, char* argv[])
     }
     catch (const bad_usage&)
     {
-        std::cerr << "Usage: " << argv[0] << " [-embed|-archive] <input path> [<output path>]" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " [-embed|-archive] <input path> [<output directory>]" << std::endl;
         return EXIT_FAILURE;
     }
     catch (const std::exception& e)
