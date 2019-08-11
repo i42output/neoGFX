@@ -118,7 +118,7 @@ namespace video_poker
             };
             if (is_straight(valueCounter))
                 result = poker_hand::Straight;
-            else if (card_type::game_traits::ace_high::value && aHand.contains(card_type::value::Ace)) // Check for straight when Ace is low.
+            else if (card_type::game_traits::ace_high && aHand.contains(card_type::value::Ace)) // Check for straight when Ace is low.
             {
                 auto aceLowHand = valueCounter;
                 aceLowHand.erase(aceLowHand.find(card_type::value::Ace));

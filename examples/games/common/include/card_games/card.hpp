@@ -36,29 +36,29 @@ namespace neogames
         public:
             enum class value : uint32_t
             {
-                Joker    = 0,
-                LowAce    = 1,
-                Two        = 2,
-                Three    = 3,
+                Joker   = 0,
+                LowAce  = 1,
+                Two     = 2,
+                Three   = 3,
                 Four    = 4,
                 Five    = 5,
-                Six        = 6,
-                Seven    = 7,
-                Eight    = 8,
+                Six     = 6,
+                Seven   = 7,
+                Eight   = 8,
                 Nine    = 9,
-                Ten        = 10,
+                Ten     = 10,
                 Jack    = 11,
-                Queen    = 12,
+                Queen   = 12,
                 King    = 13,
-                Ace        = game_traits::ace_high::value ? King + 1 : Two - 1
+                Ace     = game_traits::ace_high ? King + 1 : Two - 1
             };
             enum class suit : uint32_t
             {
                 Joker   = 0,
                 Club    = 1,
                 Diamond = 2,
-                Heart    = 3,
-                Spade    = 4
+                Heart   = 3,
+                Spade   = 4
             };
             enum class colour
             {

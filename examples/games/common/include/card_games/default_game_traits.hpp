@@ -25,13 +25,13 @@ namespace neogames
 {
     namespace card_games
     {
-        struct poker_game_traits
+        struct default_game_traits
         {
-            static const uint32_t hand_size = 5;
-            typedef std::true_type ace_high;
-            typedef std::false_type jokers_present;
+            static inline constexpr uint32_t hand_size = 5u;
+            static inline constexpr bool ace_high = true;
+            static inline constexpr bool jokers_present = false;
         };
 
-        typedef poker_game_traits default_game_traits;
+        typedef default_game_traits poker_game_traits;
     }
 }
