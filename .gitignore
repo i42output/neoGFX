@@ -269,3 +269,4 @@ Debug
 /testing/gui_test_app/build/win32/vs2019/test.vcxproj.user
 /tools/glsl2hpp/build/win32/vs2019/glsl2hpp.vcxproj.user
 /tools/nrc/build/win32/vs2019/nrc.vcxproj.user
+/examples/games/video_poker/build/win32/vs2019/video_poker.vcxproj.user

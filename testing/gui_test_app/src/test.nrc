@@ -2,14 +2,14 @@
     resource: {
         prefix: test
         files: [
-            resources/neoGFX.png // a comment
-            resources/channel.png// another comment
-            /* another comment */ resources/channel_32.png
-            /* another comment */resources/channel_128.png
-            resources/channel_256.png /* another comment */
-            resources/orca.png/* another comment */
-            resources/explosion.png /* another comment */// another comment
-            resources/icon.png /* another comment */ // another comment
+            resources/neoGFX.png
+            resources/channel.png
+            resources/channel_32.png
+            resources/channel_128.png
+            resources/channel_256.png
+            resources/orca.png
+            resources/explosion.png
+            resources/icon.png
         ]
     }
 

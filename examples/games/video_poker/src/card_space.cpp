@@ -128,7 +128,7 @@ namespace video_poker
         iTable{ aTable },
         iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
         iCardWidget{ iVerticalLayout, aCanvas, aTable.textures() },
-        iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " },
+        iHoldButton{ iVerticalLayout, "HOLD\n CANCEL " },
         iCard{ nullptr }
     {
         set_size_policy(neogfx::size_policy::ExpandingPixelPerfect);

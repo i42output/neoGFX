@@ -34,4 +34,18 @@ namespace neogfx
 
     template <typename Component>
     Component& service();
+
+    template <typename CharT, typename Traits, typename Allocator>
+    inline const std::string to_string(const std::basic_string<CharT, Traits, Allocator>& aString)
+    {
+        static_assert(sizeof(CharT) == sizeof(char));
+        return std::string{ reinterpret_cast<const char*>(aString.c_str()), aString.size() };
+    }
+
+    template <typename CharT, std::size_t Size>
+    inline const std::string to_string(const CharT (&aString)[Size])
+    {
+        static_assert(sizeof(CharT) == sizeof(char));
+        return std::string{ reinterpret_cast<const char*>(aString), Size };
+    }
 }

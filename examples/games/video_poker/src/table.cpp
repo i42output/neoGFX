@@ -110,7 +110,7 @@ namespace video_poker
             aButton.set_size_policy(neogfx::size_policy::Minimum, neogfx::size{ 1.0 });
             aButton.set_weight(neogfx::size{});
             aButton.set_foreground_colour(neogfx::colour::White);
-            aButton.text().set_size_hint("MAX\nBET");
+            aButton.text().set_size_hint(neogfx::size_hint{ "MAX\nBET" });
             aButton.text().set_text_colour(neogfx::colour::Black);
             aButton.text().set_font(neogfx::font{ "Exo 2", "Black", 24.0 });
         };
@@ -234,7 +234,7 @@ namespace video_poker
     {
         iOutcome = std::make_unique<outcome>(
             iCanvas, 
-            to_string(video_poker::to_poker_hand(*iHand)) + u8"\nWIN £" + boost::lexical_cast<std::string>(aWinnings) + "!",
+            to_string(video_poker::to_poker_hand(*iHand)) + neogfx::to_string(u8"\nWIN £") + boost::lexical_cast<std::string>(aWinnings) + "!",
             neogfx::colour::Goldenrod.with_lightness(0.8));
         iCredits += aWinnings;
     }
@@ -289,8 +289,8 @@ namespace video_poker
 
     void table::update_widgets()
     {
-        iLabelCreditsValue.text().set_text(u8"£" + boost::lexical_cast<std::string>(iCredits));
-        iLabelStakeValue.text().set_text(u8"£" + boost::lexical_cast<std::string>(iStake));
+        iLabelCreditsValue.text().set_text( neogfx::to_string(u8"£") + boost::lexical_cast<std::string>(iCredits));
+        iLabelStakeValue.text().set_text( neogfx::to_string(u8"£") + boost::lexical_cast<std::string>(iStake));
         iBetMinus.enable(iState == table_state::TakeBet && iStake > 0);
         iBetPlus.enable(iState == table_state::TakeBet && iCredits > 0 && iStake < MAX_BET);
         iBetMax.enable(iState == table_state::TakeBet && iCredits > 0 && iStake < MAX_BET);

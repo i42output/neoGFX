@@ -1,15 +1,18 @@
-<nrc>
-    <resource prefix="video_poker">
-        <file>resources/neoGFX.png</file>
-    <file>resources/icon.png</file>
-    <file>resources/club.png</file>
-    <file>resources/spade.png</file>
-    <file>resources/diamond.png</file>
-    <file>resources/heart.png</file>
-    <file>resources/jack.png</file>
-    <file>resources/queen.png</file>
-    <file>resources/king.png</file>
-    <file>resources/joker.png</file>
-    <file>resources/values.png</file>
-  </resource>
-</nrc>
+{
+    resource: {
+        prefix: video_poker
+        files: [
+            resources/neoGFX.png
+            resources/icon.png
+            resources/club.png
+            resources/spade.png
+            resources/diamond.png
+            resources/heart.png
+            resources/jack.png
+            resources/queen.png
+            resources/king.png
+            resources/joker.png
+            resources/values.png
+        ]
+    }
+}
