@@ -92,9 +92,14 @@ namespace neogfx
             {
                 iTracking = s;
                 iTrackFrom = aPosition;
-                iSizeBeforeTracking = std::make_pair(
-                    layout().get_widget_at(iTracking->first).minimum_size().cx, 
-                    layout().get_widget_at(iTracking->second).minimum_size().cx);
+                if (iType == HorizontalSplitter)
+                    iSizeBeforeTracking = std::make_pair(
+                        layout().get_widget_at(iTracking->first).minimum_size().cx, 
+                        layout().get_widget_at(iTracking->second).minimum_size().cx);
+                else
+                    iSizeBeforeTracking = std::make_pair(
+                        layout().get_widget_at(iTracking->first).minimum_size().cy,
+                        layout().get_widget_at(iTracking->second).minimum_size().cy);
                 if (has_root())
                     root().window_manager().update_mouse_cursor(root());
             }
@@ -124,10 +129,9 @@ namespace neogfx
         {
             if (iType == HorizontalSplitter)
             {
-
-                layout().get_widget_at(iTracking->first).set_minimum_size(size(
+                layout().get_widget_at(iTracking->first).set_minimum_size(size{
                     std::max(iSizeBeforeTracking.first + (aPosition.x - iTrackFrom.x), layout().spacing().cx * 3.0),
-                    layout().get_widget_at(iTracking->first).minimum_size().cy), false);
+                    layout().get_widget_at(iTracking->first).minimum_size().cy }, false);
                 if (service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT))
                 {
                     layout().get_widget_at(iTracking->second).set_minimum_size(size(
@@ -139,7 +143,17 @@ namespace neogfx
             }
             else
             {
-                // todo
+                layout().get_widget_at(iTracking->first).set_minimum_size(size{
+                    layout().get_widget_at(iTracking->first).minimum_size().cx,
+                    std::max(iSizeBeforeTracking.first + (aPosition.y - iTrackFrom.y), layout().spacing().cy * 3.0) }, false);
+                if (service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT))
+                {
+                    layout().get_widget_at(iTracking->second).set_minimum_size(size{
+                        layout().get_widget_at(iTracking->second).minimum_size().cx,
+                        std::max(iSizeBeforeTracking.second - (aPosition.y - iTrackFrom.y), layout().spacing().cy * 3.0) }, false);
+                }
+                layout_items();
+                panes_resized();
             }
         }
     }
