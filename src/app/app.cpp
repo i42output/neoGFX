@@ -159,20 +159,6 @@ namespace neogfx
         iInExec{ false },
         iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
         iCurrentStyle{ iStyles.begin() },
-        iActionFileNew{ add_action("&New..."_t, ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },
-        iActionFileOpen{ add_action("&Open..."_t, ":/neogfx/resources/icons.naa#open.png").set_shortcut("Ctrl+Shift+O") },
-        iActionFileClose{ add_action("&Close"_t).set_shortcut("Ctrl+F4") },
-        iActionFileCloseAll{ add_action("Close All"_t) },
-        iActionFileSave{ add_action("&Save"_t, ":/neogfx/resources/icons.naa#save.png").set_shortcut("Ctrl+S") },
-        iActionFileSaveAll{ add_action("Save A&ll"_t).set_shortcut("Ctrl+Shift+S") },
-        iActionFileExit{ add_action("E&xit"_t).set_shortcut("Alt+F4") },
-        iActionUndo{ add_action("Undo"_t, ":/neogfx/resources/icons.naa#undo.png").set_shortcut("Ctrl+Z") },
-        iActionRedo{ add_action("Redo"_t, ":/neogfx/resources/icons.naa#redo.png").set_shortcut("Ctrl+Shift+Z") },
-        iActionCut{ add_action("Cut"_t, ":/neogfx/resources/icons.naa#cut.png").set_shortcut("Ctrl+X") },
-        iActionCopy{ add_action("Copy"_t, ":/neogfx/resources/icons.naa#copy.png").set_shortcut("Ctrl+C") },
-        iActionPaste{ add_action("Paste"_t, ":/neogfx/resources/icons.naa#paste.png").set_shortcut("Ctrl+V") },
-        iActionDelete{ add_action("Delete"_t).set_shortcut("Del") },
-        iActionSelectAll{ add_action("Select All"_t).set_shortcut("Ctrl+A") },
         iStandardActionManager{ *this, [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
@@ -180,47 +166,61 @@ namespace neogfx
             {
                 auto& sink = service<i_clipboard>().active_sink();
                 if (sink.can_undo())
-                    iActionUndo.enable();
+                    actionUndo.enable();
                 else
-                    iActionUndo.disable();
+                    actionUndo.disable();
                 if (sink.can_redo())
-                    iActionRedo.enable();
+                    actionRedo.enable();
                 else
-                    iActionRedo.disable();
+                    actionRedo.disable();
                 if (sink.can_cut())
-                    iActionCut.enable();
+                    actionCut.enable();
                 else
-                    iActionCut.disable();
+                    actionCut.disable();
                 if (sink.can_copy())
-                    iActionCopy.enable();
+                    actionCopy.enable();
                 else
-                    iActionCopy.disable();
+                    actionCopy.disable();
                 if (sink.can_paste())
-                    iActionPaste.enable();
+                    actionPaste.enable();
                 else
-                    iActionPaste.disable();
+                    actionPaste.disable();
                 if (sink.can_delete_selected())
-                    iActionDelete.enable();
+                    actionDelete.enable();
                 else
-                    iActionDelete.disable();
+                    actionDelete.disable();
                 if (sink.can_select_all())
-                    iActionSelectAll.enable();
+                    actionSelectAll.enable();
                 else
-                    iActionSelectAll.disable();
+                    actionSelectAll.disable();
             }
             else
             {
-                iActionUndo.disable();
-                iActionRedo.disable();
-                iActionCut.disable();
-                iActionCopy.disable();
-                iActionPaste.disable();
-                iActionDelete.disable();
-                iActionSelectAll.disable();
+                actionUndo.disable();
+                actionRedo.disable();
+                actionCut.disable();
+                actionCopy.disable();
+                actionPaste.disable();
+                actionDelete.disable();
+                actionSelectAll.disable();
             }
         }, 100 },
         iAppContext{ *this, "neogfx::app::iAppContext" },
-        iAppMessageQueueContext{ *this, "neogfx::app::iAppMessageQueueContext" }
+        iAppMessageQueueContext{ *this, "neogfx::app::iAppMessageQueueContext" },
+        actionFileNew{ action{"&New..."_t, ":/neogfx/resources/icons.naa#new.png"}.set_shortcut("Ctrl+Shift+N") },
+        actionFileOpen{ action{"&Open..."_t, ":/neogfx/resources/icons.naa#open.png"}.set_shortcut("Ctrl+Shift+O") },
+        actionFileClose{ action{"&Close"_t}.set_shortcut("Ctrl+F4") },
+        actionFileCloseAll{ "Close All"_t },
+        actionFileSave{ action{"&Save"_t, ":/neogfx/resources/icons.naa#save.png"}.set_shortcut("Ctrl+S") },
+        actionFileSaveAll{ action{"Save A&ll"_t}.set_shortcut("Ctrl+Shift+S") },
+        actionFileExit{ action{"E&xit"_t}.set_shortcut("Alt+F4") },
+        actionUndo{ action{"Undo"_t, ":/neogfx/resources/icons.naa#undo.png"}.set_shortcut("Ctrl+Z") },
+        actionRedo{ action{"Redo"_t, ":/neogfx/resources/icons.naa#redo.png"}.set_shortcut("Ctrl+Shift+Z") },
+        actionCut{ action{"Cut"_t, ":/neogfx/resources/icons.naa#cut.png"}.set_shortcut("Ctrl+X") },
+        actionCopy{ action{"Copy"_t, ":/neogfx/resources/icons.naa#copy.png"}.set_shortcut("Ctrl+C") },
+        actionPaste{ action{"Paste"_t, ":/neogfx/resources/icons.naa#paste.png"}.set_shortcut("Ctrl+V") },
+        actionDelete{ action{"Delete"_t}.set_shortcut("Del") },
+        actionSelectAll{ action{"Select All"_t}.set_shortcut("Ctrl+A") }
     {
         service<i_keyboard>().grab_keyboard(*this);
 
@@ -230,14 +230,29 @@ namespace neogfx
         slateStyle.palette().set_colour(colour(0x35, 0x35, 0x35));
         register_style(slateStyle);
 
-        iActionFileExit.triggered([this]() { quit(0); });
-        iActionUndo.triggered([this]() { service<i_clipboard>().active_sink().undo(service<i_clipboard>()); });
-        iActionRedo.triggered([this]() { service<i_clipboard>().active_sink().redo(service<i_clipboard>()); });
-        iActionCut.triggered([this]() { service<i_clipboard>().cut(); });
-        iActionCopy.triggered([this]() { service<i_clipboard>().copy(); });
-        iActionPaste.triggered([this]() { service<i_clipboard>().paste(); });
-        iActionDelete.triggered([this]() { service<i_clipboard>().delete_selected(); });
-        iActionSelectAll.triggered([this]() { service<i_clipboard>().select_all(); });
+        add_action(actionFileNew);
+        add_action(actionFileOpen);
+        add_action(actionFileClose);
+        add_action(actionFileCloseAll);
+        add_action(actionFileSave);
+        add_action(actionFileSaveAll);
+        add_action(actionFileExit);
+        add_action(actionUndo);
+        add_action(actionRedo);
+        add_action(actionCut);
+        add_action(actionCopy);
+        add_action(actionPaste);
+        add_action(actionDelete);
+        add_action(actionSelectAll);
+
+        actionFileExit.triggered([this]() { quit(0); });
+        actionUndo.triggered([this]() { service<i_clipboard>().active_sink().undo(service<i_clipboard>()); });
+        actionRedo.triggered([this]() { service<i_clipboard>().active_sink().redo(service<i_clipboard>()); });
+        actionCut.triggered([this]() { service<i_clipboard>().cut(); });
+        actionCopy.triggered([this]() { service<i_clipboard>().copy(); });
+        actionPaste.triggered([this]() { service<i_clipboard>().paste(); });
+        actionDelete.triggered([this]() { service<i_clipboard>().delete_selected(); });
+        actionSelectAll.triggered([this]() { service<i_clipboard>().select_all(); });
     }
     catch (std::exception& e)
     {
@@ -395,72 +410,112 @@ namespace neogfx
 
     i_action& app::action_file_new()
     {
-        return iActionFileNew;
+        return actionFileNew;
     }
 
     i_action& app::action_file_open()
     {
-        return iActionFileOpen;
+        return actionFileOpen;
     }
 
     i_action& app::action_file_close()
     {
-        return iActionFileClose;
+        return actionFileClose;
     }
 
     i_action& app::action_file_close_all()
     {
-        return iActionFileCloseAll;
+        return actionFileCloseAll;
     }
 
     i_action& app::action_file_save()
     {
-        return iActionFileSave;
+        return actionFileSave;
     }
 
     i_action& app::action_file_save_all()
     {
-        return iActionFileSaveAll;
+        return actionFileSaveAll;
     }
 
     i_action& app::action_file_exit()
     {
-        return iActionFileExit;
+        return actionFileExit;
     }
 
     i_action& app::action_undo()
     {
-        return iActionUndo;
+        return actionUndo;
     }
 
     i_action& app::action_redo()
     {
-        return iActionRedo;
+        return actionRedo;
     }
 
     i_action& app::action_cut()
     {
-        return iActionCut;
+        return actionCut;
     }
 
     i_action& app::action_copy()
     {
-        return iActionCopy;
+        return actionCopy;
     }
 
     i_action& app::action_paste()
     {
-        return iActionPaste;
+        return actionPaste;
     }
 
     i_action& app::action_delete()
     {
-        return iActionDelete;
+        return actionDelete;
     }
 
     i_action& app::action_select_all()
     {
-        return iActionSelectAll;
+        return actionSelectAll;
+    }
+
+    i_action& app::add_action(i_action& aAction)
+    {
+        auto a = iActions.emplace(aAction.text(), std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction});
+        return *a->second;
+    }
+
+    i_action& app::add_action(const std::string& aText)
+    {
+        auto a = iActions.emplace(aText, std::make_shared<action>(aText));
+        return *a->second;
+    }
+
+    i_action& app::add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
+    {
+        auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImageUri, aDpiScaleFactor, aSampling));
+        return *a->second;
+    }
+
+    i_action& app::add_action(const std::string& aText, const i_texture& aImage)
+    {
+        auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImage));
+        return *a->second;
+    }
+
+    i_action& app::add_action(const std::string& aText, const i_image& aImage)
+    {
+        auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImage));
+        return *a->second;
+    }
+
+    void app::remove_action(i_action& aAction)
+    {
+        for (auto i = iActions.begin(); i != iActions.end(); ++i)
+            if (&*i->second == &aAction)
+            {
+                iActions.erase(i);
+                break;
+            }
     }
 
     i_action& app::find_action(const std::string& aText)
@@ -468,41 +523,7 @@ namespace neogfx
         auto a = iActions.find(aText);
         if (a == iActions.end())
             throw action_not_found();
-        return a->second;
-    }
-
-    i_action& app::add_action(const std::string& aText)
-    {
-        auto a = iActions.emplace(aText, action{ aText });
-        return a->second;
-    }
-
-    i_action& app::add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
-    {
-        auto a = iActions.emplace(aText, action{ aText, aImageUri, aDpiScaleFactor, aSampling });
-        return a->second;
-    }
-
-    i_action& app::add_action(const std::string& aText, const i_texture& aImage)
-    {
-        auto a = iActions.emplace(aText, action{ aText, aImage });
-        return a->second;
-    }
-
-    i_action& app::add_action(const std::string& aText, const i_image& aImage)
-    {
-        auto a = iActions.emplace(aText, action{ aText, aImage });
-        return a->second;
-    }
-
-    void app::remove_action(i_action& aAction)
-    {
-        for (auto i = iActions.begin(); i != iActions.end(); ++i)
-            if (&i->second == &aAction)
-            {
-                iActions.erase(i);
-                break;
-            }
+        return *a->second;
     }
 
     void app::add_mnemonic(i_mnemonic& aMnemonic)
@@ -667,17 +688,17 @@ namespace neogfx
         bool partialMatches = false;
         iKeySequence.push_back(std::make_pair(aKeyCode, aKeyModifiers));
         for (auto& a : iActions)
-            if (a.second.is_enabled() && a.second.shortcut() != std::nullopt)
+            if (a.second->is_enabled() && a.second->shortcut() != std::nullopt)
             {
-                auto matchResult = a.second.shortcut()->matches(iKeySequence.begin(), iKeySequence.end());
+                auto matchResult = a.second->shortcut()->matches(iKeySequence.begin(), iKeySequence.end());
                 if (matchResult == key_sequence::match::Full)
                 {
                     iKeySequence.clear();
                     if (service<i_keyboard>().is_front_grabber(*this))
                     {
-                        a.second.triggered.trigger();
-                        if (a.second.is_checkable())
-                            a.second.toggle();
+                        a.second->triggered.trigger();
+                        if (a.second->is_checkable())
+                            a.second->toggle();
                         return true;
                     }
                     else

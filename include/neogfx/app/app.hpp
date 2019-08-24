@@ -69,7 +69,7 @@ namespace neogfx
         };
     private:
         typedef std::map<std::string, style> style_list;
-        typedef std::multimap<std::string, action, std::less<std::string>, boost::fast_pool_allocator<std::pair<const std::string, action>>> action_list;
+        typedef std::multimap<std::string, std::shared_ptr<i_action>> action_list;
         typedef std::vector<i_mnemonic*> mnemonic_list;
     public:
         struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::app::no_instance") {} };
@@ -114,12 +114,13 @@ namespace neogfx
         i_action& action_paste() override;
         i_action& action_delete() override;
         i_action& action_select_all() override;
-        i_action& find_action(const std::string& aText) override;
+        i_action& add_action(i_action& aAction) override;
         i_action& add_action(const std::string& aText) override;
         i_action& add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
         i_action& add_action(const std::string& aText, const i_texture& aImage) override;
         i_action& add_action(const std::string& aText, const i_image& aImage) override;
         void remove_action(i_action& aAction) override;
+        i_action& find_action(const std::string& aText) override;
         void add_mnemonic(i_mnemonic& aMnemonic) override;
         void remove_mnemonic(i_mnemonic& aMnemonic) override;
     public:
@@ -149,25 +150,27 @@ namespace neogfx
         style_list iStyles;
         style_list::iterator iCurrentStyle;
         action_list iActions;
-        i_action& iActionFileNew;
-        i_action& iActionFileOpen;
-        i_action& iActionFileClose;
-        i_action& iActionFileCloseAll;
-        i_action& iActionFileSave;
-        i_action& iActionFileSaveAll;
-        i_action& iActionFileExit;        
-        i_action& iActionUndo;
-        i_action& iActionRedo;
-        i_action& iActionCut;
-        i_action& iActionCopy;
-        i_action& iActionPaste;
-        i_action& iActionDelete;
-        i_action& iActionSelectAll;
         neolib::callback_timer iStandardActionManager;
         mnemonic_list iMnemonics;
         event_processing_context iAppContext;
         event_processing_context iAppMessageQueueContext;
         std::vector<std::pair<key_code_e, key_modifiers_e>> iKeySequence;
         mutable std::unique_ptr<i_help> iHelp;
+        // standard actions
+    public:
+        action actionFileNew;
+        action actionFileOpen;
+        action actionFileClose;
+        action actionFileCloseAll;
+        action actionFileSave;
+        action actionFileSaveAll;
+        action actionFileExit;
+        action actionUndo;
+        action actionRedo;
+        action actionCut;
+        action actionCopy;
+        action actionPaste;
+        action actionDelete;
+        action actionSelectAll;
     };
 }

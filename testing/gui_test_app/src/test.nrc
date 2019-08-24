@@ -19,36 +19,36 @@
             name: "neoGFX Test App"
             default_window_icon: ":/test/resources/icon.png"
             action: {
-                id: goldenrodStyleAction
+                id: actionGoldenrodStyle
                 text: "Goldenrod Style"
                 shortcut: "Ctrl+Alt+Shift+G"
             }
             action: {
-                id: contactsAction
+                id: actionContacts
                 text: "&Contacts..."
                 image_uri: ":/closed/resources/caw_toolbar.naa#contacts.png"
                 shortcut: "Alt+C"
             }
             action: {
-                id: addFavouriteAction
+                id: actionAddFavourite
                 text: "Add Favourite..."
                 image_uri: ":/closed/resources/caw_toolbar.naa#add_favourite.png"
             }
             action: {
-                id: organizeFavouritesAction
+                id: actionOrganizeFavourites
                 text: "Organize Favourites..."
                 image_uri: ":/closed/resources/caw_toolbar.naa#organize_favourites.png"
                 shortcut: "Alt+C"
             }
             action: {
-                id: muteAction
+                id: actionMute
                 text: "Mute/&Unmute Sound"
                 image_uri: ":/closed/resources/caw_toolbar.naa#mute.png"
                 checkable: true
                 checked_image_uri: ":/closed/resources/caw_toolbar.naa#unmute.png"
             }
             action: {
-                id: pasteAndGoAction
+                id: actionPasteAndGo
                 text: "Paste and Go"
                 image_uri: ":/closed/resources/caw_toolbar.naa#paste_and_go.png"
                 shortcut: "Ctrl+Shift+V"
@@ -64,35 +64,35 @@
                     id: menu
                     menu: {
                         title: "&File"
-                        action: app.action_file_new()
-                        action: app.action_file_open()
+                        action: app.actionFileNew
+                        action: app.actionFileOpen
                         action: separator
-                        action: app.action_file_close()
+                        action: app.actionFileClose
                         action: separator
-                        action: app.action_file_save()
+                        action: app.actionFileSave
                         action: separator
-                        action: app.action_file_exit()
+                        action: app.actionFileExit
                     }
                     menu: {
                         title: "&Edit"
-                        action: app.action_undo()
-                        action: app.action_redo()
+                        action: app.actionUndo
+                        action: app.actionRedo
                         action: separator
-                        action: app.action_cut()
-                        action: app.action_copy()
-                        action: app.action_paste()
+                        action: app.actionCut
+                        action: app.actionCopy
+                        action: app.actionPaste
                         action: pasteAndGoAction
-                        action: app.action_delete()
+                        action: app.actionDelete
                         action: separator
-                        action: app.action_select_all()
+                        action: app.actionSelectAll
                     }
                     menu: {
                         title: "&View"
                     }
                     menu: {
                         title: "F&avourites"
-                        action: addFavouriteAction
-                        action: organizeFavouritesAction
+                        action: actionAddFavourite
+                        action: actionOrganizeFavourites
                         action: separator
                         action: { text: "Alice" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
                         action: { text: "Bob" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
@@ -115,43 +115,43 @@
                         }
                         action: separator
                     }
-                    action: contactsAction
-                    action: muteAction
+                    action: actionContacts
+                    action: actionMute
                     action: { text: "&Xyzzy..." image_uri: ":/neogfx/resources/icons.naa#eyedropper.png" }
                     menu: {
                         id: testMenu
                         title: "&Test"
                         action: {
-                            id: emacsStyleSequence1
-                            title: "Emacs style sequence #1"
+                            id: actionEmacsStyleSequence1
+                            text: "Emacs style sequence #1"
                             shortcut: "Ctrl+K, Ctrl+B"
                         }
                         action: {
-                            id: emacsStyleSequence2
-                            title: "Emacs style sequence #2"
+                            id: actionEmacsStyleSequence2
+                            text: "Emacs style sequence #2"
                             shortcut: "Ctrl+K, Ctrl+K"
                         }
-                        action: contactsAction
-                        action: muteAction
-                        action: muteAction
-                        action: muteAction
-                        action: muteAction
+                        action: actionContacts
+                        action: actionMute
+                        action: actionMute
+                        action: actionMute
+                        action: actionMute
                         action: {
-                            id: colourAction
-                            title: "Colour Dialog..."
+                            id: actionColourDialog
+                            text: "Colour Dialog..."
                         }
                     }
                     menu: {
                         id: windowMenu
                         title: "&Window"
                         action: {
-                            id: nextTabAction
-                            title: "Next Tab"
+                            id: actionNextTab
+                            text: "Next Tab"
                             shortcut: "Ctrl+Tab"
                         }
                         action: {
-                            id: previousTabAction
-                            title: "Previous Tab"
+                            id: actionPreviousTab
+                            text: "Previous Tab"
                             shortcut: "Shift+Ctrl+Tab"
                         }
                     }
@@ -159,6 +159,27 @@
                         id: helpMenu
                         title: "&Help"
                     }
+                }
+                toolbar: {
+                    id: toolbar
+                    action: app.actionFileNew
+                    action: app.actionFileOpen
+                    action: app.actionFileSave
+                    action: separator
+                    action: actionContacts
+                    action: actionAddFavourite
+                    action: actionOrganizeFavourites
+                    action: { text: "Keywords..." image_uri: ":/closed/resources/caw_toolbar.naa#keyword.png" }
+                    action: { text: "Settings..." image_uri: ":/closed/resources/caw_toolbar.naa#settings.png" }
+                    action: { id: actionManagePlugins text: "Manage Plugins..." image_uri: ":/closed/resources/caw_toolbar.naa#manage_plugins.png" }
+                    action: actionMute
+                    action: separator
+                    action: app.actionCut
+                    action: app.actionCopy
+                    action: app.actionPaste
+                    action: actionPasteAndGo
+                    action: separator
+                    action: { id: actionCheckForUpdates text: "Check for Updates..." image_uri: ":/closed/resources/caw_toolbar.naa#setup.png" }
                 }
             }
         }
