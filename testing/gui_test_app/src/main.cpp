@@ -17,6 +17,8 @@
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_animator.hpp>
 
+#include "test.ui.hpp"
+
 namespace ng = neogfx;
 
 class my_item_model : public ng::basic_item_model<void*, 9u>

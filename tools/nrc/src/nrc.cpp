@@ -35,6 +35,105 @@ struct failed_to_read_resource_file : std::runtime_error
 struct bad_usage : std::runtime_error { bad_usage() : std::runtime_error("Bad usage") {} };
 struct not_yet_implemented : std::runtime_error { not_yet_implemented() : std::runtime_error("Not yet implemented") {} };
 
+void parse_resource(const boost::filesystem::path& aInputFilename, const neolib::fjson_value& aItem, std::ofstream& aOutput)
+{
+    typedef neolib::fjson_string symbol_t;
+    std::vector<std::string> resourcePaths;
+    uint32_t resourceIndex = 0;
+    auto const& resource = aItem.as<neolib::fjson_object>();
+    auto const& resourcePrefix = resource.has("prefix") ? resource.at("prefix").text() : "";
+
+    auto const& resourceRef = resource.has("ref") ? resource.at("ref").text() : "";
+    auto symbol = resourcePrefix;
+    if (!symbol.empty() && !resourceRef.empty())
+        symbol += "_";
+    symbol += resourceRef;
+
+    aOutput << "namespace nrc" << std::endl << "{" << std::endl;
+    aOutput << "namespace" << std::endl << "{" << std::endl;
+
+    for (const auto& resourceItem : aItem)
+    {
+        auto process_file = [&](const neolib::fjson_string& aFile)
+        {
+            std::cout << "Processing " << aFile << "..." << std::endl;
+            resourcePaths.push_back((!resourcePrefix.empty() ? resourcePrefix + "/" : "") + aFile);
+            std::string resourcePath = boost::filesystem::path(aInputFilename).parent_path().string();
+            if (!resourcePath.empty())
+                resourcePath += "/";
+            resourcePath += aFile;
+            std::ifstream resourceFile(resourcePath, std::ios_base::in | std::ios_base::binary);
+            aOutput << "\tconst unsigned char resource_" << resourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
+            const std::size_t kBufferSize = 32;
+            bool doneSome = false;
+            unsigned char buffer[kBufferSize];
+            while (resourceFile)
+            {
+                resourceFile.read(reinterpret_cast<char*>(buffer), kBufferSize);
+                std::streamsize amount = resourceFile.gcount();
+                if (amount != 0)
+                {
+                    if (doneSome)
+                        aOutput << ", " << std::endl;
+                    aOutput << "\t\t";
+                    for (std::size_t j = 0; j != amount;)
+                    {
+                        aOutput << "0x";
+                        aOutput.width(2);
+                        aOutput.fill('0');
+                        aOutput << std::hex << std::uppercase << static_cast<unsigned int>(buffer[j]);
+                        if (++j != amount)
+                            aOutput << ", ";
+                    }
+                    doneSome = true;
+                }
+                else
+                {
+                    aOutput << std::endl;
+                    break;
+                }
+            }
+            if (resourceFile.fail() && !resourceFile.eof())
+                throw failed_to_read_resource_file(resourcePath);
+            aOutput << "\t};" << std::endl;
+            ++resourceIndex;
+        };
+
+        if (resourceItem.name() == "file")
+            process_file(resourceItem.text());
+        else if (resourceItem.name() == "files")
+            for (auto const& fileItem : resourceItem)
+                process_file(fileItem.text());
+        else 
+            continue;
+    }
+
+    aOutput << "\n\tstruct register_data" << std::endl << "\t{" << std::endl;
+    aOutput << "\t\tregister_data()" << std::endl << "\t\t{" << std::endl;
+    for (std::size_t i = 0; i < resourcePaths.size(); ++i)
+    {
+        aOutput << "\t\t\tneogfx::resource_manager::instance().add_module_resource("
+            << "\":/" << resourcePaths[i] << "\", " << "resource_" << i << "_data, " << "sizeof(resource_" << i << "_data)"
+            << ");" << std::endl;
+    }
+
+    aOutput << "\t\t}" << std::endl;
+
+    aOutput << "\t} " << symbol << ";" << std::endl;
+
+    aOutput << "}" << std::endl << "}" << std::endl << std::endl;
+
+    aOutput << "extern \"C\" void* nrc_" << symbol << " = &nrc::" << symbol << ";" << std::endl << std::endl;
+}
+
+void parse_ui(const neolib::fjson_value& aItem, std::ofstream& aOutput)
+{
+    auto const& ui = aItem.as<neolib::fjson_object>();
+    auto const& ns = ui.has("namespace") ? ui.at("namespace").text() + "::ui" : "ui";
+    aOutput << "namespace " << ns << std::endl << "{" << std::endl;
+    aOutput << "}" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
     std::cout << "nrc neogfx resource compiler" << std::endl;
@@ -62,8 +161,12 @@ int main(int argc, char* argv[])
         std::string const outputDirectory{ files.size() > 1 ? files[1] : boost::filesystem::current_path().string() };
          
         std::string resourceFileName; 
+        std::string uiFileName;
         if (options.empty() || options[0] == "-embed")
+        {
             resourceFileName = inputFileName.filename().stem().string() + ".nrc.cpp";
+            uiFileName = inputFileName.filename().stem().string() + ".ui.hpp";
+        }
         else if (options[0] == "-archive")
             throw not_yet_implemented();
         else
@@ -71,95 +174,34 @@ int main(int argc, char* argv[])
 
         if (options.empty() || options[0] == "-embed")
         {
-            auto resourceOutputPath = outputDirectory + "/" + resourceFileName;
-            std::cout << "Creating " << resourceOutputPath << "..." << std::endl;
-            std::ofstream output{ resourceOutputPath };
-            output << "// This is a automatically generated file, do not edit!" << std::endl;
-            output << "#include <neogfx/app/resource_manager.hpp>" << std::endl << std::endl;
-            output << "namespace nrc" << std::endl << "{" << std::endl;
-            output << "namespace" << std::endl << "{" << std::endl;
-            std::vector<std::string> resourcePaths;
-            std::vector<neolib::fjson_string> symbols;
-            uint32_t resourceIndex = 0;
+            std::optional<std::ofstream> resourceOutput;
+            std::optional<std::ofstream> uiOutput;
             for (const auto& item : input.root())
             {
                 if (item.name() == "resource")
                 {
-                    auto const& resource = item.as<neolib::fjson_object>();
-                    auto const& resourcePrefix = resource.has("prefix") ? resource.at("prefix").text() : "";
-                    for (const auto& resourceItem : item)
+                    if (resourceOutput == std::nullopt)
                     {
-                        auto process_file = [&](const neolib::fjson_string& aFile)
-                        {
-                            std::cout << "Processing " << aFile << "..." << std::endl;
-                            resourcePaths.push_back((!resourcePrefix.empty() ? resourcePrefix + "/" : "") + aFile);
-                            std::string resourcePath = boost::filesystem::path(inputFileName).parent_path().string();
-                            if (!resourcePath.empty())
-                                resourcePath += "/";
-                            resourcePath += aFile;
-                            std::ifstream resourceFile(resourcePath, std::ios_base::in | std::ios_base::binary);
-                            output << "\tconst unsigned char resource_" << resourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
-                            const std::size_t kBufferSize = 32;
-                            bool doneSome = false;
-                            unsigned char buffer[kBufferSize];
-                            while (resourceFile)
-                            {
-                                resourceFile.read(reinterpret_cast<char*>(buffer), kBufferSize);
-                                std::streamsize amount = resourceFile.gcount();
-                                if (amount != 0)
-                                {
-                                    if (doneSome)
-                                        output << ", " << std::endl;
-                                    output << "\t\t";
-                                    for (std::size_t j = 0; j != amount;)
-                                    {
-                                        output << "0x";
-                                        output.width(2);
-                                        output.fill('0');
-                                        output << std::hex << std::uppercase << static_cast<unsigned int>(buffer[j]);
-                                        if (++j != amount)
-                                            output << ", ";
-                                    }
-                                    doneSome = true;
-                                }
-                                else
-                                {
-                                    output << std::endl;
-                                    break;
-                                }
-                            }
-                            if (resourceFile.fail() && !resourceFile.eof())
-                                throw failed_to_read_resource_file(resourcePath);
-                            output << "\t};" << std::endl;
-                            ++resourceIndex;
-                        };
-                        if (resourceItem.name() == "file")
-                            process_file(resourceItem.text());
-                        else if (resourceItem.name() == "files")
-                            for(auto const& fileItem : resourceItem)
-                                process_file(fileItem.text());
+                        auto resourceOutputPath = outputDirectory + "/" + resourceFileName;
+                        std::cout << "Creating " << resourceOutputPath << "..." << std::endl;
+                        resourceOutput.emplace(resourceOutputPath);
+                        *resourceOutput << "// This is a automatically generated file, do not edit!" << std::endl << std::endl;
+                        *resourceOutput << "#include <neogfx/app/resource_manager.hpp>" << std::endl << std::endl;
                     }
-                    output << "\n\tstruct register_data" << std::endl << "\t{" << std::endl;
-                    output << "\t\tregister_data()" << std::endl << "\t\t{" << std::endl;
-                    for (std::size_t i = 0; i < resourcePaths.size(); ++i)
+                    parse_resource(inputFileName, item, *resourceOutput);
+                }
+                else if (item.name() == "ui")
+                {
+                    if (uiOutput == std::nullopt)
                     {
-                        output << "\t\t\tneogfx::resource_manager::instance().add_module_resource("
-                            << "\":/" << resourcePaths[i] << "\", " << "resource_" << i << "_data, " << "sizeof(resource_" << i << "_data)"
-                            << ");" << std::endl;
+                        auto uiOutputPath = outputDirectory + "/" + uiFileName;
+                        std::cout << "Creating " << uiOutputPath << "..." << std::endl;
+                        uiOutput.emplace(uiOutputPath);
+                        *uiOutput << "// This is a automatically generated file, do not edit!" << std::endl << std::endl;
                     }
-                    output << "\t\t}" << std::endl;
-                    auto const& resourceRef = resource.has("ref") ? resource.at("ref").text() : "";
-                    auto symbol = resourcePrefix;
-                    if (!symbol.empty() && !resourceRef.empty())
-                        symbol += "_";
-                    symbol += resourceRef;
-                    output << "\t} " << symbol << ";" << std::endl;
-                    symbols.push_back(symbol);
+                    parse_ui(item, *uiOutput);
                 }
             }
-            output << "}" << std::endl << "}" << std::endl << std::endl;
-            for (auto const& symbol : symbols)
-                output << "extern \"C\" void* nrc_" << symbol << " = &nrc::" << symbol << ";" << std::endl;
         }
     }
     catch (const bad_usage&)

@@ -14,6 +14,7 @@
     }
 
     ui: {
+        namespace: test
         app: {
             id: app
             name: "neoGFX Test App"
@@ -55,7 +56,7 @@
             }
             window: {
                 id: window
-                //default_size: [ 800spx 800spx ]
+                default_size: [ 800spx 800spx ]
                 status_bar: {
                     id: statusBar
                 }
@@ -187,7 +188,7 @@
                             tab_text: "Buttons"
                             vertical_layout: {
                                 id: layoutButtons
-                                //margin: 8px
+                                margin: 8px
                                 horizontal_layout: {
                                     id: layoutTopButtons
                                     push_button: {
@@ -198,8 +199,8 @@
                                             image: ":/test/resources/neoGFX.png"
                                         }
                                         button0.image: {
-                                            //minimum_size: [ 32spx 32spx ]
-                                            //maximum_size: [ 160spx max ]
+                                            minimum_size: [ 32spx 32spx ]
+                                            maximum_size: [ 160spx max ]
                                         }
                                         size_policy: Expanding
                                         foreground_colour: LightGoldenrodYellow
