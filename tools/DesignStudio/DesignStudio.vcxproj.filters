@@ -21,14 +21,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="neoGUI.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\DesignStudio.nrc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.nrc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\neoGUI.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\neoGUI.nrc.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -43,7 +43,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="neoGUI.rc">
+    <ResourceCompile Include="DesignStudio.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -53,7 +53,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="neoGUI.nrc">
+    <CustomBuild Include="DesignStudio.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -1,6 +1,6 @@
-// neoGUI.cpp : Defines the entry point for the console application.
+// main.cpp
 /*
-neogfx C++ GUI Library
+neoGFX Design Studio
 Copyright(C) 2017 Leigh Johnston
 
 This program is free software: you can redistribute it and / or modify
@@ -35,7 +35,7 @@ namespace ng = neogfx;
 
 int main(int argc, char* argv[])
 {
-    ng::app app(argc, argv, "neoGFX App/Game Designer Tool (neoGUI)");
+    ng::app app(argc, argv, "neoGFX Design Studio");
     try
     {
         ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
@@ -103,14 +103,14 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         app.halt();
-        std::cerr << "neoGUI: terminating with exception: " << e.what() << std::endl;
+        std::cerr << "neoGFX Design Studio: terminating with exception: " << e.what() << std::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
         std::exit(EXIT_FAILURE);
     }
     catch (...)
     {
         app.halt();
-        std::cerr << "neoGUI: terminating with unknown exception" << std::endl;
+        std::cerr << "neoGFX Design Studio: terminating with unknown exception" << std::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
         std::exit(EXIT_FAILURE);
     }
