@@ -18,9 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,7 +35,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="..\..\..\src\resources\win32\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\common\include\card_games\card.hpp">
@@ -76,12 +73,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="video_poker.rc">
+    <ResourceCompile Include="..\..\..\src\resources\win32\video_poker.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico">
+    <Image Include="..\..\..\src\resources\win32\icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

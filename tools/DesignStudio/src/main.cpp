@@ -83,15 +83,15 @@ int main(int argc, char* argv[])
 
         workspace.view_stack().painting([&workspace](ng::graphics_context& aGc)
         {
-            static ng::texture sBackgroundTexture1{ ng::image{ ":/neoGUI/resource/neoGFX.png" } };
-            static ng::texture sBackgroundTexture2{ ng::image{ ":/neoGUI/resource/logo_i42.png" } };
-            auto rc = workspace.view_stack().client_rect();
+            static ng::texture sBackgroundTexture1{ ng::image{ ":/DesignStudio/resources/neoGFX.png" } };
+            static ng::texture sBackgroundTexture2{ ng::image{ ":/DesignStudio/resources/logo_i42.png" } };
+            auto const& cr = workspace.view_stack().client_rect();
             aGc.draw_texture(
-                ng::point{ (rc.extents() - sBackgroundTexture1.extents()) / 2.0 },
+                ng::point{ (cr.extents() - sBackgroundTexture1.extents()) / 2.0 },
                 sBackgroundTexture1,
                 ng::colour::White.with_alpha(32));
             aGc.draw_texture(
-                ng::point{ rc.bottom_right() - sBackgroundTexture2.extents() },
+                ng::rect{ ng::point{ cr.bottom_right() - sBackgroundTexture2.extents() / 2.0 }, sBackgroundTexture2.extents() / 2.0 },
                 sBackgroundTexture2,
                 ng::colour::White.with_alpha(32));
         });

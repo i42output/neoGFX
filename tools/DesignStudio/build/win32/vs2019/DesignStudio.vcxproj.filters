@@ -18,24 +18,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="x64\Release\GeneratedFiles\DesignStudio.nrc.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.nrc.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="..\..\..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="..\..\..\src\resources\win32\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="new_project_dialog.hpp">
+    <ClInclude Include="..\..\..\src\new_project_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="symbol.hpp">
@@ -43,17 +40,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DesignStudio.rc">
+    <ResourceCompile Include="..\..\..\src\resources\win32\DesignStudio.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico">
+    <Image Include="..\..\..\src\resources\win32\icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="DesignStudio.nrc">
+    <CustomBuild Include="..\..\..\src\DesignStudio.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>

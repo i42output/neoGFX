@@ -84,6 +84,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\..\..\bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -176,10 +177,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.nrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -190,18 +188,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="new_project_dialog.hpp" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
+    <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
     <ClInclude Include="symbol.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DesignStudio.rc" />
+    <ResourceCompile Include="..\..\..\src\resources\win32\DesignStudio.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico" />
+    <Image Include="..\..\..\src\resources\win32\icon1.ico" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="DesignStudio.nrc">
+    <CustomBuild Include="..\..\..\src\DesignStudio.nrc">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Outputs>

@@ -1,7 +1,0 @@
-{
-    resource: {
-        prefix: neoGUI
-        file: resource/neoGFX.png
-        file: resource/logo_i42.png
-    }
-}

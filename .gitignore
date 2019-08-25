@@ -271,3 +271,5 @@ Debug
 /tools/nrc/build/win32/vs2019/nrc.vcxproj.user
 /examples/games/video_poker/build/win32/vs2019/video_poker.vcxproj.user
 /tools/DesignStudio/DesignStudio.vcxproj.user
+/examples/games/video_poker/src/resources/win32/video_poker.aps
+/tools/DesignStudio/build/win32/vs2019/DesignStudio.vcxproj.user

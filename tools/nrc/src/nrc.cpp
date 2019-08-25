@@ -1,6 +1,6 @@
-// nrc2.cpp
+// nrc.cpp
 /*
-neogfx C++ GUI Library
+neoGFX Resource Compiler
 Copyright(C) 2016 Leigh Johnston
 
 This program is free software: you can redistribute it and / or modify
@@ -25,8 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 struct invalid_file : std::runtime_error 
 { 
-    invalid_file() : std::runtime_error("Not a valid neogfx resource meta file (.nrc)!") {} 
-    invalid_file(const std::string& aReason) : std::runtime_error("Not a valid neogfx resource meta file (.nrc), " + aReason + "!") {}
+    invalid_file() : std::runtime_error("Not a valid neoGFX resource meta file (.nrc)!") {} 
+    invalid_file(const std::string& aReason) : std::runtime_error("Not a valid neoGFX resource meta file (.nrc), " + aReason + "!") {}
 };
 struct failed_to_read_resource_file : std::runtime_error
 {
@@ -136,7 +136,7 @@ void parse_ui(const neolib::fjson_value& aItem, std::ofstream& aOutput)
 
 int main(int argc, char* argv[])
 {
-    std::cout << "nrc neogfx resource compiler" << std::endl;
+    std::cout << "nrc neoGFX resource compiler" << std::endl;
     std::cout << "Copyright (c) 2016 Leigh Johnston" << std::endl << std::endl;
     std::vector<std::string> options;
     std::vector<std::string> files;

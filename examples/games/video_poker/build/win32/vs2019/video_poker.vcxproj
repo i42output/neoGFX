@@ -175,9 +175,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\..\src\card_space.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\table.cpp" />
@@ -216,13 +213,13 @@
     <ClInclude Include="..\..\..\include\video_poker\i_table.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\poker.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\table.hpp" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="video_poker.rc" />
+    <ResourceCompile Include="..\..\..\src\resources\win32\video_poker.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico" />
+    <Image Include="..\..\..\src\resources\win32\icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
