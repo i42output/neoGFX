@@ -67,7 +67,7 @@ namespace neogfx
         bool metrics_available() const override;
         dimension em_size() const override;
     public:
-        std::unique_ptr<i_graphics_context> create_graphics_context() const override;
+        std::unique_ptr<i_graphics_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const override;
     public:
         int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
     public:

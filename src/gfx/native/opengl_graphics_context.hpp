@@ -58,8 +58,8 @@ namespace neogfx
             }
         };
     public:
-        opengl_graphics_context(const i_render_target& aTarget);
-        opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget);
+        opengl_graphics_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);
+        opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default);
         opengl_graphics_context(const opengl_graphics_context& aOther);
         ~opengl_graphics_context();
     public:

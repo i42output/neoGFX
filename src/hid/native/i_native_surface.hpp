@@ -71,6 +71,6 @@ namespace neogfx
         virtual void resume() = 0;
         virtual bool is_rendering() const = 0;
         using i_render_target::create_graphics_context;
-        virtual std::unique_ptr<i_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
+        virtual std::unique_ptr<i_graphics_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const = 0;
     };
 }

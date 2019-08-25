@@ -26,37 +26,36 @@
             action: {
                 id: actionContacts
                 text: "&Contacts..."
-                image_uri: ":/closed/resources/caw_toolbar.naa#contacts.png"
+                image: ":/closed/resources/caw_toolbar.naa#contacts.png"
                 shortcut: "Alt+C"
             }
             action: {
                 id: actionAddFavourite
                 text: "Add Favourite..."
-                image_uri: ":/closed/resources/caw_toolbar.naa#add_favourite.png"
+                image: ":/closed/resources/caw_toolbar.naa#add_favourite.png"
             }
             action: {
                 id: actionOrganizeFavourites
                 text: "Organize Favourites..."
-                image_uri: ":/closed/resources/caw_toolbar.naa#organize_favourites.png"
+                image: ":/closed/resources/caw_toolbar.naa#organize_favourites.png"
                 shortcut: "Alt+C"
             }
             action: {
                 id: actionMute
                 text: "Mute/&Unmute Sound"
-                image_uri: ":/closed/resources/caw_toolbar.naa#mute.png"
+                image: ":/closed/resources/caw_toolbar.naa#mute.png"
                 checkable: true
-                checked_image_uri: ":/closed/resources/caw_toolbar.naa#unmute.png"
+                checked_image: ":/closed/resources/caw_toolbar.naa#unmute.png"
             }
             action: {
                 id: actionPasteAndGo
                 text: "Paste and Go"
-                image_uri: ":/closed/resources/caw_toolbar.naa#paste_and_go.png"
+                image: ":/closed/resources/caw_toolbar.naa#paste_and_go.png"
                 shortcut: "Ctrl+Shift+V"
             }
             window: {
                 id: window
-                default_width: 800
-                default_height: 800
+                //default_size: [ 800spx 800spx ]
                 status_bar: {
                     id: statusBar
                 }
@@ -94,30 +93,30 @@
                         action: actionAddFavourite
                         action: actionOrganizeFavourites
                         action: separator
-                        action: { text: "Alice" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                        action: { text: "Bob" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                        action: { text: "Carlos" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                        action: { text: "Dave" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Alice" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Bob" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Carlos" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Dave" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
                         menu: {
                             title: "Silent Running Drones"
-                            image_uri: ":/closed/resources/caw_toolbar.naa#folder.png"
-                            action: { text: "Dewey" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                            action: { text: "Huey" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                            action: { text: "Louie" image_uri: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                            image: ":/closed/resources/caw_toolbar.naa#folder.png"
+                            action: { text: "Dewey" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                            action: { text: "Huey" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                            action: { text: "Louie" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
                         }
                         menu: {
                             title: "DC (TM) Characters"
-                            image_uri: ":/closed/resources/caw_toolbar.naa#folder.png"
+                            image: ":/closed/resources/caw_toolbar.naa#folder.png"
                         }
                         menu: {
                             title: "Marvel (TM) Characters"
-                            image_uri: ":/closed/resources/caw_toolbar.naa#folder.png"
+                            image: ":/closed/resources/caw_toolbar.naa#folder.png"
                         }
                         action: separator
                     }
                     action: actionContacts
                     action: actionMute
-                    action: { text: "&Xyzzy..." image_uri: ":/neogfx/resources/icons.naa#eyedropper.png" }
+                    action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons.naa#eyedropper.png" }
                     menu: {
                         id: testMenu
                         title: "&Test"
@@ -169,9 +168,9 @@
                     action: actionContacts
                     action: actionAddFavourite
                     action: actionOrganizeFavourites
-                    action: { text: "Keywords..." image_uri: ":/closed/resources/caw_toolbar.naa#keyword.png" }
-                    action: { text: "Settings..." image_uri: ":/closed/resources/caw_toolbar.naa#settings.png" }
-                    action: { id: actionManagePlugins text: "Manage Plugins..." image_uri: ":/closed/resources/caw_toolbar.naa#manage_plugins.png" }
+                    action: { text: "Keywords..." image: ":/closed/resources/caw_toolbar.naa#keyword.png" }
+                    action: { text: "Settings..." image: ":/closed/resources/caw_toolbar.naa#settings.png" }
+                    action: { id: actionManagePlugins text: "Manage Plugins..." image: ":/closed/resources/caw_toolbar.naa#manage_plugins.png" }
                     action: actionMute
                     action: separator
                     action: app.actionCut
@@ -179,7 +178,36 @@
                     action: app.actionPaste
                     action: actionPasteAndGo
                     action: separator
-                    action: { id: actionCheckForUpdates text: "Check for Updates..." image_uri: ":/closed/resources/caw_toolbar.naa#setup.png" }
+                    action: { id: actionCheckForUpdates text: "Check for Updates..." image: ":/closed/resources/caw_toolbar.naa#setup.png" }
+                }
+                window.client_layout: {
+                    tab_page_container: {
+                        tab_page: {
+                            id: pageButtons
+                            tab_text: "Buttons"
+                            vertical_layout: {
+                                id: layoutButtons
+                                //margin: 8px
+                                horizontal_layout: {
+                                    id: layoutTopButtons
+                                    push_button: {
+                                        id: button0
+                                        text: "This is the neoGFX test application."
+                                        button0.label: {
+                                            placement: ImageTextVertical
+                                            image: ":/test/resources/neoGFX.png"
+                                        }
+                                        button0.image: {
+                                            //minimum_size: [ 32spx 32spx ]
+                                            //maximum_size: [ 160spx max ]
+                                        }
+                                        size_policy: Expanding
+                                        foreground_colour: LightGoldenrodYellow
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

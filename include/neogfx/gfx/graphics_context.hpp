@@ -56,7 +56,6 @@ namespace neogfx
         enum class type
         {
             Attached,
-            AttachedInactiveRenderTarget,
             Unattached
         };
         struct multiline_glyph_text
@@ -241,8 +240,9 @@ namespace neogfx
         glyph_text to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
         // attributes
     private:
+        type iType;
         const i_render_target& iRenderTarget;
-        std::unique_ptr<i_graphics_context> iNativeGraphicsContext;
+        mutable std::unique_ptr<i_graphics_context> iNativeGraphicsContext;
         units_context iUnitsContext;
         mutable font iDefaultFont;
         mutable point iOrigin;

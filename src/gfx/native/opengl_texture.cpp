@@ -415,9 +415,9 @@ namespace neogfx
         return 0.0;
     }
 
-    std::unique_ptr<i_graphics_context> opengl_texture::create_graphics_context() const
+    std::unique_ptr<i_graphics_context> opengl_texture::create_graphics_context(blending_mode aBlendingMode) const
     {
-        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this));
+        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context{ *this, aBlendingMode });
     }
 
     int32_t opengl_texture::bind(const std::optional<uint32_t>& aTextureUnit) const

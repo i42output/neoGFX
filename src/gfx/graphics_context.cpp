@@ -70,75 +70,72 @@ namespace neogfx
     };
 
     graphics_context::graphics_context(const i_surface& aSurface, type aType) :
+        iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
-        iNativeGraphicsContext{ aType == type::Attached ? aSurface.native_surface().create_graphics_context() : nullptr },
+        iNativeGraphicsContext{ nullptr },
         iUnitsContext{ *this },
         iDefaultFont{},
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
         iOpacity{ 1.0 },
-        iBlendingMode{ neogfx::blending_mode::None },
+        iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
         iGlyphTextData{ std::make_unique<glyph_text_data>() }
     {
-        if (attached())
-            set_blending_mode(neogfx::blending_mode::Default);
     }
 
     graphics_context::graphics_context(const i_surface& aSurface, const font& aDefaultFont, type aType) :
+        iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
-        iNativeGraphicsContext{ aType == type::Attached ? aSurface.native_surface().create_graphics_context() : nullptr },
+        iNativeGraphicsContext{ nullptr },
         iUnitsContext{ *this },
         iDefaultFont{ aDefaultFont },
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
         iOpacity{ 1.0 },
-        iBlendingMode{ neogfx::blending_mode::None },
+        iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
         iGlyphTextData{ std::make_unique<glyph_text_data>() }
     {
-        if (attached())
-            set_blending_mode(neogfx::blending_mode::Default);
     }
 
     graphics_context::graphics_context(const i_widget& aWidget, type aType) :
+        iType{ aType },
         iRenderTarget{ aWidget.surface().native_surface() },
-        iNativeGraphicsContext{ aType == type::Attached ? aWidget.surface().native_surface().create_graphics_context(aWidget) : nullptr },
+        iNativeGraphicsContext{ nullptr },
         iUnitsContext{ *this },
         iDefaultFont{ aWidget.font() },
         iOrigin{ aWidget.origin() },
         iExtents{ aWidget.extents() },
         iOpacity{ 1.0 },
-        iBlendingMode{ neogfx::blending_mode::None },
+        iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
         iGlyphTextData{ std::make_unique<glyph_text_data>() }
     {
         set_logical_coordinate_system(aWidget.logical_coordinate_system());
-        if (attached())
-            set_blending_mode(neogfx::blending_mode::Default);
     }
 
     graphics_context::graphics_context(const i_texture& aTexture, type aType) :
+        iType{ aType },
         iRenderTarget{ *aTexture.native_texture() },
-        iNativeGraphicsContext{ aType == type::Attached ? aTexture.native_texture()->create_graphics_context() : nullptr },
+        iNativeGraphicsContext{ nullptr },
         iUnitsContext{ *this },
         iDefaultFont{ font() },
         iOrigin{},
         iExtents{ aTexture.extents() },
         iOpacity{ 1.0 },
-        iBlendingMode{ neogfx::blending_mode::None },
+        iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
         iGlyphTextData{ std::make_unique<glyph_text_data>() }
     {
-        if (attached())
-            set_blending_mode(neogfx::blending_mode::Default);
     }
 
     graphics_context::graphics_context(const graphics_context& aOther) :
+        iType{ aOther.iType },
         iRenderTarget{ aOther.iRenderTarget },
         iNativeGraphicsContext{ aOther.iNativeGraphicsContext != nullptr ? aOther.native_context().clone() : nullptr },
         iUnitsContext{ *this },
@@ -148,13 +145,11 @@ namespace neogfx
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
         iOpacity{ 1.0 },
-        iBlendingMode{ neogfx::blending_mode::None },
+        iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
         iGlyphTextData{ std::make_unique<glyph_text_data>() }
     {
-        if (attached())
-            set_blending_mode(neogfx::blending_mode::Default);
     }
 
     graphics_context::~graphics_context()
@@ -658,13 +653,17 @@ namespace neogfx
 
     bool graphics_context::attached() const
     {
-        return iNativeGraphicsContext != nullptr;
+        return iType == type::Attached;
     }
 
     i_graphics_context& graphics_context::native_context() const
     {
         if (attached())
+        {
+            if (iNativeGraphicsContext == nullptr)
+                iNativeGraphicsContext = iRenderTarget.create_graphics_context(iBlendingMode);
             return *iNativeGraphicsContext;
+        }
         throw unattached();
     }
 

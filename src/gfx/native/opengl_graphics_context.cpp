@@ -155,7 +155,7 @@ namespace neogfx
         }
     }
 
-    opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget) :
+    opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{aTarget}, 
         iWidget{ nullptr },
@@ -167,6 +167,7 @@ namespace neogfx
         iSrt{ iTarget }
     {
         rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
+        set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([this]() 
         { 
@@ -174,7 +175,7 @@ namespace neogfx
         });
     }
 
-    opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget) :
+    opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{ aTarget },
         iWidget{ &aWidget },
@@ -187,6 +188,7 @@ namespace neogfx
         iSrt{ iTarget }
     {
         rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
+        set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([this]()
         {
@@ -208,6 +210,7 @@ namespace neogfx
         iSrt{ iTarget }
     {
         rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
+        set_blending_mode(iBlendingMode);
         set_smoothing_mode(iSmoothingMode);
         iSink += render_target().target_deactivating([this]()
         {

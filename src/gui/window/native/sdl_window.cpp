@@ -453,14 +453,14 @@ namespace neogfx
         return visible() && opengl_window::can_render();
     }
 
-    std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context() const
+    std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context(blending_mode aBlendingMode) const
     {
-        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this));
+        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context{ *this, aBlendingMode });
     }
 
-    std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context(const i_widget& aWidget) const
+    std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
-        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this, aWidget));
+        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context{ *this, aWidget, aBlendingMode });
     }
 
     void sdl_window::close(bool aForce)

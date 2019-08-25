@@ -67,7 +67,7 @@ namespace neogfx
     public:
         virtual colour read_pixel(const point& aPosition) const = 0;
     public:
-        virtual std::unique_ptr<i_graphics_context> create_graphics_context() const = 0;
+        virtual std::unique_ptr<i_graphics_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0;
     };
 
     class scoped_render_target
