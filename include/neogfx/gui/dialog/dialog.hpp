@@ -36,8 +36,8 @@ namespace neogfx
     class dialog : public window
     {
     public:
-        event<bool&> try_accept;
-        event<bool&> try_reject;
+        define_event(TryAccept, bool&)
+        define_event(TryReject, bool&)
     public:
         dialog(window_style aStyle = window_style::Default);
         dialog(const std::string& aDialogTitle, window_style aStyle = window_style::Default);

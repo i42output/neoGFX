@@ -58,7 +58,7 @@ namespace neogfx
         {
             iStyle = aStyle;
             update_placement();
-            style_changed.trigger();
+            evStyleChanged.trigger();
         }
     }
 

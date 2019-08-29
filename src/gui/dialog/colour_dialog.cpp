@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
+    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
     colour_dialog::colour_box::colour_box(colour_dialog& aOwner, const optional_colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
         framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColour(aColour), iCustomColour(aCustomColour)
@@ -49,7 +49,7 @@ namespace neogfx
         return minimum_size();
     }
 
-    void colour_dialog::colour_box::paint(graphics_context& aGraphicsContext) const
+    void colour_dialog::colour_box::paint(i_graphics_context& aGraphicsContext) const
     {
         framed_widget::paint(aGraphicsContext);
         const optional_colour& fillColour = (iCustomColour == std::nullopt ? iColour : **iCustomColour);
@@ -239,7 +239,7 @@ namespace neogfx
         iRightCursor(*this, cursor_widget::RightCursor)
     {
         set_margins(neogfx::margins{});
-        iSink = iOwner.selection_changed([this]()
+        iSink = iOwner.evSelectionChanged([this]()
         {
             update_cursors();
             update();
@@ -276,7 +276,7 @@ namespace neogfx
         update_cursors();
     }
 
-    void colour_dialog::x_picker::paint(graphics_context& aGraphicsContext) const
+    void colour_dialog::x_picker::paint(i_graphics_context& aGraphicsContext) const
     {
         framed_widget::paint(aGraphicsContext);
         scoped_units su{ *this, units::Pixels };
@@ -467,7 +467,7 @@ namespace neogfx
         framed_widget(aOwner.iRightTopLayout), iOwner(aOwner), iTexture{ image{ size{256, 256}, colour::Black } }, iUpdateTexture{ true }, iTracking { false }
     {
         set_margins(neogfx::margins{});
-        iOwner.selection_changed([this]
+        iOwner.evSelectionChanged([this]
         {
             iUpdateTexture = true;
             update();
@@ -491,7 +491,7 @@ namespace neogfx
         return minimum_size();
     }
 
-    void colour_dialog::yz_picker::paint(graphics_context& aGraphicsContext) const
+    void colour_dialog::yz_picker::paint(i_graphics_context& aGraphicsContext) const
     {
         framed_widget::paint(aGraphicsContext);
         rect cr = client_rect(false);
@@ -681,7 +681,7 @@ namespace neogfx
         framed_widget(aOwner.iRightBottomLayout), iOwner(aOwner)
     {
         set_margins(neogfx::margins{});
-        iOwner.selection_changed([this]
+        iOwner.evSelectionChanged([this]
         {
             update();
         });
@@ -704,7 +704,7 @@ namespace neogfx
         return minimum_size();
     }
 
-    void colour_dialog::colour_selection::paint(graphics_context& aGraphicsContext) const
+    void colour_dialog::colour_selection::paint(i_graphics_context& aGraphicsContext) const
     {
         framed_widget::paint(aGraphicsContext);
         scoped_units su(*this, aGraphicsContext, units::Pixels);
@@ -887,7 +887,7 @@ namespace neogfx
         iChannelLayout.set_margins(neogfx::margins{});
         iChannelLayout.set_spacing(standardSpacing / 2.0);
         iScreenPicker.set_size_policy(size_policy::Minimum);
-        iSink += iScreenPicker.async_clicked([&, this]()
+        iSink += iScreenPicker.evAsyncClicked([&, this]()
         {
             iScreenPickerActive = true;
             surface().as_surface_window().set_capture(*this);
@@ -917,20 +917,20 @@ namespace neogfx
             iCustomColoursGrid.add(std::make_shared<colour_box>(*this, *customColour, customColour));
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
-        iSink += iH.first.checked([this]() { set_current_channel(ChannelHue); });
-        iSink += iS.first.checked([this]() { set_current_channel(ChannelSaturation); });
-        iSink += iV.first.checked([this]() { set_current_channel(ChannelValue); });
-        iSink += iR.first.checked([this]() { set_current_channel(ChannelRed); });
-        iSink += iG.first.checked([this]() { set_current_channel(ChannelGreen); });
-        iSink += iB.first.checked([this]() { set_current_channel(ChannelBlue); });
-        iSink += iA.first.checked([this]() { set_current_channel(ChannelAlpha); });
-        iSink += iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_hue(iH.second.value()); select_colour(hsv, iH.second); });
-        iSink += iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_saturation(iS.second.value() / 100.0); select_colour(hsv, iS.second); });
-        iSink += iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_value(iV.second.value() / 100.0); select_colour(hsv, iV.second); });
-        iSink += iR.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value())), iR.second); });
-        iSink += iG.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value())), iG.second); });
-        iSink += iB.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value())), iB.second); });
-        iSink += iA.second.value_changed([this]() 
+        iSink += iH.first.evChecked([this]() { set_current_channel(ChannelHue); });
+        iSink += iS.first.evChecked([this]() { set_current_channel(ChannelSaturation); });
+        iSink += iV.first.evChecked([this]() { set_current_channel(ChannelValue); });
+        iSink += iR.first.evChecked([this]() { set_current_channel(ChannelRed); });
+        iSink += iG.first.evChecked([this]() { set_current_channel(ChannelGreen); });
+        iSink += iB.first.evChecked([this]() { set_current_channel(ChannelBlue); });
+        iSink += iA.first.evChecked([this]() { set_current_channel(ChannelAlpha); });
+        iSink += iH.second.evValueChanged([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_hue(iH.second.value()); select_colour(hsv, iH.second); });
+        iSink += iS.second.evValueChanged([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_saturation(iS.second.value() / 100.0); select_colour(hsv, iS.second); });
+        iSink += iV.second.evValueChanged([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_value(iV.second.value() / 100.0); select_colour(hsv, iV.second); });
+        iSink += iR.second.evValueChanged([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value())), iR.second); });
+        iSink += iG.second.evValueChanged([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value())), iG.second); });
+        iSink += iB.second.evValueChanged([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value())), iB.second); });
+        iSink += iA.second.evValueChanged([this]() 
         { 
             if (iUpdatingWidgets) 
                 return;
@@ -943,9 +943,9 @@ namespace neogfx
                 select_colour(hsv, iA.second);
             }
         });
-        iSink += iRgb.text_changed([this]() { if (iUpdatingWidgets) return; select_colour(colour{ iRgb.text() }, iRgb); });
+        iSink += iRgb.evTextChanged([this]() { if (iUpdatingWidgets) return; select_colour(colour{ iRgb.text() }, iRgb); });
 
-        iSink += iAddToCustomColours.clicked([this]()
+        iSink += iAddToCustomColours.evClicked([this]()
         {
             if (iCurrentCustomColour == iCustomColours.end())
                 iCurrentCustomColour = iCustomColours.begin();
@@ -978,7 +978,7 @@ namespace neogfx
         if (iCurrentChannel != aChannel)
         {
             iCurrentChannel = aChannel;
-            selection_changed.trigger();
+            evSelectionChanged.trigger();
             update();
         }
     }
@@ -1004,7 +1004,7 @@ namespace neogfx
         {
             iSelectedColour = aColour;
             update_widgets(aUpdatingWidget);
-            selection_changed.trigger();
+            evSelectionChanged.trigger();
         }
     }
 

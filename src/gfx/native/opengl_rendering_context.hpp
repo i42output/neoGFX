@@ -1,4 +1,4 @@
-// opengl_graphics_context.hpp
+// opengl_rendering_context.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
@@ -32,13 +32,13 @@ namespace neogfx
 {
     class i_widget;
 
-    class opengl_graphics_context : public i_graphics_context
+    class opengl_rendering_context : public i_rendering_context
     {
     public:
         class scoped_anti_alias
         {
         public:
-            scoped_anti_alias(opengl_graphics_context& aParent, neogfx::smoothing_mode aNewSmoothingMode) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
+            scoped_anti_alias(opengl_rendering_context& aParent, neogfx::smoothing_mode aNewSmoothingMode) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
             {
                 iParent.set_smoothing_mode(aNewSmoothingMode);
             }
@@ -47,23 +47,23 @@ namespace neogfx
                 iParent.set_smoothing_mode(iOldSmoothingMode);
             }
         private:
-            opengl_graphics_context& iParent;
+            opengl_rendering_context& iParent;
             neogfx::smoothing_mode iOldSmoothingMode;
         };
         class disable_anti_alias : public scoped_anti_alias
         {
         public:
-            disable_anti_alias(opengl_graphics_context& aParent) : scoped_anti_alias(aParent, neogfx::smoothing_mode::None)
+            disable_anti_alias(opengl_rendering_context& aParent) : scoped_anti_alias(aParent, neogfx::smoothing_mode::None)
             {
             }
         };
     public:
-        opengl_graphics_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);
-        opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default);
-        opengl_graphics_context(const opengl_graphics_context& aOther);
-        ~opengl_graphics_context();
+        opengl_rendering_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);
+        opengl_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default);
+        opengl_rendering_context(const opengl_rendering_context& aOther);
+        ~opengl_rendering_context();
     public:
-        std::unique_ptr<i_graphics_context> clone() const override;
+        std::unique_ptr<i_rendering_context> clone() const override;
     public:
         i_rendering_engine& rendering_engine() override;
         const i_render_target& render_target() const override;

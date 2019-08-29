@@ -28,6 +28,14 @@ namespace neogfx
     class action : public i_action
     {
     public:
+        define_declared_event(Triggered, triggered)
+        define_declared_event(Hovered, hovered)
+        define_declared_event(Enabled, enabled)
+        define_declared_event(Disabled, disabled)
+        define_declared_event(Checked, checked)
+        define_declared_event(Unchecked, unchecked)
+        define_declared_event(Changed, changed)
+    public:
         action();
         action(const std::string& aText);
         action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);

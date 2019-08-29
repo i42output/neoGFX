@@ -28,6 +28,11 @@ namespace neogfx
 {
     class skin_manager : public i_skin_manager
     {
+    public:
+        define_declared_event(SkinRegistered, skin_registered, i_skin&)
+        define_declared_event(SkinUnregistered, skin_unregistered, i_skin&)
+        define_declared_event(ItemRegistered, item_registered, i_skinnable_item&)
+        define_declared_event(ItemUnregistered, item_unregistered, i_skinnable_item&)
     private:
         typedef std::unordered_set<i_skin*> skin_list;
         typedef std::unordered_set<i_skinnable_item*, boost::hash<i_skinnable_item*>, std::equal_to<i_skinnable_item*>, boost::fast_pool_allocator<i_skinnable_item*>> item_list;

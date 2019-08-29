@@ -111,15 +111,15 @@ namespace neogfx::game
         return neogfx::logical_coordinate_system::AutomaticGame;
     }
 
-    void canvas::paint(graphics_context& aGraphicsContext) const
+    void canvas::paint(i_graphics_context& aGraphicsContext) const
     {    
         if (ecs().component_registered<mesh_renderer>())
         {
             aGraphicsContext.clear_depth_buffer();
             component_lock_guard<mesh_renderer> lgMeshRenderer{ ecs() };
-            rendering_entities.trigger(aGraphicsContext);
+            evRenderingEntities.trigger(aGraphicsContext);
             aGraphicsContext.draw_entities(ecs());
-            entities_rendered.trigger(aGraphicsContext);
+            evEntitiesRendered.trigger(aGraphicsContext);
         }
     }
 
@@ -148,7 +148,7 @@ namespace neogfx::game
             }
         }, 1000u);
 
-        iSink += ecs().system<game_world>().physics_applied([this](step_time)
+        iSink += ecs().system<game_world>().evPhysicsApplied([this](step_time)
         {
             update();
         });

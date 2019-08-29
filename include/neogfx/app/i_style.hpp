@@ -50,7 +50,7 @@ namespace neogfx
     class i_style
     {
     public:
-        event<style_aspect> changed;
+        declare_event(changed, style_aspect)
     public:
         virtual ~i_style() {}
     public:

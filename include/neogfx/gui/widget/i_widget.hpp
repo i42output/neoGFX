@@ -21,8 +21,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <unordered_set>
+#include <neogfx/core/event.hpp>
 #include <neogfx/gui/layout/i_anchorable_object.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/window/i_window.hpp>
@@ -39,19 +40,19 @@ namespace neogfx
     class i_widget : public i_anchorable_object, public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
     {
     public:
-        static i_widget* debug;
+        declare_event(visibility_changed)
+        declare_event(position_changed)
+        declare_event(size_changed)
+        declare_event(layout_completed)
+        declare_event(painting, i_graphics_context&)
+        declare_event(painted, i_graphics_context&)
+        declare_event(children_painted, i_graphics_context&)
+        declare_event(mouse_event, const neogfx::mouse_event&)
+        declare_event(non_client_mouse_event, const neogfx::non_client_mouse_event&)
+        declare_event(keyboard_event, const neogfx::keyboard_event&)
+        declare_event(focus_event, neogfx::focus_event)
     public:
-        event<> visibility_changed;
-        event<> position_changed;
-        event<> size_changed;
-        event<> layout_completed;
-        event<graphics_context&> painting;
-        event<graphics_context&> painted;
-        event<graphics_context&> children_painted;
-        event<const neogfx::mouse_event&> mouse_event;
-        event<const neogfx::non_client_mouse_event&> non_client_mouse_event;
-        event<const neogfx::keyboard_event&> keyboard_event;
-        event<neogfx::focus_event> focus_event;
+        static i_widget* debug;
     public:
         typedef std::vector<std::shared_ptr<i_widget>> widget_list;
     protected:
@@ -141,11 +142,11 @@ namespace neogfx
         virtual rect update_rect() const = 0;
         virtual rect default_clip_rect(bool aIncludeNonClient = false) const = 0;
         virtual bool ready_to_render() const = 0;
-        virtual void render(graphics_context& aGraphicsContext) const = 0;
+        virtual void render(i_graphics_context& aGraphicsContext) const = 0;
         virtual bool transparent_background() const = 0;
-        virtual void paint_non_client(graphics_context& aGraphicsContext) const = 0;
-        virtual void paint_non_client_after(graphics_context& aGraphicsContext) const = 0;
-        virtual void paint(graphics_context& aGraphicsContext) const = 0;
+        virtual void paint_non_client(i_graphics_context& aGraphicsContext) const = 0;
+        virtual void paint_non_client_after(i_graphics_context& aGraphicsContext) const = 0;
+        virtual void paint(i_graphics_context& aGraphicsContext) const = 0;
     public:
         virtual double opacity() const = 0;
         virtual void set_opacity(double aOpacity) = 0;
@@ -180,7 +181,7 @@ namespace neogfx
         virtual void non_client_set_capture() = 0;
         virtual void non_client_release_capture() = 0;
         virtual void captured() = 0;
-        virtual void released() = 0;
+        virtual void capture_released() = 0;
         virtual neogfx::focus_policy focus_policy() const = 0;
         virtual void set_focus_policy(neogfx::focus_policy aFocusPolicy) = 0;
         virtual bool has_focus() const = 0;
@@ -202,8 +203,6 @@ namespace neogfx
         virtual void mouse_entered(const point& aPosition) = 0;
         virtual void mouse_left() = 0;
         virtual neogfx::mouse_cursor mouse_cursor() const = 0;
-    public:
-        virtual graphics_context create_graphics_context() const = 0;
     public:
         virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;
         virtual i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) = 0;

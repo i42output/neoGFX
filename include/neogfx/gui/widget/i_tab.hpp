@@ -20,9 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
-#include "i_widget.hpp"
+#include <neogfx/core/i_event.hpp>
 #include <neogfx/gfx/i_image.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
@@ -31,8 +31,8 @@ namespace neogfx
     class i_tab
     {
     public:
-        event<> selected;
-        event<> deselected;
+        declare_event(selected)
+        declare_event(deselected)
     public:
         virtual ~i_tab() {}
     public:

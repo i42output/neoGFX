@@ -66,7 +66,7 @@ namespace neogfx
     class i_app
     {
     public:
-        event<style_aspect> current_style_changed;
+        declare_event(current_style_changed, style_aspect)
     public:
         struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };
         struct unknown_standard_menu : std::logic_error { unknown_standard_menu() : std::logic_error("neogfx::i_app::unknown_standard_menu") {} };

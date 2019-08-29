@@ -49,10 +49,10 @@ namespace neogfx
     class i_surface : public i_object, public i_device_metrics
     {
     public:
-        event<> dpi_changed;
-        event<> rendering;
-        event<> rendering_finished;
-        event<> closed;
+        declare_event(dpi_changed)
+        declare_event(rendering)
+        declare_event(rendering_finished)
+        declare_event(closed)
     public:
         struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };
         struct not_a_window : std::logic_error { not_a_window() : std::logic_error("neogfx::i_surface::not_a_window") {} };

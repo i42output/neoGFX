@@ -29,8 +29,6 @@
 
 namespace neogfx
 {
-    class graphics_context;
-
     class i_item_presentation_model;
 
     typedef item_index item_presentation_model_index;
@@ -91,7 +89,7 @@ namespace neogfx
     class i_item_presentation_model
     {
     public:
-        event<> visual_appearance_changed;
+        declare_event(visual_appearance_changed)
     public:
         struct cell_meta_type
         {
@@ -139,9 +137,9 @@ namespace neogfx
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
         virtual uint32_t columns(const item_presentation_model_index& aIndex) const = 0;
-        virtual dimension column_width(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext, bool aIncludeMargins = true) const = 0;
+        virtual dimension column_width(item_presentation_model_index::value_type aColumnIndex, const i_graphics_context& aGraphicsContext, bool aIncludeMargins = true) const = 0;
         virtual const std::string& column_heading_text(item_presentation_model_index::value_type aColumnIndex) const = 0;
-        virtual size column_heading_extents(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext) const = 0;
+        virtual size column_heading_extents(item_presentation_model_index::value_type aColumnIndex, const i_graphics_context& aGraphicsContext) const = 0;
         virtual void set_column_heading_text(item_presentation_model_index::value_type aColumnIndex, const std::string& aHeadingText) = 0;
         virtual item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const = 0;
         virtual void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_cell_editable aEditable) = 0;
@@ -168,8 +166,8 @@ namespace neogfx
         virtual optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const = 0;
         virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_texture cell_image(const item_presentation_model_index& aIndex) const = 0;
-        virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
-        virtual size cell_extents(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
+        virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
+        virtual size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
     public:
         virtual optional_sort sorting_by() const = 0;
         virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) = 0;

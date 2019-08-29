@@ -27,8 +27,8 @@ namespace neogfx
     class slider_impl : public widget
     {
     public:
-        event<> value_changed;
-        event<> constraints_changed;
+        define_event(ValueChanged)
+        define_event(ConstraintsChanged)
     public:
         enum type_e
         {
@@ -43,7 +43,7 @@ namespace neogfx
     public:
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
     public:
-        virtual void paint(graphics_context& aGraphicsContext) const;
+        virtual void paint(i_graphics_context& aGraphicsContext) const;
     public:
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
         virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);

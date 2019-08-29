@@ -42,6 +42,12 @@ namespace neogfx
 
     class keyboard : public i_keyboard
     {
+    public:
+        define_declared_event(KeyPressed, key_pressed, scan_code_e, key_code_e, key_modifiers_e)
+        define_declared_event(KeyReleased, key_released, scan_code_e, key_code_e, key_modifiers_e)
+        define_declared_event(TextInput, text_input, const std::string&)
+        define_declared_event(SysTextInput, sys_text_input, const std::string&)
+    private:
         friend class keyboard_grabber;
     public:
         keyboard();

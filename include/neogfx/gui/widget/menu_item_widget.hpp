@@ -47,8 +47,8 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     public:
-        void paint_non_client(graphics_context& aGraphicsContext) const override;
-        void paint(graphics_context& aGraphicsContext) const override;
+        void paint_non_client(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     public:
         colour background_colour() const override;
     public:

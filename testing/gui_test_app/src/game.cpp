@@ -52,7 +52,7 @@ using namespace neolib::stdint_suffix;
     }
     auto debugInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane.font().with_size(spritePlane.font().size() * 0.5), ng::text_appearance{ ng::colour::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
     spritePlane.add_shape(debugInfo);
-    spritePlane.sprites_painted([&spritePlane](ng::graphics_context& aGraphicsContext)
+    spritePlane.sprites_painted([&spritePlane](ng::i_graphics_context& aGraphicsContext)
     {
         aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane.font().with_style(ng::font_info::Underline), ng::colour::White);
         if (ng::service<ng::i_app>().keyboard().is_key_pressed(ng::ScanCode_C))
@@ -189,7 +189,7 @@ void create_game(ng::i_layout& aLayout)
 
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     // Some information text...
-    canvas.entities_rendered([&, clockFont](ng::graphics_context& gc)
+    canvas.evEntitiesRendered([&, clockFont](ng::i_graphics_context& gc)
     {
         std::ostringstream text;
         auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
@@ -201,7 +201,7 @@ void create_game(ng::i_layout& aLayout)
     // Instantiate physics...
     ecs.system<ng::game::simple_physics>();
 
-    ~~~~ecs.system<ng::game::game_world>().applying_physics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+    ~~~~ecs.system<ng::game::game_world>().evApplyingPhysics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
     {
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
@@ -226,7 +226,7 @@ void create_game(ng::i_layout& aLayout)
                 shipInfo->set_value(oss.str()); */
     });
 
-    ecs.system<ng::game::game_world>().physics_applied([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+    ecs.system<ng::game::game_world>().evPhysicsApplied([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
     {
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
@@ -293,7 +293,7 @@ void create_game(ng::i_layout& aLayout)
     }
 */
 
-    canvas.mouse_event([&canvas, spaceship](const neogfx::mouse_event& e)
+    canvas.evMouse([&canvas, spaceship](const neogfx::mouse_event& e)
     {
         if ((e.type() == neogfx::mouse_event_type::ButtonClicked ||
             e.type() == neogfx::mouse_event_type::Moved) && (e.mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left)

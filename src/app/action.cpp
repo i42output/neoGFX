@@ -183,7 +183,7 @@ namespace neogfx
         if (iCheckable != aCheckable)
         {
             iCheckable = aCheckable;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -205,7 +205,7 @@ namespace neogfx
         if (iGroup != aGroup)
         {
             iGroup = aGroup;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -215,7 +215,7 @@ namespace neogfx
         if (iSeparator != aIsSeparator)
         {
             iSeparator = aIsSeparator;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -227,7 +227,7 @@ namespace neogfx
             iText = aText;
             if (iText != std::nullopt && iSeparator)
                 iSeparator = false;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -239,7 +239,7 @@ namespace neogfx
             iMenuText = aMenuText;
             if (iMenuText != std::nullopt && iSeparator)
                 iSeparator = false;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -251,7 +251,7 @@ namespace neogfx
             iButtonText = aButtonText;
             if (iButtonText != std::nullopt && iSeparator)
                 iSeparator = false;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -263,7 +263,7 @@ namespace neogfx
             iToolTipText = aToolTipText;
             if (iToolTipText != std::nullopt && iSeparator)
                 iSeparator = false;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -275,7 +275,7 @@ namespace neogfx
             iHelpText = aHelpText;
             if (iHelpText != std::nullopt && iSeparator)
                 iSeparator = false;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -297,7 +297,7 @@ namespace neogfx
         iImage = aTexture;
         if (!iImage.is_empty() && iSeparator)
             iSeparator = false;
-        changed.trigger();
+        evChanged.trigger();
         return *this;
     }
 
@@ -318,7 +318,7 @@ namespace neogfx
         iCheckedTexture = aTexture;
         if (!iCheckedTexture.is_empty() && iSeparator)
             iSeparator = false;
-        changed.trigger();
+        evChanged.trigger();
         return *this;
     }
 
@@ -329,7 +329,7 @@ namespace neogfx
             iShortcut = aShortcut;
             if (iShortcut != std::nullopt && iSeparator)
                 iSeparator = false;
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -345,9 +345,9 @@ namespace neogfx
         {
             iEnabled = aEnabled;
             if (is_enabled())
-                enabled.trigger();
+                evEnabled.trigger();
             else
-                disabled.trigger();
+                evDisabled.trigger();
         }
     }
 
@@ -357,9 +357,9 @@ namespace neogfx
         {
             iChecked = aChecked;
             if (is_checked())
-                checked.trigger();
+                evChecked.trigger();
             else
-                unchecked.trigger();
+                evUnchecked.trigger();
         }
     }
 }

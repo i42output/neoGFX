@@ -43,7 +43,7 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
@@ -77,6 +77,7 @@ namespace neogfx
         iDefaultFont{},
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
+        iLayer{ 0 },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -93,6 +94,7 @@ namespace neogfx
         iDefaultFont{ aDefaultFont },
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
+        iLayer{ 0 },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -109,6 +111,7 @@ namespace neogfx
         iDefaultFont{ aWidget.font() },
         iOrigin{ aWidget.origin() },
         iExtents{ aWidget.extents() },
+        iLayer{ 0 },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -126,6 +129,7 @@ namespace neogfx
         iDefaultFont{ font() },
         iOrigin{},
         iExtents{ aTexture.extents() },
+        iLayer{ 0 },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -142,6 +146,7 @@ namespace neogfx
         iDefaultFont{ aOther.iDefaultFont },
         iOrigin{ aOther.origin() },
         iExtents{ aOther.extents() },
+        iLayer{ 0 },
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
         iOpacity{ 1.0 },
@@ -156,9 +161,39 @@ namespace neogfx
     {
     }
 
+    std::unique_ptr<i_rendering_context> graphics_context::clone() const
+    {
+        return std::make_unique<graphics_context>(*this);
+    }
+
+    i_rendering_engine& graphics_context::rendering_engine()
+    {
+        return native_context().rendering_engine();
+    }
+
     const i_render_target& graphics_context::render_target() const
     {
         return iRenderTarget;
+    }
+
+    const i_render_target& graphics_context::render_target()
+    {
+        return iRenderTarget;
+    }
+
+    rect graphics_context::rendering_area(bool aConsiderScissor) const
+    {
+        return native_context().rendering_area(aConsiderScissor);
+    }
+
+    void graphics_context::enqueue(const graphics_operation::operation& aOperation)
+    {
+        native_context().enqueue(aOperation);
+    }
+
+    void graphics_context::flush()
+    {
+        native_context().flush();
     }
 
     graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_colour& aClearColour) const
@@ -252,6 +287,22 @@ namespace neogfx
             for (std::size_t j = 0; j < result.paths()[i].size(); ++j)
                 result.paths()[i][j] = from_device_units(result.paths()[i][j]);
         return result;
+    }
+
+    int32_t graphics_context::layer() const
+    {
+        return iLayer;
+    }
+
+    void graphics_context::set_layer(int32_t aLayer)
+    {
+        if (iLayer != aLayer)
+        {
+            iLayer = aLayer;
+            // todo:-
+//            if (attached())
+//                native_context().enqueue(graphics_operation::set_layer{ aLayer });
+        }
     }
 
     neogfx::logical_coordinate_system graphics_context::logical_coordinate_system() const
@@ -656,7 +707,7 @@ namespace neogfx
         return iType == type::Attached;
     }
 
-    i_graphics_context& graphics_context::native_context() const
+    i_rendering_context& graphics_context::native_context() const
     {
         if (attached())
         {
@@ -803,13 +854,13 @@ namespace neogfx
         native_context().enqueue(graphics_operation::clear_stencil_buffer{});
     }
 
-    void graphics_context::blit(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect) const
+    void graphics_context::blit(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect) const
     {
         scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
         draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
     }
 
-    void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParameter2) const
+    void graphics_context::blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParameter2) const
     {
         // todo
         scoped_scissor ss{ *this, aDestinationRect };
@@ -1127,12 +1178,12 @@ namespace neogfx
     class graphics_context::glyph_shapes
     {
     public:
-        struct not_using_fallback : std::logic_error { not_using_fallback() : std::logic_error("neogfx::opengl_graphics_context::glyph_shapes::not_using_fallback") {} };
+        struct not_using_fallback : std::logic_error { not_using_fallback() : std::logic_error("neogfx::opengl_rendering_context::glyph_shapes::not_using_fallback") {} };
     public:
         class glyphs
         {
         public:
-            glyphs(const graphics_context& aParent, const font& aFont, const glyph_text_data::glyph_run& aGlyphRun) :
+            glyphs(const i_graphics_context& aParent, const font& aFont, const glyph_text_data::glyph_run& aGlyphRun) :
                 iParent{ aParent },
                 iFont{ static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->font },
                 iGlyphRun{ aGlyphRun },
@@ -1215,7 +1266,7 @@ namespace neogfx
                 return false;
             }
         private:
-            const graphics_context& iParent;
+            const i_graphics_context& iParent;
             hb_font_t* iFont;
             const glyph_text_data::glyph_run& iGlyphRun;
             hb_buffer_t* iBuf;
@@ -1226,7 +1277,7 @@ namespace neogfx
         typedef std::list<glyphs> glyphs_list;
         typedef std::vector<std::pair<glyphs_list::const_iterator, uint32_t>> result_type;
     public:
-        glyph_shapes(const graphics_context& aParent, const font& aFont, const glyph_text_data::glyph_run& aGlyphRun)
+        glyph_shapes(const i_graphics_context& aParent, const font& aFont, const glyph_text_data::glyph_run& aGlyphRun)
         {
             font tryFont = aFont;
             iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
@@ -1711,36 +1762,5 @@ namespace neogfx
             return std::move(emojiResult);
         }
         return std::move(result);
-    }
-
-    scoped_coordinate_system::scoped_coordinate_system(const graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
-        iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
-    {
-        iGc.set_logical_coordinate_system(aCoordinateSystem);
-        apply_origin(aOrigin, aExtents);
-    }
-
-    scoped_coordinate_system::scoped_coordinate_system(const graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
-        iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
-    {
-        iGc.set_logical_coordinate_system(aCoordinateSystem);
-        iGc.set_logical_coordinates(aCoordinates);
-        apply_origin(aOrigin, aExtents);
-    }
-
-    scoped_coordinate_system::~scoped_coordinate_system()
-    {
-        if (iGc.logical_coordinate_system() != iPreviousCoordinateSystem)
-            iGc.set_logical_coordinate_system(iPreviousCoordinateSystem);
-        if (iGc.logical_coordinates() != iPreviousCoordinates)
-            iGc.set_logical_coordinates(iPreviousCoordinates);
-    }
-
-    void scoped_coordinate_system::apply_origin(const point& aOrigin, const size& aExtents)
-    {
-        if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-            iGc.set_origin(aOrigin);
-        else if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
-            iGc.set_origin(point{ aOrigin.x, iGc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
     }
 }

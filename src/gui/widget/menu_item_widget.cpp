@@ -74,7 +74,7 @@ namespace neogfx
         return result;
     }
 
-    void menu_item_widget::paint_non_client(graphics_context& aGraphicsContext) const
+    void menu_item_widget::paint_non_client(i_graphics_context& aGraphicsContext) const
     {
         if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())))
         {
@@ -92,7 +92,7 @@ namespace neogfx
         }
     }
 
-    void menu_item_widget::paint(graphics_context& aGraphicsContext) const
+    void menu_item_widget::paint(i_graphics_context& aGraphicsContext) const
     {
         if (menu_item().type() != i_menu_item::Action || !menu_item().action().is_separator())
         {
@@ -287,7 +287,7 @@ namespace neogfx
             else
                 service<i_app>().remove_mnemonic(*this);
         };
-        iSink += iText.text_changed(text_updated);
+        iSink += iText.evTextChanged(text_updated);
         text_updated();
         if (menu_item().type() == i_menu_item::Action)
         {
@@ -380,7 +380,7 @@ namespace neogfx
                     {
                         destroyed_flag destroyed{ *this };
                         if (!menu_item().sub_menu().is_open())
-                            menu().open_sub_menu.trigger(menu_item().sub_menu());
+                            menu().open_sub_menu().trigger(menu_item().sub_menu());
                         if (!destroyed)
                             update();
                         iSubMenuOpener.reset();
@@ -406,7 +406,7 @@ namespace neogfx
             menu().clear_selection();
             if (destroyed)
                 return;
-            menu_item().action().triggered.async_trigger();
+            menu_item().action().triggered().async_trigger();
             if (destroyed)
                 return;
             if (menu_item().action().is_checkable())
@@ -430,7 +430,7 @@ namespace neogfx
                 menu().select_item_at(menu().find(menu_item()), aOpenAnySubMenu);
                 if (destroyed)
                     return;
-                menu().open_sub_menu.trigger(menu_item().sub_menu());
+                menu().open_sub_menu().trigger(menu_item().sub_menu());
                 if (destroyed)
                     return;
                 update();

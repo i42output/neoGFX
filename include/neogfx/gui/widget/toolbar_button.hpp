@@ -39,7 +39,7 @@ namespace neogfx
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
         virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
     public:
-        virtual void paint(graphics_context& aGraphicsContext) const;
+        virtual void paint(i_graphics_context& aGraphicsContext) const;
     public:
         virtual colour foreground_colour() const;
     public:

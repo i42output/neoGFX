@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 
 namespace neogfx
 {
@@ -35,8 +35,8 @@ namespace neogfx
         virtual void activate() = 0;
         virtual void deactivate() = 0;
     public:
-        virtual void paint_non_client(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
-        virtual void paint_non_client_after(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
-        virtual void paint(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
+        virtual void paint_non_client(i_skinnable_item& aItem, i_graphics_context& aGraphicsContext) const = 0;
+        virtual void paint_non_client_after(i_skinnable_item& aItem, i_graphics_context& aGraphicsContext) const = 0;
+        virtual void paint(i_skinnable_item& aItem, i_graphics_context& aGraphicsContext) const = 0;
     };
 }

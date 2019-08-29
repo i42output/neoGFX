@@ -45,7 +45,7 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
         
-    void check_box::box::paint(graphics_context& aGraphicsContext) const
+    void check_box::box::paint(i_graphics_context& aGraphicsContext) const
     {
         scoped_units su{ *this, units::Pixels };
         rect boxRect = client_rect();
@@ -114,7 +114,7 @@ namespace neogfx
         return neogfx::size_policy::Minimum;
     }
 
-    void check_box::paint(graphics_context& aGraphicsContext) const
+    void check_box::paint(i_graphics_context& aGraphicsContext) const
     {
         if (has_focus())
         {

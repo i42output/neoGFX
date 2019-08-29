@@ -29,6 +29,9 @@ namespace neogfx
     class clipboard : public i_clipboard
     {
     public:
+        define_declared_event(SinkActivated, sink_activated)
+        define_declared_event(SinkDeactivated, sink_deactivated)
+    public:
         clipboard(i_native_clipboard& aSystemClipboard);
     public:
         virtual bool sink_active() const;

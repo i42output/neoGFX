@@ -60,6 +60,10 @@ namespace neogfx::game
     class i_ecs : public virtual i_object
     {
     public:
+        declare_event(entity_created, entity_id)
+        declare_event(entity_destroyed, entity_id)
+        declare_event(handle_updated, handle_id)
+    public:
         struct entity_archetype_not_found : std::logic_error { entity_archetype_not_found() : std::logic_error("neogfx::i_ecs::entity_archetype_not_found") {} };
         struct component_not_found : std::logic_error { component_not_found() : std::logic_error("neogfx::i_ecs::component_not_found") {} };
         struct system_not_found : std::logic_error { system_not_found() : std::logic_error("neogfx::i_ecs::system_not_found") {} };
@@ -67,10 +71,6 @@ namespace neogfx::game
         struct entity_ids_exhausted : std::runtime_error { entity_ids_exhausted() : std::runtime_error("neogfx::i_ecs::entity_ids_exhausted") {} };
         struct handle_ids_exhausted : std::runtime_error { handle_ids_exhausted() : std::runtime_error("neogfx::i_ecs::handle_ids_exhausted") {} };
         struct invalid_handle_id : std::logic_error { invalid_handle_id() : std::logic_error("neogfx::i_ecs::invalid_handle_id") {} };
-    public:
-        event<entity_id> entity_created;
-        event<entity_id> entity_destroyed;
-        event<handle_id> handle_updated;
     public:
         typedef std::function<std::unique_ptr<i_component>()> component_factory;
         typedef std::function<std::unique_ptr<i_shared_component>()> shared_component_factory;

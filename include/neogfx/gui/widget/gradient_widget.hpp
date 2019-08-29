@@ -33,7 +33,7 @@ namespace neogfx
     class gradient_widget : public widget
     {
     public:
-        event<> gradient_changed;
+        define_event(GradientChanged)
     private:
         typedef neolib::variant<neogfx::gradient::colour_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
         typedef neolib::variant<neogfx::gradient::colour_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
@@ -51,7 +51,7 @@ namespace neogfx
         virtual neogfx::size_policy size_policy() const;
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
     public:
-        virtual void paint(graphics_context& aGraphicsContext) const;
+        virtual void paint(i_graphics_context& aGraphicsContext) const;
     public:
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
         virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
@@ -64,8 +64,8 @@ namespace neogfx
         stop_iterator stop_at(const point& aPosition);
         rect colour_stop_rect(const neogfx::gradient::colour_stop& aColourStop) const;
         rect alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const;
-        void draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
-        void draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
+        void draw_colour_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
+        void draw_alpha_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
     private:
         dimension stop_width() const;
         dimension stop_height() const;

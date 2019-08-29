@@ -20,12 +20,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_controller.hpp"
+#include <neogfx/core/event.hpp>
+#include <neogfx/gui/view/i_controller.hpp>
 
 namespace neogfx
 {
     class controller : public i_controller
     {
+    public:
+        define_declared_event(ViewAdded, view_added, i_view&)
+        define_declared_event(ViewRemoved, view_removed, i_view&)
     public:
         controller(i_model& aModel, i_view_container& aContainer);
     public:

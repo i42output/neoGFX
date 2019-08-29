@@ -131,7 +131,7 @@ namespace neogfx
             return size_policy::Minimum;
     }
 
-    void group_box::paint(graphics_context& aGraphicsContext) const
+    void group_box::paint(i_graphics_context& aGraphicsContext) const
     {
         widget::paint(aGraphicsContext);
         rect lr{ item_layout().position(), item_layout().extents() };

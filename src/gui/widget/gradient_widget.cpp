@@ -43,7 +43,7 @@ namespace neogfx
         static const dimension CONTROL_HEIGHT = BAR_HEIGHT + STOP_HEIGHT * 2;
     }
 
-    void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
+    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
     {
         scoped_scissor scissor(aGraphicsContext, aRect);
         for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
@@ -89,15 +89,15 @@ namespace neogfx
                 iSpinBox.set_minimum(0);
                 iSpinBox.set_maximum(255);
                 iSpinBox.set_step(1);
-                iSpinBox.value_changed([this]() {iSlider.set_value(iSpinBox.value()); update(); });
-                iSlider.value_changed([this]() {iSpinBox.set_value(iSlider.value()); });
+                iSpinBox.evValueChanged([this]() {iSlider.set_value(iSpinBox.value()); update(); });
+                iSlider.evValueChanged([this]() {iSpinBox.set_value(iSlider.value()); });
                 iSlider.set_value(aCurrentAlpha);
                 button_box().add_button(standard_button::Ok);
                 button_box().add_button(standard_button::Cancel);
                 centre_on_parent();
             }
         private:
-            virtual void paint_non_client(graphics_context& aGraphicsContext) const
+            virtual void paint_non_client(i_graphics_context& aGraphicsContext) const
             {
                 dialog::paint_non_client(aGraphicsContext);
                 rect backgroundRect{ window::client_widget().position(), window::client_widget().extents() };
@@ -154,7 +154,7 @@ namespace neogfx
             iCurrentColourStop = std::nullopt;
             iCurrentAlphaStop = std::nullopt;
             update();
-            gradient_changed.trigger();
+            evGradientChanged.trigger();
         }
     }
 
@@ -181,7 +181,7 @@ namespace neogfx
         return convert_units(*this, su.saved_units(), size(dpi_scale(CONTROL_HEIGHT) * 3, dpi_scale(CONTROL_HEIGHT)));
     }
 
-    void gradient_widget::paint(graphics_context& aGraphicsContext) const
+    void gradient_widget::paint(i_graphics_context& aGraphicsContext) const
     {
         scoped_units su{ *this, aGraphicsContext, units::Pixels };
         rect rectContents = contents_rect();
@@ -217,7 +217,7 @@ namespace neogfx
                 else if (iCurrentAlphaStop != std::nullopt)
                     (**iCurrentAlphaStop).second = iSelection.alpha_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
                 update();
-                gradient_changed.trigger();
+                evGradientChanged.trigger();
             }
             else
             {
@@ -243,14 +243,14 @@ namespace neogfx
                         iCurrentAlphaStop = iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
                         iCurrentColourStop = std::nullopt;
                         update();
-                        gradient_changed.trigger();
+                        evGradientChanged.trigger();
                     }
                     else if (aPosition.y >= contents_rect().bottom())
                     {
                         iCurrentColourStop = iSelection.insert_colour_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
                         iCurrentAlphaStop = std::nullopt;
                         update();
-                        gradient_changed.trigger();
+                        evGradientChanged.trigger();
                     }
                 }
             }
@@ -273,7 +273,7 @@ namespace neogfx
                 {
                     stop.second = cd.selected_colour();
                     update();
-                    gradient_changed.trigger();
+                    evGradientChanged.trigger();
                 }
                 iCustomColours = cd.custom_colours();
             }
@@ -285,7 +285,7 @@ namespace neogfx
                 {
                     stop.second = ad.selected_alpha();
                     update();
-                    gradient_changed.trigger();
+                    evGradientChanged.trigger();
                 }
             }
         }
@@ -297,7 +297,7 @@ namespace neogfx
         if (aButton == mouse_button::Right)
         {
             auto moreAction = std::make_shared<action>("More..."_t);
-            moreAction->triggered([this]()
+            moreAction->evTriggered([this]()
             {
                 gradient_dialog gd{ *this, gradient() };
                 if (iCustomColours != std::nullopt)
@@ -314,7 +314,7 @@ namespace neogfx
                 {
                     auto iter = static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
                     auto selectColourAction = std::make_shared<action>("Select stop colour..."_t);
-                    selectColourAction->triggered([this, iter]()
+                    selectColourAction->evTriggered([this, iter]()
                     {
                         auto& stop = *iter;
                         colour_dialog cd{ *this, stop.second };
@@ -324,12 +324,12 @@ namespace neogfx
                         {
                             stop.second = cd.selected_colour();
                             update();
-                            gradient_changed.trigger();
+                            evGradientChanged.trigger();
                         }
                         iCustomColours = cd.custom_colours();
                     });
                     auto splitStopAction = std::make_shared<action>("Split stop"_t);
-                    splitStopAction->triggered([this, iter]()
+                    splitStopAction->evTriggered([this, iter]()
                     {
                         auto prev = iter;
                         if (prev != iSelection.colour_begin())
@@ -348,15 +348,15 @@ namespace neogfx
                         if (iter != next)
                             iSelection.insert_colour_stop(p2)->second = c;
                         update();
-                        gradient_changed.trigger();
+                        evGradientChanged.trigger();
                     });
                     auto deleteStopAction = std::make_shared<action>("Delete stop"_t);
-                    deleteStopAction->triggered([this, iter]()
+                    deleteStopAction->evTriggered([this, iter]()
                     {
                         iCurrentColourStop = std::nullopt;
                         iSelection.erase_stop(iter);
                         update();
-                        gradient_changed.trigger();
+                        evGradientChanged.trigger();
                     });
                     if (iSelection.colour_stop_count() <= 2)
                         deleteStopAction->disable();
@@ -372,7 +372,7 @@ namespace neogfx
                 else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
                 {
                     auto selectAlphaAction = std::make_shared<action>("Select stop alpha (opacity level)..."_t);
-                    selectAlphaAction->triggered([this, stopIter]()
+                    selectAlphaAction->evTriggered([this, stopIter]()
                     {
                         auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
                         alpha_dialog ad{ root().as_widget(), stop.second };
@@ -380,17 +380,17 @@ namespace neogfx
                         {
                             stop.second = ad.selected_alpha();
                             update();
-                            gradient_changed.trigger();
+                            evGradientChanged.trigger();
                         }
                     });
                     auto deleteStopAction = std::make_shared<action>("Delete stop");
-                    deleteStopAction->triggered([this, stopIter]()
+                    deleteStopAction->evTriggered([this, stopIter]()
                     {
                         if (iCurrentAlphaStop != std::nullopt && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))
                             iCurrentAlphaStop = std::nullopt;
                         iSelection.erase_stop(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
                         update();
-                        gradient_changed.trigger();
+                        evGradientChanged.trigger();
                     });
                     if (iSelection.alpha_stop_count() <= 2)
                         deleteStopAction->disable();
@@ -436,7 +436,7 @@ namespace neogfx
                         leftStop == *iCurrentColourStop ? 0.0 : leftStop->first + min),
                         rightStop == *iCurrentColourStop ? 1.0 : rightStop->first - min);
                 update();
-                gradient_changed.trigger();
+                evGradientChanged.trigger();
             }
             else if (iCurrentAlphaStop != std::nullopt)
             {
@@ -451,7 +451,7 @@ namespace neogfx
                         leftStop == *iCurrentAlphaStop ? 0.0 : leftStop->first + min),
                         rightStop == *iCurrentAlphaStop ? 1.0 : rightStop->first - min);
                 update();
-                gradient_changed.trigger();
+                evGradientChanged.trigger();
             }
         }
     }
@@ -526,7 +526,7 @@ namespace neogfx
         return result;
     }
 
-    void gradient_widget::draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const
+    void gradient_widget::draw_colour_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const
     {
         rect r = colour_stop_rect(aColourStop);
         draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, dpi_scale(SMALL_ALPHA_PATTERN_SIZE));
@@ -621,7 +621,7 @@ namespace neogfx
         aGraphicsContext.draw_texture(r.top_left(), stopGlyphTexture->second);
     }
 
-    void gradient_widget::draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const
+    void gradient_widget::draw_alpha_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const
     {
         rect r = alpha_stop_rect(aAlphaStop);
         draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 2.0 }, dpi_select(size{ 7.0, 7.0 }, size{ 18.0, 18.0 }) }, dpi_scale(SMALL_ALPHA_PATTERN_SIZE));

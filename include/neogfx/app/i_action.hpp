@@ -31,13 +31,13 @@ namespace neogfx
     class i_action
     {
     public:
-        event<> triggered;
-        event<> hovered;
-        event<> enabled;
-        event<> disabled;
-        event<> checked;
-        event<> unchecked;
-        event<> changed;
+        declare_event(triggered)
+        declare_event(hovered)
+        declare_event(enabled)
+        declare_event(disabled)
+        declare_event(checked)
+        declare_event(unchecked)
+        declare_event(changed)
     public:
         typedef std::optional<std::string> optional_text;
     public:

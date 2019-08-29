@@ -607,10 +607,10 @@ namespace neogfx
     class i_keyboard
     {
     public:
-        event<scan_code_e, key_code_e, key_modifiers_e> key_pressed;
-        event<scan_code_e, key_code_e, key_modifiers_e> key_released;
-        event<const std::string&> text_input;
-        event<const std::string&> sys_text_input;
+        declare_event(key_pressed, scan_code_e, key_code_e, key_modifiers_e)
+        declare_event(key_released, scan_code_e, key_code_e, key_modifiers_e)
+        declare_event(text_input, const std::string&)
+        declare_event(sys_text_input, const std::string&)
     public:
         struct no_grab : std::logic_error { no_grab() : std::logic_error("neogfx::i_keyboard::no_grab") {} };
         struct already_grabbed : std::logic_error { already_grabbed() : std::logic_error("neogfx::i_keyboard::already_grabbed") {} };

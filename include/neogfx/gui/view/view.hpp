@@ -30,6 +30,9 @@ namespace neogfx
     class view : public i_view, public scrollable_widget
     {
     public:
+        define_declared_event(Activated, activated)
+        define_declared_event(Deactivated, deactivated)
+    public:
         view(i_controller& aController, i_model& aModel);
     public:
         const i_widget& as_widget() const override;

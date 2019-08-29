@@ -27,9 +27,9 @@ namespace neogfx::game
     class canvas : public widget
     {
     public:
-        event<graphics_context&> rendering_entities;
-        event<graphics_context&> entities_rendered;
-        event<entity_id> entity_clicked;
+        define_event(RenderingEntities, i_graphics_context&)
+        define_event(EntitiesRendered, i_graphics_context&)
+        define_event(EntityClicked, entity_id)
     public:
         canvas();
         canvas(game::i_ecs& aEcs);
@@ -45,7 +45,7 @@ namespace neogfx::game
         game::i_ecs& ecs() const;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
-        void paint(graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     public:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
     private:

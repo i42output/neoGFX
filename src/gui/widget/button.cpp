@@ -210,7 +210,7 @@ namespace neogfx
         if (aButton == mouse_button::Left)
         {
             update();
-            pressed.trigger();
+            evPressed.trigger();
         }
     }
 
@@ -220,7 +220,7 @@ namespace neogfx
         if (aButton == mouse_button::Left)
         {
             update();
-            double_clicked.trigger();
+            evDoubleClicked.trigger();
         }
     }
 
@@ -237,13 +237,13 @@ namespace neogfx
                 if (client_rect().contains(aPosition))
                     handle_clicked();
                 if (!destroyed)
-                    released.trigger();
+                    evReleased.trigger();
             }
         }
         else if (aButton == mouse_button::Right)
         {
             if (wasCapturing && client_rect().contains(aPosition))
-                right_clicked.trigger();
+                evRightClicked.trigger();
         }
     }
 
@@ -260,8 +260,8 @@ namespace neogfx
     void button::handle_clicked()
     {
         destroyed_flag destroyed{ *this };
-        clicked.trigger();
-        async_clicked.async_trigger();
+        evClicked.trigger();
+        evAsyncClicked.async_trigger();
         if (!destroyed && iCheckable != button_checkable::NotCheckable)
             toggle();
     }
@@ -284,13 +284,13 @@ namespace neogfx
             throw not_tri_state_checkable();
         iCheckedState = aCheckedState;
         update();
-        toggled.trigger();
+        evToggled.trigger();
         if (is_checked())
-            checked.trigger();
+            evChecked.trigger();
         else if (is_unchecked())
-            unchecked.trigger();
+            evUnchecked.trigger();
         else if (is_indeterminate())
-            indeterminate.trigger();
+            evIndeterminate.trigger();
         return true;
     }
 
@@ -311,8 +311,8 @@ namespace neogfx
 
     void button::init()
     {
-        clicked.set_trigger_type(event_trigger_type::Asynchronous);
-        double_clicked.set_trigger_type(event_trigger_type::Asynchronous);
+        evClicked.set_trigger_type(event_trigger_type::Asynchronous);
+        evDoubleClicked.set_trigger_type(event_trigger_type::Asynchronous);
 
         layout().set_margins(neogfx::margins(0.0));
         iLabel.set_size_policy(neogfx::size_policy::Expanding);
@@ -327,7 +327,7 @@ namespace neogfx
             else
                 service<i_app>().remove_mnemonic(*this);
         };
-        iSink = label().text().text_changed(label_text_updated);
+        iSink = label().text().evTextChanged(label_text_updated);
         label_text_updated();
     }
 }

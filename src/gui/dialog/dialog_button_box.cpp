@@ -88,14 +88,14 @@ namespace neogfx
         {
         case button_role::Accept:
         case button_role::Yes:
-            newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); accepted.trigger(); });
+            newButton->second->evClicked([this, newButton]() { evClicked.trigger(newButton->first.first); evAccepted.trigger(); });
             break;
         case button_role::Reject:
         case button_role::No:
-            newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); rejected.trigger(); });
+            newButton->second->evClicked([this, newButton]() { evClicked.trigger(newButton->first.first); evRejected.trigger(); });
             break;
         default:
-            newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); });
+            newButton->second->evClicked([this, newButton]() { evClicked.trigger(newButton->first.first); });
             break;
         }
         iStandardButtonLayout.remove_all();

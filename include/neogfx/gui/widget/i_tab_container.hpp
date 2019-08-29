@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
-#include "i_tab.hpp"
-#include "i_tab_page.hpp"
+#include <neogfx/gui/widget/i_tab.hpp>
+#include <neogfx/gui/widget/i_tab_page.hpp>
 
 namespace neogfx
 {
@@ -53,7 +53,7 @@ namespace neogfx
     class i_tab_container
     {
     public:
-        event<> style_changed;
+        declare_event(style_changed)
     public:
         typedef uint32_t tab_index;
         typedef std::optional<tab_index> optional_tab_index;

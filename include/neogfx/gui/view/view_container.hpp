@@ -45,9 +45,14 @@ namespace neogfx
 
     class view_container : public i_view_container, public widget
     {
+    public:
+        define_declared_event(ViewAdded, view_added, i_view&)
+        define_declared_event(ViewRemoved, view_removed, i_view&)
     private:
         class tab_container : public i_tab_container
         {
+        public:
+            define_declared_event(StyleChanged, style_changed)
         public:
             typedef std::map<i_tab*, i_view*> tab_list;
         public:

@@ -70,7 +70,7 @@ namespace neogfx
         rect client_rect(bool aIncludeMargins = true) const override;
         widget_part hit_test(const point& aPosition) const override;
     public:
-        void paint_non_client_after(graphics_context& aGraphicsContext) const override;
+        void paint_non_client_after(i_graphics_context& aGraphicsContext) const override;
     public:
         void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;

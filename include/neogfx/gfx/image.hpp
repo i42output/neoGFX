@@ -23,12 +23,16 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
+#include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_image.hpp>
 
 namespace neogfx
 {
     class image : public i_image
     {
+    public:
+        define_declared_event(Downloaded, downloaded)
+        define_declared_event(FailedToDownload, failed_to_download)
     public:
         enum image_type_e
         {

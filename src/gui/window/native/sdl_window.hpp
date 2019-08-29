@@ -89,8 +89,8 @@ namespace neogfx
     public:
         bool can_render() const override;
     public:
-        std::unique_ptr<i_graphics_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const override;
-        std::unique_ptr<i_graphics_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const override;
+        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const override;
+        std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const override;
     public:
         void close(bool aForce = false) override;
         bool visible() const override;

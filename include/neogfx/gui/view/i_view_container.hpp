@@ -40,8 +40,8 @@ namespace neogfx
     class i_view_container
     {
     public:
-        event<i_view&> view_added;
-        event<i_view&> view_removed;
+        declare_event(view_added, i_view&)
+        declare_event(view_removed, i_view&)
     public:
         struct controller_not_found : std::logic_error { controller_not_found() : std::logic_error("neogfx::i_container::controller_not_found") {} };
     public:

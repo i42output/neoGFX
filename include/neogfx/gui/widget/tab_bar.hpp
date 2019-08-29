@@ -27,6 +27,8 @@ namespace neogfx
 {
     class tab_bar : public scrollable_widget, public i_tab_container
     {
+    public:
+        define_declared_event(StyleChanged, style_changed)
     private:
         typedef std::unique_ptr<tab_button> tab_pointer;
         typedef std::vector<tab_pointer> tab_list;

@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
         ng::horizontal_layout workspaceLayout{ mainLayout };
         ng::view_container workspace{ workspaceLayout };
 
-        workspace.view_stack().painting([&workspace](ng::graphics_context& aGc)
+        workspace.view_stack().evPainting([&workspace](ng::i_graphics_context& aGc)
         {
             static ng::texture sBackgroundTexture1{ ng::image{ ":/DesignStudio/resources/neoGFX.png" } };
             static ng::texture sBackgroundTexture2{ ng::image{ ":/DesignStudio/resources/logo_i42.png" } };

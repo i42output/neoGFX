@@ -175,7 +175,7 @@ namespace neogfx
             return widget::mouse_cursor();
     }
 
-    void splitter::released()
+    void splitter::capture_released()
     {
         iTracking = std::nullopt;
     }

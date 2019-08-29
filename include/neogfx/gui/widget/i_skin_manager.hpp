@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
+#include <neogfx/core/i_event.hpp>
 #include <neogfx/gui/widget/i_skin.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 
@@ -29,10 +29,10 @@ namespace neogfx
     class i_skin_manager
     {
     public:
-        event<i_skin&> skin_registered;
-        event<i_skin&> skin_unregistered;
-        event<i_skinnable_item&> item_registered;
-        event<i_skinnable_item&> item_unregistered;
+        declare_event(skin_registered, i_skin&)
+        declare_event(skin_unregistered, i_skin&)
+        declare_event(item_registered, i_skinnable_item&)
+        declare_event(item_unregistered, i_skinnable_item&)
     public:
         virtual uint32_t skin_count() const = 0;
         virtual const i_skin& skin(uint32_t aIndex) const = 0;

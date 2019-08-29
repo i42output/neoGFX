@@ -31,7 +31,7 @@ namespace neogfx
     class colour_dialog : public dialog
     {
     public:
-        event<> selection_changed;
+        define_event(SelectionChanged)
     public:
         enum mode_e
         {
@@ -60,7 +60,7 @@ namespace neogfx
             virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
             virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
         public:
-            virtual void paint(graphics_context& aGraphicsContext) const;
+            virtual void paint(i_graphics_context& aGraphicsContext) const;
         public:
             virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
         private:
@@ -98,7 +98,7 @@ namespace neogfx
             virtual void moved();
             virtual void resized();
         public:
-            virtual void paint(graphics_context& aGraphicsContext) const;
+            virtual void paint(i_graphics_context& aGraphicsContext) const;
         public:
             virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
             virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
@@ -125,7 +125,7 @@ namespace neogfx
             virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
             virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
         public:
-            virtual void paint(graphics_context& aGraphicsContext) const;
+            virtual void paint(i_graphics_context& aGraphicsContext) const;
         public:
             virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
             virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
@@ -149,7 +149,7 @@ namespace neogfx
             virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
             virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
         public:
-            virtual void paint(graphics_context& aGraphicsContext) const;
+            virtual void paint(i_graphics_context& aGraphicsContext) const;
         private:
             colour_dialog& iOwner;
         };

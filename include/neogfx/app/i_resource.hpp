@@ -20,15 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
+#include <neogfx/core/i_event.hpp>
 
 namespace neogfx
 {
     class i_resource
     {
     public:
-        event<> downloaded;
-        event<> failed_to_download;
+        declare_event(downloaded)
+        declare_event(failed_to_download)
     public:
         typedef std::vector<uint8_t> data_type;
         typedef data_type hash_digest_type;

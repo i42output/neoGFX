@@ -34,7 +34,7 @@ namespace neogfx
     public:
         typedef neolib::variant<window_event, mouse_event, non_client_mouse_event, keyboard_event> native_event;
     public:
-        event<native_event&> filter_event;
+        declare_event(filter, native_event&)
     public:
         struct no_current_event : std::logic_error { no_current_event() : std::logic_error("neogfx::i_native_window::no_current_event") {} };
     public:

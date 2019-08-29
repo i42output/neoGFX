@@ -26,7 +26,7 @@
 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
-#include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gfx/i_rendering_context.hpp>
 #include "opengl_window.hpp"
 #include "../../../gfx/native/opengl_helpers.hpp"
 #include "../../../gfx/native/opengl_texture.hpp"
@@ -77,11 +77,9 @@ namespace neogfx
         bool alreadyActive = target_active();
         if (!alreadyActive)
         {
-            target_activating.trigger();
+            evTargetActivating.trigger();
             service<i_rendering_engine>().activate_context(*this);
         }
-//        else
-//            throw already_active();
         if (iFrameBufferTexture != std::nullopt)
         {
             GLint currentFramebuffer;
@@ -109,7 +107,7 @@ namespace neogfx
             glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         }
         if (!alreadyActive)
-            target_activated.trigger();
+            evTargetActivated.trigger();
     }
 
     bool opengl_window::target_active() const
@@ -121,9 +119,9 @@ namespace neogfx
     {
         if (target_active())
         {
-            target_deactivating.trigger();
+            evTargetDeactivating.trigger();
             rendering_engine().deactivate_context();
-            target_deactivated.trigger();
+            evTargetDeactivated.trigger();
             return;
         }
 //        throw not_active();
@@ -264,7 +262,7 @@ namespace neogfx
         iRendering = true;
         iLastFrameTime = now;
 
-        surface_window().rendering.trigger();
+        surface_window().rendering().trigger();
 
         scoped_render_target srt{ *this };
 
@@ -320,7 +318,7 @@ namespace neogfx
         iRendering = false;
         validate();
 
-        surface_window().rendering_finished.trigger();
+        surface_window().rendering_finished().trigger();
 
         iFpsData.push_back(std::chrono::high_resolution_clock::now());
         if (iFpsData.size() > 100)

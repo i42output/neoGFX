@@ -51,14 +51,17 @@ namespace neogfx
     class property : public i_property, public neolib::lifetime
     {
     public:
+        typedef T value_type;
+    public:
+        define_declared_event(VariantChanged, changed, const property_variant&)
+        define_declared_event(VariantChangedFromTo, changed_from_to, const property_variant&, const property_variant&)
+        define_event(Changed, const value_type&)
+        define_event(ChangedFromTo, const value_type&, const value_type&)
+    public:
         struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
     public:
         typedef property<T, Category> self_type;
-        typedef T value_type;
         typedef Category category_type;
-    public:
-        event<const value_type&> changed;
-        event<const value_type&, const value_type&> changed_from_to;
     private:
         typedef detail::property_optional_type_cracker<T> cracker;
     public:
@@ -251,16 +254,16 @@ namespace neogfx
                     iOwner.property_changed(*this);
                 if (destroyed)
                     return *this;
-                i_property::changed.trigger(get());
+                evVariantChanged.trigger(get());
                 if (destroyed)
                     return *this;
-                i_property::changed_from_to.trigger(previousValue, get());
+                evVariantChangedFromTo.trigger(property_variant{ previousValue }, get());
                 if (destroyed)
                     return *this;
-                changed.trigger(value());
+                evChanged.trigger(value());
                 if (destroyed)
                     return *this;
-                changed_from_to.trigger(previousValue, value());
+                evChangedFromTo.trigger(previousValue, value());
                 if (destroyed)
                     return *this;
                 if (has_delegate())

@@ -24,6 +24,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/app/event_processing_context.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/header_view.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
@@ -399,14 +400,14 @@ namespace neogfx
                 button.set_minimum_size(optional_size{});
                 button.set_maximum_size(optional_size{});
                 button.enable(true);
-                iButtonSinks[i][0] = button.clicked([&, i]()
+                iButtonSinks[i][0] = button.evClicked([&, i]()
                 {
                     root().window_manager().save_mouse_cursor();
                     root().window_manager().set_mouse_cursor(mouse_system_cursor::Wait);
                     presentation_model().sort_by(i);
                     root().window_manager().restore_mouse_cursor(root());
                 }, *this);
-                iButtonSinks[i][1] = button.right_clicked([&, i]()
+                iButtonSinks[i][1] = button.evRightClicked([&, i]()
                 {
                     context_menu menu{ *this, root().mouse_position() + root().window_position() };
                     action sortAscending{ "Sort Ascending" };
@@ -428,17 +429,17 @@ namespace neogfx
                                 sortDescending.check();
                         }
                     }
-                    sortAscending.checked([this, &sortDescending, i]()
+                    sortAscending.evChecked([this, &sortDescending, i]()
                     {
                         presentation_model().sort_by(i, i_item_presentation_model::SortAscending);
                         sortDescending.uncheck();
                     });
-                    sortDescending.checked([this, &sortAscending, i]()
+                    sortDescending.evChecked([this, &sortAscending, i]()
                     {
                         presentation_model().sort_by(i, i_item_presentation_model::SortDescending);
                         sortAscending.uncheck();
                     });
-                    resetSort.triggered([&]()
+                    resetSort.evTriggered([&]()
                     {
                         presentation_model().reset_sort();
                     });
@@ -464,7 +465,7 @@ namespace neogfx
         iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
     }
 
-    void header_view::update_from_row(uint32_t aRow, graphics_context& aGc)
+    void header_view::update_from_row(uint32_t aRow, i_graphics_context& aGc)
     {
         bool updated = false;
         for (uint32_t col = 0; col < presentation_model().columns(item_presentation_model_index{ aRow }); ++col)
@@ -473,7 +474,7 @@ namespace neogfx
             layout_items();
     }
 
-    bool header_view::update_section_width(uint32_t aColumn, const size& aCellExtents, graphics_context& aGc)
+    bool header_view::update_section_width(uint32_t aColumn, const size& aCellExtents, i_graphics_context& aGc)
     {
         dimension headingWidth = presentation_model().column_heading_extents(aColumn, aGc).cx + presentation_model().cell_margins(*this).size().cx * 2.0;
         dimension oldSectionWidth = iSectionWidths[aColumn].calculated;

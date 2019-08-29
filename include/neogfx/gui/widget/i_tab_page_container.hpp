@@ -20,14 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_tab_container.hpp"
+#include <neogfx/core/i_event.hpp>
+#include <neogfx/gui/widget/i_tab_container.hpp>
 
 namespace neogfx
 {
     class i_tab_page_container : public i_tab_container
     {
     public:
-        event<i_tab_page&> selected_tab_page_changed;
+        declare_event(selected_tab_page_changed, i_tab_page&)
     public:
         typedef uint32_t tab_index;
     public:

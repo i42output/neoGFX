@@ -73,7 +73,7 @@ namespace neogfx
         }
     }
 
-    void text_widget::paint(graphics_context& aGraphicsContext) const
+    void text_widget::paint(i_graphics_context& aGraphicsContext) const
     {
         scoped_mnemonics sm(aGraphicsContext, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT));
         size textSize = text_extent();
@@ -144,7 +144,7 @@ namespace neogfx
             iText = aText;
             iTextExtent = std::nullopt;
             iGlyphText = neogfx::glyph_text{};
-            text_changed.trigger();
+            evTextChanged.trigger();
             if (has_parent_layout())
                 parent_layout().invalidate();
             if (oldSize != minimum_size() && has_managing_layout())

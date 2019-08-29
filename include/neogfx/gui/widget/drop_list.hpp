@@ -89,7 +89,7 @@ namespace neogfx
     class i_drop_list_input_widget
     {
     public:
-        event<> text_changed;
+        declare_event(text_changed)
     public:
         class i_visitor
         {
@@ -122,7 +122,7 @@ namespace neogfx
     {
         friend class drop_list_view;
     public:
-        event<optional_item_model_index> selection_changed;
+        define_event(SelectionChanged, optional_item_model_index)
     public:
         enum class style : uint32_t
         {

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/list_view.hpp>
 #include <neogfx/gui/widget/item_selection_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>

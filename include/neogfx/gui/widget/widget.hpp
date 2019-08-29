@@ -32,6 +32,18 @@ namespace neogfx
     class widget : public anchorable_object<i_widget>
     {
     public:
+        define_declared_event(VisibilityChanged, visibility_changed)
+        define_declared_event(PositionChanged, position_changed)
+        define_declared_event(SizeChanged, size_changed)
+        define_declared_event(LayoutCompleted, layout_completed)
+        define_declared_event(Painting, painting, i_graphics_context&)
+        define_declared_event(Painted, painted, i_graphics_context&)
+        define_declared_event(ChildrenPainted, children_painted, i_graphics_context&)
+        define_declared_event(Mouse, mouse_event, const neogfx::mouse_event&)
+        define_declared_event(NonClientMouse, non_client_mouse_event, const neogfx::non_client_mouse_event&)
+        define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
+        define_declared_event(Focus, focus_event, neogfx::focus_event)
+    public:
         widget();
         widget(const widget&) = delete;
         widget(i_widget& aParent);
@@ -163,11 +175,11 @@ namespace neogfx
         rect update_rect() const override;
         rect default_clip_rect(bool aIncludeNonClient = false) const override;
         bool ready_to_render() const override;
-        void render(graphics_context& aGraphicsContext) const override;
+        void render(i_graphics_context& aGraphicsContext) const override;
         bool transparent_background() const override;
-        void paint_non_client(graphics_context& aGraphicsContext) const override;
-        void paint(graphics_context& aGraphicsContext) const override;
-        void paint_non_client_after(graphics_context& aGraphicsContext) const override;
+        void paint_non_client(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
+        void paint_non_client_after(i_graphics_context& aGraphicsContext) const override;
     public:
         double opacity() const override;
         void set_opacity(double aOpacity) override;
@@ -202,7 +214,7 @@ namespace neogfx
         void non_client_set_capture() override;
         void non_client_release_capture() override;
         void captured() override;
-        void released() override;
+        void capture_released() override;
         neogfx::focus_policy focus_policy() const override;
         void set_focus_policy(neogfx::focus_policy aFocusPolicy) override;
         bool has_focus() const override;
@@ -229,8 +241,6 @@ namespace neogfx
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool text_input(const std::string& aText) override;
         bool sys_text_input(const std::string& aText) override;
-    public:
-        graphics_context create_graphics_context() const override;
     public:
         const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;

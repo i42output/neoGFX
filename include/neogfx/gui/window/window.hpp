@@ -36,7 +36,10 @@ namespace neogfx
     class window : public i_window, public scrollable_widget
     {
     public:
-        event<graphics_context&> paint_overlay;
+        define_declared_event(Window, window_event, neogfx::window_event&)
+        define_declared_event(DismissingChildren, dismissing_children, const i_widget*)
+        define_declared_event(Closed, closed)
+        define_declared_event(PaintOverlay, paint_overlay, i_graphics_context&)
     private:
         class nested_details;
         class client;
@@ -124,8 +127,8 @@ namespace neogfx
     public:
         using widget::update;
         bool update(const rect& aUpdateRect) override;
-        void render(graphics_context& aGraphicsContext) const override;
-        void paint(graphics_context& aGraphicsContext) const override;
+        void render(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     public:
         colour background_colour() const override;
     public:

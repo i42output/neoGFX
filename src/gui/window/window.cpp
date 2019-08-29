@@ -558,7 +558,7 @@ namespace neogfx
         if (destroyed)
             return;
         iClosed = true;
-        closed.trigger();
+        evClosed.trigger();
     }
 
     colour window::frame_colour() const
@@ -668,7 +668,7 @@ namespace neogfx
         return true;
     }
 
-    void window::render(graphics_context& aGraphicsContext) const
+    void window::render(i_graphics_context& aGraphicsContext) const
     {
         aGraphicsContext.set_extents(extents());
         aGraphicsContext.set_origin(origin());
@@ -688,13 +688,13 @@ namespace neogfx
         scrollable_widget::render(aGraphicsContext);
         aGraphicsContext.set_extents(extents());
         aGraphicsContext.set_origin(origin());
-        paint_overlay.trigger(aGraphicsContext);
+        evPaintOverlay.trigger(aGraphicsContext);
         if (is_nest())
             for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
                 as_nest().nested_window(nw).as_window().as_widget().render(aGraphicsContext);
     }
 
-    void window::paint(graphics_context& aGraphicsContext) const
+    void window::paint(i_graphics_context& aGraphicsContext) const
     {
         scrollable_widget::paint(aGraphicsContext);
     }
@@ -1156,7 +1156,7 @@ namespace neogfx
 
     void window::dismiss_children(const i_widget* aClickedWidget)
     {
-        dismissing_children.trigger(aClickedWidget);
+        evDismissingChildren.trigger(aClickedWidget);
         neolib::scoped_flag sf{ iDismissingChildren };
         if ((iStyle & window_style::RequiresOwnerFocus) != window_style::RequiresOwnerFocus)
         {

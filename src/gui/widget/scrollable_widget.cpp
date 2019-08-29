@@ -123,7 +123,7 @@ namespace neogfx
             return widget::hit_test(aPosition);
     }
 
-    void scrollable_widget::paint_non_client_after(graphics_context& aGraphicsContext) const
+    void scrollable_widget::paint_non_client_after(i_graphics_context& aGraphicsContext) const
     {
         framed_widget::paint_non_client_after(aGraphicsContext);
         if (vertical_scrollbar().visible())

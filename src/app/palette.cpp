@@ -56,7 +56,7 @@ namespace neogfx
             iHoverColour = aOther.has_hover_colour() ? aOther.hover_colour() : optional_colour{};
             iWidgetDetailPrimaryColour = aOther.has_widget_detail_primary_colour() ? aOther.widget_detail_primary_colour() : optional_colour{};
             iWidgetDetailSecondaryColour = aOther.has_widget_detail_secondary_colour() ? aOther.widget_detail_secondary_colour() : optional_colour{};
-            changed.trigger();
+            evChanged.trigger();
         }
         return *this;
     }
@@ -103,7 +103,7 @@ namespace neogfx
         if (iColour != aColour)
         {
             iColour = aColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 
@@ -125,7 +125,7 @@ namespace neogfx
         if (iBackgroundColour != aBackgroundColour)
         {
             iBackgroundColour = aBackgroundColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 
@@ -147,7 +147,7 @@ namespace neogfx
         if (iForegroundColour != aForegroundColour)
         {
             iForegroundColour = aForegroundColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 
@@ -174,7 +174,7 @@ namespace neogfx
         if (iTextColour != aTextColour)
         {
             iTextColour = aTextColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 
@@ -196,7 +196,7 @@ namespace neogfx
         if (iSelectionColour != aSelectionColour)
         {
             iSelectionColour = aSelectionColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 
@@ -218,7 +218,7 @@ namespace neogfx
         if (iHoverColour != aHoverColour)
         {
             iHoverColour = aHoverColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 
@@ -240,7 +240,7 @@ namespace neogfx
         if (iWidgetDetailPrimaryColour != aWidgetDetailPrimaryColour)
         {
             iWidgetDetailPrimaryColour = aWidgetDetailPrimaryColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 
@@ -262,7 +262,7 @@ namespace neogfx
         if (iWidgetDetailSecondaryColour != aWidgetDetailSecondaryColour)
         {
             iWidgetDetailSecondaryColour = aWidgetDetailSecondaryColour;
-            changed.trigger();
+            evChanged.trigger();
         }
     }
 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
@@ -382,7 +383,7 @@ namespace neogfx
             else
             {
                 iPopup.emplace(iDropList);
-                iPopup->closed([this]()
+                iPopup->evClosed([this]()
                 {
                     iPopup = std::nullopt;
                 });
@@ -412,6 +413,8 @@ namespace neogfx
     {
         class non_editable_input_widget : public push_button, public i_drop_list_input_widget
         {
+        public:
+            define_declared_event(TextChanged, text_changed)
         public:
             non_editable_input_widget(i_layout& aLayout) :
                 push_button{ aLayout, push_button_style::DropList }
@@ -483,6 +486,8 @@ namespace neogfx
 
         class editable_input_widget : public framed_widget, public i_drop_list_input_widget
         {
+        public:
+            define_declared_event(TextChanged, text_changed)
         public:
             editable_input_widget(i_layout& aLayout) :
                 framed_widget{ aLayout, frame_style::SolidFrame },
@@ -787,7 +792,7 @@ namespace neogfx
         if (iSavedSelection != newSelection)
         {
             iSelection = newSelection;
-            selection_changed.async_trigger(iSelection);
+            evSelectionChanged.async_trigger(iSelection);
         }
         iSavedSelection = std::nullopt;
 
@@ -920,13 +925,13 @@ namespace neogfx
 
     void drop_list::visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget)
     {
-        aTextWidget.text_changed([this, &aInputWidget, &aTextWidget]()
+        aTextWidget.evTextChanged([this, &aInputWidget, &aTextWidget]()
         {
             if (!accepting_selection())
             {
                 neolib::scoped_flag sf{ iHandlingTextChange };
                 iSavedSelection = std::nullopt;
-                aInputWidget.text_changed.trigger();
+                aInputWidget.text_changed().trigger();
                 if (aTextWidget.has_focus() && (!view_created() || !view().changing_text()))
                 {
                     if (!aTextWidget.text().empty())
@@ -940,19 +945,19 @@ namespace neogfx
                 }
             }
         });
-        aTextWidget.keyboard_event([this, &aTextWidget](const neogfx::keyboard_event& aEvent)
+        aTextWidget.evKeyboard([this, &aTextWidget](const neogfx::keyboard_event& aEvent)
         {
             if (handle_proxy_key_event(aEvent))
-                aTextWidget.keyboard_event.accept();
+                aTextWidget.evKeyboard.accept();
         });
     }
 
     void drop_list::visit(i_drop_list_input_widget&, push_button& aButtonWidget)
     {
-        aButtonWidget.keyboard_event([this, &aButtonWidget](const neogfx::keyboard_event& aEvent)
+        aButtonWidget.evKeyboard([this, &aButtonWidget](const neogfx::keyboard_event& aEvent)
         {
             if (handle_proxy_key_event(aEvent))
-                aButtonWidget.keyboard_event.accept();
+                aButtonWidget.evKeyboard.accept();
         });
     }
 
@@ -982,7 +987,7 @@ namespace neogfx
             iInputWidget = std::make_unique<non_editable_input_widget>(iLayout1);
             auto& inputWidget = static_cast<non_editable_input_widget&>(iInputWidget->as_widget());
 
-            inputWidget.clicked([this]() { handle_clicked(); });
+            inputWidget.evClicked([this]() { handle_clicked(); });
 
             inputWidget.set_size_policy(size_policy::Expanding);
             
@@ -1003,7 +1008,7 @@ namespace neogfx
             iInputWidget = std::make_unique<editable_input_widget>(iLayout1);
             auto& inputWidget = static_cast<editable_input_widget&>(iInputWidget->as_widget());
 
-            inputWidget.mouse_event([&inputWidget, this](const neogfx::mouse_event& aEvent)
+            inputWidget.evMouse([&inputWidget, this](const neogfx::mouse_event& aEvent)
             {
                 if (aEvent.type() == mouse_event_type::ButtonReleased &&
                     aEvent.mouse_button() == mouse_button::Left &&
@@ -1126,7 +1131,7 @@ namespace neogfx
             if (iSelection != std::nullopt)
             {
                 iSelection = std::nullopt;
-                selection_changed.async_trigger(iSelection);
+                evSelectionChanged.async_trigger(iSelection);
             }
         }
         iSavedSelection = std::nullopt;

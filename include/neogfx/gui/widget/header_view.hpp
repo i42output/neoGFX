@@ -99,8 +99,8 @@ namespace neogfx
     private:
         void init();
         void update_buttons();
-        void update_from_row(uint32_t aRow, graphics_context& aGc);
-        bool update_section_width(uint32_t aColumn, const size& aCellExtents, graphics_context& aGc);
+        void update_from_row(uint32_t aRow, i_graphics_context& aGc);
+        bool update_section_width(uint32_t aColumn, const size& aCellExtents, i_graphics_context& aGc);
     private:
         i_owner& iOwner;
         sink iSink;

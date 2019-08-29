@@ -193,7 +193,7 @@ namespace neogfx
                     if (iOpenSubMenu->has_menu())
                         iOpenSubMenu->clear_menu();
                 });
-                iSink2 += iOpenSubMenu->closed([this]()
+                iSink2 += iOpenSubMenu->evClosed([this]()
                 {
                     close_sub_menu();
                     iOpenSubMenu.reset();
@@ -298,7 +298,7 @@ namespace neogfx
                 {
                     auto& subMenu = menu().item_at(menu().selected_item()).sub_menu();
                     if (!subMenu.is_open())
-                        menu().open_sub_menu.trigger(subMenu);
+                        menu().open_sub_menu().trigger(subMenu);
                     if (subMenu.has_available_items())
                         subMenu.select_item_at(subMenu.first_available_item(), false);
                 }
@@ -326,7 +326,7 @@ namespace neogfx
                 auto& selectedItem = menu().item_at(menu().selected_item());
                 if (selectedItem.type() == i_menu_item::Action)
                 {
-                    selectedItem.action().triggered.async_trigger();
+                    selectedItem.action().triggered().async_trigger();
                     if (selectedItem.action().is_checkable())
                         selectedItem.action().toggle();
                     menu().clear_selection();
@@ -339,7 +339,7 @@ namespace neogfx
                         menuToClose->parent().clear_selection();
                 }
                 else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
-                    menu().open_sub_menu.trigger(selectedItem.sub_menu());
+                    menu().open_sub_menu().trigger(selectedItem.sub_menu());
             }
             break;
         case ScanCode_ESCAPE:
@@ -367,7 +367,7 @@ namespace neogfx
     {
         menu_layout().set_margins(neogfx::margins{});
         menu_layout().set_spacing(neogfx::size{});
-        closed([this]()
+        evClosed([this]()
         {
             if (has_menu() && menu().is_open())
                 menu().close();

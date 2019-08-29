@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <neolib/raii.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/i_layout_item_proxy.hpp>
@@ -674,7 +675,7 @@ namespace neogfx
     {
         if (--iLayoutInProgress == 0)
         {
-            layout_completed.trigger();
+            evLayoutCompleted.trigger();
             update();
         }
     }
@@ -746,7 +747,7 @@ namespace neogfx
 
     void widget::moved()
     {
-        position_changed.trigger();
+        evPositionChanged.trigger();
     }
     
     size widget::extents() const
@@ -772,7 +773,7 @@ namespace neogfx
 
     void widget::resized()
     {
-        size_changed.trigger();
+        evSizeChanged.trigger();
         layout_items();
     }
 
@@ -1011,7 +1012,7 @@ namespace neogfx
         return iLayoutTimer == nullptr;
     }
 
-    void widget::render(graphics_context& aGraphicsContext) const
+    void widget::render(i_graphics_context& aGraphicsContext) const
     {
         if (effectively_hidden())
             return;
@@ -1043,9 +1044,9 @@ namespace neogfx
             scoped_scissor scissor(aGraphicsContext, clipRect);
             scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
 
-            painting.trigger(aGraphicsContext);
+            evPainting.trigger(aGraphicsContext);
             paint(aGraphicsContext);
-            painted.trigger(aGraphicsContext);
+            evPainted.trigger(aGraphicsContext);
 
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
@@ -1055,7 +1056,7 @@ namespace neogfx
                     c->render(aGraphicsContext);
             }
 
-            children_painted.trigger(aGraphicsContext);
+            evChildrenPainted.trigger(aGraphicsContext);
         }
 
         aGraphicsContext.set_extents(extents());
@@ -1071,18 +1072,18 @@ namespace neogfx
         return !is_root();
     }
 
-    void widget::paint_non_client(graphics_context& aGraphicsContext) const
+    void widget::paint_non_client(i_graphics_context& aGraphicsContext) const
     {
         if (has_background_colour() || !transparent_background())
             aGraphicsContext.fill_rect(update_rect(), background_colour());
     }
 
-    void widget::paint_non_client_after(graphics_context&) const
+    void widget::paint_non_client_after(i_graphics_context&) const
     {
         // do nothing
     }
 
-    void widget::paint(graphics_context&) const
+    void widget::paint(i_graphics_context&) const
     {
         // do nothing
     }
@@ -1217,7 +1218,7 @@ namespace neogfx
                 else
                     mouse_left();
             }
-            visibility_changed.trigger();
+            evVisibilityChanged.trigger();
             if (has_parent_layout())
                 parent_layout().invalidate();
             if (effectively_hidden())
@@ -1344,7 +1345,7 @@ namespace neogfx
     {
     }
 
-    void widget::released()
+    void widget::capture_released()
     {
     }
 
@@ -1376,13 +1377,13 @@ namespace neogfx
     void widget::focus_gained(focus_reason)
     {
         update();
-        focus_event.trigger(focus_event::FocusGained);
+        evFocus.trigger(focus_event::FocusGained);
     }
 
     void widget::focus_lost(focus_reason)
     {
         update();
-        focus_event.trigger(focus_event::FocusLost);
+        evFocus.trigger(focus_event::FocusLost);
     }
 
     bool widget::ignore_mouse_events() const
@@ -1503,11 +1504,6 @@ namespace neogfx
     i_widget& widget::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
     {
         return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_for_mouse_event(aPosition, aForHitTest));
-    }
-
-    graphics_context widget::create_graphics_context() const
-    {
-        return graphics_context{ *this };
     }
 }
 

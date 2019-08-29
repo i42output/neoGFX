@@ -59,7 +59,7 @@ namespace neogfx
     public:
         virtual neogfx::size_policy size_policy() const;
     public:
-        virtual void paint(graphics_context& aGraphicsContext) const;
+        virtual void paint(i_graphics_context& aGraphicsContext) const;
     public:
         virtual colour border_colour() const;
         virtual colour fill_colour() const;

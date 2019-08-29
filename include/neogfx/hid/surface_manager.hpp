@@ -30,6 +30,8 @@ namespace neogfx
     class surface_manager : public i_surface_manager
     {
     public:
+        define_declared_event(DpiChanged, dpi_changed, i_surface&)
+    public:
         struct already_rendering_surfaces : std::logic_error { already_rendering_surfaces() : std::logic_error("neogfx::surface_manager::already_rendering_surfaces") {} };
     private:
         struct surface_sorter

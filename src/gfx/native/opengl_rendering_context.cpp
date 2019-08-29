@@ -1,4 +1,4 @@
-// opengl_graphics_context.cpp
+// opengl_rendering_context.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -31,7 +31,7 @@
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
-#include "opengl_graphics_context.hpp"
+#include "opengl_rendering_context.hpp"
 #include "opengl_vertex_arrays.hpp"
 
 namespace neogfx
@@ -155,7 +155,7 @@ namespace neogfx
         }
     }
 
-    opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
+    opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{aTarget}, 
         iWidget{ nullptr },
@@ -175,7 +175,7 @@ namespace neogfx
         });
     }
 
-    opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget, neogfx::blending_mode aBlendingMode) :
+    opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{ aTarget },
         iWidget{ &aWidget },
@@ -196,7 +196,7 @@ namespace neogfx
         });
     }
 
-    opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
+    opengl_rendering_context::opengl_rendering_context(const opengl_rendering_context& aOther) :
         iRenderingEngine{ aOther.iRenderingEngine },
         iTarget{ aOther.iTarget },
         iWidget{ aOther.iWidget },
@@ -218,31 +218,31 @@ namespace neogfx
         });
     }
 
-    opengl_graphics_context::~opengl_graphics_context()
+    opengl_rendering_context::~opengl_rendering_context()
     {
     }
 
-    std::unique_ptr<i_graphics_context> opengl_graphics_context::clone() const
+    std::unique_ptr<i_rendering_context> opengl_rendering_context::clone() const
     {
-        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this));
+        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context(*this));
     }
 
-    i_rendering_engine& opengl_graphics_context::rendering_engine()
+    i_rendering_engine& opengl_rendering_context::rendering_engine()
     {
         return iRenderingEngine;
     }
 
-    const i_render_target& opengl_graphics_context::render_target() const
+    const i_render_target& opengl_rendering_context::render_target() const
     {
         return iTarget;
     }
 
-    const i_render_target& opengl_graphics_context::render_target()
+    const i_render_target& opengl_rendering_context::render_target()
     {
         return iTarget;
     }
 
-    rect opengl_graphics_context::rendering_area(bool aConsiderScissor) const
+    rect opengl_rendering_context::rendering_area(bool aConsiderScissor) const
     {
         if (scissor_rect() == std::nullopt || !aConsiderScissor)
             return rect{ point{}, render_target().target_extents() };
@@ -250,19 +250,19 @@ namespace neogfx
             return *scissor_rect();
     }
 
-    neogfx::logical_coordinate_system opengl_graphics_context::logical_coordinate_system() const
+    neogfx::logical_coordinate_system opengl_rendering_context::logical_coordinate_system() const
     {
         if (iLogicalCoordinateSystem != std::nullopt)
             return *iLogicalCoordinateSystem;
         return render_target().logical_coordinate_system();
     }
 
-    void opengl_graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+    void opengl_rendering_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
     {
         iLogicalCoordinateSystem = aSystem;
     }
 
-    logical_coordinates opengl_graphics_context::logical_coordinates() const
+    logical_coordinates opengl_rendering_context::logical_coordinates() const
     {
         if (iLogicalCoordinates != std::nullopt)
             return *iLogicalCoordinates;
@@ -285,12 +285,12 @@ namespace neogfx
         return result;
     }
 
-    void opengl_graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
+    void opengl_rendering_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
     {
         iLogicalCoordinates = aCoordinates;
     }
 
-    void opengl_graphics_context::enqueue(const graphics_operation::operation& aOperation)
+    void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
     {
         scoped_render_target srt{ render_target() };
 
@@ -302,7 +302,7 @@ namespace neogfx
         iQueue.first.push_back(aOperation);
     }
 
-    void opengl_graphics_context::flush()
+    void opengl_rendering_context::flush()
     {
         if (iQueue.first.empty())
             return;
@@ -515,14 +515,14 @@ namespace neogfx
         uva.instance().execute();
     }
 
-    void opengl_graphics_context::scissor_on(const rect& aRect)
+    void opengl_rendering_context::scissor_on(const rect& aRect)
     {
         iScissorRects.push_back(aRect);
         iScissorRect = std::nullopt;
         apply_scissor();
     }
 
-    void opengl_graphics_context::scissor_off()
+    void opengl_rendering_context::scissor_off()
     {
         if (!iScissorRects.empty())
             iScissorRects.pop_back();
@@ -530,7 +530,7 @@ namespace neogfx
         apply_scissor();
     }
 
-    const optional_rect& opengl_graphics_context::scissor_rect() const
+    const optional_rect& opengl_rendering_context::scissor_rect() const
     {
         if (iScissorRect == std::nullopt && !iScissorRects.empty())
         {
@@ -543,7 +543,7 @@ namespace neogfx
         return iScissorRect;
     }
 
-    void opengl_graphics_context::apply_scissor()
+    void opengl_rendering_context::apply_scissor()
     {
         auto sr = scissor_rect();
         if (sr != std::nullopt)
@@ -561,7 +561,7 @@ namespace neogfx
         }
     }
 
-    void opengl_graphics_context::clip_to(const rect& aRect)
+    void opengl_rendering_context::clip_to(const rect& aRect)
     {
         if (iClipCounter++ == 0)
         {
@@ -584,7 +584,7 @@ namespace neogfx
         glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
     }
 
-    void opengl_graphics_context::clip_to(const path& aPath, dimension aPathOutline)
+    void opengl_rendering_context::clip_to(const path& aPath, dimension aPathOutline)
     {
         if (iClipCounter++ == 0)
         {
@@ -633,13 +633,13 @@ namespace neogfx
         glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
     }
 
-    void opengl_graphics_context::reset_clip()
+    void opengl_rendering_context::reset_clip()
     {
         --iClipCounter;
         apply_clip();
     }
 
-    void opengl_graphics_context::apply_clip()
+    void opengl_rendering_context::apply_clip()
     {
         if (iClipCounter > 0)
         {
@@ -651,12 +651,12 @@ namespace neogfx
         }
     }
 
-    neogfx::blending_mode opengl_graphics_context::blending_mode() const
+    neogfx::blending_mode opengl_rendering_context::blending_mode() const
     {
         return iBlendingMode;
     }
 
-    void opengl_graphics_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
+    void opengl_rendering_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
     {
         iBlendingMode = aBlendingMode;
         switch (iBlendingMode)
@@ -675,12 +675,12 @@ namespace neogfx
         }
     }
 
-    smoothing_mode opengl_graphics_context::smoothing_mode() const
+    smoothing_mode opengl_rendering_context::smoothing_mode() const
     {
         return iSmoothingMode;
     }
 
-    void opengl_graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
+    void opengl_rendering_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
     {
         iSmoothingMode = aSmoothingMode;
         if (iSmoothingMode == neogfx::smoothing_mode::AntiAlias)
@@ -695,20 +695,20 @@ namespace neogfx
         }
     }
 
-    void opengl_graphics_context::push_logical_operation(logical_operation aLogicalOperation)
+    void opengl_rendering_context::push_logical_operation(logical_operation aLogicalOperation)
     {
         iLogicalOperationStack.push_back(aLogicalOperation);
         apply_logical_operation();
     }
 
-    void opengl_graphics_context::pop_logical_operation()
+    void opengl_rendering_context::pop_logical_operation()
     {
         if (!iLogicalOperationStack.empty())
             iLogicalOperationStack.pop_back();
         apply_logical_operation();
     }
 
-    void opengl_graphics_context::apply_logical_operation()
+    void opengl_rendering_context::apply_logical_operation()
     {
         if (iLogicalOperationStack.empty() || iLogicalOperationStack.back() == logical_operation::None)
         {
@@ -726,7 +726,7 @@ namespace neogfx
         }    
     }
 
-    void opengl_graphics_context::gradient_on(const gradient& aGradient, const rect& aBoundingBox)
+    void opengl_rendering_context::gradient_on(const gradient& aGradient, const rect& aBoundingBox)
     {
         basic_rect<float> boundingBox{ aBoundingBox };
         iShaderProgramStack.emplace_back(*this, iRenderingEngine, rendering_engine().gradient_shader_program());
@@ -754,71 +754,71 @@ namespace neogfx
         glCheck(glActiveTexture(GL_TEXTURE1));
     }
 
-    void opengl_graphics_context::gradient_off()
+    void opengl_rendering_context::gradient_off()
     {
         iShaderProgramStack.pop_back();
     }
 
-    void opengl_graphics_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
+    void opengl_rendering_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
     {
         // TODO: glLineStipple unavailable in 3.2
         iLineStippleActive = true;
     }
 
-    void opengl_graphics_context::line_stipple_off()
+    void opengl_rendering_context::line_stipple_off()
     {
         // TODO: glLineStipple unavailable in 3.2
         iLineStippleActive = false;
     }
 
-    bool opengl_graphics_context::is_subpixel_rendering_on() const
+    bool opengl_rendering_context::is_subpixel_rendering_on() const
     {
         return iSubpixelRendering;
     }
 
-    void opengl_graphics_context::subpixel_rendering_on()
+    void opengl_rendering_context::subpixel_rendering_on()
     {
         iSubpixelRendering = true;
     }
 
-    void opengl_graphics_context::subpixel_rendering_off()
+    void opengl_rendering_context::subpixel_rendering_off()
     {
         iSubpixelRendering = false;
     }
 
-    void opengl_graphics_context::clear(const colour& aColour)
+    void opengl_rendering_context::clear(const colour& aColour)
     {
         glCheck(glClearColor(aColour.red<GLclampf>(), aColour.green<GLclampf>(), aColour.blue<GLclampf>(), aColour.alpha<GLclampf>()));
         glCheck(glClear(GL_COLOR_BUFFER_BIT));
     }
 
-    void opengl_graphics_context::clear_depth_buffer()
+    void opengl_rendering_context::clear_depth_buffer()
     {
         glCheck(glClearDepth(1.0));
         glCheck(glClear(GL_DEPTH_BUFFER_BIT));
     }
 
-    void opengl_graphics_context::clear_stencil_buffer()
+    void opengl_rendering_context::clear_stencil_buffer()
     {
         glCheck(glStencilMask(static_cast<GLuint>(-1)));
         glCheck(glClearStencil(0xFF));
         glCheck(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
-    void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
+    void opengl_rendering_context::set_pixel(const point& aPoint, const colour& aColour)
     {
         /* todo: faster alternative to this... */
         disable_anti_alias daa{ *this };
         draw_pixel(aPoint, aColour.with_alpha(0xFF));
     }
 
-    void opengl_graphics_context::draw_pixel(const point& aPoint, const colour& aColour)
+    void opengl_rendering_context::draw_pixel(const point& aPoint, const colour& aColour)
     {
         /* todo: faster alternative to this... */
         fill_rect(rect{ aPoint, size{1.0, 1.0} }, aColour);
     }
 
-    void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
+    void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
@@ -849,7 +849,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
+    void opengl_rendering_context::draw_rect(const rect& aRect, const pen& aPen)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
@@ -880,7 +880,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
+    void opengl_rendering_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
@@ -911,7 +911,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
+    void opengl_rendering_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
@@ -941,7 +941,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
+    void opengl_rendering_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
@@ -971,7 +971,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::draw_path(const path& aPath, const pen& aPen)
+    void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
@@ -1010,7 +1010,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
+    void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
     {
         auto const& vertices = aMesh.vertices;
 
@@ -1038,7 +1038,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
+    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
     {
         iRenderingEngine.want_game_mode();
         aEcs.component<game::rigid_body>().take_snapshot();
@@ -1062,14 +1062,14 @@ namespace neogfx
         }
     }
 
-    void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
+    void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
         graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill, aZpos } };
         fill_rect(graphics_operation::batch{ &op, &op + 1 });
     }
 
-    void opengl_graphics_context::fill_rect(const graphics_operation::batch& aFillRectOps)
+    void opengl_rendering_context::fill_rect(const graphics_operation::batch& aFillRectOps)
     {
         use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
@@ -1102,7 +1102,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill)
+    void opengl_rendering_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill)
     {
         if (aRect.empty())
             return;
@@ -1133,7 +1133,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
+    void opengl_rendering_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
     {
         if (std::holds_alternative<gradient>(aFill))
             gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
@@ -1158,7 +1158,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
+    void opengl_rendering_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
     {
         if (std::holds_alternative<gradient>(aFill))
             gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
@@ -1183,7 +1183,7 @@ namespace neogfx
             gradient_off();
     }
 
-    void opengl_graphics_context::fill_path(const path& aPath, const brush& aFill)
+    void opengl_rendering_context::fill_path(const path& aPath, const brush& aFill)
     {
         for (std::size_t i = 0; i < aPath.paths().size(); ++i)
         {
@@ -1225,7 +1225,7 @@ namespace neogfx
         }
     }
 
-    void opengl_graphics_context::fill_shape(const graphics_operation::batch& aFillShapeOps)
+    void opengl_rendering_context::fill_shape(const graphics_operation::batch& aFillShapeOps)
     {
         auto& firstOp = static_variant_cast<const graphics_operation::fill_shape&>(*aFillShapeOps.first);
 
@@ -1297,7 +1297,7 @@ namespace neogfx
         }
     }
 
-    std::size_t opengl_graphics_context::max_operations(const graphics_operation::operation& aOperation)
+    std::size_t opengl_rendering_context::max_operations(const graphics_operation::operation& aOperation)
     {
         auto need = 1u;
         if (std::holds_alternative<graphics_operation::draw_glyph>(aOperation))
@@ -1310,7 +1310,7 @@ namespace neogfx
         return rendering_engine().vertex_arrays().capacity() / need;
     }
 
-    void opengl_graphics_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
+    void opengl_rendering_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
     {
         auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
 
@@ -1499,12 +1499,12 @@ namespace neogfx
         }
     }
 
-    bool opengl_graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)
+    bool opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)
     {
         return draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aTransformation);
     }
     
-    bool opengl_graphics_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
+    bool opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
     {
         auto const transformation = aTransformation * (aMeshFilter.transformation != std::nullopt ? *aMeshFilter.transformation : mat44::identity());
 
@@ -1523,7 +1523,7 @@ namespace neogfx
     }
 
 
-    bool opengl_graphics_context::draw_patch(const vertices_t& aVertices, const vertices_2d_t& aTextureVertices, const game::material& aMaterial, const game::faces_t& aFaces)
+    bool opengl_rendering_context::draw_patch(const vertices_t& aVertices, const vertices_2d_t& aTextureVertices, const game::material& aMaterial, const game::faces_t& aFaces)
     {
         colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
         if (aMaterial.colour != std::nullopt)
@@ -1635,7 +1635,7 @@ namespace neogfx
         return drawn;
     }
 
-    xyz opengl_graphics_context::to_shader_vertex(const point& aPoint, coordinate aZ) const
+    xyz opengl_rendering_context::to_shader_vertex(const point& aPoint, coordinate aZ) const
     {
         return xyz{{ aPoint.x, aPoint.y, aZ }};
     }

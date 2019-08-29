@@ -31,6 +31,13 @@ namespace neogfx
 
     class native_window : public object<i_native_window>
     {
+    public:
+        define_declared_event(TargetActivating, target_activating)
+        define_declared_event(TargetActivated, target_activated)
+        define_declared_event(TargetDeactivating, target_deactivating)
+        define_declared_event(TargetDeactivated, target_deactivated)
+        define_declared_event(Filter, filter, native_event&)
+    private:
         typedef std::deque<native_event> event_queue;
     public:
         native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager);

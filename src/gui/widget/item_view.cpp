@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/item_view.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
@@ -186,12 +187,12 @@ namespace neogfx
         update();
     }
 
-    std::pair<item_presentation_model_index::value_type, coordinate> item_view::first_visible_item(graphics_context& aGraphicsContext) const
+    std::pair<item_presentation_model_index::value_type, coordinate> item_view::first_visible_item(i_graphics_context& aGraphicsContext) const
     {
         return presentation_model().item_at(vertical_scrollbar().position(), aGraphicsContext);
     }
 
-    std::pair<item_presentation_model_index::value_type, coordinate> item_view::last_visible_item(graphics_context& aGraphicsContext) const
+    std::pair<item_presentation_model_index::value_type, coordinate> item_view::last_visible_item(i_graphics_context& aGraphicsContext) const
     {
         return presentation_model().item_at(vertical_scrollbar().position() + item_display_rect().height(), aGraphicsContext);
     }
@@ -222,7 +223,7 @@ namespace neogfx
         return size_policy::Expanding;
     }
 
-    void item_view::paint(graphics_context& aGraphicsContext) const
+    void item_view::paint(i_graphics_context& aGraphicsContext) const
     {
         scrollable_widget::paint(aGraphicsContext);
         auto first = first_visible_item(aGraphicsContext);
@@ -268,7 +269,7 @@ namespace neogfx
         }
     }
 
-    void item_view::released()
+    void item_view::capture_released()
     {
         iMouseTracker = std::nullopt;
     }
@@ -800,12 +801,12 @@ namespace neogfx
             optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
             textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != std::nullopt ? colour_or_gradient{ *backgroundColour } : colour_or_gradient{} });
             textEdit.set_text(presentation_model().cell_to_string(newIndex));
-            textEdit.focus_event([this, newIndex](neogfx::focus_event fe)
+            textEdit.evFocus([this, newIndex](neogfx::focus_event fe)
             {
                 if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!root().has_focused_widget() || !root().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
                     end_edit(true);
             });
-            textEdit.keyboard_event([this, &textEdit, newIndex](neogfx::keyboard_event ke)
+            textEdit.evKeyboard([this, &textEdit, newIndex](neogfx::keyboard_event ke)
             {
                 if (ke.type() == neogfx::keyboard_event_type::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && textEdit.cursor().position() == textEdit.cursor().anchor())
                     end_edit(false);

@@ -30,6 +30,9 @@ namespace neogfx
     class item_selection_model : public i_item_selection_model, private neolib::observable<i_item_selection_model_subscriber>, private i_item_presentation_model_subscriber
     {
     public:
+        define_declared_event(CurrentIndexChanged, current_index_changed, const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+        define_declared_event(SelectionChanged, selection_changed, const item_selection&, const item_selection&)
+    public:
         item_selection_model(item_selection_mode aMode = item_selection_mode::SingleSelection) :
             iModel{ nullptr },
             iMode{ aMode },
@@ -293,7 +296,7 @@ namespace neogfx
                     presentation_model().cell_meta(*iCurrentIndex).selection = 
                         presentation_model().cell_meta(*iCurrentIndex).selection | item_cell_selection_flags::Current;
                 notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
-                current_index_changed.trigger(iCurrentIndex, previousIndex);
+                evCurrentIndexChanged.trigger(iCurrentIndex, previousIndex);
             }
         }
     private:

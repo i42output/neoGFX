@@ -77,7 +77,7 @@ namespace neogfx
         return false;
     }
 
-    void framed_widget::paint_non_client(graphics_context& aGraphicsContext) const
+    void framed_widget::paint_non_client(i_graphics_context& aGraphicsContext) const
     {
         widget::paint_non_client(aGraphicsContext);
         switch (iStyle)
@@ -116,7 +116,7 @@ namespace neogfx
         }
     }
 
-    void framed_widget::paint(graphics_context& aGraphicsContext) const
+    void framed_widget::paint(i_graphics_context& aGraphicsContext) const
     {
         widget::paint(aGraphicsContext);
     }

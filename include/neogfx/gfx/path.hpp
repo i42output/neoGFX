@@ -23,8 +23,6 @@
 
 namespace neogfx
 {
-    class graphics_context;
-
     template <typename PointType>
     class basic_path
     {

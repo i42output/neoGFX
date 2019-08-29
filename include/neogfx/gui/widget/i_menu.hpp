@@ -31,15 +31,15 @@ namespace neogfx
     public:
         typedef uint32_t item_index;
     public:
-        event<> menu_changed;
-        event<item_index> item_added;
-        event<item_index> item_removed;
-        event<item_index> item_changed;
-        event<> opened;
-        event<> closed;
-        event<i_menu_item&> item_selected;
-        event<> selection_cleared;
-        event<i_menu&> open_sub_menu;
+        declare_event(menu_changed)
+        declare_event(item_added, item_index)
+        declare_event(item_removed, item_index)
+        declare_event(item_changed, item_index)
+        declare_event(opened)
+        declare_event(closed)
+        declare_event(item_selected, i_menu_item&)
+        declare_event(selection_cleared)
+        declare_event(open_sub_menu, i_menu&)
     public:
         enum type_e
         {

@@ -35,6 +35,9 @@ namespace neogfx
     class layout : public i_layout
     {
     public:
+        define_declared_event(LayoutCompleted, layout_completed)
+        define_declared_event(AlignmentChanged, alignment_changed)
+    public:
         struct item_already_added : std::logic_error { item_already_added() : std::logic_error("neogfx::layout::item_already_added") {} };
     protected:
         typedef layout_item item;

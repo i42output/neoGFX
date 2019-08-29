@@ -30,8 +30,8 @@ namespace neogfx
     class i_tab_page
     {
     public:
-        event<> selected;
-        event<> deselected;
+        declare_event(selected)
+        declare_event(deselected)
     public:
         virtual ~i_tab_page() {}
     public:

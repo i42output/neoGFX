@@ -58,7 +58,7 @@ namespace neogfx
         return convert_units(*this, su.saved_units(), dpi_scale(iType == Horizontal ? size{ 96, 22 } : size{ 22, 96 }));
     }
 
-    void slider_impl::paint(graphics_context& aGraphicsContext) const
+    void slider_impl::paint(i_graphics_context& aGraphicsContext) const
     {
         scoped_units su{ *this, units::Pixels };
         rect rectBarBox = bar_box();

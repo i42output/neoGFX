@@ -84,8 +84,8 @@ namespace neogfx
         virtual rect item_display_rect() const = 0;
         virtual size total_item_area(const i_units_context& aUnitsContext) const = 0;
         virtual dimension column_width(uint32_t aColumn) const = 0;
-        std::pair<item_model_index::value_type, coordinate> first_visible_item(graphics_context& aGraphicsContext) const;
-        std::pair<item_model_index::value_type, coordinate> last_visible_item(graphics_context& aGraphicsContext) const;
+        std::pair<item_model_index::value_type, coordinate> first_visible_item(i_graphics_context& aGraphicsContext) const;
+        std::pair<item_model_index::value_type, coordinate> last_visible_item(i_graphics_context& aGraphicsContext) const;
     protected:
         void layout_items_completed() override;
     protected:
@@ -93,9 +93,9 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override;
     protected:
-        void paint(graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     protected:
-        void released() override;
+        void capture_released() override;
         neogfx::focus_policy focus_policy() const override;
         void focus_gained(focus_reason aFocusReason) override;
     protected:

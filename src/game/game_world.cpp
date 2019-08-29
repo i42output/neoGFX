@@ -28,8 +28,8 @@ namespace neogfx::game
     game_world::game_world(game::i_ecs& aEcs) :
         system{ aEcs }
     {
-        applying_physics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-        physics_applied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+        evApplyingPhysics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+        evPhysicsApplied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
     }
 
     game_world::~game_world()

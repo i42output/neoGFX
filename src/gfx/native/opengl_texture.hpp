@@ -32,6 +32,11 @@ namespace neogfx
     class opengl_texture : public i_native_texture
     {
     public:
+        define_declared_event(TargetActivating, target_activating)
+        define_declared_event(TargetActivated, target_activated)
+        define_declared_event(TargetDeactivating, target_deactivating)
+        define_declared_event(TargetDeactivated, target_deactivated)
+    public:
         struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
         struct multisample_texture_initialization_unsupported : std::logic_error { multisample_texture_initialization_unsupported() : std::logic_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
         struct unsupported_sampling_type_for_function : std::logic_error { unsupported_sampling_type_for_function() : std::logic_error("neogfx::opengl_texture::unsupported_sampling_type_for_function") {} };
@@ -67,7 +72,7 @@ namespace neogfx
         bool metrics_available() const override;
         dimension em_size() const override;
     public:
-        std::unique_ptr<i_graphics_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const override;
+        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const override;
     public:
         int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
     public:

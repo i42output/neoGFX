@@ -33,10 +33,10 @@ namespace neogfx
     class i_layout : public i_layout_item
     {
     public:
-        static i_layout* debug;
+        declare_event(layout_completed)
+        declare_event(alignment_changed)
     public:
-        event<> layout_completed;
-        event<> alignment_changed;
+        static i_layout* debug;
     public:
         typedef uint32_t item_index;
         typedef std::optional<item_index> optional_item_index;

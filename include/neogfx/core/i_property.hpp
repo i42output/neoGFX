@@ -102,8 +102,8 @@ namespace neogfx
     class i_property
     {
     public:
-        event<property_variant> changed;
-        event<property_variant, property_variant> changed_from_to;
+        declare_event(changed, const property_variant&)
+        declare_event(changed_from_to, const property_variant&, const property_variant&)
     public:
         struct no_delegate : std::logic_error { no_delegate() : std::logic_error("neogfx::i_property::no_delegate") {} };
     public:

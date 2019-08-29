@@ -22,8 +22,8 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/optional.hpp>
 #include <neolib/timer.hpp>
-#include "i_scrollbar.hpp"
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gui/widget/i_scrollbar.hpp>
 
 namespace neogfx
 {
@@ -49,7 +49,7 @@ namespace neogfx
         void set_page(value_type aPage) override;
     public:
         dimension width(const i_units_context& aContext) const override;
-        void render(graphics_context& aGraphicsContext) const override;
+        void render(i_graphics_context& aGraphicsContext) const override;
     public:
         rect element_geometry(const i_units_context& aContext, element_e aElement) const override;
         element_e element_at(const i_units_context& aContext, const point& aPosition) const override;

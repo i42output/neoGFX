@@ -179,25 +179,25 @@ namespace neogfx
         iStepUpButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
         iStepUpButton.label().image().set_snap(2.0); // up and down buttons want to draw arrow texture at same size so use a snap of 2 pixels
         iStepUpButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-        iStepUpButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
-        iStepUpButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);
+        iStepUpButton.evClicked.set_trigger_type(event_trigger_type::Synchronous);
+        iStepUpButton.evDoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
         iStepDownButton.set_margins(neogfx::margins{});
         iStepDownButton.set_minimum_size(dpi_scale(SPIN_BUTTON_MINIMUM_SIZE));
         iStepDownButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
         iStepDownButton.label().image().set_snap(2.0);
         iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-        iStepDownButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
-        iStepDownButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);
+        iStepDownButton.evClicked.set_trigger_type(event_trigger_type::Synchronous);
+        iStepDownButton.evDoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
         iTextBox.set_frame_style(frame_style::NoFrame);
 
-        iSink += iTextBox.text_filter([this](const std::string& aText, bool& aAccept)
+        iSink += iTextBox.evTextFilter([this](const std::string& aText, bool& aAccept)
         {
             aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
             if (!aAccept)
                 service<i_basic_services>().system_beep();
         });
 
-        iSink += iTextBox.text_changed([this]()
+        iSink += iTextBox.evTextChanged([this]()
         {
             auto text = iTextBox.text();
             auto result = string_to_value(text);
@@ -233,14 +233,14 @@ namespace neogfx
                 do_step(step_direction::Up);
             }, 500);
         };
-        iSink += iStepUpButton.pressed(step_up);
-        iSink += iStepUpButton.clicked([this]()
+        iSink += iStepUpButton.evPressed(step_up);
+        iSink += iStepUpButton.evClicked([this]()
         {
             if (iStepper == std::nullopt) // key press?
                 do_step(step_direction::Up);
         });
-        iSink += iStepUpButton.double_clicked(step_up);
-        iSink += iStepUpButton.released([this]()
+        iSink += iStepUpButton.evDoubleClicked(step_up);
+        iSink += iStepUpButton.evReleased([this]()
         {
             iStepper = std::nullopt;
         });
@@ -255,14 +255,14 @@ namespace neogfx
                 do_step(step_direction::Down);
             }, 500);
         };
-        iSink += iStepDownButton.pressed(step_down);
-        iSink += iStepDownButton.clicked([this]()
+        iSink += iStepDownButton.evPressed(step_down);
+        iSink += iStepDownButton.evClicked([this]()
         {
             if (iStepper == std::nullopt) // key press?
                 do_step(step_direction::Down);
         });
-        iSink += iStepDownButton.double_clicked(step_down);
-        iSink += iStepDownButton.released([this]()
+        iSink += iStepDownButton.evDoubleClicked(step_down);
+        iSink += iStepDownButton.evReleased([this]()
         {
             iStepper = std::nullopt;
         });
@@ -365,7 +365,7 @@ namespace neogfx
         try { text = boost::str(boost::format(iFormat) % minimum()); } catch (...) {}
         if (text_box().text().empty())
             text_box().set_text(text);
-        constraints_changed.trigger();
+        evConstraintsChanged.trigger();
         if (iValue < minimum())
             set_value(minimum());
     }
@@ -380,7 +380,7 @@ namespace neogfx
     inline void basic_spin_box<T>::set_maximum(value_type aMaximum)
     {
         iMaximum = aMaximum;
-        constraints_changed.trigger();
+        evConstraintsChanged.trigger();
         if (iValue > maximum())
             set_value(maximum());
     }
@@ -395,7 +395,7 @@ namespace neogfx
     inline void basic_spin_box<T>::set_step(value_type aStep)
     {
         iStep = aStep;
-        constraints_changed.trigger();
+        evConstraintsChanged.trigger();
     }
 
     template <typename T>
@@ -414,7 +414,7 @@ namespace neogfx
             if (!iDontSetText)
                 iTextBox.set_text(value_to_string());
             if (aNotify && (!text().empty() || value() != minimum()))
-                value_changed.trigger();
+                evValueChanged.trigger();
         }
     }
 

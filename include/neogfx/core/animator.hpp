@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/timer.hpp>
+#include <neogfx/core/event.hpp>
 #include <neogfx/core/i_animator.hpp>
 
 namespace neogfx
@@ -70,7 +71,7 @@ namespace neogfx
     private:
         i_property& iProperty;
         neolib::destroyed_flag iPropertyDestroyed;
-        neolib::sink iSink;
+        sink iSink;
         property_variant iFrom;
         property_variant iTo;
         bool iUpdatingProperty;

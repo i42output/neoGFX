@@ -30,6 +30,16 @@ namespace neogfx
 {
     class menu : public i_menu
     {
+    public:
+        define_declared_event(MenuChanged, menu_changed)
+        define_declared_event(ItemAdded, item_added, item_index)
+        define_declared_event(ItemRemoved, item_removed, item_index)
+        define_declared_event(ItemChanged, item_changed, item_index)
+        define_declared_event(Opened, opened)
+        define_declared_event(Closed, closed)
+        define_declared_event(ItemSelected, item_selected, i_menu_item&)
+        define_declared_event(SelectionCleared, selection_cleared)
+        define_declared_event(OpenSubMenu, open_sub_menu, i_menu&)
     private:
         typedef std::unique_ptr<i_menu_item> item_pointer;
         typedef std::vector<item_pointer> item_list;

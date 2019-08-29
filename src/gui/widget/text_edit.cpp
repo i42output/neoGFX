@@ -22,6 +22,7 @@
 #include <neolib/thread.hpp>
 
 #include <neogfx/gui/widget/text_edit.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
@@ -155,7 +156,7 @@ namespace neogfx
                 bool notify = (iOwner.iWantedToNotfiyTextChanged > 0u);
                 iOwner.iWantedToNotfiyTextChanged = 0u;
                 if (notify)
-                    iOwner.text_changed.trigger();
+                    iOwner.evTextChanged.trigger();
             }
         }
     private:
@@ -269,9 +270,9 @@ namespace neogfx
         return convert_units(*this, su.saved_units(), result);
     }
 
-    void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
+    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
-    void text_edit::paint(graphics_context& aGraphicsContext) const
+    void text_edit::paint(i_graphics_context& aGraphicsContext) const
     {
         scrollable_widget::paint(aGraphicsContext);
         coordinate x = 0.0;
@@ -379,8 +380,8 @@ namespace neogfx
             auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
             auto pastePlainText = std::make_shared<action>("Plain Text"_t);
             auto pasteRichText = std::make_shared<action>("Rich Text (HTML)"_t);
-            pastePlainText->triggered([this]() { paste_plain_text(); });
-            pasteRichText->triggered([this]() { paste_rich_text(); });
+            pastePlainText->evTriggered([this]() { paste_plain_text(); });
+            pasteRichText->evTriggered([this]() { paste_rich_text(); });
             sink pasteAsSink;
             pasteAsSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
             pasteAsSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
@@ -948,7 +949,7 @@ namespace neogfx
         if (oldFont != font() || oldEffect != (iDefaultStyle.text_effect() == std::nullopt))
             refresh_paragraph(iText.begin(), 0);
         iPersistDefaultStyle = aPersist;
-        default_style_changed.trigger();
+        evDefaultStyleChanged.trigger();
         update();
     }
 
@@ -1375,17 +1376,17 @@ namespace neogfx
             focusPolicy |= neogfx::focus_policy::ConsumeReturnKey;
         set_focus_policy(focusPolicy);
         cursor().set_width(2.0);
-        iSink += cursor().position_changed([this]()
+        iSink += cursor().evPositionChanged([this]()
         {
             iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
             make_cursor_visible();
             update();
         });
-        iSink += cursor().anchor_changed([this]()
+        iSink += cursor().evAnchorChanged([this]()
         {
             update();
         });
-        iSink += cursor().appearance_changed([this]()
+        iSink += cursor().evAppearanceChanged([this]()
         {
             update();
         });
@@ -1394,7 +1395,7 @@ namespace neogfx
     std::size_t text_edit::do_insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
     {
         bool accept = true;
-        text_filter.trigger(aText, accept);
+        evTextFilter.trigger(aText, accept);
         if (!accept)
             return 0;
 
@@ -1442,7 +1443,7 @@ namespace neogfx
     void text_edit::notify_text_changed()
     {
         if (!iSuppressTextChangedNotification)
-            text_changed.trigger();
+            evTextChanged.trigger();
         else
             ++iWantedToNotfiyTextChanged;
     }
@@ -1805,7 +1806,7 @@ namespace neogfx
         return result;
     }
 
-    void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
+    void text_edit::draw_glyphs(const i_graphics_context& aGraphicsContext, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
     {
         auto lineStart = aLine->lineStart.second;
         auto lineEnd = aLine->lineEnd.second;
@@ -1857,7 +1858,7 @@ namespace neogfx
         }
     }
 
-    void text_edit::draw_cursor(const graphics_context& aGraphicsContext) const
+    void text_edit::draw_cursor(const i_graphics_context& aGraphicsContext) const
     {
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();

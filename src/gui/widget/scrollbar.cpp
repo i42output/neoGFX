@@ -155,7 +155,7 @@ namespace neogfx
         return width(style(), aContext);
     }
 
-    void scrollbar::render(graphics_context& aGraphicsContext) const
+    void scrollbar::render(i_graphics_context& aGraphicsContext) const
     {
         if (style() == scrollbar_style::Invisible)
             return;

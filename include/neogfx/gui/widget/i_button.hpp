@@ -34,6 +34,18 @@ namespace neogfx
     class i_button : public virtual i_skinnable_item
     {
     public:
+        declare_event(pressed)
+        declare_event(clicked)
+        declare_event(async_clicked)
+        declare_event(double_clicked)
+        declare_event(right_clicked)
+        declare_event(released)
+    public:
+        declare_event(toggled)
+        declare_event(checked)
+        declare_event(unchecked)
+        declare_event(indeterminate)
+    public:
         virtual button_checkable checkable() const = 0;
         virtual void set_checkable(button_checkable aCheckable = button_checkable::BiState) = 0;
         virtual bool is_checked() const = 0;

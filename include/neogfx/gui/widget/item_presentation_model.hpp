@@ -27,11 +27,11 @@
 #include <neolib/segmented_array.hpp>
 #include <neolib/observable.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
-#include "item_model.hpp"
-#include "i_item_presentation_model.hpp"
+#include <neogfx/gui/widget/item_model.hpp>
+#include <neogfx/gui/widget/i_item_presentation_model.hpp>
 
 namespace neogfx
 {
@@ -41,6 +41,8 @@ namespace neogfx
     template <typename ItemModel>
     class basic_item_presentation_model : public i_item_presentation_model, private i_item_model_subscriber, private neolib::observable<i_item_presentation_model_subscriber>
     {
+    public:
+        define_declared_event(VisualAppearanceChanged, visual_appearance_changed)
     private:
         typedef ItemModel item_model_type;
         typedef typename item_model_type::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other container_traits;
@@ -143,7 +145,7 @@ namespace neogfx
         {
             return static_cast<uint32_t>(iRows[aIndex.row()].second.size());
         }
-        dimension column_width(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext, bool aIncludeMargins = true) const override
+        dimension column_width(item_presentation_model_index::value_type aColumnIndex, const i_graphics_context& aGraphicsContext, bool aIncludeMargins = true) const override
         {
             if (iColumns.size() < aColumnIndex + 1u)
                 return 0.0;
@@ -170,7 +172,7 @@ namespace neogfx
             else
                 return item_model().column_name(iColumns[aColumnIndex].modelColumn);
         }
-        size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const graphics_context& aGraphicsContext) const override
+        size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGraphicsContext) const override
         {
             if (iColumns.size() < aColumnIndex + 1u)
                 throw bad_column_index();
@@ -508,7 +510,7 @@ namespace neogfx
         {
             return optional_texture{};
         }
-        neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
+        neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
         {
             optional_font cellFont = cell_font(aIndex);
             if (cell_meta(aIndex).text != std::nullopt)
@@ -516,7 +518,7 @@ namespace neogfx
             cell_meta(aIndex).text = aGraphicsContext.to_glyph_text(cell_to_string(aIndex), cellFont == std::nullopt ? default_font() : *cellFont);
             return *cell_meta(aIndex).text;
         }
-        size cell_extents(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
+        size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
         {
             auto oldItemHeight = item_height(aIndex, aGraphicsContext);
             auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : *cell_font(aIndex));

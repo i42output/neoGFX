@@ -27,8 +27,8 @@ namespace neogfx
     class radio_button : public button
     {
     public:
-        event<> on;
-        event<> off;
+        define_event(On)
+        define_event(Off)
     private:
         class disc : public widget
         {
@@ -38,7 +38,7 @@ namespace neogfx
             size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
             size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         public:
-            void paint(graphics_context& aGraphicsContext) const override;
+            void paint(i_graphics_context& aGraphicsContext) const override;
         };
     public:
         radio_button(const std::string& aText = std::string());
@@ -51,7 +51,7 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     protected:
-        void paint(graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     protected:
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;

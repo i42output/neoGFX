@@ -40,17 +40,17 @@ namespace neogfx
         splitter(i_layout& aLayout, type_e aType = HorizontalSplitter);
         ~splitter();
     public:
-        virtual i_widget& get_widget_at(const point& aPosition);
+        i_widget& get_widget_at(const point& aPosition) override;
     public:
-        virtual neogfx::size_policy size_policy() const;
+        neogfx::size_policy size_policy() const override;
     public:
-        virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-        virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-        virtual void mouse_moved(const point& aPosition);
-        virtual void mouse_entered(const point& aPosition);
-        virtual void mouse_left();
-        virtual neogfx::mouse_cursor mouse_cursor() const;
-        virtual void released();
+        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_moved(const point& aPosition) override;
+        void mouse_entered(const point& aPosition) override;
+        void mouse_left() override;
+        neogfx::mouse_cursor mouse_cursor() const override;
+        void capture_released() override;
     public:
         virtual void panes_resized();
         virtual void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = std::optional<uint32_t>());

@@ -29,6 +29,11 @@ namespace neogfx
     class surface_window_proxy : public object<i_surface_window>
     {
     public:
+        define_declared_event(DpiChanged, dpi_changed)
+        define_declared_event(Rendering, rendering)
+        define_declared_event(RenderingFinished, rendering_finished)
+        define_declared_event(Closed, closed)
+    public:
         surface_window_proxy(i_window& aWindow, std::function<std::unique_ptr<i_native_window>(i_surface_window&)> aNativeWindowCreator);
         ~surface_window_proxy();
     public:

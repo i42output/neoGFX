@@ -244,6 +244,7 @@
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\html.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_animator.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
@@ -303,6 +304,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_render_target.hpp" />
@@ -458,7 +460,7 @@
     <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_rendering_context.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_helpers.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp" />
@@ -544,7 +546,7 @@
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />
     <ClCompile Include="..\..\..\src\gfx\image.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_error.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_graphics_context.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_rendering_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ShowIncludes>

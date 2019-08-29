@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 
 namespace neogfx
 {
@@ -90,7 +90,7 @@ namespace neogfx
         virtual void set_page(value_type aPage) = 0;
     public:
         virtual dimension width(const i_units_context& aContext) const = 0;
-        virtual void render(graphics_context& aGraphicsContext) const = 0;
+        virtual void render(i_graphics_context& aGraphicsContext) const = 0;
     public:
         virtual rect element_geometry(const i_units_context& aContext, element_e aElement) const = 0;
         virtual element_e element_at(const i_units_context& aContext, const point& aPosition) const = 0;

@@ -81,15 +81,15 @@ namespace neogfx
     void view_container::add_controller(i_controller& aController)
     {
         iControllers.push_back(std::shared_ptr<i_controller>(std::shared_ptr<i_controller>(), &aController));
-        aController.view_added([this](i_view& aView) { view_added.trigger(aView); });
-        aController.view_removed([this](i_view& aView) { view_removed.trigger(aView); });
+        aController.view_added([this](i_view& aView) { evViewAdded.trigger(aView); });
+        aController.view_removed([this](i_view& aView) { evViewRemoved.trigger(aView); });
     }
 
     void view_container::add_controller(std::shared_ptr<i_controller> aController)
     {
         iControllers.push_back(aController);
-        aController->view_added([this](i_view& aView) { view_added.trigger(aView); });
-        aController->view_removed([this](i_view& aView) { view_removed.trigger(aView); });
+        aController->view_added([this](i_view& aView) { evViewAdded.trigger(aView); });
+        aController->view_removed([this](i_view& aView) { evViewRemoved.trigger(aView); });
     }
 
     void view_container::remove_controller(i_controller& aController)
@@ -132,7 +132,7 @@ namespace neogfx
         if (style() != aStyle)
         {
             iTabBar.set_style(aStyle);
-            style_changed.trigger();
+            evStyleChanged.trigger();
         }
     }
 

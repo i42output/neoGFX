@@ -20,12 +20,16 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_resource.hpp"
+#include <neogfx/core/event.hpp>
+#include <neogfx/app/i_resource.hpp>
 
 namespace neogfx
 {
     class module_resource : public i_resource
     {
+    public:
+        define_declared_event(Downloaded, downloaded)
+        define_declared_event(FailedToDownload, failed_to_download)
     public:
         module_resource(const std::string& aUri, const void* aData, std::size_t aSize);
     public:

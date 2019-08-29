@@ -21,13 +21,17 @@
 
 #include <neogfx/neogfx.hpp>
 #include <optional>
-#include "i_resource.hpp"
-#include "i_resource_manager.hpp"
+#include <neogfx/core/event.hpp>
+#include <neogfx/app/i_resource.hpp>
+#include <neogfx/app/i_resource_manager.hpp>
 
 namespace neogfx
 {
     class resource : public i_resource
     {
+    public:
+        define_declared_event(Downloaded, downloaded)
+        define_declared_event(FailedToDownload, failed_to_download)
     public:
         resource() = delete;
         resource(i_resource_manager& aManager, const std::string& aUri);

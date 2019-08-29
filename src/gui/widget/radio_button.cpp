@@ -46,7 +46,7 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
         
-    void radio_button::disc::paint(graphics_context& aGraphicsContext) const
+    void radio_button::disc::paint(i_graphics_context& aGraphicsContext) const
     {
         scoped_units su{ *this, units::Pixels };
         rect discRect = client_rect();
@@ -131,7 +131,7 @@ namespace neogfx
         return neogfx::size_policy::Minimum;
     }
 
-    void radio_button::paint(graphics_context& aGraphicsContext) const
+    void radio_button::paint(i_graphics_context& aGraphicsContext) const
     {
         if (has_focus())
         {
@@ -194,9 +194,9 @@ namespace neogfx
                 nextRadioButton->uncheck();
         button::set_checked_state(aCheckedState);
         if (is_on())
-            on.trigger();
+            evOn.trigger();
         else if (is_off())
-            off.trigger();
+            evOff.trigger();
         return true;
     }
 

@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/pen.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 
@@ -159,7 +160,7 @@ namespace neogfx
         return button::maximum_size(aAvailableSpace);
     }
 
-    void push_button::paint_non_client(graphics_context& aGraphicsContext) const
+    void push_button::paint_non_client(i_graphics_context& aGraphicsContext) const
     {
         button::paint_non_client(aGraphicsContext);
         if ((iStyle == push_button_style::Toolbar || iStyle == push_button_style::TitleBar) && enabled() && (entered() || capturing()))
@@ -172,7 +173,7 @@ namespace neogfx
         }
     }
 
-    void push_button::paint(graphics_context& aGraphicsContext) const
+    void push_button::paint(i_graphics_context& aGraphicsContext) const
     {
         colour faceColour = animation_colour();
         colour borderColour = border_mid_colour().darker(0x40);

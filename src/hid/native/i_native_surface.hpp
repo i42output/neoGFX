@@ -23,13 +23,13 @@
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
     class i_rendering_engine;
-    class i_graphics_context;
+    class i_rendering_context;
     class i_widget;
 
     class i_native_surface : public i_object, public i_render_target
@@ -71,6 +71,6 @@ namespace neogfx
         virtual void resume() = 0;
         virtual bool is_rendering() const = 0;
         using i_render_target::create_graphics_context;
-        virtual std::unique_ptr<i_graphics_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const = 0;
+        virtual std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const = 0;
     };
 }

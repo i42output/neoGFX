@@ -27,6 +27,8 @@ namespace neogfx
     class palette : public i_palette
     {
     public:
+        define_declared_event(Changed, changed)
+    public:
         palette();
         palette(const i_palette& aOther);
         palette(const palette& aOther);

@@ -32,8 +32,8 @@ namespace video_poker
         set_margins(neogfx::margins{});
         set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
         set_ignore_mouse_events(true);
-        iCanvas.layout_completed([this]() { update_sprite_geometry(); });
-        iCanvas.entity_clicked([this](neogfx::game::entity_id aEntity)
+        iCanvas.evLayoutCompleted([this]() { update_sprite_geometry(); });
+        iCanvas.evEntityClicked([this](neogfx::game::entity_id aEntity)
         { 
             if (aEntity == iCardSprite)
                 toggle_hold(); 
@@ -54,7 +54,7 @@ namespace video_poker
         return (minimum_size(aAvailableSpace) * 2.0).ceil();
     }
         
-    void card_widget::paint(neogfx::graphics_context& aGraphicsContext) const
+    void card_widget::paint(neogfx::i_graphics_context& aGraphicsContext) const
     {
         auto rect = client_rect();
         aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::colour::DarkGreen);
@@ -150,7 +150,7 @@ namespace video_poker
                 update_widgets();
             }
         };
-        iHoldButton.toggled(update_hold);
+        iHoldButton.evToggled(update_hold);
         iTable.state_changed([this](table_state) { update_widgets(); });
         update_widgets();
     }

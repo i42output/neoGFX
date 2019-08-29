@@ -63,7 +63,7 @@ namespace neogfx
         return false;
     }
 
-    void tab_page_container::default_tab_page::paint_non_client_after(graphics_context& aGraphicsContext) const
+    void tab_page_container::default_tab_page::paint_non_client_after(i_graphics_context& aGraphicsContext) const
     {
         if (iTab.is_selected())
         {
@@ -112,12 +112,12 @@ namespace neogfx
         return iTab;
     }
 
-    const i_widget& tab_page_container::default_tab_page::as_widget() const
+    const widget& tab_page_container::default_tab_page::as_widget() const
     {
         return *this;
     }
 
-    i_widget& tab_page_container::default_tab_page::as_widget()
+    widget& tab_page_container::default_tab_page::as_widget()
     {
         return *this;
     }
@@ -165,7 +165,7 @@ namespace neogfx
         {
             iTabBar.set_style(aStyle);
             update_tab_bar_placement();
-            style_changed.trigger();
+            evStyleChanged.trigger();
         }
     }
 
@@ -408,12 +408,12 @@ namespace neogfx
         throw no_parent_container();
     }
 
-        const i_widget& tab_page_container::as_widget() const
+    const widget& tab_page_container::as_widget() const
     {
         return *this;
     }
 
-    i_widget& tab_page_container::as_widget()
+    widget& tab_page_container::as_widget()
     {
         return *this;
     }

@@ -77,7 +77,7 @@ namespace neogfx
         return size::max_size();
     }
 
-    void toolbar_button::paint(graphics_context& aGraphicsContext) const
+    void toolbar_button::paint(i_graphics_context& aGraphicsContext) const
     {
         if (!iAction.is_separator())
             push_button::paint(aGraphicsContext);
@@ -123,7 +123,7 @@ namespace neogfx
         push_button::handle_clicked();
         if (iAction.is_enabled() && !iAction.is_separator())
         {
-            iAction.triggered.async_trigger();
+            iAction.triggered().async_trigger();
             if (iAction.is_checkable())
             {
                 if (is_checked())
@@ -158,8 +158,8 @@ namespace neogfx
                 image().set_image(iAction.image());
             }
         };
-        iSink += checked(update_checked);
-        iSink += unchecked(update_checked);
+        iSink += evChecked(update_checked);
+        iSink += evUnchecked(update_checked);
         iSink += iAction.checked([this]() {set_checked(true); });
         iSink += iAction.unchecked([this]() {set_checked(false); });
         set_checked(iAction.is_checked());

@@ -63,9 +63,9 @@ namespace neogfx
         if (aMoveAnchor)
             iAnchor = aPosition;
         if (iPosition != oldPosition)
-            position_changed.trigger();
+            evPositionChanged.trigger();
         if (iAnchor != oldAnchor)
-            anchor_changed.trigger();
+            evAnchorChanged.trigger();
     }
 
     cursor::position_type cursor::anchor() const
@@ -78,7 +78,7 @@ namespace neogfx
         if (iAnchor != aAnchor)
         {
             iAnchor = aAnchor;
-            anchor_changed.trigger();
+            evAnchorChanged.trigger();
         }
     }
 
@@ -92,7 +92,7 @@ namespace neogfx
         if (iColour != aColour)
         {
             iColour = aColour;
-            appearance_changed.trigger();
+            evAppearanceChanged.trigger();
         }
     }
 
@@ -116,7 +116,7 @@ namespace neogfx
         if (iWidth != aWidth)
         {
             iWidth = aWidth;
-            appearance_changed.trigger();
+            evAppearanceChanged.trigger();
         }
     }
 

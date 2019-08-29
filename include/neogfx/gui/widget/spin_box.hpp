@@ -31,6 +31,9 @@ namespace neogfx
     class basic_spin_box : public framed_widget
     {
     public:
+        define_event(ValueChanged)
+        define_event(ConstraintsChanged)
+    public:
         typedef T value_type;
     private:
         enum class step_direction
@@ -44,9 +47,6 @@ namespace neogfx
         basic_spin_box();
         basic_spin_box(i_widget& aParent);
         basic_spin_box(i_layout& aLayout);
-    public:
-        event<> value_changed;
-        event<> constraints_changed;
     public:
         const std::string& text();
         const line_edit& text_box() const;

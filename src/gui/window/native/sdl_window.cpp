@@ -26,7 +26,7 @@
 #include <neolib/string_utf.hpp>
 #include <neogfx/app/i_app.hpp>
 #include "../../../gfx/native/opengl.hpp"
-#include "../../../gfx/native/opengl_graphics_context.hpp"
+#include "../../../gfx/native/opengl_rendering_context.hpp"
 #include "../../../hid/native/sdl_keyboard.hpp"
 #include "../../../hid/native/sdl_mouse.hpp"
 #include "sdl_window.hpp"
@@ -453,14 +453,14 @@ namespace neogfx
         return visible() && opengl_window::can_render();
     }
 
-    std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context(blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> sdl_window::create_graphics_context(blending_mode aBlendingMode) const
     {
-        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context{ *this, aBlendingMode });
+        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
     }
 
-    std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> sdl_window::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
-        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context{ *this, aWidget, aBlendingMode });
+        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aWidget, aBlendingMode });
     }
 
     void sdl_window::close(bool aForce)

@@ -45,7 +45,7 @@ namespace neogfx
         return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + margins().size();
     }
 
-    void status_bar::separator::paint(graphics_context& aGraphicsContext) const
+    void status_bar::separator::paint(i_graphics_context& aGraphicsContext) const
     {
         scoped_units su(*this, aGraphicsContext, units::Pixels);
         rect line = client_rect(false);

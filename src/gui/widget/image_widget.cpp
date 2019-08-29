@@ -83,7 +83,7 @@ namespace neogfx
         return convert_units(*this, su.saved_units(), result);
     }
 
-    void image_widget::paint(graphics_context& aGraphicsContext) const
+    void image_widget::paint(i_graphics_context& aGraphicsContext) const
     {
         if (iTexture.is_empty())
             return;
@@ -212,7 +212,7 @@ namespace neogfx
     {
         size oldSize = minimum_size();
         iTexture = aTexture;
-        image_changed.trigger();
+        evImageChanged.trigger();
         if (oldSize != minimum_size() && has_managing_layout())
             managing_layout().layout_items(true);
         update();
@@ -222,7 +222,7 @@ namespace neogfx
     {
         size oldSize = minimum_size();
         iTexture = aImage;
-        image_changed.trigger();
+        evImageChanged.trigger();
         if (oldSize != minimum_size() && has_managing_layout())
             managing_layout().layout_items(true);
         update();

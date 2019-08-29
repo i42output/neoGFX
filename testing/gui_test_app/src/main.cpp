@@ -4,6 +4,7 @@
 #include <boost/lexical_cast.hpp>
 #include <neolib/random.hpp>
 #include <neogfx/app/app.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -104,7 +105,7 @@ public:
         iSink += ng::service<ng::i_app>().current_style_changed([this](ng::style_aspect)
         {
             iTextures.clear();
-            visual_appearance_changed.async_trigger();
+            evVisualAppearanceChanged.async_trigger();
         });
     }
 public:
@@ -144,7 +145,7 @@ public:
     keypad_button(ng::text_edit& aTextEdit, uint32_t aNumber) :
         ng::push_button{ boost::lexical_cast<std::string>(aNumber) }, iTextEdit{ aTextEdit }
     {
-        clicked([this, aNumber]()
+        evClicked([this, aNumber]()
         {
             ng::service<ng::i_app>().change_style("Keypad").
                 palette().set_colour(aNumber != 9 ? ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::colour::LightGoldenrod);
@@ -229,7 +230,7 @@ int main(int argc, char* argv[])
         bool showFps = false;
         bool fullRefresh = false;
         auto fpsFont = window.font().with_size(18);
-        window.paint_overlay([&showFps, &window, fpsFont](ng::graphics_context& aGc)
+        window.evPaintOverlay([&showFps, &window, fpsFont](ng::i_graphics_context& aGc)
         {
             if (showFps)
                 aGc.draw_text(ng::point{ 100, 120 }, (boost::format(" %1$6.2f FPS ") % window.fps()).str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::colour::DarkBlue.darker(0x40), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
@@ -412,7 +413,7 @@ int main(int argc, char* argv[])
         button0.set_size_policy(ng::size_policy::Expanding);
         button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
         ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement.");
-        button1.clicked([&tabContainer]()
+        button1.evClicked([&tabContainer]()
         {
             if (tabContainer.style() == ng::tab_container_style::TabAlignmentTop)
                 tabContainer.set_style(ng::tab_container_style::TabAlignmentBottom);
@@ -432,7 +433,7 @@ int main(int argc, char* argv[])
         button3.set_foreground_colour(ng::colour::DarkGoldenrod);
         ng::push_button buttonJapan(international, u8"クジラを食べないでください。");
         ng::push_button button4(international, u8"请停止食用犬");
-        button4.clicked([&window, &button4]() { window.set_title_text(u8"请停止食用犬"); if (button4.has_maximum_size()) button4.set_maximum_size(ng::optional_size{}); else button4.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 })); });
+        button4.evClicked([&window, &button4]() { window.set_title_text(u8"请停止食用犬"); if (button4.has_maximum_size()) button4.set_maximum_size(ng::optional_size{}); else button4.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 })); });
         button4.set_foreground_colour(ng::colour::CadetBlue);
         ng::push_button button5(layoutButtons, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
         ng::horizontal_layout dropListLayout(layoutButtons);
@@ -457,7 +458,7 @@ int main(int argc, char* argv[])
             dropList4.model().insert_item(dropList4.model().end(), randomString);
         }
         ng::check_box toggleEditable{ dropListLayout, "Toggle Editable" };
-        toggleEditable.toggled([&]()
+        toggleEditable.evToggled([&]()
         {
             dropList.set_editable(!dropList.editable());
             dropList2.set_editable(!dropList2.editable());
@@ -466,11 +467,11 @@ int main(int argc, char* argv[])
         });
         ng::horizontal_layout editLayout(layoutButtons);
         ng::text_edit textEdit(editLayout);
-        buttonGenerateUuid.clicked([&]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
-        dropList.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList2.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList3.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList4.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
+        buttonGenerateUuid.evClicked([&]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
+        dropList.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList2.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList3.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList4.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
         textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
         textEdit.set_tab_stop_hint("00000000");
         ng::slider effectWidthSlider{ editLayout, ng::slider::Vertical };
@@ -494,7 +495,7 @@ int main(int argc, char* argv[])
         ng::text_field textField3(layoutLineEdits3, "Third field (label above)", "Enter text", ng::text_field_placement::LabelAbove);
         ng::text_field textField4(layoutLineEdits3, "Fourth field (label above)", "Enter text", ng::text_field_placement::LabelAbove);
         ng::layout_as_same_size(textField1.label(), textField2.label());
-        textField1.input_box().text_changed([&button1, &textField1]()
+        textField1.input_box().evTextChanged([&button1, &textField1]()
         {
             button1.text().set_text(textField1.input_box().text());
         });
@@ -509,7 +510,7 @@ int main(int argc, char* argv[])
         slider.set_minimum(-100.0);
         slider.set_maximum(100.0);
         slider.set_step(0.1);
-        spinBox.value_changed([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
+        spinBox.evValueChanged([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
         ng::double_spin_box doubleSpinBox(layoutSpinners2);
         doubleSpinBox.set_minimum(-10);
         doubleSpinBox.set_maximum(20);
@@ -518,16 +519,16 @@ int main(int argc, char* argv[])
         ng::label label1(layout2, "Label 1:");
         bool colourCycle = false;
         ng::push_button button6(layout2, "RGB <-> HSV\ncolour space\nconversion test");
-        button6.clicked([&colourCycle]() { colourCycle = !colourCycle; });
+        button6.evClicked([&colourCycle]() { colourCycle = !colourCycle; });
         layout2.add_spacer().set_weight(ng::size(2.0f));
         ng::push_button button7(layout2, "Toggle\n&mute.");
         button7.set_foreground_colour(ng::colour::LightCoral);
         button7.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 }));
-        button7.clicked([&muteAction]() { muteAction.toggle(); });
+        button7.evClicked([&muteAction]() { muteAction.toggle(); });
         layout2.add_spacer().set_weight(ng::size(1.0));
         ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
         button8.set_foreground_colour(ng::colour(255, 235, 160));
-        button8.clicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
+        button8.evClicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
         ng::horizontal_layout layout3(layoutButtons);
         prng.seed(3);
         auto transitionPrng = prng;
@@ -537,10 +538,10 @@ int main(int argc, char* argv[])
             auto& button = layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
             ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
             button.set_foreground_colour(randomColour);
-            button.clicked([&app, &textEdit, randomColour]() { textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
+            button.evClicked([&app, &textEdit, randomColour]() { textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
             transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
         }
-        layout3.layout_completed([&layout3, &transitions, &transitionPrng]()
+        layout3.evLayoutCompleted([&layout3, &transitions, &transitionPrng]()
         {
             for (auto t : transitions)
                 ng::service<ng::i_animator>().transition(t).enable(true);
@@ -566,76 +567,76 @@ int main(int argc, char* argv[])
             else
                 tabContainer.show_tab(9);
         };
-        triState.checked([&triState, showHideTabs]()
+        triState.evChecked([&triState, showHideTabs]()
         {
             static uint32_t n;
             if ((n++)%2 == 1)
                 triState.set_indeterminate();
             showHideTabs();
         });
-        triState.unchecked([&triState, showHideTabs]()
+        triState.evUnchecked([&triState, showHideTabs]()
         {
             showHideTabs();
         });
         ng::check_box wordWrap(layoutRadiosAndChecks, "Editor word wrap");
         wordWrap.check();
-        wordWrap.checked([&textEdit]()
+        wordWrap.evChecked([&textEdit]()
         {
             textEdit.set_word_wrap(true);
         });
-        wordWrap.unchecked([&textEdit]()
+        wordWrap.evUnchecked([&textEdit]()
         {
             textEdit.set_word_wrap(false);
         });
         ng::check_box password(layoutRadiosAndChecks, "Password");
-        password.checked([&textField2]()
+        password.evChecked([&textField2]()
         {
             textField2.hint().set_text("Enter password");
             textField2.input_box().set_password(true);
         });
-        password.unchecked([&textField2]()
+        password.evUnchecked([&textField2]()
         {
             textField2.hint().set_text("Enter text");
             textField2.input_box().set_password(false);
         });
         ng::check_box columns(layoutRadiosAndChecks, "Columns");
         ng::check_box groupBoxCheckable(layoutRadiosAndChecks, "Group Box Checkable");
-        groupBoxCheckable.checked([&showFps, &fullRefresh, &groupBox]()
+        groupBoxCheckable.evChecked([&showFps, &fullRefresh, &groupBox]()
         {
             showFps = true;
             groupBox.set_checkable(true);
-            groupBox.check_box().checked([&fullRefresh]() { fullRefresh = true; });
-            groupBox.check_box().unchecked([&fullRefresh]() { fullRefresh = false; });
+            groupBox.check_box().evChecked([&fullRefresh]() { fullRefresh = true; });
+            groupBox.check_box().evUnchecked([&fullRefresh]() { fullRefresh = false; });
         });
-        groupBoxCheckable.unchecked([&showFps, &groupBox]()
+        groupBoxCheckable.evUnchecked([&showFps, &groupBox]()
         {
             showFps = false;
             groupBox.set_checkable(false);
         });
         ng::gradient_widget gw(layoutRadiosAndChecks);
-        columns.checked([&textEdit, &gw, &password]()
+        columns.evChecked([&textEdit, &gw, &password]()
         {
             password.disable();
             textEdit.set_columns(3);
-            gw.gradient_changed([&gw, &textEdit]()
+            gw.evGradientChanged([&gw, &textEdit]()
             {
                 auto cs = textEdit.column(2);
                 cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, gw.gradient() } });
                 textEdit.set_column(2, cs);
             }, textEdit);
         });
-        columns.unchecked([&textEdit, &gw, &password]()
+        columns.evUnchecked([&textEdit, &gw, &password]()
         {
             password.enable();
             textEdit.remove_columns();
-            gw.gradient_changed.unsubscribe(textEdit);
+            gw.evGradientChanged.unsubscribe(textEdit);
         });
         ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
         ng::vertical_layout layout4(layout2);
         ng::horizontal_layout layout7(layout4);
         ng::check_box buttonKerning(layout7, "kern");
         ng::check_box buttonSubpixel(layout7, "subpix");
-        buttonKerning.toggled([&app, &buttonKerning]()
+        buttonKerning.evToggled([&app, &buttonKerning]()
         {
             auto fi = app.current_style().font_info();
             if (buttonKerning.is_checked())
@@ -644,7 +645,7 @@ int main(int argc, char* argv[])
                 fi.disable_kerning();
             app.current_style().set_font_info(fi);
         });
-        buttonSubpixel.toggled([&app, &buttonSubpixel]()
+        buttonSubpixel.evToggled([&app, &buttonSubpixel]()
         {
             if (buttonSubpixel.is_checked())
                 ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
@@ -664,13 +665,13 @@ int main(int argc, char* argv[])
         ng::radio_button editOutline{ layoutEffects, "outline" };
         ng::radio_button editGlow{ layoutEffects, "glow" };
         ng::radio_button editShadow{ layoutEffects, "shadow" };
-        editNormal.checked([&]()
+        editNormal.evChecked([&]()
         {
             auto s = textEdit.default_style();
             s.set_text_effect(ng::optional_text_effect{});
             textEdit.set_default_style(s);
         });
-        editOutline.checked([&]()
+        editOutline.evChecked([&]()
         {
             effectWidthSlider.set_value(1);
             auto s = textEdit.default_style();
@@ -678,14 +679,14 @@ int main(int argc, char* argv[])
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_colour() });
             textEdit.set_default_style(s);
         });
-        editGlow.checked([&]()
+        editGlow.evChecked([&]()
         {
             effectWidthSlider.set_value(5);
             auto s = textEdit.default_style();
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::colour::Orange.with_lightness(0.9) });
             textEdit.set_default_style(s);
         });
-        effectWidthSlider.value_changed([&]()
+        effectWidthSlider.evValueChanged([&]()
         {
             auto s = textEdit.default_style();
             auto& textEffect = s.text_effect();
@@ -700,7 +701,7 @@ int main(int argc, char* argv[])
             textEdit.set_column(0, column);
             smallTextEdit.set_text(oss.str());
         });
-        effectAux1Slider.value_changed([&]()
+        effectAux1Slider.evValueChanged([&]()
         {
             editGlow.check();
             auto s = textEdit.default_style();
@@ -713,7 +714,7 @@ int main(int argc, char* argv[])
             oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
             smallTextEdit.set_text(oss.str());
         });
-        editShadow.checked([&]()
+        editShadow.evChecked([&]()
         {
             auto s = textEdit.default_style();
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, ng::colour::Black });
@@ -721,7 +722,7 @@ int main(int argc, char* argv[])
         });
         ng::radio_button radio1(layout4, "Radio 1");
         ng::radio_button radioSliderFont(layout4, "Slider changes\nfont size");
-        radioSliderFont.checked([&slider, &app]()
+        radioSliderFont.evChecked([&slider, &app]()
         {
             app.current_style().set_font_info(app.current_style().font_info().with_size(slider.normalized_value() * 18.0 + 4));
         });
@@ -734,7 +735,7 @@ int main(int argc, char* argv[])
             themeColour.set_hue(slider.normalized_value() * 360.0);
             ng::service<ng::i_app>().current_style().palette().set_colour(themeColour.to_rgb());
         };
-        slider.value_changed([update_theme_colour, &slider, &radioSliderFont, &radioThemeColour, &spinBox, &app]()
+        slider.evValueChanged([update_theme_colour, &slider, &radioSliderFont, &radioThemeColour, &spinBox, &app]()
         {
             spinBox.set_value(slider.value());
             if (radioSliderFont.is_checked())
@@ -743,13 +744,13 @@ int main(int argc, char* argv[])
                 update_theme_colour();
         });
         slider.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
-        radioThemeColour.checked([update_theme_colour, &slider, &app]()
+        radioThemeColour.evChecked([update_theme_colour, &slider, &app]()
         {
             slider.set_normalized_value(ng::service<ng::i_app>().current_style().palette().colour().to_hsv().hue() / 360.0);
             update_theme_colour();
         });
 
-        themeColour.clicked([&window]()
+        themeColour.evClicked([&window]()
         {
             static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
             if (sCustomColours == std::nullopt)
@@ -760,7 +761,7 @@ int main(int argc, char* argv[])
             auto oldColour = ng::service<ng::i_app>().change_style("Keypad").palette().colour();
             ng::colour_dialog colourPicker(window, ng::service<ng::i_app>().change_style("Keypad").palette().colour());
             colourPicker.set_custom_colours(*sCustomColours);
-            colourPicker.selection_changed([&]()
+            colourPicker.evSelectionChanged([&]()
             {
                 ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
             });
@@ -771,14 +772,14 @@ int main(int argc, char* argv[])
             *sCustomColours = colourPicker.custom_colours();
         });
 
-        themeFont.clicked([&window]()
+        themeFont.evClicked([&window]()
         {
             ng::font_dialog fontPicker(window, ng::service<ng::i_app>().current_style().font_info());
             if (fontPicker.exec() == ng::dialog_result::Accepted)
                 ng::service<ng::i_app>().current_style().set_font_info(fontPicker.selected_font());
         });
 
-        editColour.clicked([&]()
+        editColour.evClicked([&]()
         {
             static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
             static ng::colour sInk = ng::service<ng::i_app>().current_style().palette().text_colour();
@@ -798,7 +799,7 @@ int main(int argc, char* argv[])
         ng::vertical_spacer spacer1{ layout4 };
         ng::vertical_layout keypadLayout{ layout2 };
         ng::push_button button9(keypadLayout, "Default/Slate\nStyle");
-        button9.clicked([&app]()
+        button9.evClicked([&app]()
         {
             if (app.current_style().name() == "Default")
                 app.change_style("Slate");
@@ -867,8 +868,8 @@ int main(int argc, char* argv[])
             if (bd.first != ng::button_role::Invalid)
             {
                 auto& button = messageBoxButtonsGroup.item_layout().emplace<ng::check_box>(bd.second);
-                button.checked([&standardButtons, standardButton]() { standardButtons |= standardButton; });
-                button.unchecked([&standardButtons, standardButton]() { standardButtons &= ~standardButton; });
+                button.evChecked([&standardButtons, standardButton]() { standardButtons |= standardButton; });
+                button.evUnchecked([&standardButtons, standardButton]() { standardButtons &= ~standardButton; });
             }
             standardButton <<= 1;
         }
@@ -887,7 +888,7 @@ int main(int argc, char* argv[])
         ng::push_button openMessageBox{ messageBoxesPageLayout1, "Open Message Box" };
         openMessageBox.set_size_policy(ng::size_policy::Minimum);
         ng::label messageBoxResult{ messageBoxesPageLayout1 };
-        openMessageBox.clicked([&]()
+        openMessageBox.evClicked([&]()
         {
             ng::standard_button result;
             if (messageBoxIconInformation.is_checked())
@@ -917,7 +918,7 @@ int main(int argc, char* argv[])
         tableView1.set_minimum_size(ng::size(128, 128));
         tableView2.set_minimum_size(ng::size(128, 128));
         ng::push_button button10(layoutItemViews, "Toggle List\nHeader View");
-        button10.clicked([&tableView1, &tableView2]()
+        button10.evClicked([&tableView1, &tableView2]()
         {
             if (tableView1.column_header().visible())
                 tableView1.column_header().hide();
@@ -994,10 +995,10 @@ int main(int argc, char* argv[])
             itemModel.set_column_name(5, heading);
         };
 
-        column5ReadOnly.checked([&]() {    itemModel.set_column_read_only(5, true); update_column5_heading(); });
-        column5ReadOnly.unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
-        column5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
-        column5Unselectable.unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
+        column5ReadOnly.evChecked([&]() {    itemModel.set_column_read_only(5, true); update_column5_heading(); });
+        column5ReadOnly.evUnchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
+        column5Unselectable.evChecked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
+        column5Unselectable.evUnchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
 
         itemModel.set_column_min_value(0, 0u);
         itemModel.set_column_max_value(0, 9999u);
@@ -1020,7 +1021,7 @@ int main(int argc, char* argv[])
         ipm2.set_column_editable(3, ng::item_cell_editable::WhenFocused);
         tableView2.set_presentation_model(ipm2);
         tableView2.column_header().set_expand_last_column(true);
-        tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)
+        tableView1.evKeyboard([&tableView1](const ng::keyboard_event& ke)
         {
             if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
                 tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
@@ -1110,7 +1111,7 @@ int main(int argc, char* argv[])
             ng::colour::White
         };
         ng::font renderToTextureFont{ "Exo 2", ng::font_style::Bold, 11.0 };
-        auto test_pattern = [renderToTextureFont](ng::graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::colour& aColour, const std::string& aText)
+        auto test_pattern = [renderToTextureFont](ng::i_graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::colour& aColour, const std::string& aText)
         {
             aGc.draw_circle(aOrigin + ng::point{ 32.0, 32.0 }, 32.0, ng::pen{ aColour, aDpiScale * 2.0 });
             aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ aColour, 1.0 });
@@ -1129,7 +1130,7 @@ int main(int argc, char* argv[])
             test_pattern(texGc, ng::point{}, 1.0, texColour[i], "Render\nTo\nTexture");
         }
 
-        tabDrawing.painting([&](ng::graphics_context& aGc)
+        tabDrawing.painting([&](ng::i_graphics_context& aGc)
         {
             ng::service<ng::i_rendering_engine>().want_game_mode();
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
@@ -1181,18 +1182,18 @@ int main(int argc, char* argv[])
         ng::text_edit textEdit2(layoutEditor);
         textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
         ng::push_button editorStyle1(layoutEditor, "Style 1");
-        editorStyle1.clicked([&textEdit2]()
+        editorStyle1.evClicked([&textEdit2]()
         {
             textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
         });
         ng::push_button editorStyle2(layoutEditor, "Style 2");
-        editorStyle2.clicked([&textEdit2]()
+        editorStyle2.evClicked([&textEdit2]()
         {
             textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
         });
 
         auto& circlesWidget = tabContainer.add_tab_page("Circles").as_widget();
-        circlesWidget.painting([&circlesWidget, &random_colour](ng::graphics_context& aGc)
+        circlesWidget.painting([&circlesWidget, &random_colour](ng::i_graphics_context& aGc)
         {
             neolib::basic_random<ng::coordinate> prng;
             for (int i = 0; i < 100; ++i)

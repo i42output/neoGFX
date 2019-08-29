@@ -41,13 +41,13 @@ namespace neogfx
     void controller::add_view(i_view& aView)
     {
         iViews.push_back(std::shared_ptr<i_view>(std::shared_ptr<i_view>(), &aView));
-        view_added.trigger(aView);
+        evViewAdded.trigger(aView);
     }
 
     void controller::add_view(std::shared_ptr<i_view> aView)
     {
         iViews.push_back(aView);
-        view_added.trigger(*aView);
+        evViewAdded.trigger(*aView);
     }
 
     void controller::remove_view(i_view& aView)
@@ -56,7 +56,7 @@ namespace neogfx
         {
             if (&**v == &aView)
             {
-                view_removed.trigger(aView);
+                evViewRemoved.trigger(aView);
                 iViews.erase(v);
                 return;
             }

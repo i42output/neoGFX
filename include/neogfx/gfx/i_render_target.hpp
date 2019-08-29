@@ -30,7 +30,7 @@ namespace neogfx
     i_rendering_engine& service<i_rendering_engine>();
 
     class i_texture;
-    class i_graphics_context;
+    class i_rendering_context;
 
     enum class render_target_type
     {
@@ -41,10 +41,10 @@ namespace neogfx
     class i_render_target : public i_device_metrics
     {
     public:
-        event<> target_activating;
-        event<> target_activated;
-        event<> target_deactivating;
-        event<> target_deactivated;
+        declare_event(target_activating)
+        declare_event(target_activated)
+        declare_event(target_deactivating)
+        declare_event(target_deactivated)
     public:
         struct failed_to_create_framebuffer : std::runtime_error { failed_to_create_framebuffer(const std::string& aReason) : std::runtime_error("neogfx::i_render_target::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + aReason) {} };
         struct already_active : std::logic_error { already_active() : std::logic_error("neogfx::i_render_target::already_active") {} };
@@ -67,7 +67,7 @@ namespace neogfx
     public:
         virtual colour read_pixel(const point& aPosition) const = 0;
     public:
-        virtual std::unique_ptr<i_graphics_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0;
+        virtual std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0;
     };
 
     class scoped_render_target

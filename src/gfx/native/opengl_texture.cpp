@@ -22,7 +22,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include "opengl_error.hpp"
 #include "opengl_helpers.hpp"
-#include "opengl_graphics_context.hpp"
+#include "opengl_rendering_context.hpp"
 #include "opengl_texture.hpp"
 
 namespace neogfx
@@ -415,9 +415,9 @@ namespace neogfx
         return 0.0;
     }
 
-    std::unique_ptr<i_graphics_context> opengl_texture::create_graphics_context(blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> opengl_texture::create_graphics_context(blending_mode aBlendingMode) const
     {
-        return std::unique_ptr<i_graphics_context>(new opengl_graphics_context{ *this, aBlendingMode });
+        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
     }
 
     int32_t opengl_texture::bind(const std::optional<uint32_t>& aTextureUnit) const
@@ -499,11 +499,9 @@ namespace neogfx
         bool alreadyActive = target_active();
         if (!alreadyActive)
         {
-            target_activating.trigger();
+            evTargetActivating.trigger();
             service<i_rendering_engine>().activate_context(*this);
         }
-        //        else
-//            throw already_active();
         bind(10);
         if (iFrameBuffer == 0)
         {
@@ -557,7 +555,7 @@ namespace neogfx
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT1 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         if (!alreadyActive)
-            target_activated.trigger();
+            evTargetActivated.trigger();
     }
 
     bool opengl_texture::target_active() const
@@ -569,9 +567,9 @@ namespace neogfx
     {
         if (target_active())
         {
-            target_deactivating.trigger();
+            evTargetDeactivating.trigger();
             service<i_rendering_engine>().deactivate_context();
-            target_deactivated.trigger();
+            evTargetDeactivated.trigger();
             return;
         }
         throw not_active();

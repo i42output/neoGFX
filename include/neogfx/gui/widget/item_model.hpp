@@ -26,9 +26,9 @@
 #include <neolib/vecarray.hpp>
 #include <neolib/segmented_array.hpp>
 #include <neolib/observable.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
-#include "i_item_model.hpp"
-#include "i_basic_item_model.hpp"
+#include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gui/widget/i_item_model.hpp>
+#include <neogfx/gui/widget/i_basic_item_model.hpp>
 
 namespace neogfx
 {

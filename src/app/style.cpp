@@ -31,7 +31,7 @@ namespace neogfx
         iSpacing(2.0, 2.0),
         iFontInfo(service<i_font_manager>().default_system_font_info())
     {
-        iPalette.changed([this]() { handle_change(style_aspect::Colour); });
+        iPalette.evChanged([this]() { handle_change(style_aspect::Colour); });
     }
 
     style::style(const std::string& aName, const i_style& aOther) :
@@ -41,7 +41,7 @@ namespace neogfx
         iPalette(aOther.palette()),
         iFontInfo(aOther.font_info())
     {
-        iPalette.changed([this]() { handle_change(style_aspect::Colour); });
+        iPalette.evChanged([this]() { handle_change(style_aspect::Colour); });
     }
 
     style::style(const i_style& aOther) :
@@ -51,7 +51,7 @@ namespace neogfx
         iPalette(aOther.palette()),
         iFontInfo(aOther.font_info())
     {
-        iPalette.changed([this]() { handle_change(style_aspect::Colour); });
+        iPalette.evChanged([this]() { handle_change(style_aspect::Colour); });
     }
 
     style::style(const style& aOther) :
@@ -169,10 +169,10 @@ namespace neogfx
 
     void style::handle_change(style_aspect aAspect)
     {
-        changed.trigger(aAspect);
+        evChanged.trigger(aAspect);
         if (&service<i_app>().current_style() == this)
         {
-            service<i_app>().current_style_changed.trigger(aAspect);
+            service<i_app>().current_style_changed().trigger(aAspect);
             service<i_surface_manager>().layout_surfaces();
         }
     }

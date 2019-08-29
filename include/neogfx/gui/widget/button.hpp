@@ -32,17 +32,17 @@ namespace neogfx
     class button : public widget, public virtual i_button, protected i_mnemonic
     {
     public:
-        event<> pressed;
-        event<> clicked;
-        event<> async_clicked;
-        event<> double_clicked;
-        event<> right_clicked;
-        event<> released;
+        define_declared_event(Pressed, pressed)
+        define_declared_event(Clicked, clicked)
+        define_declared_event(AsyncClicked, async_clicked)
+        define_declared_event(DoubleClicked, double_clicked)
+        define_declared_event(RightClicked, right_clicked)
+        define_declared_event(Released, released)
     public:
-        event<> toggled;
-        event<> checked;
-        event<> unchecked;
-        event<> indeterminate;
+        define_declared_event(Toggled, toggled)
+        define_declared_event(Checked, checked)
+        define_declared_event(Unchecked, unchecked)
+        define_declared_event(Indeterminate, indeterminate)
     public:
         struct not_tri_state_checkable : public std::logic_error { not_tri_state_checkable() : std::logic_error("neogfx::button::not_tri_state_checkable") {} };
         // button

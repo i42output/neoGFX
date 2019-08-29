@@ -45,8 +45,8 @@ namespace neogfx
         struct help_not_active : std::logic_error { help_not_active() : std::logic_error("neogfx::i_help::help_not_active") {} };
         struct invalid_help_source : std::logic_error { invalid_help_source() : std::logic_error("neogfx::i_help::invalid_help_source") {} };
     public:
-        event<const i_help_source&> help_activated;
-        event<const i_help_source&> help_deactivated;
+        declare_event(help_activated, const i_help_source&)
+        declare_event(help_deactivated, const i_help_source&)
     public:
         virtual ~i_help() {}
     public:

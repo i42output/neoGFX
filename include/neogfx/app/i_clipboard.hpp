@@ -48,11 +48,11 @@ namespace neogfx
     class i_clipboard
     {
     public:
+        declare_event(sink_activated)
+        declare_event(sink_deactivated)
+    public:
         struct no_active_sink : std::logic_error { no_active_sink() : std::logic_error("neogfx::i_clipboard::no_active_sink") {} };
         struct sink_not_active : std::logic_error { sink_not_active() : std::logic_error("neogfx::i_clipboard::sink_not_active") {} };
-    public:
-        event<> sink_activated;
-        event<> sink_deactivated;
     public:
         virtual bool sink_active() const = 0;
         virtual i_clipboard_sink& active_sink() = 0;

@@ -52,7 +52,7 @@ namespace neogfx
             update_appearance();
         }
     protected:
-        void paint(graphics_context& aGraphicsContext) const
+        void paint(i_graphics_context& aGraphicsContext) const
         {
             scoped_units su{ *this, aGraphicsContext, units::Pixels };
             if (entered())
@@ -231,7 +231,7 @@ namespace neogfx
             if (aClosable)
             {
                 iCloseButton = std::make_unique<close_button>(*this);
-                iCloseButton->clicked([this]()
+                iCloseButton->evClicked([this]()
                 {
                     iContainer.remove_tab(iContainer.index_of(*this));
                 });
@@ -395,9 +395,9 @@ namespace neogfx
             iSelectedState = aSelectedState;
             update();
             if (is_selected())
-                selected.trigger();
+                evSelected.trigger();
             else if (is_deselected())
-                deselected.trigger();
+                evDeselected.trigger();
         }
     }
 

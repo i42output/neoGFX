@@ -32,7 +32,7 @@ namespace neogfx
     class i_surface_manager;
     class i_native_surface;
     class i_native_window;
-    class i_graphics_context;
+    class i_rendering_context;
     class i_font_manager;
     class i_texture_manager;
     class i_render_target;
@@ -61,7 +61,7 @@ namespace neogfx
     class i_rendering_engine
     {
     public:
-        event<> subpixel_rendering_changed;
+        declare_event(subpixel_rendering_changed)
     public:
         typedef void* opengl_context;
         class i_shader_program
@@ -72,10 +72,10 @@ namespace neogfx
             virtual void* handle() const = 0;
             virtual bool has_projection_matrix() const = 0;
             virtual const optional_mat44& projection_matrix() const = 0;
-            virtual void set_projection_matrix(const i_graphics_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
+            virtual void set_projection_matrix(const i_rendering_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
             virtual bool has_transformation_matrix() const = 0;
             virtual const optional_mat44& transformation_matrix() const = 0;
-            virtual void set_transformation_matrix(const i_graphics_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
+            virtual void set_transformation_matrix(const i_rendering_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
             virtual void* variable(const std::string& aVariableName) const = 0;
             virtual void set_uniform_variable(const std::string& aName, float aValue) = 0;
             virtual void set_uniform_variable(const std::string& aName, double aValue) = 0;
@@ -121,7 +121,7 @@ namespace neogfx
         virtual i_font_manager& font_manager() = 0;
         virtual i_texture_manager& texture_manager() = 0;
         virtual bool shader_program_active() const = 0;
-        virtual void activate_shader_program(i_graphics_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) = 0;
+        virtual void activate_shader_program(i_rendering_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) = 0;
         virtual void deactivate_shader_program() = 0;
     public:
         virtual const i_shader_program& active_shader_program() const = 0;

@@ -29,8 +29,8 @@ namespace neogfx
     class i_menu_item
     {
     public:
-        event<> selected;
-        event<> deselected;
+        declare_event(selected)
+        declare_event(deselected)
     public:
         enum type_e
         {

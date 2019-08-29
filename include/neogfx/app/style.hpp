@@ -28,6 +28,8 @@ namespace neogfx
     class style : public i_style
     {
     public:
+        define_declared_event(Changed, changed, style_aspect)
+    public:
         style(const std::string& aName);
         style(const std::string& aName, const i_style& aOther);
         style(const i_style& aOther);

@@ -49,7 +49,7 @@ namespace neogfx
     class text_widget : public widget
     {
     public:
-        event<> text_changed;
+        define_event(TextChanged)
     public:
         text_widget(const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
         text_widget(i_widget& aParent, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
@@ -59,7 +59,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     public:
-        void paint(graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     public:
         void set_font(const optional_font& aFont) override;
     public:

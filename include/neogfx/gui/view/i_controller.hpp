@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
+#include <neogfx/core/i_event.hpp>
 
 namespace neogfx
 {
@@ -32,8 +32,8 @@ namespace neogfx
     class i_controller
     {
     public:
-        event<i_view&> view_added;
-        event<i_view&> view_removed;
+        declare_event(view_added, i_view&)
+        declare_event(view_removed, i_view&)
     public:
         struct view_not_found : std::logic_error { view_not_found() : std::logic_error("neogfx::i_controller::view_not_found") {} };
     public:

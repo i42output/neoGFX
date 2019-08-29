@@ -28,6 +28,9 @@ namespace neogfx
 
     class menu_item : public i_menu_item
     {
+    public:
+        define_declared_event(Selected, selected)
+        define_declared_event(Deselected, deselected)
     private:
         typedef std::shared_ptr<i_action> action_pointer;
         typedef std::shared_ptr<i_menu> menu_pointer;

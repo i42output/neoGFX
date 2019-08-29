@@ -29,7 +29,7 @@ namespace neogfx
     class i_palette
     {
     public:
-        event<> changed;
+        declare_event(changed)
     public:
         virtual ~i_palette() {}
     public:

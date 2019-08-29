@@ -29,8 +29,8 @@ namespace neogfx
     class i_view
     {
     public:
-        event<> activated;
-        event<> deactivated;
+        declare_event(activated)
+        declare_event(deactivated)
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;

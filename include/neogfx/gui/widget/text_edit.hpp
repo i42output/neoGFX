@@ -36,9 +36,9 @@ namespace neogfx
     class text_edit : public scrollable_widget, public i_clipboard_sink, public i_text_document
     {
     public:
-        event<const std::string&, bool&> text_filter;
-        event<> text_changed;
-        event<> default_style_changed;
+        define_event(TextFilter, const std::string&, bool&)
+        define_event(TextChanged)
+        define_event(DefaultStyleChanged)
     public:
         enum type_e
         {
@@ -435,7 +435,7 @@ namespace neogfx
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     public:
-        void paint(graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     public:
         const neogfx::font& font() const override;
     public:
@@ -561,8 +561,8 @@ namespace neogfx
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
         style glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const;
-        void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
-        void draw_cursor(const graphics_context& aGraphicsContext) const;
+        void draw_glyphs(const i_graphics_context& aGraphicsContext, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
+        void draw_cursor(const i_graphics_context& aGraphicsContext) const;
         rect cursor_rect() const;
         static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
     private:

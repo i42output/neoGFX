@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/i_event.hpp>
 
 namespace neogfx
 {
@@ -28,7 +29,7 @@ namespace neogfx
     class i_model
     {
     public:
-        event<> modified;
+        declare_event(modified)
     public:
         virtual bool dirty() const = 0;
         virtual bool controller_registered(i_controller& aController) = 0;

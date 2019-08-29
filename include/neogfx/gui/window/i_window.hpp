@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
 #include <neogfx/gui/layout/layout_bits.hpp>
@@ -38,12 +39,14 @@ namespace neogfx
 
     class i_window
     {
+    public:
+        declare_event(window_event, neogfx::window_event&)
+        declare_event(dismissing_children, const i_widget*)
+        declare_event(closed)
+        declare_event(paint_overlay, i_graphics_context&)
+    private:
         friend class window;
         friend class surface_window_proxy;
-    public:
-        event<window_event&> window_event;
-        event<const i_widget*> dismissing_children;
-        event<> closed;
     public:
         enum dismissal_type_e
         {
