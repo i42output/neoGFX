@@ -41,7 +41,7 @@ namespace neogfx
             return std::unique_ptr<i_event_callback>{ do_clone() };
         }
     public:
-        virtual void operator()(Arguments&& ... aArguments) const = 0;
+        virtual void operator()(Arguments... aArguments) const = 0;
     private:
         virtual i_event_callback* do_clone() const = 0;
     };
@@ -54,9 +54,9 @@ namespace neogfx
     public:
         using base::base;
     public:
-        void operator()(Arguments&& ... aArguments) const override
+        void operator()(Arguments... aArguments) const override
         {
-            base::operator()(std::forward<Arguments>(aArguments)...);
+            base::operator()(aArguments...);
         }
     private:
         i_event_callback* do_clone() const override

@@ -55,6 +55,9 @@
     <ClInclude Include="x64\Release\GeneratedFiles\test.ui.hpp">
       <Filter>GeneratedFiles</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Debug\GeneratedFiles\test.ui.hpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="test.rc">

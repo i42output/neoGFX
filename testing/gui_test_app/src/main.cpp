@@ -468,10 +468,10 @@ int main(int argc, char* argv[])
         ng::horizontal_layout editLayout(layoutButtons);
         ng::text_edit textEdit(editLayout);
         buttonGenerateUuid.evClicked([&]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
-        dropList.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList2.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList3.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList4.evSelectionChanged([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList.evSelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList2.evSelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList3.evSelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList4.evSelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
         textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
         textEdit.set_tab_stop_hint("00000000");
         ng::slider effectWidthSlider{ editLayout, ng::slider::Vertical };

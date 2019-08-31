@@ -100,7 +100,7 @@ namespace neogfx
         }
         void async_trigger(Arguments... aArguments) const override
         {
-            base::async_trigger(aArguments...);
+            base::async_trigger(static_cast<Arguments>(aArguments)...);
         }
         void accept() const override
         {
