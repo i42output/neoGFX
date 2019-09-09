@@ -273,3 +273,8 @@ Debug
 /tools/DesignStudio/DesignStudio.vcxproj.user
 /examples/games/video_poker/src/resources/win32/video_poker.aps
 /tools/DesignStudio/build/win32/vs2019/DesignStudio.vcxproj.user
+/testing/gui_test_app/build/win32/vs2019/x64
+/testing/gui_test_app/build/win32/vs2019/obj
+/testing/gui_test_app/build/win32/vs2019/test.tlog
+/3rdparty/SDL/SDL2-2.0.9/cmake/CMakeCache.txt
+/3rdparty/SDL/SDL2-2.0.9/cmake/CMakeFiles/cmake.check_cache

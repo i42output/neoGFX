@@ -21,17 +21,17 @@
     <ClCompile Include="..\..\..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Release\GeneratedFiles\video_poker.nrc.cpp">
-      <Filter>GeneratedFiles</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\GeneratedFiles\video_poker.nrc.cpp">
-      <Filter>GeneratedFiles</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\table.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\card_space.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\video_poker.nrc.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\video_poker.nrc.cpp">
+      <Filter>GeneratedFiles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
