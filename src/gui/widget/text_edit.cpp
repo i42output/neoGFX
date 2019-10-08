@@ -821,7 +821,10 @@ namespace neogfx
             {
                 auto currentPosition = glyph_position(cursor_glyph_position());
                 if (currentPosition.line != currentPosition.column->lines().begin())
-                    cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, (currentPosition.line - 1)->ypos }, false)).first, aMoveAnchor);
+                {
+                    auto const columnRectSansMargins = column_rect(column_index(*currentPosition.column));
+                    cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, std::prev(currentPosition.line)->ypos } +columnRectSansMargins.top_left(), false)).first, aMoveAnchor);
+                }
             }
             break;
         case cursor::Down:
@@ -829,8 +832,9 @@ namespace neogfx
                 auto currentPosition = glyph_position(cursor_glyph_position());
                 if (currentPosition.line != currentPosition.column->lines().end())
                 {
-                    if (currentPosition.line + 1 != currentPosition.column->lines().end())
-                        cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, (currentPosition.line + 1)->ypos }, false)).first, aMoveAnchor);
+                    auto const columnRectSansMargins = column_rect(column_index(*currentPosition.column));
+                    if (std::next(currentPosition.line) != currentPosition.column->lines().end())
+                        cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, std::next(currentPosition.line)->ypos } + columnRectSansMargins.top_left(), false)).first, aMoveAnchor);
                     else if (currentPosition.lineEnd != iGlyphs.end() && currentPosition.lineEnd->is_line_breaking_whitespace())
                         cursor().set_position(iText.size(), aMoveAnchor);
                 }

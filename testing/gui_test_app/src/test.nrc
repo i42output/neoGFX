@@ -205,6 +205,14 @@
                                         size_policy: Expanding
                                         foreground_colour: LightGoldenrodYellow
                                     }
+                                    push_button: {
+                                        id: button1
+                                        text: "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement."
+                                    }
+                                    push_button: {
+                                        id: buttonGenerateUuid
+                                        text: "&Generate UUID"
+                                    }
                                 }
                             }
                         }
