@@ -119,6 +119,6 @@ namespace neogfx
     public:
         virtual bool process_events() = 0;
         virtual bool process_events(i_event_processing_context& aContext) = 0;
-        virtual i_event_processing_context& app_message_queue_context() = 0;
+        virtual i_event_processing_context& event_processing_context() = 0;
     };
 }

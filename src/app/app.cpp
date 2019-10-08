@@ -206,7 +206,6 @@ namespace neogfx
             }
         }, 100 },
         iAppContext{ *this, "neogfx::app::iAppContext" },
-        iAppMessageQueueContext{ *this, "neogfx::app::iAppMessageQueueContext" },
         actionFileNew{ action{"&New..."_t, ":/neogfx/resources/icons.naa#new.png"}.set_shortcut("Ctrl+Shift+N") },
         actionFileOpen{ action{"&Open..."_t, ":/neogfx/resources/icons.naa#open.png"}.set_shortcut("Ctrl+Shift+O") },
         actionFileClose{ action{"&Close"_t}.set_shortcut("Ctrl+F4") },
@@ -617,7 +616,7 @@ namespace neogfx
 
     bool app::process_events()
     {
-        event_processing_context epc{ *this };
+        neogfx::event_processing_context epc{ *this };
         return process_events(epc);
     }
 
@@ -671,9 +670,9 @@ namespace neogfx
         return didSome;
     }
 
-    i_event_processing_context& app::app_message_queue_context()
+    i_event_processing_context& app::event_processing_context()
     {
-        return iAppMessageQueueContext;
+        return iAppContext;
     }
 
     bool app::do_process_events()

@@ -132,7 +132,7 @@ namespace neogfx
     public:
         bool process_events() override;
         bool process_events(i_event_processing_context& aContext) override;
-        i_event_processing_context& app_message_queue_context() override;
+        i_event_processing_context& event_processing_context() override;
     private:
         bool do_process_events();
     private:
@@ -154,8 +154,7 @@ namespace neogfx
         action_list iActions;
         neolib::callback_timer iStandardActionManager;
         mnemonic_list iMnemonics;
-        event_processing_context iAppContext;
-        event_processing_context iAppMessageQueueContext;
+        neogfx::event_processing_context iAppContext;
         std::vector<std::pair<key_code_e, key_modifiers_e>> iKeySequence;
         mutable std::unique_ptr<i_help> iHelp;
         // standard actions

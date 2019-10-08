@@ -29,11 +29,12 @@ namespace neogfx
     class event_processing_context : public i_event_processing_context
     {
     public:
+        struct currently_idle : std::logic_error { currently_idle() : std::logic_error("neogfx::event_processing_context::currently_idle") {} };
+    public:
         event_processing_context(neolib::async_task& aParent, const std::string& aName = std::string{});
     public:
         virtual const std::string& name() const;
     private:
-        neolib::message_queue::scoped_context iContext;
         std::string iName;
     };
 }
