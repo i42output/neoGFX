@@ -70,7 +70,7 @@ namespace neogfx
     {
         size result = widget::minimum_size();
         if (menu_item().type() == i_menu_item::Action && menu_item().action().is_separator())
-            result.cy = units_converter(*this).from_device_units(dpi_scale(3.0));
+            result.cy = units_converter(*this).from_device_units(3.0_spx);
         return result;
     }
 
@@ -158,10 +158,10 @@ namespace neogfx
         }
         else
         {
-            scoped_units su(*this, aGraphicsContext, units::Pixels);
+            scoped_units su{ *this, units::Pixels };
             rect line = client_rect(false);
-            line.y += dpi_scale(1.0);
-            line.cy = dpi_scale(1.0);
+            line.y += 1.0_spx;
+            line.cy = 1.0_spx;
             line.x += dpi_scale(iGap);
             line.cx -= dpi_scale(iGap * 2.0);
             colour ink = colour::Black;

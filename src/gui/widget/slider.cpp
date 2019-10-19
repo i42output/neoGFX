@@ -54,8 +54,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        return convert_units(*this, su.saved_units(), dpi_scale(iType == Horizontal ? size{ 96, 22 } : size{ 22, 96 }));
+        return iType == Horizontal ? size{ 96_spx, 22_spx } : size{ 22_spx, 96_spx };
     }
 
     void slider_impl::paint(i_graphics_context& aGraphicsContext) const

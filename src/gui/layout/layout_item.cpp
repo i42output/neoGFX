@@ -201,16 +201,6 @@ namespace neogfx
         return parent_layout().device_metrics();
     }
 
-    neogfx::units layout_item::units() const
-    {
-        return parent_layout().units();
-    }
-
-    neogfx::units layout_item::set_units(neogfx::units aUnits) const
-    {
-        return parent_layout().set_units(aUnits);
-    }
-
     point layout_item::position() const
     {
         return subject().position();

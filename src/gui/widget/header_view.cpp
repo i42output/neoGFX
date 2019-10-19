@@ -265,10 +265,7 @@ namespace neogfx
         else if (has_presentation_model())
             return presentation_model().cell_spacing(*this).cx;
         else
-        {
-            dimension millimetre = as_units(*this, units::Millimetres, 1.0);
-            return units_converter(*this).from_device_units(std::ceil(units_converter(*this).to_device_units(millimetre)));
-        }
+            return rasterize(1.0_mm);
     }
 
     void header_view::set_separator_width(const optional_dimension& aWidth)
@@ -459,7 +456,7 @@ namespace neogfx
         bool updated = false;
         graphics_context gc{ *this, graphics_context::type::Unattached };
         for (uint32_t col = 0; col < presentation_model().columns(); ++col)
-            updated = update_section_width(col, iSectionWidths[col].max, gc) || updated;
+            updated = update_section_width(col, size{ iSectionWidths[col].max }, gc) || updated;
         if (updated)
             layout_items();
         iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
@@ -483,9 +480,9 @@ namespace neogfx
         if (section_width(aColumn) != oldSectionWidth || layout().get_widget_at(aColumn).minimum_size().cx != section_width(aColumn, true))
         {
             if (!expand_last_column() || aColumn != presentation_model().columns() - 1)
-                layout().get_widget_at(aColumn).set_minimum_size(size(std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy));
+                layout().get_widget_at(aColumn).set_minimum_size(size{ std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy });
             else
-                layout().get_widget_at(aColumn).set_minimum_size(size(std::max(iSectionWidths[aColumn].calculated, layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy));
+                layout().get_widget_at(aColumn).set_minimum_size(size{ std::max(iSectionWidths[aColumn].calculated, layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy });
             return true;
         }
         return false;

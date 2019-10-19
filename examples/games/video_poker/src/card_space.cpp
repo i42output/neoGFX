@@ -42,16 +42,12 @@ namespace video_poker
 
     neogfx::size card_widget::minimum_size(const neogfx::optional_size& aAvailableSpace) const
     {
-        neogfx::scoped_units su(*this, neogfx::units::Millimetres);
-        auto minSize = convert_units(*this, neogfx::units::Pixels, kBridgeCardSize * 0.5);
-        su.restore_saved_units();
-        minSize = neogfx::units_converter(*this).from_device_units(minSize);
-        return minSize.ceil();
+        return rasterize(neogfx::from_mm(kBridgeCardSize * 0.5));
     }
 
     neogfx::size card_widget::maximum_size(const neogfx::optional_size& aAvailableSpace) const
     {
-        return (minimum_size(aAvailableSpace) * 2.0).ceil();
+        return rasterize(minimum_size(aAvailableSpace) * 2.0);
     }
         
     void card_widget::paint(neogfx::i_graphics_context& aGraphicsContext) const

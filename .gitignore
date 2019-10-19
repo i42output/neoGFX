@@ -278,3 +278,15 @@ Debug
 /testing/gui_test_app/build/win32/vs2019/test.tlog
 /3rdparty/SDL/SDL2-2.0.9/cmake/CMakeCache.txt
 /3rdparty/SDL/SDL2-2.0.9/cmake/CMakeFiles/cmake.check_cache
+/examples/games/video_poker/build/win32/vs2019/video_poker.tlog
+/examples/games/video_poker/build/win32/vs2019/*.obj
+/examples/games/video_poker/build/win32/vs2019/*.pdb
+/examples/games/video_poker/build/win32/vs2019/video_poker.Build.CppClean.log
+/examples/games/video_poker/build/win32/vs2019/video_poker.log
+/examples/games/video_poker/build/win32/vs2019/video_poker.res
+/testing/gui_test_app/build/win32/vs2019/*.obj
+/testing/gui_test_app/build/win32/vs2019/*.pdb
+/testing/gui_test_app/build/win32/vs2019/test.Build.CppClean.log
+/testing/gui_test_app/build/win32/vs2019/test.aps
+/testing/gui_test_app/build/win32/vs2019/test.log
+/testing/gui_test_app/build/win32/vs2019/test.res

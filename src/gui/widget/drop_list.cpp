@@ -275,7 +275,7 @@ namespace neogfx
         auto idealSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea + iView.margins().size();
         idealSize.cy = std::min(idealSize.cy, iDropList.root().as_widget().extents().cy / 2.0);
         if (idealSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
-            idealSize.cx += vertical_scrollbar().width(*this);
+            idealSize.cx += vertical_scrollbar().width();
         return idealSize.max(iDropList.minimum_size());
     }
 
@@ -917,7 +917,7 @@ namespace neogfx
             graphics_context gc{ *this, graphics_context::type::Unattached };
             modelWidth = presentation_model().column_width(0, gc, false);
             if (list_always_visible())
-                modelWidth += view().vertical_scrollbar().width(*this);
+                modelWidth += view().vertical_scrollbar().width();
         }
         minimumSize.cx += modelWidth;
         return minimumSize;
@@ -994,11 +994,9 @@ namespace neogfx
             auto& inputLabelLayout = inputWidget.label().layout();
             inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
             auto& s1 = inputWidget.layout().add_spacer();
-            scoped_units su1{ s1, inputLabelLayout, units::Pixels };
             s1.set_minimum_width(inputLabelLayout.spacing().cx);
             inputWidget.layout().add(iDownArrow);
             auto& s2 = inputWidget.layout().add_spacer();
-            scoped_units su2{ s2, inputLabelLayout, units::Pixels };
             s2.set_fixed_size(size{ inputLabelLayout.spacing().cx, 0.0 });
 
             changed = true;

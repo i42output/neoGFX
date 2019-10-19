@@ -34,10 +34,8 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        dimension length = std::ceil(units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text().font().height() * (2.0 / 3.0)));
-        length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.5)));
-        return convert_units(*this, su.saved_units(), size(length, length));
+        dimension const length = std::ceil(units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text().font().height() * (2.0 / 3.0)));
+        return rasterize(size{ std::max<dimension>(length, 3.5_mm) });
     }
 
     size check_box::box::maximum_size(const optional_size& aAvailableSpace) const

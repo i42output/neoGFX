@@ -625,16 +625,6 @@ namespace neogfx
         return scrollable_widget::device_metrics();
     }
 
-    units window::units() const
-    {
-        return scrollable_widget::units();
-    }
-
-    units window::set_units(neogfx::units aUnits) const
-    {
-        return scrollable_widget::set_units(aUnits);
-    }
-
     void window::resized()
     {
         window_manager().resize_window(*this, widget::extents());
@@ -681,8 +671,8 @@ namespace neogfx
             else
             {
                 rect shadowRect = to_client_coordinates(non_client_rect());
-                shadowRect.position() += dpi_scale(point{ 4.0, 4.0 });
-                aGraphicsContext.fill_rounded_rect(shadowRect, dpi_scale(point{ 4.0, 4.0 }).x, colour::Yellow);
+                shadowRect.position() += point{ 4.0_spx, 4.0_spx };
+                aGraphicsContext.fill_rounded_rect(shadowRect, 4.0_spx, colour::Yellow);
             }
         }
         scrollable_widget::render(aGraphicsContext);

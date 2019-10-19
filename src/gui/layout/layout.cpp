@@ -41,7 +41,6 @@ namespace neogfx
     layout::layout(neogfx::alignment aAlignment) :
         iParent{ nullptr },
         iOwner{ nullptr },
-        iUnitsContext{ *this },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iEnabled{ false },
@@ -57,7 +56,6 @@ namespace neogfx
     layout::layout(i_widget& aOwner, neogfx::alignment aAlignment) :
         iParent{ nullptr },
         iOwner{ &aOwner },
-        iUnitsContext{ *this },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iEnabled{ false },
@@ -74,7 +72,6 @@ namespace neogfx
     layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
         iParent{ nullptr },
         iOwner{ aParent.has_layout_owner() ? &aParent.layout_owner() : nullptr },
-        iUnitsContext{ *this },
         iMargins{ neogfx::margins{} },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
@@ -580,7 +577,7 @@ namespace neogfx
         if (has_weight())
             return *iWeight;
         else
-            return 1.0;
+            return size{ 1.0 };
     }
 
     void layout::set_weight(const optional_size& aWeight, bool aUpdateLayout)
@@ -650,16 +647,6 @@ namespace neogfx
         if (device_metrics_available())
             return layout_owner().device_metrics();
         throw no_device_metrics();
-    }
-
-    units layout::units() const
-    {
-        return iUnitsContext.units();
-    }
-
-    units layout::set_units(neogfx::units aUnits) const
-    {
-        return iUnitsContext.set_units(aUnits);
     }
 
     layout::item_list::const_iterator layout::cbegin() const

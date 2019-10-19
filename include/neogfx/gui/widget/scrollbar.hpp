@@ -48,13 +48,13 @@ namespace neogfx
         value_type page() const override;
         void set_page(value_type aPage) override;
     public:
-        dimension width(const i_units_context& aContext) const override;
+        dimension width() const override;
         void render(i_graphics_context& aGraphicsContext) const override;
     public:
-        rect element_geometry(const i_units_context& aContext, element_e aElement) const override;
-        element_e element_at(const i_units_context& aContext, const point& aPosition) const override;
+        rect element_geometry(element_e aElement) const override;
+        element_e element_at(const point& aPosition) const override;
     public:
-        void update(const i_units_context& aContext, const update_params_t& aUpdateParams = update_params_t()) override;
+        void update(const update_params_t& aUpdateParams = update_params_t()) override;
         element_e clicked_element() const override;
         void click_element(element_e aElement) override;
         void unclick_element() override;
@@ -65,7 +65,7 @@ namespace neogfx
         void track() override;
         void untrack() override;
     public:
-        static dimension width(scrollbar_style aStyle, const i_units_context& aContext);
+        static dimension width(scrollbar_style aStyle);
     private:
         i_scrollbar_container& iContainer;
         scrollbar_type iType;

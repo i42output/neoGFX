@@ -24,7 +24,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/variant.hpp>
 #include <neolib/lifetime.hpp>
-#include <neogfx/core/units_context.hpp>
+#include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
 
@@ -145,8 +145,6 @@ namespace neogfx
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
-        neogfx::units units() const override;
-        neogfx::units set_units(neogfx::units aUnits) const override;
     public:
         void layout_as(const point& aPosition, const size& aSize);
         uint32_t layout_id() const override;
@@ -179,7 +177,6 @@ namespace neogfx
     private:
         i_layout* iParent;
         mutable i_widget* iOwner;
-        units_context iUnitsContext;
         optional_margins iMargins;
         optional_size iSpacing;
         bool iAlwaysUseSpacing;

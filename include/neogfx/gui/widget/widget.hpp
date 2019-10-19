@@ -104,8 +104,6 @@ namespace neogfx
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
-        neogfx::units units() const override;
-        neogfx::units set_units(neogfx::units aUnits) const override;
         // i_geometry
     public:
         point position() const override;
@@ -266,7 +264,6 @@ namespace neogfx
         std::shared_ptr<i_layout> iLayout;
         class layout_timer;
         std::unique_ptr<layout_timer> iLayoutTimer;
-        units_context iUnitsContext;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         // properties
     public:

@@ -613,7 +613,7 @@ namespace neogfx
         {
             glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
             path innerPath = aPath;
-            innerPath.deflate(aPathOutline);
+            innerPath.deflate(delta{ aPathOutline });
             for (std::size_t i = 0; i < innerPath.paths().size(); ++i)
             {
                 if (innerPath.paths()[i].size() > 2)

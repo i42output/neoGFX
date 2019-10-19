@@ -85,15 +85,12 @@ namespace neogfx
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
-        neogfx::units units() const override;
-        neogfx::units set_units(neogfx::units aUnits) const override;
     public:
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
         bool visible() const override;
     private:
         i_layout* iParentLayout;
-        units_context iUnitsContext;
         point iPosition;
         size iExtents;
         optional_size_policy iSizePolicy;

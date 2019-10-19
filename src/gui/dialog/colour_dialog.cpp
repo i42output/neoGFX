@@ -36,10 +36,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return framed_widget::minimum_size(aAvailableSpace);
-        scoped_units su(*this, units::Millimetres);
-        auto result = convert_units(*this, units::Pixels, framed_widget::minimum_size(aAvailableSpace) + size{ 4, 3.5 }).ceil();
-        su.restore_saved_units();
-        return units_converter(*this).from_device_units(result);
+        return rasterize(framed_widget::minimum_size(aAvailableSpace) + size{ 4_mm, 3.5_mm });
     }
 
     size colour_dialog::colour_box::maximum_size(const optional_size& aAvailableSpace) const
@@ -56,20 +53,20 @@ namespace neogfx
         if (fillColour != std::nullopt)
         {
             if (fillColour->alpha() != 0xFF)
-                draw_alpha_background(aGraphicsContext, client_rect(false), dpi_scale(2.0));
+                draw_alpha_background(aGraphicsContext, client_rect(false), 2.0_spx);
             aGraphicsContext.fill_rect(client_rect(false), *fillColour);
         }
         else
         {
             aGraphicsContext.fill_rect(client_rect(false), colour::White);
-            aGraphicsContext.draw_line(client_rect(false).top_left(), client_rect(false).bottom_right(), pen{ colour::Black, dpi_scale(2.0) });
-            aGraphicsContext.draw_line(client_rect(false).top_right(), client_rect(false).bottom_left(), pen{ colour::Black, dpi_scale(2.0) });
+            aGraphicsContext.draw_line(client_rect(false).top_left(), client_rect(false).bottom_right(), pen{ colour::Black, 2.0_spx });
+            aGraphicsContext.draw_line(client_rect(false).top_right(), client_rect(false).bottom_left(), pen{ colour::Black, 2.0_spx });
         }
         if (iCustomColour != std::nullopt && iOwner.current_custom_colour() == *iCustomColour)
         {
             auto radius = client_rect(false).width() * 0.5 * 0.666;
             aGraphicsContext.fill_circle(client_rect(false).centre(), radius, colour::White);
-            aGraphicsContext.fill_circle(client_rect(false).centre(), radius - dpi_scale(1.0), colour::Black);
+            aGraphicsContext.fill_circle(client_rect(false).centre(), radius - 1.0_spx, colour::Black);
         }
     }
 
@@ -251,10 +248,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return framed_widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        size result = framed_widget::minimum_size(aAvailableSpace);
-        result += dpi_scale(size{ 32, 256 });
-        return result;
+        return framed_widget::minimum_size(aAvailableSpace) + size{ 32_spx, 256_spx };
     }
 
     size colour_dialog::x_picker::maximum_size(const optional_size& aAvailableSpace) const
@@ -478,10 +472,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return framed_widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        size result = framed_widget::minimum_size(aAvailableSpace);
-        result += dpi_scale(size{ 256, 256 });
-        return result;
+        return framed_widget::minimum_size(aAvailableSpace) + size{ 256_spx, 256_spx };
     }
 
     size colour_dialog::yz_picker::maximum_size(const optional_size& aAvailableSpace) const
@@ -512,8 +503,8 @@ namespace neogfx
             }
             iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
         }
-        aGraphicsContext.draw_texture(rect{ cr.top_left(), dpi_scale(size{256.0, 256.0}) }, iTexture);
-        point cursor = dpi_scale(current_cursor_position());
+        aGraphicsContext.draw_texture(rect{ cr.top_left(), size{ 256.0_spx, 256.0_spx } }, iTexture);
+        point cursor = spx(current_cursor_position());
         aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iOwner.selected_colour());
         aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iOwner.selected_colour().light(0x80) ? colour::Black : colour::White });
     }
@@ -691,10 +682,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return framed_widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        size result = framed_widget::minimum_size(aAvailableSpace);
-        result += dpi_scale(size{ 60, 80 });
-        return result;
+        return framed_widget::minimum_size(aAvailableSpace) + size{ 60_spx, 80_spx };
     }
 
     size colour_dialog::colour_selection::maximum_size(const optional_size& aAvailableSpace) const
@@ -707,7 +695,7 @@ namespace neogfx
     void colour_dialog::colour_selection::paint(i_graphics_context& aGraphicsContext) const
     {
         framed_widget::paint(aGraphicsContext);
-        scoped_units su(*this, aGraphicsContext, units::Pixels);
+        scoped_units su{ *this, units::Pixels };
         rect cr = client_rect(false);
         draw_alpha_background(aGraphicsContext, cr);
         rect top = cr;
@@ -854,7 +842,7 @@ namespace neogfx
 
     void colour_dialog::init()
     {
-        scoped_units su(static_cast<framed_widget&>(*this), units::Pixels);
+        scoped_units su{ static_cast<framed_widget&>(*this), units::Pixels };
         static const std::set<colour> sBasicColours
         {
             colour::AliceBlue, colour::AntiqueWhite, colour::Aquamarine, colour::Azure, colour::Beige, colour::Bisque, colour::Black, colour::BlanchedAlmond, 
@@ -876,7 +864,7 @@ namespace neogfx
             colour::SlateBlue, colour::SlateGray, colour::Snow, colour::SpringGreen, colour::SteelBlue, colour::Tan, colour::Thistle, colour::Tomato, 
             colour::Turquoise, colour::Violet, colour::VioletRed, colour::Wheat, colour::White, colour::WhiteSmoke, colour::Yellow, colour::YellowGreen 
         };
-        auto standardSpacing = set_standard_layout(16.0);
+        auto standardSpacing = set_standard_layout(size{ 16.0 });
         iLayout.set_margins(neogfx::margins{});
         iLayout.set_spacing(standardSpacing);
         iLayout2.set_margins(neogfx::margins{});

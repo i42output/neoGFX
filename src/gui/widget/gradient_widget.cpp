@@ -77,7 +77,7 @@ namespace neogfx
         private:
             void init(colour::component aCurrentAlpha)
             {
-                auto standardSpacing = set_standard_layout(16.0);
+                auto standardSpacing = set_standard_layout(size{ 16.0 });
                 iLayout.set_margins(neogfx::margins{});
                 iLayout.set_spacing(standardSpacing);
                 iLayout2.set_margins(neogfx::margins{});
@@ -102,7 +102,7 @@ namespace neogfx
                 dialog::paint_non_client(aGraphicsContext);
                 rect backgroundRect{ window::client_widget().position(), window::client_widget().extents() };
                 scoped_scissor scissor(aGraphicsContext, update_rect());
-                draw_alpha_background(aGraphicsContext, backgroundRect, dpi_scale(ALPHA_PATTERN_SIZE));
+                draw_alpha_background(aGraphicsContext, backgroundRect, spx(ALPHA_PATTERN_SIZE));
                 aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
             }
         private:
@@ -177,23 +177,22 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        return convert_units(*this, su.saved_units(), size(dpi_scale(CONTROL_HEIGHT) * 3, dpi_scale(CONTROL_HEIGHT)));
+        return size{ spx(CONTROL_HEIGHT) * 3, spx(CONTROL_HEIGHT) };
     }
 
     void gradient_widget::paint(i_graphics_context& aGraphicsContext) const
     {
-        scoped_units su{ *this, aGraphicsContext, units::Pixels };
+        scoped_units su{ *this, units::Pixels };
         rect rectContents = contents_rect();
         colour frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
-        draw_alpha_background(aGraphicsContext, rectContents, dpi_scale(ALPHA_PATTERN_SIZE));
+        draw_alpha_background(aGraphicsContext, rectContents, spx(ALPHA_PATTERN_SIZE));
         neogfx::gradient selection = iSelection;
         selection.set_direction(gradient::Horizontal);
         aGraphicsContext.fill_rect(rectContents, selection);
-        rectContents.inflate(size{ dpi_scale(BORDER_THICKNESS) });
-        aGraphicsContext.draw_rect(rectContents, pen(frameColour.mid(background_colour()), dpi_scale(BORDER_THICKNESS)));
-        rectContents.inflate(size{ dpi_scale(BORDER_THICKNESS) });
-        aGraphicsContext.draw_rect(rectContents, pen(frameColour, dpi_scale(BORDER_THICKNESS)));
+        rectContents.inflate(size{ spx(BORDER_THICKNESS) });
+        aGraphicsContext.draw_rect(rectContents, pen(frameColour.mid(background_colour()), spx(BORDER_THICKNESS)));
+        rectContents.inflate(size{ spx(BORDER_THICKNESS) });
+        aGraphicsContext.draw_rect(rectContents, pen(frameColour, spx(BORDER_THICKNESS)));
         for (gradient::colour_stop_list::const_iterator i = iSelection.colour_begin(); i != iSelection.colour_end(); ++i)
             draw_colour_stop(aGraphicsContext, *i);
         for (gradient::alpha_stop_list::const_iterator i = iSelection.alpha_begin(); i != iSelection.alpha_end(); ++i)
@@ -476,11 +475,11 @@ namespace neogfx
     rect gradient_widget::contents_rect() const
     {
         rect r = client_rect(false);
-        r.move(point{ std::floor(dpi_scale(STOP_WIDTH) / 2), dpi_scale(STOP_HEIGHT) });
-        r.cx = r.width() - dpi_scale(STOP_WIDTH);
-        r.cy = dpi_scale(BAR_HEIGHT);
-        r.deflate(size{ dpi_scale(BORDER_THICKNESS) });
-        r.deflate(size{ dpi_scale(BORDER_THICKNESS) });
+        r.move(point{ std::floor(spx(STOP_WIDTH) / 2), spx(STOP_HEIGHT) });
+        r.cx = r.width() - spx(STOP_WIDTH);
+        r.cy = spx(BAR_HEIGHT);
+        r.deflate(size{ spx(BORDER_THICKNESS) });
+        r.deflate(size{ spx(BORDER_THICKNESS) });
         return r;
     }
 
@@ -509,27 +508,27 @@ namespace neogfx
     rect gradient_widget::colour_stop_rect(const neogfx::gradient::colour_stop& aColourStop) const
     {
         rect result = contents_rect();
-        result.x = result.left() + std::floor((result.width() - 1.0) * aColourStop.first) - std::floor(dpi_scale(STOP_WIDTH) / 2);
-        result.y = result.bottom() + dpi_scale(BORDER_THICKNESS + BORDER_SPACER_THICKNESS);
-        result.cx = dpi_scale(STOP_WIDTH);
-        result.cy = dpi_scale(STOP_HEIGHT);
+        result.x = result.left() + std::floor((result.width() - 1.0) * aColourStop.first) - std::floor(spx(STOP_WIDTH) / 2);
+        result.y = result.bottom() + spx(BORDER_THICKNESS + BORDER_SPACER_THICKNESS);
+        result.cx = spx(STOP_WIDTH);
+        result.cy = spx(STOP_HEIGHT);
         return result;
     }
 
     rect gradient_widget::alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const
     {
         rect result = contents_rect();
-        result.x = result.left() + std::floor((result.width() - 1.0) * aAlphaStop.first) - std::floor(dpi_scale(STOP_WIDTH) / 2);
-        result.y = result.top() - dpi_scale(BORDER_THICKNESS + BORDER_SPACER_THICKNESS + STOP_HEIGHT);
-        result.cx = dpi_scale(STOP_WIDTH);
-        result.cy = dpi_scale(STOP_HEIGHT);
+        result.x = result.left() + std::floor((result.width() - 1.0) * aAlphaStop.first) - std::floor(spx(STOP_WIDTH) / 2);
+        result.y = result.top() - spx(BORDER_THICKNESS + BORDER_SPACER_THICKNESS + STOP_HEIGHT);
+        result.cx = spx(STOP_WIDTH);
+        result.cy = spx(STOP_HEIGHT);
         return result;
     }
 
     void gradient_widget::draw_colour_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const
     {
         rect r = colour_stop_rect(aColourStop);
-        draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, dpi_scale(SMALL_ALPHA_PATTERN_SIZE));
+        draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, spx(SMALL_ALPHA_PATTERN_SIZE));
         const char* stopGlpyhPattern =
         {
             "[11,17]"
@@ -624,7 +623,7 @@ namespace neogfx
     void gradient_widget::draw_alpha_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const
     {
         rect r = alpha_stop_rect(aAlphaStop);
-        draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 2.0 }, dpi_select(size{ 7.0, 7.0 }, size{ 18.0, 18.0 }) }, dpi_scale(SMALL_ALPHA_PATTERN_SIZE));
+        draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 2.0 }, dpi_select(size{ 7.0, 7.0 }, size{ 18.0, 18.0 }) }, spx(SMALL_ALPHA_PATTERN_SIZE));
         const char* stopGlpyhPattern =
         {
             "[11,17]"

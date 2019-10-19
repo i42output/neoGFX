@@ -221,10 +221,10 @@ namespace neogfx
 
         iSampleBox.set_size_policy(neogfx::size_policy::Expanding);
         iSample.set_size_policy(neogfx::size_policy::Expanding);
-        iSample.set_minimum_size(dpi_scale(size{ 192.0, 48.0 }));
-        iSample.set_maximum_size(dpi_scale(size{ size::max_dimension(), 48.0 }));
+        iSample.set_minimum_size(size{ 192.0_spx, 48.0_spx });
+        iSample.set_maximum_size(size{ size::max_dimension(), 48.0_spx });
 
-        set_standard_layout(16.0);
+        set_standard_layout(size{ 16.0 });
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
 

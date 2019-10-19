@@ -27,14 +27,12 @@ namespace neogfx
 {
     spacer::spacer(expansion_policy_e aExpansionPolicy) :
         iParentLayout{ nullptr }, 
-        iUnitsContext{ *this }, 
         iExpansionPolicy{ aExpansionPolicy }
     {
     }
 
     spacer::spacer(i_layout& aParentLayout, expansion_policy_e aExpansionPolicy) :
         iParentLayout{ nullptr }, 
-        iUnitsContext{ *this },
         iExpansionPolicy{ aExpansionPolicy }
     {
         aParentLayout.add(*this);
@@ -225,7 +223,7 @@ namespace neogfx
         if (has_weight())
             return *iWeight;
         else
-            return 1.0;
+            return size{ 1.0 };
     }
 
     void spacer::set_weight(const optional_size& aWeight, bool aUpdateLayout)
@@ -309,16 +307,6 @@ namespace neogfx
         if (device_metrics_available())
             return parent_layout().device_metrics();
         throw no_device_metrics();
-    }
-
-    units spacer::units() const
-    {
-        return iUnitsContext.units();
-    }
-
-    units spacer::set_units(neogfx::units aUnits) const
-    {
-        return iUnitsContext.set_units(aUnits);
     }
 
     void spacer::layout_as(const point&, const size& aSize)

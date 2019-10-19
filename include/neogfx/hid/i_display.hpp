@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/core/device_metrics.hpp>
+#include <neogfx/core/units.hpp>
 #include <neogfx/core/colour.hpp>
 
 namespace neogfx
@@ -35,7 +36,7 @@ namespace neogfx
         SubpixelFormatBGRVertical
     };
 
-    class i_display
+    class i_display : public i_units_context
     {
     public:
         struct failed_to_get_monitor_dpi : std::runtime_error { failed_to_get_monitor_dpi() : std::runtime_error("neogfx::i_display::failed_to_get_monitor_dpi") {} };

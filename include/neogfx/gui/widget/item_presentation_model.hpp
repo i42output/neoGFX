@@ -227,12 +227,11 @@ namespace neogfx
         {
             if (iCellSpacing == std::nullopt)
             {
-                dimension millimetre = as_units(aUnitsContext, units::Millimetres, 1.0);
-                basic_size<int> result = units_converter(aUnitsContext).from_device_units(units_converter(aUnitsContext).to_device_units(size{ millimetre, millimetre }).ceil());
-                if (result.cx % 2 == 1)
-                    ++result.cx;
-                if (result.cy % 2 == 1)
-                    ++result.cy;
+                size result{ 1.0_mm, 1.0_mm };
+                if (to_px<uint32_t>(result.cx) % 2u == 1u)
+                    result.cx = from_px<dimension>(to_px<uint32_t>(result.cx) + 1u);
+                if (to_px<uint32_t>(result.cy) % 2u == 1u)
+                    result.cy = from_px<dimension>(to_px<uint32_t>(result.cy) + 1u);
                 return result;
             }
             return units_converter(aUnitsContext).from_device_units(*iCellSpacing);
@@ -530,7 +529,7 @@ namespace neogfx
             if (!cellDataInfo.readOnly && cellDataInfo.step != neolib::none)
             {
                 cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellDataInfo.max.to_string(), cellFont).cx);
-                cellExtents.cx += aGraphicsContext.dpi_scale(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE).cx; // todo: get this from widget metrics (skin API)
+                cellExtents.cx += spx(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
             }
             auto const& maybeCellImage = cell_image(aIndex);
             if (maybeCellImage != std::nullopt)

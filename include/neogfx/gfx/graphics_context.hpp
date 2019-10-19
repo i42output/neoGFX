@@ -189,8 +189,6 @@ namespace neogfx
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
-        neogfx::units units() const override;
-        neogfx::units set_units(neogfx::units aUnits) const override;
     protected:
         bool attached() const;
         i_rendering_context& native_context() const;
@@ -204,7 +202,6 @@ namespace neogfx
         type iType;
         const i_render_target& iRenderTarget;
         mutable std::unique_ptr<i_rendering_context> iNativeGraphicsContext;
-        units_context iUnitsContext;
         mutable font iDefaultFont;
         mutable point iOrigin;
         mutable size iExtents;

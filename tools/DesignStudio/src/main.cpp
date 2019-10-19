@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "new_project_dialog.hpp"
 
 namespace ng = neogfx;
+using namespace ng::unit_literals;
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +65,7 @@ int main(int argc, char* argv[])
         });
 
         ng::toolbar toolbar{ mainWindow.toolbar_layout() };
-        toolbar.set_button_image_extents(mainWindow.dpi_scale(ng::size{ 16.0, 16.0 }));
+        toolbar.set_button_image_extents(ng::size{ 16.0_spx, 16.0_spx });
         toolbar.add_action(app.action_file_new());
         toolbar.add_action(app.action_file_open());
         toolbar.add_action(app.action_file_save());

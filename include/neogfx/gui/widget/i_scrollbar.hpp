@@ -89,13 +89,13 @@ namespace neogfx
         virtual value_type page() const = 0;
         virtual void set_page(value_type aPage) = 0;
     public:
-        virtual dimension width(const i_units_context& aContext) const = 0;
+        virtual dimension width() const = 0;
         virtual void render(i_graphics_context& aGraphicsContext) const = 0;
     public:
-        virtual rect element_geometry(const i_units_context& aContext, element_e aElement) const = 0;
-        virtual element_e element_at(const i_units_context& aContext, const point& aPosition) const = 0;
+        virtual rect element_geometry(element_e aElement) const = 0;
+        virtual element_e element_at(const point& aPosition) const = 0;
     public:
-        virtual void update(const i_units_context& aContext, const update_params_t& aUpdateParams = update_params_t()) = 0;
+        virtual void update(const update_params_t& aUpdateParams = update_params_t()) = 0;
         virtual element_e clicked_element() const = 0;
         virtual void click_element(element_e aElement) = 0;
         virtual void unclick_element() = 0;
@@ -112,7 +112,7 @@ namespace neogfx
     class i_scrollbar_container
     {
     public:
-        virtual rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const = 0;
+        virtual rect scrollbar_geometry(const i_scrollbar& aScrollbar) const = 0;
         virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) = 0;
         virtual colour scrollbar_colour(const i_scrollbar& aScrollbar) const = 0;
         virtual const i_widget& as_widget() const = 0;

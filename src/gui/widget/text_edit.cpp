@@ -257,17 +257,14 @@ namespace neogfx
             }
             result += iHintedSize->second.max(childLayoutSize);
         }
-        return convert_units(*this, su.saved_units(), result);
+        return to_units(*this, su.saved_units(), result);
     }
 
     size text_edit::maximum_size(const optional_size& aAvailableSpace) const
     {
         if (iType == MultiLine || has_maximum_size())
             return scrollable_widget::maximum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        auto result = scrollable_widget::maximum_size(aAvailableSpace);
-        result.cy = minimum_size(aAvailableSpace).cy;
-        return convert_units(*this, su.saved_units(), result);
+        return size{ scrollable_widget::maximum_size(aAvailableSpace).cx, minimum_size(aAvailableSpace).cy };
     }
 
     void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
@@ -1067,7 +1064,7 @@ namespace neogfx
             }
             if (aGlyphPosition >= lineStart && aGlyphPosition <= lineEnd)
             {
-                delta alignmentAdjust = 0.0;
+                delta alignmentAdjust;
                 auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
                 if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                     ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
@@ -1133,7 +1130,7 @@ namespace neogfx
         {
             if (line != lines.begin() && adjustedPosition.y < line->ypos)
                 --line;
-            delta alignmentAdjust = 0.0;
+            delta alignmentAdjust;
             auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
             if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                 ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
@@ -1736,7 +1733,7 @@ namespace neogfx
                     if (!showVerticalScrollbar && pos.y >= availableHeight)
                     {
                         showVerticalScrollbar = true;
-                        availableWidth -= vertical_scrollbar().width(*this);
+                        availableWidth -= vertical_scrollbar().width();
                         next_pass();
                     }
                     else if (++p == iGlyphParagraphs.end() && pass == 1)
@@ -1746,7 +1743,7 @@ namespace neogfx
                     if (!showHorizontalScrollbar && iTextExtents.cx > availableWidth)
                     {
                         showHorizontalScrollbar = true;
-                        availableHeight -= horizontal_scrollbar().width(*this);
+                        availableHeight -= horizontal_scrollbar().width();
                         next_pass();
                     }
                     else if (++p == iGlyphParagraphs.end())

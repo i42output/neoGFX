@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/i_units_context.hpp>
+#include <neogfx/core/units.hpp>
 
 namespace neogfx
 {

@@ -183,8 +183,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\game.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
-    <ClCompile Include="x64\Debug\GeneratedFiles\test.nrc.cpp" />
-    <ClCompile Include="x64\Debug\GeneratedFiles\toolbar.nrc.cpp" />
+    <ClCompile Include="x64\Debug\GeneratedFiles\test.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\toolbar.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="x64\Release\GeneratedFiles\test.nrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

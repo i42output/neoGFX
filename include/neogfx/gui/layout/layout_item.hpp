@@ -59,8 +59,6 @@ namespace neogfx
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
-        neogfx::units units() const override;
-        neogfx::units set_units(neogfx::units aUnits) const override;
     public:
         point position() const override;
         void set_position(const point& aPosition) override;

@@ -35,10 +35,8 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
-        dimension length = std::ceil(units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text().font().height() * (2.0 / 3.0)));
-        length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.5)));
-        return convert_units(*this, su.saved_units(), size(length, length));
+        dimension const length = std::ceil(units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text().font().height() * (2.0 / 3.0)));
+        return rasterize(size{ std::max<dimension>(length, 3.5_mm) });
     }
 
     size radio_button::disc::maximum_size(const optional_size& aAvailableSpace) const
@@ -54,7 +52,7 @@ namespace neogfx
         colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
         if (borderColour1.similar_intensity(container_background_colour(), 0.03125))
             borderColour1.dark() ? borderColour1.lighten(0x40) : borderColour1.darken(0x40);
-        auto scaledPixel = dpi_scale(size{ 1.0, 1.0 });
+        size const scaledPixel{ 1.0_spx, 1.0_spx };
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);
         aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColour1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);

@@ -54,7 +54,7 @@ namespace neogfx
     protected:
         void paint(i_graphics_context& aGraphicsContext) const
         {
-            scoped_units su{ *this, aGraphicsContext, units::Pixels };
+            scoped_units su{ *this, units::Pixels };
             if (entered())
             {
                 double radius = std::sqrt(std::pow(image().image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
@@ -307,7 +307,7 @@ namespace neogfx
             result.extents() += size{ 5.0, 0.0 };
             break;
         }
-        return convert_units(*this, su.saved_units(), result);
+        return to_units(*this, su.saved_units(), result);
     }
 
     bool tab_button::spot_colour() const
@@ -337,17 +337,14 @@ namespace neogfx
         {
         case tab_container_style::TabAlignmentTop:
         case tab_container_style::TabAlignmentBottom:
-            result = convert_units(*this, units::Millimetres, result) + size{ 2.0, is_selected() ? 1.0 : 0.0 };
+            result += size{ 2.0_mm, is_selected() ? 1.0_mm : 0.0_mm };
             break;
         case tab_container_style::TabAlignmentLeft:
         case tab_container_style::TabAlignmentRight:
-            result = convert_units(*this, units::Millimetres, result) + size{ is_selected() ? 1.0 : 0.0, 2.0 };
+            result += size{ is_selected() ? 1.0_mm : 0.0_mm, 2.0_mm };
             break;
         }
-        scoped_units su{ *this, units::Millimetres };
-        result = convert_units(*this, units::Pixels, result).ceil();
-        scoped_units su2{ *this, units::Pixels };
-        return convert_units(*this, su.saved_units(), result);
+        return rasterize(result);
     }
 
     void tab_button::handle_clicked()

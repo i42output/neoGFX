@@ -209,7 +209,7 @@ namespace neogfx
                 colourStart = colourStart.with_lightness(colourStart.to_hsl().lightness() + 0.1);
                 const double transitionHeight = 0.04;
                 const double transitionStart = 0.5 - transitionHeight / 2.0 +
-                    (!capturing() ? 0.0 : (as_units(*this, units::Millimetres, 1.0) / outline.bounding_rect().height()));
+                    (!capturing() ? 0.0 : (rasterize(1.0_mm) / outline.bounding_rect().height()));
                 const double transitionEnd = transitionStart + transitionHeight;
                 aGraphicsContext.fill_rect(outline.bounding_rect(),
                     gradient{ gradient::colour_stop_list{
@@ -412,14 +412,14 @@ namespace neogfx
     {
         if (iStyle == push_button_style::ItemViewHeader)
         {
-            set_margins(dpi_scale(neogfx::margins{ 1.0, 2.0 }));
+            set_margins(neogfx::margins{ 1.0_spx, 2.0_spx });
             layout().set_margins(neogfx::margins{});
             label().set_margins(neogfx::margins{});
             label().text().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
         }
         else if (iStyle == push_button_style::Toolbar)
         {
-            set_margins(dpi_scale(neogfx::margins{ 2.0, 2.0 }));
+            set_margins(neogfx::margins{ 2.0_spx, 2.0_spx });
             layout().set_margins(neogfx::margins{});
             label().set_margins(neogfx::margins{});
         }

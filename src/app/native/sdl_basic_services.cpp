@@ -92,6 +92,26 @@ namespace neogfx
 #endif
     }
 
+    bool display::high_dpi() const
+    {
+        return device_metrics().ppi() >= 150.0;
+    }
+
+    dimension display::dpi_scale_factor() const
+    {
+        return default_dpi_scale_factor(device_metrics().ppi());
+    }
+
+    bool display::device_metrics_available() const
+    {
+        return true;
+    }
+
+    const i_device_metrics& display::device_metrics() const
+    {
+        return *this;
+    }
+
     uint32_t display::index() const
     {
         return iIndex;

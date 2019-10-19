@@ -89,7 +89,7 @@ namespace neogfx
         virtual neogfx::scrolling_disposition scrolling_disposition() const;
         virtual neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const;
     protected:
-        rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const override;
+        rect scrollbar_geometry(const i_scrollbar& aScrollbar) const override;
         void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) override;
         colour scrollbar_colour(const i_scrollbar& aScrollbar) const override;
         const i_widget& as_widget() const override;

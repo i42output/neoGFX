@@ -76,11 +76,10 @@ namespace neogfx
     {
         if (has_minimum_size() || iTexture.is_empty())
             return widget::minimum_size(aAvailableSpace);
-        scoped_units su{ *this, units::Pixels };
         size result = iTexture.extents();
         if (iDpiAutoScale)
             result *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
-        return convert_units(*this, su.saved_units(), result);
+        return to_units(*this, scoped_units::current_units(), result);
     }
 
     void image_widget::paint(i_graphics_context& aGraphicsContext) const

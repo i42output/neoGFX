@@ -51,8 +51,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
-        iLayoutInProgress{ 0 },
-        iUnitsContext{ *this }
+        iLayoutInProgress{ 0 }
     {
     }
     
@@ -63,8 +62,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
-        iLayoutInProgress{ 0 },
-        iUnitsContext{ *this }
+        iLayoutInProgress{ 0 }
     {
         aParent.add(*this);
     }
@@ -76,8 +74,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
-        iLayoutInProgress{ 0 },
-        iUnitsContext{ *this }
+        iLayoutInProgress{ 0 }
     {
         aLayout.add(*this);
     }
@@ -133,16 +130,6 @@ namespace neogfx
         if (device_metrics_available())
             return surface();
         throw no_device_metrics();
-    }
-
-    units widget::units() const
-    {
-        return iUnitsContext.units();
-    }
-
-    units widget::set_units(neogfx::units aUnits) const
-    {
-        return iUnitsContext.set_units(aUnits);
     }
 
     bool widget::is_singular() const
@@ -848,7 +835,7 @@ namespace neogfx
     {
         if (has_weight())
             return *Weight;
-        return 1.0;
+        return size{ 1.0 };
     }
 
     void widget::set_weight(const optional_size& aWeight, bool aUpdateLayout)
@@ -941,7 +928,7 @@ namespace neogfx
         const auto& adjustedMargins =
             (has_margins() ?
                 *Margins :
-                service<i_app>().current_style().margins() * dpi_scale(1.0));
+                service<i_app>().current_style().margins() * 1.0_spx);
         return units_converter(*this).from_device_units(adjustedMargins);
     }
 

@@ -73,7 +73,6 @@ namespace neogfx
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
         iNativeGraphicsContext{ nullptr },
-        iUnitsContext{ *this },
         iDefaultFont{},
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
@@ -90,7 +89,6 @@ namespace neogfx
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
         iNativeGraphicsContext{ nullptr },
-        iUnitsContext{ *this },
         iDefaultFont{ aDefaultFont },
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
@@ -107,7 +105,6 @@ namespace neogfx
         iType{ aType },
         iRenderTarget{ aWidget.surface().native_surface() },
         iNativeGraphicsContext{ nullptr },
-        iUnitsContext{ *this },
         iDefaultFont{ aWidget.font() },
         iOrigin{ aWidget.origin() },
         iExtents{ aWidget.extents() },
@@ -125,7 +122,6 @@ namespace neogfx
         iType{ aType },
         iRenderTarget{ *aTexture.native_texture() },
         iNativeGraphicsContext{ nullptr },
-        iUnitsContext{ *this },
         iDefaultFont{ font() },
         iOrigin{},
         iExtents{ aTexture.extents() },
@@ -142,7 +138,6 @@ namespace neogfx
         iType{ aOther.iType },
         iRenderTarget{ aOther.iRenderTarget },
         iNativeGraphicsContext{ aOther.iNativeGraphicsContext != nullptr ? aOther.native_context().clone() : nullptr },
-        iUnitsContext{ *this },
         iDefaultFont{ aOther.iDefaultFont },
         iOrigin{ aOther.origin() },
         iExtents{ aOther.extents() },
@@ -690,16 +685,6 @@ namespace neogfx
     const i_device_metrics& graphics_context::device_metrics() const
     {
         return *this;
-    }
-
-    units graphics_context::units() const
-    {
-        return iUnitsContext.units();
-    }
-
-    units graphics_context::set_units(neogfx::units aUnits) const
-    {
-        return iUnitsContext.set_units(aUnits);
     }
 
     bool graphics_context::attached() const

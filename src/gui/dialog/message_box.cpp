@@ -264,7 +264,7 @@ namespace neogfx
 
     void message_box::init()
     {
-        auto standardSpacing = set_standard_layout(16.0);
+        auto standardSpacing = set_standard_layout(size{ 16.0 });
         iLayout1.set_margins(neogfx::margins{});
         iLayout1.set_spacing(standardSpacing);
         iLayout2.set_alignment(neogfx::alignment::Left);
@@ -281,7 +281,7 @@ namespace neogfx
         text().set_font(neogfx::font{ normalFont.with_style(font_style::Bold) });
 
         icon().set_aspect_ratio(aspect_ratio::KeepExpanding);
-        icon().set_fixed_size(dpi_scale(size{ 32.0, 32.0 }));
+        icon().set_fixed_size(size{ 32.0_spx, 32.0_spx });
     
         centre_on_parent();
 

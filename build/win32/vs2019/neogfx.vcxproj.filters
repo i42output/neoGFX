@@ -669,12 +669,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\skin_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\units_context.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\i_units_context.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\geometrical.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -886,6 +880,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\units.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1219,9 +1219,6 @@
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\units_context.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1295,6 +1292,9 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_rendering_context.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\units.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

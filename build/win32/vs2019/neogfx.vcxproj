@@ -231,6 +231,7 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_playback_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_sample.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\colour.hpp" />
@@ -248,14 +249,13 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\i_units_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\units.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\units_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp" />
@@ -527,7 +527,7 @@
     <ClCompile Include="..\..\..\src\core\animator.cpp" />
     <ClCompile Include="..\..\..\src\core\colour.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
-    <ClCompile Include="..\..\..\src\core\units_context.cpp" />
+    <ClCompile Include="..\..\..\src\core\units.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />

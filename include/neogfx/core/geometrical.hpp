@@ -25,6 +25,7 @@
 #include <ostream>
 #include <optional>
 #include "numerical.hpp"
+#include "alignment.hpp"
 
 namespace neogfx
 { 
@@ -98,7 +99,7 @@ namespace neogfx
     public:
         constexpr basic_delta() : dx(0), dy(0) {}
         constexpr basic_delta(coordinate_type dx, coordinate_type dy) : dx(dx), dy(dy) {}
-        constexpr basic_delta(coordinate_type aSquareDelta) : dx(aSquareDelta), dy(aSquareDelta) {}
+        constexpr explicit basic_delta(coordinate_type aSquareDelta) : dx(aSquareDelta), dy(aSquareDelta) {}
         template <typename CoordinateType2>
         constexpr basic_delta(const basic_delta<CoordinateType2>& other) :
             dx(static_cast<CoordinateType>(other.dx)), dy(static_cast<CoordinateType>(other.dy)) {}
@@ -173,7 +174,7 @@ namespace neogfx
         template <typename Scalar>
         constexpr basic_size(const basic_vector<Scalar, 3>& other) : cx(static_cast<dimension_type>(other.x)), cy(static_cast<dimension_type>(other.y)) {}
         constexpr basic_size(dimension_type cx, dimension_type cy) : cx(cx), cy(cy) {}
-        constexpr basic_size(dimension_type aSquareDimension) : cx(aSquareDimension), cy(aSquareDimension) {}
+        constexpr explicit basic_size(dimension_type aSquareDimension) : cx(aSquareDimension), cy(aSquareDimension) {}
         template <typename CoordinateType2>
         constexpr basic_size(const basic_size<CoordinateType2>& other) :
             cx(static_cast<CoordinateType>(other.cx)), cy(static_cast<CoordinateType>(other.cy)) {}

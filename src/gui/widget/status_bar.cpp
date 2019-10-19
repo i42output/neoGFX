@@ -47,9 +47,9 @@ namespace neogfx
 
     void status_bar::separator::paint(i_graphics_context& aGraphicsContext) const
     {
-        scoped_units su(*this, aGraphicsContext, units::Pixels);
+        scoped_units su{ *this, units::Pixels };
         rect line = client_rect(false);
-        line.deflate(dpi_scale(size{ 0.0, 2.0 }));
+        line.deflate(size{ 0.0_spx, 2.0_spx });
         line.cx = 1.0;
         colour ink = (has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().foreground_colour());
         aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0x80));

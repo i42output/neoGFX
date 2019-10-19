@@ -21,6 +21,7 @@
 #include "test.ui.hpp"
 
 namespace ng = neogfx;
+using namespace ng::unit_literals;
 
 class my_item_model : public ng::basic_item_model<void*, 9u>
 {
@@ -408,8 +409,8 @@ int main(int argc, char* argv[])
         ng::push_button button0(topButtons, "This is the neoGFX test application.");
         button0.label().set_placement(ng::label_placement::ImageTextVertical);
         button0.image().set_image(ng::image{ ":/test/resources/neoGFX.png" });
-        button0.image().set_minimum_size(window.dpi_scale(ng::size{ 32, 32 }));
-        button0.image().set_maximum_size(window.dpi_scale(ng::size{ 160, std::numeric_limits<ng::dimension>::max() }));
+        button0.image().set_minimum_size(ng::size{ 32_spx, 32_spx });
+        button0.image().set_maximum_size(ng::size{ 160_spx, std::numeric_limits<ng::dimension>::max() });
         button0.set_size_policy(ng::size_policy::Expanding);
         button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
         ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement.");
@@ -432,9 +433,16 @@ int main(int argc, char* argv[])
         ng::push_button button3(international, u8"שועל חום קפיצות מעל הכלב העצלן");
         button3.set_foreground_colour(ng::colour::DarkGoldenrod);
         ng::push_button buttonJapan(international, u8"クジラを食べないでください。");
-        ng::push_button button4(international, u8"请停止食用犬");
-        button4.evClicked([&window, &button4]() { window.set_title_text(u8"请停止食用犬"); if (button4.has_maximum_size()) button4.set_maximum_size(ng::optional_size{}); else button4.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 })); });
-        button4.set_foreground_colour(ng::colour::CadetBlue);
+        ng::push_button buttonChina(international, u8"请停止食用犬");
+        buttonChina.evClicked([&window, &buttonChina]() 
+        { 
+            window.set_title_text(u8"请停止食用犬"); 
+            if (buttonChina.has_maximum_size()) 
+                buttonChina.set_maximum_size(ng::optional_size{}); 
+            else 
+                buttonChina.set_maximum_size(ng::size{ 128_spx, 64_spx }); 
+        });
+        buttonChina.set_foreground_colour(ng::colour::CadetBlue);
         ng::push_button button5(layoutButtons, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
         ng::horizontal_layout dropListLayout(layoutButtons);
         ng::drop_list dropList(dropListLayout);
@@ -502,19 +510,19 @@ int main(int argc, char* argv[])
         ng::vertical_layout layoutSpinners(layoutLineEdits);
         ng::horizontal_layout layoutSpinners2(layoutSpinners);
         ng::vertical_spacer spacerSpinners(layoutSpinners);
-        ng::double_spin_box spinBox(layoutSpinners2);
-        spinBox.set_minimum(-100.0);
-        spinBox.set_maximum(100.0);
-        spinBox.set_step(0.1);
-        ng::double_slider slider(layoutSpinners2);
-        slider.set_minimum(-100.0);
-        slider.set_maximum(100.0);
-        slider.set_step(0.1);
-        spinBox.evValueChanged([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
-        ng::double_spin_box doubleSpinBox(layoutSpinners2);
-        doubleSpinBox.set_minimum(-10);
-        doubleSpinBox.set_maximum(20);
-        doubleSpinBox.set_step(0.5);
+        ng::double_spin_box spinBox1(layoutSpinners2);
+        spinBox1.set_minimum(-100.0);
+        spinBox1.set_maximum(100.0);
+        spinBox1.set_step(0.1);
+        ng::double_slider slider1(layoutSpinners2);
+        slider1.set_minimum(-100.0);
+        slider1.set_maximum(100.0);
+        slider1.set_step(0.1);
+        spinBox1.evValueChanged([&slider1, &spinBox1]() {slider1.set_value(spinBox1.value()); });
+        ng::double_spin_box spinBox2(layoutSpinners2);
+        spinBox2.set_minimum(-10);
+        spinBox2.set_maximum(20);
+        spinBox2.set_step(0.5);
         ng::horizontal_layout layout2(layoutButtons);
         ng::label label1(layout2, "Label 1:");
         bool colourCycle = false;
@@ -523,7 +531,7 @@ int main(int argc, char* argv[])
         layout2.add_spacer().set_weight(ng::size(2.0f));
         ng::push_button button7(layout2, "Toggle\n&mute.");
         button7.set_foreground_colour(ng::colour::LightCoral);
-        button7.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 }));
+        button7.set_maximum_size(ng::size{ 128_spx, 64_spx });
         button7.evClicked([&muteAction]() { muteAction.toggle(); });
         layout2.add_spacer().set_weight(ng::size(1.0));
         ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
@@ -613,23 +621,23 @@ int main(int argc, char* argv[])
             showFps = false;
             groupBox.set_checkable(false);
         });
-        ng::gradient_widget gw(layoutRadiosAndChecks);
-        columns.evChecked([&textEdit, &gw, &password]()
+        ng::gradient_widget gradientWidget(layoutRadiosAndChecks);
+        columns.evChecked([&textEdit, &gradientWidget, &password]()
         {
             password.disable();
             textEdit.set_columns(3);
-            gw.evGradientChanged([&gw, &textEdit]()
+            gradientWidget.evGradientChanged([&gradientWidget, &textEdit]()
             {
                 auto cs = textEdit.column(2);
-                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, gw.gradient() } });
+                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, gradientWidget.gradient() } });
                 textEdit.set_column(2, cs);
             }, textEdit);
         });
-        columns.evUnchecked([&textEdit, &gw, &password]()
+        columns.evUnchecked([&textEdit, &gradientWidget, &password]()
         {
             password.enable();
             textEdit.remove_columns();
-            gw.evGradientChanged.unsubscribe(textEdit);
+            gradientWidget.evGradientChanged.unsubscribe(textEdit);
         });
         ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
         ng::vertical_layout layout4(layout2);
@@ -722,31 +730,31 @@ int main(int argc, char* argv[])
         });
         ng::radio_button radio1(layout4, "Radio 1");
         ng::radio_button radioSliderFont(layout4, "Slider changes\nfont size");
-        radioSliderFont.evChecked([&slider, &app]()
+        radioSliderFont.evChecked([&slider1, &app]()
         {
-            app.current_style().set_font_info(app.current_style().font_info().with_size(slider.normalized_value() * 18.0 + 4));
+            app.current_style().set_font_info(app.current_style().font_info().with_size(slider1.normalized_value() * 18.0 + 4));
         });
         ng::radio_button radio3(layout4, "Radio 3");
         radio3.disable();
         ng::radio_button radioThemeColour(layout4, "Slider changes\ntheme colour");
-        auto update_theme_colour = [&slider]()
+        auto update_theme_colour = [&slider1]()
         {
             auto themeColour = ng::service<ng::i_app>().current_style().palette().colour().to_hsv();
-            themeColour.set_hue(slider.normalized_value() * 360.0);
+            themeColour.set_hue(slider1.normalized_value() * 360.0);
             ng::service<ng::i_app>().current_style().palette().set_colour(themeColour.to_rgb());
         };
-        slider.evValueChanged([update_theme_colour, &slider, &radioSliderFont, &radioThemeColour, &spinBox, &app]()
+        slider1.evValueChanged([update_theme_colour, &slider1, &radioSliderFont, &radioThemeColour, &spinBox1, &app]()
         {
-            spinBox.set_value(slider.value());
+            spinBox1.set_value(slider1.value());
             if (radioSliderFont.is_checked())
-                app.current_style().set_font_info(app.current_style().font_info().with_size(slider.normalized_value() * 18.0 + 4));
+                app.current_style().set_font_info(app.current_style().font_info().with_size(slider1.normalized_value() * 18.0 + 4));
             else if (radioThemeColour.is_checked())
                 update_theme_colour();
         });
-        slider.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
-        radioThemeColour.evChecked([update_theme_colour, &slider, &app]()
+        slider1.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
+        radioThemeColour.evChecked([update_theme_colour, &slider1, &app]()
         {
-            slider.set_normalized_value(ng::service<ng::i_app>().current_style().palette().colour().to_hsv().hue() / 360.0);
+            slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().colour().to_hsv().hue() / 360.0);
             update_theme_colour();
         });
 
@@ -853,12 +861,12 @@ int main(int argc, char* argv[])
         messageBoxIconStop.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#stop.png" });
         messageBoxIconError.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#error.png" });
         messageBoxIconCritical.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#critical.png" });
-        messageBoxIconInformation.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
-        messageBoxIconQuestion.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
-        messageBoxIconWarning.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
-        messageBoxIconStop.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
-        messageBoxIconError.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
-        messageBoxIconCritical.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
+        messageBoxIconInformation.label().image().set_fixed_size(ng::size{ 24.0_spx });
+        messageBoxIconQuestion.label().image().set_fixed_size(ng::size{ 24.0_spx });
+        messageBoxIconWarning.label().image().set_fixed_size(ng::size{ 24.0_spx });
+        messageBoxIconStop.label().image().set_fixed_size(ng::size{ 24.0_spx });
+        messageBoxIconError.label().image().set_fixed_size(ng::size{ 24.0_spx });
+        messageBoxIconCritical.label().image().set_fixed_size(ng::size{ 24.0_spx });
         ng::group_box messageBoxButtonsGroup{ messageBoxesPageLayout1, "Buttons" };
         uint32_t standardButtons = 0;
         uint32_t standardButton = 1;
@@ -880,11 +888,11 @@ int main(int argc, char* argv[])
         ng::label messageBoxTextLabel{ messageBoxTextGroup.item_layout(), "Text:" };
         ng::text_edit messageBoxText{ messageBoxTextGroup.item_layout() };
         messageBoxText.set_text("This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line");
-        messageBoxText.set_minimum_size(window.dpi_scale(ng::size{ 256, 128 }));
+        messageBoxText.set_minimum_size(ng::size{ 256_spx, 128_spx });
         ng::label messageBoxDetailedTextLabel{ messageBoxTextGroup.item_layout(), "Detailed Text:" };
         ng::text_edit messageBoxDetailedText{ messageBoxTextGroup.item_layout() };
         messageBoxDetailedText.set_text("This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank.");
-        messageBoxDetailedText.set_minimum_size(window.dpi_scale(ng::size{ 256, 128 }));
+        messageBoxDetailedText.set_minimum_size(ng::size{ 256_spx, 128_spx });
         ng::push_button openMessageBox{ messageBoxesPageLayout1, "Open Message Box" };
         openMessageBox.set_size_policy(ng::size_policy::Minimum);
         ng::label messageBoxResult{ messageBoxesPageLayout1 };
@@ -1134,11 +1142,11 @@ int main(int argc, char* argv[])
         {
             ng::service<ng::i_rendering_engine>().want_game_mode();
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
-            aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, gw.gradient().with_direction(ng::gradient::Horizontal));
-            aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, gw.gradient().with_direction(ng::gradient::Horizontal));
+            aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, gradientWidget.gradient().with_direction(ng::gradient::Horizontal));
+            aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, gradientWidget.gradient().with_direction(ng::gradient::Horizontal));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ng::pen{ ng::colour::Blue4, 2.0 });
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 150, 150 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
-            aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, gw.gradient().with_direction(ng::gradient::Radial));
+            aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, gradientWidget.gradient().with_direction(ng::gradient::Radial));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
             aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
             aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
@@ -1164,10 +1172,10 @@ int main(int argc, char* argv[])
             aGc.draw_texture(texLocation + ng::point{ 65.0, 65.0 }, tex[3]);
 
             texLocation.x += 140.0;
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, aGc.dpi_scale(1.0), texColour[0], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, aGc.dpi_scale(1.0), texColour[1], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, aGc.dpi_scale(1.0), texColour[2], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, aGc.dpi_scale(1.0), texColour[3], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, 1.0_spx, texColour[0], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, 1.0_spx, texColour[1], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, 1.0_spx, texColour[2], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_spx, texColour[3], "Render\nTo\nScreen");
         });
 
         neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
