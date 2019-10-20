@@ -140,9 +140,8 @@ namespace neogfx
 
     std::map<void*, sdl_window*> sHandleMap;
 
-    sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
+    sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
         opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
-        iBasicServices(aBasicServices),
         iParent(0),
         iStyle(aStyle),
         iHandle(0),
@@ -178,9 +177,8 @@ namespace neogfx
         iReady = true;
     }
 
-    sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+    sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
         opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
-        iBasicServices(aBasicServices),
         iParent(0),
         iStyle(aStyle),
         iHandle(0),
@@ -214,9 +212,8 @@ namespace neogfx
         iReady = true;
     }
 
-    sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+    sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
         opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
-        iBasicServices(aBasicServices),
         iParent(0),
         iStyle(aStyle),
         iHandle(0),
@@ -250,9 +247,8 @@ namespace neogfx
         iReady = true;
     }
 
-    sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
+    sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
         opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
-        iBasicServices(aBasicServices),
         iParent(&aParent),
         iStyle(aStyle),
         iHandle(0),
@@ -288,9 +284,8 @@ namespace neogfx
         iReady = true;
     }
 
-    sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+    sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
         opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
-        iBasicServices(aBasicServices),
         iParent(&aParent),
         iStyle(aStyle),
         iHandle(0),
@@ -324,9 +319,8 @@ namespace neogfx
         iReady = true;
     }
 
-    sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+    sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
         opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
-        iBasicServices(aBasicServices),
         iParent(&aParent),
         iStyle(aStyle),
         iHandle(0),
@@ -372,7 +366,7 @@ namespace neogfx
 
     bool sdl_window::has_parent() const
     {
-        return iParent != nullptr;
+        return iParent != nullptr;  
     }
 
     const i_native_window& sdl_window::parent() const

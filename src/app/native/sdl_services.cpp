@@ -43,8 +43,14 @@ namespace neogfx
     template<> i_rendering_engine& service<i_rendering_engine>()
     { 
         auto const& programOptions = service<i_app>().program_options();
-        static sdl_renderer sSdlRenderer{ programOptions.renderer(), programOptions.double_buffering(), service<i_basic_services>(), service<i_keyboard>() };
+        static sdl_renderer sSdlRenderer{ programOptions.renderer(), programOptions.double_buffering() };
         return sSdlRenderer; 
+    }
+
+    template<> void teardown_service<i_rendering_engine>()
+    {
+        static_cast<sdl_renderer&>(service<i_rendering_engine>()).~sdl_renderer();
+        new(&service<i_rendering_engine>()) sdl_renderer{ neogfx::renderer::None, false };
     }
 
     template<> i_window_manager& service<i_window_manager>()

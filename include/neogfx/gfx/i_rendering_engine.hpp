@@ -45,7 +45,8 @@ namespace neogfx
         OpenGL,
         DirectX,
         Vulkan,
-        Software
+        Software,
+        None
     };
 
     static const uint32_t GRADIENT_FILTER_SIZE = 15;
@@ -105,6 +106,7 @@ namespace neogfx
         virtual neogfx::renderer renderer() const = 0;
         virtual bool double_buffering() const = 0;
         virtual void initialize() = 0;
+        virtual void cleanup() = 0;
         virtual const i_render_target* active_target() const = 0;
         virtual void activate_context(const i_render_target& aTarget) = 0;
         virtual void deactivate_context() = 0;

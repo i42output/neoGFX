@@ -120,6 +120,7 @@ namespace neogfx
     public:
         neogfx::renderer renderer() const override;
         void initialize() override;
+        void cleanup() override;
         i_font_manager& font_manager() override;
         i_texture_manager& texture_manager() override;
         bool shader_program_active() const override;

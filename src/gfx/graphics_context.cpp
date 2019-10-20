@@ -892,7 +892,7 @@ namespace neogfx
 
     graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
-        return to_multiline_glyph_text(aTextBegin, aTextEnd, [&aFont](std::u32string::size_type) { return aFont; }, aMaxWidth, aAlignment);
+        return to_multiline_glyph_text(aTextBegin, aTextEnd, [aFont](std::u32string::size_type) { return aFont; }, aMaxWidth, aAlignment);
     }
 
     graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment) const

@@ -291,12 +291,6 @@ namespace neogfx
 
     opengl_renderer::~opengl_renderer()
     {
-        // We explictly destroy these OpenGL objects here when context should still exist
-        iVertexArrays.reset();
-        iGradientDataCacheQueue.clear();
-        iGradientDataCacheMap.clear();
-        iGradientDataCache.clear();
-        iUncachedGradient.reset();
     }
 
     const i_device_metrics& opengl_renderer::default_screen_metrics() const
@@ -726,6 +720,19 @@ namespace neogfx
         }
     }
 
+    void opengl_renderer::cleanup()
+    {
+        // We explictly destroy these OpenGL objects here when context should still exist
+        iVertexArrays = std::nullopt;
+        iGradientDataCacheQueue.clear();
+        iGradientDataCacheMap.clear();
+        iGradientDataCache.clear();
+        iUncachedGradient = std::nullopt;
+        iFontManager = std::nullopt;
+        iTextureManager = std::nullopt;
+        opengl_buffer_cleanup();
+    }
+       
     i_font_manager& opengl_renderer::font_manager()
     {
         if (iFontManager == std::nullopt)

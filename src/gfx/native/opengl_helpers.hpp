@@ -104,6 +104,20 @@ namespace neogfx
         value_type* iMemory;
     };
 
+    typedef std::vector<std::function<void()>> opengl_buffer_cleanup_functions_type;
+
+    inline opengl_buffer_cleanup_functions_type& opengl_buffer_cleanup_functions()
+    {
+        static opengl_buffer_cleanup_functions_type sCleanupFunctions;
+        return sCleanupFunctions;
+    }
+
+    inline void opengl_buffer_cleanup()
+    {
+        for (auto const& cleanupFunction : opengl_buffer_cleanup_functions())
+            cleanupFunction();
+    }
+
     template <typename T>
     class opengl_buffer_allocator_arena
     {
@@ -111,10 +125,13 @@ namespace neogfx
         typedef opengl_buffer<T> buffer_type;
         typedef std::unique_ptr<buffer_type> buffer_pointer;
         typedef std::map<void*, buffer_pointer> arena_map_type;
+        typedef std::vector<std::function<void()>> cleanup_functions_type;
     public:
         static arena_map_type& arena_map()
         {
             thread_local arena_map_type tArenaMap;
+            arena_map_type* const capturedMap = &tArenaMap;
+            opengl_buffer_cleanup_functions().push_back([capturedMap]() { capturedMap->clear(); });
             return tArenaMap;
         }
     };

@@ -47,51 +47,48 @@ namespace neogfx
         }
     };
 
-    sdl_renderer::sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard) :
+    sdl_renderer::sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows) :
         opengl_renderer{ aRenderer },
         iDoubleBuffering{ aDoubleBufferedWindows },
-        iBasicServices{ aBasicServices }, 
-        iKeyboard{ aKeyboard }, 
         iCreatingWindow{ 0 },
         iContext{ nullptr },
         iDefaultOffscreenWindow{ nullptr },
         iInitialized{ false }
     {
-        SDL_AddEventWatch(&filter_event, this);
-
-        sdl_instance::instantiate();
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, aDoubleBufferedWindows ? 1 : 0);
-        switch (aRenderer)
+        if (aRenderer != neogfx::renderer::None)
         {
-        case renderer::Vulkan:
-        case renderer::Software:
-            throw unsupported_renderer();
-        case renderer::DirectX: // ANGLE
-            #ifdef _WIN32
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-            #else
-            throw unsupported_renderer();
-            #endif
-            break;
-        case renderer::OpenGL:
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);        
-            break;
-        default:
-            break;
+            SDL_AddEventWatch(&filter_event, this);
+            sdl_instance::instantiate();
+            switch (aRenderer)
+            {
+            case renderer::Vulkan:
+            case renderer::Software:
+                throw unsupported_renderer();
+            case renderer::DirectX: // ANGLE
+#ifdef _WIN32
+                SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, aDoubleBufferedWindows ? 1 : 0);
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
+                throw unsupported_renderer();
+#endif
+                break;
+            case renderer::OpenGL:
+                SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, aDoubleBufferedWindows ? 1 : 0);
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+                SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+                break;
+            default:
+                break;
+            }
         }
     }
 
     sdl_renderer::~sdl_renderer()
     {
-        if (iContext != nullptr)
-            SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext);
-        for (auto window : iOffscreenWindows)
-            SDL_DestroyWindow(static_cast<SDL_Window*>(window.second));
-        iOffscreenWindows.clear();
+        cleanup();
     }
 
     void sdl_renderer::initialize()
@@ -104,6 +101,20 @@ namespace neogfx
             glCheck(glewInit());
             opengl_renderer::initialize();
             iInitialized = true;
+        }
+    }
+
+    void sdl_renderer::cleanup()
+    {
+        if (iInitialized && renderer() != neogfx::renderer::None)
+        {
+            if (iContext != nullptr)
+                SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext);
+            opengl_renderer::cleanup();
+            if (iContext != nullptr)
+                destroy_context(iContext);
+            for (auto window : iOffscreenWindows)
+                SDL_DestroyWindow(static_cast<SDL_Window*>(window.second));
         }
     }
 
@@ -161,19 +172,19 @@ namespace neogfx
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle)
     {
         neolib::scoped_counter sc(iCreatingWindow);
-        return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle));
+        return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle });
     }
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
     {
         neolib::scoped_counter sc(iCreatingWindow);
-        return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle));
+        return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle });
     }
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
     {
         neolib::scoped_counter sc(iCreatingWindow);
-        return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle));
+        return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle });
     }
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle)
@@ -181,7 +192,7 @@ namespace neogfx
         neolib::scoped_counter sc(iCreatingWindow);
         sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
         if (parent != nullptr)
-            return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, *parent, aVideoMode, aWindowTitle, aStyle));
+            return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, *parent, aVideoMode, aWindowTitle, aStyle });
         else
             return create_window(aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle);
     }
@@ -191,7 +202,7 @@ namespace neogfx
         neolib::scoped_counter sc(iCreatingWindow);
         sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
         if (parent != nullptr)
-            return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle));
+            return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle });
         else
             return create_window(aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle);
     }
@@ -201,7 +212,7 @@ namespace neogfx
         neolib::scoped_counter sc(iCreatingWindow);
         sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
         if (parent != nullptr)
-            return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle));
+            return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle });
         else
             return create_window(aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle);
     }

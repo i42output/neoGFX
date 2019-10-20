@@ -23,8 +23,6 @@
 #include <set>
 #include <map>
 #include "opengl_renderer.hpp"
-#include <neogfx/app/i_basic_services.hpp>
-#include <neogfx/hid/keyboard.hpp>
 
 namespace neogfx
 {
@@ -39,10 +37,11 @@ namespace neogfx
         struct failed_to_activate_opengl_context : std::runtime_error { failed_to_activate_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_activate_opengl_context: " + aReason) {} };
         struct no_target_active : std::logic_error { no_target_active() : std::logic_error("neogfx::sdl_renderer::no_target_active") {} };
     public:
-        sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard);
+        sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows);
         ~sdl_renderer();
     public:
         void initialize() override;
+        void cleanup() override;
     public:
         bool double_buffering() const override;
         const i_render_target* active_target() const override;
@@ -72,8 +71,6 @@ namespace neogfx
     private:
         bool iInitialized;
         bool iDoubleBuffering;
-        i_basic_services& iBasicServices;
-        i_keyboard& iKeyboard;
         std::unordered_map<const i_render_target*, void*> iOffscreenWindows;
         void* iDefaultOffscreenWindow;
         opengl_context iContext;

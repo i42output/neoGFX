@@ -35,6 +35,9 @@ namespace neogfx
     template <typename Component>
     Component& service();
 
+    template <typename Component>
+    void teardown_service();
+
     template <typename CharT, typename Traits, typename Allocator>
     inline const std::string to_string(const std::basic_string<CharT, Traits, Allocator>& aString)
     {

@@ -131,13 +131,13 @@ namespace neogfx
                 std::cerr.sync_with_stdio(true);
             }
 #endif
-            service<i_rendering_engine>();
             service<i_rendering_engine>().initialize();
         }
     }
 
     app::loader::~loader()
     {
+        teardown_service<i_rendering_engine>();
         app* tp = &iApp;
         app* np = nullptr;
         sFirstInstance.compare_exchange_strong(tp, np);
