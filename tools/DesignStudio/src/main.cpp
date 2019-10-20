@@ -82,18 +82,19 @@ int main(int argc, char* argv[])
         ng::horizontal_layout workspaceLayout{ mainLayout };
         ng::view_container workspace{ workspaceLayout };
 
-        workspace.view_stack().evPainting([&workspace](ng::i_graphics_context& aGc)
+        ng::texture backgroundTexture1{ ng::image{ ":/DesignStudio/resources/neoGFX.png" } };
+        ng::texture backgroundTexture2{ ng::image{ ":/DesignStudio/resources/logo_i42.png" } };
+
+        workspace.view_stack().evPainting([&](ng::i_graphics_context& aGc)
         {
-            static ng::texture sBackgroundTexture1{ ng::image{ ":/DesignStudio/resources/neoGFX.png" } };
-            static ng::texture sBackgroundTexture2{ ng::image{ ":/DesignStudio/resources/logo_i42.png" } };
             auto const& cr = workspace.view_stack().client_rect();
             aGc.draw_texture(
-                ng::point{ (cr.extents() - sBackgroundTexture1.extents()) / 2.0 },
-                sBackgroundTexture1,
+                ng::point{ (cr.extents() - backgroundTexture1.extents()) / 2.0 },
+                backgroundTexture1,
                 ng::colour::White.with_alpha(32));
             aGc.draw_texture(
-                ng::rect{ ng::point{ cr.bottom_right() - sBackgroundTexture2.extents() / 2.0 }, sBackgroundTexture2.extents() / 2.0 },
-                sBackgroundTexture2,
+                ng::rect{ ng::point{ cr.bottom_right() - backgroundTexture2.extents() / 2.0 }, backgroundTexture2.extents() / 2.0 },
+                backgroundTexture2,
                 ng::colour::White.with_alpha(32));
         });
 
