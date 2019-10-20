@@ -36,41 +36,44 @@ namespace neogfx
     {
         try
         {
-            neolib::zip zipFile(kFilePath);
-            std::istringstream metaDataFile{ zipFile.extract_to_string(zipFile.index_of("meta.json")) };
-            boost::property_tree::ptree metaData;
-            boost::property_tree::read_json(metaDataFile, metaData);
-            for (auto const& set : metaData.get_child("sets"))
+            if (boost::filesystem::exists(kFilePath))
             {
-                dimension size = set.second.get<dimension>("size");
-                std::string location = set.second.get<std::string>("location");
-                std::string prefix = set.second.get<std::string>("prefix", "");
-                std::string separator = set.second.get<std::string>("separator", "-");
-                for (std::size_t i = 0; i < zipFile.file_count(); ++i)
+                neolib::zip zipFile(kFilePath);
+                std::istringstream metaDataFile{ zipFile.extract_to_string(zipFile.index_of("meta.json")) };
+                boost::property_tree::ptree metaData;
+                boost::property_tree::read_json(metaDataFile, metaData);
+                for (auto const& set : metaData.get_child("sets"))
                 {
-                    auto const& filePath = zipFile.file_path(i);
-                    if (filePath.find(location) == 0)
+                    dimension size = set.second.get<dimension>("size");
+                    std::string location = set.second.get<std::string>("location");
+                    std::string prefix = set.second.get<std::string>("prefix", "");
+                    std::string separator = set.second.get<std::string>("separator", "-");
+                    for (std::size_t i = 0; i < zipFile.file_count(); ++i)
                     {
-                        std::u32string codePoints;
-                        std::vector<std::string> hexCodePoints;
-                        auto filename = boost::filesystem::path(filePath).stem().string();
-                        if (filename.size() <= prefix.size() || (!prefix.empty() && filename.find(prefix) != 0))
-                            continue;
-                        neolib::tokens(filename.substr(prefix.size()), separator, hexCodePoints);
-                        for (auto const& hexCodePoint : hexCodePoints)
+                        auto const& filePath = zipFile.file_path(i);
+                        if (filePath.find(location) == 0)
                         {
-                            std::stringstream ss;
-                            ss << std::hex << hexCodePoint;
-                            uint32_t x;
-                            ss >> x;
-                            if (x < 256)
-                                break;
-                            codePoints.push_back(x);
-                        }
-                        if (!codePoints.empty())
-                        {
-                            iEmojis[codePoints][size] = filePath;
-                            iEmojiMap[codePoints] = std::optional<emoji_id>{};
+                            std::u32string codePoints;
+                            std::vector<std::string> hexCodePoints;
+                            auto filename = boost::filesystem::path(filePath).stem().string();
+                            if (filename.size() <= prefix.size() || (!prefix.empty() && filename.find(prefix) != 0))
+                                continue;
+                            neolib::tokens(filename.substr(prefix.size()), separator, hexCodePoints);
+                            for (auto const& hexCodePoint : hexCodePoints)
+                            {
+                                std::stringstream ss;
+                                ss << std::hex << hexCodePoint;
+                                uint32_t x;
+                                ss >> x;
+                                if (x < 256)
+                                    break;
+                                codePoints.push_back(x);
+                            }
+                            if (!codePoints.empty())
+                            {
+                                iEmojis[codePoints][size] = filePath;
+                                iEmojiMap[codePoints] = std::optional<emoji_id>{};
+                            }
                         }
                     }
                 }

@@ -97,7 +97,7 @@ namespace neogfx
         {
             iDefaultOffscreenWindow = allocate_offscreen_window(nullptr);
             iContext = create_context(iDefaultOffscreenWindow);
-            SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext);
+            glCheck(SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext));
             glCheck(glewInit());
             opengl_renderer::initialize();
             iInitialized = true;
@@ -109,7 +109,7 @@ namespace neogfx
         if (iInitialized && renderer() != neogfx::renderer::None)
         {
             if (iContext != nullptr)
-                SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext);
+                glCheck(SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext));
             opengl_renderer::cleanup();
             if (iContext != nullptr)
                 destroy_context(iContext);
@@ -132,6 +132,9 @@ namespace neogfx
 
     void sdl_renderer::activate_context(const i_render_target& aTarget)
     {
+        //if constexpr (!ndebug)
+        //    std::cerr << "sdl_renderer: activating context..." << std::endl;
+
         if (iContext == nullptr)
             iContext = create_context(aTarget);
 
@@ -141,10 +144,16 @@ namespace neogfx
             initialize();
 
         activate_current_target();
+
+        //if constexpr (!ndebug)
+        //    std::cerr << "sdl_renderer: context activated" << std::endl;
     }
 
     void sdl_renderer::deactivate_context()
     {
+        //if constexpr (!ndebug)
+        //    std::cerr << "sdl_renderer: deactivating context..." << std::endl;
+
         if (iTargetStack.empty())
             throw no_target_active();
         iTargetStack.pop_back();
@@ -155,6 +164,11 @@ namespace neogfx
             iTargetStack.pop_back();
             activeTarget->activate_target();
         }
+        else
+            activate_current_target();
+
+        //if constexpr (!ndebug)
+        //    std::cerr << "sdl_renderer: context deactivated" << std::endl;
     }
 
     i_rendering_engine::opengl_context sdl_renderer::create_context(const i_render_target& aTarget)
@@ -252,17 +266,16 @@ namespace neogfx
 
     sdl_renderer::opengl_context sdl_renderer::create_context(void* aNativeSurfaceHandle)
     {
-        return SDL_GL_CreateContext(static_cast<SDL_Window*>(aNativeSurfaceHandle));
+        opengl_context result;
+        glCheck(result = SDL_GL_CreateContext(static_cast<SDL_Window*>(aNativeSurfaceHandle)));
+        return result;
     }
 
     void* sdl_renderer::allocate_offscreen_window(const i_render_target* aRenderTarget)
     {
-        if (aRenderTarget != nullptr)
-        {
-            auto existingWindow = iOffscreenWindows.find(aRenderTarget);
-            if (existingWindow != iOffscreenWindows.end())
-                return existingWindow->second;
-        }
+        auto existingWindow = iOffscreenWindows.find(aRenderTarget);
+        if (existingWindow != iOffscreenWindows.end())
+            return existingWindow->second;
         SDL_Window* newWindow = SDL_CreateWindow(
             "neogfx::offscreen_window",
             0,
@@ -272,8 +285,7 @@ namespace neogfx
             SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
         if (newWindow == 0)
             throw failed_to_create_offscreen_window(SDL_GetError());
-        if (aRenderTarget != nullptr)
-            iOffscreenWindows[aRenderTarget] = newWindow;
+        iOffscreenWindows[aRenderTarget] = newWindow;
         return newWindow;
     }
 
@@ -292,10 +304,12 @@ namespace neogfx
 
     void sdl_renderer::activate_current_target()
     {
-        glCheck(auto result = SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? active_target()->target_handle() : allocate_offscreen_window(active_target())), static_cast<SDL_GLContext>(iContext)));
-        if (result == -1)
-            throw failed_to_activate_opengl_context(SDL_GetError());
-        SDL_GL_SetSwapInterval(0);
+        glCheck(
+            if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? 
+                active_target()->target_handle() : allocate_offscreen_window(active_target())), static_cast<SDL_GLContext>(iContext)) == -1)
+                throw failed_to_activate_opengl_context(SDL_GetError());
+        )
+        glCheck(SDL_GL_SetSwapInterval(0));
     }
 
     int sdl_renderer::filter_event(void* aSelf, SDL_Event* aEvent)

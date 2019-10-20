@@ -1024,14 +1024,16 @@ namespace neogfx
     
     opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
     {
-        GLuint programHandle = glCheck(glCreateProgram());
+        GLuint programHandle;
+        glCheck(programHandle = glCreateProgram());
         if (0 == programHandle)
             throw failed_to_create_shader_program("Failed to create shader program object");
         bool hasProjectionMatrix = false;
         bool hasTransformationMatrix = false;
         for (auto& s : aShaders)
         {
-            GLuint shader = glCheck(glCreateShader(s.second));
+            GLuint shader;
+            glCheck(shader = glCreateShader(s.second));
             if (0 == shader)
                 throw failed_to_create_shader_program("Failed to create shader object");
             std::string source = s.first;

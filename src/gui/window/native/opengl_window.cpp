@@ -47,8 +47,6 @@ namespace neogfx
     opengl_window::~opengl_window()
     {
         set_destroyed();
-        if (target_active())
-            rendering_engine().deactivate_context();
     }
 
     render_target_type opengl_window::target_type() const
@@ -298,7 +296,8 @@ namespace neogfx
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
         }
         glCheck(glClear(GL_DEPTH_BUFFER_BIT));
-        glCheck(GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
+        GLenum status;
+        glCheck(status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
         if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
         glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
@@ -367,6 +366,8 @@ namespace neogfx
             iFrameBufferTexture = std::nullopt;
             glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
         }
+        if (target_active())
+            deactivate_target();
     }
 
     void opengl_window::set_destroyed()

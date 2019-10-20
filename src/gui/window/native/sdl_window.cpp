@@ -1370,8 +1370,8 @@ namespace neogfx
     void sdl_window::display()
     {
         if (rendering_engine().double_buffering())
-            SDL_GL_SwapWindow(iHandle);
+            glCheck(SDL_GL_SwapWindow(iHandle))
         else
-            glCheck(glFinish());
+            glCheck(glFinish())
     }
 }

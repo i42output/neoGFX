@@ -423,9 +423,7 @@ namespace neogfx
     int32_t opengl_texture::bind(const std::optional<uint32_t>& aTextureUnit) const
     {
         if (aTextureUnit != std::nullopt)
-        {
             glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
-        }
         GLint previousTexture = 0;
         glCheck(glGetIntegerv(sampling() != texture_sampling::Multisample ? sampling() != texture_sampling::Data ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_RECTANGLE : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
