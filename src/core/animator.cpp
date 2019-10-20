@@ -24,7 +24,16 @@
 
 namespace neogfx
 {
-    template <> i_animator& service<i_animator>() { static animator sAnimator{}; return sAnimator; }
+    template<> i_animator& service<i_animator>() 
+    { 
+        static animator sAnimator{}; 
+        return sAnimator; 
+    }
+
+    template<> void teardown_service<i_animator>()
+    {
+        service<i_animator>().stop();
+    }
 
     transition::transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled) :
         iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }
@@ -174,6 +183,11 @@ namespace neogfx
     void animator::remove_transition(transition_id aTransitionId)
     {
         iTransitions.remove(aTransitionId);
+    }
+
+    void animator::stop()
+    {
+        iTimer.disable();
     }
 
     void animator::next_frame()

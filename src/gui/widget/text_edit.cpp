@@ -1815,7 +1815,6 @@ namespace neogfx
             --lineEnd;
         {
             thread_local glyph_text tGlyphText;
-            tGlyphText = glyph_text{};
             optional_text_appearance textAppearance;
             point textPos = aPosition;
             point glyphPos = aPosition;
@@ -1855,7 +1854,10 @@ namespace neogfx
                 glyphPos.x += glyph.advance().cx;
             }
             if (!tGlyphText.empty())
+            {
                 aGraphicsContext.draw_glyph_text(textPos, tGlyphText, *textAppearance);
+                tGlyphText = glyph_text{};
+            }
         }
     }
 

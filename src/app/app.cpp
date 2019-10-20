@@ -30,6 +30,7 @@
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/app/i_clipboard.hpp>
+#include <neogfx/core/i_animator.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
 namespace neogfx
@@ -137,6 +138,7 @@ namespace neogfx
 
     app::loader::~loader()
     {
+        teardown_service<i_animator>();
         teardown_service<i_rendering_engine>();
         app* tp = &iApp;
         app* np = nullptr;

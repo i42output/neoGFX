@@ -60,6 +60,7 @@ namespace neogfx
         virtual i_transition& transition(transition_id aTransitionId) = 0;
         virtual transition_id add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true) = 0;
         virtual void remove_transition(transition_id aTransitionId) = 0;
+        virtual void stop() = 0;
     public:
         virtual double animation_time() const = 0;
     protected:

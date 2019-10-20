@@ -85,6 +85,7 @@ namespace neogfx
         i_transition& transition(transition_id aTransitionId) override;
         transition_id add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true) override;
         void remove_transition(transition_id aTransitionId) override;
+        void stop() override;
     public:
         double animation_time() const override;
     protected:
