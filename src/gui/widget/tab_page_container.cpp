@@ -145,6 +145,7 @@ namespace neogfx
 
     tab_page_container::~tab_page_container()
     {
+        set_destroying();
         while (tab_count() > 0)
             remove_tab(tab_count() - 1);
     }

@@ -149,7 +149,7 @@ namespace neogfx
             auto keep = std::move(iTabs[aTabIndex]);
             iTabs.erase(iTabs.begin() + aTabIndex);
         }
-        if (wasSelected)
+        if (wasSelected && iContainer.as_widget().as_lifetime().is_alive())
         {
             auto nextVisible = (aTabIndex < tab_count() ? next_visible_tab(aTabIndex) : previous_visible_tab(aTabIndex));
             if (nextVisible)
