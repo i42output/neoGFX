@@ -34,8 +34,8 @@ namespace neogfx
     {
         Invalid = 0x00,
         Normal = 0x01,
-        Bold = 0x02,
-        Italic = 0x04,
+        Italic = 0x02,
+        Bold = 0x04,
         Underline = 0x08,
         BoldItalic = Bold | Italic,
         BoldItalicUnderline = Bold | Italic | Underline,

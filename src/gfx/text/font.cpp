@@ -58,12 +58,34 @@ namespace neogfx
             { "ultrabold", font_weight::Ultrabold },
             { "ultra bold", font_weight::Ultrabold },
             { "heavy", font_weight::Heavy },
-            { "black", font_weight::Black }
+            { "black", font_weight::Black },
+        };
+        static std::unordered_map<std::string, font_weight> sAbbreviatedWeightMap =
+        {
+            { "t", font_weight::Thin },
+            { "el", font_weight::Extralight },
+            { "ul", font_weight::Ultralight },
+            { "n", font_weight::Normal },
+            { "r", font_weight::Regular },
+            { "m", font_weight::Medium },
+            { "sb", font_weight::Semibold },
+            { "db", font_weight::Demibold },
+            { "b", font_weight::Bold },
+            { "eb", font_weight::Extrabold },
+            { "ub", font_weight::Ultrabold },
+            { "h", font_weight::Heavy },
+            { "bl", font_weight::Black },
         };
         boost::algorithm::to_lower(aStyleName);
         auto w = sWeightMap.find(aStyleName);
         if (w != sWeightMap.end())
             return w->second;
+        auto aw = sAbbreviatedWeightMap.find(aStyleName);
+        if (aw != sAbbreviatedWeightMap.end())
+            return aw->second;
+        for (auto& wme : sWeightMap)
+            if (aStyleName.find(wme.first) != std::string::npos)
+                return wme.second;
         return font_weight::Normal;
     }
 

@@ -27,10 +27,10 @@
     <ClCompile Include="..\..\..\src\card_space.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\video_poker.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\video_poker.res.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\video_poker.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\video_poker.res.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
   </ItemGroup>

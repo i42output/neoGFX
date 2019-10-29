@@ -43,6 +43,7 @@ namespace neogui
             iNamingConvention{ naming_convention::NeoGfx },
             iLayout0{ client_layout() }, iLayout01{ iLayout0 }, iLayout1{ iLayout01 }, iLayout2{ iLayout01 }, 
             iType{ iLayout1, "Project Type"_t }, iDefaults{ iLayout2, "Project Defaults"_t },
+            iNewApp{ iType.item_layout(), "Blank app"_t },
             iNewMVCApp{ iType.item_layout(), "MVC (model-view-controller) app"_t },
             iNewDialogApp{ iType.item_layout(), "Dialog app"_t },
             iNew2DGame{ iType.item_layout(), "2D game"_t },
@@ -106,6 +107,7 @@ namespace neogui
         neogfx::vertical_layout iLayout1;
         neogfx::vertical_layout iLayout2;
         neogfx::group_box iType;
+        neogfx::radio_button iNewApp;
         neogfx::radio_button iNewMVCApp;
         neogfx::radio_button iNewDialogApp;
         neogfx::radio_button iNew2DGame;

@@ -76,14 +76,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IntDir>.\x64\Debug\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>
-    </IntDir>
+    <IntDir>.\x64\Release\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -183,17 +183,17 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\game.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
-    <ClCompile Include="x64\Debug\GeneratedFiles\test.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\test.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\toolbar.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\toolbar.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\test.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\test.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\toolbar.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\toolbar.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -206,9 +206,9 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/test.nrc.cpp</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/test.nrc.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/test.nrc.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/test.nrc.cpp;$(IntDir)/GeneratedFiles/test.ui.hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/test.nrc.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/test.nrc.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/test.nrc.cpp;$(IntDir)/GeneratedFiles/test.ui.hpp</Outputs>
       <SubType>Designer</SubType>
     </CustomBuild>
   </ItemGroup>

@@ -748,7 +748,7 @@ namespace neogfx
     void drop_list::show_view()
     {
         iListProxy.show_view();
-        if (editable())
+        if (editable() && !accepting_selection())
         {
             if ((iStyle & style::NoFilter) != style::NoFilter)
                 presentation_model().filter_by(0, input_widget().text());

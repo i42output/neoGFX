@@ -37,7 +37,7 @@ namespace neogfx
         typedef std::pair<const void*, std::size_t> memory_block_type;
     private:
         typedef neolib::variant<filename_type, memory_block_type> source_type;
-        typedef std::multimap<font_style, std::pair<std::string, FT_Long>> style_map;
+        typedef std::map<std::pair<font_style, std::string>, FT_Long> style_map;
         typedef std::map<std::tuple<FT_Long, font::point_size, size>, std::shared_ptr<i_native_font_face>> face_map;
         typedef std::unordered_map<i_native_font_face*, uint32_t> usage_map;
     public:

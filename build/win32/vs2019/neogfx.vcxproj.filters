@@ -1279,23 +1279,23 @@
     <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\icons.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\resources.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\icons.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\resources.nrc.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_rendering_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\units.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

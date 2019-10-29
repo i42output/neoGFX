@@ -29,8 +29,10 @@ namespace neogfx
 {
     class i_native_font
     {
+        // construction
     public:
         virtual ~i_native_font() {}
+        // operations
     public:
         virtual const std::string& family_name() const = 0;
         virtual bool has_style(font_style aStyle) const = 0;
@@ -39,8 +41,25 @@ namespace neogfx
         virtual const std::string& style_name(uint32_t aStyleIndex) const = 0;
         virtual i_native_font_face& create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+        // reference counting
     public:
         virtual void add_ref(i_native_font_face& aFace) = 0;
         virtual void release(i_native_font_face& aFace) = 0;
+        // helpers
+    public:
+        font_style min_style() const
+        {
+            auto minStyle = style(0u);
+            for (auto si = 1u; si < style_count(); ++si)
+                minStyle = std::min(minStyle, style(si));
+            return minStyle;
+        }
+        font_weight min_weight() const
+        {
+            auto minWeight = font::weight_from_style_name(style_name(0));
+            for (auto si = 1u; si < style_count(); ++si)
+                minWeight = std::min(minWeight, font::weight_from_style_name(style_name(si)));
+            return minWeight;
+        }
     };
 }

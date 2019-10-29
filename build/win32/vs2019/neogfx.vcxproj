@@ -635,19 +635,19 @@
     <ClCompile Include="..\..\..\src\hid\surface_window_proxy.cpp" />
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
-    <ClCompile Include="x64\Debug\GeneratedFiles\icons.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\resources.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\icons.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\resources.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>

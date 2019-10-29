@@ -55,7 +55,8 @@ namespace neogfx
 
     bool native_font::has_style(font_style aStyle) const
     {
-        return iStyleMap.find(aStyle) != iStyleMap.end();
+        auto result = std::find_if(iStyleMap.begin(), iStyleMap.end(), [aStyle](auto const& s) { return s.first.first == aStyle; });
+        return result != iStyleMap.end();
     }
 
     uint32_t native_font::style_count() const
@@ -65,12 +66,12 @@ namespace neogfx
 
     font_style native_font::style(uint32_t aStyleIndex) const
     {
-        return std::next(iStyleMap.begin(), aStyleIndex)->first;
+        return std::next(iStyleMap.begin(), aStyleIndex)->first.first;
     }
 
     const std::string& native_font::style_name(uint32_t aStyleIndex) const
     {
-        return std::next(iStyleMap.begin(), aStyleIndex)->second.first;
+        return std::next(iStyleMap.begin(), aStyleIndex)->first.second;
     }
 
     namespace
@@ -95,11 +96,11 @@ namespace neogfx
     {
         std::multimap<font_style, style_map::value_type*> matches;
         for (auto& s : iStyleMap)
-            matches.insert(std::make_pair(static_cast<font_style>(matching_bits(static_cast<uint32_t>(s.first), static_cast<uint32_t>(aStyle))), &s));
+            matches.insert(std::make_pair(static_cast<font_style>(matching_bits(static_cast<uint32_t>(s.first.first), static_cast<uint32_t>(aStyle))), &s));
         if (matches.empty())
             throw no_matching_style_found();
-        FT_Long faceIndex = matches.rbegin()->second->second.second;
-        font_style faceStyle = matches.rbegin()->second->first;
+        FT_Long faceIndex = matches.rbegin()->second->second;
+        font_style faceStyle = matches.rbegin()->second->first.first;
         return create_face(faceIndex, faceStyle, aSize, aDevice);
     }
 
@@ -107,15 +108,15 @@ namespace neogfx
     {
         style_map::value_type* foundStyle = 0;
         for (auto& s : iStyleMap)
-            if (neolib::make_ci_string(s.second.first) == neolib::make_ci_string(aStyleName))
+            if (neolib::make_ci_string(s.first.second) == neolib::make_ci_string(aStyleName))
             {
                 foundStyle = &s;
                 break;
             }
-        if (foundStyle == 0)
+        if (foundStyle == nullptr)
             return create_face(font_style::Normal, aSize, aDevice);
-        FT_Long faceIndex = foundStyle->second.second;
-        font_style faceStyle = foundStyle->first;
+        FT_Long faceIndex = foundStyle->second;
+        font_style faceStyle = foundStyle->first.first;
         return create_face(faceIndex, faceStyle, aSize, aDevice);
     }
 
@@ -172,9 +173,14 @@ namespace neogfx
                 style = static_cast<font_style>(style | font_style::Italic);
             if (face->style_flags & FT_STYLE_FLAG_BOLD)
                 style = static_cast<font_style>(style | font_style::Bold);
+            auto const searchKey = neolib::ci_string{ face->style_name };
+            if (searchKey.find("italic") != neolib::ci_string::npos)
+                style |= font_style::Italic;
+            if (searchKey.find("bold") != neolib::ci_string::npos || searchKey.find("heavy") != neolib::ci_string::npos || searchKey.find("black") != neolib::ci_string::npos)
+                style |= font_style::Bold;
             if (style == font_style::Invalid)
                 style = font_style::Normal;
-            iStyleMap.emplace(style, std::make_pair(face->style_name, aFaceIndex));
+            iStyleMap.emplace(std::make_pair(style, face->style_name), aFaceIndex);
         }
         catch (...)
         {

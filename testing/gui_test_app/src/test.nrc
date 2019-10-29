@@ -506,6 +506,280 @@
                                 }
                             }
                         }
+                        tab_page: {
+                            id: pageMdi
+                            tab_text: "MDI"
+                        }
+                        tab_page: {
+                            id: pageMessageBox
+                            tab_text: "Message Boxes"
+                            horizontal_layout: {
+                                id: pageLayoutMessageBox
+                                group_box: {
+                                    id: groupMessageBoxIcons
+                                    text: "Icons"
+                                    item_layout: {
+                                        radio_button: {
+                                            id: radioMessageBoxIconInformation
+                                            text: "Information"
+                                            image: {
+                                                uri: ":/neogfx/resources/icons.naa#information.png"
+                                                size: 24spx
+                                            }
+                                        }
+                                        radio_button: {
+                                            id: radioMessageBoxIconQuestion
+                                            text: "Question"
+                                            image: {
+                                                uri: ":/neogfx/resources/icons.naa#question.png"
+                                                size: 24spx
+                                            }
+                                        }
+                                        radio_button: {
+                                            id: radioMessageBoxIconWarning
+                                            text: "Warning"
+                                            image: {
+                                                uri: ":/neogfx/resources/icons.naa#warning.png"
+                                                size: 24spx
+                                            }
+                                        }
+                                        radio_button: {
+                                            id: radioMessageBoxIconStop
+                                            text: "Stop"
+                                            image: {
+                                                uri: ":/neogfx/resources/icons.naa#stop.png"
+                                                size: 24spx
+                                            }
+                                        }
+                                        radio_button: {
+                                            id: radioMessageBoxIconError
+                                            text: "Error"
+                                            image: {
+                                                uri: ":/neogfx/resources/icons.naa#error.png"
+                                                size: 24spx
+                                            }
+                                        }
+                                        radio_button: {
+                                            id: radioMessageBoxIconCritical
+                                            text: "Critical"
+                                            image: {
+                                                uri: ":/neogfx/resources/icons.naa#critical.png"
+                                                size: 24spx
+                                            }
+                                        }
+                                    }
+                                }
+                                group_box: {
+                                    id: groupMessageBoxButtons
+                                    text: "Buttons"
+                                }
+                                group_box: {
+                                    id: groupMessageBoxText
+                                    text: "Text"
+                                    item_layout: {
+                                        label: {
+                                            text: "Title:"
+                                        }
+                                        line_edit: {
+                                            id: lineEditMessageBoxTitle
+                                            text: "neoGFX Message Box Test"
+                                        }
+                                        label: {
+                                            text: "Text:"
+                                        }
+                                        text_edit: {
+                                            id: textEditMessageBoxText
+                                            text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
+                                        }
+                                        label: {
+                                            text: "Detailed Text:"
+                                        }
+                                        text_edit: {
+                                            id: textEditMessageBoxDetailedText
+                                            text: "This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank."
+                                            minimum_size: [ 256spx 128spx ]
+                                            size_policy: Minimum
+                                        }
+                                    }
+                                }
+                                push_button: {
+                                    id: buttonOpenMessageBox
+                                    text: "Open Message Box"
+                                    size_policy: Minimum
+                                }
+                                label: {
+                                    id: lableMessageBoxResult
+                                }
+                            }
+                        }
+                        tab_page: {
+                            id: pageItemViews
+                            tab_text: "Item Views"
+                            vertical_layout: {
+                                id: layoutItemViews
+                                table_view: {
+                                    id: tableView1
+                                    minimum_size: [ 128 128 ]
+                                }
+                                table_view: {
+                                    id: tableView2
+                                    minimum_size: [ 128 128 ]
+                                }
+                                push_button: {
+                                    id: button10
+                                    text: "Toggle List\nHeader View"
+                                }
+                                horizontal_layout: {
+                                    id: layoutTableViewTweaks
+                                    alignment: Top
+                                    spacer: {}
+                                    vertical_layout: {
+                                        id: layoutTableViewSelection
+                                        weight: 0
+                                        radio_button: {
+                                            id: radioNoTableViewSelection
+                                            text: "No selection"
+                                        }
+                                        radio_button: {
+                                            id: radioSingleTableViewSelection
+                                            text: "Single selection"
+                                        }
+                                        radio_button: {
+                                            id: radioMultipleTableViewSelection
+                                            text: "Multiple selection"
+                                        }
+                                        radio_button: {
+                                            id: radioExtendedTableViewSelection
+                                            text: "Extended selection"
+                                        }
+                                    }
+                                    group_box: {
+                                        id: groupColumn5
+                                        text: "Column 5"
+                                        item_layout: {
+                                            check_box: {
+                                                id: checkColumn5ReadOnly
+                                                text: "Read only"
+                                            }
+                                            check_box: {
+                                                id: checkColumn5Unselectable
+                                                text: "Unselectable"
+                                            }
+                                            vertical_spacer: {}
+                                        }
+                                    }
+                                    spacer: {}
+                                }
+                            }
+                        }
+                        tab_page: {
+                            id: pageLots
+                            tab_text: "Lots"
+                        }
+                        tab_page: {
+                            id: pageImages
+                            tab_text: "Images"
+                            horizontal_layout: {
+                                vertical_layout: {
+                                    image_widget: {
+                                        image: ":/test/resources/channel_256.png"
+                                        aspect_ratio: Ignore
+                                        background_colour: Red
+                                        size_policy: Expanding
+                                        minimum_size: 0
+                                    }
+                                    image_widget: {
+                                        image: ":/test/resources/channel_256.png"
+                                        aspect_ratio: Keep
+                                        background_colour: Green
+                                        size_policy: Expanding
+                                        minimum_size: 0
+                                    }
+                                    image_widget: {
+                                        image: ":/test/resources/channel_256.png"
+                                        aspect_ratio: KeepExpanding
+                                        background_colour: Blue
+                                        size_policy: Expanding
+                                        minimum_size: 0
+                                    }
+                                    image_widget: {
+                                        image: ":/test/resources/channel_256.png"
+                                        aspect_ratio: Stretch
+                                        background_colour: Magenta
+                                        size_policy: Expanding
+                                        minimum_size: 0
+                                    }
+                                }
+                                image_widget: {
+                                    image: ":/test/resources/orca.png"
+                                }
+                                grid_layout: {
+                                    id: gridLayoutImages
+                                }
+                            }
+                        }
+                        tab_page: {
+                            id: pageGame
+                            tab_text: "Game"
+                            vertical_layout: {
+                                id: layoutGame
+                            }
+                        }
+                        tab_page: {
+                            id: pageDrawing
+                            tab_text: "Drawing"
+                            vertical_layout: {
+                                id: layoutDrawing1
+                                horizontal_layout: {
+                                    id: layoutDrawing2
+                                    size_policy: Minimum
+                                    label: {
+                                        text: "Easing:"
+                                    }
+                                    drop_list: {
+                                        id: dropListEasing
+                                        size_policy: Minimum
+                                    }
+                                }
+                            }
+                        }
+                        tab_page: {
+                            id: pageEditor
+                            tab_text: "Editor"
+                            vertical_layout: {
+                                id: layoutEditor
+                                text_edit: {
+                                    id: textEditEditor
+                                    default_style: {
+                                        text_colour: {
+                                            gradient: [ Red White Horizontal ]
+                                        }
+                                    }
+                                }
+                                push_button: {
+                                    id: buttonStyle1
+                                    text: "Style 1"
+                                }
+                                push_button: {
+                                    id: buttonStyle2
+                                    text: "Style 2"
+                                }
+                            }
+                        }
+                        tab_page: {
+                            id: pageCircles
+                            tab_text: "Circles"
+                        }
+                        tab_page: {
+                            id: pageFoo
+                            tab_text: "Foo"
+                            tab_image: ":/test/resources/channel.png"
+                        }
+                        tab_page: {
+                            id: pageBar
+                            tab_text: "Bar"
+                            tab_image: ":/test/resources/channel.png"
+                        }
                     }
                 }
             }

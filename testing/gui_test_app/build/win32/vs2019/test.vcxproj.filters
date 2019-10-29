@@ -27,16 +27,16 @@
     <ClCompile Include="..\..\..\src\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\test.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\test.res.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\toolbar.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\test.res.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\test.nrc.cpp">
+    <ClCompile Include="x64\Release\GeneratedFiles\toolbar.res.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\toolbar.nrc.cpp">
+    <ClCompile Include="x64\Debug\GeneratedFiles\toolbar.res.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
   </ItemGroup>
