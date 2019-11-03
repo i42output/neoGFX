@@ -186,7 +186,8 @@ namespace neogfx
             }
         }
         for (auto& ff : iFontFamilies)
-            std::sort(ff.second.begin(), ff.second.end(), [](auto const& f1, auto const& f2) { return f1->min_style() < f2->min_style() ? true : f1->min_weight() < f2->min_weight(); });
+            std::sort(ff.second.begin(), ff.second.end(), 
+                [](auto const& f1, auto const& f2) { return f1->min_style() < f2->min_style() || (f1->min_style() == f2->min_style() && f1->min_weight() < f2->min_weight()); });
     }
 
     font_manager::~font_manager()

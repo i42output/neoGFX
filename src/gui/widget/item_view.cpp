@@ -185,13 +185,13 @@ namespace neogfx
         iSelectionModel = aSelectionModel;
         if (has_selection_model())
         {
-            selection_model().presentation_model_added([this](i_item_presentation_model& aNewModel) { presentation_model_added(aNewModel); });
-            selection_model().presentation_model_changed([this](i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) { presentation_model_changed(aNewModel, aOldModel); });
-            selection_model().presentation_model_removed([this](i_item_presentation_model& aOldModel) { presentation_model_removed(aOldModel); });
-            selection_model().mode_changed([this](item_selection_mode aNewMode) { mode_changed(aNewMode); });
-            selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) { current_index_changed(aCurrentIndex, aPreviousIndex); });
-            selection_model().selection_changed([this](const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) { selection_changed(aCurrentSelection, aPreviousSelection); });
-            selection_model().destroyed([this]() { iSelectionModel = nullptr; });
+            iSelectionModelSink += selection_model().presentation_model_added([this](i_item_presentation_model& aNewModel) { presentation_model_added(aNewModel); });
+            iSelectionModelSink += selection_model().presentation_model_changed([this](i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) { presentation_model_changed(aNewModel, aOldModel); });
+            iSelectionModelSink += selection_model().presentation_model_removed([this](i_item_presentation_model& aOldModel) { presentation_model_removed(aOldModel); });
+            iSelectionModelSink += selection_model().mode_changed([this](item_selection_mode aNewMode) { mode_changed(aNewMode); });
+            iSelectionModelSink += selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) { current_index_changed(aCurrentIndex, aPreviousIndex); });
+            iSelectionModelSink += selection_model().selection_changed([this](const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) { selection_changed(aCurrentSelection, aPreviousSelection); });
+            iSelectionModelSink += selection_model().destroyed([this]() { iSelectionModel = nullptr; });
             if (has_presentation_model())
                 selection_model().set_presentation_model(presentation_model());
         }
