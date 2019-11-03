@@ -157,7 +157,7 @@ namespace neogfx
             else
                 iLabel.set_margins(neogfx::optional_margins{});
         };
-        iInputBoxContainer.Margins.evChanged(label_margin_updater);
+        iInputBoxContainer.Margins.Changed(label_margin_updater);
         label_margin_updater(iInputBoxContainer.Margins);
         iLabel.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
         iInputBox.set_margins(neogfx::margins{});
@@ -172,7 +172,7 @@ namespace neogfx
         {
             input_box().set_size_hint(size_hint{ input_box().size_hint().primaryHint, hint().text() });
         };
-        hint().evTextChanged(size_hint_updater);
+        hint().TextChanged(size_hint_updater);
         size_hint_updater();
 
         auto hint_updater = [this]()
@@ -185,8 +185,8 @@ namespace neogfx
         {
             hint_updater();
         });
-        input_box().evDefaultStyleChanged(hint_updater);
-        input_box().evTextChanged(hint_updater);
+        input_box().DefaultStyleChanged(hint_updater);
+        input_box().TextChanged(hint_updater);
         hint_updater();
     }
 }

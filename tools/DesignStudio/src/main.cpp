@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
         ng::texture backgroundTexture1{ ng::image{ ":/DesignStudio/resources/neoGFX.png" } };
         ng::texture backgroundTexture2{ ng::image{ ":/DesignStudio/resources/logo_i42.png" } };
 
-        workspace.view_stack().evPainting([&](ng::i_graphics_context& aGc)
+        workspace.view_stack().Painting([&](ng::i_graphics_context& aGc)
         {
             auto const& cr = workspace.view_stack().client_rect();
             aGc.draw_texture(

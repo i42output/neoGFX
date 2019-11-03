@@ -144,7 +144,7 @@ namespace neogfx
             iText = aText;
             iTextExtent = std::nullopt;
             iGlyphText = neogfx::glyph_text{};
-            evTextChanged.trigger();
+            TextChanged.trigger();
             if (has_parent_layout())
                 parent_layout().invalidate();
             if (oldSize != minimum_size() && has_managing_layout())

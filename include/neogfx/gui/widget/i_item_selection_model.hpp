@@ -20,9 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
-#include "item_index.hpp"
-#include "item_selection.hpp"
+#include <neogfx/core/i_event.hpp>
+#include <neogfx/core/i_object.hpp>
+#include <neogfx/gui/widget/item_index.hpp>
+#include <neogfx/gui/widget/item_selection.hpp>
 
 namespace neogfx
 {
@@ -75,25 +76,15 @@ namespace neogfx
 
     class i_item_selection_model;
 
-    class i_item_selection_model_subscriber
-    {
-    public:
-        virtual void model_added(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel) = 0;
-        virtual void model_changed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) = 0;
-        virtual void model_removed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aOldModel) = 0;
-        virtual void selection_mode_changed(const i_item_selection_model& aSelectionModel, item_selection_mode aNewMode) = 0;
-        virtual void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) = 0;
-        virtual void selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) = 0;
-        virtual void selection_model_destroyed(const i_item_selection_model& aSelectionModel) = 0;
-    public:
-        enum notify_type { NotifyModelAdded, NotifyModelChanged, NotifyModelRemoved, NotifySelectionModeChanged, NotifyCurrentIndexChanged, NotifySelectionChanged, NotifySelectionModelDestroyed };
-    };
-
-    class i_item_selection_model
+    class i_item_selection_model : public i_object
     {
     public:
         declare_event(current_index_changed, const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
         declare_event(selection_changed, const item_selection&, const item_selection&)
+        declare_event(presentation_model_added, i_item_presentation_model&)
+        declare_event(presentation_model_changed, i_item_presentation_model&, i_item_presentation_model&)
+        declare_event(presentation_model_removed, i_item_presentation_model&)
+        declare_event(mode_changed, item_selection_mode)
     public:
         struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::i_item_selection_model::no_presentation_model") {} };
         struct no_current_index : std::logic_error { no_current_index() : std::logic_error("neogfx::i_item_selection_model::no_current_index") {} };
@@ -128,9 +119,6 @@ namespace neogfx
         virtual bool filtering() const = 0;
     public:
         virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
-    public:
-        virtual void subscribe(i_item_selection_model_subscriber& aSubscriber) = 0;
-        virtual void unsubscribe(i_item_selection_model_subscriber& aSubscriber) = 0;
     };
 
     inline item_selection_operation operator|(item_selection_operation aLhs, item_selection_operation aRhs)

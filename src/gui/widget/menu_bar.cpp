@@ -80,7 +80,7 @@ namespace neogfx
                 if (selectedItem.type() == i_menu_item::SubMenu)
                 {
                     if (!selectedItem.sub_menu().is_open())
-                        evOpenSubMenu.trigger(selectedItem.sub_menu());
+                        OpenSubMenu.trigger(selectedItem.sub_menu());
                     if (selectedItem.sub_menu().has_available_items())
                         selectedItem.sub_menu().select_item_at(selectedItem.sub_menu().first_available_item(), false);
                 }
@@ -98,7 +98,7 @@ namespace neogfx
                     clear_selection();
                 }
                 else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
-                    evOpenSubMenu.trigger(selectedItem.sub_menu());
+                    OpenSubMenu.trigger(selectedItem.sub_menu());
             }
             break;
         case ScanCode_ESCAPE:
@@ -136,11 +136,11 @@ namespace neogfx
             if (aClickedWidget != this && (aClickedWidget == 0 || !is_ancestor_of(*aClickedWidget)))
                 clear_selection();
         });
-        iSink += evItemAdded([this](item_index aItemIndex)
+        iSink += ItemAdded([this](item_index aItemIndex)
         {
             layout().add_at(aItemIndex, std::make_shared<menu_item_widget>(*this, item_at(aItemIndex)));
         });
-        iSink += evItemRemoved([this](item_index aItemIndex)
+        iSink += ItemRemoved([this](item_index aItemIndex)
         {
             if (layout().is_widget_at(aItemIndex))
             {
@@ -149,7 +149,7 @@ namespace neogfx
             }
             layout().remove_at(aItemIndex);
         });
-        iSink += evItemSelected([this](i_menu_item& aMenuItem)
+        iSink += ItemSelected([this](i_menu_item& aMenuItem)
         {
             if (iOpenSubMenu->has_menu())
             {
@@ -158,19 +158,19 @@ namespace neogfx
                 {
                     close_sub_menu(false);
                     if (aMenuItem.type() == i_menu_item::SubMenu)
-                        evOpenSubMenu.trigger(aMenuItem.sub_menu());
+                        OpenSubMenu.trigger(aMenuItem.sub_menu());
                 }
             }
             update();
         });
-        iSink += evSelectionCleared([this]()
+        iSink += SelectionCleared([this]()
         {
             if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
                 service<i_keyboard>().ungrab_keyboard(*this);
             close_sub_menu(false);
             update();
         });
-        iSink += evOpenSubMenu([this](i_menu& aSubMenu)
+        iSink += OpenSubMenu([this](i_menu& aSubMenu)
         {
             auto& itemWidget = layout().get_widget_at<menu_item_widget>(find(aSubMenu));
             close_sub_menu(false);
@@ -182,7 +182,7 @@ namespace neogfx
                 if (iOpenSubMenu->has_menu())
                     iOpenSubMenu->clear_menu();
             });
-            iSink2 += iOpenSubMenu->evClosed([this]()
+            iSink2 += iOpenSubMenu->Closed([this]()
             {
                 close_sub_menu();
                 iOpenSubMenu.reset();

@@ -102,6 +102,6 @@ namespace neogfx
             do_layout_items<layout::row_major<flow_layout>>(aPosition, aSize);
         if (has_layout_owner())
             layout_owner().layout_items_completed();
-        evLayoutCompleted.trigger();
+        LayoutCompleted.trigger();
     }
 }

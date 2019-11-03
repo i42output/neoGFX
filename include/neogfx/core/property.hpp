@@ -254,16 +254,16 @@ namespace neogfx
                     iOwner.property_changed(*this);
                 if (destroyed)
                     return *this;
-                evVariantChanged.trigger(get());
+                VariantChanged.trigger(get());
                 if (destroyed)
                     return *this;
-                evVariantChangedFromTo.trigger(property_variant{ previousValue }, get());
+                VariantChangedFromTo.trigger(property_variant{ previousValue }, get());
                 if (destroyed)
                     return *this;
-                evChanged.trigger(value());
+                Changed.trigger(value());
                 if (destroyed)
                     return *this;
-                evChangedFromTo.trigger(previousValue, value());
+                ChangedFromTo.trigger(previousValue, value());
                 if (destroyed)
                     return *this;
                 if (has_delegate())

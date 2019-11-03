@@ -39,9 +39,9 @@ namespace neogfx
     public:
         using list_view::total_item_area;
     protected:
-        void items_filtered(const i_item_presentation_model& aPresentationModel) override;
+        void items_filtered() override;
     protected:
-        void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) override;
+        void current_index_changed(const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) override;
     protected:
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
     protected:

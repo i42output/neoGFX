@@ -96,7 +96,7 @@ namespace neogfx::game
         {
             yield();
             component_lock_guard<rigid_body> lgRigidBodies{ ecs() };
-            ecs().system<game_world>().evApplyingPhysics.trigger(worldClock.time);
+            ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
                 rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -133,7 +133,7 @@ namespace neogfx::game
                 rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
-            ecs().system<game_world>().evPhysicsApplied.trigger(worldClock.time);
+            ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_lock_guard<clock> lgClock{ ecs() };
             worldClock.time += worldClock.timeStep;
         }

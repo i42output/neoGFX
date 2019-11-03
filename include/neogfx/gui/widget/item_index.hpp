@@ -25,6 +25,7 @@
 
 namespace neogfx
 {
+    template <typename ModelIndexType>
     class item_index
     {
     public:
@@ -45,17 +46,17 @@ namespace neogfx
         {
         }
     public:
-        item_index& operator+=(const item_index& aRhs)
+        ModelIndexType& operator+=(const item_index& aRhs)
         {
             iRow += aRhs.iRow;
             iColumn += aRhs.iColumn;
-            return *this;
+            return static_cast<ModelIndexType&>(*this);
         }
-        item_index& operator-=(const item_index& aRhs)
+        ModelIndexType& operator-=(const item_index& aRhs)
         {
             iRow -= aRhs.iRow;
             iColumn -= aRhs.iColumn;
-            return *this;
+            return static_cast<ModelIndexType&>(*this);
         }
     public:
         row_type row() const
@@ -79,25 +80,30 @@ namespace neogfx
         column_type iColumn;
     };
 
-    inline bool operator==(const item_index& aLhs, const item_index& aRhs)
+    template <typename ModelIndexType>
+    inline bool operator==(const item_index<ModelIndexType>& aLhs, const item_index<ModelIndexType>& aRhs)
     {
         return aLhs.row() == aRhs.row() && aLhs.column() == aRhs.column();
     }
 
-    inline bool operator!=(const item_index& aLhs, const item_index& aRhs)
+    template <typename ModelIndexType>
+    inline bool operator!=(const item_index<ModelIndexType>& aLhs, const item_index<ModelIndexType>& aRhs)
     {
         return !(aLhs == aRhs);
     }
 
-    inline bool operator<(const item_index& aLhs, const item_index& aRhs)
+    template <typename ModelIndexType>
+    inline bool operator<(const item_index<ModelIndexType>& aLhs, const item_index<ModelIndexType>& aRhs)
     {
         return std::forward_as_tuple(aLhs.row(), aLhs.column()) < std::forward_as_tuple(aRhs.row(), aRhs.column());
     }
 
-    inline bool operator>(const item_index& aLhs, const item_index& aRhs)
+    template <typename ModelIndexType>
+    inline bool operator>(const item_index<ModelIndexType>& aLhs, const item_index<ModelIndexType>& aRhs)
     {
         return std::forward_as_tuple(aLhs.row(), aLhs.column()) > std::forward_as_tuple(aRhs.row(), aRhs.column());
     }
 
-    typedef std::optional<item_index> optional_item_index;
+    template <typename ModelIndexType>
+    using optional_item_index = std::optional<item_index<ModelIndexType>> ;
 }

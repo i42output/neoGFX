@@ -20,13 +20,19 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/i_lifetime.hpp>
+
+#include <neogfx/core/i_event.hpp>
 #include <neogfx/core/i_properties.hpp>
 
 namespace neogfx
 {
     class i_object
     {
+    public:
+        declare_event(destroying);
+        declare_event(destroyed);
     public:
         virtual neolib::i_lifetime& as_lifetime() = 0;
     public:

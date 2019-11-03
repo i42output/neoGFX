@@ -189,7 +189,7 @@ void create_game(ng::i_layout& aLayout)
 
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     // Some information text...
-    canvas.evEntitiesRendered([&, clockFont](ng::i_graphics_context& gc)
+    canvas.EntitiesRendered([&, clockFont](ng::i_graphics_context& gc)
     {
         std::ostringstream text;
         auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
@@ -201,7 +201,7 @@ void create_game(ng::i_layout& aLayout)
     // Instantiate physics...
     ecs.system<ng::game::simple_physics>();
 
-    ~~~~ecs.system<ng::game::game_world>().evApplyingPhysics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+    ~~~~ecs.system<ng::game::game_world>().ApplyingPhysics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
     {
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
@@ -226,7 +226,7 @@ void create_game(ng::i_layout& aLayout)
                 shipInfo->set_value(oss.str()); */
     });
 
-    ecs.system<ng::game::game_world>().evPhysicsApplied([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+    ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
     {
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
@@ -293,7 +293,7 @@ void create_game(ng::i_layout& aLayout)
     }
 */
 
-    canvas.evMouse([&canvas, spaceship](const neogfx::mouse_event& e)
+    canvas.Mouse([&canvas, spaceship](const neogfx::mouse_event& e)
     {
         if ((e.type() == neogfx::mouse_event_type::ButtonClicked ||
             e.type() == neogfx::mouse_event_type::Moved) && (e.mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left)

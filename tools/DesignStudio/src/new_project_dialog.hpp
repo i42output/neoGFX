@@ -77,16 +77,16 @@ namespace neogui
             {
                 iNamespace.set_text(to_symbol_name(iName.text(), iNamingConvention, named_entity::Namespace));
             };
-            iName.evTextChanged([=]()
+            iName.TextChanged([=]()
             {
                 updateNamespace();
             });
-            iLowerCaseWithUnderscores.evChecked([=]() { iNamingConvention = naming_convention::LowerCaseWithUnderscores; updateNamespace(); });
-            iMixedCaseWithUnderscores.evChecked([=]() { iNamingConvention = naming_convention::MixedCaseWithUnderscores; updateNamespace(); });
-            iUpperCamelCase.evChecked([=]() { iNamingConvention = naming_convention::UpperCamelCase; updateNamespace(); });
-            iLowerCamelCase.evChecked([=]() { iNamingConvention = naming_convention::LowerCamelCase; updateNamespace(); });
-            iNeoGfx.evChecked([=]() { iNamingConvention = naming_convention::NeoGfx; updateNamespace(); });
-            evTryAccept([this](bool& aCanAccept)
+            iLowerCaseWithUnderscores.Checked([=]() { iNamingConvention = naming_convention::LowerCaseWithUnderscores; updateNamespace(); });
+            iMixedCaseWithUnderscores.Checked([=]() { iNamingConvention = naming_convention::MixedCaseWithUnderscores; updateNamespace(); });
+            iUpperCamelCase.Checked([=]() { iNamingConvention = naming_convention::UpperCamelCase; updateNamespace(); });
+            iLowerCamelCase.Checked([=]() { iNamingConvention = naming_convention::LowerCamelCase; updateNamespace(); });
+            iNeoGfx.Checked([=]() { iNamingConvention = naming_convention::NeoGfx; updateNamespace(); });
+            TryAccept([this](bool& aCanAccept)
             {
                 if (to_symbol_name(iName.text(), iNamingConvention, named_entity::Namespace).empty())
                 {

@@ -126,7 +126,7 @@ namespace neogfx
         if (destroyed)
             return;
         iClosed = true;
-        evClosed.trigger();
+        Closed.trigger();
         if (!destroyed)
             set_destroyed();
     }
@@ -428,7 +428,7 @@ namespace neogfx
         if (!iClosed)
         {
             iClosed = true;
-            evClosed.trigger();
+            Closed.trigger();
             if (!destroyed)
                 set_destroyed();
         }

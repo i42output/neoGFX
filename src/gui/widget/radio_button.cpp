@@ -192,9 +192,9 @@ namespace neogfx
                 nextRadioButton->uncheck();
         button::set_checked_state(aCheckedState);
         if (is_on())
-            evOn.trigger();
+            On.trigger();
         else if (is_off())
-            evOff.trigger();
+            Off.trigger();
         return true;
     }
 

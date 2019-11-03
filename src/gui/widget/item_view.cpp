@@ -47,12 +47,6 @@ namespace neogfx
 
     item_view::~item_view()
     {
-        if (has_selection_model())
-            selection_model().unsubscribe(*this);
-        if (has_presentation_model())
-            presentation_model().unsubscribe(*this);
-        if (has_model())
-            model().unsubscribe(*this);
     }
 
     bool item_view::has_model() const
@@ -86,12 +80,15 @@ namespace neogfx
     {
         if (iModel == aModel)
             return;
-        if (has_model())
-            model().unsubscribe(*this);
+        iModelSink.clear();
         iModel = aModel;
         if (has_model())
         {
-            model().subscribe(*this);
+            iModelSink += model().column_info_changed([this](item_model_index::value_type aColumnIndex) { column_info_changed(aColumnIndex); });
+            iModelSink += model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
+            iModelSink += model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
+            iModelSink += model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
+            iModelSink += model().destroying([this]() { iModel = nullptr; });
             if (has_presentation_model())
                 presentation_model().set_item_model(*aModel);
         }
@@ -131,11 +128,19 @@ namespace neogfx
     {
         if (iPresentationModel == aPresentationModel)
             return;
-        if (has_presentation_model())
-            presentation_model().unsubscribe(*this);
+        iPresentationModelSink.clear();
         iPresentationModel = aPresentationModel;
         if (has_presentation_model())
-            presentation_model().subscribe(*this);
+        {
+            presentation_model().item_model_changed([this](const i_item_model& aItemModel) { item_model_changed(aItemModel); });
+            presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
+            presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
+            presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
+            presentation_model().items_sorting([this]() { items_sorting(); });
+            presentation_model().items_sorted([this]() { items_sorted(); });
+            presentation_model().items_filtering([this]() { items_filtering(); });
+            presentation_model().items_filtered([this]() { items_filtered(); });
+        }
         if (has_presentation_model() && has_model())
             presentation_model().set_item_model(model());
         if (has_presentation_model() && has_selection_model())
@@ -176,12 +181,20 @@ namespace neogfx
     {
         if (iSelectionModel == aSelectionModel)
             return;
-        if (has_selection_model())
-            selection_model().unsubscribe(*this);
+        iSelectionModelSink.clear();
         iSelectionModel = aSelectionModel;
-        selection_model().subscribe(*this);
-        if (has_presentation_model() && has_selection_model())
-            selection_model().set_presentation_model(presentation_model());
+        if (has_selection_model())
+        {
+            selection_model().presentation_model_added([this](i_item_presentation_model& aNewModel) { presentation_model_added(aNewModel); });
+            selection_model().presentation_model_changed([this](i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) { presentation_model_changed(aNewModel, aOldModel); });
+            selection_model().presentation_model_removed([this](i_item_presentation_model& aOldModel) { presentation_model_removed(aOldModel); });
+            selection_model().mode_changed([this](item_selection_mode aNewMode) { mode_changed(aNewMode); });
+            selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) { current_index_changed(aCurrentIndex, aPreviousIndex); });
+            selection_model().selection_changed([this](const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) { selection_changed(aCurrentSelection, aPreviousSelection); });
+            selection_model().destroyed([this]() { iSelectionModel = nullptr; });
+            if (has_presentation_model())
+                selection_model().set_presentation_model(presentation_model());
+        }
         selection_model_changed();
         update_scrollbar_visibility();
         update();
@@ -544,7 +557,7 @@ namespace neogfx
         }
     }
 
-    void item_view::column_info_changed(const i_item_model&, item_model_index::value_type)
+    void item_view::column_info_changed(item_model_index::value_type)
     {
         update_scrollbar_visibility();
         update();
@@ -552,59 +565,50 @@ namespace neogfx
             end_edit(false);
     }
 
-    void item_view::item_added(const i_item_model&, const item_model_index&)
+    void item_view::item_added(const item_model_index&)
     {
     }
 
-    void item_view::item_changed(const i_item_model&, const item_model_index&)
+    void item_view::item_changed(const item_model_index&)
     {
     }
 
-    void item_view::item_removed(const i_item_model&, const item_model_index&)
+    void item_view::item_removed(const item_model_index&)
     {
     }
 
-    void item_view::model_destroyed(const i_item_model&)
-    {
-        iModel = nullptr;
-    }
-
-    void item_view::column_info_changed(const i_item_presentation_model&, item_presentation_model_index::column_type)
-    {
-    }
-
-    void item_view::item_model_changed(const i_item_presentation_model&, const i_item_model&)
+    void item_view::item_model_changed(const i_item_model&)
     {
         update_scrollbar_visibility();
         update();
     }
 
-    void item_view::item_added(const i_item_presentation_model&, const item_presentation_model_index&)
+    void item_view::item_added(const item_presentation_model_index&)
     {
         update_scrollbar_visibility();
         update();
     }
 
-    void item_view::item_changed(const i_item_presentation_model&, const item_presentation_model_index&)
+    void item_view::item_changed(const item_presentation_model_index&)
     {
         update_scrollbar_visibility();
         update();
     }
 
-    void item_view::item_removed(const i_item_presentation_model&, const item_presentation_model_index&)
+    void item_view::item_removed(const item_presentation_model_index&)
     {
         update_scrollbar_visibility();
         update();
     }
 
-    void item_view::items_sorting(const i_item_presentation_model&)
+    void item_view::items_sorting()
     {
         if (selection_model().has_current_index())
             iSavedModelIndex = presentation_model().to_item_model_index(selection_model().current_index());
         end_edit(true);
     }
 
-    void item_view::items_sorted(const i_item_presentation_model&)
+    void item_view::items_sorted()
     {
         if (iSavedModelIndex != std::nullopt && presentation_model().have_item_model_index(*iSavedModelIndex))
             selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
@@ -612,12 +616,12 @@ namespace neogfx
         update();
     }
 
-    void item_view::items_filtering(const i_item_presentation_model&)
+    void item_view::items_filtering()
     {
         end_edit(true);
     }
 
-    void item_view::items_filtered(const i_item_presentation_model&)
+    void item_view::items_filtered()
     {
         if (presentation_model().rows() != 0)
             selection_model().set_current_index(item_presentation_model_index{});
@@ -625,34 +629,29 @@ namespace neogfx
         update();
     }
 
-    void item_view::model_destroyed(const i_item_presentation_model&)
-    {
-        iPresentationModel = nullptr;
-    }
-
-    void item_view::model_added(const i_item_selection_model&, i_item_presentation_model&)
+    void item_view::presentation_model_added(i_item_presentation_model&)
     {
     }
 
-    void item_view::model_changed(const i_item_selection_model&, i_item_presentation_model&, i_item_presentation_model&)
+    void item_view::presentation_model_changed(i_item_presentation_model&, i_item_presentation_model&)
     {
     }
 
-    void item_view::model_removed(const i_item_selection_model&, i_item_presentation_model&)
+    void item_view::presentation_model_removed(i_item_presentation_model&)
     {
     }
 
-    void item_view::selection_mode_changed(const i_item_selection_model&, item_selection_mode)
+    void item_view::mode_changed(item_selection_mode)
     {
     }
 
-    void item_view::current_index_changed(const i_item_selection_model& aModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
+    void item_view::current_index_changed(const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
     {
         if (aCurrentIndex != std::nullopt)
         {
             make_visible(*aCurrentIndex);
             update(cell_rect(*aCurrentIndex, true));
-            if (!aModel.sorting() && !aModel.filtering())
+            if (!selection_model().sorting() && !selection_model().filtering())
             {
                 if (aPreviousIndex != std::nullopt)
                 {
@@ -667,11 +666,7 @@ namespace neogfx
             update(cell_rect(*aPreviousIndex, true));
     }
 
-    void item_view::selection_changed(const i_item_selection_model&, const item_selection&, const item_selection&)
-    {
-    }
-
-    void item_view::selection_model_destroyed(const i_item_selection_model&)
+    void item_view::selection_changed(const item_selection&, const item_selection&)
     {
     }
 
@@ -801,12 +796,12 @@ namespace neogfx
             optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
             textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != std::nullopt ? colour_or_gradient{ *backgroundColour } : colour_or_gradient{} });
             textEdit.set_text(presentation_model().cell_to_string(newIndex));
-            textEdit.evFocus([this, newIndex](neogfx::focus_event fe)
+            textEdit.Focus([this, newIndex](neogfx::focus_event fe)
             {
                 if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!root().has_focused_widget() || !root().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
                     end_edit(true);
             });
-            textEdit.evKeyboard([this, &textEdit, newIndex](neogfx::keyboard_event ke)
+            textEdit.Keyboard([this, &textEdit, newIndex](neogfx::keyboard_event ke)
             {
                 if (ke.type() == neogfx::keyboard_event_type::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && textEdit.cursor().position() == textEdit.cursor().anchor())
                     end_edit(false);

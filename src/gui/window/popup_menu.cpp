@@ -193,7 +193,7 @@ namespace neogfx
                     if (iOpenSubMenu->has_menu())
                         iOpenSubMenu->clear_menu();
                 });
-                iSink2 += iOpenSubMenu->evClosed([this]()
+                iSink2 += iOpenSubMenu->Closed([this]()
                 {
                     close_sub_menu();
                     iOpenSubMenu.reset();
@@ -367,7 +367,7 @@ namespace neogfx
     {
         menu_layout().set_margins(neogfx::margins{});
         menu_layout().set_spacing(neogfx::size{});
-        evClosed([this]()
+        Closed([this]()
         {
             if (has_menu() && menu().is_open())
                 menu().close();

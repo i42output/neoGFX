@@ -246,14 +246,14 @@ namespace neogfx
         add_action(actionDelete);
         add_action(actionSelectAll);
 
-        actionFileExit.evTriggered([this]() { quit(0); });
-        actionUndo.evTriggered([this]() { service<i_clipboard>().active_sink().undo(service<i_clipboard>()); });
-        actionRedo.evTriggered([this]() { service<i_clipboard>().active_sink().redo(service<i_clipboard>()); });
-        actionCut.evTriggered([this]() { service<i_clipboard>().cut(); });
-        actionCopy.evTriggered([this]() { service<i_clipboard>().copy(); });
-        actionPaste.evTriggered([this]() { service<i_clipboard>().paste(); });
-        actionDelete.evTriggered([this]() { service<i_clipboard>().delete_selected(); });
-        actionSelectAll.evTriggered([this]() { service<i_clipboard>().select_all(); });
+        actionFileExit.Triggered([this]() { quit(0); });
+        actionUndo.Triggered([this]() { service<i_clipboard>().active_sink().undo(service<i_clipboard>()); });
+        actionRedo.Triggered([this]() { service<i_clipboard>().active_sink().redo(service<i_clipboard>()); });
+        actionCut.Triggered([this]() { service<i_clipboard>().cut(); });
+        actionCopy.Triggered([this]() { service<i_clipboard>().copy(); });
+        actionPaste.Triggered([this]() { service<i_clipboard>().paste(); });
+        actionDelete.Triggered([this]() { service<i_clipboard>().delete_selected(); });
+        actionSelectAll.Triggered([this]() { service<i_clipboard>().select_all(); });
     }
     catch (std::exception& e)
     {
@@ -383,7 +383,7 @@ namespace neogfx
         if (iCurrentStyle != existingStyle)
         {
             iCurrentStyle = existingStyle;
-            evCurrentStyleChanged.trigger(style_aspect::Style);
+            CurrentStyleChanged.trigger(style_aspect::Style);
             service<i_surface_manager>().layout_surfaces();
             service<i_surface_manager>().invalidate_surfaces();
         }
@@ -595,7 +595,7 @@ namespace neogfx
         void activate(const i_help_source& aSource) override
         {
             iActiveSources.push_back(&aSource);
-            evHelpActivated.trigger(aSource);
+            HelpActivated.trigger(aSource);
         }
         void deactivate(const i_help_source& aSource) override
         {
@@ -603,7 +603,7 @@ namespace neogfx
             if (existing == iActiveSources.rend())
                 throw invalid_help_source();
             iActiveSources.erase(existing.base() - 1);
-            evHelpDeactivated.trigger(aSource);
+            HelpDeactivated.trigger(aSource);
         }
     private:
         std::vector<const i_help_source*> iActiveSources;

@@ -156,7 +156,7 @@ namespace neogfx
                 bool notify = (iOwner.iWantedToNotfiyTextChanged > 0u);
                 iOwner.iWantedToNotfiyTextChanged = 0u;
                 if (notify)
-                    iOwner.evTextChanged.trigger();
+                    iOwner.TextChanged.trigger();
             }
         }
     private:
@@ -377,8 +377,8 @@ namespace neogfx
             auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
             auto pastePlainText = std::make_shared<action>("Plain Text"_t);
             auto pasteRichText = std::make_shared<action>("Rich Text (HTML)"_t);
-            pastePlainText->evTriggered([this]() { paste_plain_text(); });
-            pasteRichText->evTriggered([this]() { paste_rich_text(); });
+            pastePlainText->Triggered([this]() { paste_plain_text(); });
+            pasteRichText->Triggered([this]() { paste_rich_text(); });
             sink pasteAsSink;
             pasteAsSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
             pasteAsSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
@@ -950,7 +950,7 @@ namespace neogfx
         if (oldFont != font() || oldEffect != (iDefaultStyle.text_effect() == std::nullopt))
             refresh_paragraph(iText.begin(), 0);
         iPersistDefaultStyle = aPersist;
-        evDefaultStyleChanged.trigger();
+        DefaultStyleChanged.trigger();
         update();
     }
 
@@ -1377,17 +1377,17 @@ namespace neogfx
             focusPolicy |= neogfx::focus_policy::ConsumeReturnKey;
         set_focus_policy(focusPolicy);
         cursor().set_width(2.0);
-        iSink += cursor().evPositionChanged([this]()
+        iSink += cursor().PositionChanged([this]()
         {
             iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
             make_cursor_visible();
             update();
         });
-        iSink += cursor().evAnchorChanged([this]()
+        iSink += cursor().AnchorChanged([this]()
         {
             update();
         });
-        iSink += cursor().evAppearanceChanged([this]()
+        iSink += cursor().AppearanceChanged([this]()
         {
             update();
         });
@@ -1396,7 +1396,7 @@ namespace neogfx
     std::size_t text_edit::do_insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
     {
         bool accept = true;
-        evTextFilter.trigger(aText, accept);
+        TextFilter.trigger(aText, accept);
         if (!accept)
             return 0;
 
@@ -1444,7 +1444,7 @@ namespace neogfx
     void text_edit::notify_text_changed()
     {
         if (!iSuppressTextChangedNotification)
-            evTextChanged.trigger();
+            TextChanged.trigger();
         else
             ++iWantedToNotfiyTextChanged;
     }

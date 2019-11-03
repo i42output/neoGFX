@@ -130,7 +130,7 @@ namespace neogfx
         if (result() != dialog_result::Accepted)
         {
             bool canAccept = true;
-            evTryAccept.trigger(canAccept);
+            TryAccept.trigger(canAccept);
             if (canAccept)
                 set_result(dialog_result::Accepted);
             else
@@ -143,7 +143,7 @@ namespace neogfx
         if (result() != dialog_result::Rejected)
         {
             bool canReject = true;
-            evTryReject.trigger(canReject);
+            TryReject.trigger(canReject);
             if (canReject)
                 set_result(dialog_result::Rejected);
             else
@@ -182,11 +182,11 @@ namespace neogfx
         {
             iButtonBox.emplace(button_box_layout());
             button_box().layout().set_spacing(client_layout().spacing());
-            button_box().evAccepted([this]()
+            button_box().Accepted([this]()
             {
                 accept();
             });
-            button_box().evRejected([this]()
+            button_box().Rejected([this]()
             {
                 reject();
             });
@@ -217,7 +217,7 @@ namespace neogfx
     bool dialog::can_close() const
     {
         bool canReject = true;
-        evTryReject.trigger(canReject);
+        TryReject.trigger(canReject);
         return canReject;
     }
 

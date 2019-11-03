@@ -166,7 +166,7 @@ namespace neogfx
         {
             iTabBar.set_style(aStyle);
             update_tab_bar_placement();
-            evStyleChanged.trigger();
+            StyleChanged.trigger();
         }
     }
 

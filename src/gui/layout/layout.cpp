@@ -426,7 +426,7 @@ namespace neogfx
         if (iAlignment != aAlignment)
         {
             iAlignment = aAlignment;
-            evAlignmentChanged.trigger();
+            AlignmentChanged.trigger();
             if (aUpdateLayout)
                 invalidate();
         }

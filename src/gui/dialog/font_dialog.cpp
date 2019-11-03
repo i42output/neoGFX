@@ -206,7 +206,7 @@ namespace neogfx
 
     void font_dialog::init()
     {
-        button_box().option_layout().add(std::make_shared<push_button>("Subpixel Rendering..."_t)).evClicked([this]()
+        button_box().option_layout().add(std::make_shared<push_button>("Subpixel Rendering..."_t)).Clicked([this]()
         {
             message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
         });
@@ -239,7 +239,7 @@ namespace neogfx
         {
             update_selected_font(iFamilyPicker);
         });
-        iFamilyPicker.evSelectionChanged([this](const optional_item_model_index&)
+        iFamilyPicker.SelectionChanged([this](const optional_item_model_index&)
         {
             update_selected_font(iFamilyPicker);
         });
@@ -248,12 +248,12 @@ namespace neogfx
         {
             update_selected_font(iStylePicker);
         });
-        iStylePicker.evSelectionChanged([this](const optional_item_model_index&)
+        iStylePicker.SelectionChanged([this](const optional_item_model_index&)
         {
             update_selected_font(iStylePicker);
         });
 
-        iSizePicker.evSelectionChanged([this](const optional_item_model_index&)
+        iSizePicker.SelectionChanged([this](const optional_item_model_index&)
         {
             update_selected_font(iSizePicker);
         });
@@ -329,6 +329,6 @@ namespace neogfx
             iSizePicker.selection_model().unset_current_index();
         iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
-            evSelectionChanged.trigger();
+            SelectionChanged.trigger();
     }
 }

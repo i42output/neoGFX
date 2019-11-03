@@ -75,7 +75,7 @@ namespace neogfx
         bool alreadyActive = target_active();
         if (!alreadyActive)
         {
-            evTargetActivating.trigger();
+            TargetActivating.trigger();
             service<i_rendering_engine>().activate_context(*this);
         }
         if (iFrameBufferTexture != std::nullopt)
@@ -105,7 +105,7 @@ namespace neogfx
             glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         }
         if (!alreadyActive)
-            evTargetActivated.trigger();
+            TargetActivated.trigger();
     }
 
     bool opengl_window::target_active() const
@@ -117,9 +117,9 @@ namespace neogfx
     {
         if (target_active())
         {
-            evTargetDeactivating.trigger();
+            TargetDeactivating.trigger();
             rendering_engine().deactivate_context();
-            evTargetDeactivated.trigger();
+            TargetDeactivated.trigger();
             return;
         }
 //        throw not_active();

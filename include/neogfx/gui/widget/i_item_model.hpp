@@ -21,29 +21,20 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
+
 #include <neolib/variant.hpp>
 #include <neolib/generic_iterator.hpp>
+
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_property.hpp>
-#include "item_index.hpp"
+#include <neogfx/gui/widget/item_index.hpp>
 
 namespace neogfx
 {
     class i_item_model;
 
-    typedef item_index item_model_index;
-    typedef optional_item_index optional_item_model_index;
-
-    class i_item_model_subscriber
-    {
-    public:
-        virtual void column_info_changed(const i_item_model& aModel, item_model_index::column_type aColumnIndex) = 0;
-        virtual void item_added(const i_item_model& aModel, const item_model_index& aItemIndex) = 0;
-        virtual void item_changed(const i_item_model& aModel, const item_model_index& aItemIndex) = 0;
-        virtual void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex) = 0;
-        virtual void model_destroyed(const i_item_model& aModel) = 0;
-    public:
-        enum notify_type { NotifyColumnInfoChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyModelDestroyed };
-    };
+    struct item_model_index : item_index<item_model_index> { using item_index::item_index; };
+    typedef std::optional<item_model_index> optional_item_model_index;
 
     enum item_cell_data_type
     {
@@ -204,8 +195,13 @@ namespace neogfx
 
     typedef std::optional<item_cell_data_info> optional_item_cell_data_info;
 
-    class i_item_model
+    class i_item_model : public i_object
     {
+    public:
+        declare_event(column_info_changed, item_model_index::column_type)
+        declare_event(item_added, const item_model_index&)
+        declare_event(item_changed, const item_model_index&)
+        declare_event(item_removed, const item_model_index&)
     public:
         typedef neolib::generic_iterator iterator;
         typedef neolib::generic_iterator const_iterator;
@@ -264,8 +260,5 @@ namespace neogfx
     public:
         virtual const item_cell_data_info& cell_data_info(const item_model_index& aIndex) const = 0;
         virtual const item_cell_data& cell_data(const item_model_index& aIndex) const = 0;
-    public:
-        virtual void subscribe(i_item_model_subscriber& aSubscriber) = 0;
-        virtual void unsubscribe(i_item_model_subscriber& aSubscriber) = 0;
     };
 }

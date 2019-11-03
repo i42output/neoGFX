@@ -231,7 +231,7 @@ namespace neogfx
             if (aClosable)
             {
                 iCloseButton = std::make_unique<close_button>(*this);
-                iCloseButton->evClicked([this]()
+                iCloseButton->Clicked([this]()
                 {
                     iContainer.remove_tab(iContainer.index_of(*this));
                 });
@@ -392,9 +392,9 @@ namespace neogfx
             iSelectedState = aSelectedState;
             update();
             if (is_selected())
-                evSelected.trigger();
+                Selected.trigger();
             else if (is_deselected())
-                evDeselected.trigger();
+                Deselected.trigger();
         }
     }
 

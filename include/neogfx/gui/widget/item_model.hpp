@@ -23,9 +23,11 @@
 #include <vector>
 #include <deque>
 #include <boost/algorithm/string.hpp>
+
 #include <neolib/vecarray.hpp>
 #include <neolib/segmented_array.hpp>
-#include <neolib/observable.hpp>
+
+#include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/i_item_model.hpp>
 #include <neogfx/gui/widget/i_basic_item_model.hpp>
@@ -135,8 +137,13 @@ namespace neogfx
     };
 
     template <typename T, uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_flat_container_traits<T, CellType, Columns>>
-    class basic_item_model : public i_basic_item_model<T>, private neolib::observable<i_item_model_subscriber>
+    class basic_item_model : public object<i_basic_item_model<T>>
     {
+    public:
+        define_declared_event(ColumnInfoChanged, column_info_changed, item_model_index::column_type)
+        define_declared_event(ItemAdded, item_added, const item_model_index&)
+        define_declared_event(ItemChanged, item_changed, const item_model_index&)
+        define_declared_event(ItemRemoved, item_removed, const item_model_index&)
     public:
         typedef ContainerTraits container_traits;
         typedef typename container_traits::value_type value_type;
@@ -166,7 +173,7 @@ namespace neogfx
         }
         ~basic_item_model()
         {
-            notify_observers(i_item_model_subscriber::NotifyModelDestroyed);
+            set_destroying();
         }
     public:
         uint32_t rows() const override
@@ -192,7 +199,7 @@ namespace neogfx
             if (iColumns.size() < aColumnIndex + 1u)
                 iColumns.resize(aColumnIndex + 1u);
             iColumns[aColumnIndex].name = aName;
-            notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
         bool column_selectable(item_model_index::column_type aColumnIndex) const override
         {
@@ -201,7 +208,7 @@ namespace neogfx
         void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) override
         {
             default_cell_data_info(aColumnIndex).unselectable = !aSelectable;
-            notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
         bool column_read_only(item_model_index::column_type aColumnIndex) const override
         {
@@ -210,7 +217,7 @@ namespace neogfx
         void set_column_read_only(item_model_index::column_type aColumnIndex, bool aReadOnly) override
         {
             default_cell_data_info(aColumnIndex).readOnly = aReadOnly;
-            notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
         item_cell_data_type column_data_type(item_model_index::column_type aColumnIndex) const override
         {
@@ -219,7 +226,7 @@ namespace neogfx
         void set_column_data_type(item_model_index::column_type aColumnIndex, item_cell_data_type aType) override
         {
             default_cell_data_info(aColumnIndex).type = aType;
-            notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
         const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const override
         {
@@ -228,7 +235,7 @@ namespace neogfx
         void set_column_min_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
         {
             default_cell_data_info(aColumnIndex).min = aValue;
-            notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
         const item_cell_data& column_max_value(item_model_index::column_type aColumnIndex) const override
         {
@@ -237,7 +244,7 @@ namespace neogfx
         void set_column_max_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
         {
             default_cell_data_info(aColumnIndex).max = aValue;
-            notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
         const item_cell_data& column_step_value(item_model_index::column_type aColumnIndex) const override
         {
@@ -246,7 +253,7 @@ namespace neogfx
         void set_column_step_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
         {
             default_cell_data_info(aColumnIndex).step = aValue;
-            notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
     public:
         i_item_model::iterator index_to_iterator(const item_model_index& aIndex) override
@@ -318,15 +325,6 @@ namespace neogfx
             return const_base_iterator(container_traits::sibling_end(iItems, aParent));
         }
     public:
-        void subscribe(i_item_model_subscriber& aSubscriber) override
-        {
-            add_observer(aSubscriber);
-        }
-        void unsubscribe(i_item_model_subscriber& aSubscriber) override
-        {
-            remove_observer(aSubscriber);
-        }
-    public:
         const item_cell_data& cell_data(const item_model_index& aIndex) const override
         {
             return iItems[aIndex.row()].second[aIndex.column()];
@@ -351,7 +349,7 @@ namespace neogfx
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue) override
         {
             base_iterator i = iItems.insert(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));
-            notify_observers(i_item_model_subscriber::NotifyItemAdded, iterator_to_index(i));
+            ItemAdded.trigger(iterator_to_index(i));
             return i;
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) override
@@ -371,7 +369,7 @@ namespace neogfx
         i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue) override
         {
             base_iterator i = container_traits::append(iItems, aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));
-            notify_observers(i_item_model_subscriber::NotifyItemAdded, iterator_to_index(i));
+            ItemAdded.trigger(iterator_to_index(i));
             return i;
         }
         i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) override
@@ -391,7 +389,7 @@ namespace neogfx
         }
         void erase(i_item_model::const_iterator aPosition) override
         {
-            notify_observers(i_item_model_subscriber::NotifyItemRemoved, iterator_to_index(aPosition));
+            ItemRemoved.trigger(iterator_to_index(aPosition));
             iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>());
         }
         void insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData) override
@@ -422,7 +420,7 @@ namespace neogfx
             {
                 item_model_index index = iterator_to_index(aItem);
                 index.set_column(aColumnIndex);
-                notify_observers(i_item_model_subscriber::NotifyItemChanged, index);
+                ItemChanged.trigger(index);
             }
         }
         void insert_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) override
@@ -436,7 +434,7 @@ namespace neogfx
             iItems[aIndex.row()].second[aIndex.column()] = aCellData;
             if (default_cell_data_info(aIndex.column()).type == item_cell_data_type::Unknown)
                 default_cell_data_info(aIndex.column()).type = static_cast<item_cell_data_type>(aCellData.index());
-            notify_observers(i_item_model_subscriber::NotifyItemChanged, aIndex);
+            ItemChanged.trigger(aIndex);
         }
     public:
         value_type& item(const item_model_index& aIndex) override
@@ -467,28 +465,6 @@ namespace neogfx
             if (iColumns[aColumnIndex].defaultDataInfo == std::nullopt)
                 iColumns[aColumnIndex].defaultDataInfo = item_cell_data_info{};
             return *iColumns[aColumnIndex].defaultDataInfo;
-        }
-    private:
-        void notify_observer(i_item_model_subscriber& aObserver, i_item_model_subscriber::notify_type aType, const void* aParameter, const void*) override
-        {
-            switch (aType)
-            {
-            case i_item_model_subscriber::NotifyColumnInfoChanged:
-                aObserver.column_info_changed(*this, *static_cast<const item_model_index::column_type*>(aParameter));
-                break;
-            case i_item_model_subscriber::NotifyItemAdded:
-                aObserver.item_added(*this, *static_cast<const item_model_index*>(aParameter));
-                break;
-            case i_item_model_subscriber::NotifyItemChanged:
-                aObserver.item_changed(*this, *static_cast<const item_model_index*>(aParameter));
-                break;
-            case i_item_model_subscriber::NotifyItemRemoved:
-                aObserver.item_removed(*this, *static_cast<const item_model_index*>(aParameter));
-                break;
-            case i_item_model_subscriber::NotifyModelDestroyed:
-                aObserver.model_destroyed(*this);
-                break;
-            }
         }
     private:
         container_type iItems;

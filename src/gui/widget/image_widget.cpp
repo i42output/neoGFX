@@ -211,7 +211,7 @@ namespace neogfx
     {
         size oldSize = minimum_size();
         iTexture = aTexture;
-        evImageChanged.trigger();
+        ImageChanged.trigger();
         if (oldSize != minimum_size() && has_managing_layout())
             managing_layout().layout_items(true);
         update();
@@ -221,7 +221,7 @@ namespace neogfx
     {
         size oldSize = minimum_size();
         iTexture = aImage;
-        evImageChanged.trigger();
+        ImageChanged.trigger();
         if (oldSize != minimum_size() && has_managing_layout())
             managing_layout().layout_items(true);
         update();

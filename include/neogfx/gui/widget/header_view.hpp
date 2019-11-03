@@ -33,7 +33,7 @@ namespace neogfx
         PanesResized
     };
 
-    class header_view : public splitter, private i_item_presentation_model_subscriber
+    class header_view : public splitter
     {
     private:
         class updater;
@@ -86,16 +86,15 @@ namespace neogfx
         void panes_resized() override;
         void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = std::optional<uint32_t>()) override;
     protected:
-        void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) override;
-        void item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel) override;
-        void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
-        void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
-        void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
-        void items_sorting(const i_item_presentation_model& aModel) override;
-        void items_sorted(const i_item_presentation_model& aModel) override;
-        void items_filtering(const i_item_presentation_model& aModel) override;
-        void items_filtered(const i_item_presentation_model& aModel) override;
-        void model_destroyed(const i_item_presentation_model& aModel) override;
+        virtual void column_info_changed(item_presentation_model_index::column_type aColumnIndex);
+        virtual void item_model_changed(const i_item_model& aItemModel);
+        virtual void item_added(const item_presentation_model_index& aItemIndex);
+        virtual void item_changed(const item_presentation_model_index& aItemIndex);
+        virtual void item_removed(const item_presentation_model_index& aItemIndex);
+        virtual void items_sorting();
+        virtual void items_sorted();
+        virtual void items_filtering();
+        virtual void items_filtered();
     private:
         void init();
         void update_buttons();
@@ -108,6 +107,7 @@ namespace neogfx
         type_e iType;
         std::shared_ptr<i_item_model> iModel;
         std::shared_ptr<i_item_presentation_model> iPresentationModel;
+        sink iPresentationModelSink;
         bool iExpandLastColumn;
         optional_dimension iSeparatorWidth;
         std::vector<section_dimension> iSectionWidths;

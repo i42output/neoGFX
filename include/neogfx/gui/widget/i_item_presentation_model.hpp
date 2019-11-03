@@ -21,35 +21,20 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
+
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
-#include "item_index.hpp"
-#include "i_item_model.hpp"
+#include <neogfx/gui/widget/item_index.hpp>
+#include <neogfx/gui/widget/i_item_model.hpp>
 
 namespace neogfx
 {
     class i_item_presentation_model;
 
-    typedef item_index item_presentation_model_index;
-    typedef optional_item_index optional_item_presentation_model_index;
-
-    class i_item_presentation_model_subscriber
-    {
-    public:
-        virtual void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) = 0;
-        virtual void item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel) = 0;
-        virtual void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
-        virtual void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
-        virtual void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
-        virtual void items_sorting(const i_item_presentation_model& aModel) = 0;
-        virtual void items_sorted(const i_item_presentation_model& aModel) = 0;
-        virtual void items_filtering(const i_item_presentation_model& aModel) = 0;
-        virtual void items_filtered(const i_item_presentation_model& aModel) = 0;
-        virtual void model_destroyed(const i_item_presentation_model& aModel) = 0;
-    public:
-        enum notify_type { NotifyColumnInfoChanged, NotifyItemModelChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorting, NotifyItemsSorted, NotifyItemsFiltering, NotifyItemsFiltered, NotifyModelDestroyed };
-    };
+    struct item_presentation_model_index : item_index<item_presentation_model_index> { using item_index::item_index; };
+    typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
     enum class item_cell_selection_flags
     {
@@ -86,10 +71,19 @@ namespace neogfx
         return static_cast<item_cell_selection_flags>(~static_cast<uint32_t>(aLhs));
     }
 
-    class i_item_presentation_model
+    class i_item_presentation_model : public i_object
     {
     public:
         declare_event(visual_appearance_changed)
+        declare_event(column_info_changed, item_presentation_model_index::column_type)
+        declare_event(item_model_changed, const i_item_model&)
+        declare_event(item_added, const item_presentation_model_index&)
+        declare_event(item_changed, const item_presentation_model_index&)
+        declare_event(item_removed, const item_presentation_model_index&)
+        declare_event(items_sorting)
+        declare_event(items_sorted)
+        declare_event(items_filtering)
+        declare_event(items_filtered)
     public:
         struct cell_meta_type
         {
@@ -179,8 +173,5 @@ namespace neogfx
         virtual optional_filter filtering_by() const = 0;
         virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type_e aFilterSearchType = Prefix, case_sensitivity_e aCaseSensitivity = CaseInsensitive) = 0;
         virtual void reset_filter() = 0;
-    public:
-        virtual void subscribe(i_item_presentation_model_subscriber& aSubscriber) = 0;
-        virtual void unsubscribe(i_item_presentation_model_subscriber& aSubscriber) = 0;
     };
 }

@@ -158,8 +158,8 @@ namespace neogfx
                 image().set_image(iAction.image());
             }
         };
-        iSink += evChecked(update_checked);
-        iSink += evUnchecked(update_checked);
+        iSink += Checked(update_checked);
+        iSink += Unchecked(update_checked);
         iSink += iAction.checked([this]() {set_checked(true); });
         iSink += iAction.unchecked([this]() {set_checked(false); });
         set_checked(iAction.is_checked());

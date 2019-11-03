@@ -80,15 +80,15 @@ namespace neogfx
         return iChangingText;
     }
 
-    void drop_list_view::items_filtered(const i_item_presentation_model& aPresentationModel)
+    void drop_list_view::items_filtered()
     {
-        list_view::items_filtered(aPresentationModel);
+        list_view::items_filtered();
         iDropList.iListProxy.update_view_placement();
     }
 
-    void drop_list_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
+    void drop_list_view::current_index_changed(const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
     {
-        list_view::current_index_changed(aSelectionModel, aCurrentIndex, aPreviousIndex);
+        list_view::current_index_changed(aCurrentIndex, aPreviousIndex);
         if (!presentation_model().filtering() && !iDropList.handling_text_change())
         {
             neolib::scoped_flag sf{ iChangingText };
@@ -383,7 +383,7 @@ namespace neogfx
             else
             {
                 iPopup.emplace(iDropList);
-                iPopup->evClosed([this]()
+                iPopup->Closed([this]()
                 {
                     iPopup = std::nullopt;
                 });
@@ -792,7 +792,7 @@ namespace neogfx
         if (iSavedSelection != newSelection)
         {
             iSelection = newSelection;
-            evSelectionChanged.async_trigger(iSelection);
+            SelectionChanged.async_trigger(iSelection);
         }
         iSavedSelection = std::nullopt;
 
@@ -925,7 +925,7 @@ namespace neogfx
 
     void drop_list::visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget)
     {
-        aTextWidget.evTextChanged([this, &aInputWidget, &aTextWidget]()
+        aTextWidget.TextChanged([this, &aInputWidget, &aTextWidget]()
         {
             if (!accepting_selection())
             {
@@ -945,19 +945,19 @@ namespace neogfx
                 }
             }
         });
-        aTextWidget.evKeyboard([this, &aTextWidget](const neogfx::keyboard_event& aEvent)
+        aTextWidget.Keyboard([this, &aTextWidget](const neogfx::keyboard_event& aEvent)
         {
             if (handle_proxy_key_event(aEvent))
-                aTextWidget.evKeyboard.accept();
+                aTextWidget.Keyboard.accept();
         });
     }
 
     void drop_list::visit(i_drop_list_input_widget&, push_button& aButtonWidget)
     {
-        aButtonWidget.evKeyboard([this, &aButtonWidget](const neogfx::keyboard_event& aEvent)
+        aButtonWidget.Keyboard([this, &aButtonWidget](const neogfx::keyboard_event& aEvent)
         {
             if (handle_proxy_key_event(aEvent))
-                aButtonWidget.evKeyboard.accept();
+                aButtonWidget.Keyboard.accept();
         });
     }
 
@@ -987,7 +987,7 @@ namespace neogfx
             iInputWidget = std::make_unique<non_editable_input_widget>(iLayout1);
             auto& inputWidget = static_cast<non_editable_input_widget&>(iInputWidget->as_widget());
 
-            inputWidget.evClicked([this]() { handle_clicked(); });
+            inputWidget.Clicked([this]() { handle_clicked(); });
 
             inputWidget.set_size_policy(size_policy::Expanding);
             
@@ -1006,7 +1006,7 @@ namespace neogfx
             iInputWidget = std::make_unique<editable_input_widget>(iLayout1);
             auto& inputWidget = static_cast<editable_input_widget&>(iInputWidget->as_widget());
 
-            inputWidget.evMouse([&inputWidget, this](const neogfx::mouse_event& aEvent)
+            inputWidget.Mouse([&inputWidget, this](const neogfx::mouse_event& aEvent)
             {
                 if (aEvent.type() == mouse_event_type::ButtonReleased &&
                     aEvent.mouse_button() == mouse_button::Left &&
@@ -1129,7 +1129,7 @@ namespace neogfx
             if (iSelection != std::nullopt)
             {
                 iSelection = std::nullopt;
-                evSelectionChanged.async_trigger(iSelection);
+                SelectionChanged.async_trigger(iSelection);
             }
         }
         iSavedSelection = std::nullopt;
@@ -1140,7 +1140,7 @@ namespace neogfx
             std::string text;
             if (iSelection)
             {
-                auto const& maybeImage = presentation_model().cell_image(*iSelection);
+                auto const& maybeImage = presentation_model().cell_image(presentation_model().from_item_model_index(*iSelection));
                 if (maybeImage != std::nullopt)
                     image = *maybeImage;
                 text = model().cell_data(*iSelection).to_string();

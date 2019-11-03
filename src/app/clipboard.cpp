@@ -44,7 +44,7 @@ namespace neogfx
         if (sink_active())
             deactivate(*iActiveSink);
         iActiveSink = &aSink;
-        evSinkActivated.trigger();
+        SinkActivated.trigger();
     }
 
     void clipboard::deactivate(i_clipboard_sink& aSink)
@@ -52,7 +52,7 @@ namespace neogfx
         if (iActiveSink != &aSink)
             throw sink_not_active();
         iActiveSink = nullptr;
-        evSinkDeactivated.trigger();
+        SinkDeactivated.trigger();
     }
 
     bool clipboard::has_text() const

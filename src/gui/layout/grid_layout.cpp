@@ -416,7 +416,7 @@ namespace neogfx
         }
         if (has_layout_owner())
             layout_owner().layout_items_completed();
-        evLayoutCompleted.trigger();
+        LayoutCompleted.trigger();
     }
 
     const grid_layout::cell_coordinates& grid_layout::cursor() const

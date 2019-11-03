@@ -662,7 +662,7 @@ namespace neogfx
     {
         if (--iLayoutInProgress == 0)
         {
-            evLayoutCompleted.trigger();
+            LayoutCompleted.trigger();
             update();
         }
     }
@@ -734,7 +734,7 @@ namespace neogfx
 
     void widget::moved()
     {
-        evPositionChanged.trigger();
+        PositionChanged.trigger();
     }
     
     size widget::extents() const
@@ -760,7 +760,7 @@ namespace neogfx
 
     void widget::resized()
     {
-        evSizeChanged.trigger();
+        SizeChanged.trigger();
         layout_items();
     }
 
@@ -1031,9 +1031,9 @@ namespace neogfx
             scoped_scissor scissor(aGraphicsContext, clipRect);
             scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
 
-            evPainting.trigger(aGraphicsContext);
+            Painting.trigger(aGraphicsContext);
             paint(aGraphicsContext);
-            evPainted.trigger(aGraphicsContext);
+            Painted.trigger(aGraphicsContext);
 
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
@@ -1043,7 +1043,7 @@ namespace neogfx
                     c->render(aGraphicsContext);
             }
 
-            evChildrenPainted.trigger(aGraphicsContext);
+            ChildrenPainted.trigger(aGraphicsContext);
         }
 
         aGraphicsContext.set_extents(extents());
@@ -1205,7 +1205,7 @@ namespace neogfx
                 else
                     mouse_left();
             }
-            evVisibilityChanged.trigger();
+            VisibilityChanged.trigger();
             if (has_parent_layout())
                 parent_layout().invalidate();
             if (effectively_hidden())
@@ -1364,13 +1364,13 @@ namespace neogfx
     void widget::focus_gained(focus_reason)
     {
         update();
-        evFocus.trigger(focus_event::FocusGained);
+        Focus.trigger(focus_event::FocusGained);
     }
 
     void widget::focus_lost(focus_reason)
     {
         update();
-        evFocus.trigger(focus_event::FocusLost);
+        Focus.trigger(focus_event::FocusLost);
     }
 
     bool widget::ignore_mouse_events() const

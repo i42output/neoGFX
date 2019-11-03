@@ -285,7 +285,7 @@ namespace neogfx
     
         centre_on_parent();
 
-        button_box().evClicked([this](standard_button aButton)
+        button_box().Clicked([this](standard_button aButton)
         {
             set_response(aButton);
             set_result(dialog_result::Other);

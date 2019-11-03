@@ -71,7 +71,7 @@ namespace neogfx
     void menu::set_title(const std::string& aTitle)
     {
         iTitle = aTitle;
-        evMenuChanged.trigger();
+        MenuChanged.trigger();
     }
 
     const i_texture& menu::image() const
@@ -82,19 +82,19 @@ namespace neogfx
     void menu::set_image(const std::string& aUri)
     {
         iImage = neogfx::image{aUri};
-        evMenuChanged.trigger();
+        MenuChanged.trigger();
     }
 
     void menu::set_image(const i_image& aImage)
     {
         iImage = aImage;
-        evMenuChanged.trigger();
+        MenuChanged.trigger();
     }
 
     void menu::set_image(const i_texture& aTexture)
     {
         iImage = aTexture;
-        evMenuChanged.trigger();
+        MenuChanged.trigger();
     }
 
     uint32_t menu::count() const
@@ -139,7 +139,7 @@ namespace neogfx
     i_menu& menu::insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle)
     {
         auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(*this, Popup, aSubMenuTitle)));
-        evItemAdded.trigger(aItemIndex);
+        ItemAdded.trigger(aItemIndex);
         return (**newItem).sub_menu();
     }
 
@@ -151,13 +151,13 @@ namespace neogfx
     void menu::insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction)
     {
         iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
-        evItemAdded.trigger(aItemIndex);
+        ItemAdded.trigger(aItemIndex);
         aAction->changed([this, &aAction]()
         {
             for (item_index i = 0; i < iItems.size(); ++i)
                 if (&(iItems[i]->action()) == &*aAction)
                 {
-                    evItemChanged.trigger(i);
+                    ItemChanged.trigger(i);
                     return;
                 }
         });
@@ -173,7 +173,7 @@ namespace neogfx
         if (aItemIndex >= count())
             throw bad_item_index();
         iItems.erase(iItems.begin() + aItemIndex);
-        evItemRemoved.trigger(aItemIndex);
+        ItemRemoved.trigger(aItemIndex);
     }
 
     menu::item_index menu::find(const i_menu_item& aItem) const
@@ -217,7 +217,7 @@ namespace neogfx
             item_at(selection).deselected().trigger();
         }
         iSelection = aItemIndex;
-        evItemSelected.trigger(item_at(aItemIndex));
+        ItemSelected.trigger(item_at(aItemIndex));
         item_at(aItemIndex).select(aOpenAnySubMenu);
     }
 
@@ -228,7 +228,7 @@ namespace neogfx
             auto selection = selected_item();
             iSelection = std::nullopt;
             item_at(selection).deselected().trigger();
-            evSelectionCleared.trigger();
+            SelectionCleared.trigger();
         }
     }
 
@@ -296,7 +296,7 @@ namespace neogfx
     {
         if (++iOpenCount == 1)
         {
-            evOpened.trigger();
+            Opened.trigger();
         }
     }
 
@@ -308,7 +308,7 @@ namespace neogfx
         {
             if (has_selected_item())
                 clear_selection();
-            evClosed.trigger();
+            Closed.trigger();
         }
     }
 

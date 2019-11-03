@@ -29,7 +29,7 @@
 
 namespace neogfx
 {
-    class item_view : public scrollable_widget, protected header_view::i_owner, private i_item_model_subscriber, private i_item_presentation_model_subscriber, private i_item_selection_model_subscriber
+    class item_view : public scrollable_widget, protected header_view::i_owner
     {
     public:
         struct no_model : std::logic_error { no_model() : std::logic_error("neogfx::item_view::no_model") {} };
@@ -111,30 +111,26 @@ namespace neogfx
         void update_scrollbar_visibility() override;
         void update_scrollbar_visibility(usv_stage_e aStage) override;
     protected:
-        void column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex) override;
-        void item_added(const i_item_model& aModel, const item_model_index& aItemIndex) override;
-        void item_changed(const i_item_model& aModel, const item_model_index& aItemIndex) override;
-        void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex) override;
-        void model_destroyed(const i_item_model& aModel) override;
+        virtual void column_info_changed(item_model_index::value_type aColumnIndex);
+        virtual void item_added(const item_model_index& aItemIndex);
+        virtual void item_changed(const item_model_index& aItemIndex);
+        virtual void item_removed(const item_model_index& aItemIndex);
     protected:
-        void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) override;
-        void item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel) override;
-        void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
-        void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
-        void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
-        void items_sorting(const i_item_presentation_model& aModel) override;
-        void items_sorted(const i_item_presentation_model& aModel) override;
-        void items_filtering(const i_item_presentation_model& aModel) override;
-        void items_filtered(const i_item_presentation_model& aModel) override;
-        void model_destroyed(const i_item_presentation_model& aModel) override;
+        virtual void item_model_changed(const i_item_model& aItemModel);
+        virtual void item_added(const item_presentation_model_index& aItemIndex);
+        virtual void item_changed(const item_presentation_model_index& aItemIndex);
+        virtual void item_removed(const item_presentation_model_index& aItemIndex);
+        virtual void items_sorting();
+        virtual void items_sorted();
+        virtual void items_filtering();
+        virtual void items_filtered();
     protected:
-        void model_added(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel) override;
-        void model_changed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) override;
-        void model_removed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aOldModel) override;
-        void selection_mode_changed(const i_item_selection_model& aSelectionModel, item_selection_mode aNewMode) override;
-        void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) override;
-        void selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) override;
-        void selection_model_destroyed(const i_item_selection_model& aSelectionModel) override;
+        virtual void presentation_model_added(i_item_presentation_model& aNewModel);
+        virtual void presentation_model_changed(i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel);
+        virtual void presentation_model_removed(i_item_presentation_model& aOldModel);
+        virtual void mode_changed(item_selection_mode aNewMode);
+        virtual void current_index_changed(const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex);
+        virtual void selection_changed(const item_selection& aCurrentSelection, const item_selection& aPreviousSelection);
     public:
         rect row_rect(const item_presentation_model_index& aItemIndex) const;
         rect cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground = false) const;
@@ -143,6 +139,9 @@ namespace neogfx
         void init();
     private:
         sink iSink;
+        sink iModelSink;
+        sink iPresentationModelSink;
+        sink iSelectionModelSink;
         std::shared_ptr<i_item_model> iModel;
         std::shared_ptr<i_item_presentation_model> iPresentationModel;
         std::shared_ptr<i_item_selection_model> iSelectionModel;

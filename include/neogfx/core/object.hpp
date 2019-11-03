@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/lifetime.hpp>
+
+#include <neogfx/core/event.hpp>
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_properties.hpp>
 #include <neogfx/core/i_property.hpp>
@@ -30,6 +32,27 @@ namespace neogfx
     template <typename Base>
     class object : public Base, public i_properties, protected virtual neolib::lifetime
     {
+    public:
+        define_declared_event(Destroying, destroying);
+        define_declared_event(Destroyed, destroyed);
+    public:
+        ~object()
+        {
+            set_destroyed();
+        }
+        // i_lifetime
+    public:
+        void set_destroying() override
+        {
+            Destroying.trigger();
+            neolib::lifetime::set_destroying();
+        }
+        void set_destroyed() override
+        {
+            Destroyed.trigger();
+            neolib::lifetime::set_destroyed();
+        }
+    public:
         // i_object
     public:
         neolib::i_lifetime& as_lifetime() override

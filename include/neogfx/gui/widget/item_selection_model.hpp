@@ -21,17 +21,22 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
-#include <neolib/observable.hpp>
-#include "i_item_presentation_model.hpp"
-#include "i_item_selection_model.hpp"
+
+#include <neogfx/core/object.hpp>
+#include <neogfx/gui/widget/i_item_presentation_model.hpp>
+#include <neogfx/gui/widget/i_item_selection_model.hpp>
 
 namespace neogfx
 {
-    class item_selection_model : public i_item_selection_model, private neolib::observable<i_item_selection_model_subscriber>, private i_item_presentation_model_subscriber
+    class item_selection_model : public object<i_item_selection_model>
     {
     public:
         define_declared_event(CurrentIndexChanged, current_index_changed, const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
         define_declared_event(SelectionChanged, selection_changed, const item_selection&, const item_selection&)
+        define_declared_event(PresentationModelAdded, presentation_model_added, i_item_presentation_model&)
+        define_declared_event(PresentationModelChanged, presentation_model_changed, i_item_presentation_model&, i_item_presentation_model&)
+        define_declared_event(PresentationModelRemoved, presentation_model_removed, i_item_presentation_model&)
+        define_declared_event(ModeChanged, mode_changed, item_selection_mode)
     public:
         item_selection_model(item_selection_mode aMode = item_selection_mode::SingleSelection) :
             iModel{ nullptr },
@@ -50,9 +55,7 @@ namespace neogfx
         }
         ~item_selection_model()
         {
-            if (has_presentation_model())
-                presentation_model().unsubscribe(*this);
-            notify_observers(i_item_selection_model_subscriber::NotifySelectionModelDestroyed);
+            set_destroying();
         }
     public:
         bool has_presentation_model() const override
@@ -69,16 +72,66 @@ namespace neogfx
         {
             if (iModel == &aModel)
                 return;
-            if (has_presentation_model())
-                presentation_model().unsubscribe(*this);
+
+            iSink.clear();
+            
             unset_current_index();
             i_item_presentation_model* oldModel = iModel;
+
             iModel = &aModel;
-            presentation_model().subscribe(*this);
+
+            iSink += presentation_model().item_removed([this](const item_presentation_model_index&)
+            {
+                if (has_current_index())
+                {
+                    if (presentation_model().rows() <= 1)
+                        iCurrentIndex = std::nullopt;
+                    else if (iCurrentIndex->row() >= presentation_model().rows() - 1)
+                        iCurrentIndex->set_row(iCurrentIndex->row() - 1);
+                }
+            });
+            iSink += presentation_model().items_sorting([this]()
+            {
+                neolib::scoped_flag sf{ iSorting };
+                iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
+                unset_current_index();
+            });
+            iSink += presentation_model().items_sorted([this]()
+            {
+                neolib::scoped_flag sf{ iSorting };
+                if (iSavedModelIndex != std::nullopt)
+                    set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
+                iSavedModelIndex = std::nullopt;
+            });
+            iSink += presentation_model().items_filtering([this]()
+            {
+                neolib::scoped_flag sf{ iFiltering };
+                iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
+                unset_current_index();
+            });
+            iSink += presentation_model().items_filtered([this]()
+            {
+                neolib::scoped_flag sf{ iFiltering };
+                if (iSavedModelIndex != std::nullopt && presentation_model().have_item_model_index(*iSavedModelIndex))
+                    set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
+                else if (presentation_model().rows() >= 1)
+                    set_current_index(item_presentation_model_index{ 0, 0 });
+                iSavedModelIndex = std::nullopt;
+            });
+            iSink += presentation_model().destroying([this]()
+            {
+                auto oldModel = iModel;
+                iModel = nullptr;
+                iCurrentIndex = std::nullopt;
+                iSavedModelIndex = std::nullopt;
+                iSelection = item_selection{};
+                PresentationModelRemoved.trigger(*oldModel);
+            });
+
             if (oldModel == nullptr)
-                notify_observers(i_item_selection_model_subscriber::NotifyModelAdded, presentation_model());
+                PresentationModelAdded.trigger(presentation_model());
             else
-                notify_observers(i_item_selection_model_subscriber::NotifyModelChanged, presentation_model(), *oldModel);
+                PresentationModelChanged.trigger(presentation_model(), *oldModel);
         }
     public:
         item_selection_mode mode() const override
@@ -90,7 +143,7 @@ namespace neogfx
             if (iMode == aMode)
                 return;
             iMode = aMode;
-            notify_observers(i_item_selection_model_subscriber::NotifySelectionModeChanged, mode());
+            ModeChanged.trigger(mode());
         }
     public:
         bool has_current_index() const override
@@ -271,15 +324,6 @@ namespace neogfx
         {
             return is_selectable(aIndex) && !(has_presentation_model() && presentation_model().cell_editable(aIndex) == item_cell_editable::No);
         }
-    public:
-        void subscribe(i_item_selection_model_subscriber& aSubscriber) override
-        {
-            add_observer(aSubscriber);
-        }
-        void unsubscribe(i_item_selection_model_subscriber& aSubscriber) override
-        {
-            remove_observer(aSubscriber);
-        }
     private:
         void do_set_current_index(const optional_item_presentation_model_index& aNewIndex)
         {
@@ -295,96 +339,8 @@ namespace neogfx
                 if (iCurrentIndex != std::nullopt)
                     presentation_model().cell_meta(*iCurrentIndex).selection = 
                         presentation_model().cell_meta(*iCurrentIndex).selection | item_cell_selection_flags::Current;
-                notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
-                evCurrentIndexChanged.trigger(iCurrentIndex, previousIndex);
+                CurrentIndexChanged.trigger(iCurrentIndex, previousIndex);
             }
-        }
-    private:
-        void notify_observer(i_item_selection_model_subscriber& aObserver, i_item_selection_model_subscriber::notify_type aType, const void* aParameter, const void* aParameter2) override
-        {
-            switch (aType)
-            {
-            case i_item_selection_model_subscriber::NotifyModelAdded:
-                aObserver.model_added(*this, const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter)));
-                break;
-            case i_item_selection_model_subscriber::NotifyModelChanged:
-                aObserver.model_changed(*this, const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter)), const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter2)));
-                break;
-            case i_item_selection_model_subscriber::NotifyModelRemoved:
-                aObserver.model_removed(*this, const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter)));
-                break;
-            case i_item_selection_model_subscriber::NotifySelectionModeChanged:
-                aObserver.selection_mode_changed(*this, *static_cast<const item_selection_mode*>(aParameter));
-                break;
-            case i_item_selection_model_subscriber::NotifyCurrentIndexChanged:
-                aObserver.current_index_changed(*this, *static_cast<const optional_item_presentation_model_index*>(aParameter), *static_cast<const optional_item_presentation_model_index*>(aParameter2));
-                break;
-            case i_item_selection_model_subscriber::NotifySelectionChanged:
-                aObserver.selection_changed(*this, *static_cast<const item_selection*>(aParameter), *static_cast<const item_selection*>(aParameter2));
-                break;
-            case i_item_selection_model_subscriber::NotifySelectionModelDestroyed:
-                aObserver.selection_model_destroyed(*this);
-                break;
-            }
-        }
-    private:
-        void column_info_changed(const i_item_presentation_model&, item_presentation_model_index::value_type) override
-        {
-        }
-        void item_model_changed(const i_item_presentation_model&, const i_item_model&) override
-        {
-        }
-        void item_added(const i_item_presentation_model&, const item_presentation_model_index&) override
-        {
-        }
-        void item_changed(const i_item_presentation_model&, const item_presentation_model_index&) override
-        {
-        }
-        void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index&) override
-        {
-            if (has_current_index())
-            {
-                if (aModel.rows() <= 1)
-                    iCurrentIndex = std::nullopt;
-                else if (iCurrentIndex->row() >= aModel.rows() - 1)
-                    iCurrentIndex->set_row(iCurrentIndex->row() - 1);
-            }
-        }
-        void items_sorting(const i_item_presentation_model&) override
-        {
-            neolib::scoped_flag sf{ iSorting };
-            iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
-            unset_current_index();
-        }
-        void items_sorted(const i_item_presentation_model&) override
-        {
-            neolib::scoped_flag sf{ iSorting };
-            if (iSavedModelIndex != std::nullopt)
-                set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
-            iSavedModelIndex = std::nullopt;
-        }
-        void items_filtering(const i_item_presentation_model&) override
-        {
-            neolib::scoped_flag sf{ iFiltering };
-            iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
-            unset_current_index();
-        }
-        void items_filtered(const i_item_presentation_model& aModel) override
-        {
-            neolib::scoped_flag sf{ iFiltering };
-            if (iSavedModelIndex != std::nullopt && aModel.have_item_model_index(*iSavedModelIndex))
-                set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
-            else if (aModel.rows() >= 1)
-                set_current_index(item_presentation_model_index{ 0, 0 });
-            iSavedModelIndex = std::nullopt;
-        }
-        void model_destroyed(const i_item_presentation_model& aModel) override
-        {
-            iModel = nullptr;
-            iCurrentIndex = std::nullopt;
-            iSavedModelIndex = std::nullopt;
-            iSelection = item_selection{};
-            notify_observers(i_item_selection_model_subscriber::NotifyModelRemoved, aModel);
         }
     private:
         i_item_presentation_model* iModel;
@@ -394,5 +350,6 @@ namespace neogfx
         item_selection iSelection;
         bool iSorting;
         bool iFiltering;
+        sink iSink;
     };
 }

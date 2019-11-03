@@ -150,7 +150,7 @@ namespace neogfx
     {
         neolib::destroyed_flag destroyed{ *this };
         neolib::scoped_counter sc{ iProcessingEvent };
-        if (!evFilter.trigger(iCurrentEvent))
+        if (!Filter.trigger(iCurrentEvent))
         {
             if (destroyed)
                 sc.ignore();

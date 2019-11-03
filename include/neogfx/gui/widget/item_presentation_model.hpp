@@ -23,10 +23,12 @@
 #include <vector>
 #include <deque>
 #include <boost/algorithm/string.hpp>
+
 #include <neolib/vecarray.hpp>
 #include <neolib/segmented_array.hpp>
-#include <neolib/observable.hpp>
 #include <neolib/raii.hpp>
+
+#include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
@@ -39,10 +41,19 @@ namespace neogfx
     i_rendering_engine& service<i_rendering_engine>();
 
     template <typename ItemModel>
-    class basic_item_presentation_model : public i_item_presentation_model, private i_item_model_subscriber, private neolib::observable<i_item_presentation_model_subscriber>
+    class basic_item_presentation_model : public object<i_item_presentation_model>
     {
     public:
         define_declared_event(VisualAppearanceChanged, visual_appearance_changed)
+        define_declared_event(ColumnInfoChanged, column_info_changed, item_presentation_model_index::column_type)
+        define_declared_event(ItemModelChanged, item_model_changed, const i_item_model&)
+        define_declared_event(ItemAdded, item_added, const item_presentation_model_index&)
+        define_declared_event(ItemChanged, item_changed, const item_presentation_model_index&)
+        define_declared_event(ItemRemoved, item_removed, const item_presentation_model_index&)
+        define_declared_event(ItemsSorting, items_sorting)
+        define_declared_event(ItemsSorted, items_sorted)
+        define_declared_event(ItemsFiltering, items_filtering)
+        define_declared_event(ItemsFiltered, items_filtered)
     private:
         typedef ItemModel item_model_type;
         typedef typename item_model_type::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other container_traits;
@@ -77,9 +88,7 @@ namespace neogfx
         }
         ~basic_item_presentation_model()
         {
-            if (has_item_model())
-                item_model().unsubscribe(*this);
-            notify_observers(i_item_presentation_model_subscriber::NotifyModelDestroyed);
+            set_destroying();
         }
     public:
         bool initializing() const override
@@ -101,21 +110,32 @@ namespace neogfx
             if (iItemModel != &aItemModel)
             {
                 neolib::scoped_flag sf{ iInitializing };
-                if (has_item_model())
-                    item_model().unsubscribe(*this);
+                iItemModelSink.clear();
                 iItemModel = &aItemModel;
-                item_model().subscribe(*this);
+                iItemModelSink += item_model().column_info_changed([this](item_model_index::column_type aColumnIndex) { item_model_column_info_changed(aColumnIndex); });
+                iItemModelSink += item_model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
+                iItemModelSink += item_model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
+                iItemModelSink += item_model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
+                iItemModelSink += item_model().destroying([this]() 
+                { 
+                    iItemModel = nullptr;
+                    iColumns.clear(); 
+                    iRows.clear(); 
+                    reset_maps();
+                    reset_meta();
+                    reset_sort();
+                });
                 iColumns.clear();
                 for (item_model_index::column_type col = 0; col < item_model().columns(); ++col)
                     iColumns.push_back(column_info{ col });
                 iRows.clear();
                 for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
-                    item_added(item_model(), item_model_index{ row });
+                    item_added(item_model_index{ row });
                 reset_maps();
                 reset_meta();
                 reset_sort();
+                ItemModelChanged.trigger(item_model());
             }
-            notify_observers(i_item_presentation_model_subscriber::NotifyItemModelChanged);
         }
         item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const override
         {
@@ -195,7 +215,7 @@ namespace neogfx
                 throw bad_column_index();
             iColumns[aColumnIndex].headingText = aHeadingText;
             iColumns[aColumnIndex].headingExtents = std::nullopt;
-            notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+            ColumnInfoChanged.trigger(aColumnIndex);
         }
         item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const override
         {
@@ -631,15 +651,6 @@ namespace neogfx
                 execute_filter();
             }
         }
-    public:
-        virtual void subscribe(i_item_presentation_model_subscriber& aSubscriber)
-        {
-            add_observer(aSubscriber);
-        }
-        virtual void unsubscribe(i_item_presentation_model_subscriber& aSubscriber)
-        {
-            remove_observer(aSubscriber);
-        }
     private:
         void init()
         {
@@ -656,7 +667,7 @@ namespace neogfx
         }
         void execute_sort()
         {
-            notify_observers(i_item_presentation_model_subscriber::NotifyItemsSorting);
+            ItemsSorting.trigger();
             std::sort(iRows.begin(), iRows.end(), [&](const typename container_type::value_type& aLhs, const typename container_type::value_type& aRhs) -> bool
             {
                 if (!iSortOrder.empty())
@@ -687,13 +698,13 @@ namespace neogfx
             });
             reset_maps();
             reset_position_meta(0);
-            notify_observers(i_item_presentation_model_subscriber::NotifyItemsSorted);
+            ItemsSorted.trigger();
         }
         void execute_filter()
         {
             neolib::scoped_flag sf1{ iInitializing };
             neolib::scoped_flag sf2{ iFiltering };
-            notify_observers(i_item_presentation_model_subscriber::NotifyItemsFiltering);
+            ItemsFiltering.trigger();
             iRows.clear();
             for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
             {
@@ -721,36 +732,36 @@ namespace neogfx
                     }
                 }
                 if (matches)
-                    item_added(item_model(), item_model_index{ row });
+                    item_added(item_model_index{ row });
             }
             reset_maps();
             reset_cell_meta();
             reset_position_meta(0);
-            notify_observers(i_item_presentation_model_subscriber::NotifyItemsFiltered);
+            ItemsFiltered.trigger();
             execute_sort();
         }
     private:
-        void column_info_changed(const i_item_model&, item_model_index::column_type aColumnIndex) override
+        void item_model_column_info_changed(item_model_index::column_type aColumnIndex)
         {
             reset_column_meta();
             if (have_item_model_index(item_model_index{ 0, aColumnIndex }))
-                notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, from_item_model_index(item_model_index{ 0, aColumnIndex }).column());
+                ColumnInfoChanged.trigger(from_item_model_index(item_model_index{ 0, aColumnIndex }).column());
         }
-        void item_added(const i_item_model& aItemModel, const item_model_index& aItemIndex) override
+        void item_added(const item_model_index& aItemIndex)
         {
             for (auto& row : iRows)
                 if (row.first >= aItemIndex.row())
                     ++row.first;
-            iRows.push_back(std::make_pair(aItemIndex.row(), row_container_type{ aItemModel.columns() }));
+            iRows.push_back(std::make_pair(aItemIndex.row(), row_container_type{ item_model().columns() }));
             if (!iInitializing)
             {
-                notify_observers(i_item_presentation_model_subscriber::NotifyItemAdded, item_presentation_model_index{ static_cast<uint32_t>(iRows.size() - 1u), 0u });
+                ItemAdded.trigger(item_presentation_model_index{ static_cast<uint32_t>(iRows.size() - 1u), 0u });
                 reset_maps();
                 reset_position_meta(0);
                 execute_sort();
             }
         }
-        void item_changed(const i_item_model&, const item_model_index& aItemIndex) override
+        void item_changed(const item_model_index& aItemIndex)
         {
             if (!iInitializing)
             {
@@ -766,27 +777,23 @@ namespace neogfx
                 auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
                 cellMeta.text = std::nullopt;
                 cellMeta.extents = std::nullopt;
-                notify_observers(i_item_presentation_model_subscriber::NotifyItemChanged, from_item_model_index(aItemIndex));
+                ItemChanged.trigger(from_item_model_index(aItemIndex));
                 iColumns[aItemIndex.column()].width = std::nullopt;
                 reset_maps();
                 reset_position_meta(0);
                 execute_sort();
             }
         }
-        void item_removed(const i_item_model&, const item_model_index& aItemIndex) override
+        void item_removed(const item_model_index& aItemIndex)
         {
             if (!iInitializing)
-                notify_observers(i_item_presentation_model_subscriber::NotifyItemRemoved, from_item_model_index(aItemIndex));
+                ItemRemoved.trigger(from_item_model_index(aItemIndex));
             iRows.erase(iRows.begin() + from_item_model_index(aItemIndex).row());
             for (auto& row : iRows)
                 if (row.first >= aItemIndex.row())
                     --row.first;
             reset_maps();
             reset_position_meta(0);
-        }
-        void model_destroyed(const i_item_model&) override
-        {
-            iItemModel = 0;
         }
     private:
         void reset_maps() const
@@ -849,44 +856,8 @@ namespace neogfx
                 iPositions[i] = std::nullopt;
         }
     private:
-        void notify_observer(i_item_presentation_model_subscriber& aObserver, i_item_presentation_model_subscriber::notify_type aType, const void* aParameter, const void*) override
-        {
-            switch (aType)
-            {
-            case i_item_presentation_model_subscriber::NotifyColumnInfoChanged:
-                aObserver.column_info_changed(*this, *static_cast<const item_presentation_model_index::value_type*>(aParameter));
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemModelChanged:
-                aObserver.item_model_changed(*this, item_model());
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemAdded:
-                aObserver.item_added(*this, *static_cast<const item_presentation_model_index*>(aParameter));
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemChanged:
-                aObserver.item_changed(*this, *static_cast<const item_presentation_model_index*>(aParameter));
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemRemoved:
-                aObserver.item_removed(*this, *static_cast<const item_presentation_model_index*>(aParameter));
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemsSorting:
-                aObserver.items_sorting(*this);
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemsSorted:
-                aObserver.items_sorted(*this);
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemsFiltering:
-                aObserver.items_filtering(*this);
-                break;
-            case i_item_presentation_model_subscriber::NotifyItemsFiltered:
-                aObserver.items_filtered(*this);
-                break;
-            case i_item_presentation_model_subscriber::NotifyModelDestroyed:
-                aObserver.model_destroyed(*this);
-                break;
-            }
-        }
-    private:
         i_item_model* iItemModel;
+        sink iItemModelSink;
         optional_size iCellSpacing;
         optional_margins iCellMargins;
         container_type iRows;

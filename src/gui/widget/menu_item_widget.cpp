@@ -287,7 +287,7 @@ namespace neogfx
             else
                 service<i_app>().remove_mnemonic(*this);
         };
-        iSink += iText.evTextChanged(text_updated);
+        iSink += iText.TextChanged(text_updated);
         text_updated();
         if (menu_item().type() == i_menu_item::Action)
         {

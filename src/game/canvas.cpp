@@ -117,9 +117,9 @@ namespace neogfx::game
         {
             aGraphicsContext.clear_depth_buffer();
             component_lock_guard<mesh_renderer> lgMeshRenderer{ ecs() };
-            evRenderingEntities.trigger(aGraphicsContext);
+            RenderingEntities.trigger(aGraphicsContext);
             aGraphicsContext.draw_entities(ecs());
-            evEntitiesRendered.trigger(aGraphicsContext);
+            EntitiesRendered.trigger(aGraphicsContext);
         }
     }
 
@@ -148,7 +148,7 @@ namespace neogfx::game
             }
         }, 1000u);
 
-        iSink += ecs().system<game_world>().evPhysicsApplied([this](step_time)
+        iSink += ecs().system<game_world>().PhysicsApplied([this](step_time)
         {
             update();
         });

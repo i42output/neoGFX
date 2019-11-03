@@ -21,19 +21,19 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
-#include "item_index.hpp"
+#include <neogfx/gui/widget/i_item_presentation_model.hpp>
 
 namespace neogfx
 {
     class item_selection
     {
     public:
-        typedef std::vector<item_index> index_list;
+        typedef std::vector<item_presentation_model_index> index_list;
         class range
         {
         public:
-            range(const item_index& aStart, const item_index& aEnd) :
-                iStart(aStart), iEnd(aEnd)
+            range(const item_presentation_model_index& aStart, const item_presentation_model_index& aEnd) :
+                iStart{ aStart }, iEnd{ aEnd }
             {
             }
         public:
@@ -42,41 +42,41 @@ namespace neogfx
                 return iStart < aRhs.iStart;
             }
         public:
-            const item_index& start() const
+            const item_presentation_model_index& start() const
             {
                 return iStart;
             }
-            item_index& start()
+            item_presentation_model_index& start()
             {
                 return iStart;
             }
-            const item_index& end() const
+            const item_presentation_model_index& end() const
             {
                 return iEnd;
             }
-            item_index& end()
+            item_presentation_model_index& end()
             {
                 return iEnd;
             }
         private:
-            item_index iStart;
-            item_index iEnd;
+            item_presentation_model_index iStart;
+            item_presentation_model_index iEnd;
         };
         typedef std::vector<range> range_list;
     public:
         item_selection()
         {
         }
-        item_selection(const item_index& aIndex)
+        item_selection(const item_presentation_model_index& aIndex)
         {
-            iSelections.push_back(range(aIndex, aIndex));
+            iSelections.push_back(range{ aIndex, aIndex });
         }
         item_selection(const range& aRange)
         {
             iSelections.push_back(aRange);
         }
         item_selection(const range_list& aSelections) :
-            iSelections(aSelections)
+            iSelections{ aSelections }
         {
             sort();
         }
@@ -116,23 +116,23 @@ namespace neogfx
                 {
                     for (auto c = s.start().column(); c <= s.start().column(); ++c)
                     {
-                        result.push_back(item_index(r, c));
+                        result.push_back(item_presentation_model_index{ r, c });
                     }
                 }
             }
             return result;
         }
-        void add(const item_index& aIndex)
+        void add(const item_presentation_model_index& aIndex)
         {
             auto i = find(aIndex);
             if (i != iSelections.begin() && std::prev(i)->end().row() == aIndex.row() && std::prev(i)->end().column() == aIndex.column() - 1)
                 std::prev(i)->end().set_column(aIndex.column());
             else if (i == iSelections.end())
-                iSelections.push_back(range(aIndex, aIndex));
+                iSelections.push_back(range{ aIndex, aIndex });
             else if (aIndex < i->start())
-                iSelections.insert(i, range(aIndex, aIndex));
+                iSelections.insert(i, range{ aIndex, aIndex });
             else if (i != iSelections.begin() && aIndex < std::prev(i)->end() && (aIndex.column() < std::prev(i)->start().column() || aIndex.column() > std::prev(i)->end().column()))
-                iSelections.insert(i, range(aIndex, aIndex));
+                iSelections.insert(i, range{ aIndex, aIndex });
         }
         void add(const range& aRange)
         {
@@ -145,7 +145,7 @@ namespace neogfx
             sort();
         }    
     private:
-        range_list::iterator find(const item_index& aIndex)
+        range_list::iterator find(const item_presentation_model_index& aIndex)
         {
             return std::lower_bound(iSelections.begin(), iSelections.end(), range_list::value_type(aIndex, aIndex), [](const range_list::value_type& lhs, const range_list::value_type& rhs) -> bool
             {

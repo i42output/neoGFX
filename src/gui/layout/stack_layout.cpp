@@ -111,6 +111,6 @@ namespace neogfx
         }
         if (has_layout_owner())
             layout_owner().layout_items_completed();
-        evLayoutCompleted.trigger();
+        LayoutCompleted.trigger();
     }
 }

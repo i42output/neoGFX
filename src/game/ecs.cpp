@@ -235,13 +235,13 @@ namespace neogfx::game
         auto entityId = next_entity_id();
         if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
             component<entity_info>().populate(entityId, entity_info{ aArchetypeId, system<time>().world_time() });
-        evEntityCreated.trigger(entityId);
+        EntityCreated.trigger(entityId);
         return entityId;
     }
     
     void ecs::destroy_entity(entity_id aEntityId)
     {
-        evEntityDestroyed.trigger(aEntityId);
+        EntityDestroyed.trigger(aEntityId);
         for (auto& component : iComponents)
             if (component.second->has_entity_record(aEntityId))
                 component.second->destroy_entity_record(aEntityId);
