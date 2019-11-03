@@ -580,6 +580,7 @@ namespace neogfx
         iDownArrow{ texture{} }, 
         iListProxy{ *this },
         iHandlingTextChange{ false },
+        iAcceptingSelection{ false },
         iCancellingSelection{ false }
     {
         init();
@@ -606,8 +607,9 @@ namespace neogfx
         iLayout1{ iLayout0 },
         iDownArrow{ texture{} },
         iListProxy{ *this },
+        iHandlingTextChange{ false },
         iAcceptingSelection{ false },
-        iHandlingTextChange{ false }
+        iCancellingSelection{ false }
     {
         init();
     }
