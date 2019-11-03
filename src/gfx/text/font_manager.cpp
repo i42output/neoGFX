@@ -185,8 +185,8 @@ namespace neogfx
                 throw;
             }
         }
-        for (auto& ff : iFontFamilies)
-            std::sort(ff.second.begin(), ff.second.end(), 
+        for (auto& famlily : iFontFamilies)
+            std::sort(famlily.second.begin(), famlily.second.end(),
                 [](auto const& f1, auto const& f2) { return f1->min_style() < f2->min_style() || (f1->min_style() == f2->min_style() && f1->min_weight() < f2->min_weight()); });
     }
 
@@ -350,8 +350,8 @@ namespace neogfx
         if (aFamilyIndex < font_family_count())
         {
             uint32_t styles = 0;
-            for (auto& f : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
-                styles += f->style_count();
+            for (auto& font : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
+                styles += font->style_count();
             return styles;
         }
         throw bad_font_family_index();
@@ -361,11 +361,11 @@ namespace neogfx
     {
         if (aFamilyIndex < font_family_count() && aStyleIndex < font_style_count(aFamilyIndex))
         {
-            for (auto& f : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
+            for (auto& font : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
             {
-                if (aStyleIndex < f->style_count())
-                    return f->style_name(aStyleIndex);
-                aStyleIndex -= f->style_count();
+                if (aStyleIndex < font->style_count())
+                    return font->style_name(aStyleIndex);
+                aStyleIndex -= font->style_count();
             }
         }
         throw bad_font_family_index();

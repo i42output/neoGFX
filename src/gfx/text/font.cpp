@@ -83,9 +83,15 @@ namespace neogfx
         auto aw = sAbbreviatedWeightMap.find(aStyleName);
         if (aw != sAbbreviatedWeightMap.end())
             return aw->second;
+        std::optional<decltype(sWeightMap)::value_type*> match;
         for (auto& wme : sWeightMap)
             if (aStyleName.find(wme.first) != std::string::npos)
-                return wme.second;
+            {
+                if (match == std::nullopt || (**match).first.size() < wme.first.size())
+                    match = &wme;
+            }
+        if (match != std::nullopt)
+            return (**match).second;
         return font_weight::Normal;
     }
 
