@@ -40,6 +40,8 @@ namespace neogfx
             {
                 neolib::destroyed_flag destroyed{ *this };
                 neolib::destroyed_flag surfaceDestroyed{ aParent.surface().as_lifetime() };
+                if (destroyed || surfaceDestroyed)
+                    return;
                 for (auto& sw : aParent.iSectionWidths)
                 {
                     sw.calculated = 0.0;

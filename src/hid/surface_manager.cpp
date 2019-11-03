@@ -103,6 +103,15 @@ namespace neogfx
                 return true;
         return false;
     }
+
+    std::size_t surface_manager::strong_surface_count() const
+    {
+        std::size_t result = 0u;
+        for (auto& s : iSurfaces)
+            if (s->is_strong())
+                ++result;
+        return result;
+    }
         
     bool surface_manager::process_events(bool& aLastWindowClosed)
     {

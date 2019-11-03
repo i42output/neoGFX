@@ -537,6 +537,8 @@ namespace neogfx
 
     bool window::can_close() const
     {
+        if (is_strong() && !service<i_app>().in_exec())
+            return false;
         return true;
     }
 

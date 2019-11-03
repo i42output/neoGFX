@@ -56,6 +56,7 @@ namespace neogfx
         std::size_t surface_count() const override;
         i_surface& surface(std::size_t aIndex) override;
         bool any_strong_surfaces() const override;
+        std::size_t strong_surface_count() const override;
         bool process_events(bool& aLastWindowClosed) override;
         void layout_surfaces() override;
         void invalidate_surfaces() override;

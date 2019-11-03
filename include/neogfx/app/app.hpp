@@ -59,6 +59,7 @@ namespace neogfx
     class app : public neolib::async_thread, public i_app, private i_keyboard_handler
     {
     public:
+        define_declared_event(ExecutionStarted, execution_started)
         define_declared_event(CurrentStyleChanged, current_style_changed, style_aspect)
     private:
         class loader

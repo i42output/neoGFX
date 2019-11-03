@@ -66,6 +66,7 @@ namespace neogfx
     class i_app
     {
     public:
+        declare_event(execution_started)
         declare_event(current_style_changed, style_aspect)
     public:
         struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };

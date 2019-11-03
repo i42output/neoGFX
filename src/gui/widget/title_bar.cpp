@@ -187,7 +187,7 @@ namespace neogfx
             iMinimizeButton.enable(!isIconic && isEnabled);
             iMaximizeButton.enable(!isMaximized && isEnabled);
             iRestoreButton.enable(!isRestored && isEnabled);
-            iCloseButton.enable(isEnabled);
+            iCloseButton.enable(iWindow.can_close());
             bool layoutChanged = false;
             layoutChanged = iMinimizeButton.show(!isIconic && (iWindow.style() & window_style::MinimizeBox) == window_style::MinimizeBox) || layoutChanged;
             layoutChanged = iMaximizeButton.show(!isMaximized && (iWindow.style() & window_style::MaximizeBox) == window_style::MaximizeBox) || layoutChanged;
@@ -199,6 +199,10 @@ namespace neogfx
                 update(true);
             }
         };
+        iSink += service<i_app>().execution_started([this, update_widgets]()
+        {
+            update_widgets();
+        });
         iSink += iWindow.window_event([this, update_widgets](neogfx::window_event& e)
         {
             switch (e.type())
