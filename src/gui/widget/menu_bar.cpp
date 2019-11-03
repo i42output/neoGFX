@@ -188,6 +188,22 @@ namespace neogfx
                 iOpenSubMenu.reset();
             });
         });
+        if (widget::parent().is_root())
+        {
+            iSink += root().window_event([this](neogfx::window_event& e)
+            {
+                switch (e.type())
+                {
+                case window_event_type::FocusGained:
+                case window_event_type::FocusLost:
+                    enable(root().is_active());
+                    break;
+                default:
+                    break;
+                }
+            });
+            enable(root().is_active());
+        }
     }
 
     void menu_bar::close_sub_menu(bool aClearSelection)
