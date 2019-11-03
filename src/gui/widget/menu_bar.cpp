@@ -61,6 +61,14 @@ namespace neogfx
         return widget::visible();
     }
 
+    double menu_bar::opacity() const
+    {
+        double result = widget::opacity();
+        if (widget::parent().is_root() && !root().is_active())
+            result *= 0.25;
+        return result;
+    }
+
     bool menu_bar::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
     {
         switch (aScanCode)
@@ -196,13 +204,12 @@ namespace neogfx
                 {
                 case window_event_type::FocusGained:
                 case window_event_type::FocusLost:
-                    enable(root().is_active());
+                    update();
                     break;
                 default:
                     break;
                 }
             });
-            enable(root().is_active());
         }
     }
 

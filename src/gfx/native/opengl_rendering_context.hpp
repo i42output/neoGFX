@@ -84,6 +84,7 @@ namespace neogfx
         void clip_to(const path& aPath, dimension aPathOutline);
         void reset_clip();
         void apply_clip();
+        void set_opacity(double aOpacity);
         neogfx::blending_mode blending_mode() const;
         void set_blending_mode(neogfx::blending_mode aBlendingMode);
         neogfx::smoothing_mode smoothing_mode() const;
@@ -134,6 +135,7 @@ namespace neogfx
         graphics_operation::queue iQueue;
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
+        double iOpacity;
         neogfx::blending_mode iBlendingMode;
         neogfx::smoothing_mode iSmoothingMode; 
         bool iSubpixelRendering;

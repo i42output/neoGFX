@@ -41,6 +41,8 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;    
     public:
+        double opacity() const override;
+    public:
         bool visible() const override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;

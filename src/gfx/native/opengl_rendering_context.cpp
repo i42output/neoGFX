@@ -159,6 +159,7 @@ namespace neogfx
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{aTarget}, 
         iWidget{ nullptr },
+        iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::None },
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
@@ -180,6 +181,7 @@ namespace neogfx
         iTarget{ aTarget },
         iWidget{ &aWidget },
         iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },        
+        iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::None },
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
@@ -202,6 +204,7 @@ namespace neogfx
         iWidget{ aOther.iWidget },
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
+        iOpacity{ 1.0 },
         iBlendingMode{ aOther.iBlendingMode },
         iSmoothingMode{ aOther.iSmoothingMode },
         iSubpixelRendering{ aOther.iSubpixelRendering },
@@ -351,6 +354,10 @@ namespace neogfx
                     (void)op;
                     reset_clip();
                 }
+                break;
+            case graphics_operation::operation_type::SetOpacity:
+                for (auto op = opBatch.first; op != opBatch.second; ++op)
+                    set_opacity(static_variant_cast<const graphics_operation::set_opacity&>(*op).opacity);
                 break;
             case graphics_operation::operation_type::SetBlendingMode:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -651,6 +658,11 @@ namespace neogfx
         }
     }
 
+    void opengl_rendering_context::set_opacity(double aOpacity)
+    {
+        iOpacity = aOpacity;
+    }
+
     neogfx::blending_mode opengl_rendering_context::blending_mode() const
     {
         return iBlendingMode;
@@ -834,7 +846,7 @@ namespace neogfx
                 static_variant_cast<colour>(aPen.colour()).red<float>(),
                 static_variant_cast<colour>(aPen.colour()).green<float>(),
                 static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+                static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
             vec4f{};
 
         glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -871,7 +883,7 @@ namespace neogfx
                         static_variant_cast<colour>(aPen.colour()).red<float>(),
                         static_variant_cast<colour>(aPen.colour()).green<float>(),
                         static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                        static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+                        static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{};
         }
         glCheck(glLineWidth(1.0f));
@@ -902,7 +914,7 @@ namespace neogfx
                         static_variant_cast<colour>(aPen.colour()).red<float>(),
                         static_variant_cast<colour>(aPen.colour()).green<float>(),
                         static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                        static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+                        static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
         }
         glCheck(glLineWidth(1.0f));
@@ -932,7 +944,7 @@ namespace neogfx
                         static_variant_cast<colour>(aPen.colour()).red<float>(),
                         static_variant_cast<colour>(aPen.colour()).green<float>(),
                         static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                        static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+                        static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
         }
         glCheck(glLineWidth(1.0f));
@@ -962,7 +974,7 @@ namespace neogfx
                         static_variant_cast<colour>(aPen.colour()).red<float>(),
                         static_variant_cast<colour>(aPen.colour()).green<float>(),
                         static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                        static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+                        static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
         }
         glCheck(glLineWidth(1.0f));
@@ -998,7 +1010,7 @@ namespace neogfx
                                 static_variant_cast<colour>(aPen.colour()).red<float>(),
                                 static_variant_cast<colour>(aPen.colour()).green<float>(),
                                 static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                                static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+                                static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                             vec4f{}});
                 }
                 if (aPath.shape() == path::ConvexPolygon)
@@ -1030,7 +1042,7 @@ namespace neogfx
                         static_variant_cast<colour>(aPen.colour()).red<float>(),
                         static_variant_cast<colour>(aPen.colour()).green<float>(),
                         static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                        static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+                        static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
         }
 
@@ -1093,7 +1105,7 @@ namespace neogfx
                             static_variant_cast<const colour&>(drawOp.fill).red<float>(),
                             static_variant_cast<const colour&>(drawOp.fill).green<float>(),
                             static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const colour&>(drawOp.fill).alpha<float>()}} :
+                            static_variant_cast<const colour&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
                         vec4f{};
             }
         }
@@ -1124,7 +1136,7 @@ namespace neogfx
                         static_variant_cast<const colour&>(aFill).red<float>(),
                         static_variant_cast<const colour&>(aFill).green<float>(),
                         static_variant_cast<const colour&>(aFill).blue<float>(),
-                        static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+                        static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}}); 
             }
         }
@@ -1149,7 +1161,7 @@ namespace neogfx
                         static_variant_cast<const colour&>(aFill).red<float>(),
                         static_variant_cast<const colour&>(aFill).green<float>(),
                         static_variant_cast<const colour&>(aFill).blue<float>(),
-                        static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+                        static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
             }
         }
@@ -1174,7 +1186,7 @@ namespace neogfx
                         static_variant_cast<const colour&>(aFill).red<float>(),
                         static_variant_cast<const colour&>(aFill).green<float>(),
                         static_variant_cast<const colour&>(aFill).blue<float>(),
-                        static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+                        static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
             }
         }
@@ -1212,7 +1224,7 @@ namespace neogfx
                                 static_variant_cast<const colour&>(aFill).red<float>(),
                                 static_variant_cast<const colour&>(aFill).green<float>(),
                                 static_variant_cast<const colour&>(aFill).blue<float>(),
-                                static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+                                static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                             vec4f{}});
                     }
                 }
@@ -1268,7 +1280,7 @@ namespace neogfx
                                     static_variant_cast<const colour&>(drawOp.fill).red<float>(),
                                     static_variant_cast<const colour&>(drawOp.fill).green<float>(),
                                     static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
-                                    static_variant_cast<const colour&>(drawOp.fill).alpha<float>()}} :
+                                    static_variant_cast<const colour&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
                                 vec4f{},
                             uv[vi]});
                     }
@@ -1415,7 +1427,7 @@ namespace neogfx
                                     static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).red<float>(),
                                     static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).green<float>(),
                                     static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).blue<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).alpha<float>()}} :
+                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                                 vec4f{};
                         }
                         else
@@ -1425,7 +1437,7 @@ namespace neogfx
                                     static_variant_cast<const colour&>(drawOp.appearance.ink()).red<float>(),
                                     static_variant_cast<const colour&>(drawOp.appearance.ink()).green<float>(),
                                     static_variant_cast<const colour&>(drawOp.appearance.ink()).blue<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha<float>()}} :
+                                    static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha<float>() * static_cast<float>(iOpacity)}} :
                                 vec4f{};
                         }
 
@@ -1616,7 +1628,7 @@ namespace neogfx
                             colourizationColour.red<float>(),
                             colourizationColour.green<float>(),
                             colourizationColour.blue<float>(),
-                            colourizationColour.alpha<float>()}},
+                            colourizationColour.alpha<float>() * static_cast<float>(iOpacity)}},
                         uv);
                 }
             }
