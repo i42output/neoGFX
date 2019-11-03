@@ -209,8 +209,8 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/DesignStudio.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/DesignStudio.res.cpp</Outputs>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
