@@ -24,11 +24,13 @@
 #include <neogfx/core/geometrical.hpp>
 #include "i_native_texture.hpp"
 #include <neogfx/gfx/i_image.hpp>
+#include <neogfx/gfx/shader_array.hpp>
 
 namespace neogfx
 {
     class i_texture_manager;
 
+    template <typename T>
     class opengl_texture : public i_native_texture
     {
     public:
@@ -41,8 +43,11 @@ namespace neogfx
         struct multisample_texture_initialization_unsupported : std::logic_error { multisample_texture_initialization_unsupported() : std::logic_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
         struct unsupported_sampling_type_for_function : std::logic_error { unsupported_sampling_type_for_function() : std::logic_error("neogfx::opengl_texture::unsupported_sampling_type_for_function") {} };
     public:
-        opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_colour& aColour = optional_colour());
-        opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
+        typedef T value_type;
+        static constexpr texture_data_type kDataType = crack_shader_array_data_type<value_type>::DATA_TYPE;
+    public:
+        opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, const optional_colour& aColour = optional_colour());
+        opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA);
         ~opengl_texture();
     public:
         texture_id id() const override;
@@ -99,7 +104,6 @@ namespace neogfx
         dimension iDpiScaleFactor;
         texture_sampling iSampling;
         texture_data_format iDataFormat;
-        texture_data_type iDataType;
         size_u32 iSize;
         size_u32 iStorageSize;
         GLuint iHandle;

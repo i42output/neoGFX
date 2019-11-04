@@ -34,11 +34,11 @@ namespace neogfx
         iWindow{ aWindow }, 
         iRenderingEngine{ service<i_rendering_engine>() },
         iNativeWindow{ aNativeWindowCreator(*this) },
-        iNativeSurfaceDestroyed{ iNativeWindow->as_lifetime() },
         iClosed{ false },
         iCapturingWidget{ nullptr },
         iClickedWidget{ nullptr }
     {
+        iNativeSurfaceDestroyed.emplace(iNativeWindow->as_lifetime());
         service<i_surface_manager>().add_surface(*this);
     }
 
@@ -252,7 +252,7 @@ namespace neogfx
 
     bool surface_window_proxy::has_native_surface() const
     {
-        return iNativeWindow != nullptr && !iNativeSurfaceDestroyed;
+        return iNativeWindow != nullptr && !*iNativeSurfaceDestroyed;
     }
 
     const i_native_surface& surface_window_proxy::native_surface() const

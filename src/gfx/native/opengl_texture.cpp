@@ -73,13 +73,13 @@ namespace neogfx
         }
     }
 
-    opengl_texture::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_colour& aColour) :
+    template <typename T>
+    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, const optional_colour& aColour) :
         iManager{ aManager },
         iId{ aId },
         iDpiScaleFactor{ aDpiScaleFactor },
         iSampling{ aSampling },
         iDataFormat{ aDataFormat },
-        iDataType{ aDataType },
         iSize{ aExtents },
         iStorageSize{ aSampling != texture_sampling::NormalMipmap ?
             (aSampling != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
@@ -117,19 +117,31 @@ namespace neogfx
             }
             if (sampling() != texture_sampling::Multisample)
             {
-                std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
+                std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
                 if (aColour != std::nullopt)
                 {
-                    for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                        for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-                        {
-                            data[y * iStorageSize.cx * 4 + x * 4 + 0] = aColour->red();
-                            data[y * iStorageSize.cx * 4 + x * 4 + 1] = aColour->green();
-                            data[y * iStorageSize.cx * 4 + x * 4 + 2] = aColour->blue();
-                            data[y * iStorageSize.cx * 4 + x * 4 + 3] = aColour->alpha();
-                        }
+                    if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                data[y * iStorageSize.cx + x + 0] = 
+                                    value_type{
+                                        aColour->red(),
+                                        aColour->green(),
+                                        aColour->blue(),
+                                        aColour->alpha()
+                                    };
+                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                data[y * iStorageSize.cx + x + 0] = 
+                                    value_type{
+                                        aColour->red<float>(),
+                                        aColour->green<float>(),
+                                        aColour->blue<float>(),
+                                        aColour->alpha<float>()
+                                    };
                 }
-                glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, iDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), data.empty() ? nullptr : &data[0]));
+                glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), data.empty() ? nullptr : &data[0]));
                 if (sampling() == texture_sampling::NormalMipmap)
                 {
                     glCheck(glGenerateMipmap(GL_TEXTURE_2D));
@@ -139,7 +151,7 @@ namespace neogfx
             {
                 if (aColour != std::nullopt)
                     throw multisample_texture_initialization_unsupported();
-                glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), std::get<0>(to_gl_enum(iDataFormat, iDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
+                glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
             }
             glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
         }
@@ -150,13 +162,13 @@ namespace neogfx
         }
     }
 
-    opengl_texture::opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType) :
+    template <typename T>
+    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat) :
         iManager{ aManager },
         iId{ aId },
         iDpiScaleFactor{ aImage.dpi_scale_factor() },
         iSampling{ aImage.sampling() },
         iDataFormat{ aDataFormat },
-        iDataType{ aDataType },
         iSize{ aImage.extents() },
         iStorageSize{ aImage.sampling() != texture_sampling::NormalMipmap ? 
             (aImage.sampling() != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
@@ -198,13 +210,24 @@ namespace neogfx
             {
             case colour_format::RGBA8:
                 {
-                    const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
-                    std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
-                    for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                        for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-                            for (std::size_t c = 0; c < 4; ++c)
-                                data[(iSize.cy + 1 - y) * iStorageSize.cx * 4 + x * 4 + c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
-                    glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, iDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), &data[0]));
+                    std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
+                    if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
+                    {
+                        const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                for (std::size_t c = 0; c < 4; ++c)
+                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
+                    }
+                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
+                    {
+                        const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                for (std::size_t c = 0; c < 4; ++c)
+                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c] / 255.0f;
+                    }
+                    glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &data[0]));
                     if (sampling() == texture_sampling::NormalMipmap)
                     {
                         glCheck(glGenerateMipmap(GL_TEXTURE_2D));
@@ -224,7 +247,8 @@ namespace neogfx
         }
     }
 
-    opengl_texture::~opengl_texture()
+    template <typename T>
+    opengl_texture<T>::~opengl_texture()
     {
         if (iFrameBuffer != 0)
         {
@@ -234,32 +258,38 @@ namespace neogfx
         glCheck(glDeleteTextures(1, &iHandle));
     }
 
-    texture_id opengl_texture::id() const
+    template <typename T>
+    texture_id opengl_texture<T>::id() const
     {
         return iId;
     }
 
-    texture_type opengl_texture::type() const
+    template <typename T>
+    texture_type opengl_texture<T>::type() const
     {
         return texture_type::Texture;
     }
 
-    bool opengl_texture::is_render_target() const
+    template <typename T>
+    bool opengl_texture<T>::is_render_target() const
     {
         return iFrameBuffer != 0;
     }
 
-    const i_sub_texture& opengl_texture::as_sub_texture() const
+    template <typename T>
+    const i_sub_texture& opengl_texture<T>::as_sub_texture() const
     {
         throw not_sub_texture();
     }
 
-    dimension opengl_texture::dpi_scale_factor() const
+    template <typename T>
+    dimension opengl_texture<T>::dpi_scale_factor() const
     {
         return iDpiScaleFactor;
     }
 
-    texture_sampling opengl_texture::sampling() const
+    template <typename T>
+    texture_sampling opengl_texture<T>::sampling() const
     {
         switch (iSampling)
         {
@@ -273,7 +303,8 @@ namespace neogfx
         }
     }
 
-    uint32_t opengl_texture::samples() const
+    template <typename T>
+    uint32_t opengl_texture<T>::samples() const
     {
         switch (iSampling)
         {
@@ -291,32 +322,38 @@ namespace neogfx
         }
     }
 
-    texture_data_format opengl_texture::data_format() const
+    template <typename T>
+    texture_data_format opengl_texture<T>::data_format() const
     {
         return iDataFormat;
     }
 
-    texture_data_type opengl_texture::data_type() const
+    template <typename T>
+    texture_data_type opengl_texture<T>::data_type() const
     {
-        return iDataType;
+        return kDataType;
     }
 
-    bool opengl_texture::is_empty() const
+    template <typename T>
+    bool opengl_texture<T>::is_empty() const
     {
         return false;
     }
 
-    size opengl_texture::extents() const
+    template <typename T>
+    size opengl_texture<T>::extents() const
     {
         return iSize;
     }
 
-    size opengl_texture::storage_extents() const
+    template <typename T>
+    size opengl_texture<T>::storage_extents() const
     {
         return iStorageSize;
     }
 
-    void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
+    template <typename T>
+    void opengl_texture<T>::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
     {
         if (sampling() != texture_sampling::Multisample)
         {
@@ -328,14 +365,14 @@ namespace neogfx
             {
                 glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
                     static_cast<GLint>(aRect.x), static_cast<GLint>(aRect.y), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
-                    std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), aPixelData));
+                    std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
             }
             else
             {
                 glCheck(glTexImage2D(to_gl_enum(sampling()), 0,
-                    std::get<0>(to_gl_enum(iDataFormat, iDataType)),
+                    std::get<0>(to_gl_enum(iDataFormat, kDataType)),
                     static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy), 0,
-                    std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), aPixelData));
+                    std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
             }
             if (sampling() == texture_sampling::NormalMipmap)
             {
@@ -348,79 +385,92 @@ namespace neogfx
             throw unsupported_sampling_type_for_function();
     }
 
-    void opengl_texture::set_pixels(const i_image& aImage)
+    template <typename T>
+    void opengl_texture<T>::set_pixels(const i_image& aImage)
     {
         set_pixels(rect{ point{ 1.0, 1.0 }, aImage.extents() }, aImage.cpixels());
     }
 
-    void opengl_texture::set_pixel(const point& aPosition, const colour& aColour)
+    template <typename T>
+    void opengl_texture<T>::set_pixel(const point& aPosition, const colour& aColour)
     {
         std::array<uint8_t, 4> pixel{ aColour.red(), aColour.green(), aColour.blue(), aColour.alpha() };
         set_pixels(rect{ aPosition, size{1.0, 1.0} }, &pixel);
     }
 
-    colour opengl_texture::get_pixel(const point& aPosition) const
+    template <typename T>
+    colour opengl_texture<T>::get_pixel(const point& aPosition) const
     {
         switch (sampling())
         {
         case texture_sampling::Normal:
         case texture_sampling::Nearest:
         case texture_sampling::Data:
-            throw std::logic_error("opengl_texture::get_pixel: function not yet implemented");
+            throw std::logic_error("neogfx::opengl_texture::get_pixel: function not yet implemented");
             break;
         default:
             throw unsupported_sampling_type_for_function();
         }
     }
 
-    void* opengl_texture::handle() const
+    template <typename T>
+    void* opengl_texture<T>::handle() const
     {
         return reinterpret_cast<void*>(static_cast<intptr_t>(iHandle));
     }
 
-    bool opengl_texture::is_resident() const
+    template <typename T>
+    bool opengl_texture<T>::is_resident() const
     {
         GLboolean resident;
         glCheck(glAreTexturesResident(1, &iHandle, &resident));
         return resident == GL_TRUE;
     }
 
-    const std::string& opengl_texture::uri() const
+    template <typename T>
+    const std::string& opengl_texture<T>::uri() const
     {
         return iUri;
     }
 
-    dimension opengl_texture::horizontal_dpi() const
+    template <typename T>
+    dimension opengl_texture<T>::horizontal_dpi() const
     {
         return dpi_scale_factor() * 96.0;
     }
 
-    dimension opengl_texture::vertical_dpi() const
+    template <typename T>
+    dimension opengl_texture<T>::vertical_dpi() const
     {
         return dpi_scale_factor() * 96.0;
     }
 
-    dimension opengl_texture::ppi() const
+    template <typename T>
+    dimension opengl_texture<T>::ppi() const
     {
         return size{ horizontal_dpi(), vertical_dpi() }.magnitude() / std::sqrt(2.0);
     }
 
-    bool opengl_texture::metrics_available() const
+    template <typename T>
+    bool opengl_texture<T>::metrics_available() const
     {
         return true;
     }
 
-    dimension opengl_texture::em_size() const
+    template <typename T>
+    dimension opengl_texture<T>::em_size() const
     {
         return 0.0;
     }
 
-    std::unique_ptr<i_rendering_context> opengl_texture::create_graphics_context(blending_mode aBlendingMode) const
+    template <typename T>
+    std::unique_ptr<i_rendering_context> opengl_texture<T>::create_graphics_context(blending_mode aBlendingMode) const
     {
         return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
     }
 
-    int32_t opengl_texture::bind(const std::optional<uint32_t>& aTextureUnit) const
+    template <typename T>
+    int32_t opengl_texture<T>::bind(const std::optional<uint32_t>& aTextureUnit) const
     {
         if (aTextureUnit != std::nullopt)
             glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
@@ -430,42 +480,50 @@ namespace neogfx
         return previousTexture;
     }
 
-    std::shared_ptr<i_native_texture> opengl_texture::native_texture() const
+    template <typename T>
+    std::shared_ptr<i_native_texture> opengl_texture<T>::native_texture() const
     {
         return std::dynamic_pointer_cast<i_native_texture>(iManager.find_texture(id()));
     }
 
-    render_target_type opengl_texture::target_type() const
+    template <typename T>
+    render_target_type opengl_texture<T>::target_type() const
     {
         return render_target_type::Texture;
     }
 
-    void* opengl_texture::target_handle() const
+    template <typename T>
+    void* opengl_texture<T>::target_handle() const
     {
         return native_texture()->handle();
     }
 
-    const i_texture& opengl_texture::target_texture() const
+    template <typename T>
+    const i_texture& opengl_texture<T>::target_texture() const
     {
         return *this;
     }
 
-    size opengl_texture::target_extents() const
+    template <typename T>
+    size opengl_texture<T>::target_extents() const
     {
         return extents();
     }
 
-    neogfx::logical_coordinate_system opengl_texture::logical_coordinate_system() const
+    template <typename T>
+    neogfx::logical_coordinate_system opengl_texture<T>::logical_coordinate_system() const
     {
         return iLogicalCoordinateSystem;
     }
 
-    void opengl_texture::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+    template <typename T>
+    void opengl_texture<T>::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
     {
         iLogicalCoordinateSystem = aSystem;
     }
 
-    logical_coordinates opengl_texture::logical_coordinates() const
+    template <typename T>
+    logical_coordinates opengl_texture<T>::logical_coordinates() const
     {
         if (iLogicalCoordinates != std::nullopt)
             return *iLogicalCoordinates;
@@ -487,12 +545,14 @@ namespace neogfx
         return result;
     }
 
-    void opengl_texture::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
+    template <typename T>
+    void opengl_texture<T>::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
     {
         iLogicalCoordinates = aCoordinates;
     }
 
-    void opengl_texture::activate_target() const
+    template <typename T>
+    void opengl_texture<T>::activate_target() const
     {
         bool alreadyActive = target_active();
         if (!alreadyActive)
@@ -556,12 +616,14 @@ namespace neogfx
             TargetActivated.trigger();
     }
 
-    bool opengl_texture::target_active() const
+    template <typename T>
+    bool opengl_texture<T>::target_active() const
     {
         return service<i_rendering_engine>().active_target() == this;
     }
 
-    void opengl_texture::deactivate_target() const
+    template <typename T>
+    void opengl_texture<T>::deactivate_target() const
     {
         if (target_active())
         {
@@ -573,17 +635,23 @@ namespace neogfx
         throw not_active();
     }
 
-    colour opengl_texture::read_pixel(const point& aPosition) const
+    template <typename T>
+    colour opengl_texture<T>::read_pixel(const point& aPosition) const
     {
         if (sampling() != neogfx::texture_sampling::Multisample)
         {
             scoped_render_target srt{ *this };
             std::array<uint8_t, 4> pixel;
             basic_point<GLint> pos{ aPosition };
-            glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), &pixel));
+            glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &pixel));
             return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
         }
         else
-            throw std::logic_error("opengl_texture::read_pixel: not yet implemented for multisample render targets");
+            throw std::logic_error("neogfx::opengl_texture::read_pixel: not yet implemented for multisample render targets");
     }
+
+    template class opengl_texture<uint8_t>;
+    template class opengl_texture<float>;
+    template class opengl_texture<std::array<uint8_t, 4>>;
+    template class opengl_texture<std::array<float, 4>>;
 }

@@ -147,10 +147,10 @@ namespace neogfx
         const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const;
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false);
     private:
+        std::optional<destroyed_flag> iNativeSurfaceDestroyed;
         i_window& iWindow;
         i_rendering_engine& iRenderingEngine;
         std::unique_ptr<i_native_window> iNativeWindow;
-        destroyed_flag iNativeSurfaceDestroyed;
         bool iNativeWindowClosing;
         bool iClosed;
         std::optional<char32_t> iSurrogatePairPart;

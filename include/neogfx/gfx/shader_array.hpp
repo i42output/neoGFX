@@ -29,10 +29,10 @@ namespace neogfx
     struct crack_shader_array_data_type;
 
     template <>
-    struct crack_shader_array_data_type<unsigned char> 
+    struct crack_shader_array_data_type<uint8_t>
     { 
         static constexpr texture_data_format DATA_FORMAT = texture_data_format::Red;
-        static constexpr texture_data_type DATA_TYPE = texture_data_type::UnsignedByte; 
+        static constexpr texture_data_type DATA_TYPE = texture_data_type::UnsignedByte;
     };
     template <>
     struct crack_shader_array_data_type<float> 
@@ -41,10 +41,16 @@ namespace neogfx
         static constexpr texture_data_type DATA_TYPE = texture_data_type::Float;
     };
     template <>
+    struct crack_shader_array_data_type<std::array<uint8_t, 4>>
+    {
+        static constexpr texture_data_format DATA_FORMAT = texture_data_format::RGBA;
+        static constexpr texture_data_type DATA_TYPE = texture_data_type::UnsignedByte;
+    };
+    template <>
     struct crack_shader_array_data_type<std::array<float, 4>> 
     { 
         static constexpr texture_data_format DATA_FORMAT = texture_data_format::RGBA;
-        static constexpr texture_data_type DATA_TYPE = texture_data_type::Float; 
+        static constexpr texture_data_type DATA_TYPE = texture_data_type::Float;
     };
 
     template <typename T>
