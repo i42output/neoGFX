@@ -44,13 +44,19 @@ namespace neogfx
     public:
         void set_destroying() override
         {
-            Destroying.trigger();
-            neolib::lifetime::set_destroying();
+            if (is_alive())
+            {
+                Destroying.trigger();
+                neolib::lifetime::set_destroying();
+            }
         }
         void set_destroyed() override
         {
-            Destroyed.trigger();
-            neolib::lifetime::set_destroyed();
+            if (!is_destroyed())
+            {
+                Destroyed.trigger();
+                neolib::lifetime::set_destroyed();
+            }
         }
     public:
         // i_object

@@ -117,18 +117,17 @@ namespace neogfx
         if (iClosed)
             return;
         destroyed_flag destroyed{ *this };
-        if (has_native_surface())
-            native_surface().close();
-        else
+        if (has_native_surface() && !iNativeWindowClosing)
         {
-            auto ptr = std::move(iNativeWindow);
+            native_surface().close();
+            if (destroyed)
+                return;
         }
-        if (destroyed)
-            return;
         iClosed = true;
         Closed.trigger();
-        if (!destroyed)
-            set_destroyed();
+        if (destroyed)
+            return;
+        set_destroyed();
     }
 
     bool surface_window_proxy::has_parent_surface() const
@@ -419,19 +418,7 @@ namespace neogfx
     void surface_window_proxy::native_window_closed()
     {
         iNativeWindowClosing = true;
-        destroyed_flag destroyed{ *this };
-        {
-            auto ptr = std::move(iNativeWindow);
-        }
-        if (destroyed)
-            return;
-        if (!iClosed)
-        {
-            iClosed = true;
-            Closed.trigger();
-            if (!destroyed)
-                set_destroyed();
-        }
+        close();
     }
 
     void surface_window_proxy::native_window_focus_gained()
