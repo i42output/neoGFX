@@ -160,7 +160,7 @@ namespace neogfx
 
     i_tab& view_container::tab_container::tab(tab_index aTabIndex)
     {
-        return const_cast<i_tab&>(const_cast<const tab_container*>(this)->tab(aTabIndex));
+        return const_cast<i_tab&>(to_const(*this).tab(aTabIndex));
     }
 
     bool view_container::tab_container::is_tab_selected() const
@@ -181,7 +181,7 @@ namespace neogfx
 
     i_tab& view_container::tab_container::selected_tab()
     {
-        return const_cast<i_tab&>(const_cast<const tab_container*>(this)->selected_tab());
+        return const_cast<i_tab&>(to_const(*this).selected_tab());
     }
 
     i_tab& view_container::tab_container::add_tab(const std::string& aTabText)

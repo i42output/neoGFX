@@ -111,7 +111,7 @@ namespace neogfx
         }
         i_nested_window& nested_parent() override
         {
-            return const_cast<i_nested_window&>(const_cast<const nested_details*>(this)->nested_parent());
+            return const_cast<i_nested_window&>(to_const(*this).nested_parent());
         }
     public:
         const i_window& as_window() const override
@@ -393,7 +393,7 @@ namespace neogfx
 
     i_surface_window& window::surface()
     {
-        return const_cast<i_surface_window&>(const_cast<const window*>(this)->surface());
+        return const_cast<i_surface_window&>(to_const(*this).surface());
     }
 
     bool window::has_native_surface() const
@@ -410,7 +410,7 @@ namespace neogfx
 
     i_native_surface& window::native_surface()
     {
-        return const_cast<i_native_surface&>(const_cast<const window*>(this)->native_surface());
+        return const_cast<i_native_surface&>(to_const(*this).native_surface());
     }
 
     bool window::has_native_window() const
@@ -425,7 +425,7 @@ namespace neogfx
 
     i_native_window& window::native_window()
     {
-        return const_cast<i_native_window&>(const_cast<const window*>(this)->native_window());
+        return const_cast<i_native_window&>(to_const(*this).native_window());
     }
 
     bool window::has_parent_window(bool aSameSurface) const
@@ -444,7 +444,7 @@ namespace neogfx
 
     i_window& window::parent_window()
     {
-        return const_cast<i_window&>(const_cast<const window*>(this)->parent_window());
+        return const_cast<i_window&>(to_const(*this).parent_window());
     }
 
     bool window::is_owner_of(const i_window& aChildWindow) const
@@ -471,7 +471,7 @@ namespace neogfx
 
     i_window& window::ultimate_ancestor()
     {
-        return const_cast<i_window&>(const_cast<const window*>(this)->ultimate_ancestor());
+        return const_cast<i_window&>(to_const(*this).ultimate_ancestor());
     }
 
     bool window::is_nested() const
@@ -495,7 +495,7 @@ namespace neogfx
 
     i_nest& window::nest()
     {
-        return const_cast<i_nest&>(const_cast<const window*>(this)->nest());
+        return const_cast<i_nest&>(to_const(*this).nest());
     }
 
     const i_nested_window& window::as_nested() const
@@ -505,7 +505,7 @@ namespace neogfx
 
     i_nested_window& window::as_nested()
     {
-        return const_cast<i_nested_window&>(const_cast<const window*>(this)->as_nested());
+        return const_cast<i_nested_window&>(to_const(*this).as_nested());
     }
 
     bool window::is_nest() const
@@ -522,7 +522,7 @@ namespace neogfx
 
     i_nest& window::as_nest()
     {
-        return const_cast<i_nest&>(const_cast<const window*>(this)->as_nest());
+        return const_cast<i_nest&>(to_const(*this).as_nest());
     }
 
     bool window::is_strong() const

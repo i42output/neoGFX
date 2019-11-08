@@ -28,5 +28,8 @@ namespace neogfx::nrc
     {
     public:
         ui_parser(const neolib::fjson_object& aRoot, std::ofstream& aOutput);
+    private:
+        const neolib::fjson_object& iRoot;
+        std::ofstream& iOutput;
     };
 }

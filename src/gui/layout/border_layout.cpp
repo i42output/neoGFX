@@ -93,7 +93,7 @@ namespace neogfx
 
     i_layout& border_layout::part(layout_position aPosition)
     {
-        return const_cast<i_layout&>(const_cast<const border_layout*>(this)->part(aPosition));
+        return const_cast<i_layout&>(to_const(*this).part(aPosition));
     }
 
     const vertical_layout& border_layout::top() const

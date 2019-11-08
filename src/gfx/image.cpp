@@ -169,7 +169,7 @@ namespace neogfx
 
     void* image::data()
     {
-        return const_cast<void*>(const_cast<const image*>(this)->data());
+        return const_cast<void*>(to_const(*this).data());
     }
 
     std::size_t image::size() const

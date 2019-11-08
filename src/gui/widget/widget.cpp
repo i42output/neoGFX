@@ -176,7 +176,7 @@ namespace neogfx
 
     i_window& widget::root()
     {
-        return const_cast<i_window&>(const_cast<const widget*>(this)->root());
+        return const_cast<i_window&>(to_const(*this).root());
     }
 
     bool widget::has_parent() const
@@ -193,7 +193,7 @@ namespace neogfx
 
     i_widget& widget::parent()
     {
-        return const_cast<i_widget&>(const_cast<const widget*>(this)->parent());
+        return const_cast<i_widget&>(to_const(*this).parent());
     }
 
     void widget::set_parent(i_widget& aParent)
@@ -339,7 +339,7 @@ namespace neogfx
 
     i_widget& widget::before()
     {
-        return const_cast<i_widget&>(const_cast<const widget*>(this)->before());
+        return const_cast<i_widget&>(to_const(*this).before());
     }
 
     const i_widget& widget::after() const
@@ -375,7 +375,7 @@ namespace neogfx
 
     i_widget& widget::after()
     {
-        return const_cast<i_widget&>(const_cast<const widget*>(this)->after());
+        return const_cast<i_widget&>(to_const(*this).after());
     }
 
     void widget::link_before(i_widget* aPreviousWidget)
@@ -478,7 +478,7 @@ namespace neogfx
 
     i_widget& widget::managing_layout()
     {
-        return const_cast<i_widget&>(const_cast<const widget*>(this)->managing_layout());
+        return const_cast<i_widget&>(to_const(*this).managing_layout());
     }
 
     bool widget::is_managing_layout() const
@@ -530,7 +530,7 @@ namespace neogfx
 
     i_layout& widget::parent_layout()
     {
-        return const_cast<i_layout&>(const_cast<const widget*>(this)->parent_layout());
+        return const_cast<i_layout&>(to_const(*this).parent_layout());
     }
 
     void widget::set_parent_layout(i_layout* aParentLayout)
@@ -554,7 +554,7 @@ namespace neogfx
 
     i_widget& widget::layout_owner()
     {
-        return const_cast<i_widget&>(const_cast<const widget*>(this)->layout_owner());
+        return const_cast<i_widget&>(to_const(*this).layout_owner());
     }
 
     void widget::set_layout_owner(i_widget* aOwner)
@@ -790,7 +790,7 @@ namespace neogfx
 
     i_widget& widget::get_widget_at(const point& aPosition)
     {
-        return const_cast<i_widget&>(const_cast<const widget*>(this)->get_widget_at(aPosition));
+        return const_cast<i_widget&>(to_const(*this).get_widget_at(aPosition));
     }
 
     widget_part widget::hit_test(const point& aPosition) const
@@ -1490,7 +1490,7 @@ namespace neogfx
 
     i_widget& widget::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
     {
-        return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_for_mouse_event(aPosition, aForHitTest));
+        return const_cast<i_widget&>(to_const(*this).widget_for_mouse_event(aPosition, aForHitTest));
     }
 }
 

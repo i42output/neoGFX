@@ -112,7 +112,7 @@ namespace neogfx
 
     i_layout& layout_item::parent_layout()
     {
-        return const_cast<i_layout&>(const_cast<const layout_item*>(this)->parent_layout());
+        return const_cast<i_layout&>(to_const(*this).parent_layout());
     }
 
     void layout_item::set_parent_layout(i_layout* aParentLayout)
@@ -135,7 +135,7 @@ namespace neogfx
 
     i_widget& layout_item::layout_owner()
     {
-        return const_cast<i_widget&>(const_cast<const layout_item*>(this)->layout_owner());
+        return const_cast<i_widget&>(to_const(*this).layout_owner());
     }
 
     void layout_item::set_layout_owner(i_widget* aOwner)

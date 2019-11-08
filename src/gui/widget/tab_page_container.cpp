@@ -194,7 +194,7 @@ namespace neogfx
 
     i_tab& tab_page_container::tab(tab_index aTabIndex)
     {
-        return const_cast<i_tab&>(const_cast<const tab_page_container*>(this)->tab(aTabIndex));
+        return const_cast<i_tab&>(to_const(*this).tab(aTabIndex));
     }
 
     bool tab_page_container::has_tab_page(tab_index aTabIndex) const
@@ -214,7 +214,7 @@ namespace neogfx
 
     i_tab_page& tab_page_container::tab_page(tab_index aTabIndex)
     {
-        return const_cast<i_tab_page&>(const_cast<const tab_page_container*>(this)->tab_page(aTabIndex));
+        return const_cast<i_tab_page&>(to_const(*this).tab_page(aTabIndex));
     }
 
     bool tab_page_container::is_tab_selected() const
@@ -235,7 +235,7 @@ namespace neogfx
 
     i_tab& tab_page_container::selected_tab()
     {
-        return const_cast<i_tab&>(const_cast<const tab_page_container*>(this)->selected_tab());
+        return const_cast<i_tab&>(to_const(*this).selected_tab());
     }
 
     const i_tab_page& tab_page_container::selected_tab_page() const
@@ -252,7 +252,7 @@ namespace neogfx
 
     i_tab_page& tab_page_container::selected_tab_page()
     {
-        return const_cast<i_tab_page&>(const_cast<const tab_page_container*>(this)->selected_tab_page());
+        return const_cast<i_tab_page&>(to_const(*this).selected_tab_page());
     }
 
     i_tab& tab_page_container::add_tab(const std::string& aTabText)

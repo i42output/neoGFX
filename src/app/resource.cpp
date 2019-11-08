@@ -138,7 +138,7 @@ namespace neogfx
     
     void* resource::data()
     {
-        return const_cast<void*>(const_cast<const resource*>(this)->data());
+        return const_cast<void*>(to_const(*this).data());
     }
 
     std::size_t resource::size() const

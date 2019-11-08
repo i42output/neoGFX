@@ -1,4 +1,4 @@
-// ui_parser.cpp
+// i_ui_element_parser.hpp
 /*
 neoGFX Resource Compiler
 Copyright(C) 2019 Leigh Johnston
@@ -17,15 +17,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neolib/neolib.hpp>
+#pragma once
 
-#include "ui_parser.hpp"
+#include <neogfx/neogfx.hpp>
+#include <neolib/i_reference_counted.hpp>
+#include <neolib/i_string.hpp>
+#include <neolib/i_vector.hpp>
+#include <neolib/i_simple_variant.hpp>
 
 namespace neogfx::nrc
 {
-    ui_parser::ui_parser(const neolib::fjson_object& aRoot, std::ofstream& aOutput) : 
-        iRoot{ aRoot }, iOutput{ aOutput }
+    class i_ui_element;
+
+    class i_ui_element_parser : public neolib::i_reference_counted
     {
-        // todo
-    }
+    public:
+        typedef neolib::i_simple_variant data_type;
+        typedef neolib::i_vector<neolib::i_simple_variant> array_data_type;
+    public:
+        virtual void emit(const neolib::i_string& aText) = 0;
+    };
 }

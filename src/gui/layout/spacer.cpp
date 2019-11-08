@@ -88,7 +88,7 @@ namespace neogfx
 
     i_layout& spacer::parent_layout()
     {
-        return const_cast<i_layout&>(const_cast<const spacer*>(this)->parent_layout());
+        return const_cast<i_layout&>(to_const(*this).parent_layout());
     }
 
     void spacer::set_parent_layout(i_layout* aParentLayout)
@@ -113,7 +113,7 @@ namespace neogfx
 
     i_widget& spacer::layout_owner()
     {
-        return const_cast<i_widget&>(const_cast<const spacer*>(this)->layout_owner());
+        return const_cast<i_widget&>(to_const(*this).layout_owner());
     }
 
     void spacer::set_layout_owner(i_widget*)

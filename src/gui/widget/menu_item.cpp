@@ -61,7 +61,7 @@ namespace neogfx
 
     i_action& menu_item::action()
     {
-        return const_cast<i_action&>(const_cast<const menu_item*>(this)->action());
+        return const_cast<i_action&>(to_const(*this).action());
     }
 
     const i_menu& menu_item::sub_menu() const
@@ -73,7 +73,7 @@ namespace neogfx
 
     i_menu& menu_item::sub_menu()
     {
-        return const_cast<i_menu&>(const_cast<const menu_item*>(this)->sub_menu());
+        return const_cast<i_menu&>(to_const(*this).sub_menu());
     }
 
     bool menu_item::available() const

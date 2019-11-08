@@ -175,7 +175,7 @@ namespace neogfx
 
     radio_button* radio_button::next_radio_button()
     {
-        return const_cast<radio_button*>(const_cast<const radio_button*>(this)->next_radio_button());
+        return const_cast<radio_button*>(to_const(*this).next_radio_button());
     }
 
     bool radio_button::can_toggle() const

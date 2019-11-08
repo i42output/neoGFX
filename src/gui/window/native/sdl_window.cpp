@@ -378,7 +378,7 @@ namespace neogfx
 
     i_native_window& sdl_window::parent()
     {
-        return const_cast<i_native_window&>(const_cast<const sdl_window*>(this)->parent());
+        return const_cast<i_native_window&>(to_const(*this).parent());
     }
 
     bool sdl_window::initialising() const

@@ -96,7 +96,7 @@ namespace neogfx::game
             }
             node& parent()
             {
-                return const_cast<node&>(const_cast<const node*>(this)->parent());
+                return const_cast<node&>(to_const(*this).parent());
             }
             uint32_t depth() const
             {

@@ -125,7 +125,7 @@ namespace neogfx
 
     i_tab& tab_bar::selected_tab()
     {
-        return const_cast<i_tab&>(const_cast<const tab_bar*>(this)->selected_tab());
+        return const_cast<i_tab&>(to_const(*this).selected_tab());
     }
 
     i_tab& tab_bar::add_tab(const std::string& aTabText)

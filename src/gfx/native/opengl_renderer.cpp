@@ -842,7 +842,7 @@ namespace neogfx
 
     opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays()
     {
-        return const_cast<opengl_standard_vertex_arrays&>(const_cast<const opengl_renderer*>(this)->vertex_arrays());
+        return const_cast<opengl_standard_vertex_arrays&>(to_const(*this).vertex_arrays());
     }
 
     i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, texture_sampling aSampling)

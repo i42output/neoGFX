@@ -106,7 +106,7 @@ namespace neogfx::game
 
     i_entity_archetype& ecs::archetype(entity_archetype_id aArchetypeId)
     {
-        return const_cast<i_entity_archetype&>(const_cast<const ecs*>(this)->archetype(aArchetypeId));
+        return const_cast<i_entity_archetype&>(to_const(*this).archetype(aArchetypeId));
     }
 
     bool ecs::component_instantiated(component_id aComponentId) const
@@ -127,7 +127,7 @@ namespace neogfx::game
 
     i_component& ecs::component(component_id aComponentId)
     {
-        return const_cast<i_component&>(const_cast<const ecs*>(this)->component(aComponentId));
+        return const_cast<i_component&>(to_const(*this).component(aComponentId));
     }
 
     bool ecs::shared_component_instantiated(component_id aComponentId) const
@@ -148,7 +148,7 @@ namespace neogfx::game
 
     i_shared_component& ecs::shared_component(component_id aComponentId)
     {
-        return const_cast<i_shared_component&>(const_cast<const ecs*>(this)->shared_component(aComponentId));
+        return const_cast<i_shared_component&>(to_const(*this).shared_component(aComponentId));
     }
 
     bool ecs::system_instantiated(system_id aSystemId) const
@@ -174,7 +174,7 @@ namespace neogfx::game
 
     i_system& ecs::system(system_id aSystemId)
     {
-        return const_cast<i_system&>(const_cast<const ecs*>(this)->system(aSystemId));
+        return const_cast<i_system&>(to_const(*this).system(aSystemId));
     }
 
     entity_id ecs::next_entity_id()

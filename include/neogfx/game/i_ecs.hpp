@@ -194,7 +194,7 @@ namespace neogfx::game
         {
             if (!component_registered<ecs_data_type_t<ComponentData>>())
                 register_component<ecs_data_type_t<ComponentData>>();
-            return const_cast<static_component<ecs_data_type_t<ComponentData>>&>(const_cast<const i_ecs*>(this)->component<ecs_data_type_t<ComponentData>>());
+            return const_cast<static_component<ecs_data_type_t<ComponentData>>&>(to_const(*this).component<ecs_data_type_t<ComponentData>>());
         }
         template <typename ComponentData>
         bool shared_component_instantiated() const
@@ -211,7 +211,7 @@ namespace neogfx::game
         {
             if (!shared_component_registered<ecs_data_type_t<ComponentData>>())
                 register_shared_component<ecs_data_type_t<ComponentData>>();
-            return const_cast<static_shared_component<ecs_data_type_t<ComponentData>>&>(const_cast<const i_ecs*>(this)->shared_component<ecs_data_type_t<ComponentData>>());
+            return const_cast<static_shared_component<ecs_data_type_t<ComponentData>>&>(to_const(*this).shared_component<ecs_data_type_t<ComponentData>>());
         }
         template <typename System>
         bool system_instantiated() const
@@ -228,7 +228,7 @@ namespace neogfx::game
         {
             if (!system_registered<ecs_data_type_t<System>>())
                 register_system<ecs_data_type_t<System>>();
-            return const_cast<ecs_data_type_t<System>&>(const_cast<const i_ecs*>(this)->system<ecs_data_type_t<System>>());
+            return const_cast<ecs_data_type_t<System>&>(to_const(*this).system<ecs_data_type_t<System>>());
         }
     public:
         template <typename ComponentData>

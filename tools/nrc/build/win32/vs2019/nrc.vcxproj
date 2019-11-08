@@ -107,7 +107,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_SCL_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirBoost)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirNeogfx)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions> /std:c++latest </AdditionalOptions>
     </ClCompile>
@@ -146,7 +146,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_SCL_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirBoost)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirNeogfx)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions> /std:c++latest </AdditionalOptions>
     </ClCompile>
@@ -166,6 +166,9 @@
     <ClCompile Include="..\..\..\src\ui_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\nrc\i_ui_element.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\nrc\i_ui_element_parser.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\nrc\ui_element.hpp" />
     <ClInclude Include="..\..\..\src\ui_parser.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

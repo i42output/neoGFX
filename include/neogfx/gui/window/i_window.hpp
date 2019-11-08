@@ -182,7 +182,7 @@ namespace neogfx
         }
         i_surface_window* find_surface()
         {
-            return const_cast<i_surface_window*>(const_cast<const i_window*>(this)->find_surface());
+            return const_cast<i_surface_window*>(to_const(*this).find_surface());
         }
         bool is_ancestor_of(const i_window& aWindow) const
         {

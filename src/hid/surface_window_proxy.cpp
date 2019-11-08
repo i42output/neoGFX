@@ -142,7 +142,7 @@ namespace neogfx
     
     i_surface& surface_window_proxy::parent_surface()
     {
-        return const_cast<i_surface&>(const_cast<const surface_window_proxy*>(this)->parent_surface());
+        return const_cast<i_surface&>(to_const(*this).parent_surface());
     }
 
     bool surface_window_proxy::is_owner_of(const i_surface& aChildSurface) const
@@ -263,7 +263,7 @@ namespace neogfx
 
     i_native_surface& surface_window_proxy::native_surface()
     {
-        return const_cast<i_native_surface&>(const_cast<const surface_window_proxy*>(this)->native_surface());
+        return const_cast<i_native_surface&>(to_const(*this).native_surface());
     }
 
     bool surface_window_proxy::has_native_window() const
@@ -280,7 +280,7 @@ namespace neogfx
 
     i_native_window& surface_window_proxy::native_window()
     {
-        return const_cast<i_native_window&>(const_cast<const surface_window_proxy*>(this)->native_window());
+        return const_cast<i_native_window&>(to_const(*this).native_window());
     }
 
     void surface_window_proxy::handle_dpi_changed()
@@ -807,7 +807,7 @@ namespace neogfx
 
     i_window& surface_window_proxy::window_at_position(const point& aPosition)
     {
-        return const_cast<i_window&>(const_cast<const surface_window_proxy*>(this)->window_at_position(aPosition));
+        return const_cast<i_window&>(to_const(*this).window_at_position(aPosition));
     }
 
     const i_widget& surface_window_proxy::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
@@ -821,7 +821,7 @@ namespace neogfx
 
     i_widget& surface_window_proxy::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
     {
-        return const_cast<i_widget&>(const_cast<const surface_window_proxy*>(this)->widget_for_mouse_event(aPosition, aForHitTest));
+        return const_cast<i_widget&>(to_const(*this).widget_for_mouse_event(aPosition, aForHitTest));
     }
 
 }

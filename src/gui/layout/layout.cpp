@@ -139,7 +139,7 @@ namespace neogfx
 
     i_layout& layout::parent_layout()
     {
-        return const_cast<i_layout&>(const_cast<const layout*>(this)->parent_layout());
+        return const_cast<i_layout&>(to_const(*this).parent_layout());
     }
 
     void layout::set_parent_layout(i_layout* aParentLayout)
@@ -163,7 +163,7 @@ namespace neogfx
 
     i_widget& layout::layout_owner()
     {
-        return const_cast<i_widget&>(const_cast<const layout*>(this)->layout_owner());
+        return const_cast<i_widget&>(to_const(*this).layout_owner());
     }
 
     void layout::set_layout_owner(i_widget* aOwner)
@@ -300,7 +300,7 @@ namespace neogfx
 
     i_layout_item& layout::item_at(item_index aIndex)
     {
-        return const_cast<i_layout_item&>(const_cast<const layout*>(this)->item_at(aIndex));
+        return const_cast<i_layout_item&>(to_const(*this).item_at(aIndex));
     }
 
     const i_widget& layout::get_widget_at(item_index aIndex) const
@@ -315,7 +315,7 @@ namespace neogfx
 
     i_widget& layout::get_widget_at(item_index aIndex)
     {
-        return const_cast<i_widget&>(const_cast<const layout*>(this)->get_widget_at(aIndex));
+        return const_cast<i_widget&>(to_const(*this).get_widget_at(aIndex));
     }
         
     const i_layout& layout::get_layout_at(item_index aIndex) const
@@ -330,7 +330,7 @@ namespace neogfx
 
     i_layout& layout::get_layout_at(item_index aIndex)
     {
-        return const_cast<i_layout&>(const_cast<const layout*>(this)->get_layout_at(aIndex));
+        return const_cast<i_layout&>(to_const(*this).get_layout_at(aIndex));
     }
 
     const i_layout_item_proxy& layout::find_proxy(const i_layout_item& aItem) const
@@ -343,7 +343,7 @@ namespace neogfx
 
     i_layout_item_proxy& layout::find_proxy(i_layout_item& aItem)
     {
-        return const_cast<i_layout_item_proxy&>(const_cast<const layout*>(this)->find_proxy(aItem));
+        return const_cast<i_layout_item_proxy&>(to_const(*this).find_proxy(aItem));
     }
 
     bool layout::high_dpi() const

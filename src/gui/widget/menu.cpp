@@ -111,7 +111,7 @@ namespace neogfx
 
     i_menu_item& menu::item_at(item_index aItemIndex)
     {
-        return const_cast<i_menu_item&>(const_cast<const menu*>(this)->item_at(aItemIndex));
+        return const_cast<i_menu_item&>(to_const(*this).item_at(aItemIndex));
     }
 
     i_menu& menu::add_sub_menu(const std::string& aSubMenuTitle)

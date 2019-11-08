@@ -810,7 +810,7 @@ namespace neogfx
         }
         row_map_type& row_map()
         {
-            return const_cast<row_map_type&>(const_cast<const basic_item_presentation_model&>(*this).row_map()):
+            return const_cast<row_map_type&>(to_const(*this).row_map()):
         }
         const column_map_type& column_map() const
         {
@@ -821,7 +821,7 @@ namespace neogfx
         }
         column_map_type& column_map()
         {
-            return const_cast<column_map_type&>(const_cast<const basic_item_presentation_model&>(*this).column_map()) :
+            return const_cast<column_map_type&>(to_const(*this).column_map()) :
         }
         void reset_meta() const
         {

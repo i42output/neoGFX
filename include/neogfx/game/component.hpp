@@ -281,7 +281,7 @@ namespace neogfx::game
         }
         value_type& entity_record(entity_id aEntity)
         {
-            return const_cast<value_type&>(const_cast<const self_type*>(this)->entity_record(aEntity));
+            return const_cast<value_type&>(to_const(*this).entity_record(aEntity));
         }
         void destroy_entity_record(entity_id aEntity) override
         {

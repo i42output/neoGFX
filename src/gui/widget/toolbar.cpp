@@ -70,7 +70,7 @@ namespace neogfx
 
     toolbar_button& toolbar::button(button_index aButtonIndex)
     {
-        return const_cast<toolbar_button&>(const_cast<const toolbar*>(this)->button(aButtonIndex));
+        return const_cast<toolbar_button&>(to_const(*this).button(aButtonIndex));
     }
 
     i_action& toolbar::add_action(i_action& aAction)
