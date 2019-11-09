@@ -17,12 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neolib/neolib.hpp>
+#include <neogfx/neogfx.hpp>
 #include <fstream>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <neolib/json.hpp>
+#include <neolib/application.hpp>
 
 #include "ui_parser.hpp"
 
@@ -156,9 +157,28 @@ int main(int argc, char* argv[])
 {
     using namespace neogfx::nrc;
 
-    std::cout << "nrc neoGFX resource compiler" << std::endl;
-    std::cout << "Copyright (c) 2016 Leigh Johnston" << std::endl << std::endl;
-    std::vector<std::string> options;
+    neolib::application_info appInfo
+    {
+        neolib::to_program_arguments(argc, argv),
+        "nrc neoGFX resource compiler",
+        "i42 Software",
+        neolib::version{ 1, 0, 0, 0 },
+        "Copyright (c) 2019 Leigh Johnston",
+        {}, {}, {}, ".nel"
+    };
+    neolib::application app{ appInfo };
+
+    std::cout << "------ " << appInfo.name() << " ------" << std::endl;
+    std::cout << appInfo.copyright() << std::endl << std::endl;
+
+    std::cout << "Loading neoGFX element libraries..." << std::endl;
+    app.plugin_manager().load_plugins();
+    for (auto const& plugin : app.plugin_manager().plugins())
+        std::cout << "Element library '" << plugin->name() << "' loaded." << std::endl;
+
+    std::cout << std::endl;
+
+    std::vector<std::string> options; // todo: use boost.ProgramOptions
     std::vector<std::string> files;
     for (int a = 1; a < argc; ++a)
         if (argv[a][0] == '-')
