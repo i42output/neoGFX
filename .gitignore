@@ -290,3 +290,5 @@ Debug
 /testing/gui_test_app/build/win32/vs2019/test.aps
 /testing/gui_test_app/build/win32/vs2019/test.log
 /testing/gui_test_app/build/win32/vs2019/test.res
+/bin
+/tools/nrc/element_libraries/default/build/win32/default/default.vcxproj.user

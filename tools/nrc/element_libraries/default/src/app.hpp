@@ -1,4 +1,4 @@
-// ui_parser.hpp
+// app.hpp
 /*
 neoGFX Resource Compiler
 Copyright(C) 2019 Leigh Johnston
@@ -19,17 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neogfx/neogfx.hpp>
-#include <neolib/json.hpp>
+#include <neogfx/tools/nrc/ui_element.hpp>
 
 namespace neogfx::nrc
 {
-    class ui_parser
+    class app : public ui_element<>
     {
     public:
-        ui_parser(const neolib::fjson_object& aRoot, std::ofstream& aOutput);
-    private:
-        const neolib::fjson_object& iRoot;
-        std::ofstream& iOutput;
+        app(i_ui_element_parser& aParser, const neolib::i_string& aName) :
+            ui_element<>{ aParser, aName, ui_element_type::App }
+        {
+        }
+    public:
+        void parse(const neolib::i_string& aName, const data_type& aData) override
+        {
+        }
+        void parse(const neolib::i_string& aName, const array_data_type& aData) override
+        {
+        }
     };
 }

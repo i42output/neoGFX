@@ -120,30 +120,6 @@ namespace neogfx
     template<typename T>
     inline T convert_units(const i_units_context& aUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue);
 
-    template <typename T>
-    class basic_length : public length_units
-    {
-    public:
-        typedef T value_type;
-    public:
-        basic_length(value_type aValue, length_units::units aUnits = length_units::Pixels) :
-            iValue(aValue), iUnits(aUnits)
-        {
-        }
-    public:
-        operator value_type() const
-        {
-            return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<length_units::units>::current_units(), iValue);
-        }
-        length_units::units units() const
-        {
-            return iUnits;
-        }
-    private:
-        value_type iValue;
-        length_units::units iUnits;
-    };
-
     template <typename Units>
     class basic_scoped_units
     {
@@ -206,6 +182,30 @@ namespace neogfx
     private:
         std::optional<scoped_units_context> iScopedContext;
         std::optional<units> iSavedUnits;
+    };
+
+    template <typename T>
+    class basic_length : public length_units
+    {
+    public:
+        typedef T value_type;
+    public:
+        basic_length(value_type aValue, length_units::units aUnits = length_units::Pixels) :
+            iValue(aValue), iUnits(aUnits)
+        {
+        }
+    public:
+        operator value_type() const
+        {
+            return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<length_units::units>::current_units(), iValue);
+        }
+        length_units::units units() const
+        {
+            return iUnits;
+        }
+    private:
+        value_type iValue;
+        length_units::units iUnits;
     };
 
     class length_units_converter

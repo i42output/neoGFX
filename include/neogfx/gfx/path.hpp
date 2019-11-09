@@ -48,12 +48,12 @@ namespace neogfx
         typedef std::vector<point_type> path_type;
         typedef std::vector<path_type> paths_type;
         typedef typename paths_type::size_type paths_size_type;
-        struct clip_rect_list : std::vector < mesh_type >
+        struct clip_rect_list : std::vector<mesh_type>
         {
             bool contains(const point_type& aPoint) const
             {
-                for (std::vector<mesh_type>::const_iterator i = begin(); i != end(); ++i)
-                    if (i->contains(aPoint))
+                for (auto const& m : *this)
+                    if (m.contains(aPoint))
                         return true;
                 return false;
             }
@@ -199,17 +199,17 @@ namespace neogfx
         void inflate(const delta_type& aDelta)
         {
             mesh_type boundingRect = bounding_rect(false);
-            for (paths_type::iterator i = iPaths.begin(); i != iPaths.end(); ++i)
-                for (path_type::iterator j = i->begin(); j != i->end(); ++j)
+            for (auto& path : iPaths)
+                for (auto& point : path)
                 {
-                    if (j->x < boundingRect.x + static_cast<coordinate_type>(boundingRect.cx / 2))
-                        j->x -= aDelta.dx;
+                    if (point.x < boundingRect.x + static_cast<coordinate_type>(boundingRect.cx / 2))
+                        point.x -= aDelta.dx;
                     else
-                        j->x += aDelta.dx;
-                    if (j->y < boundingRect.y + static_cast<coordinate_type>(boundingRect.cy / 2))
-                        j->y -= aDelta.dy;
+                        point.x += aDelta.dx;
+                    if (point.y < boundingRect.y + static_cast<coordinate_type>(boundingRect.cy / 2))
+                        point.y -= aDelta.dy;
                     else
-                        j->y += aDelta.dy;
+                        point.y += aDelta.dy;
                 }
             iBoundingRect.reset();
         }

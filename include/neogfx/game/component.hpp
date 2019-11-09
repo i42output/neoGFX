@@ -171,6 +171,9 @@ namespace neogfx::game
     private:
         typedef static_component_base<Data, i_component> base_type;
     public:
+        using typename base_type::entity_record_not_found;
+        using typename base_type::invalid_data;
+    public:
         typedef typename base_type::data_type data_type;
         typedef typename base_type::data_meta_type data_meta_type;
         typedef typename base_type::value_type value_type;
@@ -238,6 +241,20 @@ namespace neogfx::game
             iReverseIndices = aRhs.iReverseIndices;
             return *this;
         }
+    public:
+        using base_type::ecs;
+        using base_type::id;
+        using base_type::mutex;
+    public:
+        using base_type::is_data_optional;
+        using base_type::name;
+        using base_type::field_count;
+        using base_type::field_type;
+        using base_type::field_type_id;
+        using base_type::field_name;
+    public:
+        using base_type::component_data;
+        using base_type::operator[];
     public:
         entity_id entity(const data_type& aData) const
         {
@@ -436,6 +453,9 @@ namespace neogfx::game
     private:
         typedef static_component_base<shared<ecs_data_type_t<Data>>, i_shared_component> base_type;
     public:
+        using typename base_type::entity_record_not_found;
+        using typename base_type::invalid_data;
+    public:
         typedef typename base_type::data_type data_type;
         typedef typename base_type::data_meta_type data_meta_type;
         typedef typename base_type::value_type value_type;
@@ -448,6 +468,19 @@ namespace neogfx::game
             base_type{ aEcs }
         {
         }
+    public:
+        using base_type::ecs;
+        using base_type::id;
+        using base_type::mutex;
+    public:
+        using base_type::is_data_optional;
+        using base_type::name;
+        using base_type::field_count;
+        using base_type::field_type;
+        using base_type::field_type_id;
+        using base_type::field_name;
+    public:
+        using base_type::component_data;
     public:
         const mapped_type& operator[](typename component_data_t::size_type aIndex) const
         {

@@ -588,7 +588,7 @@ namespace neogfx
             if constexpr (gui)
                 return basic_vector<basic_vector<coordinate_type, 2>, 4>(top_left().to_vector(), top_right().to_vector(), bottom_right().to_vector(), bottom_left().to_vector()); 
             else
-                return basic_vector<basic_vector<coordinate_type, 2>, 4>(botttom_left().to_vector(), bottom_right().to_vector(), top_right().to_vector(), top_left().to_vector());
+                return basic_vector<basic_vector<coordinate_type, 2>, 4>(bottom_left().to_vector(), bottom_right().to_vector(), top_right().to_vector(), top_left().to_vector());
         }
         const point_type& position() const { return *this; }
         point_type& position() { return *this; }
@@ -733,7 +733,7 @@ namespace neogfx
     inline basic_rect<CoordinateType, CoordinateSystem> operator+(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_point<CoordinateType>& right)
     {
         basic_rect<CoordinateType, CoordinateSystem> ret = left;
-        ret.basic_point::operator+=(right);
+        ret.basic_point<CoordinateType>::operator+=(right);
         return ret;
     }
 
@@ -741,7 +741,7 @@ namespace neogfx
     inline basic_rect<CoordinateType, CoordinateSystem> operator+(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_size<CoordinateType>& right)
     {
         basic_rect<CoordinateType, CoordinateSystem> ret = left;
-        ret.basic_size::operator+=(right);
+        ret.basic_size<CoordinateType>::operator+=(right);
         return ret;
     }
 
@@ -749,7 +749,7 @@ namespace neogfx
     inline basic_rect<CoordinateType, CoordinateSystem> operator+(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_delta<CoordinateType>& right)
     {
         basic_rect<CoordinateType, CoordinateSystem> ret = left;
-        ret.basic_size::operator+=(right);
+        ret.basic_size<CoordinateType>::operator+=(right);
         return ret;
     }
 
@@ -757,7 +757,7 @@ namespace neogfx
     inline basic_rect<CoordinateType, CoordinateSystem> operator-(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_point<CoordinateType>& right)
     {
         basic_rect<CoordinateType, CoordinateSystem> ret = left;
-        ret.basic_point::operator-=(right);
+        ret.basic_point<CoordinateType>::operator-=(right);
         return ret;
     }
 
@@ -765,7 +765,7 @@ namespace neogfx
     inline basic_rect<CoordinateType, CoordinateSystem> operator-(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_size<CoordinateType>& right)
     {
         basic_rect<CoordinateType, CoordinateSystem> ret = left;
-        ret.basic_size::operator-=(right);
+        ret.basic_size<CoordinateType>::operator-=(right);
         return ret;
     }
 
@@ -773,7 +773,7 @@ namespace neogfx
     inline basic_rect<CoordinateType, CoordinateSystem> operator-(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_delta<CoordinateType>& right)
     {
         basic_rect<CoordinateType, CoordinateSystem> ret = left;
-        ret.basic_size::operator-=(right);
+        ret.basic_size<CoordinateType>::operator-=(right);
         return ret;
     }
 

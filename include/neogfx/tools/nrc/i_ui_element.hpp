@@ -19,14 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/neogfx.hpp>
 #include <neolib/neolib.hpp>
 #include <neolib/i_reference_counted.hpp>
 #include <neolib/i_string.hpp>
-
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
-
 #include <neogfx/tools/nrc/i_ui_element_parser.hpp>
 
 namespace neogfx::nrc
@@ -49,6 +48,9 @@ namespace neogfx::nrc
         typedef i_ui_element_parser::array_data_type array_data_type;
     public:
         virtual ~i_ui_element() {}
+    public:
+        virtual const i_ui_element_parser& parser() const = 0;
+        virtual i_ui_element_parser& parser() = 0;
     public:
         virtual const neolib::i_string& name() const = 0;
         virtual ui_element_type type() const = 0;
@@ -77,5 +79,5 @@ namespace neogfx::nrc
         {
             return const_cast<i_ui_element&>(to_const(*this).find(aName));
         }
-    }
+    };
 }

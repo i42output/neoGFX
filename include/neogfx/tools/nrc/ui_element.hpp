@@ -20,21 +20,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/tools/nrc/ui_element.hpp>
+#include <neolib/reference_counted.hpp>
+#include <neogfx/tools/nrc/i_ui_element.hpp>
 
 namespace neogfx::nrc
 {
-    template <typename Base>
-    class ui_element : public Base
+    template <typename Base = i_ui_element>
+    class ui_element : public neolib::reference_counted<Base>
     {
     public:
-        ui_element(const neolib::i_string& aName, ui_element_type aType) : 
-            iParent{ nullptr }, iName{ aName }, iType{ aType }
+        ui_element(i_ui_element_parser& aParser, const neolib::i_string& aName, ui_element_type aType) :
+            iParser{ aParser }, iParent { nullptr }, iName{ aName }, iType{ aType }
         {
         }
         ui_element(i_ui_element& aParent, const neolib::i_string& aName, ui_element_type aType) :
-            iParent{ &aParent }, iName{ aName }, iType{ aType }
+            iParser{ aParent.parser() }, iParent{ &aParent }, iName{ aName }, iType{ aType }
         {
+        }
+    public:
+        const i_ui_element_parser& parser() const override
+        {
+            return iParser;
+        }
+        i_ui_element_parser& parser() override
+        {
+            return iParser;
         }
     public:
         const neolib::i_string& name() const override
@@ -61,6 +71,10 @@ namespace neogfx::nrc
             return const_cast<i_ui_element&>(to_const(*this).parent());
         }
     public:
+        i_ui_element& parse(const neolib::i_string& aName) override
+        {
+        }
+    public:
         void instantiate(i_app& aApp) override
         {
         }
@@ -71,6 +85,7 @@ namespace neogfx::nrc
         {
         }
     private:
+        i_ui_element_parser& iParser;
         i_ui_element* iParent;
         neolib::string iName;
         ui_element_type iType;

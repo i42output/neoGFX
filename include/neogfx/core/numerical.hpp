@@ -464,7 +464,7 @@ namespace neogfx
         inline T operator*(const basic_vector<T, D, row_vector, IsScalar>& left, const basic_vector<T, D, column_vector, IsScalar>& right)
         {
             T result = {};
-            for (uitn32_t index = 0; index < D; ++index)
+            for (uint32_t index = 0; index < D; ++index)
                 result += (left[index] * right[index]);
             return result;
         }

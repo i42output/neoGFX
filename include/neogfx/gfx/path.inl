@@ -22,7 +22,7 @@ namespace neogfx
     template <typename PointType>
     inline void basic_path<PointType>::add_rect(const mesh_type& aRectangle)
     {
-        size_type pixelSize = pixel();
+        size_type const pixelSize = { 1px, 1px };
         move_to(aRectangle.left(), aRectangle.top());
         line_to(aRectangle.right() - pixelSize.cx, aRectangle.top());
         line_to(aRectangle.right() - pixelSize.cx, aRectangle.bottom() - pixelSize.cy);
@@ -39,13 +39,13 @@ namespace neogfx
         coordinate_type minY = std::numeric_limits<coordinate_type>::max();
         coordinate_type maxX = std::numeric_limits<coordinate_type>::min();
         coordinate_type maxY = std::numeric_limits<coordinate_type>::min();
-        for (paths_type::const_iterator i = iPaths.begin(); i != iPaths.end(); ++i)
-            for (path_type::const_iterator j = i->begin(); j != i->end(); ++j)
+        for (auto const& path : iPaths)
+            for (auto const& point : path)
             {
-                minX = std::min(minX, j->x);
-                minY = std::min(minY, j->y);
-                maxX = std::max(maxX, j->x);
-                maxY = std::max(maxY, j->y);
+                minX = std::min(minX, point.x);
+                minY = std::min(minY, point.y);
+                maxX = std::max(maxX, point.x);
+                maxY = std::max(maxY, point.y);
             }
         iBoundingRect = mesh_type(point_type(minX, minY) + (aOffsetPosition ? iPosition : point(0.0, 0.0)), size_type(maxX - minX + aPixelWidthAdjustment.cx, maxY - minY + aPixelWidthAdjustment.cy));
         return *iBoundingRect;
@@ -80,21 +80,21 @@ namespace neogfx
     {
         mesh_type boundingRect = bounding_rect() + aOrigin;
         typedef std::vector<line_type> lines_t;
-        lines_t::size_type lineCount = 0;
-        for (paths_type::const_iterator i = iPaths.begin(); i != iPaths.end(); ++i)
-            lineCount += !i->empty() ? i->size() - 1 : 0;
+        typename lines_t::size_type lineCount = 0;
+        for (auto const& path : iPaths)
+            lineCount += !path.empty() ? path.size() - 1 : 0;
         lines_t lines;
         lines.reserve(lineCount);
-        for (paths_type::const_iterator i = iPaths.begin(); i != iPaths.end(); ++i)
+        for (auto const& path : iPaths)
         {
-            if (i->size() > 1)
+            if (path.size() > 1)
             {
-                point_type ptPrevious = (*i)[0] + aOrigin;
-                for (path_type::const_iterator j = i->begin() + 1; j != i->end(); ++j)
+                point_type ptPrevious = path[0] + aOrigin;
+                for (auto pt = path.begin() + 1; pt != path.end(); ++pt)
                 {
-                    point_type pt = *j + aOrigin;
-                    lines.push_back(line_type(ptPrevious, pt));
-                    ptPrevious = pt;
+                    auto const ptAdjusted = *pt + aOrigin;
+                    lines.push_back(line_type(ptPrevious, ptAdjusted));
+                    ptPrevious = ptAdjusted;
                 }
             }
         }
@@ -105,19 +105,17 @@ namespace neogfx
         {
             xIntersects.clear();
             line_type scanLine(point_type(boundingRect.left(), y), point_type(boundingRect.right() - 1, y));
-            for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
+            for (auto const& line1 : lines)
             {
-                const line_type& line1 = *i;
                 point_type pt;
                 if (line1.intersection(scanLine, pt))
                 {
                     if (!line1.is_vertex(pt))
                         xIntersects.push_back(intersect(pt.x));
                     else
-                        for (lines_t::const_iterator j = lines.begin(); j != lines.end(); ++j)
+                        for (auto const& line2 : lines)
                         {
-                            const line_type& line2 = *j;
-                            if (line2.is_vertex(pt) && j != i)
+                            if (line2.is_vertex(pt) && &line2 != &line1)
                             {
                                 line_type cornerLine1 = line1.from(pt);
                                 line_type cornerLine2 = line2.from(pt);
@@ -130,29 +128,28 @@ namespace neogfx
                 }                
             }
             std::sort(xIntersects.begin(), xIntersects.end());
-            intersect_list::const_iterator end = std::unique(xIntersects.begin(), xIntersects.end());
+            auto end = std::unique(xIntersects.begin(), xIntersects.end());
             bool hadFirst = false;
             bool parity = true;
             intersect previousIntersect;
-            for (intersect_list::const_iterator i = xIntersects.begin(); i != end; ++i)
+            for (auto const& currentIntersect : xIntersects)
             {
-                intersect currentIntersect = *i;
                 if (hadFirst)
                 {
                     bool isHorizontalEdge = false;
-                    for (lines_t::const_iterator i = lines.begin(); !isHorizontalEdge && i != lines.end(); ++i)
+                    for (auto line1 = lines.begin(); !isHorizontalEdge && line1 != lines.end(); ++line1)
                     {
-                        if (*i == line_type(point_type(previousIntersect.x(), y), point_type(currentIntersect.x(), y)) && i->delta_y() == 0)
+                        if (*line1 == line_type{ point_type{ previousIntersect.x(), y }, point_type{ currentIntersect.x(), y } } && line1->delta_y() == 0)
                         {
                             isHorizontalEdge = true;
                             bool found = false;
-                            for (lines_t::const_iterator j = lines.begin(); !found && j != lines.end(); ++j)
-                                if (j->is_vertex(i->a) && j != i)
-                                    for (lines_t::const_iterator k = lines.begin(); !found && k != lines.end(); ++k)
-                                        if (k->is_vertex(i->b) && k != i)
+                            for (auto line2 = lines.begin(); !found && line2 != lines.end(); ++line2)
+                                if (line2->is_vertex(line1.a) && line2 != line1)
+                                    for (auto line3 = lines.begin(); !found && line3 != lines.end(); ++line3)
+                                        if (line3->is_vertex(line1->b) && line3 != line1)
                                         {
                                             found = true;
-                                            if ((j->delta_y() > 0 && k->delta_y() < 0) || (j->delta_y() < 0 && k->delta_y() > 0))
+                                            if ((line2->delta_y() > 0 && line3->delta_y() < 0) || (line2->delta_y() < 0 && line3->delta_y() > 0))
                                                 parity = !parity;
                                         }
                         }
@@ -162,7 +159,7 @@ namespace neogfx
                         if (parity)
                         {
                             add_clip_rect<point_type>(clipRects, 
-                                mesh_type(point_type(previousIntersect.x() + 1, y), size_type(currentIntersect.x() - previousIntersect.x() - 1, 1)));
+                                mesh_type{ point_type{ previousIntersect.x() + 1, y }, size_type{ currentIntersect.x() - previousIntersect.x() - 1, 1 } });
                         }
                         if (!currentIntersect.skip())
                             parity = !parity;
