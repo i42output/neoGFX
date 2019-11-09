@@ -1,6 +1,7 @@
 {
+    namespace: video_poker
+
     resource: {
-        prefix: video_poker
         files: [
             resources/neoGFX.png
             resources/icon.png

@@ -1,7 +1,8 @@
 {
+    namespace: neogfx
+
     resource: {
         ref: resources
-        prefix: neogfx
         file: resources/icons/neoGFX.png
     }
 }

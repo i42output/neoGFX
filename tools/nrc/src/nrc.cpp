@@ -42,13 +42,13 @@ namespace neogfx::nrc
     struct bad_usage : std::runtime_error { bad_usage() : std::runtime_error("Bad usage") {} };
     struct not_yet_implemented : std::runtime_error { not_yet_implemented() : std::runtime_error("Not yet implemented") {} };
 
-    void parse_resource(const boost::filesystem::path& aInputFilename, const neolib::fjson_value& aItem, std::ofstream& aOutput)
+    void parse_resource(const boost::filesystem::path& aInputFilename, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
     {
         typedef neolib::fjson_string symbol_t;
         std::vector<std::string> resourcePaths;
         uint32_t resourceIndex = 0;
         auto const& resource = aItem.as<neolib::fjson_object>();
-        auto const& resourcePrefix = resource.has("prefix") ? resource.at("prefix").text() : "";
+        auto const& resourcePrefix = aNamespace + (resource.has("namespace") ? ("/" + resource.at("namespace").text()) : "");
 
         auto const& resourceRef = resource.has("ref") ? resource.at("ref").text() : "";
         auto symbol = resourcePrefix;
@@ -133,9 +133,11 @@ namespace neogfx::nrc
         aOutput << "extern \"C\" void* nrc_" << symbol << " = &nrc::" << symbol << ";" << std::endl << std::endl;
     }
 
-    void parse_ui(const neolib::fjson_value& aItem, std::ofstream& aOutput)
+    void parse_ui(const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
     {
         auto const& ui = aItem.as<neolib::fjson_object>();
+
+        auto ns = aNamespace + (ui.has("namespace") ? "/" + ui.at("namespace").text() : "");
 
         aOutput << boost::format(
             "// This is an automatically generated file, do not edit!\n"
@@ -143,7 +145,7 @@ namespace neogfx::nrc
             "namespace%1%\n"
             "{\n"
             "    struct ui\n"
-            "    {\n") % (ui.has("namespace") ? " " + ui.at("namespace").text() : "");
+            "    {\n") % (!ns.empty() ? " " + aNamespace : "");
 
         ui_parser uiParser{ ui, aOutput };
 
@@ -216,6 +218,7 @@ int main(int argc, char* argv[])
         {
             std::optional<std::ofstream> resourceOutput;
             std::optional<std::ofstream> uiOutput;
+            auto const& ns = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
             for (const auto& item : input.root())
             {
                 if (item.name() == "resource")
@@ -228,7 +231,7 @@ int main(int argc, char* argv[])
                         *resourceOutput << "// This is an automatically generated file, do not edit!" << std::endl << std::endl;
                         *resourceOutput << "#include <neogfx/app/resource_manager.hpp>" << std::endl << std::endl;
                     }
-                    parse_resource(inputFileName, item, *resourceOutput);
+                    parse_resource(inputFileName, ns, item, *resourceOutput);
                 }
                 else if (item.name() == "ui")
                 {
@@ -238,7 +241,7 @@ int main(int argc, char* argv[])
                         std::cout << "Creating " << uiOutputPath << "..." << std::endl;
                         uiOutput.emplace(uiOutputPath);
                     }
-                    parse_ui(item, *uiOutput);
+                    parse_ui(ns, item, *uiOutput);
                 }
             }
         }

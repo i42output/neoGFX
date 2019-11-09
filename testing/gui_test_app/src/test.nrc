@@ -1,6 +1,7 @@
 {
+    namespace: test
+
     resource: {
-        prefix: test
         files: [
             resources/neoGFX.png
             resources/channel.png
@@ -14,7 +15,6 @@
     }
 
     ui: {
-        namespace: test
         app: {
             id: app
             name: "neoGFX Test App"
