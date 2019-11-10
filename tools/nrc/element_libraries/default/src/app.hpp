@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/neogfx.hpp>
+#include <boost/format.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
 
 namespace neogfx::nrc
@@ -29,11 +31,13 @@ namespace neogfx::nrc
         app(const i_ui_element_parser& aParser) :
             ui_element<>{ aParser, aParser.current_object_data(neolib::string{"id"}).value_as_string(), ui_element_type::App }
         {
-            std::ostringstream oss;
-            oss << aParser.indent(0) << "neogfx::app " << id() << ";" << std::endl;
-            oss << std::endl;
-            oss << aParser.indent(0) << "ui(int argc, char* argv[], const std::string& aName = std::string{}) : " << std::endl << aParser.indent(1) << id() << "{ argc, argv, aName } {}" << std::endl;
-            aParser.emit(neolib::string{ oss.str() });
+            aParser.emit(neolib::string{ 
+                (boost::format(
+                    "  neogfx::app %1%\n"
+                    "\n"
+                    "  ui(int argc, char* argv[], const std::string& aName = std::string{}) :\n"
+                    "   %1%{ argc, argv, aName } {}\n") % id()
+                ).str()});
         }
     public:
         void parse(const neolib::i_string& aName, const data_type& aData) override

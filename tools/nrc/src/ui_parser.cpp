@@ -34,25 +34,25 @@ namespace neogfx::nrc
                 iLibraries.push_back(library);
         }
 
-        aOutput << boost::format(
+        emit(neolib::string{ (boost::format(
             "// This is an automatically generated file, do not edit!\n"
             "\n"
-            "namespace%2%\n"
+            "namespace%1%\n"
             "{\n"
-            "%1%""struct ui\n"
-            "%1%""{\n") % indent(-1) % (!aNamespace.empty() ? " " + aNamespace : "");
+            " struct ui\n"
+            " {\n") % (!aNamespace.empty() ? " " + aNamespace : "")).str() });
 
         for (auto const& node : aRoot.contents())
             parse(node);
 
-        aOutput <<
-            indent(-1) << "};\n"
-            "}\n";
+        emit(neolib::string{ (boost::format(
+            " };\n"
+            "}\n")).str() });
     }
 
     void ui_parser::indent(int32_t aLevel, neolib::i_string& aResult) const
     {
-        aResult = std::string((aLevel + 2) * 4, ' '); // todo: make indentation configurable
+        aResult = std::string(aLevel * 4, ' '); // todo: make indentation configurable
     }
 
     void ui_parser::current_object_data(const neolib::i_string& aKey, neolib::i_simple_variant& aData) const
@@ -77,7 +77,19 @@ namespace neogfx::nrc
 
     void ui_parser::emit(const neolib::i_string& aText) const
     {
-        iOutput << aText.to_std_string_view();
+        bool newLine = true;
+        for (auto const& ch : aText)
+        {
+            if (ch == ' ' && newLine)
+                iOutput << indent(1);
+            else
+            {
+                newLine = false;
+                iOutput << ch;
+            }
+            if (ch == '\n')
+                newLine = true;
+        }
     }
 
     void ui_parser::parse(const neolib::fjson_value& aNode)
