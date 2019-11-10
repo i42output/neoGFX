@@ -408,7 +408,7 @@ namespace neogfx
                     presentation_model().sort_by(i);
                     root().window_manager().restore_mouse_cursor(root());
                 }, *this);
-                iButtonSinks[i][1] = button.RightClicked([&, i]()
+                iButtonSinks[i][1] = button.right_clicked([&, i]()
                 {
                     context_menu menu{ *this, root().mouse_position() + root().window_position() };
                     action sortAscending{ "Sort Ascending" };
@@ -430,17 +430,17 @@ namespace neogfx
                                 sortDescending.check();
                         }
                     }
-                    sortAscending.Checked([this, &sortDescending, i]()
+                    sortAscending.checked([this, &sortDescending, i]()
                     {
                         presentation_model().sort_by(i, i_item_presentation_model::SortAscending);
                         sortDescending.uncheck();
                     });
-                    sortDescending.Checked([this, &sortAscending, i]()
+                    sortDescending.checked([this, &sortAscending, i]()
                     {
                         presentation_model().sort_by(i, i_item_presentation_model::SortDescending);
                         sortAscending.uncheck();
                     });
-                    resetSort.Triggered([&]()
+                    resetSort.triggered([&]()
                     {
                         presentation_model().reset_sort();
                     });

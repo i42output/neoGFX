@@ -122,7 +122,7 @@ namespace neogfx
     {
         friend class drop_list_view;
     public:
-        define_event(SelectionChanged, optional_item_model_index)
+        define_event(SelectionChanged, selection_changed, optional_item_model_index)
     public:
         enum class style : uint32_t
         {

@@ -989,7 +989,7 @@ namespace neogfx
             iInputWidget = std::make_unique<non_editable_input_widget>(iLayout1);
             auto& inputWidget = static_cast<non_editable_input_widget&>(iInputWidget->as_widget());
 
-            inputWidget.Clicked([this]() { handle_clicked(); });
+            inputWidget.clicked([this]() { handle_clicked(); });
 
             inputWidget.set_size_policy(size_policy::Expanding);
             

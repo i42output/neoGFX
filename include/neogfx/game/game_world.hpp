@@ -27,8 +27,8 @@ namespace neogfx::game
     class game_world : public system
     {
     public:
-        define_event(ApplyingPhysics, step_time)
-        define_event(PhysicsApplied, step_time)
+        define_event(ApplyingPhysics, applying_physics, step_time)
+        define_event(PhysicsApplied, physics_applied, step_time)
     public:
         game_world(game::i_ecs& aEcs);
         ~game_world();

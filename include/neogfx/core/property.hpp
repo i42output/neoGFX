@@ -55,8 +55,8 @@ namespace neogfx
     public:
         define_declared_event(VariantChanged, changed, const property_variant&)
         define_declared_event(VariantChangedFromTo, changed_from_to, const property_variant&, const property_variant&)
-        define_event(Changed, const value_type&)
-        define_event(ChangedFromTo, const value_type&, const value_type&)
+        define_event_2(Changed, changed, const value_type&)
+        define_event_2(ChangedFromTo, changed_from_to, const value_type&, const value_type&)
     public:
         struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
     public:

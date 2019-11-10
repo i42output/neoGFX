@@ -234,7 +234,7 @@ namespace neogfx
             }, 500);
         };
         iSink += iStepUpButton.Pressed(step_up);
-        iSink += iStepUpButton.Clicked([this]()
+        iSink += iStepUpButton.clicked([this]()
         {
             if (iStepper == std::nullopt) // key press?
                 do_step(step_direction::Up);
@@ -256,7 +256,7 @@ namespace neogfx
             }, 500);
         };
         iSink += iStepDownButton.Pressed(step_down);
-        iSink += iStepDownButton.Clicked([this]()
+        iSink += iStepDownButton.clicked([this]()
         {
             if (iStepper == std::nullopt) // key press?
                 do_step(step_direction::Down);

@@ -206,7 +206,7 @@ namespace neogfx
 
     void font_dialog::init()
     {
-        button_box().option_layout().add(std::make_shared<push_button>("Subpixel Rendering..."_t)).Clicked([this]()
+        button_box().option_layout().add(std::make_shared<push_button>("Subpixel Rendering..."_t)).clicked([this]()
         {
             message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
         });

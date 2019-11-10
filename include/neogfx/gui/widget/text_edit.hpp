@@ -36,9 +36,9 @@ namespace neogfx
     class text_edit : public scrollable_widget, public i_clipboard_sink, public i_text_document
     {
     public:
-        define_event(TextFilter, const std::string&, bool&)
-        define_event(TextChanged)
-        define_event(DefaultStyleChanged)
+        define_event(TextFilter, text_filter, const std::string&, bool&)
+        define_event(TextChanged, text_changed)
+        define_event(DefaultStyleChanged, default_style_changed)
     public:
         enum type_e
         {

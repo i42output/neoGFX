@@ -38,9 +38,9 @@ namespace neogfx
     class cursor
     {
     public:
-        define_event(PositionChanged)
-        define_event(AnchorChanged)
-        define_event(AppearanceChanged)
+        define_event(PositionChanged, position_changed)
+        define_event(AnchorChanged, anchor_changed)
+        define_event(AppearanceChanged, appearance_changed)
     public:
         enum move_operation_e
         {

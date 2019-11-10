@@ -231,7 +231,7 @@ namespace neogfx
             if (aClosable)
             {
                 iCloseButton = std::make_unique<close_button>(*this);
-                iCloseButton->Clicked([this]()
+                iCloseButton->clicked([this]()
                 {
                     iContainer.remove_tab(iContainer.index_of(*this));
                 });

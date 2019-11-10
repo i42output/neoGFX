@@ -80,10 +80,10 @@ namespace neogfx
     class dialog_button_box : public widget
     {
     public:
-        define_event(Accepted)
-        define_event(Rejected)
+        define_event(Accepted, accepted)
+        define_event(Rejected, rejected)
     public:
-        define_event(Clicked, standard_button)
+        define_event(Clicked, clicked, standard_button)
     public:
         typedef std::pair<button_role, std::string> button_details;
     private:

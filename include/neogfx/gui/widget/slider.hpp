@@ -27,8 +27,8 @@ namespace neogfx
     class slider_impl : public widget
     {
     public:
-        define_event(ValueChanged)
-        define_event(ConstraintsChanged)
+        define_event(ValueChanged, value_changed)
+        define_event(ConstraintsChanged, constraints_changed)
     public:
         enum type_e
         {

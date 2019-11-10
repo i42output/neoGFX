@@ -246,14 +246,14 @@ namespace neogfx
         add_action(actionDelete);
         add_action(actionSelectAll);
 
-        actionFileExit.Triggered([this]() { quit(0); });
-        actionUndo.Triggered([this]() { service<i_clipboard>().active_sink().undo(service<i_clipboard>()); });
-        actionRedo.Triggered([this]() { service<i_clipboard>().active_sink().redo(service<i_clipboard>()); });
-        actionCut.Triggered([this]() { service<i_clipboard>().cut(); });
-        actionCopy.Triggered([this]() { service<i_clipboard>().copy(); });
-        actionPaste.Triggered([this]() { service<i_clipboard>().paste(); });
-        actionDelete.Triggered([this]() { service<i_clipboard>().delete_selected(); });
-        actionSelectAll.Triggered([this]() { service<i_clipboard>().select_all(); });
+        actionFileExit.triggered([this]() { quit(0); });
+        actionUndo.triggered([this]() { service<i_clipboard>().active_sink().undo(service<i_clipboard>()); });
+        actionRedo.triggered([this]() { service<i_clipboard>().active_sink().redo(service<i_clipboard>()); });
+        actionCut.triggered([this]() { service<i_clipboard>().cut(); });
+        actionCopy.triggered([this]() { service<i_clipboard>().copy(); });
+        actionPaste.triggered([this]() { service<i_clipboard>().paste(); });
+        actionDelete.triggered([this]() { service<i_clipboard>().delete_selected(); });
+        actionSelectAll.triggered([this]() { service<i_clipboard>().select_all(); });
     }
     catch (std::exception& e)
     {

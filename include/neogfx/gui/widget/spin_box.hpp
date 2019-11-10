@@ -31,8 +31,8 @@ namespace neogfx
     class basic_spin_box : public framed_widget
     {
     public:
-        define_event(ValueChanged)
-        define_event(ConstraintsChanged)
+        define_event(ValueChanged, value_changed)
+        define_event(ConstraintsChanged, constraints_changed)
     public:
         typedef T value_type;
     private:

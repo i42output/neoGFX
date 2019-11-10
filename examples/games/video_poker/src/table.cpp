@@ -128,10 +128,10 @@ namespace video_poker
         iLabelStakeValue.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
         iLabelStakeValue.text().set_text_colour(neogfx::colour::White);
 
-        iBetMinus.Clicked([this]() { bet(-1); });
-        iBetPlus.Clicked([this]() { bet(+1); });
-        iBetMax.Clicked([this]() { bet(MAX_BET); });
-        iDeal.Clicked([this]() { deal(); });
+        iBetMinus.clicked([this]() { bet(-1); });
+        iBetPlus.clicked([this]() { bet(+1); });
+        iBetMax.clicked([this]() { bet(MAX_BET); });
+        iDeal.clicked([this]() { deal(); });
 
         iTextures = neogfx::service<neogfx::i_rendering_engine>().texture_manager().create_texture_atlas();
         auto& valueTextures = iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/values.png" });

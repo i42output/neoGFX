@@ -81,11 +81,11 @@ namespace neogui
             {
                 updateNamespace();
             });
-            iLowerCaseWithUnderscores.Checked([=]() { iNamingConvention = naming_convention::LowerCaseWithUnderscores; updateNamespace(); });
-            iMixedCaseWithUnderscores.Checked([=]() { iNamingConvention = naming_convention::MixedCaseWithUnderscores; updateNamespace(); });
-            iUpperCamelCase.Checked([=]() { iNamingConvention = naming_convention::UpperCamelCase; updateNamespace(); });
-            iLowerCamelCase.Checked([=]() { iNamingConvention = naming_convention::LowerCamelCase; updateNamespace(); });
-            iNeoGfx.Checked([=]() { iNamingConvention = naming_convention::NeoGfx; updateNamespace(); });
+            iLowerCaseWithUnderscores.checked([=]() { iNamingConvention = naming_convention::LowerCaseWithUnderscores; updateNamespace(); });
+            iMixedCaseWithUnderscores.checked([=]() { iNamingConvention = naming_convention::MixedCaseWithUnderscores; updateNamespace(); });
+            iUpperCamelCase.checked([=]() { iNamingConvention = naming_convention::UpperCamelCase; updateNamespace(); });
+            iLowerCamelCase.checked([=]() { iNamingConvention = naming_convention::LowerCamelCase; updateNamespace(); });
+            iNeoGfx.checked([=]() { iNamingConvention = naming_convention::NeoGfx; updateNamespace(); });
             TryAccept([this](bool& aCanAccept)
             {
                 if (to_symbol_name(iName.text(), iNamingConvention, named_entity::Namespace).empty())

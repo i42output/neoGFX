@@ -30,7 +30,7 @@ namespace neogfx
     class font_dialog : public dialog
     {
     public:
-        define_event(SelectionChanged)
+        define_event(SelectionChanged, selection_changed)
     public:
         font_dialog(const neogfx::font& aCurrentFont = neogfx::font{});
         font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{});

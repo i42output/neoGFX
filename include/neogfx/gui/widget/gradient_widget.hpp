@@ -33,7 +33,7 @@ namespace neogfx
     class gradient_widget : public widget
     {
     public:
-        define_event(GradientChanged)
+        define_event(GradientChanged, gradient_changed)
     private:
         typedef neolib::variant<neogfx::gradient::colour_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
         typedef neolib::variant<neogfx::gradient::colour_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;

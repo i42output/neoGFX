@@ -31,7 +31,7 @@ namespace neogfx
     class colour_dialog : public dialog
     {
     public:
-        define_event(SelectionChanged)
+        define_event(SelectionChanged, selection_changed)
     public:
         enum mode_e
         {

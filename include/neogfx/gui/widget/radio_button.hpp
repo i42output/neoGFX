@@ -27,8 +27,8 @@ namespace neogfx
     class radio_button : public button
     {
     public:
-        define_event(On)
-        define_event(Off)
+        define_event(On, on)
+        define_event(Off, off)
     private:
         class disc : public widget
         {

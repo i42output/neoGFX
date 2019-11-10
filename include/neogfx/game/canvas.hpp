@@ -27,9 +27,9 @@ namespace neogfx::game
     class canvas : public widget
     {
     public:
-        define_event(RenderingEntities, i_graphics_context&)
-        define_event(EntitiesRendered, i_graphics_context&)
-        define_event(EntityClicked, entity_id)
+        define_event(RenderingEntities, rendering_entities, i_graphics_context&)
+        define_event(EntitiesRendered, entities_rendered, i_graphics_context&)
+        define_event(EntityClicked, entity_clicked, entity_id)
     public:
         canvas();
         canvas(game::i_ecs& aEcs);
