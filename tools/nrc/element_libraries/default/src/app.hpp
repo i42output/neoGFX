@@ -33,7 +33,7 @@ namespace neogfx::nrc
         {
             aParser.emit(neolib::string{ 
                 (boost::format(
-                    "  neogfx::app %1%\n"
+                    "  neogfx::app %1%;\n"
                     "\n"
                     "  ui(int argc, char* argv[], const std::string& aName = std::string{}) :\n"
                     "   %1%{ argc, argv, aName } {}\n") % id()
