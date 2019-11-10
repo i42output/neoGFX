@@ -26,9 +26,14 @@ namespace neogfx::nrc
     class app : public ui_element<>
     {
     public:
-        app(i_ui_element_parser& aParser, const neolib::i_string& aName) :
-            ui_element<>{ aParser, aName, ui_element_type::App }
+        app(const i_ui_element_parser& aParser) :
+            ui_element<>{ aParser, aParser.current_object_data(neolib::string{"id"}).value_as_string(), ui_element_type::App }
         {
+            std::ostringstream oss;
+            oss << aParser.indent(0) << "neogfx::app " << id() << ";" << std::endl;
+            oss << std::endl;
+            oss << aParser.indent(0) << "ui(int argc, char* argv[], const std::string& aName = std::string{}) : " << std::endl << aParser.indent(1) << id() << "{ argc, argv, aName } {}" << std::endl;
+            aParser.emit(neolib::string{ oss.str() });
         }
     public:
         void parse(const neolib::i_string& aName, const data_type& aData) override

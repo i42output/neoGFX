@@ -16,7 +16,7 @@
 
     ui: {
         app: {
-            id: app
+            id: appTest
             name: "neoGFX Test App"
             default_window_icon: ":/test/resources/icon.png"
             action: {

@@ -50,34 +50,32 @@ namespace neogfx::nrc
         virtual ~i_ui_element() {}
     public:
         virtual const i_ui_element_parser& parser() const = 0;
-        virtual i_ui_element_parser& parser() = 0;
     public:
-        virtual const neolib::i_string& name() const = 0;
+        virtual const neolib::i_string& id() const = 0;
         virtual ui_element_type type() const = 0;
     public:
         virtual bool has_parent() const = 0;
         virtual const i_ui_element& parent() const = 0;
         virtual i_ui_element& parent() = 0;
     public:
-        virtual i_ui_element& parse(const neolib::i_string& aName) = 0;
-        virtual void parse(const neolib::i_string& aName, const data_type& aData) = 0;
-        virtual void parse(const neolib::i_string& aName, const array_data_type& aData) = 0;
+        virtual void parse(const neolib::i_string& aType, const data_type& aData) = 0;
+        virtual void parse(const neolib::i_string& aType, const array_data_type& aData) = 0;
     public:
         virtual void instantiate(i_app& aApp) = 0;
         virtual void instantiate(i_widget& aWidget) = 0;
         virtual void instantiate(i_layout& aLayout) = 0;
     public:
-        const i_ui_element& find(const neolib::i_string& aName) const
+        const i_ui_element& find(const neolib::i_string& aId) const
         {
-            if (name() == aName)
+            if (id() == aId)
                 return *this;
             if (has_parent())
-                return parent().find(aName);
+                return parent().find(aId);
             throw ui_element_not_found();
         }
-        i_ui_element& find(const neolib::i_string& aName)
+        i_ui_element& find(const neolib::i_string& aId)
         {
-            return const_cast<i_ui_element&>(to_const(*this).find(aName));
+            return const_cast<i_ui_element&>(to_const(*this).find(aId));
         }
     };
 }

@@ -29,12 +29,19 @@ namespace neogfx::nrc
     class ui_element : public neolib::reference_counted<Base>
     {
     public:
-        ui_element(i_ui_element_parser& aParser, const neolib::i_string& aName, ui_element_type aType) :
-            iParser{ aParser }, iParent { nullptr }, iName{ aName }, iType{ aType }
+        using i_ui_element::no_parent;
+        using i_ui_element::wrong_type;
+        using i_ui_element::ui_element_not_found;
+    public:
+        using i_ui_element::data_type;
+        using i_ui_element::array_data_type;
+    public:
+        ui_element(const i_ui_element_parser& aParser, const neolib::i_string& aId, ui_element_type aType) :
+            iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iType{ aType }
         {
         }
-        ui_element(i_ui_element& aParent, const neolib::i_string& aName, ui_element_type aType) :
-            iParser{ aParent.parser() }, iParent{ &aParent }, iName{ aName }, iType{ aType }
+        ui_element(i_ui_element& aParent, const neolib::i_string& aId, ui_element_type aType) :
+            iParser{ aParent.parser() }, iParent{ &aParent }, iId{ aId }, iType{ aType }
         {
         }
     public:
@@ -42,14 +49,10 @@ namespace neogfx::nrc
         {
             return iParser;
         }
-        i_ui_element_parser& parser() override
-        {
-            return iParser;
-        }
     public:
-        const neolib::i_string& name() const override
+        const neolib::i_string& id() const override
         {
-            return iName;
+            return iId;
         }
         ui_element_type type() const override
         {
@@ -71,10 +74,6 @@ namespace neogfx::nrc
             return const_cast<i_ui_element&>(to_const(*this).parent());
         }
     public:
-        i_ui_element& parse(const neolib::i_string& aName) override
-        {
-        }
-    public:
         void instantiate(i_app& aApp) override
         {
         }
@@ -85,9 +84,9 @@ namespace neogfx::nrc
         {
         }
     private:
-        i_ui_element_parser& iParser;
+        const i_ui_element_parser& iParser;
         i_ui_element* iParent;
-        neolib::string iName;
+        neolib::string iId;
         ui_element_type iType;
-    }
+    };
 }

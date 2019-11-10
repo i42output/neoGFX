@@ -133,25 +133,11 @@ namespace neogfx::nrc
         aOutput << "extern \"C\" void* nrc_" << symbol << " = &nrc::" << symbol << ";" << std::endl << std::endl;
     }
 
-    void parse_ui(const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
+    void parse_ui(neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
     {
         auto const& ui = aItem.as<neolib::fjson_object>();
-
         auto ns = aNamespace + (ui.has("namespace") ? "/" + ui.at("namespace").text() : "");
-
-        aOutput << boost::format(
-            "// This is an automatically generated file, do not edit!\n"
-            "\n"
-            "namespace%1%\n"
-            "{\n"
-            "    struct ui\n"
-            "    {\n") % (!ns.empty() ? " " + aNamespace : "");
-
-        ui_parser uiParser{ ui, aOutput };
-
-        aOutput <<
-            "    };\n"
-            "}\n";
+        ui_parser uiParser{ aPluginManager, ns, ui, aOutput };
     }
 }
 
@@ -241,7 +227,7 @@ int main(int argc, char* argv[])
                         std::cout << "Creating " << uiOutputPath << "..." << std::endl;
                         uiOutput.emplace(uiOutputPath);
                     }
-                    parse_ui(ns, item, *uiOutput);
+                    parse_ui(app.plugin_manager(), ns, item, *uiOutput);
                 }
             }
         }

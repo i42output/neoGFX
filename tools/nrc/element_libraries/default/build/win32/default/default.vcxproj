@@ -169,6 +169,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\dllmain.cpp" />
+    <ClCompile Include="..\..\..\src\library.cpp" />
     <ClCompile Include="..\..\..\src\plugin.cpp" />
   </ItemGroup>
   <ItemGroup>

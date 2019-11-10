@@ -32,6 +32,9 @@ namespace neogfx::nrc
 
     class i_ui_element_library : public neolib::i_reference_counted
     {
+        // exceptions
+    public:
+        struct unknown_element_type : std::logic_error { unknown_element_type() : std::logic_error{ "neogfx::nrc::i_ui_element_library::unknown_element_type" } {} };
         // types
     public:
         typedef neolib::i_set<neolib::i_string> elements_t;
@@ -40,13 +43,18 @@ namespace neogfx::nrc
         virtual const elements_t& elements() const = 0;
         // factory
     public:
-        neolib::ref_ptr<i_ui_element> create_element(i_ui_element_parser& aParser, const neolib::i_string& aElementName)
+        neolib::ref_ptr<i_ui_element> create_element(const i_ui_element_parser& aParser, const neolib::i_string& aElementType)
         {
-            return neolib::ref_ptr<i_ui_element>{ do_create_element(aParser, aElementName) };
+            return neolib::ref_ptr<i_ui_element>{ do_create_element(aParser, aElementType) };
+        }
+        neolib::ref_ptr<i_ui_element> create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType)
+        {
+            return neolib::ref_ptr<i_ui_element>{ do_create_element(aParser, aParent, aElementType) };
         }
         // implementation
     private:
-        virtual i_ui_element* do_create_element(i_ui_element_parser& aParser, const neolib::i_string& aElementName) = 0;
+        virtual i_ui_element* do_create_element(const i_ui_element_parser& aParser, const neolib::i_string& aElementType) = 0;
+        virtual i_ui_element* do_create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType) = 0;
         // interface
     public:
         static const neolib::uuid& iid() { static const neolib::uuid sId = neolib::make_uuid("3D10EA2F-5110-419C-BFF9-93263C618792"); return sId; }

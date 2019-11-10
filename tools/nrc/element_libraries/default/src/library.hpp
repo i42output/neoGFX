@@ -36,24 +36,14 @@ namespace neogfx::nrc
         typedef neolib::set<neolib::i_string, neolib::string> elements_t;
         // construction
     public:
-        default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
-            iApplication{ aApplication },
-            iPluginPath{ aPluginPath }
-        {
-        }
+        default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);
         // meta
     public:
-        const elements_t& elements() const override
-        {
-            return iElements;
-        }
+        const elements_t& elements() const override;
         // implementation
     private:
-        i_ui_element* do_create_element(i_ui_element_parser& aParser, const neolib::i_string& aElementName) override
-        {
-            // todo
-            return nullptr;
-        }
+        i_ui_element* do_create_element(const i_ui_element_parser& aParser, const neolib::i_string& aElementType) override;
+        i_ui_element* do_create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType) override;
         // meta
     public:
         static const neolib::uuid& library_id() { static const neolib::uuid sId = neolib::make_uuid("6942704C-043E-43A2-9290-CD58E106E65E"); return sId; }
