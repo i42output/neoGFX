@@ -36,12 +36,12 @@ namespace neogfx::nrc
         struct element_type_not_found : std::runtime_error { element_type_not_found(const std::string& aType) : std::runtime_error{ "nrc: Element type '" + aType + "' not found." } {} };
         // types
     public:
-        typedef neolib::i_simple_variant data_type;
-        typedef neolib::i_vector<neolib::i_simple_variant> array_data_type;
+        typedef neolib::i_simple_variant data_t;
+        typedef neolib::i_vector<neolib::i_simple_variant> array_data_t;
         // operations
     public:
         virtual void indent(int32_t aLevel, neolib::i_string& aResult) const = 0;
-        virtual void current_object_data(const neolib::i_string& aKey, neolib::i_simple_variant& aData) const = 0;
+        virtual void current_object_data(const neolib::i_string& aKey, data_t& aData) const = 0;
         virtual void emit(const neolib::i_string& aText) const = 0;
         // helpers
     public:

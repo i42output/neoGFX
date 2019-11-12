@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/neolib.hpp>
 #include <neolib/i_reference_counted.hpp>
 #include <neolib/i_string.hpp>
+#include <neolib/i_vector.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -44,8 +45,9 @@ namespace neogfx::nrc
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error{ "neogfx::nrc::i_ui_element::wrong_type" } {} };
         struct ui_element_not_found : std::runtime_error { ui_element_not_found() : std::runtime_error{ "neogfx::nrc::i_ui_element::ui_element_not_found" } {} };
     public:
-        typedef i_ui_element_parser::data_type data_type;
-        typedef i_ui_element_parser::array_data_type array_data_type;
+        typedef neolib::i_vector<neolib::i_ref_ptr<i_ui_element>> children_t;
+        typedef i_ui_element_parser::data_t data_t;
+        typedef i_ui_element_parser::array_data_t array_data_t;
     public:
         virtual ~i_ui_element() {}
     public:
@@ -57,9 +59,15 @@ namespace neogfx::nrc
         virtual bool has_parent() const = 0;
         virtual const i_ui_element& parent() const = 0;
         virtual i_ui_element& parent() = 0;
+        virtual const children_t& children() const = 0;
+        virtual children_t& children() = 0;
     public:
-        virtual void parse(const neolib::i_string& aType, const data_type& aData) = 0;
-        virtual void parse(const neolib::i_string& aType, const array_data_type& aData) = 0;
+        virtual void parse(const neolib::i_string& aType, const data_t& aData) = 0;
+        virtual void parse(const neolib::i_string& aType, const array_data_t& aData) = 0;
+        virtual void emit() const = 0;
+        virtual void emit_preamble() const = 0;
+        virtual void emit_ctor() const = 0;
+        virtual void emit_body() const = 0;
     public:
         virtual void instantiate(i_app& aApp) = 0;
         virtual void instantiate(i_widget& aWidget) = 0;

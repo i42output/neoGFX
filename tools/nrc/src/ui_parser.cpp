@@ -45,6 +45,9 @@ namespace neogfx::nrc
         for (auto const& node : aRoot.contents())
             parse(node);
 
+        for (auto const& element : iRootElements)
+            element->emit();
+
         emit(neolib::string{ (boost::format(
             " };\n"
             "}\n")).str() });
@@ -55,7 +58,7 @@ namespace neogfx::nrc
         aResult = std::string(aLevel * 4, ' '); // todo: make indentation configurable
     }
 
-    void ui_parser::current_object_data(const neolib::i_string& aKey, neolib::i_simple_variant& aData) const
+    void ui_parser::current_object_data(const neolib::i_string& aKey, data_t& aData) const
     {
         auto const& value = iCurrentNode->as<neolib::fjson_object>().at(aKey.to_std_string());
         auto& data = aData;
@@ -92,17 +95,28 @@ namespace neogfx::nrc
         }
     }
 
+    neolib::ref_ptr<i_ui_element> ui_parser::create_element(const neolib::i_string& aElementType)
+    {
+        for (auto const& library : iLibraries)
+            if (library->elements().find(aElementType) != library->elements().end())
+                return neolib::ref_ptr<i_ui_element>{ library->create_element(*this, aElementType) };
+        throw element_type_not_found(aElementType.to_std_string());
+    }
+
+    neolib::ref_ptr<i_ui_element> ui_parser::create_element(i_ui_element& aParent, const neolib::i_string& aElementType)
+    {
+        for (auto const& library : iLibraries)
+            if (library->elements().find(aElementType) != library->elements().end())
+                return neolib::ref_ptr<i_ui_element>{ library->create_element(*this, aParent, aElementType) };
+        throw element_type_not_found(aElementType.to_std_string());
+    }
+
     void ui_parser::parse(const neolib::fjson_value& aNode)
     {
         iCurrentNode = &aNode;
-        neolib::string const elementType{ aNode.name() };
-        for (auto const& library : iLibraries)
-            if (library->elements().find(elementType) != library->elements().end())
-            {
-                iElements.push_back(library->create_element(*this, elementType));
-                auto& element = *iElements.back();
-                parse(aNode, element);
-            }
+        auto element = create_element(neolib::string{ aNode.name() });
+        iRootElements.push_back(element);
+        parse(aNode, *element);
     }
 
     void ui_parser::parse(const neolib::fjson_value& aNode, i_ui_element& aElement)
@@ -113,7 +127,7 @@ namespace neogfx::nrc
         case neolib::json_type::Object:
             for (auto const& e : aNode.as<neolib::fjson_object>().contents())
                 if (e.type() == neolib::json_type::Object)
-                    parse(e);
+                    parse(e, *create_element(aElement, neolib::string{ e.name() }));
             break;
         case neolib::json_type::Array:
             break;
@@ -136,17 +150,5 @@ namespace neogfx::nrc
         case neolib::json_type::Keyword:
             break;
         }
-    }
-
-    neolib::ref_ptr<i_ui_element> ui_parser::create_object(const neolib::fjson_value& aNode, neolib::ref_ptr<i_ui_element> aParent)
-    {
-        neolib::string const elementType{ aNode.name() };
-        for (auto const& library : iLibraries)
-            if (library->elements().find(elementType) != library->elements().end())
-            {
-                iElements.push_back(library->create_element(*this, elementType));
-                return iElements.back();
-            }
-        throw element_type_not_found(elementType.to_std_string());
     }
 }

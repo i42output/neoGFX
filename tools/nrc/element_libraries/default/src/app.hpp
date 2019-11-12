@@ -31,20 +31,55 @@ namespace neogfx::nrc
         app(const i_ui_element_parser& aParser) :
             ui_element<>{ aParser, aParser.current_object_data(neolib::string{"id"}).value_as_string(), ui_element_type::App }
         {
-            aParser.emit(neolib::string{ 
-                (boost::format(
-                    "  neogfx::app %1%;\n"
-                    "\n"
-                    "  ui(int argc, char* argv[], const std::string& aName = std::string{}) :\n"
-                    "   %1%{ argc, argv, aName } {}\n") % id()
-                ).str()});
         }
     public:
-        void parse(const neolib::i_string& aName, const data_type& aData) override
+        void parse(const neolib::i_string& aName, const data_t& aData) override
         {
         }
-        void parse(const neolib::i_string& aName, const array_data_type& aData) override
+        void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
+        }
+        void emit() const override
+        {
+            emit_preamble();
+            parser().emit(neolib::string{
+                (boost::format(
+                    "\n"
+                    "  ui(int argc, char* argv[], const std::string& aName = std::string{}) :\n")
+                ).str() });
+            emit_ctor();
+            parser().emit(neolib::string{
+                (boost::format(
+                    "  {\n")
+                ).str() });
+            emit_body();
+            parser().emit(neolib::string{
+                (boost::format(
+                    "  }\n")
+                ).str() });
+        }
+        void emit_preamble() const override
+        {
+            parser().emit(neolib::string{
+                (boost::format(
+                    "  neogfx::app %1%;\n") % id()
+                ).str() });
+            for (auto const& child : children())
+                child->emit_preamble();
+        }
+        void emit_ctor() const override
+        {
+            parser().emit(neolib::string{
+                (boost::format(
+                    "   %1%{ argc, argv, aName }\n") % id()
+                ).str() });
+            for (auto const& child : children())
+                child->emit_ctor();
+        }
+        void emit_body() const override
+        {
+            for (auto const& child : children())
+                child->emit_body();
         }
     };
 }

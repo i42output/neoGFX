@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/reference_counted.hpp>
+#include <neolib/vector.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
 
 namespace neogfx::nrc
@@ -33,16 +34,21 @@ namespace neogfx::nrc
         using i_ui_element::wrong_type;
         using i_ui_element::ui_element_not_found;
     public:
-        using i_ui_element::data_type;
-        using i_ui_element::array_data_type;
+        typedef neolib::vector<neolib::i_ref_ptr<i_ui_element>, neolib::ref_ptr<i_ui_element>> children_t;
+        using i_ui_element::data_t;
+        using i_ui_element::array_data_t;
     public:
         ui_element(const i_ui_element_parser& aParser, const neolib::i_string& aId, ui_element_type aType) :
             iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iType{ aType }
         {
+            if (has_parent())
+                parent().children().push_back(neolib::ref_ptr<i_ui_element>{ *this });
         }
         ui_element(i_ui_element& aParent, const neolib::i_string& aId, ui_element_type aType) :
             iParser{ aParent.parser() }, iParent{ &aParent }, iId{ aId }, iType{ aType }
         {
+            if (has_parent())
+                parent().children().push_back(neolib::ref_ptr<i_ui_element>{ *this });
         }
     public:
         const i_ui_element_parser& parser() const override
@@ -73,6 +79,14 @@ namespace neogfx::nrc
         {
             return const_cast<i_ui_element&>(to_const(*this).parent());
         }
+        const children_t& children() const override
+        {
+            return iChildren;
+        }
+        children_t& children() override
+        {
+            return iChildren;
+        }
     public:
         void instantiate(i_app& aApp) override
         {
@@ -88,5 +102,6 @@ namespace neogfx::nrc
         i_ui_element* iParent;
         neolib::string iId;
         ui_element_type iType;
+        children_t iChildren;
     };
 }

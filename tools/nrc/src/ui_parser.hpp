@@ -33,23 +33,22 @@ namespace neogfx::nrc
     class ui_parser : public neolib::reference_counted<i_ui_element_parser>
     {
     public:
-        typedef neolib::simple_variant data_type;
-    public:
         ui_parser(const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
     public:
         using i_ui_element_parser::indent;
         void indent(int32_t aLevel, neolib::i_string& aResult) const override;
-        void current_object_data(const neolib::i_string& aKey, neolib::i_simple_variant& aData) const override;
+        void current_object_data(const neolib::i_string& aKey, data_t& aData) const override;
         void emit(const neolib::i_string& aText) const override;
     private:
+        neolib::ref_ptr<i_ui_element> create_element(const neolib::i_string& aElementType);
+        neolib::ref_ptr<i_ui_element> create_element(i_ui_element& aParent, const neolib::i_string& aElementType);
         void parse(const neolib::fjson_value& aNode);
         void parse(const neolib::fjson_value& aNode, i_ui_element& aElement);
-        neolib::ref_ptr<i_ui_element> create_object(const neolib::fjson_value& aNode, neolib::ref_ptr<i_ui_element> aParent = nullptr);
     private:
         const neolib::fjson_object& iRoot;
         std::ofstream& iOutput;
         std::vector<neolib::ref_ptr<i_ui_element_library>> iLibraries;
-        std::vector<neolib::ref_ptr<i_ui_element>> iElements;
+        std::vector<neolib::ref_ptr<i_ui_element>> iRootElements;
         mutable const neolib::fjson_value* iCurrentNode;
     };
 }
