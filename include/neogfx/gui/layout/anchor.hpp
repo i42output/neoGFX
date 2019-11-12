@@ -28,8 +28,8 @@ namespace neogfx
     template <typename T, typename... GetterArgs>
     class anchor : public i_anchor<T, GetterArgs...>
     {
-    public:
         typedef i_anchor<T, GetterArgs...> base_type;
+    public:
         typedef typename base_type::value_type value_type;
         typedef typename base_type::constraint constraint;
     private:

@@ -77,6 +77,7 @@ namespace neogfx::game
     template <typename Data, typename Base>
     class static_component_base : public Base
     {
+        typedef static_component_base<ecs_data_type_t<Data>, Base> self_type;
     public:
         struct entity_record_not_found : std::logic_error { entity_record_not_found() : std::logic_error("neogfx::static_component::entity_record_not_found") {} };
         struct invalid_data : std::logic_error { invalid_data() : std::logic_error("neogfx::static_component::invalid_data") {} };
@@ -85,8 +86,6 @@ namespace neogfx::game
         typedef typename data_type::meta data_meta_type;
         typedef typename detail::crack_component_data<Data>::value_type value_type;
         typedef typename detail::crack_component_data<Data>::container_type component_data_t;
-    private:
-        typedef static_component_base<ecs_data_type_t<Data>, Base> self_type;
     public:
         static_component_base(game::i_ecs& aEcs) : 
             iEcs{ aEcs }
@@ -168,7 +167,7 @@ namespace neogfx::game
     template <typename Data>
     class static_component : public static_component_base<Data, i_component>
     {
-    private:
+        typedef static_component<Data> self_type;
         typedef static_component_base<Data, i_component> base_type;
     public:
         using typename base_type::entity_record_not_found;
@@ -181,8 +180,6 @@ namespace neogfx::game
         typedef std::vector<entity_id> component_data_entities_t;
         typedef typename component_data_t::size_type reverse_index_t;
         typedef std::vector<reverse_index_t> reverse_indices_t;
-    private:
-        typedef static_component<Data> self_type;
         typedef std::vector<reverse_index_t> free_indices_t;
     public:
         typedef std::unique_ptr<self_type> snapshot_ptr;
@@ -450,7 +447,7 @@ namespace neogfx::game
     template <typename Data>
     class static_shared_component : public static_component_base<shared<ecs_data_type_t<Data>>, i_shared_component>
     {
-    private:
+        typedef static_shared_component<Data> self_type;
         typedef static_component_base<shared<ecs_data_type_t<Data>>, i_shared_component> base_type;
     public:
         using typename base_type::entity_record_not_found;
@@ -461,8 +458,6 @@ namespace neogfx::game
         typedef typename base_type::value_type value_type;
         typedef typename base_type::component_data_t component_data_t;
         typedef typename component_data_t::mapped_type mapped_type;
-    private:
-        typedef static_shared_component<Data> self_type;
     public:
         static_shared_component(game::i_ecs& aEcs) :
             base_type{ aEcs }

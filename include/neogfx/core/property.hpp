@@ -50,6 +50,7 @@ namespace neogfx
     template <typename T, typename Category>
     class property : public i_property, public neolib::lifetime
     {
+        typedef property<T, Category> self_type;
     public:
         typedef T value_type;
     public:
@@ -60,7 +61,6 @@ namespace neogfx
     public:
         struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
     public:
-        typedef property<T, Category> self_type;
         typedef Category category_type;
     private:
         typedef detail::property_optional_type_cracker<T> cracker;
