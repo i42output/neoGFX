@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_simple_variant.hpp>
+#include <neolib/simple_variant.hpp>
 #include <neolib/reference_counted.hpp>
 #include <neolib/i_plugin_manager.hpp>
 #include <neolib/json.hpp>
@@ -33,12 +33,17 @@ namespace neogfx::nrc
     class ui_parser : public neolib::reference_counted<i_ui_element_parser>
     {
     public:
+        typedef neolib::simple_variant data_t;
+    public:
         ui_parser(const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
     public:
         using i_ui_element_parser::indent;
         void indent(int32_t aLevel, neolib::i_string& aResult) const override;
-        void current_object_data(const neolib::i_string& aKey, data_t& aData) const override;
         void emit(const neolib::i_string& aText) const override;
+    private:
+        bool data_exists(const neolib::i_string& aKey) const override;
+        const data_t& get_data(const neolib::i_string& aKey) const override;
+        data_t& get_data(const neolib::i_string& aKey) override;
     private:
         neolib::ref_ptr<i_ui_element> create_element(const neolib::i_string& aElementType);
         neolib::ref_ptr<i_ui_element> create_element(i_ui_element& aParent, const neolib::i_string& aElementType);
@@ -50,5 +55,6 @@ namespace neogfx::nrc
         std::vector<neolib::ref_ptr<i_ui_element_library>> iLibraries;
         std::vector<neolib::ref_ptr<i_ui_element>> iRootElements;
         mutable const neolib::fjson_value* iCurrentNode;
+        mutable std::map<std::pair<const neolib::fjson_value*, std::string>, data_t> iDataCache;
     };
 }

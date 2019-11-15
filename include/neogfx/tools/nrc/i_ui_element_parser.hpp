@@ -34,6 +34,7 @@ namespace neogfx::nrc
         // exceptions
     public:
         struct element_type_not_found : std::runtime_error { element_type_not_found(const std::string& aType) : std::runtime_error{ "nrc: Element type '" + aType + "' not found." } {} };
+        struct element_data_not_found : std::runtime_error { element_data_not_found(const std::string& aData) : std::runtime_error{ "nrc: Element data '" + aData + "' not found." } {} };
         // types
     public:
         typedef neolib::i_simple_variant data_t;
@@ -41,8 +42,12 @@ namespace neogfx::nrc
         // operations
     public:
         virtual void indent(int32_t aLevel, neolib::i_string& aResult) const = 0;
-        virtual void current_object_data(const neolib::i_string& aKey, data_t& aData) const = 0;
         virtual void emit(const neolib::i_string& aText) const = 0;
+        // implementation
+    private:
+        virtual bool data_exists(const neolib::i_string& aKey) const = 0;
+        virtual const data_t& get_data(const neolib::i_string& aKey) const = 0;
+        virtual data_t& get_data(const neolib::i_string& aKey) = 0;
         // helpers
     public:
         std::string indent(int32_t aLevel) const
@@ -51,11 +56,51 @@ namespace neogfx::nrc
             indent(aLevel, result);
             return result.to_std_string();
         }
-        neolib::simple_variant current_object_data(const neolib::i_string& aKey) const
+        bool data_exists(const std::string& aKey) const
         {
-            neolib::simple_variant data;
-            current_object_data(aKey, data);
-            return data;
+            return data_exists(neolib::string{ aKey });
+        }
+        const data_t& get_data(const std::string& aKey) const
+        {
+            return get_data(neolib::string{ aKey });
+        }
+        data_t& get_data(const std::string& aKey)
+        {
+            return get_data(neolib::string{ aKey });
+        }
+        template <typename T>
+        const T& get(const std::string& aKey) const
+        {
+            return get_data(aKey).get<T>();
+        }
+        template <typename T>
+        T& get(const std::string& aKey)
+        {
+            return get_data(aKey).get<T>();
+        }
+        template <typename T>
+        std::optional<T> get_optional(const std::string& aKey) const
+        {
+            if (data_exists(aKey))
+                return get_data(aKey).get<abstract_t<T>>();
+            else
+                return {};
+        }
+        template <typename T, typename U>
+        const T& get(const std::string& aKey, const U& aDefault) const
+        {
+            if (data_exists(aKey))
+                return get_data(aKey).get<abstract_t<T>>();
+            else
+                return aDefault;
+        }
+        template <typename T, typename U>
+        T& get(const std::string& aKey, U& aDefault)
+        {
+            if (data_exists(aKey))
+                return get_data(aKey).get<abstract_t<T>>();
+            else
+                return aDefault;
         }
     };
 }

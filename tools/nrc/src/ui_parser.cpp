@@ -58,10 +58,17 @@ namespace neogfx::nrc
         aResult = std::string(aLevel * 4, ' '); // todo: make indentation configurable
     }
 
-    void ui_parser::current_object_data(const neolib::i_string& aKey, data_t& aData) const
+    bool ui_parser::data_exists(const neolib::i_string& aKey) const
     {
+        return iCurrentNode->as<neolib::fjson_object>().has(aKey.to_std_string());
+    }
+
+    const ui_parser::data_t& ui_parser::get_data(const neolib::i_string& aKey) const
+    {
+        if (!data_exists(aKey))
+            throw element_data_not_found(aKey.to_std_string());
         auto const& value = iCurrentNode->as<neolib::fjson_object>().at(aKey.to_std_string());
-        auto& data = aData;
+        auto& data = iDataCache[std::make_pair(iCurrentNode, aKey.to_std_string())];
         value.visit([&data](auto&& v)
         {
             typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
@@ -76,8 +83,14 @@ namespace neogfx::nrc
             else if constexpr (std::is_same_v<vt, neolib::fjson_keyword>)
                 data = neolib::simple_variant{ neolib::string{v.text} };
         });
+        return data;
     }
 
+    ui_parser::data_t& ui_parser::get_data(const neolib::i_string& aKey)
+    {
+        return const_cast<ui_parser::data_t&>(to_const(*this).get_data(aKey));
+    }
+        
     void ui_parser::emit(const neolib::i_string& aText) const
     {
         bool newLine = true;

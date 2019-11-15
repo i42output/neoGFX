@@ -29,7 +29,8 @@ namespace neogfx::nrc
     {
     public:
         app(const i_ui_element_parser& aParser) :
-            ui_element<>{ aParser, aParser.current_object_data(neolib::string{"id"}).value<neolib::i_string>(), ui_element_type::App }
+            ui_element<>{ aParser, aParser.get<neolib::i_string>("id"), ui_element_type::App },
+            iName{ aParser.get_optional<neolib::string>("name")}
         {
         }
     public:
@@ -45,7 +46,7 @@ namespace neogfx::nrc
             parser().emit(neolib::string{
                 (boost::format(
                     "\n"
-                    "  ui(int argc, char* argv[], const std::string& aName = std::string{}) :\n")
+                    "  ui(int argc, char* argv[], const std::string& aName = {%1%}) :\n") % (iName ? "\"" + *iName + "\"" : "")
                 ).str() });
             emit_ctor();
             parser().emit(neolib::string{
@@ -81,5 +82,7 @@ namespace neogfx::nrc
             for (auto const& child : children())
                 child->emit_body();
         }
+    private:
+        std::optional<neolib::string> iName;
     };
 }

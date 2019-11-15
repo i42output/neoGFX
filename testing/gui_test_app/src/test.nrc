@@ -13,12 +13,13 @@
             resources/icon.png
         ]
     }
-    /*
+    
     ui: {
         app: {
             id: appTest
-            name: "neoGFX Test App"
+            name: "neoGFX Test App (Pre-Release)"
             default_window_icon: ":/test/resources/icon.png"
+                /*
             action: {
                 id: actionGoldenrodStyle
                 text: "Goldenrod Style"
@@ -782,7 +783,7 @@
                         }
                     }
                 }
-            }
+            }*/
         }
-    }*/
+    }
 }
