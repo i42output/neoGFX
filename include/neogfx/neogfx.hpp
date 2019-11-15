@@ -25,12 +25,15 @@
 using namespace boost::multiprecision;
 
 #include <neolib/stdint.hpp>
+#include <neolib/reference_counted.hpp>
 #include <neogfx/app/i18n.hpp>
 
 namespace neogfx
 {
     using namespace neolib::stdint_suffix;
     using namespace std::string_literals;
+
+    using neolib::ref_ptr;
 
     template <typename Component>
     Component& service();

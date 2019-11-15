@@ -32,7 +32,7 @@ namespace neogfx::game
     class entity_archetype : public i_entity_archetype
     {
     private:
-        typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
+        typedef neolib::set<component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
     public:
         entity_archetype(const entity_archetype_id& aId, const std::string& aName, std::initializer_list<component_id> aComponents);
         entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents);

@@ -30,7 +30,7 @@ namespace neogfx::game
     class system : public i_system
     {
     private:
-        typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
+        typedef neolib::set<component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
     public:
         system(game::i_ecs& aEcs);
         template <typename ComponentIdIter>

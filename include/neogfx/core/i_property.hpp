@@ -22,7 +22,9 @@
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
 #include <neolib/any.hpp>
+#include <neolib/simple_variant.hpp>
 #include <neolib/variant.hpp>
+#include <neolib/i_enum.hpp>
 #include <neolib/i_lifetime.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
@@ -48,43 +50,43 @@ namespace neogfx
         size,
         point,
         rect,
-        custom_type> variant_t;
+        custom_type> property_variant_t;
 
-    class property_variant : public variant_t
+    class property_variant : public property_variant_t
     {
     public:
         property_variant() : 
-            variant_t{}
+            property_variant_t{}
         {
         }
         property_variant(const property_variant& other) :
-            variant_t{ static_cast<const variant_t&>(other) }
+            property_variant_t{ static_cast<const property_variant_t&>(other) }
         {
         }
         property_variant(property_variant&& other) :
-            variant_t{ static_cast<variant_t&&>(std::move(other)) }
+            property_variant_t{ static_cast<property_variant_t&&>(std::move(other)) }
         {
         }
         template <typename T>
         property_variant(T&& aValue) :
-            variant_t{ std::forward<T>(aValue) }
+            property_variant_t{ std::forward<T>(aValue) }
         {
         }
     public:
-        using variant_t::operator=;
+        using property_variant_t::operator=;
         property_variant& operator=(const property_variant& other)
         {
-            variant_t::operator=(static_cast<const variant_t&>(other));
+            property_variant_t::operator=(static_cast<const property_variant_t&>(other));
             return *this;
         }
         property_variant& operator=(property_variant&& other)
         {
-            variant_t::operator=(static_cast<variant_t&&>(std::move(other)));
+            property_variant_t::operator=(static_cast<property_variant_t&&>(std::move(other)));
             return *this;
         }
     public:
-        using variant_t::operator==;
-        using variant_t::operator!=;
+        using property_variant_t::operator==;
+        using property_variant_t::operator!=;
     };
 
     template <typename T> struct variant_type_for { typedef custom_type type; };

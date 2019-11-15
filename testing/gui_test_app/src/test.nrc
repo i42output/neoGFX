@@ -13,7 +13,7 @@
             resources/icon.png
         ]
     }
-
+    /*
     ui: {
         app: {
             id: appTest
@@ -784,5 +784,5 @@
                 }
             }
         }
-    }
+    }*/
 }

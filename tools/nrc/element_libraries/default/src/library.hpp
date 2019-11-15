@@ -33,7 +33,7 @@ namespace neogfx::nrc
     {
         // types
     public:
-        typedef neolib::set<neolib::i_string, neolib::string> elements_t;
+        typedef neolib::set<neolib::string> elements_t;
         // construction
     public:
         default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);

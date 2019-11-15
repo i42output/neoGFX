@@ -247,6 +247,8 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_properties.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\units.hpp" />

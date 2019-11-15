@@ -29,7 +29,7 @@ namespace neogfx::nrc
     {
     public:
         app(const i_ui_element_parser& aParser) :
-            ui_element<>{ aParser, aParser.current_object_data(neolib::string{"id"}).value_as_string(), ui_element_type::App }
+            ui_element<>{ aParser, aParser.current_object_data(neolib::string{"id"}).value<neolib::i_string>(), ui_element_type::App }
         {
         }
     public:
