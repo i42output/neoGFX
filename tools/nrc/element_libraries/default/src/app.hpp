@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/format.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
 
 namespace neogfx::nrc
@@ -30,7 +29,8 @@ namespace neogfx::nrc
     public:
         app(const i_ui_element_parser& aParser) :
             ui_element<>{ aParser, aParser.get<neolib::i_string>("id"), ui_element_type::App },
-            iName{ aParser.get_optional<neolib::string>("name")}
+            iName{ aParser.get_optional<neolib::string>("name") },
+            iDefaultWindowIcon{ aParser.get_optional<neolib::string>("default_window_icon") }
         {
         }
     public:
@@ -40,49 +40,40 @@ namespace neogfx::nrc
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
         }
+    protected:
         void emit() const override
         {
             emit_preamble();
-            parser().emit(neolib::string{
-                (boost::format(
-                    "\n"
-                    "  ui(int argc, char* argv[], const std::string& aName = {%1%}) :\n") % (iName ? "\"" + *iName + "\"" : "")
-                ).str() });
+            emit("\n"
+                "  ui(int argc, char* argv[], const std::string& aName = {%1%}) :\n", iName ? "\"" + *iName + "\"" : "");
             emit_ctor();
-            parser().emit(neolib::string{
-                (boost::format(
-                    "  {\n")
-                ).str() });
+            emit("  {\n");
             emit_body();
-            parser().emit(neolib::string{
-                (boost::format(
-                    "  }\n")
-                ).str() });
+            emit("  }\n");
         }
         void emit_preamble() const override
         {
-            parser().emit(neolib::string{
-                (boost::format(
-                    "  neogfx::app %1%;\n") % id()
-                ).str() });
+            emit("  neogfx::app %1%;\n", id());
             for (auto const& child : children())
                 child->emit_preamble();
         }
         void emit_ctor() const override
         {
-            parser().emit(neolib::string{
-                (boost::format(
-                    "   %1%{ argc, argv, aName }\n") % id()
-                ).str() });
+            emit("   %1%{ argc, argv, aName }\n", id());
             for (auto const& child : children())
                 child->emit_ctor();
         }
         void emit_body() const override
         {
+            if (iDefaultWindowIcon)
+                emit("   %1%.set_default_window_icon(neogfx::image{ \"%2%\" });\n", id(), *iDefaultWindowIcon);
             for (auto const& child : children())
                 child->emit_body();
         }
+    protected:
+        using ui_element<>::emit;
     private:
         std::optional<neolib::string> iName;
+        std::optional<neolib::string> iDefaultWindowIcon;
     };
 }

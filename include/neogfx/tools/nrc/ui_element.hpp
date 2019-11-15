@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/format.hpp>
 #include <neolib/reference_counted.hpp>
 #include <neolib/vector.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
@@ -96,6 +97,21 @@ namespace neogfx::nrc
         }
         void instantiate(i_layout& aLayout) override
         {
+        }
+    protected:
+        void emit(const std::string& aArgument) const
+        {
+            parser().emit(neolib::string{ aArgument });
+        }
+        template <typename T>
+        void emit(const std::string& aFormat, const T& aArgument) const
+        {
+            parser().emit(neolib::string{ (boost::format(aFormat) % aArgument).str() });
+        }
+        template <typename T1, typename T2>
+        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2) const
+        {
+            parser().emit(neolib::string{ (boost::format(aFormat) % aArgument1 % aArgument2).str() });
         }
     private:
         const i_ui_element_parser& iParser;
