@@ -19,32 +19,36 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
 {
     class video_mode
     {
     public:
-        video_mode(uint32_t aWidth, uint32_t aHeight, uint32_t aBitsPerPixel = 32) : 
-            iWidth(aWidth), iHeight(aHeight), iBitsPerPixel(aBitsPerPixel)
+        typedef basic_size<uint32_t> resolution_t;
+    public:
+        video_mode(const resolution_t& aResolution, uint32_t aBitsPerPixel = 32) :
+            iResolution{ aResolution }, iBitsPerPixel{ aBitsPerPixel }
+        {
+        };
+        video_mode(uint32_t aWidth, uint32_t aHeight, uint32_t aBitsPerPixel = 32) :
+            iResolution{ aWidth, aHeight }, iBitsPerPixel{ aBitsPerPixel }
         {
         };
     public:
-        uint32_t width() const
+        const resolution_t& resolution() const
         {
-            return iWidth;
-        }
-        uint32_t height() const
-        {
-            return iHeight;
+            return iResolution;
         }
         uint32_t bits_per_pixel() const
         {
             return iBitsPerPixel;
         }
     private:
-        uint32_t iWidth;
-        uint32_t iHeight;
+        resolution_t iResolution;
         uint32_t iBitsPerPixel;
     };
+
+    typedef std::optional<video_mode> optional_video_mode;
 }

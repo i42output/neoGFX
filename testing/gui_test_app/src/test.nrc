@@ -53,10 +53,10 @@
                 text: "Paste and Go"
                 image: ":/closed/resources/caw_toolbar.naa#paste_and_go.png"
                 shortcut: "Ctrl+Shift+V"
-            }/*
+            }
             window: {
                 id: mainWindow
-                default_size: [ 800spx 800spx ]
+                default_size: [ 800spx 800spx ]/*
                 status_bar: {
                     id: statusBar
                 }
@@ -781,8 +781,8 @@
                             tab_image: ":/test/resources/channel.png"
                         }
                     }
-                }
-            }*/
+                }*/
+            }
         }
     }
 }

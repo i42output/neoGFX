@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/core/colour.hpp>
+#include <neogfx/gui/window/window_bits.hpp>
 #include "i_display.hpp"
 
 namespace neogfx
@@ -45,6 +46,7 @@ namespace neogfx
     public:
         neogfx::rect rect() const override;
         neogfx::rect desktop_rect() const override;
+        window_placement default_window_placement() const override;
         colour read_pixel(const point& aPosition) const override;
     public:
         neogfx::subpixel_format subpixel_format() const override;

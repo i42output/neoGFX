@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/format.hpp>
 #include <neolib/reference_counted.hpp>
 #include <neolib/vector.hpp>
+#include <neogfx/core/units.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
 
 namespace neogfx::nrc
@@ -113,6 +114,11 @@ namespace neogfx::nrc
         {
             parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2)).str() });
         }
+        template <typename T1, typename T2, typename T3>
+        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3) const
+        {
+            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3)).str() });
+        }
     private:
         template <typename T>
         static const T& convert_emit_argument(const T& aArgument)
@@ -122,6 +128,10 @@ namespace neogfx::nrc
         static std::string convert_emit_argument(const bool& aArgument)
         {
             return aArgument ? "true" : "false";
+        }
+        static std::string convert_emit_argument(const length& aArgument)
+        {
+            return aArgument.to_string();
         }
     private:
         const i_ui_element_parser& iParser;

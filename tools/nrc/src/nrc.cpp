@@ -40,7 +40,6 @@ namespace neogfx::nrc
         failed_to_read_resource_file(const std::string& aPath) : std::runtime_error("Failed to read resource file '" + aPath + "'!") {}
     };
     struct bad_usage : std::runtime_error { bad_usage() : std::runtime_error("Bad usage") {} };
-    struct not_yet_implemented : std::runtime_error { not_yet_implemented() : std::runtime_error("Not yet implemented") {} };
 
     void parse_resource(const boost::filesystem::path& aInputFilename, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
     {
@@ -143,7 +142,8 @@ namespace neogfx::nrc
 
 int main(int argc, char* argv[])
 {
-    using namespace neogfx::nrc;
+    using namespace neogfx;
+    using namespace nrc;
 
     neolib::application_info appInfo
     {
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
             uiFileName = inputFileName.filename().stem().string() + ".ui.hpp";
         }
         else if (options[0] == "-archive")
-            throw not_yet_implemented();
+            throw not_yet_implemented("nrc");
         else
             throw bad_usage();
 

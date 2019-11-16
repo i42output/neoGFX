@@ -117,8 +117,8 @@ namespace neogfx
         virtual void restore() = 0;
         virtual bool is_fullscreen() const = 0;
         virtual point window_position() const = 0;
-        virtual neogfx::window_placement window_placement() const = 0;
-        virtual void set_window_placement(const neogfx::window_placement& aPlacement) = 0;
+        virtual const window_placement& placement() const = 0;
+        virtual void set_placement(const window_placement& aPlacement) = 0;
         virtual void centre(bool aSetMinimumSize = true) = 0;
         virtual void centre_on_parent(bool aSetMinimumSize = true) = 0;
         virtual bool window_enabled() const = 0;

@@ -187,21 +187,88 @@ namespace neogfx
     template <typename T>
     class basic_length : public length_units
     {
+        typedef basic_length<T> self_type;
     public:
         typedef T value_type;
     public:
-        basic_length(value_type aValue, length_units::units aUnits = length_units::Pixels) :
-            iValue(aValue), iUnits(aUnits)
+        basic_length(value_type aValue = value_type{}, length_units::units aUnits = length_units::Pixels) :
+            iValue{ aValue }, iUnits{ aUnits }
         {
         }
     public:
         operator value_type() const
         {
-            return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<length_units::units>::current_units(), iValue);
+            return value();
+        }
+        value_type value() const
+        {
+            return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<length_units::units>::current_units(), unconverted_value());
+        }
+        value_type unconverted_value() const
+        {
+            return iValue;
         }
         length_units::units units() const
         {
             return iUnits;
+        }
+        std::string to_string(bool aToEmit = true) const
+        {
+            std::ostringstream oss;
+            oss << unconverted_value();
+            if (aToEmit)
+                oss << "_";
+            switch (units())
+            {
+            case length_units::Pixels:
+                oss << "px";
+                break;
+            case length_units::ScaledPixels:
+                oss << "spx";
+                break;
+            case length_units::Points:
+                oss << "pt";
+                break;
+            case length_units::Picas:
+                oss << "pc";
+                break;
+            case length_units::Ems:
+                oss << "em";
+                break;
+            case length_units::Millimetres:
+                oss << "mm";
+                break;
+            case length_units::Centimetres:
+                oss << "cm";
+                break;
+            case length_units::Inches:
+                oss << "in";
+                break;
+            case length_units::Percentage:
+                oss << "pct";
+                break;
+            }
+            return oss.str();
+        }
+        static self_type from_string(const std::string& aValue)
+        {
+            std::istringstream iss{ aValue };
+            iss >> iValue;
+            std::string u;
+            iss >> u;
+            static const std::unordered_map<std::string, length_units::units> names
+            {
+                { "px", length_units::Pixels },
+                { "spx", length_units::ScaledPixels },
+                { "pt", length_units::Points },
+                { "pc", length_units::Picas },
+                { "em", length_units::Ems },
+                { "mm", length_units::Millimetres },
+                { "cm", length_units::Centimetres },
+                { "in", length_units::Inches },
+                { "pct", length_units::Percentage }
+            };
+            iUnits = names[u];
         }
     private:
         value_type iValue;
@@ -360,6 +427,12 @@ namespace neogfx
     }
 
     template <typename T>
+    inline T from_pt(T aValue)
+    {
+        return from_units(length_units::Points, aValue);
+    }
+
+    template <typename T>
     inline T from_pc(T aValue)
     {
         return from_units(length_units::Picas, aValue);
@@ -405,6 +478,12 @@ namespace neogfx
     inline ResultT from_spx(T aValue)
     {
         return static_cast<ResultT>(from_units(length_units::ScaledPixels, aValue));
+    }
+
+    template <typename ResultT, typename T>
+    inline ResultT from_pt(T aValue)
+    {
+        return static_cast<ResultT>(from_units(length_units::Points, aValue));
     }
 
     template <typename ResultT, typename T>
@@ -456,6 +535,12 @@ namespace neogfx
     }
 
     template <typename T>
+    inline T to_pt(T aValue)
+    {
+        return to_units(length_units::Points, aValue);
+    }
+
+    template <typename T>
     inline T to_pc(T aValue)
     {
         return to_units(length_units::Picas, aValue);
@@ -504,6 +589,12 @@ namespace neogfx
     }
 
     template <typename ResultT, typename T>
+    inline ResultT to_pt(T aValue)
+    {
+        return static_cast<ResultT>(to_units(length_units::Points, aValue));
+    }
+
+    template <typename ResultT, typename T>
     inline ResultT to_pc(T aValue)
     {
         return static_cast<ResultT>(to_units(length_units::Picas, aValue));
@@ -549,6 +640,12 @@ namespace neogfx
     inline basic_length<T> spx(T aValue)
     {
         return basic_length<T>{ aValue, length_units::ScaledPixels };
+    }
+
+    template <typename T>
+    inline basic_length<T> pt(T aValue)
+    {
+        return basic_length<T>{ aValue, length_units::Points };
     }
 
     template <typename T>
@@ -629,6 +726,11 @@ namespace neogfx
             return spx(static_cast<default_geometry_value_type>(aValue));
         }
 
+        inline basic_length<default_geometry_value_type> operator ""_pt(long double aValue)
+        {
+            return pt(static_cast<default_geometry_value_type>(aValue));
+        }
+
         inline basic_length<default_geometry_value_type> operator ""_pc(long double aValue)
         {
             return pc(static_cast<default_geometry_value_type>(aValue));
@@ -667,6 +769,11 @@ namespace neogfx
         inline basic_length<default_geometry_value_type> operator ""_spx(unsigned long long int aValue)
         {
             return spx(static_cast<default_geometry_value_type>(aValue));
+        }
+
+        inline basic_length<default_geometry_value_type> operator ""_pt(unsigned long long int aValue)
+        {
+            return pt(static_cast<default_geometry_value_type>(aValue));
         }
 
         inline basic_length<default_geometry_value_type> operator ""_pc(unsigned long long int aValue)

@@ -176,6 +176,7 @@
     <ClInclude Include="..\..\..\src\action.hpp" />
     <ClInclude Include="..\..\..\src\app.hpp" />
     <ClInclude Include="..\..\..\src\library.hpp" />
+    <ClInclude Include="..\..\..\src\window.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

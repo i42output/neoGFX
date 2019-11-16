@@ -30,11 +30,17 @@
 #include <SDL_syswm.h>
 
 #include <neogfx/hid/display.hpp>
+#include <neogfx/app/i_app.hpp>
 #include "i_native_clipboard.hpp"
 #include "sdl_basic_services.hpp"
 
 namespace neogfx
 {
+    window_placement window_placement::default_placement()
+    {
+        return window_placement{ service<i_basic_services>().display().rect().extents() };
+    }
+
 #ifdef WIN32
     BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aDisplayList)
     {
@@ -134,14 +140,27 @@ namespace neogfx
 #endif
     }
 
-    neogfx::rect display::rect() const
+    rect display::rect() const
     {
         return iRect;
     }
 
-    neogfx::rect display::desktop_rect() const
+    rect display::desktop_rect() const
     {
         return iDesktopRect;
+    }
+
+    window_placement display::default_window_placement() const
+    {
+        auto fullscreenResolution = service<i_app>().program_options().full_screen();
+        if (fullscreenResolution != std::nullopt)
+        {
+            if (fullscreenResolution->first == 0)
+                return window_placement{ video_mode{ rect().extents() } };
+            else
+                return window_placement{ video_mode{ fullscreenResolution->first, fullscreenResolution->second } };
+        }
+        return desktop_rect().deflate(desktop_rect().extents() * 0.167);
     }
 
     subpixel_format display::subpixel_format() const

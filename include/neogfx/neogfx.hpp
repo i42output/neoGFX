@@ -54,4 +54,10 @@ namespace neogfx
         static_assert(sizeof(CharT) == sizeof(char));
         return std::string{ reinterpret_cast<const char*>(aString), Size };
     }
+
+    struct not_yet_implemented : std::runtime_error
+    {
+        not_yet_implemented(const std::string& aDetail = {}) :
+            std::runtime_error{ "neoGFX: Functionality not yet implemented" + (aDetail.empty() ? "" : " (" + aDetail + ")") } {}
+    };
 }
