@@ -42,14 +42,14 @@ namespace neogfx::nrc
         ui_element(const i_ui_element_parser& aParser, const neolib::i_string& aId, ui_element_type aType) :
             iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iType{ aType }
         {
-            if (has_parent())
-                parent().children().push_back(neolib::ref_ptr<i_ui_element>{ *this });
         }
         ui_element(i_ui_element& aParent, const neolib::i_string& aId, ui_element_type aType) :
             iParser{ aParent.parser() }, iParent{ &aParent }, iId{ aId }, iType{ aType }
         {
-            if (has_parent())
-                parent().children().push_back(neolib::ref_ptr<i_ui_element>{ *this });
+            parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
+        }
+        ~ui_element()
+        {
         }
     public:
         const i_ui_element_parser& parser() const override
@@ -106,12 +106,22 @@ namespace neogfx::nrc
         template <typename T>
         void emit(const std::string& aFormat, const T& aArgument) const
         {
-            parser().emit(neolib::string{ (boost::format(aFormat) % aArgument).str() });
+            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument)).str() });
         }
         template <typename T1, typename T2>
         void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2) const
         {
-            parser().emit(neolib::string{ (boost::format(aFormat) % aArgument1 % aArgument2).str() });
+            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2)).str() });
+        }
+    private:
+        template <typename T>
+        static const T& convert_emit_argument(const T& aArgument)
+        {
+            return aArgument;
+        }
+        static std::string convert_emit_argument(const bool& aArgument)
+        {
+            return aArgument ? "true" : "false";
         }
     private:
         const i_ui_element_parser& iParser;

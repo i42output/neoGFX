@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include "library.hpp"
 #include "app.hpp"
+#include "action.hpp"
 
 namespace neogfx::nrc
 {
     default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
-        iElements{ "app" }
+        iElements{ "app", "action" }
     {
     }
 
@@ -49,9 +50,15 @@ namespace neogfx::nrc
         throw unknown_element_type();
     }
 
-    i_ui_element* default_ui_element_library::do_create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType)
+    i_ui_element* default_ui_element_library::do_create_element(i_ui_element& aParent, const neolib::i_string& aElementType)
     {
-        // todo
+        static const std::map<std::string, std::function<i_ui_element*(i_ui_element&)>> sFactoryMethods =
+        {
+            { "action", [](i_ui_element& aParent) -> i_ui_element* { return new action{ aParent }; } }
+        };
+        auto method = sFactoryMethods.find(aElementType);
+        if (method != sFactoryMethods.end())
+            return (method->second)(aParent);
         throw unknown_element_type();
     }
 }

@@ -19,7 +19,6 @@
             id: appTest
             name: "neoGFX Test App (Pre-Release)"
             default_window_icon: ":/test/resources/icon.png"
-                /*
             action: {
                 id: actionGoldenrodStyle
                 text: "Goldenrod Style"
@@ -54,7 +53,7 @@
                 text: "Paste and Go"
                 image: ":/closed/resources/caw_toolbar.naa#paste_and_go.png"
                 shortcut: "Ctrl+Shift+V"
-            }
+            }/*
             window: {
                 id: mainWindow
                 default_size: [ 800spx 800spx ]
@@ -82,7 +81,7 @@
                         action: app.actionCut
                         action: app.actionCopy
                         action: app.actionPaste
-                        action: pasteAndGoAction
+                        action: actionPasteAndGo
                         action: app.actionDelete
                         action: separator
                         action: app.actionSelectAll

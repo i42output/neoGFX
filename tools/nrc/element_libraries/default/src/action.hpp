@@ -1,4 +1,4 @@
-// app.hpp
+// action.hpp
 /*
 neoGFX Resource Compiler
 Copyright(C) 2019 Leigh Johnston
@@ -24,13 +24,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::nrc
 {
-    class app : public ui_element<>
+    class action : public ui_element<>
     {
     public:
-        app(const i_ui_element_parser& aParser) :
-            ui_element<>{ aParser, aParser.get<neolib::i_string>("id"), ui_element_type::App },
-            iName{ aParser.get_optional<neolib::string>("name") },
-            iDefaultWindowIcon{ aParser.get_optional<neolib::string>("default_window_icon") }
+        action(i_ui_element& aParent) :
+            ui_element<>{ aParent, aParent.parser().get<neolib::i_string>("id"), ui_element_type::Action },
+            iCheckable{ aParent.parser().get_optional<bool>("checkable") },
+            iText{ aParent.parser().get_optional<neolib::string>("text") },
+            iImage{ aParent.parser().get_optional<neolib::string>("image") },
+            iShortcut{ aParent.parser().get_optional<neolib::string>("shortcut") },
+            iCheckedImage{ aParent.parser().get_optional<neolib::string>("checked_image") }
         {
         }
     public:
@@ -43,38 +46,38 @@ namespace neogfx::nrc
     protected:
         void emit() const override
         {
-            emit_preamble();
-            emit("\n"
-                "  ui(int argc, char* argv[], const std::string& aName = {%1%}) :\n", iName ? "\"" + *iName + "\"" : "");
-            emit_ctor();
-            emit("  {\n");
-            emit_body();
-            emit("  }\n");
         }
         void emit_preamble() const override
         {
-            emit("  neogfx::app %1%;\n", id());
+            emit("  neogfx::action %1%;\n", id());
             for (auto const& child : children())
                 child->emit_preamble();
         }
         void emit_ctor() const override
         {
-            emit("   %1%{ argc, argv, aName }", id());
-            for (auto const& child : children())
-                child->emit_ctor();
-            emit("\n");
+            if (iText)
+                emit(",\n"
+                    "   %1%{ \"%2%\" }", id(), *iText);
         }
         void emit_body() const override
         {
-            if (iDefaultWindowIcon)
-                emit("   %1%.set_default_window_icon(neogfx::image{ \"%2%\" });\n", id(), *iDefaultWindowIcon);
-            for (auto const& child : children())
-                child->emit_body();
+            if (iCheckable)
+                emit("   %1%.set_checkable(%2%);\n", id(), *iCheckable);
+            if (iImage)
+                emit("   %1%.set_image(\"%2%\");\n", id(), *iImage);
+            if (iShortcut)
+                emit("   %1%.set_shortcut(\"%2%\");\n", id(), *iShortcut);
+            if (iCheckedImage)
+                emit("   %1%.set_checked_image(\"%2%\");\n", id(), *iCheckedImage);
+            emit("   %1%.add_action(%2%);\n", parent().id(), id());
         }
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neolib::string> iName;
-        std::optional<neolib::string> iDefaultWindowIcon;
+        std::optional<bool> iCheckable;
+        std::optional<neolib::string> iText;
+        std::optional<neolib::string> iImage;
+        std::optional<neolib::string> iShortcut;
+        std::optional<neolib::string> iCheckedImage;
     };
 }

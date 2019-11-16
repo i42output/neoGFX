@@ -47,6 +47,16 @@ namespace neogfx
         remove_all();
     }
 
+    const i_widget& menu_bar::as_widget() const
+    {
+        return *this;
+    }
+
+    i_widget& menu_bar::as_widget()
+    {
+        return *this;
+    }
+
     size_policy menu_bar::size_policy() const
     {
         if (widget::has_size_policy())

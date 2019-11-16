@@ -47,14 +47,14 @@ namespace neogfx::nrc
         {
             return neolib::ref_ptr<i_ui_element>{ do_create_element(aParser, aElementType) };
         }
-        neolib::ref_ptr<i_ui_element> create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType)
+        neolib::ref_ptr<i_ui_element> create_element(i_ui_element& aParent, const neolib::i_string& aElementType)
         {
-            return neolib::ref_ptr<i_ui_element>{ do_create_element(aParser, aParent, aElementType) };
+            return neolib::ref_ptr<i_ui_element>{ do_create_element(aParent, aElementType) };
         }
         // implementation
     private:
         virtual i_ui_element* do_create_element(const i_ui_element_parser& aParser, const neolib::i_string& aElementType) = 0;
-        virtual i_ui_element* do_create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType) = 0;
+        virtual i_ui_element* do_create_element(i_ui_element& aParent, const neolib::i_string& aElementType) = 0;
         // interface
     public:
         static const neolib::uuid& iid() { static const neolib::uuid sId = neolib::make_uuid("3D10EA2F-5110-419C-BFF9-93263C618792"); return sId; }

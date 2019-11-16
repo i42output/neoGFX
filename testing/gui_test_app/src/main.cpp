@@ -246,18 +246,12 @@ int main(int argc, char* argv[])
             ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(ng::colour::LightGoldenrod);
         });
 
-        auto& contactsAction = app.add_action("&Contacts...", ":/closed/resources/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
-        contactsAction.triggered([]()
+        ui.actionContacts.triggered([]()
         {
             ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(ng::colour::White);
         });
-        auto& muteAction = app.add_action("Mute/&Unmute Sound", ":/closed/resources/caw_toolbar.naa#mute.png");
-        muteAction.set_checkable(true);
-        muteAction.set_checked_image(":/closed/resources/caw_toolbar.naa#unmute.png");
-
-        auto& pasteAndGoAction = app.add_action("Paste and Go", ":/closed/resources/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
-
-        neolib::callback_timer ct{ app, [&app, &pasteAndGoAction](neolib::callback_timer& aTimer)
+        
+        neolib::callback_timer ct{ app, [&app, &ui](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             if (ng::service<ng::i_clipboard>().sink_active())
@@ -265,16 +259,16 @@ int main(int argc, char* argv[])
                 auto& sink = ng::service<ng::i_clipboard>().active_sink();
                 if (sink.can_paste())
                 {
-                    pasteAndGoAction.enable();
+                    ui.actionPasteAndGo.enable();
                 }
                 else
                 {
-                    pasteAndGoAction.disable();
+                    ui.actionPasteAndGo.disable();
                 }
             }
         }, 100 };
 
-        pasteAndGoAction.triggered([&app]()
+        ui.actionPasteAndGo.triggered([&app]()
         {
             ng::service<ng::i_clipboard>().paste();
         });
@@ -298,7 +292,7 @@ int main(int argc, char* argv[])
         editMenu.add_action(app.action_cut());
         editMenu.add_action(app.action_copy());
         editMenu.add_action(app.action_paste());
-        editMenu.add_action(pasteAndGoAction);
+        editMenu.add_action(ui.actionPasteAndGo);
         editMenu.add_action(app.action_delete());
         editMenu.add_separator();
         editMenu.add_action(app.action_select_all());
@@ -338,8 +332,8 @@ int main(int argc, char* argv[])
                 }
             }
         }
-        menu.add_action(contactsAction);
-        menu.add_action(muteAction);
+        menu.add_action(ui.actionContacts);
+        menu.add_action(ui.actionMute);
         menu.add_action(app.add_action("&Xyzzy...", ":/neogfx/resources/icons.naa#eyedropper.png"));
 
         auto& testMenu = menu.add_sub_menu("&Test");
@@ -351,11 +345,11 @@ int main(int argc, char* argv[])
             {
                 ng::message_box::information(window, "Emacs style sequence #2", "Ctrl+K, Ctrl+K");
             });
-        testMenu.add_action(contactsAction);
-        testMenu.add_action(muteAction);
-        testMenu.add_action(muteAction);
-        testMenu.add_action(muteAction);
-        testMenu.add_action(muteAction);
+        testMenu.add_action(ui.actionContacts);
+        testMenu.add_action(ui.actionMute);
+        testMenu.add_action(ui.actionMute);
+        testMenu.add_action(ui.actionMute);
+        testMenu.add_action(ui.actionMute);
         ng::i_action& colourAction = app.add_action("Colour Dialog...");
         colourAction.triggered([&window]()
         {
@@ -375,7 +369,7 @@ int main(int argc, char* argv[])
         toolbar.add_action(app.action_file_open());
         toolbar.add_action(app.action_file_save());
         toolbar.add_separator();
-        toolbar.add_action(contactsAction);
+        toolbar.add_action(ui.actionContacts);
         toolbar.add_action(addFavouriteAction);
         toolbar.add_action(organizeFavouritesAction);
         toolbar.add_action(app.add_action("Keywords...", ":/closed/resources/caw_toolbar.naa#keyword.png"));
@@ -384,12 +378,12 @@ int main(int argc, char* argv[])
             {
                 ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(!ng::service<ng::i_rendering_engine>().frame_rate_limited());
             });
-        toolbar.add_action(muteAction);
+        toolbar.add_action(ui.actionMute);
         toolbar.add_separator();
         toolbar.add_action(app.action_cut());
         toolbar.add_action(app.action_copy());
         toolbar.add_action(app.action_paste());
-        toolbar.add_action(pasteAndGoAction);
+        toolbar.add_action(ui.actionPasteAndGo);
         toolbar.add_separator();
         toolbar.add_action(app.add_action("Check for Updates...", ":/closed/resources/caw_toolbar.naa#setup.png"));
 
@@ -530,11 +524,11 @@ int main(int argc, char* argv[])
         ng::push_button button7(layout2, "Toggle\n&mute.");
         button7.set_foreground_colour(ng::colour::LightCoral);
         button7.set_maximum_size(ng::size{ 128_spx, 64_spx });
-        button7.clicked([&muteAction]() { muteAction.toggle(); });
+        button7.clicked([&ui]() { ui.actionMute.toggle(); });
         layout2.add_spacer().set_weight(ng::size(1.0));
         ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
         button8.set_foreground_colour(ng::colour(255, 235, 160));
-        button8.clicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
+        button8.clicked([&ui]() { if (ui.actionContacts.is_enabled()) ui.actionContacts.disable(); else ui.actionContacts.enable(); });
         ng::horizontal_layout layout3(layoutButtons);
         prng.seed(3);
         auto transitionPrng = prng;

@@ -46,6 +46,16 @@ namespace neogfx
     {
     }
 
+    const i_widget& menu::as_widget() const
+    {
+        throw no_widget();
+    }
+    
+    i_widget& menu::as_widget()
+    {
+        throw no_widget();
+    }
+
     bool menu::has_parent() const
     {
         return iParent != nullptr;

@@ -48,6 +48,8 @@ namespace neogfx
         menu(type_e aType = Popup, const std::string& aTitle = std::string());
         ~menu();
     public:
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
         bool has_parent() const override;
         i_menu& parent() override;
         type_e type() const override;

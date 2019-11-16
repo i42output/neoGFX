@@ -72,12 +72,12 @@ namespace neogfx::nrc
         value.visit([&data](auto&& v)
         {
             typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
-            if constexpr (std::is_integral_v<vt>)
+            if constexpr (std::is_same_v<vt, bool>)
+                data = neolib::simple_variant{ v };
+            else if constexpr (std::is_integral_v<vt>)
                 data = neolib::simple_variant{ static_cast<int64_t>(v) };
             else if constexpr (std::is_floating_point_v<vt>)
                 data = neolib::simple_variant{ static_cast<double>(v) };
-            else if constexpr (std::is_same_v<vt, bool>)
-                data = neolib::simple_variant{ v };
             else if constexpr (std::is_same_v<vt, neolib::fjson_string>)
                 data = neolib::simple_variant{ neolib::string{v} };
             else if constexpr (std::is_same_v<vt, neolib::fjson_keyword>)
@@ -120,7 +120,7 @@ namespace neogfx::nrc
     {
         for (auto const& library : iLibraries)
             if (library->elements().find(aElementType) != library->elements().end())
-                return neolib::ref_ptr<i_ui_element>{ library->create_element(*this, aParent, aElementType) };
+                return neolib::ref_ptr<i_ui_element>{ library->create_element(aParent, aElementType) };
         throw element_type_not_found(aElementType.to_std_string());
     }
 
@@ -140,7 +140,10 @@ namespace neogfx::nrc
         case neolib::json_type::Object:
             for (auto const& e : aNode.as<neolib::fjson_object>().contents())
                 if (e.type() == neolib::json_type::Object)
+                {
+                    iCurrentNode = &e;
                     parse(e, *create_element(aElement, neolib::string{ e.name() }));
+                }
             break;
         case neolib::json_type::Array:
             break;

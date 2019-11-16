@@ -34,6 +34,7 @@ namespace neogfx::nrc
     enum class ui_element_type
     {
         App,
+        Action,
         Widget,
         Layout
     };

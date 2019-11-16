@@ -36,6 +36,9 @@ namespace neogfx
         menu_bar(i_layout& aLayout);
         ~menu_bar();
     public:
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
+    public:
         using widget::find;
         using menu::find;
     public:

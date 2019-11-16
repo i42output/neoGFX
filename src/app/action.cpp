@@ -23,28 +23,28 @@
 
 namespace neogfx
 {
-    action::action() : 
+    action::action() :
         iEnabled{ false }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ true }
     {
     }
 
     action::action(const std::string& aText) :
-        iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }
     {
     }
 
     action::action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
-        iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
     {
     }
 
     action::action(const std::string& aText, const i_texture& aImage) :
-        iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
 
     action::action(const std::string& aText, const i_image& aImage) :
-        iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
 

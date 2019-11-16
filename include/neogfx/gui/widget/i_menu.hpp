@@ -29,6 +29,8 @@ namespace neogfx
     class i_menu
     {
     public:
+        struct no_widget : std::logic_error { no_widget() : std::logic_error{ "neogfx::i_menu::no_widget" } {} };
+    public:
         typedef uint32_t item_index;
     public:
         declare_event(menu_changed)
@@ -58,6 +60,8 @@ namespace neogfx
     public:
         virtual ~i_menu() {}
     public:
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
         virtual bool has_parent() const = 0;
         virtual i_menu& parent() = 0;
         virtual type_e type() const = 0;

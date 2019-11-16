@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     menu_item_widget::menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem) :
-        iMenu{ aMenu }, iMenuItem{ aMenuItem }, iLayout{ *this }, iIcon{ iLayout, texture{}, aspect_ratio::Keep }, iText{ iLayout }, iSpacer{ iLayout }, iShortcutText{ iLayout }
+        widget{ aMenu.as_widget() }, iMenu { aMenu }, iMenuItem{ aMenuItem }, iLayout{ *this }, iIcon{ iLayout, texture{}, aspect_ratio::Keep }, iText{ iLayout }, iSpacer{ iLayout }, iShortcutText{ iLayout }
     {
         init();
     }
