@@ -291,6 +291,12 @@ namespace neogfx
     {
         return iName;
     }
+
+    void app::set_name(const std::string& aName)
+    {
+        iName = aName;
+        NameChanged.trigger();
+    }
     
     int app::exec(bool aQuitWhenLastWindowClosed)
     {

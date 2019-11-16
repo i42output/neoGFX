@@ -45,7 +45,7 @@ namespace neogfx::nrc
         {
             emit_preamble();
             emit("\n"
-                "  ui(int argc, char* argv[], const std::string& aName = {%1%}) :\n", iName ? "\"" + *iName + "\"" : "");
+                "  ui(int argc, char* argv[]) :\n");
             emit_ctor();
             emit("  {\n");
             emit_body();
@@ -59,13 +59,15 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            emit("   %1%{ argc, argv, aName }", id());
+            emit("   %1%{ argc, argv }", id());
             for (auto const& child : children())
                 child->emit_ctor();
             emit("\n");
         }
         void emit_body() const override
         {
+            if (iName)
+                emit("   %1%.set_name(\"%2%\"_t);\n", id(), *iName);
             if (iDefaultWindowIcon)
                 emit("   %1%.set_default_window_icon(neogfx::image{ \"%2%\" });\n", id(), *iDefaultWindowIcon);
             for (auto const& child : children())

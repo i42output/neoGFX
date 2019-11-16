@@ -60,6 +60,7 @@ namespace neogfx
     {
     public:
         define_declared_event(ExecutionStarted, execution_started)
+        define_declared_event(NameChanged, name_changed)
         define_declared_event(CurrentStyleChanged, current_style_changed, style_aspect)
     private:
         class loader
@@ -87,6 +88,7 @@ namespace neogfx
         static app& instance();
         const i_program_options& program_options() const override;
         const std::string& name() const override;
+        void set_name(const std::string& aName) override;
         int exec(bool aQuitWhenLastWindowClosed = true) override;
         bool in_exec() const override;
         void quit(int aResultCode = 0) override;

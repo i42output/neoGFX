@@ -57,7 +57,7 @@ namespace neogfx::nrc
         {
             if (iText)
                 emit(",\n"
-                    "   %1%{ \"%2%\" }", id(), *iText);
+                    "   %1%{ \"%2%\"_t }", id(), *iText);
         }
         void emit_body() const override
         {

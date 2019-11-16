@@ -67,6 +67,7 @@ namespace neogfx
     {
     public:
         declare_event(execution_started)
+        declare_event(name_changed)
         declare_event(current_style_changed, style_aspect)
     public:
         struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };
@@ -74,6 +75,7 @@ namespace neogfx
     public:
         virtual const i_program_options& program_options() const = 0;
         virtual const std::string& name() const = 0;
+        virtual void set_name(const std::string& aName) = 0;
         virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
         virtual bool in_exec() const = 0;
         virtual void quit(int aResultCode) = 0;
