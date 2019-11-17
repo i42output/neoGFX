@@ -45,9 +45,11 @@ namespace neogfx::nrc
         virtual void emit(const neolib::i_string& aText) const = 0;
         // implementation
     private:
-        virtual bool data_exists(const neolib::i_string& aKey) const = 0;
-        virtual const data_t& get_data(const neolib::i_string& aKey) const = 0;
-        virtual data_t& get_data(const neolib::i_string& aKey) = 0;
+        virtual bool do_data_exists(const neolib::i_string& aKey) const = 0;
+        virtual const data_t& do_get_data(const neolib::i_string& aKey) const = 0;
+        virtual data_t& do_get_data(const neolib::i_string& aKey) = 0;
+        virtual const array_data_t& do_get_array_data(const neolib::i_string& aKey) const = 0;
+        virtual array_data_t& do_get_array_data(const neolib::i_string& aKey) = 0;
         // helpers
     public:
         std::string indent(int32_t aLevel) const
@@ -58,15 +60,23 @@ namespace neogfx::nrc
         }
         bool data_exists(const std::string& aKey) const
         {
-            return data_exists(neolib::string{ aKey });
+            return do_data_exists(neolib::string{ aKey });
         }
         const data_t& get_data(const std::string& aKey) const
         {
-            return get_data(neolib::string{ aKey });
+            return do_get_data(neolib::string{ aKey });
         }
         data_t& get_data(const std::string& aKey)
         {
-            return get_data(neolib::string{ aKey });
+            return do_get_data(neolib::string{ aKey });
+        }
+        const array_data_t& get_array_data(const std::string& aKey) const
+        {
+            return do_get_array_data(neolib::string{ aKey });
+        }
+        array_data_t& get_array_data(const std::string& aKey)
+        {
+            return do_get_array_data(neolib::string{ aKey });
         }
         template <typename T>
         const T& get(const std::string& aKey) const

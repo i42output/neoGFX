@@ -189,6 +189,8 @@ namespace neogfx
     {
         typedef basic_length<T> self_type;
     public:
+        struct unknown_unit : std::runtime_error { unknown_unit(const std::string& aUnitName) : std::runtime_error{ "neoGFX: Error: Unknown unit '" + aUnitName + "'" } {} };
+    public:
         typedef T value_type;
     public:
         basic_length(value_type aValue = value_type{}, length_units::units aUnits = length_units::Pixels) :
@@ -252,11 +254,7 @@ namespace neogfx
         }
         static self_type from_string(const std::string& aValue)
         {
-            std::istringstream iss{ aValue };
-            iss >> iValue;
-            std::string u;
-            iss >> u;
-            static const std::unordered_map<std::string, length_units::units> names
+            static const std::unordered_map<std::string, length_units::units> sUnitTypes
             {
                 { "px", length_units::Pixels },
                 { "spx", length_units::ScaledPixels },
@@ -268,7 +266,16 @@ namespace neogfx
                 { "in", length_units::Inches },
                 { "pct", length_units::Percentage }
             };
-            iUnits = names[u];
+            self_type result;
+            std::istringstream iss{ aValue };
+            iss >> result.iValue;
+            std::string unitName;
+            iss >> unitName;
+            auto u = sUnitTypes.find(unitName);
+            if (u == sUnitTypes.end())
+                throw unknown_unit(unitName);
+            result.iUnits = u->second;
+            return result;
         }
     private:
         value_type iValue;

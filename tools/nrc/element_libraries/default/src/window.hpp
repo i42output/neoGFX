@@ -32,16 +32,28 @@ namespace neogfx::nrc
         {
             if (aParent.parser().data_exists("default_size"))
             {
-                auto const& ds = aParent.parser().get_optional<neolib::i_vector<neolib::i_string>>("default_size");
-                length cx;
-                length cy;
-                if (ds->size() > 0u)
-                    cx = length::from_string(ds[0].to_std_string());
-                if (ds->size() > 1u)
-                    cy = length::from_string(ds[1].to_std_string());
+                auto const& ds = aParent.parser().get_array_data("default_size");
+                auto get_length = [](auto&& av) -> length
+                {
+                    length result;
+                    std::visit([&result](auto&& v)
+                    {
+                        typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
+                        if constexpr (std::is_integral_v<vt>)
+                            result = v;
+                        else if constexpr (std::is_same_v<vt, neolib::i_string>)
+                            result = length::from_string(v.to_std_string());
+                        else
+                            throw wrong_type();
+                    }, av);
+                    return result;
+                };
+                if (ds.size() >= 2u)
+                    iDefaultSize.emplace(get_length(ds[0]), get_length(ds[1]));
+                else if (ds.size() >= 1u)
+                    iDefaultSize.emplace(get_length(ds[0]), get_length(ds[0]));
                 else
-                    cy = cx;
-                iDefaultSize.emplace(cx, cy);
+                    iDefaultSize.emplace();
             }
         }
     public:
@@ -57,15 +69,29 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            if (iDefaultSize)
-                emit("  neogfx::window %1% = neogfx::make_default_window(neogfx::size{ %2%, %3% });\n", id(), iDefaultSize->cx, iDefaultSize->cy);
-            else
-                emit("  neogfx::window %1% = neogfx::make_default_window();\n", id());
+            emit("  neogfx::window %1%;\n", id());
             for (auto const& child : children())
                 child->emit_preamble();
         }
         void emit_ctor() const override
         {
+            switch(parent().type())
+            {
+            case ui_element_type::Widget:
+                if (iDefaultSize)
+                    emit(",\n"
+                        "   %1%{ %2%, %3%, %4% }", id(), parent().id(), iDefaultSize->cx, iDefaultSize->cy);
+                else
+                    emit(",\n"
+                        "   %1%{ %2% }", id(), parent().id());
+                break;
+            default:
+                if (iDefaultSize)
+                    emit(",\n"
+                        "   %1%{ neogfx::size{ %2%, %3% } }", id(), iDefaultSize->cx, iDefaultSize->cy);
+                break;
+            }
+           
         }
         void emit_body() const override
         {

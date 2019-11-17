@@ -96,13 +96,60 @@ namespace neogfx
         {
         }
         window_placement(
-            const optional_rect& aNormalGeometry,
+            const rect& aNormalGeometry,
             const optional_rect& aIconizedGeometry = rect{},
             const optional_rect& aMaximizedGeometry = {},
             const optional_video_mode& aVideoMode = {},
             window_state aState = window_state::Normal) :
-            iPositionSpecified{ aNormalGeometry },
+            iPositionSpecified{ true },
             iNormalGeometry{ aNormalGeometry },
+            iIconizedGeometry{ aIconizedGeometry },
+            iMaximizedGeometry{ aMaximizedGeometry },
+            iVideoMode{ aVideoMode },
+            iState{ aState }
+        {
+            check_state();
+        }
+        window_placement(
+            const point& aNormalPosition,
+            const optional_rect& aIconizedGeometry = rect{},
+            const optional_rect& aMaximizedGeometry = {},
+            const optional_video_mode& aVideoMode = {},
+            window_state aState = window_state::Normal) :
+            iPositionSpecified{ true },
+            iNormalGeometry{ aNormalPosition },
+            iIconizedGeometry{ aIconizedGeometry },
+            iMaximizedGeometry{ aMaximizedGeometry },
+            iVideoMode{ aVideoMode },
+            iState{ aState }
+        {
+            check_state();
+        }
+        window_placement(
+            const point& aNormalTopLeft,
+            const point& aNormalBottomRight,
+            const optional_rect& aIconizedGeometry = rect{},
+            const optional_rect& aMaximizedGeometry = {},
+            const optional_video_mode& aVideoMode = {},
+            window_state aState = window_state::Normal) :
+            iPositionSpecified{ true },
+            iNormalGeometry{ rect{ aNormalTopLeft, aNormalBottomRight } },
+            iIconizedGeometry{ aIconizedGeometry },
+            iMaximizedGeometry{ aMaximizedGeometry },
+            iVideoMode{ aVideoMode },
+            iState{ aState }
+        {
+            check_state();
+        }
+        window_placement(
+            const point& aNormalPosition,
+            const size& aNormalSize,
+            const optional_rect& aIconizedGeometry = rect{},
+            const optional_rect& aMaximizedGeometry = {},
+            const optional_video_mode& aVideoMode = {},
+            window_state aState = window_state::Normal) :
+            iPositionSpecified{ true },
+            iNormalGeometry{ rect{ aNormalPosition, aNormalSize } },
             iIconizedGeometry{ aIconizedGeometry },
             iMaximizedGeometry{ aMaximizedGeometry },
             iVideoMode{ aVideoMode },

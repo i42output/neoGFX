@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     popup_menu::popup_menu(const point& aPosition, i_menu& aMenu, window_style aStyle) :
-        window{ aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+        window{ aPosition, aStyle, scrollbar_style::Menu, frame_style::SolidFrame },
         iParentWidget{ 0 }, 
         iMenu{ nullptr }, 
         iOpeningSubMenu{ false }
@@ -39,7 +39,7 @@ namespace neogfx
     }
 
     popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, window_style aStyle) :
-        window{ aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+        window{ aParent, aPosition, aStyle, scrollbar_style::Menu, frame_style::SolidFrame },
         iParentWidget{ &aParent }, 
         iMenu{ nullptr }, 
         iOpeningSubMenu{ false }
@@ -49,7 +49,7 @@ namespace neogfx
     }
 
     popup_menu::popup_menu(const point& aPosition, window_style aStyle) :
-        window{ aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+        window{ aPosition, aStyle, scrollbar_style::Menu, frame_style::SolidFrame },
         iParentWidget{ 0 }, 
         iMenu{ nullptr }, 
         iOpeningSubMenu{ false }
@@ -58,7 +58,7 @@ namespace neogfx
     }
 
     popup_menu::popup_menu(i_widget& aParent, const point& aPosition, window_style aStyle) :
-        window{ aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+        window{ aParent, aPosition, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
         iParentWidget{ &aParent }, 
         iMenu{ nullptr }, 
         iOpeningSubMenu{ false }

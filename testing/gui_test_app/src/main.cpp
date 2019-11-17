@@ -207,21 +207,7 @@ int main(int argc, char* argv[])
         app.current_style().palette().set_colour(ng::colour::Black);
         app.change_style("Slate");
 
-        std::optional<ng::window> windowObject;
-        auto fullscreenResolution = app.program_options().full_screen();
-        if (fullscreenResolution != std::nullopt)
-        {
-            if (fullscreenResolution->first == 0)
-                windowObject.emplace(
-                    ng::video_mode{ 
-                        static_cast<uint32_t>(ng::service<ng::i_basic_services>().display().desktop_rect().width()), 
-                        static_cast<uint32_t>(ng::service<ng::i_basic_services>().display().desktop_rect().height()) });
-            else
-                windowObject.emplace(ng::video_mode{ fullscreenResolution->first, fullscreenResolution->second });
-        }
-        else
-            windowObject.emplace(ng::size{ 800, 800 } * ng::service<ng::i_surface_manager>().display().metrics().horizontal_dpi() / 96.0);
-        ng::window& window = *windowObject;
+        ng::window& window = ui.mainWindow;
 
         ng::status_bar statusBar{ window.status_bar_layout() };
         auto& layout0 = window.client_layout();

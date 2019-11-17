@@ -119,6 +119,11 @@ namespace neogfx::nrc
         {
             parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3)).str() });
         }
+        template <typename T1, typename T2, typename T3, typename T4>
+        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4) const
+        {
+            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3) % convert_emit_argument(aArgument4)).str() });
+        }
     private:
         template <typename T>
         static const T& convert_emit_argument(const T& aArgument)

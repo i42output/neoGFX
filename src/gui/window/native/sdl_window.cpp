@@ -154,13 +154,15 @@ namespace neogfx
         iClickedWidgetPart(widget_part::Nowhere),
         iSystemMenuOpen(false)
     {
+        // todo: refactor the code duplication in this and following ctor bodies away
+
         install_creation_hook(*this);
         iHandle = SDL_CreateWindow(
             aWindowTitle.c_str(),
             0,
             0,
-            aVideoMode.width(),
-            aVideoMode.height(),
+            aVideoMode.resolution().cx,
+            aVideoMode.resolution().cy,
             SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
         if (iHandle == nullptr)
             throw failed_to_create_window(SDL_GetError());
@@ -266,8 +268,8 @@ namespace neogfx
             aWindowTitle.c_str(),
             0,
             0,
-            aVideoMode.width(),
-            aVideoMode.height(),
+            aVideoMode.resolution().cx,
+            aVideoMode.resolution().cy,
             SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
         if (iHandle == nullptr)
             throw failed_to_create_window(SDL_GetError());

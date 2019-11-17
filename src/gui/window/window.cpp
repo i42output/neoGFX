@@ -902,13 +902,13 @@ namespace neogfx
     const window_placement& window::placement() const
     {
         // todo: update cache
-        throw not_yet_implemented("window::placement");
+        return iPlacement;
     }
 
     void window::set_placement(const neogfx::window_placement& aPlacement)
     {
-        // todo: update
-        throw not_yet_implemented("window::set_placement");
+        iPlacement = aPlacement;
+        // todo: update native window state
     }
 
     bool window::window_enabled() const
