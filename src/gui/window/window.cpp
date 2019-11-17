@@ -297,17 +297,6 @@ namespace neogfx
         }
 
         init();
-
-        if (!aPlacement.video_mode())
-        {
-            if (aPlacement.state() == window_state::Normal)
-            {
-                if (aPlacement.position_specified())
-                    move(aPlacement.normal_geometry()->top_left());
-                else
-                    centre_on_parent(false);
-            }
-        }
     }
 
     window_style window::style() const
@@ -976,8 +965,16 @@ namespace neogfx
 
         init_scrollbars();
 
-        if (placement().state() == window_state::Normal)
-            move(placement().normal_geometry()->top_left());
+        if (!placement().video_mode())
+        {
+            if (placement().state() == window_state::Normal)
+            {
+                if (placement().position_specified())
+                    move(placement().normal_geometry()->top_left());
+                else
+                    centre_on_parent(false);
+            }
+        }
     }
 
     double window::rendering_priority() const
