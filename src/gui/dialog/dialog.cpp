@@ -26,7 +26,7 @@
 namespace neogfx
 {
     dialog::dialog(window_style aStyle) :
-        window{ {}, {}, aStyle },
+        window{ aStyle },
         iClientLayout{ window::client_layout() },
         iButtonBoxLayout{ window::client_layout() }
     {
@@ -34,7 +34,7 @@ namespace neogfx
     }
 
     dialog::dialog(const std::string& aDialogTitle, window_style aStyle) :
-        window{ {}, aDialogTitle, aStyle },
+        window{ aDialogTitle, aStyle },
         iClientLayout{ window::client_layout() },
         iButtonBoxLayout{ window::client_layout() }
     {
@@ -42,7 +42,7 @@ namespace neogfx
     }
 
     dialog::dialog(const size& aDimensions, window_style aStyle) :
-        window{ aDimensions, {}, aStyle },
+        window{ aDimensions, aStyle },
         iClientLayout{ window::client_layout() },
         iButtonBoxLayout{ window::client_layout() }
     {
@@ -74,7 +74,7 @@ namespace neogfx
     }
 
     dialog::dialog(i_widget& aParent, window_style aStyle) :
-        window{ aParent, {}, {}, aStyle },
+        window{ aParent, aStyle },
         iClientLayout{ window::client_layout() },
         iButtonBoxLayout{ window::client_layout() }
     {
@@ -82,7 +82,7 @@ namespace neogfx
     }
 
     dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle) :
-        window{ aParent, {}, aDialogTitle, aStyle },
+        window{ aParent, aDialogTitle, aStyle },
         iClientLayout{ window::client_layout() },
         iButtonBoxLayout{ window::client_layout() }
     {
@@ -106,7 +106,7 @@ namespace neogfx
     }
 
     dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle) :
-        window{ aParent, rect{ aPosition, aDimensions }, {}, aStyle },
+        window{ aParent, rect{ aPosition, aDimensions }, aStyle },
         iClientLayout{ window::client_layout() },
         iButtonBoxLayout{ window::client_layout() }
     {
