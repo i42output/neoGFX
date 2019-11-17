@@ -59,7 +59,7 @@
                 default_size: [ 800spx 800spx ]
                 status_bar: {
                     id: statusBar
-                }/*
+                }
                 menu_bar: {
                     id: menu
                     menu: {
@@ -159,7 +159,7 @@
                         id: helpMenu
                         title: "&Help"
                     }
-                }
+                }/*
                 toolbar: {
                     id: toolbar
                     action: appTest.actionFileNew
