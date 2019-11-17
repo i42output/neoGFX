@@ -1217,17 +1217,17 @@ namespace neogfx
                 break;
             case SDL_WINDOWEVENT_MINIMIZED:
                 push_event(window_event{ window_event_type::Iconized });
-                invalidate(surface_size());
+                invalidate(rect{ surface_size() });
                 render(true);
                 break;
             case SDL_WINDOWEVENT_MAXIMIZED:
                 push_event(window_event{ window_event_type::Maximized });
-                invalidate(surface_size());
+                invalidate(rect{ surface_size() });
                 render(true);
                 break;
             case SDL_WINDOWEVENT_RESTORED:
                 push_event(window_event{ window_event_type::Restored });
-                invalidate(surface_size());
+                invalidate(rect{ surface_size() });
                 render(true);
                 break;
             case SDL_WINDOWEVENT_ENTER:
@@ -1245,7 +1245,7 @@ namespace neogfx
                 push_event(window_event{ window_event_type::FocusLost });
                 break;
             case SDL_WINDOWEVENT_EXPOSED:
-                invalidate(surface_size());
+                invalidate(rect{ surface_size() });
                 render(true);
                 break;
             }

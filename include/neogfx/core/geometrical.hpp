@@ -570,8 +570,8 @@ namespace neogfx
         basic_rect() {}
         basic_rect(const point_type& coordinates, const size_type& dimensions) : point_type{ coordinates }, size_type{ dimensions } {}
         basic_rect(const point_type& leftCorner, const point_type& rightCorner) : point_type{ leftCorner }, size_type{ std::abs<CoordinateType>(rightCorner.x - leftCorner.x), std::abs<CoordinateType>(rightCorner.y - leftCorner.y) } {}
-        basic_rect(const point_type& coordinates) : point_type{ coordinates }, size_type{} {}
-        basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
+        explicit basic_rect(const point_type& coordinates) : point_type{ coordinates }, size_type{} {}
+        explicit basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
         basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>

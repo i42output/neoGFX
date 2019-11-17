@@ -971,7 +971,7 @@ namespace neogfx
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
             if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
-                surface().native_surface().invalidate(surface().surface_size());
+                surface().native_surface().invalidate(rect{ surface().surface_size() });
         });
 
         init_scrollbars();
