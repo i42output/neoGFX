@@ -29,7 +29,14 @@ namespace neogfx
     class popup_menu : public window
     {
     public:
-        static const window_style DEFAULT_STYLE = window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::HideOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow;
+        static const window_style DEFAULT_STYLE = 
+            window_style::Weak | 
+            window_style::NoDecoration |
+            window_style::NoActivate | 
+            window_style::RequiresOwnerFocus | 
+            window_style::HideOnOwnerClick | 
+            window_style::InitiallyHidden | 
+            window_style::DropShadow;
     public:
         struct no_menu : std::logic_error { no_menu() : std::logic_error("neogfx::popup_menu::no_menu") {} };
     public:

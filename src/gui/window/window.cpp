@@ -490,7 +490,7 @@ namespace neogfx
 
     bool window::is_weak() const
     {
-        return (window_style() & window_style::Weak) == window_style::Weak;
+        return (style() & window_style::Weak) == window_style::Weak;
     }
 
     bool window::can_close() const
