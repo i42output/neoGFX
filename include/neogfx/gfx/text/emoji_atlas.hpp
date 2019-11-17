@@ -1,7 +1,7 @@
 // emoji_atlas.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -27,23 +27,23 @@
 
 namespace neogfx
 {
-	class emoji_atlas : public i_emoji_atlas
-	{
-	private:
-		typedef std::map<dimension, std::string> sets;
-		typedef std::map<std::u32string, sets> emojis;
-	public:
-		emoji_atlas(i_texture_manager& aTextureManager);
-	public:
-		virtual bool is_emoji(char32_t aCodePoint) const;
-		virtual bool is_emoji(const std::u32string& aCodePoints) const;
-		virtual emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const;
-		virtual emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize = 64) const;
-		virtual const i_texture& emoji_texture(emoji_id aId) const;
-	private:
-		const std::string kFilePath;
-		std::unique_ptr<i_texture_atlas> iTextureAtlas;
-		emojis iEmojis;
-		mutable std::unordered_map<std::u32string, boost::optional<emoji_id>> iEmojiMap;
-	};
+    class emoji_atlas : public i_emoji_atlas
+    {
+    private:
+        typedef std::map<dimension, std::string> sets;
+        typedef std::map<std::u32string, sets> emojis;
+    public:
+        emoji_atlas();
+    public:
+        virtual bool is_emoji(char32_t aCodePoint) const;
+        virtual bool is_emoji(const std::u32string& aCodePoints) const;
+        virtual emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const;
+        virtual emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize = 64) const;
+        virtual const i_texture& emoji_texture(emoji_id aId) const;
+    private:
+        const std::string kFilePath;
+        std::unique_ptr<i_texture_atlas> iTextureAtlas;
+        emojis iEmojis;
+        mutable std::unordered_map<std::u32string, std::optional<emoji_id>> iEmojiMap;
+    };
 }

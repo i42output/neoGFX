@@ -1,7 +1,7 @@
 // group_box.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -18,151 +18,167 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 
 namespace neogfx
 {
-	group_box::group_box(const std::string& aText) : 
-		widget(), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
-	{
-		init();
-	}
+    group_box::group_box(const std::string& aText) : 
+        widget(), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
+    {
+        init();
+    }
 
-	group_box::group_box(i_widget& aParent, const std::string& aText) :
-		widget(aParent), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
-	{
-		init();
-	}
+    group_box::group_box(i_widget& aParent, const std::string& aText) :
+        widget(aParent), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
+    {
+        init();
+    }
 
-	group_box::group_box(i_layout& aLayout, const std::string& aText) :
-		widget(aLayout), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
-	{
-		init();
-	}
+    group_box::group_box(i_layout& aLayout, const std::string& aText) :
+        widget(aLayout), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
+    {
+        init();
+    }
 
-	bool group_box::is_checkable() const
-	{
-		return iTitle.is<check_box_ptr>();
-	}
+    bool group_box::is_checkable() const
+    {
+        return std::holds_alternative<check_box_ptr>(iTitle);
+    }
 
-	void group_box::set_checkable(bool aCheckable)
-	{
-		if (is_checkable() != aCheckable)
-		{
-			std::string text = label().text().text();
-			iTitle.clear();
-			if (aCheckable)
-			{
-				iTitle = std::make_unique<neogfx::check_box>(text);
-				iLayout.add_item_at(0, *static_variant_cast<check_box_ptr&>(iTitle));
-			}
-			else
-			{
-				iTitle = std::make_unique<neogfx::label>(text);
-				iLayout.add_item_at(0, *static_variant_cast<label_ptr&>(iTitle));
-			}
-		}
-	}
+    void group_box::set_checkable(bool aCheckable)
+    {
+        if (is_checkable() != aCheckable)
+        {
+            std::string text = label().text().text();
+            iTitle = neolib::none;
+            if (aCheckable)
+            {
+                iTitle = std::make_unique<neogfx::check_box>(text);
+                iLayout.add_at(0, *static_variant_cast<check_box_ptr&>(iTitle));
+            }
+            else
+            {
+                iTitle = std::make_unique<neogfx::label>(text);
+                iLayout.add_at(0, *static_variant_cast<label_ptr&>(iTitle));
+            }
+        }
+    }
 
-	const label& group_box::label() const
-	{
-		if (iTitle.is<label_ptr>())
-			return *static_variant_cast<const label_ptr&>(iTitle);
-		else
-			return static_variant_cast<const check_box_ptr&>(iTitle)->label();
-	}
+    const label& group_box::label() const
+    {
+        if (std::holds_alternative<label_ptr>(iTitle))
+            return *static_variant_cast<const label_ptr&>(iTitle);
+        else
+            return static_variant_cast<const check_box_ptr&>(iTitle)->label();
+    }
 
-	label& group_box::label()
-	{
-		if (iTitle.is<label_ptr>())
-			return *static_variant_cast<label_ptr&>(iTitle);
-		else
-			return static_variant_cast<check_box_ptr&>(iTitle)->label();
-	}
+    label& group_box::label()
+    {
+        if (std::holds_alternative<label_ptr>(iTitle))
+            return *static_variant_cast<label_ptr&>(iTitle);
+        else
+            return static_variant_cast<check_box_ptr&>(iTitle)->label();
+    }
 
-	const check_box& group_box::check_box() const
-	{
-		if (iTitle.is<check_box_ptr>())
-			return *static_variant_cast<const check_box_ptr&>(iTitle);
-		throw not_checkable();
-	}
+    bool group_box::has_check_box() const
+    {
+        return std::holds_alternative<check_box_ptr>(iTitle);
+    }
 
-	check_box& group_box::check_box()
-	{
-		if (iTitle.is<check_box_ptr>())
-			return *static_variant_cast<check_box_ptr&>(iTitle);
-		throw not_checkable();
-	}
+    const check_box& group_box::check_box() const
+    {
+        if (has_check_box())
+            return *static_variant_cast<const check_box_ptr&>(iTitle);
+        throw not_checkable();
+    }
 
-	void group_box::set_item_layout(i_layout& aItemLayout)
-	{
-		iItemLayout = std::shared_ptr<i_layout>(std::shared_ptr<i_layout>(), &aItemLayout);
-		if (aItemLayout.parent() != &iLayout)
-			iLayout.add_item(iItemLayout);
-	}
+    check_box& group_box::check_box()
+    {
+        if (has_check_box())
+            return *static_variant_cast<check_box_ptr&>(iTitle);
+        throw not_checkable();
+    }
 
-	void group_box::set_item_layout(std::shared_ptr<i_layout> aItemLayout)
-	{
-		iItemLayout = aItemLayout;
-		if (aItemLayout->parent() != &iLayout)
-			iLayout.add_item(iItemLayout);
-	}
+    void group_box::set_item_layout(i_layout& aItemLayout)
+    {
+        set_item_layout(std::shared_ptr<i_layout>{std::shared_ptr<i_layout>{}, &aItemLayout});
+    }
 
-	const i_layout& group_box::item_layout() const
-	{
-		return *iItemLayout;
-	}
+    void group_box::set_item_layout(std::shared_ptr<i_layout> aItemLayout)
+    {
+        if (iItemLayout != nullptr)
+            iLayout.remove(*iItemLayout);
+        iItemLayout = aItemLayout;
+        if (!aItemLayout->has_parent_layout() || &aItemLayout->parent_layout() != &iLayout)
+            iLayout.add(iItemLayout);
+    }
 
-	i_layout& group_box::item_layout()
-	{
-		return *iItemLayout;
-	}
+    const i_layout& group_box::item_layout() const
+    {
+        return *iItemLayout;
+    }
 
-	neogfx::size_policy group_box::size_policy() const
-	{
-		if (widget::has_size_policy())
-			return widget::size_policy();
-		else
-			return size_policy::Minimum;
-	}
+    i_layout& group_box::item_layout()
+    {
+        return *iItemLayout;
+    }
 
-	void group_box::paint(graphics_context& aGraphicsContext) const
-	{
-		widget::paint(aGraphicsContext);
-		rect lr{ item_layout().position(), item_layout().extents() };
-		lr.inflate(size{ 5.0 });
-		aGraphicsContext.fill_rounded_rect(lr, 4.0, border_colour());
-		lr.deflate(size{ 1.0 });
-		aGraphicsContext.fill_rounded_rect(lr, 4.0, fill_colour());
-	}
+    neogfx::size_policy group_box::size_policy() const
+    {
+        if (widget::has_size_policy())
+            return widget::size_policy();
+        else
+            return size_policy::Minimum;
+    }
 
-	colour group_box::border_colour() const
-	{
-		if (container_background_colour().light())
-			return background_colour().darker(24);
-		else
-			return background_colour().lighter(24);
-	}
+    void group_box::paint(i_graphics_context& aGraphicsContext) const
+    {
+        widget::paint(aGraphicsContext);
+        rect lr{ item_layout().position(), item_layout().extents() };
+        lr.inflate(size{ 5.0 });
+        aGraphicsContext.fill_rounded_rect(lr, 4.0, border_colour());
+        lr.deflate(size{ 1.0 });
+        aGraphicsContext.fill_rounded_rect(lr, 4.0, fill_colour());
+    }
 
-	colour group_box::fill_colour() const
-	{
-		return container_background_colour().light() ? border_colour().lighter(24) : border_colour().darker(24);
-	}
+    colour group_box::border_colour() const
+    {
+        if (container_background_colour().light())
+            return background_colour().darker(24);
+        else
+            return background_colour().lighter(24);
+    }
 
-	colour group_box::background_colour() const
-	{
-		if (container_background_colour().light())
-			return parent().background_colour().darker(24);
-		else
-			return parent().background_colour().lighter(24);
-	}
+    colour group_box::fill_colour() const
+    {
+        return container_background_colour().light() ? border_colour().lighter(24) : border_colour().darker(24);
+    }
 
-	void group_box::init()
-	{
-		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ 5.0 });
-		iLayout.set_spacing(neogfx::size{ 5.0 });
-		set_item_layout(std::make_shared<vertical_layout>());
-	}
+    colour group_box::background_colour() const
+    {
+        if (container_background_colour().light())
+            return parent().background_colour().darker(24);
+        else
+            return parent().background_colour().lighter(24);
+    }
+
+    class group_box_item_layout : public vertical_layout
+    {
+    public:
+        size minimum_size(const optional_size& aAvailableSpace) const override
+        {
+            auto result = vertical_layout::minimum_size(aAvailableSpace);
+            if (result == size{})
+                result = size{ 10.0, 10.0 };
+            return result;
+        }
+    };
+
+    void group_box::init()
+    {
+        set_margins(neogfx::margins{});
+        iLayout.set_margins(neogfx::margins{ 5.0 });
+        iLayout.set_spacing(neogfx::size{ 5.0 });
+        set_item_layout(std::make_shared<group_box_item_layout>());
+    }
 }

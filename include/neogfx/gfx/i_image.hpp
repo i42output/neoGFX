@@ -1,7 +1,7 @@
 // i_image.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,30 +20,34 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometry.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/app/i_resource.hpp>
 
 namespace neogfx
 {
-	enum class colour_format
-	{
-		RGBA8
-	};
+    enum class colour_format
+    {
+        RGBA8
+    };
 
-	class i_image : public i_resource
-	{
-	public:
-		struct unknown_image_format : std::runtime_error { unknown_image_format() : std::runtime_error("neogfx::i_image::unknown_image_format") {} };
-	public:
-		virtual ~i_image() {}
-	public:
-		virtual neogfx::colour_format colour_format() const = 0;
-		virtual texture_sampling sampling() const = 0;
-		virtual const neogfx::size& extents() const = 0;
-		virtual void resize(const neogfx::size& aNewSize) = 0;
-		virtual colour get_pixel(const point& aPoint) const = 0;
-		virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
-	};
+    class i_image : public i_resource
+    {
+    public:
+        struct unknown_image_format : std::runtime_error { unknown_image_format() : std::runtime_error("neogfx::i_image::unknown_image_format") {} };
+    public:
+        virtual ~i_image() {}
+    public:
+        virtual dimension dpi_scale_factor() const = 0;
+        virtual neogfx::colour_format colour_format() const = 0;
+        virtual texture_sampling sampling() const = 0;
+        virtual texture_data_format data_format() const = 0;
+        virtual const neogfx::size& extents() const = 0;
+        virtual void resize(const neogfx::size& aNewSize) = 0;
+        virtual const void* cpixels() const = 0;
+        virtual const void* pixels() const = 0;
+        virtual void* pixels() = 0;
+        virtual colour get_pixel(const point& aPoint) const = 0;
+        virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
+    };
 }

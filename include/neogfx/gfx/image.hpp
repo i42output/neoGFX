@@ -1,7 +1,7 @@
 // image.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,74 +22,71 @@
 #include <neogfx/neogfx.hpp>
 #include <vector>
 #include <unordered_map>
-#include <boost/optional.hpp>
+#include <optional>
+#include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_image.hpp>
 
 namespace neogfx
 {
-	class image : public i_image
-	{
-	public:
-		enum image_type_e
-		{
-			UnknownImage,
-			PngImage
-		};
-	private:
-		struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
-	public:
-		image(texture_sampling aSampling = texture_sampling::NormalMipmap);
-		image(const neogfx::size& aSize, const colour& aColour = colour::Black, texture_sampling aSampling = texture_sampling::NormalMipmap);
-		image(const std::string& aUri, texture_sampling aSampling = texture_sampling::NormalMipmap);
-		template <typename T, std::size_t Width, std::size_t Height>
-		image(const std::string& aUri, const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap) : iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
-		{
-			resize(neogfx::size{ Width, Height });
-			for (std::size_t y = 0; y < Height; ++y)
-				for (std::size_t x = 0; x < Width; ++x)
-					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
-		}
-		template <typename T, std::size_t Width, std::size_t Height>
-		image(const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap) : iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
-		{
-			resize(neogfx::size{ Width, Height });
-			for (std::size_t y = 0; y < Height; ++y)
-				for (std::size_t x = 0; x < Width; ++x)
-					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
-		}
-		~image();
-	public:
-		virtual bool available() const;
-		virtual std::pair<bool, double> downloading() const;
-		virtual bool error() const;
-		virtual const std::string& error_string() const;
-	public:
-		virtual const std::string& uri() const;
-		virtual const void* cdata() const;
-		virtual const void* data() const;
-		virtual void* data();
-		virtual std::size_t size() const;
-		virtual hash_digest_type hash() const;
-	public:
-		virtual neogfx::colour_format colour_format() const;
-		virtual texture_sampling sampling() const;
-		virtual const neogfx::size& extents() const;
-		virtual void resize(const neogfx::size& aNewSize);
-		virtual colour get_pixel(const point& aPoint) const;
-		virtual void set_pixel(const point& aPoint, const colour& aColour);
-	private:
-		bool has_resource() const;
-		const i_resource& resource() const;
-		image_type_e recognize() const;
-		bool load();
-		bool load_png();
-	private:
-		i_resource::pointer iResource;
-		std::string iUri;
-		boost::optional<std::string> iError;
-		neogfx::colour_format iColourFormat;
-		data_type iData;
-		texture_sampling iSampling;
-		neogfx::size iSize;
-	};
+    class image : public i_image
+    {
+    public:
+        define_declared_event(Downloaded, downloaded)
+        define_declared_event(FailedToDownload, failed_to_download)
+    public:
+        enum image_type_e
+        {
+            UnknownImage,
+            PngImage
+        };
+    private:
+        struct error_parsing_image_pattern : std::logic_error { error_parsing_image_pattern() : std::logic_error("neogfx::image::error_parsing_image_pattern") {} };
+        struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
+    public:
+        image(dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(const neogfx::size& aSize, const colour& aColour = colour::Black, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        ~image();
+    public:
+        bool available() const override;
+        std::pair<bool, double> downloading() const override;
+        bool error() const override;
+        const std::string& error_string() const override;
+    public:
+        const std::string& uri() const override;
+        const void* cdata() const override;
+        const void* data() const override;
+        void* data() override;
+        std::size_t size() const override;
+        hash_digest_type hash() const override;
+    public:
+        dimension dpi_scale_factor() const override;
+        neogfx::colour_format colour_format() const override;
+        texture_sampling sampling() const override;
+        texture_data_format data_format() const override;
+        const neogfx::size& extents() const override;
+        void resize(const neogfx::size& aNewSize) override;
+        const void* cpixels() const override;
+        const void* pixels() const override;
+        void* pixels() override;
+        colour get_pixel(const point& aPoint) const override;
+        void set_pixel(const point& aPoint, const colour& aColour) override;
+    private:
+        bool has_resource() const;
+        const i_resource& resource() const;
+        image_type_e recognize() const;
+        bool load();
+        bool load_png();
+    private:
+        i_resource::pointer iResource;
+        std::string iUri;
+        std::optional<std::string> iError;
+        dimension iDpiScaleFactor;
+        neogfx::colour_format iColourFormat;
+        data_type iData;
+        texture_sampling iSampling;
+        neogfx::size iSize;
+    };
 }

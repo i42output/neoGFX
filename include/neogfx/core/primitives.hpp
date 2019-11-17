@@ -1,7 +1,7 @@
 // primitives.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,12 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometry.hpp>
 #include <neogfx/core/numerical.hpp>
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/core/units.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 
 namespace neogfx
 {
-	typedef uint32_t id;
+    typedef uint32_t id;
 }

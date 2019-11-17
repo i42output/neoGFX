@@ -1,7 +1,7 @@
 // image_widget.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -25,54 +25,56 @@
 
 namespace neogfx
 {
-	enum class aspect_ratio
-	{
-		Ignore,
-		Stretch,
-		Keep,
-		KeepExpanding
-	};
+    enum class aspect_ratio
+    {
+        Ignore,
+        Stretch,
+        Keep,
+        KeepExpanding
+    };
 
-	enum class cardinal_placement
-	{
-		NorthWest,
-		North,
-		NorthEast,
-		West,
-		Centre,
-		East,
-		SouthWest,
-		South,
-		SouthEast
-	};
+    enum class cardinal_placement
+    {
+        NorthWest,
+        North,
+        NorthEast,
+        West,
+        Centre,
+        East,
+        SouthWest,
+        South,
+        SouthEast
+    };
 
-	class image_widget : public widget
-	{
-	public:
-		event<> image_changed;
-	public:
-		image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-		image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-		image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-		image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-		image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-		image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-	public:
-		virtual neogfx::size_policy size_policy() const;
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-	public:
-		virtual void paint(graphics_context& aGraphicsContext) const;
-	public:
-		const texture& image() const;
-		void set_image(const i_texture& aImage);
-		void set_image(const i_image& aImage);
-		void set_aspect_ratio(aspect_ratio aAspectRatio);
-		void set_placement(cardinal_placement aPlacement);
-		void set_snap(dimension aSnap);
-	private:
-		texture iTexture;
-		aspect_ratio iAspectRatio;
-		cardinal_placement iPlacement;
-		dimension iSnap;
-	};
+    class image_widget : public widget
+    {
+    public:
+        define_event(ImageChanged, image_changed)
+    public:
+        image_widget(const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+        image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+        image_widget(i_widget& aParent, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+        image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+        image_widget(i_layout& aLayout, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+        image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+    public:
+        virtual neogfx::size_policy size_policy() const;
+        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+    public:
+        virtual void paint(i_graphics_context& aGraphicsContext) const;
+    public:
+        const texture& image() const;
+        void set_image(const i_texture& aImage);
+        void set_image(const i_image& aImage);
+        void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio);
+        void set_placement(cardinal_placement aPlacement);
+        void set_snap(dimension aSnap);
+        void set_dpi_auto_scale(bool aDpiAutoScale);
+    private:
+        texture iTexture;
+        neogfx::aspect_ratio iAspectRatio;
+        cardinal_placement iPlacement;
+        dimension iSnap;
+        bool iDpiAutoScale;
+    };
 }

@@ -1,7 +1,7 @@
 // i_native_texture.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,23 +20,19 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
-	class i_native_texture
-	{
-	public:
-		virtual ~i_native_texture() {}
-	public:
-		virtual texture_sampling sampling() const = 0;
-		virtual size extents() const = 0;
-		virtual size storage_extents() const = 0;
-		virtual void set_pixels(const rect& aRect, const void* aPixelData) = 0;
-	public:
-		virtual void* handle() const = 0;
-		virtual bool is_resident() const = 0;
-		virtual const std::string& uri() const = 0;
-	};
+    class i_native_texture : public i_texture, public i_render_target
+    {
+    public:
+        virtual void* handle() const = 0;
+        virtual bool is_resident() const = 0;
+        virtual const std::string& uri() const = 0;
+    public:
+        virtual size extents() const = 0;
+    };
 }

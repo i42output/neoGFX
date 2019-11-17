@@ -1,7 +1,7 @@
 // grid_layout.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,92 +22,97 @@
 #include <neogfx/neogfx.hpp>
 #include <map>
 #include <boost/pool/pool_alloc.hpp>
+#include <neolib/lifetime.hpp>
 #include "layout.hpp"
 #include "vertical_layout.hpp"
 #include "horizontal_layout.hpp"
 
 namespace neogfx
 {
-	class grid_layout : public layout
-	{
-	public:
-		struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };
-	public:
-		typedef uint32_t cell_coordinate;
-		typedef basic_point<cell_coordinate> cell_coordinates;
-		typedef basic_size<cell_coordinate> cell_dimensions;
-	private:
-		struct row_major;
-		struct column_major;
-		typedef std::map<cell_coordinates, item_list::iterator, std::less<cell_coordinates>, boost::pool_allocator<std::pair<cell_coordinates, item_list::iterator>>> cell_list;
-		typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
-	public:
-		grid_layout();
-		grid_layout(i_widget& aParent);
-		grid_layout(i_layout& aParent);
-		grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns);
-		grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns);
-	public:
-		cell_coordinate rows() const;
-		cell_coordinate columns() const;
-		cell_coordinates dimensions() const;
-		void set_dimensions(cell_coordinate aRows, cell_coordinate aColumns);
-		bool is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
-		void add_item(i_widget& aWidget) override;
-		void add_item(std::shared_ptr<i_widget> aWidget) override;
-		void add_item(i_layout& aLayout) override;
-		void add_item(std::shared_ptr<i_layout> aLayout) override;
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget);
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget);
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout);
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout);
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer);
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer);
-		using layout::add_item_at;
-		virtual i_spacer& add_spacer() override;
-		virtual i_spacer& add_spacer_at(item_index aPosition) override;
-		virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		void remove_item_at(item_index aIndex) override;
-		bool remove_item(i_layout& aItem) override;
-		bool remove_item(i_widget& aItem) override;
-		virtual void remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		void remove_items() override;
-		i_widget& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		template <typename WidgetT>
-		WidgetT& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
-		{
-			return static_cast<WidgetT&>(get_widget(aRow, aColumn));
-		}
-		using layout::get_widget_at;
-		i_layout& get_layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		using layout::get_layout_at;
-	public:
-		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-	public:
-		void set_spacing(const size& aSpacing, bool aUpdateLayout = true) override;
-		void add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
-		void add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
-	public:
-		void layout_items(const point& aPosition, const size& aSize) override;
-	private:
-		uint32_t visible_rows() const;
-		bool is_row_visible(uint32_t aRow) const;
-		uint32_t visible_columns() const;
-		bool is_column_visible(uint32_t aColumn) const;
-		size::dimension_type row_minimum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size()) const;
-		size::dimension_type column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size()) const;
-		size::dimension_type row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size()) const;
-		size::dimension_type column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size()) const;
-		void increment_cursor();
-		horizontal_layout& row_layout(cell_coordinate aRow);
-		span_list::const_iterator find_span(const cell_coordinates& aCell) const;
-	private:
-		vertical_layout iRowLayout;
-		std::vector<std::shared_ptr<horizontal_layout>> iRows;
-		cell_list iCells;
-		cell_dimensions iDimensions;
-		cell_coordinates iCursor;
-		span_list iSpans;
-	};
+    class grid_layout : public layout, protected virtual neolib::lifetime
+    {
+    public:
+        struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };
+    public:
+        typedef uint32_t cell_coordinate;
+        typedef basic_point<cell_coordinate> cell_coordinates;
+        typedef basic_size<cell_coordinate> cell_dimensions;
+    private:
+        struct row_major;
+        struct column_major;
+        typedef std::map<cell_coordinates, i_layout_item*, std::less<cell_coordinates>, neolib::fast_pool_allocator<std::pair<const cell_coordinates, i_layout_item*>>> cell_list;
+        typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
+    public:
+        grid_layout(neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        grid_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        grid_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        ~grid_layout();
+    public:
+        cell_coordinate rows() const;
+        cell_coordinate columns() const;
+        cell_coordinates dimensions() const;
+        void set_dimensions(cell_coordinate aRows, cell_coordinate aColumns);
+        bool is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
+        i_layout_item& add(i_layout_item& aItem) override;
+        i_layout_item& add(std::shared_ptr<i_layout_item> aItem) override;
+        virtual i_layout_item& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout_item& aItem);
+        virtual i_layout_item& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout_item> aItem);
+        using layout::add_at;
+        i_spacer& add_spacer() override;
+        i_spacer& add_spacer_at(item_index aPosition) override;
+        virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+        virtual void remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+        cell_coordinates item_position(const i_layout_item& aItem) const;
+        i_layout_item& item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+        i_widget& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+        i_layout& layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+    public:
+        void invalidate() override;
+    public:
+        void next_layout_id() override;
+    public:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+    public:
+        void set_spacing(const optional_size& aSpacing, bool aUpdateLayout = true) override;
+        grid_layout& add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
+        grid_layout& add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
+        void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+    public:
+        void layout_items(const point& aPosition, const size& aSize) override;
+    public:
+        const cell_coordinates& cursor() const;
+    protected:
+        void remove(item_list::iterator aItem);
+    private:
+        uint32_t visible_rows() const;
+        bool is_row_visible(uint32_t aRow) const;
+        uint32_t visible_columns() const;
+        bool is_column_visible(uint32_t aColumn) const;
+        size::dimension_type row_minimum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size()) const;
+        size::dimension_type column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size()) const;
+        size::dimension_type row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size()) const;
+        size::dimension_type column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size()) const;
+        void increment_cursor();
+        horizontal_layout& row_layout(cell_coordinate aRow);
+        span_list::const_iterator find_span(const cell_coordinates& aCell) const;
+        void init();
+        // helpers
+    public:
+        template <typename WidgetT>
+        WidgetT& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+        {
+            return static_cast<WidgetT&>(widget_at_position(aRow, aColumn));
+        }
+    private:
+        cell_list iCells;
+        cell_dimensions iDimensions;
+        cell_coordinates iCursor;
+        span_list iSpans;
+        vertical_layout iRowLayout;
+        std::vector<std::shared_ptr<horizontal_layout>> iRows;
+    };
 }

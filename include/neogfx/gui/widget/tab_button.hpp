@@ -1,7 +1,7 @@
 // tab_button.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -26,52 +26,60 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class tab_button : public push_button, public i_tab
-	{
-		friend class tab_bar;
-		class close_button;
-	public:
-		tab_button(i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
-		tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
-		tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
-		~tab_button();
-	public:
-		const i_tab_container& container() const override;
-		i_tab_container& container() override;
-		bool closable() const override;
-		void set_closable(bool aClosable) override;
-		bool is_selected() const override;
-		bool is_deselected() const override;
-		void select() override;
-	public:
-		const std::string& text() const override;
-		void set_text(const std::string& aText) override;
-		void set_image(const i_texture& aTexture) override;
-		void set_image(const i_image& aImage) override;
-	public:
-		const i_widget& as_widget() const override;
-		i_widget& as_widget() override;
-	protected:
-		rect path_bounding_rect() const override;
-		bool spot_colour() const override;
-		colour border_mid_colour() const override;
-		bool perform_hover_animation() const override;
-	protected:
-		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-		void handle_clicked() override;
-	protected:
-		colour foreground_colour() const override;
-	protected:
-		using push_button::update;
-		void update(const rect& aUpdateRect) override;
-	protected:
-		void mouse_entered() override;
-		void mouse_left() override;
-	protected:
-		void set_selected_state(bool aSelectedState);
-	private:
-		i_tab_container& iContainer;
-		std::unique_ptr<close_button> iCloseButton;
-		bool iSelectedState;
-	};
+    class tab_button : public push_button, public i_tab
+    {
+    public:
+        define_declared_event(Selected, selected)
+        define_declared_event(Deselected, deselected)
+    private:
+        friend class tab_bar;
+        class close_button;
+    public:
+        tab_button(i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+        ~tab_button();
+    public:
+        const i_tab_container& container() const override;
+        i_tab_container& container() override;
+        bool closable() const override;
+        void set_closable(bool aClosable) override;
+        bool is_selected() const override;
+        bool is_deselected() const override;
+        void select() override;
+    public:
+        const std::string& text() const override;
+        void set_text(const std::string& aText) override;
+        void set_image(const i_texture& aTexture) override;
+        void set_image(const i_image& aImage) override;
+    public:
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
+    protected:
+        rect path_bounding_rect() const override;
+        bool spot_colour() const override;
+        colour border_mid_colour() const override;
+        bool perform_hover_animation() const override;
+    protected:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        void handle_clicked() override;
+    protected:
+        colour foreground_colour() const override;
+    protected:
+        using push_button::update;
+        bool update(const rect& aUpdateRect) override;
+    protected:
+        void mouse_entered(const point& aPosition) override;
+        void mouse_left() override;
+    protected:
+        void set_selected_state(bool aSelectedState);
+    private:
+        void init();
+    private:
+        sink iSink;
+        i_tab_container& iContainer;
+        std::unique_ptr<close_button> iCloseButton;
+        bool iStandardImageSize;
+        bool iSelectedState;
+    };
 }

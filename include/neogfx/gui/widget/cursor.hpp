@@ -1,7 +1,7 @@
 // cursor.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,67 +22,79 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/colour.hpp>
 
 namespace neogfx
 {
-	class i_document;
+    class i_document;
 
-	class cursor
-	{
-	public:
-		event<> position_changed;
-		event<> anchor_changed;
-		event<> appearance_changed;
-	public:
-		enum move_operation_e
-		{
-			None,
-			StartOfDocument,
-			StartOfParagraph,
-			StartOfLine,
-			StartOfWord,
-			EndOfDocument,
-			EndOfParagraph,
-			EndOfLine,
-			EndOfWord,
-			PreviousParagraph, 
-			PreviousLine,
-			PreviousWord,
-			PreviousCharacter,
-			NextParagraph,
-			NextLine,
-			NextWord,
-			NextCharacter,
-			Up,
-			Down,
-			Left,
-			Right
-		};
-		typedef std::size_t position_type;
-	public:
-		struct no_document : std::logic_error { no_document() : std::logic_error("neogfx::cursor::no_document") {} };
-	public:
-		cursor();
-		cursor(i_document& aDocument);
-	public:
-		bool has_document() const;
-		i_document& document() const;
-		void move(move_operation_e aMoveOperation);
-		position_type position() const;
-		void set_position(position_type aPosition, bool aMoveAnchor = true);
-		position_type anchor() const;
-		void set_anchor(position_type aAnchor);
-		const colour_or_gradient& colour() const;
-		void set_colour(const colour_or_gradient& aColour);
-		dimension width() const;
-		void set_width(dimension aWidth);
-	private:
-		i_document* iDocument;
-		position_type iPosition;
-		position_type iAnchor;
-		colour_or_gradient iColour;
-		dimension iWidth;
-	};
+    enum class cursor_style
+    {
+        Standard,
+        Xor
+    };
+
+    class cursor
+    {
+    public:
+        define_event(PositionChanged, position_changed)
+        define_event(AnchorChanged, anchor_changed)
+        define_event(AppearanceChanged, appearance_changed)
+    public:
+        enum move_operation_e
+        {
+            None,
+            StartOfDocument,
+            StartOfParagraph,
+            StartOfLine,
+            StartOfWord,
+            EndOfDocument,
+            EndOfParagraph,
+            EndOfLine,
+            EndOfWord,
+            PreviousParagraph, 
+            PreviousLine,
+            PreviousWord,
+            PreviousCharacter,
+            NextParagraph,
+            NextLine,
+            NextWord,
+            NextCharacter,
+            Up,
+            Down,
+            Left,
+            Right
+        };
+        typedef std::size_t position_type;
+    public:
+        struct no_document : std::logic_error { no_document() : std::logic_error("neogfx::cursor::no_document") {} };
+    public:
+        cursor();
+        cursor(i_document& aDocument);
+    public:
+        bool has_document() const;
+        i_document& document() const;
+        void move(move_operation_e aMoveOperation);
+        position_type position() const;
+        void set_position(position_type aPosition, bool aMoveAnchor = true);
+        position_type anchor() const;
+        void set_anchor(position_type aAnchor);
+        const colour_or_gradient& colour() const;
+        void set_colour(const colour_or_gradient& aColour);
+        cursor_style style() const;
+        void set_style(cursor_style aStyle);
+        dimension width() const;
+        void set_width(dimension aWidth);
+        std::chrono::milliseconds flash_interval() const;
+        void set_flash_interval(std::chrono::milliseconds aInterval);
+    private:
+        i_document* iDocument;
+        position_type iPosition;
+        position_type iAnchor;
+        colour_or_gradient iColour;
+        cursor_style iStyle;
+        dimension iWidth;
+        std::chrono::milliseconds iFlashInterval;
+    };
 }

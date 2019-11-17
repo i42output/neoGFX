@@ -1,7 +1,7 @@
 // dialog.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -25,47 +25,60 @@
 
 namespace neogfx
 {
-	class dialog : public window
-	{
-	public:
-		event<bool&> try_accept;
-		event<bool&> try_reject;
-	public:
-		enum result_code_e
-		{
-			Accepted,
-			Rejected
-		};
-	public:
-		dialog(window_style aStyle = window_style::Default);
-		dialog(const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-		dialog(const size& aDimensions, window_style aStyle = window_style::Default);
-		dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-		dialog(const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default);
-		dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-		dialog(i_widget& aParent, window_style aStyle = window_style::Default);
-		dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-		dialog(i_widget& aParent, const size& aDimensions, window_style aStyle = window_style::Default);
-		dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-		dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default);
-		dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-		~dialog();
-	public:
-		virtual void accept();
-		virtual void reject();
-	public:
-		dialog_button_box& button_box();
-		result_code_e exec();
-	public:
-		virtual neogfx::size_policy size_policy() const;
-	public:
-		virtual bool can_close() const;
-	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-	private:
-		void init();
-	private:
-		boost::optional<dialog_button_box> iButtonBox;
-		boost::optional<result_code_e> iResult;
-	};
+    enum class dialog_result
+    {
+        NoResult,
+        Accepted,
+        Rejected,
+        Other
+    };
+
+    class dialog : public window
+    {
+    public:
+        define_event(TryAccept, try_accept, bool&)
+        define_event(TryReject, try_reject, bool&)
+    public:
+        dialog(window_style aStyle = window_style::Default);
+        dialog(const std::string& aDialogTitle, window_style aStyle = window_style::Default);
+        dialog(const size& aDimensions, window_style aStyle = window_style::Default);
+        dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
+        dialog(const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default);
+        dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
+        dialog(i_widget& aParent, window_style aStyle = window_style::Default);
+        dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
+        dialog(i_widget& aParent, const size& aDimensions, window_style aStyle = window_style::Default);
+        dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
+        dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default);
+        dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
+        ~dialog();
+    public:
+        virtual void accept();
+        virtual void reject();
+        virtual dialog_result result() const;
+        virtual void set_result(dialog_result aResult);
+    public:
+        size set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox = true, bool aDpiScaling = true);
+        dialog_button_box& button_box();
+    public:
+        virtual dialog_result exec();
+    public:
+        neogfx::size_policy size_policy() const override;
+    public:
+        bool can_close() const override;
+    public:
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+    public:
+        const i_layout& client_layout() const override;
+        i_layout& client_layout() override;
+        virtual const i_layout& button_box_layout() const;
+        virtual i_layout& button_box_layout();
+    private:
+        void init();
+    private:
+        vertical_layout iClientLayout;
+        vertical_layout iButtonBoxLayout;
+        std::optional<dialog_button_box> iButtonBox;
+        std::optional<dialog_result> iResult;
+    };
 }

@@ -1,7 +1,7 @@
 // i_emoji_atlas.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -24,17 +24,17 @@
 
 namespace neogfx
 {
-	class i_emoji_atlas
-	{
-	public:
-		typedef uint32_t emoji_id;
-	public:
-		struct emoji_not_found : std::logic_error { emoji_not_found() : std::logic_error("neogfx::i_emoji_atlas::emoji_not_found") {} };
-	public:
-		virtual bool is_emoji(char32_t aCodePoint) const = 0;
-		virtual bool is_emoji(const std::u32string& aCodePoints) const = 0;
-		virtual emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const = 0;
-		virtual emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize) const = 0;
-		virtual const i_texture& emoji_texture(emoji_id aId) const = 0;
-	};
+    class i_emoji_atlas
+    {
+    public:
+        typedef uint32_t emoji_id;
+    public:
+        struct emoji_not_found : std::logic_error { emoji_not_found() : std::logic_error("neogfx::i_emoji_atlas::emoji_not_found") {} };
+    public:
+        virtual bool is_emoji(char32_t aCodePoint) const = 0;
+        virtual bool is_emoji(const std::u32string& aCodePoints) const = 0;
+        virtual emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const = 0;
+        virtual emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize) const = 0;
+        virtual const i_texture& emoji_texture(emoji_id aId) const = 0;
+    };
 }

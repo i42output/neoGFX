@@ -1,7 +1,7 @@
 // sdl_keyboard.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,18 +20,20 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <SDL_keyboard.h>
 #include <neogfx/hid/keyboard.hpp>
-#include "SDL_keyboard.h"
 
 namespace neogfx
 {
-	class sdl_keyboard : public keyboard
-	{
-	public:
-		virtual bool is_key_pressed(scan_code_e aScanCode) const
-		{
-			const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-			return keyboardState[aScanCode] == 1;
-		}
-	};
+    class sdl_keyboard : public keyboard
+    {
+    public:
+        sdl_keyboard();
+    public:
+        bool is_key_pressed(scan_code_e aScanCode) const override;
+        keyboard_locks locks() const override;
+    public:
+        static scan_code_e from_sdl_scan_code(SDL_Scancode aScanCode);
+        static SDL_Scancode to_sdl_scan_code(scan_code_e aScanCode);
+    };
 }

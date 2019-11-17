@@ -1,7 +1,7 @@
 // i_menu_item.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -24,30 +24,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_menu;
+    class i_menu;
 
-	class i_menu_item
-	{
-	public:
-		event<> selected;
-		event<> deselected;
-	public:
-		enum type_e
-		{
-			Action,
-			SubMenu,
-		};
-	public:
-		struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::i_menu_item::wrong_type") {} };
-	public:
-		virtual type_e type() const = 0;
-		virtual const i_action& action() const = 0;
-		virtual i_action& action() = 0;
-		virtual const i_menu& sub_menu() const = 0;
-		virtual i_menu& sub_menu() = 0;
-	public:
-		virtual bool available() const = 0;
-		virtual void select(bool aSelectAnySubMenuItem = true) = 0;
-		virtual bool select_any_sub_menu_item() const = 0;
-	};
+    enum class menu_item_type : uint32_t
+    {
+        Action,
+        SubMenu
+    };
+
+    class i_menu_item
+    {
+    public:
+        declare_event(selected)
+        declare_event(deselected)
+    public:
+        struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::i_menu_item::wrong_type") {} };
+    public:
+        virtual menu_item_type type() const = 0;
+        virtual const i_action& action() const = 0;
+        virtual i_action& action() = 0;
+        virtual const i_menu& sub_menu() const = 0;
+        virtual i_menu& sub_menu() = 0;
+    public:
+        virtual bool available() const = 0;
+        virtual void select(bool aOpenAnySubMenu = true) = 0;
+        virtual bool open_any_sub_menu() const = 0;
+    };
 }

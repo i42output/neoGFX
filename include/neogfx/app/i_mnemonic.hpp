@@ -1,7 +1,7 @@
 // i_mnemonic.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -24,26 +24,26 @@
 
 namespace neogfx
 {
-	class i_widget;
+    class i_widget;
 
-	class i_mnemonic
-	{
-	public:
-		virtual std::string mnemonic() const = 0;
-		virtual void mnemonic_execute() = 0;
-		virtual i_widget& mnemonic_widget() = 0;
-	};
+    class i_mnemonic
+    {
+    public:
+        virtual std::string mnemonic() const = 0;
+        virtual void mnemonic_execute() = 0;
+        virtual i_widget& mnemonic_widget() = 0;
+    };
 
-	inline std::string mnemonic_from_text(const std::string& aText, char aMnemonicPrefix = '&')
-	{
-		auto u = neolib::utf8_to_utf32(aText);
-		for (std::size_t i = 0; i < u.size(); ++i)
-		{
-			if (u[i] == static_cast<char32_t>(aMnemonicPrefix) && i < u.size() - 1 && u[i + 1] != static_cast<char32_t>(aMnemonicPrefix))
-			{
-				return neolib::utf32_to_utf8(u.substr(i + 1, 1));
-			}
-		}
-		return std::string{};
-	}
+    inline std::string mnemonic_from_text(const std::string& aText, char aMnemonicPrefix = '&')
+    {
+        auto u = neolib::utf8_to_utf32(aText);
+        for (std::size_t i = 0; i < u.size(); ++i)
+        {
+            if (u[i] == static_cast<char32_t>(aMnemonicPrefix) && i < u.size() - 1 && u[i + 1] != static_cast<char32_t>(aMnemonicPrefix))
+            {
+                return neolib::utf32_to_utf8(u.substr(i + 1, 1));
+            }
+        }
+        return std::string{};
+    }
 }

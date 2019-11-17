@@ -1,7 +1,7 @@
 // opengl_texture.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -18,184 +18,640 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_texture_manager.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include "opengl_error.hpp"
+#include "opengl_helpers.hpp"
+#include "opengl_rendering_context.hpp"
 #include "opengl_texture.hpp"
 
 namespace neogfx
 {
-	opengl_texture::opengl_texture(const neogfx::size& aExtents, texture_sampling aSampling, const optional_colour& aColour) :
-		iSampling(aSampling),
-		iSize(aExtents),
-		iStorageSize{ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } },
-		iHandle(0),
-		iUri("neogfx::opengl_texture::internal")
-	{
-		GLint previousTexture;
-		try
-		{
-			glCheck(glGetIntegerv(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
-			glCheck(glGenTextures(1, &iHandle));
-			glCheck(glBindTexture(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, iHandle));
-			if (iSampling == texture_sampling::Normal)
-			{
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			}
-			else if (iSampling == texture_sampling::NormalMipmap)
-			{
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-			}
-			if (aColour != boost::none)
-			{
-				if (iSampling == texture_sampling::Multisample)
-					throw multisample_texture_initialization_unsupported();
-				std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
-				for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-					for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-					{
-						data[y * iStorageSize.cx * 4 + x * 4 + 0] = aColour->red();
-						data[y * iStorageSize.cx * 4 + x * 4 + 1] = aColour->green();
-						data[y * iStorageSize.cx * 4 + x * 4 + 2] = aColour->blue();
-						data[y * iStorageSize.cx * 4 + x * 4 + 3] = aColour->alpha();
-					}
-				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
-				if (iSampling == texture_sampling::NormalMipmap)
-				{
-					glCheck(glGenerateMipmap(GL_TEXTURE_2D));
-				}
-			}
-			else
-			{
-				if (iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap)
-				{
-					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-					if (iSampling == texture_sampling::NormalMipmap)
-					{
-						glCheck(glGenerateMipmap(GL_TEXTURE_2D));
-					}
-				}
-				else
-				{
-					glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
-				}
-			}
-			glCheck(glBindTexture(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
-		}
-		catch (...)
-		{
-			glCheck(glDeleteTextures(1, &iHandle));
-			throw;
-		}
-	}
+    namespace
+    {
+        inline std::tuple<GLenum, GLenum, GLenum> to_gl_enum(texture_data_format aDataFormat, texture_data_type aDataType)
+        {
+            switch (aDataFormat)
+            {
+            case texture_data_format::RGBA:
+            case texture_data_format::SubPixel:
+                switch (aDataType)
+                {
+                case texture_data_type::UnsignedByte:
+                    return std::make_tuple(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+                case texture_data_type::Float:
+                    return std::make_tuple(GL_RGBA32F, GL_RGBA, GL_FLOAT);
+                default:
+                    throw std::logic_error("neogfx::to_gl_enum: bad data type");
+                }
+            case texture_data_format::Red:
+                switch (aDataType)
+                {
+                case texture_data_type::UnsignedByte:
+                    return std::make_tuple(GL_R8, GL_RED, GL_UNSIGNED_BYTE);
+                case texture_data_type::Float:
+                    return std::make_tuple(GL_R32F, GL_RED, GL_FLOAT);
+                default:
+                    throw std::logic_error("neogfx::to_gl_enum: bad data type");
+                }
+            default:
+                throw std::logic_error("neogfx::to_gl_enum: bad data format");
+            }
+        }
 
-	opengl_texture::opengl_texture(const i_image& aImage) :
-		iSampling(aImage.sampling()),
-		iSize(aImage.extents()), 
-		iStorageSize{size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}},
-		iHandle(0), 
-		iUri(aImage.uri())
-	{
-		GLint previousTexture = 0;
-		try
-		{
-			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-			glCheck(glGenTextures(1, &iHandle));
-			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
-			if (iSampling == texture_sampling::Normal)
-			{
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			}
-			else if (iSampling == texture_sampling::NormalMipmap)
-			{
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-			}
-			switch (aImage.colour_format())
-			{
-			case colour_format::RGBA8:
-				{
-					const uint8_t* imageData = static_cast<const uint8_t*>(aImage.data());
-					std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
-					for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-						for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-							for (std::size_t c = 0; c < 4; ++c)
-								data[y * iStorageSize.cx * 4 + x * 4 + c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
-					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
-					if (iSampling == texture_sampling::NormalMipmap)
-					{
-						glCheck(glGenerateMipmap(GL_TEXTURE_2D));
-					}
-				}
-				break;
-			default:
-				throw unsupported_colour_format();
-				break;
-			}
-			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
-		}
-		catch (...)
-		{
-			glCheck(glDeleteTextures(1, &iHandle));
-			throw;
-		}
-	}
+        inline GLenum to_gl_enum(texture_sampling aSampling)
+        {
+            switch (aSampling)
+            {
+            case texture_sampling::Multisample:
+                return GL_TEXTURE_2D_MULTISAMPLE;
+            case texture_sampling::Data:
+                return GL_TEXTURE_RECTANGLE;
+            default:
+                return GL_TEXTURE_2D;
+            }
+        }
+    }
 
-	opengl_texture::~opengl_texture()
-	{
-		glCheck(glDeleteTextures(1, &iHandle));
-	}
+    template <typename T>
+    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, const optional_colour& aColour) :
+        iManager{ aManager },
+        iId{ aId },
+        iDpiScaleFactor{ aDpiScaleFactor },
+        iSampling{ aSampling },
+        iDataFormat{ aDataFormat },
+        iSize{ aExtents },
+        iStorageSize{ aSampling != texture_sampling::NormalMipmap ?
+            (aSampling != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
+            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
+        iHandle{ 0 },
+        iUri{ "neogfx::opengl_texture::internal" },
+        iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
+        iFrameBuffer{ 0 },
+        iDepthStencilBuffer{ 0 }
+    {
+        try
+        {
+            glCheck(glGenTextures(1, &iHandle));
+            GLint previousTexture = bind(1);
+            glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+            glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
+            switch(sampling())
+            {
+            case texture_sampling::Normal:
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                break;
+            case texture_sampling::NormalMipmap:
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+                break;
+            case texture_sampling::Nearest:
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+                break;
+            case texture_sampling::Data:
+                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+                break;
+            }
+            if (sampling() != texture_sampling::Multisample)
+            {
+                std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
+                if (aColour != std::nullopt)
+                {
+                    if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                data[y * iStorageSize.cx + x + 0] = 
+                                    value_type{
+                                        aColour->red(),
+                                        aColour->green(),
+                                        aColour->blue(),
+                                        aColour->alpha()
+                                    };
+                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                data[y * iStorageSize.cx + x + 0] = 
+                                    value_type{
+                                        aColour->red<float>(),
+                                        aColour->green<float>(),
+                                        aColour->blue<float>(),
+                                        aColour->alpha<float>()
+                                    };
+                }
+                glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), data.empty() ? nullptr : &data[0]));
+                if (sampling() == texture_sampling::NormalMipmap)
+                {
+                    glCheck(glGenerateMipmap(GL_TEXTURE_2D));
+                }
+            }
+            else
+            {
+                if (aColour != std::nullopt)
+                    throw multisample_texture_initialization_unsupported();
+                glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
+            }
+            glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
+        }
+        catch (...)
+        {
+            glCheck(glDeleteTextures(1, &iHandle));
+            throw;
+        }
+    }
 
-	texture_sampling opengl_texture::sampling() const
-	{
-		return iSampling;
-	}
+    template <typename T>
+    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat) :
+        iManager{ aManager },
+        iId{ aId },
+        iDpiScaleFactor{ aImage.dpi_scale_factor() },
+        iSampling{ aImage.sampling() },
+        iDataFormat{ aDataFormat },
+        iSize{ aImage.extents() },
+        iStorageSize{ aImage.sampling() != texture_sampling::NormalMipmap ? 
+            (aImage.sampling() != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
+            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
+        iHandle{ 0 },
+        iUri{ aImage.uri() },
+        iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
+        iFrameBuffer{ 0 },
+        iDepthStencilBuffer{ 0 }
+    {
+        try
+        {
+            
+            glCheck(glGenTextures(1, &iHandle));
+            GLint previousTexture = bind(1);
+            switch(sampling())
+            {
+            case texture_sampling::Normal:
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                break;
+            case texture_sampling::NormalMipmap:
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+                break;
+            case texture_sampling::Nearest:
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+                break;
+            case texture_sampling::Data:
+                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+                break;
+            case texture_sampling::Multisample:
+                throw multisample_texture_initialization_unsupported();
+                break;
+            }
+            switch (aImage.colour_format())
+            {
+            case colour_format::RGBA8:
+                {
+                    std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
+                    if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
+                    {
+                        const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                for (std::size_t c = 0; c < 4; ++c)
+                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
+                    }
+                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
+                    {
+                        const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                                for (std::size_t c = 0; c < 4; ++c)
+                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c] / 255.0f;
+                    }
+                    glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &data[0]));
+                    if (sampling() == texture_sampling::NormalMipmap)
+                    {
+                        glCheck(glGenerateMipmap(GL_TEXTURE_2D));
+                    }
+                }
+                break;
+            default:
+                throw unsupported_colour_format();
+                break;
+            }
+            glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
+        }
+        catch (...)
+        {
+            glCheck(glDeleteTextures(1, &iHandle));
+            throw;
+        }
+    }
 
-	size opengl_texture::extents() const
-	{
-		return iSize;
-	}
+    template <typename T>
+    opengl_texture<T>::~opengl_texture()
+    {
+        if (iFrameBuffer != 0)
+        {
+            glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
+            glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
+        }
+        glCheck(glDeleteTextures(1, &iHandle));
+    }
 
-	size opengl_texture::storage_extents() const
-	{
-		return iStorageSize;
-	}
+    template <typename T>
+    texture_id opengl_texture<T>::id() const
+    {
+        return iId;
+    }
 
-	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData)
-	{
-		GLint previousTexture;
-		if (iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap)
-		{
-			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
-			glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
-				static_cast<GLint>(aRect.x + 1.0), static_cast<GLint>(aRect.y + 1.0), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
-				GL_RGBA, GL_UNSIGNED_BYTE, aPixelData));
-			if (iSampling == texture_sampling::NormalMipmap)
-			{
-				glCheck(glGenerateMipmap(GL_TEXTURE_2D));
-			}
-			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
-		}
-		else
-			throw multisample_texture_initialization_unsupported();
-	}
+    template <typename T>
+    texture_type opengl_texture<T>::type() const
+    {
+        return texture_type::Texture;
+    }
 
-	void* opengl_texture::handle() const
-	{
-		return reinterpret_cast<void*>(iHandle);
-	}
+    template <typename T>
+    bool opengl_texture<T>::is_render_target() const
+    {
+        return iFrameBuffer != 0;
+    }
 
-	bool opengl_texture::is_resident() const
-	{
-		GLboolean resident;
-		glCheck(glAreTexturesResident(1, &iHandle, &resident));
-		return resident == GL_TRUE;
-	}
+    template <typename T>
+    const i_sub_texture& opengl_texture<T>::as_sub_texture() const
+    {
+        throw not_sub_texture();
+    }
 
-	const std::string& opengl_texture::uri() const
-	{
-		return iUri;
-	}
+    template <typename T>
+    dimension opengl_texture<T>::dpi_scale_factor() const
+    {
+        return iDpiScaleFactor;
+    }
+
+    template <typename T>
+    texture_sampling opengl_texture<T>::sampling() const
+    {
+        switch (iSampling)
+        {
+        case texture_sampling::Multisample4x:
+        case texture_sampling::Multisample8x:
+        case texture_sampling::Multisample16x:
+        case texture_sampling::Multisample32x:
+            return texture_sampling::Multisample;
+        default:
+            return iSampling;
+        }
+    }
+
+    template <typename T>
+    uint32_t opengl_texture<T>::samples() const
+    {
+        switch (iSampling)
+        {
+        case texture_sampling::Multisample:
+        case texture_sampling::Multisample4x:
+            return 4u;
+        case texture_sampling::Multisample8x:
+            return 8u;
+        case texture_sampling::Multisample16x:
+            return 16u;
+        case texture_sampling::Multisample32x:
+            return 32u;
+        default:
+            return 1u;
+        }
+    }
+
+    template <typename T>
+    texture_data_format opengl_texture<T>::data_format() const
+    {
+        return iDataFormat;
+    }
+
+    template <typename T>
+    texture_data_type opengl_texture<T>::data_type() const
+    {
+        return kDataType;
+    }
+
+    template <typename T>
+    bool opengl_texture<T>::is_empty() const
+    {
+        return false;
+    }
+
+    template <typename T>
+    size opengl_texture<T>::extents() const
+    {
+        return iSize;
+    }
+
+    template <typename T>
+    size opengl_texture<T>::storage_extents() const
+    {
+        return iStorageSize;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
+    {
+        if (sampling() != texture_sampling::Multisample)
+        {
+            GLint previousTexture = bind(1);
+            GLint previousPackAlignment;
+            glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
+            glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
+            if (sampling() != texture_sampling::Data)
+            {
+                glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
+                    static_cast<GLint>(aRect.x), static_cast<GLint>(aRect.y), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
+                    std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
+            }
+            else
+            {
+                glCheck(glTexImage2D(to_gl_enum(sampling()), 0,
+                    std::get<0>(to_gl_enum(iDataFormat, kDataType)),
+                    static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy), 0,
+                    std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
+            }
+            if (sampling() == texture_sampling::NormalMipmap)
+            {
+                glCheck(glGenerateMipmap(to_gl_enum(sampling())));
+            }
+            glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
+            glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
+        }
+        else
+            throw unsupported_sampling_type_for_function();
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_pixels(const i_image& aImage)
+    {
+        set_pixels(rect{ point{ 1.0, 1.0 }, aImage.extents() }, aImage.cpixels());
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_pixel(const point& aPosition, const colour& aColour)
+    {
+        std::array<uint8_t, 4> pixel{ aColour.red(), aColour.green(), aColour.blue(), aColour.alpha() };
+        set_pixels(rect{ aPosition, size{1.0, 1.0} }, &pixel);
+    }
+
+    template <typename T>
+    colour opengl_texture<T>::get_pixel(const point& aPosition) const
+    {
+        switch (sampling())
+        {
+        case texture_sampling::Normal:
+        case texture_sampling::Nearest:
+        case texture_sampling::Data:
+            throw std::logic_error("neogfx::opengl_texture::get_pixel: function not yet implemented");
+            break;
+        default:
+            throw unsupported_sampling_type_for_function();
+        }
+    }
+
+    template <typename T>
+    void* opengl_texture<T>::handle() const
+    {
+        return reinterpret_cast<void*>(static_cast<intptr_t>(iHandle));
+    }
+
+    template <typename T>
+    bool opengl_texture<T>::is_resident() const
+    {
+        GLboolean resident;
+        glCheck(glAreTexturesResident(1, &iHandle, &resident));
+        return resident == GL_TRUE;
+    }
+
+    template <typename T>
+    const std::string& opengl_texture<T>::uri() const
+    {
+        return iUri;
+    }
+
+    template <typename T>
+    dimension opengl_texture<T>::horizontal_dpi() const
+    {
+        return dpi_scale_factor() * 96.0;
+    }
+
+    template <typename T>
+    dimension opengl_texture<T>::vertical_dpi() const
+    {
+        return dpi_scale_factor() * 96.0;
+    }
+
+    template <typename T>
+    dimension opengl_texture<T>::ppi() const
+    {
+        return size{ horizontal_dpi(), vertical_dpi() }.magnitude() / std::sqrt(2.0);
+    }
+
+    template <typename T>
+    bool opengl_texture<T>::metrics_available() const
+    {
+        return true;
+    }
+
+    template <typename T>
+    dimension opengl_texture<T>::em_size() const
+    {
+        return 0.0;
+    }
+
+    template <typename T>
+    std::unique_ptr<i_rendering_context> opengl_texture<T>::create_graphics_context(blending_mode aBlendingMode) const
+    {
+        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
+    }
+
+    template <typename T>
+    int32_t opengl_texture<T>::bind(const std::optional<uint32_t>& aTextureUnit) const
+    {
+        if (aTextureUnit != std::nullopt)
+            glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
+        GLint previousTexture = 0;
+        glCheck(glGetIntegerv(sampling() != texture_sampling::Multisample ? sampling() != texture_sampling::Data ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_RECTANGLE : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
+        glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
+        return previousTexture;
+    }
+
+    template <typename T>
+    std::shared_ptr<i_native_texture> opengl_texture<T>::native_texture() const
+    {
+        return std::dynamic_pointer_cast<i_native_texture>(iManager.find_texture(id()));
+    }
+
+    template <typename T>
+    render_target_type opengl_texture<T>::target_type() const
+    {
+        return render_target_type::Texture;
+    }
+
+    template <typename T>
+    void* opengl_texture<T>::target_handle() const
+    {
+        return native_texture()->handle();
+    }
+
+    template <typename T>
+    const i_texture& opengl_texture<T>::target_texture() const
+    {
+        return *this;
+    }
+
+    template <typename T>
+    size opengl_texture<T>::target_extents() const
+    {
+        return extents();
+    }
+
+    template <typename T>
+    neogfx::logical_coordinate_system opengl_texture<T>::logical_coordinate_system() const
+    {
+        return iLogicalCoordinateSystem;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+    {
+        iLogicalCoordinateSystem = aSystem;
+    }
+
+    template <typename T>
+    logical_coordinates opengl_texture<T>::logical_coordinates() const
+    {
+        if (iLogicalCoordinates != std::nullopt)
+            return *iLogicalCoordinates;
+        neogfx::logical_coordinates result;
+        switch (iLogicalCoordinateSystem)
+        {
+        case neogfx::logical_coordinate_system::Specified:
+            throw logical_coordinates_not_specified();
+            break;
+        case neogfx::logical_coordinate_system::AutomaticGui:
+            result.bottomLeft = vec2{ 0.0, extents().cy };
+            result.topRight = vec2{ extents().cx, 0.0 };
+            break;
+        case neogfx::logical_coordinate_system::AutomaticGame:
+            result.bottomLeft = vec2{ 0.0, 0.0 };
+            result.topRight = vec2{ extents().cx, extents().cy };
+            break;
+        }
+        return result;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
+    {
+        iLogicalCoordinates = aCoordinates;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::activate_target() const
+    {
+        bool alreadyActive = target_active();
+        if (!alreadyActive)
+        {
+            TargetActivating.trigger();
+            service<i_rendering_engine>().activate_context(*this);
+        }
+        bind(10);
+        if (iFrameBuffer == 0)
+        {
+            glCheck(glEnable(GL_MULTISAMPLE));
+            glCheck(glEnable(GL_BLEND));
+            glCheck(glEnable(GL_DEPTH_TEST));
+            glCheck(glDepthFunc(GL_LEQUAL));
+            glCheck(glGenFramebuffers(1, &iFrameBuffer));
+            glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
+            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(native_texture()->handle())), 0));
+            glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
+            glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
+            if (sampling() != texture_sampling::Multisample)
+            {
+                glCheck(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storage_extents().cx), static_cast<GLsizei>(storage_extents().cy)));
+            }
+            else
+            {
+                glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples(), GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storage_extents().cx), static_cast<GLsizei>(storage_extents().cy)));
+            }
+            glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+            glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+            glCheck(glClear(GL_DEPTH_BUFFER_BIT));
+        }
+        else
+        {
+            GLint currentFramebuffer;
+            glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFramebuffer));
+            if (static_cast<decltype(iFrameBuffer)>(currentFramebuffer) != iFrameBuffer)
+            {
+                glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
+            }
+            GLint queryResult = 0;
+            glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &queryResult));
+            if (queryResult == GL_TEXTURE)
+            {
+                glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &queryResult));
+            }
+            else
+                queryResult = 0;
+            if (queryResult != static_cast<GLint>(reinterpret_cast<std::intptr_t>(native_texture()->handle())))
+            {
+                glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(native_texture()->handle())), 0));
+            }
+            glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
+        }
+        GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+        if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
+            throw failed_to_create_framebuffer(glErrorString(status));
+        glCheck(glViewport(1, 1, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT1 };
+        glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
+        if (!alreadyActive)
+            TargetActivated.trigger();
+    }
+
+    template <typename T>
+    bool opengl_texture<T>::target_active() const
+    {
+        return service<i_rendering_engine>().active_target() == this;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::deactivate_target() const
+    {
+        if (target_active())
+        {
+            TargetDeactivating.trigger();
+            service<i_rendering_engine>().deactivate_context();
+            TargetDeactivated.trigger();
+            return;
+        }
+        throw not_active();
+    }
+
+    template <typename T>
+    colour opengl_texture<T>::read_pixel(const point& aPosition) const
+    {
+        if (sampling() != neogfx::texture_sampling::Multisample)
+        {
+            scoped_render_target srt{ *this };
+            std::array<uint8_t, 4> pixel;
+            basic_point<GLint> pos{ aPosition };
+            glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &pixel));
+            return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
+        }
+        else
+            throw std::logic_error("neogfx::opengl_texture::read_pixel: not yet implemented for multisample render targets");
+    }
+
+    template class opengl_texture<uint8_t>;
+    template class opengl_texture<float>;
+    template class opengl_texture<std::array<uint8_t, 4>>;
+    template class opengl_texture<std::array<float, 4>>;
 }

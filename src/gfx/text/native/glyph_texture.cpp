@@ -1,7 +1,7 @@
 // glyph_texture.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,22 +22,32 @@
 
 namespace neogfx
 {
-	glyph_texture::glyph_texture(const i_sub_texture& aTexture, const point& aPlacement) :
-		iTexture(aTexture), iPlacement(aPlacement)
-	{
-	}
+    glyph_texture::glyph_texture(const i_sub_texture& aTexture, bool aSubpixel, const point& aPlacement, glyph_pixel_mode aPixelMode) :
+        iTexture(aTexture), iSubpixel{ aSubpixel }, iPlacement{ aPlacement }, iPixelMode{ aPixelMode }
+    {
+    }
 
-	glyph_texture::~glyph_texture()
-	{
-	}
+    glyph_texture::~glyph_texture()
+    {
+    }
 
-	const i_sub_texture& glyph_texture::texture() const
-	{
-		return iTexture;
-	}
+    const i_sub_texture& glyph_texture::texture() const
+    {
+        return iTexture;
+    }
 
-	const point& glyph_texture::placement() const
-	{
-		return iPlacement;
-	}
+    bool glyph_texture::subpixel() const
+    {
+        return iSubpixel && iPixelMode == glyph_pixel_mode::LCD;
+    }
+
+    const point& glyph_texture::placement() const
+    {
+        return iPlacement;
+    }
+
+    glyph_pixel_mode glyph_texture::pixel_mode() const
+    {
+        return iPixelMode;
+    }
 }

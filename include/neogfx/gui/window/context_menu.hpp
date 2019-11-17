@@ -1,7 +1,7 @@
 // context_menu.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -24,23 +24,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class context_menu
-	{
-	public:
-		struct widget_not_created_yet : std::logic_error { widget_not_created_yet() : std::logic_error("neogfx::context_menu::widget_not_created_yet") {} };
-	public:
-		context_menu(const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
-		context_menu(i_widget& aParent, const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
-		~context_menu();
-	public:
-		i_menu& menu();
-		popup_menu& root_widget();
-		void exec();
-	private:
-		std::unique_ptr<i_menu> iMenu;
-		i_widget* iParent;
-		point iPosition;
-		window_style iStyle;
-		static std::unique_ptr<popup_menu> sWidget;
-	};
+    class context_menu
+    {
+    public:
+        struct widget_not_created_yet : std::logic_error { widget_not_created_yet() : std::logic_error("neogfx::context_menu::widget_not_created_yet") {} };
+    public:
+        context_menu(const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
+        context_menu(i_widget& aParent, const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
+        ~context_menu();
+    public:
+        i_menu& menu();
+        popup_menu& root_widget();
+        void exec();
+    private:
+        std::unique_ptr<i_menu> iMenu;
+        i_widget* iParent;
+        point iPosition;
+        window_style iStyle;
+        static std::unique_ptr<popup_menu> sWidget;
+    };
 }

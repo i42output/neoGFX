@@ -1,7 +1,7 @@
 // i_surface_manager.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -21,33 +21,41 @@
 
 #include <neogfx/neogfx.hpp>
 #include "i_surface.hpp"
+#include "i_display.hpp"
 
 namespace neogfx
 {
-	class i_surface_manager
-	{
-	public:
-		struct surface_not_found : std::logic_error { surface_not_found() : std::logic_error("neogfx::i_surface_manager::surface_not_found") {} };
-	public:
-		virtual ~i_surface_manager() {}
-	public:
-		virtual bool initialising_surface() const = 0;
-		virtual void add_surface(i_surface& aSurface) = 0;
-		virtual void remove_surface(i_surface& aSurface) = 0;
-		virtual std::size_t surface_count() const = 0;
-		virtual i_surface& surface(std::size_t aIndex) = 0;
-		virtual bool any_strong_surfaces() const = 0;
-		virtual bool process_events(bool& aLastWindowClosed) = 0;
-		virtual void layout_surfaces() = 0;
-		virtual void invalidate_surfaces() = 0;
-		virtual void render_surfaces() = 0;
-		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
-		virtual void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const = 0;
-		virtual uint32_t display_count() const = 0;
-		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
-		virtual rect desktop_rect(const i_surface& aSurface) const = 0;
-	public:
-		virtual bool is_surface_attached(void* aNativeSurfaceHandle) const = 0;
-		virtual i_surface& attached_surface(void* aNativeSurfaceHandle) = 0;
-	};
+    class i_display;
+
+    class i_surface_manager
+    {
+    public:
+        declare_event(dpi_changed, i_surface&)
+    public:
+        struct surface_not_found : std::logic_error { surface_not_found() : std::logic_error("neogfx::i_surface_manager::surface_not_found") {} };
+    public:
+        virtual ~i_surface_manager() {}
+    public:
+        virtual bool initialising_surface() const = 0;
+        virtual void add_surface(i_surface& aSurface) = 0;
+        virtual void remove_surface(i_surface& aSurface) = 0;
+        virtual std::size_t surface_count() const = 0;
+        virtual i_surface& surface(std::size_t aIndex) = 0;
+        virtual bool any_strong_surfaces() const = 0;
+        virtual std::size_t strong_surface_count() const = 0;
+        virtual bool process_events(bool& aLastWindowClosed) = 0;
+        virtual void layout_surfaces() = 0;
+        virtual void invalidate_surfaces() = 0;
+        virtual void render_surfaces() = 0;
+        virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
+        virtual void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const = 0;
+        virtual uint32_t display_count() const = 0;
+        virtual i_display& display(uint32_t aDisplayIndex = 0) const = 0;
+        virtual i_display& display(const i_surface& aSurface) const = 0;
+        virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
+        virtual rect desktop_rect(const i_surface& aSurface) const = 0;
+    public:
+        virtual bool is_surface_attached(void* aNativeSurfaceHandle) const = 0;
+        virtual i_surface& attached_surface(void* aNativeSurfaceHandle) = 0;
+    };
 }

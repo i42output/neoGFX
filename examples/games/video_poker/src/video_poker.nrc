@@ -1,0 +1,19 @@
+{
+    namespace: video_poker
+
+    resource: {
+        files: [
+            resources/neoGFX.png
+            resources/icon.png
+            resources/club.png
+            resources/spade.png
+            resources/diamond.png
+            resources/heart.png
+            resources/jack.png
+            resources/queen.png
+            resources/king.png
+            resources/joker.png
+            resources/values.png
+        ]
+    }
+}

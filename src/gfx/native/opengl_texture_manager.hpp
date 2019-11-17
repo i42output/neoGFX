@@ -1,7 +1,7 @@
 // opengl_texture_manager.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@
 
 namespace neogfx
 {
-	class opengl_texture_manager : public texture_manager
-	{
-	public:
-		virtual std::unique_ptr<i_native_texture> create_texture(const neogfx::size& aExtents, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
-		virtual std::unique_ptr<i_native_texture> create_texture(const i_image& aImage);
-	};
+    class opengl_texture_manager : public texture_manager
+    {
+    public:
+        std::shared_ptr<i_texture> create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_colour& aColour = optional_colour()) override;
+        std::shared_ptr<i_texture> create_texture(const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte) override;
+    };
 }

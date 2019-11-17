@@ -1,7 +1,7 @@
 // colour.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,903 +22,927 @@
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
 #include <neolib/variant.hpp>
-#include "geometry.hpp"
-#include "hsl_colour.hpp"
-#include "hsv_colour.hpp"
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/core/hsl_colour.hpp>
+#include <neogfx/core/hsv_colour.hpp>
 
 namespace neogfx
 {
-	class colour
-	{
-		// types
-	public:
-		typedef uint32_t argb;
-		typedef uint8_t component;
-		struct matrix : std::tr1::array<std::tr1::array<double, 5>, 5>
-		{
-			matrix() : std::tr1::array<std::tr1::array<double, 5>, 5>() {}
-		};
-		// constants
-	public:
-		static const colour AliceBlue;
-		static const colour AntiqueWhite;
-		static const colour AntiqueWhite1;
-		static const colour AntiqueWhite2;
-		static const colour AntiqueWhite3;
-		static const colour AntiqueWhite4;
-		static const colour Aquamarine;
-		static const colour Aquamarine1;
-		static const colour Aquamarine2;
-		static const colour Aquamarine3;
-		static const colour Aquamarine4;
-		static const colour Azure;
-		static const colour Azure1;
-		static const colour Azure2;
-		static const colour Azure3;
-		static const colour Azure4;
-		static const colour Beige;
-		static const colour Bisque;
-		static const colour Bisque1;
-		static const colour Bisque2;
-		static const colour Bisque3;
-		static const colour Bisque4;
-		static const colour Black;
-		static const colour BlanchedAlmond;
-		static const colour Blue;
-		static const colour Blue1;
-		static const colour Blue2;
-		static const colour Blue3;
-		static const colour Blue4;
-		static const colour BlueViolet;
-		static const colour Brown;
-		static const colour Brown1;
-		static const colour Brown2;
-		static const colour Brown3;
-		static const colour Brown4;
-		static const colour Burlywood;
-		static const colour Burlywood1;
-		static const colour Burlywood2;
-		static const colour Burlywood3;
-		static const colour Burlywood4;
-		static const colour CadetBlue;
-		static const colour CadetBlue1;
-		static const colour CadetBlue2;
-		static const colour CadetBlue3;
-		static const colour CadetBlue4;
-		static const colour Chartreuse;
-		static const colour Chartreuse1;
-		static const colour Chartreuse2;
-		static const colour Chartreuse3;
-		static const colour Chartreuse4;
-		static const colour Chocolate;
-		static const colour Chocolate1;
-		static const colour Chocolate2;
-		static const colour Chocolate3;
-		static const colour Chocolate4;
-		static const colour Coral;
-		static const colour Coral1;
-		static const colour Coral2;
-		static const colour Coral3;
-		static const colour Coral4;
-		static const colour CornflowerBlue;
-		static const colour Cornsilk;
-		static const colour Cornsilk1;
-		static const colour Cornsilk2;
-		static const colour Cornsilk3;
-		static const colour Cornsilk4;
-		static const colour Cyan;
-		static const colour Cyan1;
-		static const colour Cyan2;
-		static const colour Cyan3;
-		static const colour Cyan4;
-		static const colour DarkBlue;
-		static const colour DarkCyan;
-		static const colour DarkGoldenrod;
-		static const colour DarkGoldenrod1;
-		static const colour DarkGoldenrod2;
-		static const colour DarkGoldenrod3;
-		static const colour DarkGoldenrod4;
-		static const colour DarkGray;
-		static const colour DarkGreen;
-		static const colour DarkGrey;
-		static const colour DarkKhaki;
-		static const colour DarkMagenta;
-		static const colour DarkOliveGreen;
-		static const colour DarkOliveGreen1;
-		static const colour DarkOliveGreen2;
-		static const colour DarkOliveGreen3;
-		static const colour DarkOliveGreen4;
-		static const colour DarkOrange;
-		static const colour DarkOrange1;
-		static const colour DarkOrange2;
-		static const colour DarkOrange3;
-		static const colour DarkOrange4;
-		static const colour DarkOrchid;
-		static const colour DarkOrchid1;
-		static const colour DarkOrchid2;
-		static const colour DarkOrchid3;
-		static const colour DarkOrchid4;
-		static const colour DarkRed;
-		static const colour DarkSalmon;
-		static const colour DarkSeaGreen;
-		static const colour DarkSeaGreen1;
-		static const colour DarkSeaGreen2;
-		static const colour DarkSeaGreen3;
-		static const colour DarkSeaGreen4;
-		static const colour DarkSlateBlue;
-		static const colour DarkSlateGray;
-		static const colour DarkSlateGray1;
-		static const colour DarkSlateGray2;
-		static const colour DarkSlateGray3;
-		static const colour DarkSlateGray4;
-		static const colour DarkSlateGrey;
-		static const colour DarkTurquoise;
-		static const colour DarkViolet;
-		static const colour DebianRed;
-		static const colour DeepPink;
-		static const colour DeepPink1;
-		static const colour DeepPink2;
-		static const colour DeepPink3;
-		static const colour DeepPink4;
-		static const colour DeepSkyBlue;
-		static const colour DeepSkyBlue1;
-		static const colour DeepSkyBlue2;
-		static const colour DeepSkyBlue3;
-		static const colour DeepSkyBlue4;
-		static const colour DimGray;
-		static const colour DimGrey;
-		static const colour DodgerBlue;
-		static const colour DodgerBlue1;
-		static const colour DodgerBlue2;
-		static const colour DodgerBlue3;
-		static const colour DodgerBlue4;
-		static const colour Firebrick;
-		static const colour Firebrick1;
-		static const colour Firebrick2;
-		static const colour Firebrick3;
-		static const colour Firebrick4;
-		static const colour FloralWhite;
-		static const colour ForestGreen;
-		static const colour Gainsboro;
-		static const colour GhostWhite;
-		static const colour Gold;
-		static const colour Gold1;
-		static const colour Gold2;
-		static const colour Gold3;
-		static const colour Gold4;
-		static const colour Goldenrod;
-		static const colour Goldenrod1;
-		static const colour Goldenrod2;
-		static const colour Goldenrod3;
-		static const colour Goldenrod4;
-		static const colour Gray;
-		static const colour Gray0;
-		static const colour Gray1;
-		static const colour Gray10;
-		static const colour Gray100;
-		static const colour Gray11;
-		static const colour Gray12;
-		static const colour Gray13;
-		static const colour Gray14;
-		static const colour Gray15;
-		static const colour Gray16;
-		static const colour Gray17;
-		static const colour Gray18;
-		static const colour Gray19;
-		static const colour Gray2;
-		static const colour Gray20;
-		static const colour Gray21;
-		static const colour Gray22;
-		static const colour Gray23;
-		static const colour Gray24;
-		static const colour Gray25;
-		static const colour Gray26;
-		static const colour Gray27;
-		static const colour Gray28;
-		static const colour Gray29;
-		static const colour Gray3;
-		static const colour Gray30;
-		static const colour Gray31;
-		static const colour Gray32;
-		static const colour Gray33;
-		static const colour Gray34;
-		static const colour Gray35;
-		static const colour Gray36;
-		static const colour Gray37;
-		static const colour Gray38;
-		static const colour Gray39;
-		static const colour Gray4;
-		static const colour Gray40;
-		static const colour Gray41;
-		static const colour Gray42;
-		static const colour Gray43;
-		static const colour Gray44;
-		static const colour Gray45;
-		static const colour Gray46;
-		static const colour Gray47;
-		static const colour Gray48;
-		static const colour Gray49;
-		static const colour Gray5;
-		static const colour Gray50;
-		static const colour Gray51;
-		static const colour Gray52;
-		static const colour Gray53;
-		static const colour Gray54;
-		static const colour Gray55;
-		static const colour Gray56;
-		static const colour Gray57;
-		static const colour Gray58;
-		static const colour Gray59;
-		static const colour Gray6;
-		static const colour Gray60;
-		static const colour Gray61;
-		static const colour Gray62;
-		static const colour Gray63;
-		static const colour Gray64;
-		static const colour Gray65;
-		static const colour Gray66;
-		static const colour Gray67;
-		static const colour Gray68;
-		static const colour Gray69;
-		static const colour Gray7;
-		static const colour Gray70;
-		static const colour Gray71;
-		static const colour Gray72;
-		static const colour Gray73;
-		static const colour Gray74;
-		static const colour Gray75;
-		static const colour Gray76;
-		static const colour Gray77;
-		static const colour Gray78;
-		static const colour Gray79;
-		static const colour Gray8;
-		static const colour Gray80;
-		static const colour Gray81;
-		static const colour Gray82;
-		static const colour Gray83;
-		static const colour Gray84;
-		static const colour Gray85;
-		static const colour Gray86;
-		static const colour Gray87;
-		static const colour Gray88;
-		static const colour Gray89;
-		static const colour Gray9;
-		static const colour Gray90;
-		static const colour Gray91;
-		static const colour Gray92;
-		static const colour Gray93;
-		static const colour Gray94;
-		static const colour Gray95;
-		static const colour Gray96;
-		static const colour Gray97;
-		static const colour Gray98;
-		static const colour Gray99;
-		static const colour Green;
-		static const colour Green1;
-		static const colour Green2;
-		static const colour Green3;
-		static const colour Green4;
-		static const colour GreenYellow;
-		static const colour Grey;
-		static const colour Grey0;
-		static const colour Grey1;
-		static const colour Grey10;
-		static const colour Grey100;
-		static const colour Grey11;
-		static const colour Grey12;
-		static const colour Grey13;
-		static const colour Grey14;
-		static const colour Grey15;
-		static const colour Grey16;
-		static const colour Grey17;
-		static const colour Grey18;
-		static const colour Grey19;
-		static const colour Grey2;
-		static const colour Grey20;
-		static const colour Grey21;
-		static const colour Grey22;
-		static const colour Grey23;
-		static const colour Grey24;
-		static const colour Grey25;
-		static const colour Grey26;
-		static const colour Grey27;
-		static const colour Grey28;
-		static const colour Grey29;
-		static const colour Grey3;
-		static const colour Grey30;
-		static const colour Grey31;
-		static const colour Grey32;
-		static const colour Grey33;
-		static const colour Grey34;
-		static const colour Grey35;
-		static const colour Grey36;
-		static const colour Grey37;
-		static const colour Grey38;
-		static const colour Grey39;
-		static const colour Grey4;
-		static const colour Grey40;
-		static const colour Grey41;
-		static const colour Grey42;
-		static const colour Grey43;
-		static const colour Grey44;
-		static const colour Grey45;
-		static const colour Grey46;
-		static const colour Grey47;
-		static const colour Grey48;
-		static const colour Grey49;
-		static const colour Grey5;
-		static const colour Grey50;
-		static const colour Grey51;
-		static const colour Grey52;
-		static const colour Grey53;
-		static const colour Grey54;
-		static const colour Grey55;
-		static const colour Grey56;
-		static const colour Grey57;
-		static const colour Grey58;
-		static const colour Grey59;
-		static const colour Grey6;
-		static const colour Grey60;
-		static const colour Grey61;
-		static const colour Grey62;
-		static const colour Grey63;
-		static const colour Grey64;
-		static const colour Grey65;
-		static const colour Grey66;
-		static const colour Grey67;
-		static const colour Grey68;
-		static const colour Grey69;
-		static const colour Grey7;
-		static const colour Grey70;
-		static const colour Grey71;
-		static const colour Grey72;
-		static const colour Grey73;
-		static const colour Grey74;
-		static const colour Grey75;
-		static const colour Grey76;
-		static const colour Grey77;
-		static const colour Grey78;
-		static const colour Grey79;
-		static const colour Grey8;
-		static const colour Grey80;
-		static const colour Grey81;
-		static const colour Grey82;
-		static const colour Grey83;
-		static const colour Grey84;
-		static const colour Grey85;
-		static const colour Grey86;
-		static const colour Grey87;
-		static const colour Grey88;
-		static const colour Grey89;
-		static const colour Grey9;
-		static const colour Grey90;
-		static const colour Grey91;
-		static const colour Grey92;
-		static const colour Grey93;
-		static const colour Grey94;
-		static const colour Grey95;
-		static const colour Grey96;
-		static const colour Grey97;
-		static const colour Grey98;
-		static const colour Grey99;
-		static const colour Honeydew;
-		static const colour Honeydew1;
-		static const colour Honeydew2;
-		static const colour Honeydew3;
-		static const colour Honeydew4;
-		static const colour HotPink;
-		static const colour HotPink1;
-		static const colour HotPink2;
-		static const colour HotPink3;
-		static const colour HotPink4;
-		static const colour IndianRed;
-		static const colour IndianRed1;
-		static const colour IndianRed2;
-		static const colour IndianRed3;
-		static const colour IndianRed4;
-		static const colour Ivory;
-		static const colour Ivory1;
-		static const colour Ivory2;
-		static const colour Ivory3;
-		static const colour Ivory4;
-		static const colour Khaki;
-		static const colour Khaki1;
-		static const colour Khaki2;
-		static const colour Khaki3;
-		static const colour Khaki4;
-		static const colour Lavender;
-		static const colour LavenderBlush;
-		static const colour LavenderBlush1;
-		static const colour LavenderBlush2;
-		static const colour LavenderBlush3;
-		static const colour LavenderBlush4;
-		static const colour LawnGreen;
-		static const colour LemonChiffon;
-		static const colour LemonChiffon1;
-		static const colour LemonChiffon2;
-		static const colour LemonChiffon3;
-		static const colour LemonChiffon4;
-		static const colour LightBlue;
-		static const colour LightBlue1;
-		static const colour LightBlue2;
-		static const colour LightBlue3;
-		static const colour LightBlue4;
-		static const colour LightCoral;
-		static const colour LightCyan;
-		static const colour LightCyan1;
-		static const colour LightCyan2;
-		static const colour LightCyan3;
-		static const colour LightCyan4;
-		static const colour LightGoldenrod;
-		static const colour LightGoldenrod1;
-		static const colour LightGoldenrod2;
-		static const colour LightGoldenrod3;
-		static const colour LightGoldenrod4;
-		static const colour LightGoldenrodYellow;
-		static const colour LightGray;
-		static const colour LightGreen;
-		static const colour LightGrey;
-		static const colour LightPink;
-		static const colour LightPink1;
-		static const colour LightPink2;
-		static const colour LightPink3;
-		static const colour LightPink4;
-		static const colour LightSalmon;
-		static const colour LightSalmon1;
-		static const colour LightSalmon2;
-		static const colour LightSalmon3;
-		static const colour LightSalmon4;
-		static const colour LightSeaGreen;
-		static const colour LightSkyBlue;
-		static const colour LightSkyBlue1;
-		static const colour LightSkyBlue2;
-		static const colour LightSkyBlue3;
-		static const colour LightSkyBlue4;
-		static const colour LightSlateBlue;
-		static const colour LightSlateGray;
-		static const colour LightSlateGrey;
-		static const colour LightSteelBlue;
-		static const colour LightSteelBlue1;
-		static const colour LightSteelBlue2;
-		static const colour LightSteelBlue3;
-		static const colour LightSteelBlue4;
-		static const colour LightYellow;
-		static const colour LightYellow1;
-		static const colour LightYellow2;
-		static const colour LightYellow3;
-		static const colour LightYellow4;
-		static const colour LimeGreen;
-		static const colour Linen;
-		static const colour Magenta;
-		static const colour Magenta1;
-		static const colour Magenta2;
-		static const colour Magenta3;
-		static const colour Magenta4;
-		static const colour Maroon;
-		static const colour Maroon1;
-		static const colour Maroon2;
-		static const colour Maroon3;
-		static const colour Maroon4;
-		static const colour MediumAquamarine;
-		static const colour MediumBlue;
-		static const colour MediumOrchid;
-		static const colour MediumOrchid1;
-		static const colour MediumOrchid2;
-		static const colour MediumOrchid3;
-		static const colour MediumOrchid4;
-		static const colour MediumPurple;
-		static const colour MediumPurple1;
-		static const colour MediumPurple2;
-		static const colour MediumPurple3;
-		static const colour MediumPurple4;
-		static const colour MediumSeaGreen;
-		static const colour MediumSlateBlue;
-		static const colour MediumSpringGreen;
-		static const colour MediumTurquoise;
-		static const colour MediumVioletRed;
-		static const colour MidnightBlue;
-		static const colour MintCream;
-		static const colour MistyRose;
-		static const colour MistyRose1;
-		static const colour MistyRose2;
-		static const colour MistyRose3;
-		static const colour MistyRose4;
-		static const colour Moccasin;
-		static const colour NavajoWhite;
-		static const colour NavajoWhite1;
-		static const colour NavajoWhite2;
-		static const colour NavajoWhite3;
-		static const colour NavajoWhite4;
-		static const colour Navy;
-		static const colour NavyBlue;
-		static const colour OldLace;
-		static const colour OliveDrab;
-		static const colour OliveDrab1;
-		static const colour OliveDrab2;
-		static const colour OliveDrab3;
-		static const colour OliveDrab4;
-		static const colour Orange;
-		static const colour Orange1;
-		static const colour Orange2;
-		static const colour Orange3;
-		static const colour Orange4;
-		static const colour OrangeRed;
-		static const colour OrangeRed1;
-		static const colour OrangeRed2;
-		static const colour OrangeRed3;
-		static const colour OrangeRed4;
-		static const colour Orchid;
-		static const colour Orchid1;
-		static const colour Orchid2;
-		static const colour Orchid3;
-		static const colour Orchid4;
-		static const colour PaleGoldenrod;
-		static const colour PaleGreen;
-		static const colour PaleGreen1;
-		static const colour PaleGreen2;
-		static const colour PaleGreen3;
-		static const colour PaleGreen4;
-		static const colour PaleTurquoise;
-		static const colour PaleTurquoise1;
-		static const colour PaleTurquoise2;
-		static const colour PaleTurquoise3;
-		static const colour PaleTurquoise4;
-		static const colour PaleVioletRed;
-		static const colour PaleVioletRed1;
-		static const colour PaleVioletRed2;
-		static const colour PaleVioletRed3;
-		static const colour PaleVioletRed4;
-		static const colour PapayaWhip;
-		static const colour PeachPuff;
-		static const colour PeachPuff1;
-		static const colour PeachPuff2;
-		static const colour PeachPuff3;
-		static const colour PeachPuff4;
-		static const colour Peru;
-		static const colour Pink;
-		static const colour Pink1;
-		static const colour Pink2;
-		static const colour Pink3;
-		static const colour Pink4;
-		static const colour Plum;
-		static const colour Plum1;
-		static const colour Plum2;
-		static const colour Plum3;
-		static const colour Plum4;
-		static const colour PowderBlue;
-		static const colour Purple;
-		static const colour Purple1;
-		static const colour Purple2;
-		static const colour Purple3;
-		static const colour Purple4;
-		static const colour Red;
-		static const colour Red1;
-		static const colour Red2;
-		static const colour Red3;
-		static const colour Red4;
-		static const colour RosyBrown;
-		static const colour RosyBrown1;
-		static const colour RosyBrown2;
-		static const colour RosyBrown3;
-		static const colour RosyBrown4;
-		static const colour RoyalBlue;
-		static const colour RoyalBlue1;
-		static const colour RoyalBlue2;
-		static const colour RoyalBlue3;
-		static const colour RoyalBlue4;
-		static const colour SaddleBrown;
-		static const colour Salmon;
-		static const colour Salmon1;
-		static const colour Salmon2;
-		static const colour Salmon3;
-		static const colour Salmon4;
-		static const colour SandyBrown;
-		static const colour SeaGreen;
-		static const colour SeaGreen1;
-		static const colour SeaGreen2;
-		static const colour SeaGreen3;
-		static const colour SeaGreen4;
-		static const colour Seashell;
-		static const colour Seashell1;
-		static const colour Seashell2;
-		static const colour Seashell3;
-		static const colour Seashell4;
-		static const colour Sienna;
-		static const colour Sienna1;
-		static const colour Sienna2;
-		static const colour Sienna3;
-		static const colour Sienna4;
-		static const colour SkyBlue;
-		static const colour SkyBlue1;
-		static const colour SkyBlue2;
-		static const colour SkyBlue3;
-		static const colour SkyBlue4;
-		static const colour SlateBlue;
-		static const colour SlateBlue1;
-		static const colour SlateBlue2;
-		static const colour SlateBlue3;
-		static const colour SlateBlue4;
-		static const colour SlateGray;
-		static const colour SlateGray1;
-		static const colour SlateGray2;
-		static const colour SlateGray3;
-		static const colour SlateGray4;
-		static const colour SlateGrey;
-		static const colour Snow;
-		static const colour Snow1;
-		static const colour Snow2;
-		static const colour Snow3;
-		static const colour Snow4;
-		static const colour SpringGreen;
-		static const colour SpringGreen1;
-		static const colour SpringGreen2;
-		static const colour SpringGreen3;
-		static const colour SpringGreen4;
-		static const colour SteelBlue;
-		static const colour SteelBlue1;
-		static const colour SteelBlue2;
-		static const colour SteelBlue3;
-		static const colour SteelBlue4;
-		static const colour Tan;
-		static const colour Tan1;
-		static const colour Tan2;
-		static const colour Tan3;
-		static const colour Tan4;
-		static const colour Thistle;
-		static const colour Thistle1;
-		static const colour Thistle2;
-		static const colour Thistle3;
-		static const colour Thistle4;
-		static const colour Tomato;
-		static const colour Tomato1;
-		static const colour Tomato2;
-		static const colour Tomato3;
-		static const colour Tomato4;
-		static const colour Turquoise;
-		static const colour Turquoise1;
-		static const colour Turquoise2;
-		static const colour Turquoise3;
-		static const colour Turquoise4;
-		static const colour Violet;
-		static const colour VioletRed;
-		static const colour VioletRed1;
-		static const colour VioletRed2;
-		static const colour VioletRed3;
-		static const colour VioletRed4;
-		static const colour Wheat;
-		static const colour Wheat1;
-		static const colour Wheat2;
-		static const colour Wheat3;
-		static const colour Wheat4;
-		static const colour White;
-		static const colour WhiteSmoke;
-		static const colour Yellow;
-		static const colour Yellow1;
-		static const colour Yellow2;
-		static const colour Yellow3;
-		static const colour Yellow4;
-		static const colour YellowGreen;
-	public:
-		static const component MinComponetValue = 0x00;
-		static const component MaxComponetValue = 0xFF;
-	private:
-		static const argb AlphaShift = 24;
-		static const argb RedShift = 16;
-		static const argb GreenShift = 8;
-		static const argb BlueShift = 0;
-		// construction
-	public:
-		colour();
-		explicit colour(argb aValue);
-		colour(component aRed, component aGreen, component aBlue, component aAlpha = 0xFF);
-		template <typename T>
-		colour(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(0xFF), typename std::enable_if<std::is_integral<T>::value, void>::type* = nullptr) :
-			colour(static_cast<component>(aRed), static_cast<component>(aGreen), static_cast<component>(aBlue), static_cast<component>(aAlpha))
-		{
-		}
-		colour(const std::string& aTextValue);
-		// operations
-	public:
-		static colour from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha = 1.0);
-		static colour from_hsv(double aHue, double aSaturation, double aValue, double aAlpha = 1.0);
-		static boost::optional<colour> from_name(const std::string& aName);
-		argb value() const;
-		component alpha() const;
-		component red() const;
-		component green() const;
-		component blue() const;
-		template <typename T>
-		T alpha() const { return static_cast<T>(alpha()) / 0xFF; }
-		template <typename T>
-		T red() const { return static_cast<T>(red()) / 0xFF; }
-		template <typename T>
-		T green() const { return static_cast<T>(green()) / 0xFF; }
-		template <typename T>
-		T blue() const { return static_cast<T>(blue()) / 0xFF; }
-		colour& set_alpha(component aNewValue);
-		colour& set_red(component aNewValue);
-		colour& set_green(component aNewValue);
-		colour& set_blue(component aNewValue);
-		colour with_alpha(component aNewValue) const; 
-		colour with_red(component aNewValue) const;
-		colour with_green(component aNewValue) const;
-		colour with_blue(component aNewValue) const;
-		colour with_combined_alpha(component aNewValue) const;
-		hsl_colour to_hsl() const;
-		hsv_colour to_hsv() const;
-		double intensity() const;
-		bool similar_intensity(const colour& aOther, double aThreshold = 0.5);
-		colour mid(const colour& aOther) const;
-		bool light(double aLightIntensity = 0.70) const;
-		bool dark(double aDarkIntensity = 0.30) const;
-		colour& lighten(component aDelta);
-		colour& darken(component aDelta);
-		colour lighter(component aDelta) const;
-		colour darker(component aDelta) const;
-		colour shade(component aDelta) const;
-		colour monochrome() const;
-		colour same_lightness_as(const colour& aOther) const;
-		colour with_lightness(double aLightness) const;
-		colour inverse() const;
-		colour& operator+=(component aDelta);
-		colour& operator-=(component aDelta);
-		colour operator~() const;
-		bool operator==(const colour& aOther) const;
-		bool operator!=(const colour& aOther) const;
-		bool operator<(const colour& aOther) const;
-		std::string to_string() const;
-		std::string to_hex_string() const;
-		// attributes
-	private:
-		argb iValue;
-	};
+    class colour
+    {
+        // types
+    public:
+        typedef uint32_t argb;
+        typedef uint8_t component;
+        struct matrix : std::array<std::array<double, 5>, 5>
+        {
+            matrix() : std::array<std::array<double, 5>, 5>() {}
+        };
+        // constants
+    public:
+        static const colour AliceBlue;
+        static const colour AntiqueWhite;
+        static const colour AntiqueWhite1;
+        static const colour AntiqueWhite2;
+        static const colour AntiqueWhite3;
+        static const colour AntiqueWhite4;
+        static const colour Aquamarine;
+        static const colour Aquamarine1;
+        static const colour Aquamarine2;
+        static const colour Aquamarine3;
+        static const colour Aquamarine4;
+        static const colour Azure;
+        static const colour Azure1;
+        static const colour Azure2;
+        static const colour Azure3;
+        static const colour Azure4;
+        static const colour Beige;
+        static const colour Bisque;
+        static const colour Bisque1;
+        static const colour Bisque2;
+        static const colour Bisque3;
+        static const colour Bisque4;
+        static const colour Black;
+        static const colour BlanchedAlmond;
+        static const colour Blue;
+        static const colour Blue1;
+        static const colour Blue2;
+        static const colour Blue3;
+        static const colour Blue4;
+        static const colour BlueViolet;
+        static const colour Brown;
+        static const colour Brown1;
+        static const colour Brown2;
+        static const colour Brown3;
+        static const colour Brown4;
+        static const colour Burlywood;
+        static const colour Burlywood1;
+        static const colour Burlywood2;
+        static const colour Burlywood3;
+        static const colour Burlywood4;
+        static const colour CadetBlue;
+        static const colour CadetBlue1;
+        static const colour CadetBlue2;
+        static const colour CadetBlue3;
+        static const colour CadetBlue4;
+        static const colour Chartreuse;
+        static const colour Chartreuse1;
+        static const colour Chartreuse2;
+        static const colour Chartreuse3;
+        static const colour Chartreuse4;
+        static const colour Chocolate;
+        static const colour Chocolate1;
+        static const colour Chocolate2;
+        static const colour Chocolate3;
+        static const colour Chocolate4;
+        static const colour Coral;
+        static const colour Coral1;
+        static const colour Coral2;
+        static const colour Coral3;
+        static const colour Coral4;
+        static const colour CornflowerBlue;
+        static const colour Cornsilk;
+        static const colour Cornsilk1;
+        static const colour Cornsilk2;
+        static const colour Cornsilk3;
+        static const colour Cornsilk4;
+        static const colour Cyan;
+        static const colour Cyan1;
+        static const colour Cyan2;
+        static const colour Cyan3;
+        static const colour Cyan4;
+        static const colour DarkBlue;
+        static const colour DarkCyan;
+        static const colour DarkGoldenrod;
+        static const colour DarkGoldenrod1;
+        static const colour DarkGoldenrod2;
+        static const colour DarkGoldenrod3;
+        static const colour DarkGoldenrod4;
+        static const colour DarkGray;
+        static const colour DarkGreen;
+        static const colour DarkGrey;
+        static const colour DarkKhaki;
+        static const colour DarkMagenta;
+        static const colour DarkOliveGreen;
+        static const colour DarkOliveGreen1;
+        static const colour DarkOliveGreen2;
+        static const colour DarkOliveGreen3;
+        static const colour DarkOliveGreen4;
+        static const colour DarkOrange;
+        static const colour DarkOrange1;
+        static const colour DarkOrange2;
+        static const colour DarkOrange3;
+        static const colour DarkOrange4;
+        static const colour DarkOrchid;
+        static const colour DarkOrchid1;
+        static const colour DarkOrchid2;
+        static const colour DarkOrchid3;
+        static const colour DarkOrchid4;
+        static const colour DarkRed;
+        static const colour DarkSalmon;
+        static const colour DarkSeaGreen;
+        static const colour DarkSeaGreen1;
+        static const colour DarkSeaGreen2;
+        static const colour DarkSeaGreen3;
+        static const colour DarkSeaGreen4;
+        static const colour DarkSlateBlue;
+        static const colour DarkSlateGray;
+        static const colour DarkSlateGray1;
+        static const colour DarkSlateGray2;
+        static const colour DarkSlateGray3;
+        static const colour DarkSlateGray4;
+        static const colour DarkSlateGrey;
+        static const colour DarkTurquoise;
+        static const colour DarkViolet;
+        static const colour DebianRed;
+        static const colour DeepPink;
+        static const colour DeepPink1;
+        static const colour DeepPink2;
+        static const colour DeepPink3;
+        static const colour DeepPink4;
+        static const colour DeepSkyBlue;
+        static const colour DeepSkyBlue1;
+        static const colour DeepSkyBlue2;
+        static const colour DeepSkyBlue3;
+        static const colour DeepSkyBlue4;
+        static const colour DimGray;
+        static const colour DimGrey;
+        static const colour DodgerBlue;
+        static const colour DodgerBlue1;
+        static const colour DodgerBlue2;
+        static const colour DodgerBlue3;
+        static const colour DodgerBlue4;
+        static const colour Firebrick;
+        static const colour Firebrick1;
+        static const colour Firebrick2;
+        static const colour Firebrick3;
+        static const colour Firebrick4;
+        static const colour FloralWhite;
+        static const colour ForestGreen;
+        static const colour Gainsboro;
+        static const colour GhostWhite;
+        static const colour Gold;
+        static const colour Gold1;
+        static const colour Gold2;
+        static const colour Gold3;
+        static const colour Gold4;
+        static const colour Goldenrod;
+        static const colour Goldenrod1;
+        static const colour Goldenrod2;
+        static const colour Goldenrod3;
+        static const colour Goldenrod4;
+        static const colour Gray;
+        static const colour Gray0;
+        static const colour Gray1;
+        static const colour Gray10;
+        static const colour Gray100;
+        static const colour Gray11;
+        static const colour Gray12;
+        static const colour Gray13;
+        static const colour Gray14;
+        static const colour Gray15;
+        static const colour Gray16;
+        static const colour Gray17;
+        static const colour Gray18;
+        static const colour Gray19;
+        static const colour Gray2;
+        static const colour Gray20;
+        static const colour Gray21;
+        static const colour Gray22;
+        static const colour Gray23;
+        static const colour Gray24;
+        static const colour Gray25;
+        static const colour Gray26;
+        static const colour Gray27;
+        static const colour Gray28;
+        static const colour Gray29;
+        static const colour Gray3;
+        static const colour Gray30;
+        static const colour Gray31;
+        static const colour Gray32;
+        static const colour Gray33;
+        static const colour Gray34;
+        static const colour Gray35;
+        static const colour Gray36;
+        static const colour Gray37;
+        static const colour Gray38;
+        static const colour Gray39;
+        static const colour Gray4;
+        static const colour Gray40;
+        static const colour Gray41;
+        static const colour Gray42;
+        static const colour Gray43;
+        static const colour Gray44;
+        static const colour Gray45;
+        static const colour Gray46;
+        static const colour Gray47;
+        static const colour Gray48;
+        static const colour Gray49;
+        static const colour Gray5;
+        static const colour Gray50;
+        static const colour Gray51;
+        static const colour Gray52;
+        static const colour Gray53;
+        static const colour Gray54;
+        static const colour Gray55;
+        static const colour Gray56;
+        static const colour Gray57;
+        static const colour Gray58;
+        static const colour Gray59;
+        static const colour Gray6;
+        static const colour Gray60;
+        static const colour Gray61;
+        static const colour Gray62;
+        static const colour Gray63;
+        static const colour Gray64;
+        static const colour Gray65;
+        static const colour Gray66;
+        static const colour Gray67;
+        static const colour Gray68;
+        static const colour Gray69;
+        static const colour Gray7;
+        static const colour Gray70;
+        static const colour Gray71;
+        static const colour Gray72;
+        static const colour Gray73;
+        static const colour Gray74;
+        static const colour Gray75;
+        static const colour Gray76;
+        static const colour Gray77;
+        static const colour Gray78;
+        static const colour Gray79;
+        static const colour Gray8;
+        static const colour Gray80;
+        static const colour Gray81;
+        static const colour Gray82;
+        static const colour Gray83;
+        static const colour Gray84;
+        static const colour Gray85;
+        static const colour Gray86;
+        static const colour Gray87;
+        static const colour Gray88;
+        static const colour Gray89;
+        static const colour Gray9;
+        static const colour Gray90;
+        static const colour Gray91;
+        static const colour Gray92;
+        static const colour Gray93;
+        static const colour Gray94;
+        static const colour Gray95;
+        static const colour Gray96;
+        static const colour Gray97;
+        static const colour Gray98;
+        static const colour Gray99;
+        static const colour Green;
+        static const colour Green1;
+        static const colour Green2;
+        static const colour Green3;
+        static const colour Green4;
+        static const colour GreenYellow;
+        static const colour Grey;
+        static const colour Grey0;
+        static const colour Grey1;
+        static const colour Grey10;
+        static const colour Grey100;
+        static const colour Grey11;
+        static const colour Grey12;
+        static const colour Grey13;
+        static const colour Grey14;
+        static const colour Grey15;
+        static const colour Grey16;
+        static const colour Grey17;
+        static const colour Grey18;
+        static const colour Grey19;
+        static const colour Grey2;
+        static const colour Grey20;
+        static const colour Grey21;
+        static const colour Grey22;
+        static const colour Grey23;
+        static const colour Grey24;
+        static const colour Grey25;
+        static const colour Grey26;
+        static const colour Grey27;
+        static const colour Grey28;
+        static const colour Grey29;
+        static const colour Grey3;
+        static const colour Grey30;
+        static const colour Grey31;
+        static const colour Grey32;
+        static const colour Grey33;
+        static const colour Grey34;
+        static const colour Grey35;
+        static const colour Grey36;
+        static const colour Grey37;
+        static const colour Grey38;
+        static const colour Grey39;
+        static const colour Grey4;
+        static const colour Grey40;
+        static const colour Grey41;
+        static const colour Grey42;
+        static const colour Grey43;
+        static const colour Grey44;
+        static const colour Grey45;
+        static const colour Grey46;
+        static const colour Grey47;
+        static const colour Grey48;
+        static const colour Grey49;
+        static const colour Grey5;
+        static const colour Grey50;
+        static const colour Grey51;
+        static const colour Grey52;
+        static const colour Grey53;
+        static const colour Grey54;
+        static const colour Grey55;
+        static const colour Grey56;
+        static const colour Grey57;
+        static const colour Grey58;
+        static const colour Grey59;
+        static const colour Grey6;
+        static const colour Grey60;
+        static const colour Grey61;
+        static const colour Grey62;
+        static const colour Grey63;
+        static const colour Grey64;
+        static const colour Grey65;
+        static const colour Grey66;
+        static const colour Grey67;
+        static const colour Grey68;
+        static const colour Grey69;
+        static const colour Grey7;
+        static const colour Grey70;
+        static const colour Grey71;
+        static const colour Grey72;
+        static const colour Grey73;
+        static const colour Grey74;
+        static const colour Grey75;
+        static const colour Grey76;
+        static const colour Grey77;
+        static const colour Grey78;
+        static const colour Grey79;
+        static const colour Grey8;
+        static const colour Grey80;
+        static const colour Grey81;
+        static const colour Grey82;
+        static const colour Grey83;
+        static const colour Grey84;
+        static const colour Grey85;
+        static const colour Grey86;
+        static const colour Grey87;
+        static const colour Grey88;
+        static const colour Grey89;
+        static const colour Grey9;
+        static const colour Grey90;
+        static const colour Grey91;
+        static const colour Grey92;
+        static const colour Grey93;
+        static const colour Grey94;
+        static const colour Grey95;
+        static const colour Grey96;
+        static const colour Grey97;
+        static const colour Grey98;
+        static const colour Grey99;
+        static const colour Honeydew;
+        static const colour Honeydew1;
+        static const colour Honeydew2;
+        static const colour Honeydew3;
+        static const colour Honeydew4;
+        static const colour HotPink;
+        static const colour HotPink1;
+        static const colour HotPink2;
+        static const colour HotPink3;
+        static const colour HotPink4;
+        static const colour IndianRed;
+        static const colour IndianRed1;
+        static const colour IndianRed2;
+        static const colour IndianRed3;
+        static const colour IndianRed4;
+        static const colour Ivory;
+        static const colour Ivory1;
+        static const colour Ivory2;
+        static const colour Ivory3;
+        static const colour Ivory4;
+        static const colour Khaki;
+        static const colour Khaki1;
+        static const colour Khaki2;
+        static const colour Khaki3;
+        static const colour Khaki4;
+        static const colour Lavender;
+        static const colour LavenderBlush;
+        static const colour LavenderBlush1;
+        static const colour LavenderBlush2;
+        static const colour LavenderBlush3;
+        static const colour LavenderBlush4;
+        static const colour LawnGreen;
+        static const colour LemonChiffon;
+        static const colour LemonChiffon1;
+        static const colour LemonChiffon2;
+        static const colour LemonChiffon3;
+        static const colour LemonChiffon4;
+        static const colour LightBlue;
+        static const colour LightBlue1;
+        static const colour LightBlue2;
+        static const colour LightBlue3;
+        static const colour LightBlue4;
+        static const colour LightCoral;
+        static const colour LightCyan;
+        static const colour LightCyan1;
+        static const colour LightCyan2;
+        static const colour LightCyan3;
+        static const colour LightCyan4;
+        static const colour LightGoldenrod;
+        static const colour LightGoldenrod1;
+        static const colour LightGoldenrod2;
+        static const colour LightGoldenrod3;
+        static const colour LightGoldenrod4;
+        static const colour LightGoldenrodYellow;
+        static const colour LightGray;
+        static const colour LightGreen;
+        static const colour LightGrey;
+        static const colour LightPink;
+        static const colour LightPink1;
+        static const colour LightPink2;
+        static const colour LightPink3;
+        static const colour LightPink4;
+        static const colour LightSalmon;
+        static const colour LightSalmon1;
+        static const colour LightSalmon2;
+        static const colour LightSalmon3;
+        static const colour LightSalmon4;
+        static const colour LightSeaGreen;
+        static const colour LightSkyBlue;
+        static const colour LightSkyBlue1;
+        static const colour LightSkyBlue2;
+        static const colour LightSkyBlue3;
+        static const colour LightSkyBlue4;
+        static const colour LightSlateBlue;
+        static const colour LightSlateGray;
+        static const colour LightSlateGrey;
+        static const colour LightSteelBlue;
+        static const colour LightSteelBlue1;
+        static const colour LightSteelBlue2;
+        static const colour LightSteelBlue3;
+        static const colour LightSteelBlue4;
+        static const colour LightYellow;
+        static const colour LightYellow1;
+        static const colour LightYellow2;
+        static const colour LightYellow3;
+        static const colour LightYellow4;
+        static const colour LimeGreen;
+        static const colour Linen;
+        static const colour Magenta;
+        static const colour Magenta1;
+        static const colour Magenta2;
+        static const colour Magenta3;
+        static const colour Magenta4;
+        static const colour Maroon;
+        static const colour Maroon1;
+        static const colour Maroon2;
+        static const colour Maroon3;
+        static const colour Maroon4;
+        static const colour MediumAquamarine;
+        static const colour MediumBlue;
+        static const colour MediumOrchid;
+        static const colour MediumOrchid1;
+        static const colour MediumOrchid2;
+        static const colour MediumOrchid3;
+        static const colour MediumOrchid4;
+        static const colour MediumPurple;
+        static const colour MediumPurple1;
+        static const colour MediumPurple2;
+        static const colour MediumPurple3;
+        static const colour MediumPurple4;
+        static const colour MediumSeaGreen;
+        static const colour MediumSlateBlue;
+        static const colour MediumSpringGreen;
+        static const colour MediumTurquoise;
+        static const colour MediumVioletRed;
+        static const colour MidnightBlue;
+        static const colour MintCream;
+        static const colour MistyRose;
+        static const colour MistyRose1;
+        static const colour MistyRose2;
+        static const colour MistyRose3;
+        static const colour MistyRose4;
+        static const colour Moccasin;
+        static const colour NavajoWhite;
+        static const colour NavajoWhite1;
+        static const colour NavajoWhite2;
+        static const colour NavajoWhite3;
+        static const colour NavajoWhite4;
+        static const colour Navy;
+        static const colour NavyBlue;
+        static const colour OldLace;
+        static const colour OliveDrab;
+        static const colour OliveDrab1;
+        static const colour OliveDrab2;
+        static const colour OliveDrab3;
+        static const colour OliveDrab4;
+        static const colour Orange;
+        static const colour Orange1;
+        static const colour Orange2;
+        static const colour Orange3;
+        static const colour Orange4;
+        static const colour OrangeRed;
+        static const colour OrangeRed1;
+        static const colour OrangeRed2;
+        static const colour OrangeRed3;
+        static const colour OrangeRed4;
+        static const colour Orchid;
+        static const colour Orchid1;
+        static const colour Orchid2;
+        static const colour Orchid3;
+        static const colour Orchid4;
+        static const colour PaleGoldenrod;
+        static const colour PaleGreen;
+        static const colour PaleGreen1;
+        static const colour PaleGreen2;
+        static const colour PaleGreen3;
+        static const colour PaleGreen4;
+        static const colour PaleTurquoise;
+        static const colour PaleTurquoise1;
+        static const colour PaleTurquoise2;
+        static const colour PaleTurquoise3;
+        static const colour PaleTurquoise4;
+        static const colour PaleVioletRed;
+        static const colour PaleVioletRed1;
+        static const colour PaleVioletRed2;
+        static const colour PaleVioletRed3;
+        static const colour PaleVioletRed4;
+        static const colour PapayaWhip;
+        static const colour PeachPuff;
+        static const colour PeachPuff1;
+        static const colour PeachPuff2;
+        static const colour PeachPuff3;
+        static const colour PeachPuff4;
+        static const colour Peru;
+        static const colour Pink;
+        static const colour Pink1;
+        static const colour Pink2;
+        static const colour Pink3;
+        static const colour Pink4;
+        static const colour Plum;
+        static const colour Plum1;
+        static const colour Plum2;
+        static const colour Plum3;
+        static const colour Plum4;
+        static const colour PowderBlue;
+        static const colour Purple;
+        static const colour Purple1;
+        static const colour Purple2;
+        static const colour Purple3;
+        static const colour Purple4;
+        static const colour Red;
+        static const colour Red1;
+        static const colour Red2;
+        static const colour Red3;
+        static const colour Red4;
+        static const colour RosyBrown;
+        static const colour RosyBrown1;
+        static const colour RosyBrown2;
+        static const colour RosyBrown3;
+        static const colour RosyBrown4;
+        static const colour RoyalBlue;
+        static const colour RoyalBlue1;
+        static const colour RoyalBlue2;
+        static const colour RoyalBlue3;
+        static const colour RoyalBlue4;
+        static const colour SaddleBrown;
+        static const colour Salmon;
+        static const colour Salmon1;
+        static const colour Salmon2;
+        static const colour Salmon3;
+        static const colour Salmon4;
+        static const colour SandyBrown;
+        static const colour SeaGreen;
+        static const colour SeaGreen1;
+        static const colour SeaGreen2;
+        static const colour SeaGreen3;
+        static const colour SeaGreen4;
+        static const colour Seashell;
+        static const colour Seashell1;
+        static const colour Seashell2;
+        static const colour Seashell3;
+        static const colour Seashell4;
+        static const colour Sienna;
+        static const colour Sienna1;
+        static const colour Sienna2;
+        static const colour Sienna3;
+        static const colour Sienna4;
+        static const colour SkyBlue;
+        static const colour SkyBlue1;
+        static const colour SkyBlue2;
+        static const colour SkyBlue3;
+        static const colour SkyBlue4;
+        static const colour SlateBlue;
+        static const colour SlateBlue1;
+        static const colour SlateBlue2;
+        static const colour SlateBlue3;
+        static const colour SlateBlue4;
+        static const colour SlateGray;
+        static const colour SlateGray1;
+        static const colour SlateGray2;
+        static const colour SlateGray3;
+        static const colour SlateGray4;
+        static const colour SlateGrey;
+        static const colour Snow;
+        static const colour Snow1;
+        static const colour Snow2;
+        static const colour Snow3;
+        static const colour Snow4;
+        static const colour SpringGreen;
+        static const colour SpringGreen1;
+        static const colour SpringGreen2;
+        static const colour SpringGreen3;
+        static const colour SpringGreen4;
+        static const colour SteelBlue;
+        static const colour SteelBlue1;
+        static const colour SteelBlue2;
+        static const colour SteelBlue3;
+        static const colour SteelBlue4;
+        static const colour Tan;
+        static const colour Tan1;
+        static const colour Tan2;
+        static const colour Tan3;
+        static const colour Tan4;
+        static const colour Thistle;
+        static const colour Thistle1;
+        static const colour Thistle2;
+        static const colour Thistle3;
+        static const colour Thistle4;
+        static const colour Tomato;
+        static const colour Tomato1;
+        static const colour Tomato2;
+        static const colour Tomato3;
+        static const colour Tomato4;
+        static const colour Turquoise;
+        static const colour Turquoise1;
+        static const colour Turquoise2;
+        static const colour Turquoise3;
+        static const colour Turquoise4;
+        static const colour Violet;
+        static const colour VioletRed;
+        static const colour VioletRed1;
+        static const colour VioletRed2;
+        static const colour VioletRed3;
+        static const colour VioletRed4;
+        static const colour Wheat;
+        static const colour Wheat1;
+        static const colour Wheat2;
+        static const colour Wheat3;
+        static const colour Wheat4;
+        static const colour White;
+        static const colour WhiteSmoke;
+        static const colour Yellow;
+        static const colour Yellow1;
+        static const colour Yellow2;
+        static const colour Yellow3;
+        static const colour Yellow4;
+        static const colour YellowGreen;
+    public:
+        static const component MinComponetValue = 0x00;
+        static const component MaxComponetValue = 0xFF;
+    private:
+        static const argb AlphaShift = 24;
+        static const argb RedShift = 16;
+        static const argb GreenShift = 8;
+        static const argb BlueShift = 0;
+        // construction
+    public:
+        colour();
+        colour(const colour& aOther);
+        explicit colour(argb aValue);
+        colour(component aRed, component aGreen, component aBlue, component aAlpha = 0xFF);
+        template <typename T>
+        colour(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(0xFF), typename std::enable_if<std::is_integral<T>::value, void>::type* = nullptr) :
+            colour(static_cast<component>(aRed), static_cast<component>(aGreen), static_cast<component>(aBlue), static_cast<component>(aAlpha))
+        {
+        }
+        colour(const vec4& aValue);
+        colour(const vec4f& aValue);
+        colour(const std::string& aTextValue);
+        // operations
+    public:
+        static colour from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha = 1.0);
+        static colour from_hsv(double aHue, double aSaturation, double aValue, double aAlpha = 1.0);
+        static std::optional<colour> from_name(const std::string& aName);
+        argb value() const;
+        component alpha() const;
+        component red() const;
+        component green() const;
+        component blue() const;
+        template <typename T>
+        T alpha() const { return static_cast<T>(alpha()) / 0xFF; }
+        template <typename T>
+        T red() const { return static_cast<T>(red()) / 0xFF; }
+        template <typename T>
+        T green() const { return static_cast<T>(green()) / 0xFF; }
+        template <typename T>
+        T blue() const { return static_cast<T>(blue()) / 0xFF; }
+        colour& set_alpha(component aNewValue);
+        colour& set_red(component aNewValue);
+        colour& set_green(component aNewValue);
+        colour& set_blue(component aNewValue);
+        colour with_alpha(component aNewValue) const; 
+        colour with_red(component aNewValue) const;
+        colour with_green(component aNewValue) const;
+        colour with_blue(component aNewValue) const;
+        colour with_combined_alpha(component aNewValue) const;
+        colour with_combined_alpha(double aCoefficient) const;
+        hsl_colour to_hsl() const;
+        hsv_colour to_hsv() const;
+        double brightness() const;
+        double intensity() const;
+        double luma() const;
+        bool similar_intensity(const colour& aOther, double aThreshold = 0.5);
+        colour mid(const colour& aOther) const;
+        bool light(double aThreshold = 0.50) const;
+        bool dark(double aThreshold = 0.50) const;
+        colour& lighten(component aDelta);
+        colour& darken(component aDelta);
+        colour lighter(component aDelta) const;
+        colour darker(component aDelta) const;
+        colour shade(component aDelta) const;
+        colour monochrome() const;
+        colour same_lightness_as(const colour& aOther) const;
+        colour with_lightness(double aLightness) const;
+        colour inverse() const;
+        colour& operator+=(component aDelta);
+        colour& operator-=(component aDelta);
+        colour operator~() const;
+        bool operator==(const colour& aOther) const;
+        bool operator!=(const colour& aOther) const;
+        bool operator<(const colour& aOther) const;
+        std::string to_string() const;
+        std::string to_hex_string() const;
+        vec4 to_vec4() const;
+        vec4f to_vec4f() const;
+        // attributes
+    private:
+        argb iValue;
+    };
 
-	inline colour operator+(const colour& aLeft, colour::component aRight)
-	{
-		colour ret = aLeft;
-		ret += aRight;
-		return ret;
-	}
+    inline colour operator+(const colour& aLeft, colour::component aRight)
+    {
+        colour ret = aLeft;
+        ret += aRight;
+        return ret;
+    }
 
-	inline colour operator-(const colour& aLeft, colour::component aRight)
-	{
-		colour ret = aLeft;
-		ret -= aRight;
-		return ret;
-	}
+    inline colour operator-(const colour& aLeft, colour::component aRight)
+    {
+        colour ret = aLeft;
+        ret -= aRight;
+        return ret;
+    }
 
-	class gradient
-	{
-		// constants
-	public:
-		static const std::size_t MaxStops = 256;
-		// types
-	public:
-		enum direction_e
-		{
-			Vertical	= 0,
-			Horizontal	= 1,
-			Diagonal	= 2,
-			Radial		= 3
-		};
-		enum corner_e
-		{
-			TopLeft		= 0,
-			TopRight	= 1,
-			BottomRight	= 2,
-			BottomLeft	= 3
-		};
-		typedef neolib::variant<corner_e, double> orientation_type;
-		enum shape_e
-		{
-			Ellipse		= 0,
-			Circle		= 1
-		};
-		enum size_e
-		{
-			ClosestSide		= 0,
-			FarthestSide	= 1,
-			ClosestCorner	= 2,
-			FarthestCorner	= 3
-		};
-		typedef std::pair<double, colour> colour_stop;
-		typedef std::vector<colour_stop> colour_stop_list;
-		typedef std::pair<double, colour::component> alpha_stop;
-		typedef std::vector<alpha_stop> alpha_stop_list;
-	public:
-		struct bad_position : std::logic_error { bad_position() : std::logic_error("neogfx::gradient::bad_position") {} };
-		// construction
-	public:
-		gradient();
-		gradient(const colour& aColour, direction_e aDirection = Vertical);
-		gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection = Vertical);
-		gradient(const colour_stop_list& aColourStops, direction_e aDirection = Vertical);
-		gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection = Vertical);
-		// operations
-	public:
-		colour_stop_list::const_iterator colour_begin() const;
-		colour_stop_list::const_iterator colour_end() const;
-		alpha_stop_list::const_iterator alpha_begin() const;
-		alpha_stop_list::const_iterator alpha_end() const;
-		colour_stop_list::iterator colour_begin();
-		colour_stop_list::iterator colour_end();
-		alpha_stop_list::iterator alpha_begin();
-		alpha_stop_list::iterator alpha_end();
-		colour_stop_list::iterator find_colour_stop(double aPos, bool aToInsert = false);
-		colour_stop_list::iterator find_colour_stop(double aPos, double aStart, double aEnd, bool aToInsert = false);
-		alpha_stop_list::iterator find_alpha_stop(double aPos, bool aToInsert = false);
-		alpha_stop_list::iterator find_alpha_stop(double aPos, double aStart, double aEnd, bool aToInsert = false);
-		colour_stop_list::iterator insert_colour_stop(double aPos);
-		colour_stop_list::iterator insert_colour_stop(double aPos, double aStart, double aEnd);
-		alpha_stop_list::iterator insert_alpha_stop(double aPos);
-		alpha_stop_list::iterator insert_alpha_stop(double aPos, double aStart, double aEnd);
-		void erase_stop(colour_stop_list::iterator aStop);
-		void erase_stop(alpha_stop_list::iterator aStop);
-		std::size_t colour_stop_count() const;
-		std::size_t alpha_stop_count() const;
-		colour_stop_list combined_stops() const;
-		colour at(double aPos) const;
-		colour at(double aPos, double aStart, double aEnd) const;
-		colour colour_at(double aPos) const;
-		colour colour_at(double aPos, double aStart, double aEnd) const;
-		colour::component alpha_at(double aPos) const;
-		colour::component alpha_at(double aPos, double aStart, double aEnd) const;
-		gradient with_alpha(colour::component aAlpha) const;
-		gradient with_combined_alpha(colour::component aAlpha) const;
-		direction_e direction() const;
-		void set_direction(direction_e aDirection);
-		gradient with_direction(direction_e aDirection) const;
-		orientation_type orientation() const;
-		void set_orientation(orientation_type aOrientation);
-		gradient with_orientation(orientation_type aOrientation) const;
-		shape_e shape() const;
-		void set_shape(shape_e aShape);
-		gradient with_shape(shape_e aShape) const;
-		size_e size() const;
-		void set_size(size_e aSize);
-		gradient with_size(size_e aSize) const;
-		const optional_point& centre() const;
-		void set_centre(const optional_point& aCentre);
-		gradient with_centre(const optional_point& aCentre) const;
-		double smoothness() const;
-		void set_smoothness(double aSmoothness);
-		gradient with_smoothness(double aSmoothness) const;
-		const optional_rect& rect() const;
-		void set_rect(const optional_rect& aRect);
-		gradient with_rect(const optional_rect& aRect) const;
-	public:
-		bool operator==(const gradient& aOther) const;
-		bool operator!=(const gradient& aOther) const;
-		bool operator<(const gradient& aOther) const;
-	public:
-		static double normalized_position(double aPos, double aStart, double aEnd);
-	private:
-		const colour_stop_list& colour_stops() const;
-		colour_stop_list& colour_stops();
-		const alpha_stop_list& alpha_stops() const;
-		alpha_stop_list& alpha_stops();
-		void fix();
-		// attributes
-	private:
-		colour_stop_list iColourStops;
-		alpha_stop_list iAlphaStops;
-		direction_e iDirection;
-		orientation_type iOrientation;
-		shape_e iShape;
-		size_e iSize;
-		optional_point iCentre;
-		double iSmoothness;
-		optional_rect iRect;
-	};
+    inline colour operator*(const colour& aLeft, double aCoefficient)
+    {
+        return aLeft.to_vec4() * vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 };
+    }
 
-	typedef boost::optional<colour> optional_colour;
-	typedef boost::optional<gradient> optional_gradient;
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const colour& aColour)
+    {
+        aStream << "[A: 0x" << std::hex << (int)aColour.alpha() <<
+            ", R: 0x" << std::hex << (int)aColour.red() <<
+            ", G: 0x" << std::hex << (int)aColour.green() <<
+            ", B: 0x" << std::hex << (int)aColour.blue() << "]";
+        return aStream; 
+    }
 
-	typedef neolib::variant<colour, gradient> colour_or_gradient;
-	typedef boost::optional<colour_or_gradient> optional_colour_or_gradient;
+    class gradient
+    {
+        // constants
+    public:
+        static const std::uint32_t MaxStops = 256;
+        // types
+    public:
+        enum direction_e
+        {
+            Vertical    = 0,
+            Horizontal    = 1,
+            Diagonal    = 2,
+            Rectangular = 3,
+            Radial        = 4
+        };
+        enum corner_e
+        {
+            TopLeft        = 0,
+            TopRight    = 1,
+            BottomRight    = 2,
+            BottomLeft    = 3
+        };
+        typedef neolib::variant<corner_e, double> orientation_type;
+        enum shape_e
+        {
+            Ellipse        = 0,
+            Circle        = 1
+        };
+        enum size_e
+        {
+            ClosestSide        = 0,
+            FarthestSide    = 1,
+            ClosestCorner    = 2,
+            FarthestCorner    = 3
+        };
+        typedef std::pair<double, colour> colour_stop;
+        typedef std::vector<colour_stop> colour_stop_list;
+        typedef std::pair<double, colour::component> alpha_stop;
+        typedef std::vector<alpha_stop> alpha_stop_list;
+    public:
+        struct bad_position : std::logic_error { bad_position() : std::logic_error("neogfx::gradient::bad_position") {} };
+        // construction
+    public:
+        gradient();
+        gradient(const gradient& aOther);
+        explicit gradient(const colour& aColour);
+        gradient(const colour& aColour, direction_e aDirection);
+        gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection = Vertical);
+        gradient(const colour_stop_list& aColourStops, direction_e aDirection = Vertical);
+        gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection = Vertical);
+        // operations
+    public:
+        bool use_cache() const;
+        void set_cache_usage(bool aUseCache);
+        colour_stop_list::const_iterator colour_begin() const;
+        colour_stop_list::const_iterator colour_end() const;
+        alpha_stop_list::const_iterator alpha_begin() const;
+        alpha_stop_list::const_iterator alpha_end() const;
+        colour_stop_list::iterator colour_begin();
+        colour_stop_list::iterator colour_end();
+        alpha_stop_list::iterator alpha_begin();
+        alpha_stop_list::iterator alpha_end();
+        colour_stop_list::iterator find_colour_stop(double aPos, bool aToInsert = false);
+        colour_stop_list::iterator find_colour_stop(double aPos, double aStart, double aEnd, bool aToInsert = false);
+        alpha_stop_list::iterator find_alpha_stop(double aPos, bool aToInsert = false);
+        alpha_stop_list::iterator find_alpha_stop(double aPos, double aStart, double aEnd, bool aToInsert = false);
+        colour_stop_list::iterator insert_colour_stop(double aPos);
+        colour_stop_list::iterator insert_colour_stop(double aPos, double aStart, double aEnd);
+        alpha_stop_list::iterator insert_alpha_stop(double aPos);
+        alpha_stop_list::iterator insert_alpha_stop(double aPos, double aStart, double aEnd);
+        void erase_stop(colour_stop_list::iterator aStop);
+        void erase_stop(alpha_stop_list::iterator aStop);
+        std::size_t colour_stop_count() const;
+        std::size_t alpha_stop_count() const;
+        colour_stop_list combined_stops() const;
+        colour at(double aPos) const;
+        colour at(double aPos, double aStart, double aEnd) const;
+        colour colour_at(double aPos) const;
+        colour colour_at(double aPos, double aStart, double aEnd) const;
+        colour::component alpha_at(double aPos) const;
+        colour::component alpha_at(double aPos, double aStart, double aEnd) const;
+        gradient with_alpha(colour::component aAlpha) const;
+        gradient with_combined_alpha(colour::component aAlpha) const;
+        direction_e direction() const;
+        void set_direction(direction_e aDirection);
+        gradient with_direction(direction_e aDirection) const;
+        orientation_type orientation() const;
+        void set_orientation(orientation_type aOrientation);
+        gradient with_orientation(orientation_type aOrientation) const;
+        shape_e shape() const;
+        void set_shape(shape_e aShape);
+        gradient with_shape(shape_e aShape) const;
+        size_e size() const;
+        void set_size(size_e aSize);
+        gradient with_size(size_e aSize) const;
+        const optional_vec2& exponents() const;
+        void set_exponents(const optional_vec2& aExponents);
+        gradient with_exponents(const optional_vec2& aExponents) const;
+        const optional_point& centre() const;
+        void set_centre(const optional_point& aCentre);
+        gradient with_centre(const optional_point& aCentre) const;
+        double smoothness() const;
+        void set_smoothness(double aSmoothness);
+        gradient with_smoothness(double aSmoothness) const;
+    public:
+        bool operator==(const gradient& aOther) const;
+        bool operator!=(const gradient& aOther) const;
+        bool operator<(const gradient& aOther) const;
+    public:
+        static double normalized_position(double aPos, double aStart, double aEnd);
+    private:
+        const colour_stop_list& colour_stops() const;
+        colour_stop_list& colour_stops();
+        const alpha_stop_list& alpha_stops() const;
+        alpha_stop_list& alpha_stops();
+        void fix();
+        // attributes
+    private:
+        bool iUseCache;
+        colour_stop_list iColourStops;
+        alpha_stop_list iAlphaStops;
+        direction_e iDirection;
+        orientation_type iOrientation;
+        shape_e iShape;
+        size_e iSize;
+        optional_vec2 iExponents;
+        optional_point iCentre;
+        double iSmoothness;
+    };
 
-	typedef colour color;
-	typedef optional_colour optional_color;
-	typedef colour_or_gradient color_or_gradient;
-	typedef optional_colour_or_gradient optional_color_or_gradient;
+    typedef std::optional<colour> optional_colour;
+    typedef std::optional<gradient> optional_gradient;
+
+    typedef neolib::variant<colour, gradient> colour_or_gradient;
+    typedef std::optional<colour_or_gradient> optional_colour_or_gradient;
 }

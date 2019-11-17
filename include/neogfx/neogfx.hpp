@@ -1,7 +1,7 @@
 // neogfx.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,24 +20,44 @@
 #pragma once
 
 #include <neolib/neolib.hpp>
+#include <string>
+#include <boost/multiprecision/cpp_int.hpp>
+using namespace boost::multiprecision;
+
+#include <neolib/stdint.hpp>
+#include <neolib/reference_counted.hpp>
+#include <neogfx/app/i18n.hpp>
 
 namespace neogfx
 {
-	inline const void*& debug()
-	{
-		static const void* sObject;
-		return sObject;
-	}
+    using namespace neolib::stdint_suffix;
+    using namespace std::string_literals;
 
-	template <typename T>
-	inline void set_debug(const T* aObject)
-	{
-		debug() = aObject;
-	}
+    using neolib::ref_ptr;
 
-	template <typename T>
-	inline void set_debug(const T& aObject)
-	{
-		debug() = &aObject;
-	}
+    template <typename Component>
+    Component& service();
+
+    template <typename Component>
+    void teardown_service();
+
+    template <typename CharT, typename Traits, typename Allocator>
+    inline const std::string to_string(const std::basic_string<CharT, Traits, Allocator>& aString)
+    {
+        static_assert(sizeof(CharT) == sizeof(char));
+        return std::string{ reinterpret_cast<const char*>(aString.c_str()), aString.size() };
+    }
+
+    template <typename CharT, std::size_t Size>
+    inline const std::string to_string(const CharT (&aString)[Size])
+    {
+        static_assert(sizeof(CharT) == sizeof(char));
+        return std::string{ reinterpret_cast<const char*>(aString), Size };
+    }
+
+    struct not_yet_implemented : std::runtime_error
+    {
+        not_yet_implemented(const std::string& aDetail = {}) :
+            std::runtime_error{ "neoGFX: Functionality not yet implemented" + (aDetail.empty() ? "" : " (" + aDetail + ")") } {}
+    };
 }

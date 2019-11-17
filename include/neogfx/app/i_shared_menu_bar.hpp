@@ -1,7 +1,7 @@
 // i_shared_menu_bar.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_shared_menu_bar : public i_menu
-	{
-	public:
-		virtual void use(const i_menu& aSourceMenu) = 0;
-	};
+    class i_shared_menu_bar : public i_menu
+    {
+    public:
+        virtual void use(const i_menu& aSourceMenu) = 0;
+    };
 }

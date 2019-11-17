@@ -1,7 +1,7 @@
 // horizontal_layout.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,27 +20,27 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include "layout.hpp"
 
 namespace neogfx
 {
-	class horizontal_layout : public layout
-	{
-	public:
-		horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-		horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-		horizontal_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-	public:
-		using layout::add_spacer;
-		virtual i_spacer& add_spacer();
-		virtual i_spacer& add_spacer_at(item_index aPosition);
-	public:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
-	public:
-		virtual void layout_items(const point& aPosition, const size& aSize);
-	protected:
-		using layout::items_visible;
-	};
+    class horizontal_layout : public layout
+    {
+    public:
+        horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        horizontal_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        horizontal_layout(horizontal_layout& aParent);
+    public:
+        i_spacer& add_spacer() override;
+        i_spacer& add_spacer_at(item_index aPosition) override;
+    public:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+    public:
+        void layout_items(const point& aPosition, const size& aSize) override;
+    protected:
+        using layout::items_visible;
+    };
 }

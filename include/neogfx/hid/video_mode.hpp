@@ -1,7 +1,7 @@
 // video_mode.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -19,32 +19,36 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
 {
-	class video_mode
-	{
-	public:
-		video_mode(uint32_t aWidth, uint32_t aHeight, uint32_t aBitsPerPixel = 32) : 
-			iWidth(aWidth), iHeight(aHeight), iBitsPerPixel(aBitsPerPixel)
-		{
-		};
-	public:
-		uint32_t width() const
-		{
-			return iWidth;
-		}
-		uint32_t height() const
-		{
-			return iHeight;
-		}
-		uint32_t bits_per_pixel() const
-		{
-			return iBitsPerPixel;
-		}
-	private:
-		uint32_t iWidth;
-		uint32_t iHeight;
-		uint32_t iBitsPerPixel;
-	};
+    class video_mode
+    {
+    public:
+        typedef basic_size<uint32_t> resolution_t;
+    public:
+        video_mode(const resolution_t& aResolution, uint32_t aBitsPerPixel = 32) :
+            iResolution{ aResolution }, iBitsPerPixel{ aBitsPerPixel }
+        {
+        };
+        video_mode(uint32_t aWidth, uint32_t aHeight, uint32_t aBitsPerPixel = 32) :
+            iResolution{ aWidth, aHeight }, iBitsPerPixel{ aBitsPerPixel }
+        {
+        };
+    public:
+        const resolution_t& resolution() const
+        {
+            return iResolution;
+        }
+        uint32_t bits_per_pixel() const
+        {
+            return iBitsPerPixel;
+        }
+    private:
+        resolution_t iResolution;
+        uint32_t iBitsPerPixel;
+    };
+
+    typedef std::optional<video_mode> optional_video_mode;
 }

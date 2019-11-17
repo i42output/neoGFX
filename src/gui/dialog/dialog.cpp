@@ -1,7 +1,7 @@
 // dialog.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -18,174 +18,248 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/app/event_processing_context.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 
 namespace neogfx
 {
-	dialog::dialog(window_style aStyle) :
-		window(size{}, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(window_style aStyle) :
+        window{ aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(const std::string& aDialogTitle, window_style aStyle) :
-		window(size{}, aDialogTitle, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(const std::string& aDialogTitle, window_style aStyle) :
+        window{ aDialogTitle, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(const size& aDimensions, window_style aStyle) :
-		window(aDimensions, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(const size& aDimensions, window_style aStyle) :
+        window{ aDimensions, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aDimensions, aDialogTitle, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
+        window{ aDimensions, aDialogTitle, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(const point& aPosition, const size& aDimensions, window_style aStyle) :
-		window(aPosition, aDimensions, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(const point& aPosition, const size& aDimensions, window_style aStyle) :
+        window{ rect{ aPosition, aDimensions }, {}, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aPosition, aDimensions, aDialogTitle, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
+        window{ rect{ aPosition, aDimensions }, aDialogTitle, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(i_widget& aParent, window_style aStyle) :
-		window(aParent, size{}, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(i_widget& aParent, window_style aStyle) :
+        window{ aParent, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle) :
-		window(aParent, size{}, aDialogTitle, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle) :
+        window{ aParent, aDialogTitle, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(i_widget& aParent, const size& aDimensions, window_style aStyle) :
-		window(aParent, aDimensions, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(i_widget& aParent, const size& aDimensions, window_style aStyle) :
+        window{ aParent, aDimensions, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aParent, aDimensions, aDialogTitle, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
+        window{ aParent, aDimensions, aDialogTitle, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle) :
-		window(aParent, aPosition, aDimensions, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle) :
+        window{ aParent, rect{ aPosition, aDimensions }, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aParent, aPosition, aDimensions, aDialogTitle, aStyle)
-	{
-		init();
-	}
+    dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
+        window{ aParent, rect{ aPosition, aDimensions }, aDialogTitle, aStyle },
+        iClientLayout{ window::client_layout() },
+        iButtonBoxLayout{ window::client_layout() }
+    {
+        init();
+    }
 
-	dialog::~dialog()
-	{
-	}
+    dialog::~dialog()
+    {
+    }
 
-	void dialog::accept()
-	{
-		if (iResult != Accepted)
-		{
-			bool canAccept = true;
-			try_accept.trigger(canAccept);
-			if (canAccept)
-				iResult = Accepted;
-			else
-				app::instance().basic_services().system_beep();
-		}
-	}
+    void dialog::accept()
+    {
+        if (result() != dialog_result::Accepted)
+        {
+            bool canAccept = true;
+            TryAccept.trigger(canAccept);
+            if (canAccept)
+                set_result(dialog_result::Accepted);
+            else
+                service<i_basic_services>().system_beep();
+        }
+    }
 
-	void dialog::reject()
-	{
-		if (iResult != Rejected)
-		{
-			bool canReject = true;
-			try_reject.trigger(canReject);
-			if (canReject)
-				iResult = Rejected;
-			else
-				app::instance().basic_services().system_beep();
-		}
-	}
+    void dialog::reject()
+    {
+        if (result() != dialog_result::Rejected)
+        {
+            bool canReject = true;
+            TryReject.trigger(canReject);
+            if (canReject)
+                set_result(dialog_result::Rejected);
+            else
+                service<i_basic_services>().system_beep();
+        }
+    }
 
-	dialog_button_box& dialog::button_box()
-	{
-		if (iButtonBox == boost::none)
-		{
-			if (!has_layout())
-				set_layout(std::make_shared<vertical_layout>());
-			iButtonBox.emplace(layout());
-			iButtonBox->accepted([this]()
-			{
-				accept();
-			});
-			iButtonBox->rejected([this]()
-			{
-				reject();
-			});
-		}
-		return *iButtonBox;
-	}
+    dialog_result dialog::result() const
+    {
+        if (iResult != std::nullopt)
+            return *iResult;
+        return dialog_result::NoResult;
+    }
 
-	dialog::result_code_e dialog::exec()
-	{
-		app::event_processing_context epc(app::instance(), "neogfx::dialog");
-		while (iResult == boost::none)
-		{
-			app::instance().process_events(epc);
-			if (surface().destroyed() && iResult == boost::none)
-				iResult = Rejected;
-		}
-		return *iResult;
-	}
+    void dialog::set_result(dialog_result aResult)
+    {
+        iResult = aResult;
+    }
 
-	neogfx::size_policy dialog::size_policy() const
-	{
-		if (widget::has_size_policy())
-			return widget::size_policy();
-		return neogfx::size_policy::Minimum;
-	}
+    size dialog::set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox, bool aDpiScaling)
+    {
+        auto ajustedSpacing = (aDpiScaling ? dpi_scale(aControlSpacing) : aControlSpacing);
+        set_margins(neogfx::margins{});
+        window::client_layout().set_margins(neogfx::margins{ ajustedSpacing.cx, ajustedSpacing.cy, ajustedSpacing.cx, ajustedSpacing.cy });
+        window::client_layout().set_spacing(ajustedSpacing);
+        client_layout().set_margins(neogfx::margins{});
+        client_layout().set_spacing(ajustedSpacing);
+        if (aCreateButtonBox)
+            button_box().layout().set_spacing(ajustedSpacing);
+        return ajustedSpacing;
+    }
 
-	bool dialog::can_close() const
-	{
-		bool canReject = true;
-		try_reject.trigger(canReject);
-		return canReject;
-	}
+    dialog_button_box& dialog::button_box()
+    {
+        if (iButtonBox == std::nullopt)
+        {
+            iButtonBox.emplace(button_box_layout());
+            button_box().layout().set_spacing(client_layout().spacing());
+            button_box().Accepted([this]()
+            {
+                accept();
+            });
+            button_box().Rejected([this]()
+            {
+                reject();
+            });
+        }
+        return *iButtonBox;
+    }
 
-	bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
-	{
-		switch (aScanCode)
-		{
-		case ScanCode_RETURN:
-			accept();
-			return true;
-		case ScanCode_ESCAPE:
-			reject();
-			return true;
-		default:
-			return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-		}
-	}
+    dialog_result dialog::exec()
+    {
+        neolib::destroyed_flag destroyed{ surface().as_lifetime() };
+        event_processing_context epc(service<neolib::async_task>(), "neogfx::dialog");
+        while (iResult == std::nullopt)
+        {
+            service<i_app>().process_events(epc);
+            if (destroyed && result() == dialog_result::NoResult)
+                set_result(dialog_result::Rejected);
+        }
+        return *iResult;
+    }
 
-	void dialog::init()
-	{
-	}
+    neogfx::size_policy dialog::size_policy() const
+    {
+        if (widget::has_size_policy())
+            return widget::size_policy();
+        return neogfx::size_policy::Minimum;
+    }
+
+    bool dialog::can_close() const
+    {
+        bool canReject = true;
+        TryReject.trigger(canReject);
+        return canReject;
+    }
+
+    bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    {
+        switch (aScanCode)
+        {
+        case ScanCode_RETURN:
+            accept();
+            return true;
+        case ScanCode_ESCAPE:
+            if ((style() & window_style::Close) == window_style::Close)
+                reject();
+            return true;
+        default:
+            return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+        }
+    }
+
+    const i_layout& dialog::client_layout() const
+    {
+        return iClientLayout;
+    }
+
+    i_layout& dialog::client_layout()
+    {
+        return iClientLayout;
+    }
+
+    const i_layout& dialog::button_box_layout() const
+    {
+        return iButtonBoxLayout;
+    }
+
+    i_layout& dialog::button_box_layout()
+    {
+        return iButtonBoxLayout;
+    }
+
+    void dialog::init()
+    {
+        iButtonBoxLayout.set_weight(size{});
+        set_standard_layout(service<i_app>().current_style().spacing(), false);
+    }
 }

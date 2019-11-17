@@ -1,7 +1,7 @@
 // i_resource.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,37 +20,37 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
+#include <neogfx/core/i_event.hpp>
 
 namespace neogfx
 {
-	class i_resource
-	{
-	public:
-		event<> downloaded;
-		event<> failed_to_download;
-	public:
-		typedef std::vector<uint8_t> data_type;
-		typedef data_type hash_digest_type;
-		typedef std::shared_ptr<i_resource> pointer;
-		typedef std::weak_ptr<i_resource> weak_pointer;
-	public:
-		struct not_available : std::logic_error { not_available() : std::logic_error("neogfx::i_resource::not_available") {} };
-		struct no_data : std::logic_error { no_data() : std::logic_error("neogfx::i_resource::no_data") {} };
-		struct const_data : std::logic_error { const_data() : std::logic_error("neogfx::i_resource::const_data") {} };
-	public:
-		virtual ~i_resource() {}
-	public:
-		virtual bool available() const = 0;
-		virtual std::pair<bool, double> downloading() const = 0;
-		virtual bool error() const = 0;
-		virtual const std::string& error_string() const = 0;
-	public:
-		virtual const std::string& uri() const = 0;
-		virtual const void* cdata() const = 0;
-		virtual const void* data() const = 0;
-		virtual void* data() = 0;
-		virtual std::size_t size() const = 0;
-		virtual hash_digest_type hash() const = 0;
-	};
+    class i_resource
+    {
+    public:
+        declare_event(downloaded)
+        declare_event(failed_to_download)
+    public:
+        typedef std::vector<uint8_t> data_type;
+        typedef data_type hash_digest_type;
+        typedef std::shared_ptr<i_resource> pointer;
+        typedef std::weak_ptr<i_resource> weak_pointer;
+    public:
+        struct not_available : std::logic_error { not_available() : std::logic_error("neogfx::i_resource::not_available") {} };
+        struct no_data : std::logic_error { no_data() : std::logic_error("neogfx::i_resource::no_data") {} };
+        struct const_data : std::logic_error { const_data() : std::logic_error("neogfx::i_resource::const_data") {} };
+    public:
+        virtual ~i_resource() {}
+    public:
+        virtual bool available() const = 0;
+        virtual std::pair<bool, double> downloading() const = 0;
+        virtual bool error() const = 0;
+        virtual const std::string& error_string() const = 0;
+    public:
+        virtual const std::string& uri() const = 0;
+        virtual const void* cdata() const = 0;
+        virtual const void* data() const = 0;
+        virtual void* data() = 0;
+        virtual std::size_t size() const = 0;
+        virtual hash_digest_type hash() const = 0;
+    };
 }

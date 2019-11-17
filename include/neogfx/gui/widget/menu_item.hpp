@@ -1,7 +1,7 @@
 // menu_item.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -20,35 +20,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_menu_item.hpp"
+#include <neogfx/gui/widget/i_menu_item.hpp>
 
 namespace neogfx
 {
-	class i_menu;
+    class i_menu;
 
-	class menu_item : public i_menu_item
-	{
-	private:
-		typedef std::shared_ptr<i_action> action_pointer;
-		typedef std::shared_ptr<i_menu> menu_pointer;
-		typedef neolib::variant<action_pointer, menu_pointer> contents;
-	public:
-		menu_item(i_action& aAction);
-		menu_item(std::shared_ptr<i_action> aAction);
-		menu_item(i_menu& aSubMenu);
-		menu_item(std::shared_ptr<i_menu> aSubMenu);
-	public:
-		type_e type() const override;
-		const i_action& action() const override;
-		i_action& action() override;
-		const i_menu& sub_menu() const override;
-		i_menu& sub_menu() override;
-	public:
-		bool available() const override;
-		void select(bool aSelectAnySubMenuItem = true) override;
-		bool select_any_sub_menu_item() const override;
-	private:
-		contents iContents;
-		bool iSelectAnySubMenuItem;
-	};
+    class menu_item : public i_menu_item
+    {
+    public:
+        define_declared_event(Selected, selected)
+        define_declared_event(Deselected, deselected)
+    private:
+        typedef std::shared_ptr<i_action> action_pointer;
+        typedef std::shared_ptr<i_menu> menu_pointer;
+        typedef neolib::variant<action_pointer, menu_pointer> contents;
+    public:
+        menu_item(i_action& aAction);
+        menu_item(std::shared_ptr<i_action> aAction);
+        menu_item(i_menu& aSubMenu);
+        menu_item(std::shared_ptr<i_menu> aSubMenu);
+    public:
+        menu_item_type type() const override;
+        const i_action& action() const override;
+        i_action& action() override;
+        const i_menu& sub_menu() const override;
+        i_menu& sub_menu() override;
+    public:
+        bool available() const override;
+        void select(bool aOpenAnySubMenu = true) override;
+        bool open_any_sub_menu() const override;
+    private:
+        contents iContents;
+        bool iOpenAnySubMenu;
+    };
 }

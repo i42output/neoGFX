@@ -1,7 +1,7 @@
 // pen.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -23,24 +23,24 @@
 
 namespace neogfx
 {
-	class pen
-	{
-	public:
-		// construction
-	public:
-		pen() : iWidth(0) {}
-		pen(const colour_or_gradient& aColour, bool aAntiAliased = true) : iColour(aColour), iWidth(1), iAntiAliased(aAntiAliased) {}
-		pen(const colour_or_gradient& aColour, dimension aWidth, bool aAntiAliased = true) : iColour(aColour), iWidth(aWidth), iAntiAliased(aAntiAliased) {}
-		// operations
-	public:
-		neogfx::colour_or_gradient colour() const { return iColour; }
-		dimension width() const { return iWidth; }
-		bool anti_aliased() const { return iAntiAliased; }
-	private:
-		colour_or_gradient iColour;
-		dimension iWidth;
-		bool iAntiAliased;
-	};
+    class pen
+    {
+    public:
+        // construction
+    public:
+        pen() : iWidth(0) {}
+        pen(const colour_or_gradient& aColour, bool aAntiAliased = true) : iColour(aColour), iWidth(1), iAntiAliased(aAntiAliased) {}
+        pen(const colour_or_gradient& aColour, dimension aWidth, bool aAntiAliased = true) : iColour(aColour), iWidth(aWidth), iAntiAliased(aAntiAliased) {}
+        // operations
+    public:
+        neogfx::colour_or_gradient colour() const { return iColour; }
+        dimension width() const { return iWidth; }
+        bool anti_aliased() const { return iAntiAliased; }
+    private:
+        colour_or_gradient iColour;
+        dimension iWidth;
+        bool iAntiAliased;
+    };
 
-	typedef boost::optional<pen> optional_pen;
+    typedef std::optional<pen> optional_pen;
 }

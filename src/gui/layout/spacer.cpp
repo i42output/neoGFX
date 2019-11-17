@@ -1,7 +1,7 @@
 // spacer.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -18,251 +18,324 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 
 namespace neogfx
 {
-	spacer::device_metrics_forwarder::device_metrics_forwarder(i_spacer& aOwner) :
-		iOwner(aOwner)
-	{
-	}
+    spacer::spacer(expansion_policy_e aExpansionPolicy) :
+        iParentLayout{ nullptr }, 
+        iExpansionPolicy{ aExpansionPolicy }
+    {
+    }
 
-	bool spacer::device_metrics_forwarder::metrics_available() const
-	{
-		return iOwner.parent().device_metrics().metrics_available();
-	}
+    spacer::spacer(i_layout& aParentLayout, expansion_policy_e aExpansionPolicy) :
+        iParentLayout{ nullptr }, 
+        iExpansionPolicy{ aExpansionPolicy }
+    {
+        aParentLayout.add(*this);
+    }
 
-	size spacer::device_metrics_forwarder::extents() const
-	{
-		return iOwner.parent().device_metrics().extents();
-	}
+    spacer::~spacer()
+    {
+        if (has_parent_layout())
+            parent_layout().remove(*this);
+    }
 
-	dimension spacer::device_metrics_forwarder::horizontal_dpi() const
-	{
-		return iOwner.parent().device_metrics().horizontal_dpi();
-	}
+    bool spacer::is_layout() const
+    {
+        return false;
+    }
 
-	dimension spacer::device_metrics_forwarder::vertical_dpi() const
-	{
-		return iOwner.parent().device_metrics().vertical_dpi();
-	}
+    const i_layout& spacer::as_layout() const
+    {
+        throw not_a_layout();
+    }
 
-	dimension spacer::device_metrics_forwarder::em_size() const
-	{
-		return iOwner.parent().device_metrics().em_size();
-	}
+    i_layout& spacer::as_layout()
+    {
+        throw not_a_layout();
+    }
 
-	spacer::spacer(expansion_policy_e aExpansionPolicy) :
-		iParent(0), iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder), iExpansionPolicy(aExpansionPolicy)
-	{
-	}
+    bool spacer::is_widget() const
+    {
+        return false;
+    }
 
-	spacer::spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy) :
-		iParent(&aParent), iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder), iExpansionPolicy(aExpansionPolicy)
-	{
-		aParent.add_item(*this);
-	}
+    const i_widget& spacer::as_widget() const
+    {
+        throw not_a_widget();
+    }
 
-	const i_layout& spacer::parent() const
-	{
-		if (iParent == 0)
-			throw no_parent();
-		return *iParent;
-	}
+    i_widget& spacer::as_widget()
+    {
+        throw not_a_widget();
+    }
 
-	i_layout& spacer::parent()
-	{
-		if (iParent == 0)
-			throw no_parent();
-		return *iParent;
-	}
+    bool spacer::has_parent_layout() const
+    {
+        return iParentLayout != nullptr;
+    }
 
-	void spacer::set_parent(i_layout& aParent)
-	{
-		iParent = &aParent;
-	}
+    const i_layout& spacer::parent_layout() const
+    {
+        if (has_parent_layout())
+            return *iParentLayout;
+        throw no_parent_layout();
+    }
 
-	spacer::expansion_policy_e spacer::expansion_policy() const
-	{
-		return iExpansionPolicy;
-	}
+    i_layout& spacer::parent_layout()
+    {
+        return const_cast<i_layout&>(to_const(*this).parent_layout());
+    }
 
-	void spacer::set_expansion_policy(expansion_policy_e aExpansionPolicy)
-	{
-		if (iExpansionPolicy != aExpansionPolicy)
-		{
-			iExpansionPolicy = aExpansionPolicy;
-			if (iParent != 0 && iParent->owner() != 0)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
-		}
-	}
+    void spacer::set_parent_layout(i_layout* aParentLayout)
+    {
+        iParentLayout = aParentLayout;
+    }
 
-	size spacer::extents() const
-	{
-		return units_converter(*this).from_device_units(iExtents);
-	}
+    bool spacer::has_layout_owner() const
+    {
+        if (has_parent_layout())
+            return parent_layout().has_layout_owner();
+        else
+            return false;
+    }
 
-	point spacer::position() const
-	{
-		return units_converter(*this).from_device_units(iPosition);
-	}
+    const i_widget& spacer::layout_owner() const
+    {
+        if (has_layout_owner())
+            return parent_layout().layout_owner();
+        throw no_layout_owner();
+    }
 
-	void spacer::set_position(const point& aPosition)
-	{
-		iPosition = units_converter(*this).to_device_units(aPosition);
-	}
+    i_widget& spacer::layout_owner()
+    {
+        return const_cast<i_widget&>(to_const(*this).layout_owner());
+    }
 
-	void spacer::set_extents(const size& aExtents)
-	{
-		iExtents = units_converter(*this).to_device_units(aExtents);
-	}
+    void spacer::set_layout_owner(i_widget*)
+    {
+        // do nothing
+    }
 
-	bool spacer::has_size_policy() const
-	{
-		return iSizePolicy != boost::none;
-	}
+    bool spacer::is_proxy() const
+    {
+        return false;
+    }
 
-	size_policy spacer::size_policy() const
-	{
-		if (has_size_policy())
-			return *iSizePolicy;
-		neogfx::size_policy result{neogfx::size_policy::Minimum};
-		if (iExpansionPolicy & ExpandHorizontally)
-			result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
-		if (iExpansionPolicy & ExpandVertically)
-			result.set_vertical_size_policy(neogfx::size_policy::Expanding);
-		return result;
-	}
+    const i_layout_item_proxy& spacer::layout_item_proxy() const
+    {
+        return parent_layout().find_proxy(*this);
+    }
 
-	void spacer::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-	{
-		if (iSizePolicy != aSizePolicy)
-		{
-			iSizePolicy = aSizePolicy;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
-		}
-	}
+    i_layout_item_proxy& spacer::layout_item_proxy()
+    {
+        return parent_layout().find_proxy(*this);
+    }
 
-	bool spacer::has_weight() const
-	{
-		return iWeight != boost::none;
-	}
+    spacer::expansion_policy_e spacer::expansion_policy() const
+    {
+        return iExpansionPolicy;
+    }
 
-	size spacer::weight() const
-	{
-		if (has_weight())
-			return *iWeight;
-		else
-			return 1.0;
-	}
+    void spacer::set_expansion_policy(expansion_policy_e aExpansionPolicy)
+    {
+        if (iExpansionPolicy != aExpansionPolicy)
+        {
+            iExpansionPolicy = aExpansionPolicy;
+            if (has_layout_owner())
+                layout_owner().layout_root(true);
+        }
+    }
 
-	void spacer::set_weight(const optional_size& aWeight, bool aUpdateLayout)
-	{
-		if (iWeight != aWeight)
-		{
-			iWeight = aWeight;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
-		}
-	}
+    size spacer::extents() const
+    {
+        return units_converter(*this).from_device_units(iExtents);
+    }
 
-	bool spacer::has_minimum_size() const
-	{
-		return iMinimumSize != boost::none;
-	}
+    bool spacer::high_dpi() const
+    {
+        return has_layout_owner() && layout_owner().has_surface() ? 
+            layout_owner().surface().ppi() >= 150.0 : 
+            service<i_surface_manager>().display().metrics().ppi() >= 150.0;
+    }
 
-	size spacer::minimum_size(const optional_size&) const
-	{
-		return has_minimum_size() ?
-			units_converter(*this).from_device_units(*iMinimumSize) :
-			size{};
-	}
+    dimension spacer::dpi_scale_factor() const
+    {
+        return default_dpi_scale_factor(
+            has_layout_owner() && layout_owner().has_surface() ?
+                layout_owner().surface().ppi() : 
+                service<i_surface_manager>().display().metrics().ppi());
+    }
 
-	void spacer::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
-	{
-		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
-		if (iMinimumSize != newMinimumSize)
-		{
-			iMinimumSize = newMinimumSize;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
-		}
-	}
+    point spacer::position() const
+    {
+        return units_converter(*this).from_device_units(iPosition);
+    }
 
-	bool spacer::has_maximum_size() const
-	{
-		return iMaximumSize != boost::none;
-	}
+    void spacer::set_position(const point& aPosition)
+    {
+        iPosition = units_converter(*this).to_device_units(aPosition);
+    }
 
-	size spacer::maximum_size(const optional_size&) const
-	{
-		return has_maximum_size() ?
-			units_converter(*this).from_device_units(*iMaximumSize) :
-			size{std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max()};
-	}
+    void spacer::set_extents(const size& aExtents)
+    {
+        iExtents = units_converter(*this).to_device_units(aExtents);
+    }
 
-	void spacer::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
-	{
-		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
-		if (iMaximumSize != newMaximumSize)
-		{
-			iMaximumSize = newMaximumSize;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
-		}
-	}
+    bool spacer::has_size_policy() const
+    {
+        return iSizePolicy != std::nullopt;
+    }
 
-	bool spacer::has_margins() const
-	{
-		return false;
-	}
+    size_policy spacer::size_policy() const
+    {
+        if (has_size_policy())
+            return *iSizePolicy;
+        neogfx::size_policy result{neogfx::size_policy::Minimum};
+        if (iExpansionPolicy & ExpandHorizontally)
+            result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
+        if (iExpansionPolicy & ExpandVertically)
+            result.set_vertical_size_policy(neogfx::size_policy::Expanding);
+        return result;
+    }
 
-	neogfx::margins spacer::margins() const
-	{
-		return neogfx::margins{};
-	}
+    void spacer::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
+    {
+        if (iSizePolicy != aSizePolicy)
+        {
+            iSizePolicy = aSizePolicy;
+            if (has_layout_owner() && aUpdateLayout)
+                layout_owner().layout_root(true);
+        }
+    }
 
-	void spacer::set_margins(const optional_margins&, bool)
-	{
-		/* do nothing */
-	}
+    bool spacer::has_weight() const
+    {
+        return iWeight != std::nullopt;
+    }
 
-	const i_device_metrics& spacer::device_metrics() const
-	{
-		return iDeviceMetricsForwarder;
-	}
+    size spacer::weight() const
+    {
+        if (has_weight())
+            return *iWeight;
+        else
+            return size{ 1.0 };
+    }
 
-	units spacer::units() const
-	{
-		return iUnitsContext.units();
-	}
+    void spacer::set_weight(const optional_size& aWeight, bool aUpdateLayout)
+    {
+        if (iWeight != aWeight)
+        {
+            iWeight = aWeight;
+            if (has_layout_owner() && aUpdateLayout)
+                layout_owner().layout_root(true);
+        }
+    }
 
-	units spacer::set_units(neogfx::units aUnits) const
-	{
-		return iUnitsContext.set_units(aUnits);
-	}
+    bool spacer::has_minimum_size() const
+    {
+        return iMinimumSize != std::nullopt;
+    }
 
-	horizontal_spacer::horizontal_spacer() :
-		spacer(ExpandHorizontally)
-	{
-	}
+    size spacer::minimum_size(const optional_size&) const
+    {
+        return has_minimum_size() ?
+            units_converter(*this).from_device_units(*iMinimumSize) :
+            size{};
+    }
 
-	horizontal_spacer::horizontal_spacer(i_layout& aParent) :
-		spacer(aParent, ExpandHorizontally)
-	{
-	}
+    void spacer::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
+    {
+        optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+        if (iMinimumSize != newMinimumSize)
+        {
+            iMinimumSize = newMinimumSize;
+            if (has_layout_owner() && aUpdateLayout)
+                layout_owner().layout_root(true);
+        }
+    }
 
-	vertical_spacer::vertical_spacer() :
-		spacer(ExpandVertically)
-	{
-	}
+    bool spacer::has_maximum_size() const
+    {
+        return iMaximumSize != std::nullopt;
+    }
 
-	vertical_spacer::vertical_spacer(i_layout& aParent) :
-		spacer(aParent, ExpandVertically)
-	{
-	}
+    size spacer::maximum_size(const optional_size&) const
+    {
+        return has_maximum_size() ?
+            units_converter(*this).from_device_units(*iMaximumSize) :
+            size::max_size();
+    }
+
+    void spacer::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
+    {
+        optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+        if (iMaximumSize != newMaximumSize)
+        {
+            iMaximumSize = newMaximumSize;
+            if (has_layout_owner() && aUpdateLayout)
+                layout_owner().layout_root(true);
+        }
+    }
+
+    bool spacer::has_margins() const
+    {
+        return false;
+    }
+
+    neogfx::margins spacer::margins() const
+    {
+        return neogfx::margins{};
+    }
+
+    void spacer::set_margins(const optional_margins&, bool)
+    {
+        /* do nothing */
+    }
+
+    bool spacer::device_metrics_available() const
+    {
+        return has_parent_layout() && parent_layout().device_metrics_available();
+    }
+
+    const i_device_metrics& spacer::device_metrics() const
+    {
+        if (device_metrics_available())
+            return parent_layout().device_metrics();
+        throw no_device_metrics();
+    }
+
+    void spacer::layout_as(const point&, const size& aSize)
+    {
+        set_extents(aSize);
+    }
+
+    bool spacer::visible() const
+    {
+        return true;
+    }
+
+    horizontal_spacer::horizontal_spacer() :
+        spacer(ExpandHorizontally)
+    {
+    }
+
+    horizontal_spacer::horizontal_spacer(i_layout& aParent) :
+        spacer(aParent, ExpandHorizontally)
+    {
+    }
+
+    vertical_spacer::vertical_spacer() :
+        spacer(ExpandVertically)
+    {
+    }
+
+    vertical_spacer::vertical_spacer(i_layout& aParent) :
+        spacer(aParent, ExpandVertically)
+    {
+    }
 }

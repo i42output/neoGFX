@@ -1,7 +1,7 @@
 // graphics_operations.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,348 +20,332 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <vector>
 #include <neolib/variant.hpp>
-#include <neolib/vecarray.hpp>
-#include <neogfx/core/geometry.hpp>
-#include <neogfx/core/path.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/gfx/text/font.hpp>
 #include <neogfx/game/mesh.hpp>
-#include <neogfx/../../src/gfx/native/i_native_texture.hpp>
-#include <neogfx/../../src/gfx/text/native/i_native_font_face.hpp>
+#include <neogfx/game/material.hpp>
 
 namespace neogfx
 {
-	namespace graphics_operation
-	{
-		struct set_logical_coordinate_system
-		{
-			logical_coordinate_system system;
-		};
+    namespace graphics_operation
+    {
+        struct set_logical_coordinate_system
+        {
+            logical_coordinate_system system;
+        };
 
-		struct set_logical_coordinates
-		{
-			std::pair<vec2, vec2> coordinates;
-		};
+        struct set_logical_coordinates
+        {
+            logical_coordinates coordinates;
+        };
 
-		struct scissor_on
-		{
-			rect rect;
-		};
+        struct scissor_on
+        {
+            rect rect;
+        };
 
-		struct scissor_off
-		{
-		};
+        struct scissor_off
+        {
+        };
 
-		struct clip_to_rect
-		{
-			rect rect;
-		};
+        struct clip_to_rect
+        {
+            rect rect;
+        };
 
-		struct clip_to_path
-		{
-			path path;
-			dimension pathOutline;
-		};
+        struct clip_to_path
+        {
+            path path;
+            dimension pathOutline;
+        };
 
-		struct reset_clip
-		{
-		};
+        struct reset_clip
+        {
+        };
 
-		struct set_smoothing_mode
-		{
-			smoothing_mode smoothingMode;
-		};
+        struct set_opacity
+        {
+            double opacity;
+        };
 
-		struct push_logical_operation
-		{
-			logical_operation logicalOperation;
-		};
+        struct set_blending_mode
+        {
+            blending_mode blendingMode;
+        };
 
-		struct pop_logical_operation
-		{
-		};
+        struct set_smoothing_mode
+        {
+            smoothing_mode smoothingMode;
+        };
 
-		struct line_stipple_on
-		{
-			uint32_t factor;
-			uint16_t pattern;
-		};
+        struct push_logical_operation
+        {
+            logical_operation logicalOperation;
+        };
 
-		struct line_stipple_off
-		{
-		};
+        struct pop_logical_operation
+        {
+        };
 
-		struct subpixel_rendering_on
-		{
-		};
+        struct line_stipple_on
+        {
+            uint32_t factor;
+            uint16_t pattern;
+        };
 
-		struct subpixel_rendering_off
-		{
-		};
+        struct line_stipple_off
+        {
+        };
 
-		struct clear
-		{
-			colour colour;
-		};
+        struct subpixel_rendering_on
+        {
+        };
 
-		struct clear_depth_buffer
-		{
-		};
+        struct subpixel_rendering_off
+        {
+        };
 
-		struct set_pixel
-		{
-			point point;
-			colour colour;
-		};
+        struct clear
+        {
+            colour colour;
+        };
 
-		struct draw_pixel
-		{
-			point point;
-			colour colour;
-		};
+        struct clear_depth_buffer
+        {
+        };
 
-		struct draw_line
-		{
-			point from;
-			point to;
-			pen pen;
-		};
+        struct clear_stencil_buffer
+        {
+        };
 
-		struct draw_rect
-		{
-			rect rect;
-			pen pen;
-		};
+        struct set_pixel
+        {
+            point point;
+            colour colour;
+        };
 
-		struct draw_rounded_rect
-		{
-			rect rect;
-			dimension radius;
-			pen pen;
-		};
+        struct draw_pixel
+        {
+            point point;
+            colour colour;
+        };
 
-		struct draw_circle
-		{
-			point centre;
-			dimension radius;
-			pen pen;
-			angle startAngle;
-		};
+        struct draw_line
+        {
+            point from;
+            point to;
+            pen pen;
+        };
 
-		struct draw_arc
-		{
-			point centre;
-			dimension radius;
-			angle startAngle;
-			angle endAngle;
-			pen pen;
-		};
+        struct draw_rect
+        {
+            rect rect;
+            pen pen;
+        };
 
-		struct draw_path
-		{
-			path path;
-			pen pen;
-		};
+        struct draw_rounded_rect
+        {
+            rect rect;
+            dimension radius;
+            pen pen;
+        };
 
-		struct draw_shape
-		{
-			neogfx::mesh mesh;
-			pen pen;
-		};
+        struct draw_circle
+        {
+            point centre;
+            dimension radius;
+            pen pen;
+            angle startAngle;
+        };
 
-		struct fill_rect
-		{
-			rect rect;
-			brush fill;
-		};
+        struct draw_arc
+        {
+            point centre;
+            dimension radius;
+            angle startAngle;
+            angle endAngle;
+            pen pen;
+        };
 
-		struct fill_rounded_rect
-		{
-			rect rect;
-			dimension radius;
-			brush fill;
-		};
+        struct draw_path
+        {
+            path path;
+            pen pen;
+        };
 
-		struct fill_circle
-		{
-			point centre;
-			dimension radius;
-			brush fill;
-		};
+        struct draw_shape
+        {
+            game::mesh mesh;
+            pen pen;
+        };
 
-		struct fill_arc
-		{
-			point centre;
-			dimension radius;
-			angle startAngle;
-			angle endAngle;
-			brush fill;
-		};
+        struct draw_entities
+        {
+            game::i_ecs& ecs;
+            mat44 transformation;
+        };
 
-		struct fill_path
-		{
-			path path;
-			brush fill;
-		};
+        struct fill_rect
+        {
+            rect rect;
+            brush fill;
+            scalar zpos;
+        };
 
-		struct fill_shape
-		{
-			neogfx::mesh mesh;
-			brush fill;
-		};
+        struct fill_rounded_rect
+        {
+            rect rect;
+            dimension radius;
+            brush fill;
+        };
 
-		struct draw_glyph
-		{
-			point point;
-			glyph glyph;
-			font font;
-			text_appearance appearance;
-		};
+        struct fill_circle
+        {
+            point centre;
+            dimension radius;
+            brush fill;
+        };
 
-		struct draw_texture
-		{
-			neogfx::mesh mesh;
-			texture texture;
-			rect textureRect;
-			optional_colour colour;
-			shader_effect shaderEffect;
-		};
+        struct fill_arc
+        {
+            point centre;
+            dimension radius;
+            angle startAngle;
+            angle endAngle;
+            brush fill;
+        };
 
-		typedef neolib::variant <
-			set_logical_coordinate_system,
-			set_logical_coordinates,
-			scissor_on,
-			scissor_off,
-			clip_to_rect,
-			clip_to_path,
-			reset_clip,
-			set_smoothing_mode,
-			push_logical_operation,
-			pop_logical_operation,
-			line_stipple_on,
-			line_stipple_off,
-			subpixel_rendering_on,
-			subpixel_rendering_off,
-			clear,
-			clear_depth_buffer,
-			set_pixel,
-			draw_pixel,
-			draw_line,
-			draw_rect,
-			draw_rounded_rect,
-			draw_circle,
-			draw_arc,
-			draw_path,
-			draw_shape,
-			fill_rect,
-			fill_rounded_rect,
-			fill_circle,
-			fill_arc,
-			fill_path,
-			fill_shape,
-			draw_glyph,
-			draw_texture
-		> operation;
+        struct fill_path
+        {
+            path path;
+            brush fill;
+        };
 
-		enum operation_type
-		{
-			Invalid = 0,
-			SetLogicalCoordinateSystem,
-			SetLogicalCoordinates,
-			ScissorOn,
-			ScissorOff,
-			ClipToRect,
-			ClipToPath,
-			ResetClip,
-			SetSmoothingMode,
-			PushLogicalOperation,
-			PopLogicalOperation,
-			LineStippleOn,
-			LineStippleOff,
-			SubpixelRenderingOn,
-			SubpixelRenderingOff,
-			Clear,
-			ClearDepthBuffer,
-			SetPixel,
-			DrawPixel,
-			DrawLine,
-			DrawRect,
-			DrawRoundedRect,
-			DrawCircle,
-			DrawArc,
-			DrawPath,
-			DrawShape,
-			FillRect,
-			FillRoundedRect,
-			FillCircle,
-			FillArc,
-			FillPath,
-			FillShape,
-			DrawGlyph,
-			DrawTexture
-		};
+        struct fill_shape
+        {
+            game::mesh mesh;
+            brush fill;
+        };
 
-		bool inline batchable(const operation& aLeft, const operation& aRight)
-		{
-			if (aLeft.which() != aRight.which())
-				return false;
-			switch (static_cast<operation_type>(aLeft.which()))
-			{
-			case operation_type::SetPixel:
-			case operation_type::DrawPixel:
-				return true;
-			case operation_type::DrawLine:
-			{
-				auto& left = static_variant_cast<const draw_line&>(aLeft);
-				auto& right = static_variant_cast<const draw_line&>(aRight);
-				return left.pen.width() == right.pen.width() &&
-					left.pen.anti_aliased() == right.pen.anti_aliased();
-			}
-			case operation_type::FillRect:
-			{
-				auto& left = static_variant_cast<const fill_rect&>(aLeft);
-				auto& right = static_variant_cast<const fill_rect&>(aRight);
-				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
-			}
-			case operation_type::FillShape:
-			{
-				auto& left = static_variant_cast<const fill_shape&>(aLeft);
-				auto& right = static_variant_cast<const fill_shape&>(aRight);
-				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
-			}
-			case operation_type::DrawGlyph:
-			{
-				auto& left = static_variant_cast<const draw_glyph&>(aLeft);
-				auto& right = static_variant_cast<const draw_glyph&>(aRight);
-				if (left.glyph.is_emoji() || right.glyph.is_emoji())
-					return false;
-				if (left.appearance.ink().which() != right.appearance.ink().which() || !left.appearance.ink().is<colour>())
-					return false;
-				if (left.appearance.has_effect() != right.appearance.has_effect())
-					return false;
-				if (left.appearance.has_effect() && (left.appearance.effect().type() != right.appearance.effect().type() || left.appearance.effect().width() != right.appearance.effect().width()))
-					return false;
-				const i_glyph_texture& leftGlyphTexture = !left.glyph.use_fallback() ? left.font.native_font_face().glyph_texture(left.glyph) :
-					left.glyph.fallback_font(left.font).native_font_face().glyph_texture(left.glyph);
-				const i_glyph_texture& rightGlyphTexture = !right.glyph.use_fallback() ? right.font.native_font_face().glyph_texture(right.glyph) :
-					right.glyph.fallback_font(right.font).native_font_face().glyph_texture(right.glyph);
-				return leftGlyphTexture.texture().native_texture()->handle() == rightGlyphTexture.texture().native_texture()->handle() &&
-					left.glyph.subpixel() == right.glyph.subpixel();
-			}
-			case operation_type::DrawTexture:
-			{
-				auto& left = static_variant_cast<const draw_texture&>(aLeft);
-				auto& right = static_variant_cast<const draw_texture&>(aRight);
-				return left.texture.native_texture()->handle() == right.texture.native_texture()->handle() && left.shaderEffect == right.shaderEffect;
-			}
-			default:
-				return false;
-			}
-		}
+        struct draw_glyph
+        {
+            vec3 point;
+            glyph glyph;
+            font_id glyphFont;
+            text_appearance appearance;
+        };
 
-		typedef neolib::vecarray<operation, 1, -1> batch;
+        inline const i_glyph_texture& glyph_texture(const draw_glyph& aDrawGlyph)
+        {
+            return aDrawGlyph.glyph.glyph_texture(service<i_font_manager>().font_from_id(aDrawGlyph.glyphFont));
+        }
 
-		typedef std::deque<batch> queue;
-	}
+        inline size glyph_extents(const draw_glyph& aDrawGlyph)
+        {
+            return aDrawGlyph.glyph.extents(service<i_font_manager>().font_from_id(aDrawGlyph.glyphFont));
+        }
+
+        struct draw_mesh
+        {
+            game::mesh mesh;
+            game::material material;
+            mat44 transformation;
+        };
+
+        typedef neolib::variant <
+            set_logical_coordinate_system,
+            set_logical_coordinates,
+            scissor_on,
+            scissor_off,
+            clip_to_rect,
+            clip_to_path,
+            reset_clip,
+            set_opacity,
+            set_blending_mode,
+            set_smoothing_mode,
+            push_logical_operation,
+            pop_logical_operation,
+            line_stipple_on,
+            line_stipple_off,
+            subpixel_rendering_on,
+            subpixel_rendering_off,
+            clear,
+            clear_depth_buffer,
+            clear_stencil_buffer,
+            set_pixel,
+            draw_pixel,
+            draw_line,
+            draw_rect,
+            draw_rounded_rect,
+            draw_circle,
+            draw_arc,
+            draw_path,
+            draw_shape,
+            draw_entities,
+            fill_rect,
+            fill_rounded_rect,
+            fill_circle,
+            fill_arc,
+            fill_path,
+            fill_shape,
+            draw_glyph,
+            draw_mesh
+        > operation;
+
+        enum operation_type
+        {
+            Invalid = 0,
+            SetLogicalCoordinateSystem,
+            SetLogicalCoordinates,
+            ScissorOn,
+            ScissorOff,
+            ClipToRect,
+            ClipToPath,
+            ResetClip,
+            SetOpacity,
+            SetBlendingMode,
+            SetSmoothingMode,
+            PushLogicalOperation,
+            PopLogicalOperation,
+            LineStippleOn,
+            LineStippleOff,
+            SubpixelRenderingOn,
+            SubpixelRenderingOff,
+            Clear,
+            ClearDepthBuffer,
+            ClearStencilBuffer,
+            SetPixel,
+            DrawPixel,
+            DrawLine,
+            DrawRect,
+            DrawRoundedRect,
+            DrawCircle,
+            DrawArc,
+            DrawPath,
+            DrawShape,
+            DrawEntities,
+            FillRect,
+            FillRoundedRect,
+            FillCircle,
+            FillArc,
+            FillPath,
+            FillShape,
+            DrawGlyph,
+            DrawMesh
+        };
+
+        std::string to_string(operation_type aOpType);
+
+        bool batchable(const operation& aLeft, const operation& aRight);
+
+        typedef std::vector<operation> operations;
+        typedef std::vector<operations::size_type> batches;
+        typedef std::pair<const operation*, const operation*> batch;
+        typedef std::pair<operations, batches> queue;
+    }
 }

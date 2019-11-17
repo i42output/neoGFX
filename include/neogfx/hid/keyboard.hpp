@@ -1,7 +1,7 @@
 // keyboard.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,39 +20,46 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <deque>
 #include "i_keyboard.hpp"
 
 namespace neogfx
 {
-	class keyboard;
+    class keyboard;
 
-	class keyboard_grabber : public i_keyboard_handler
-	{
-	public:
-		keyboard_grabber(keyboard& aKeyboard);
-	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool text_input(const std::string& aText);
-		virtual bool sys_text_input(const std::string& aText);
-	private:
-		keyboard& iKeyboard;
-	};
+    class keyboard_grabber : public i_keyboard_handler
+    {
+    public:
+        keyboard_grabber(keyboard& aKeyboard);
+    public:
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool text_input(const std::string& aText) override;
+        bool sys_text_input(const std::string& aText) override;
+    private:
+        keyboard& iKeyboard;
+    };
 
-	class keyboard : public i_keyboard
-	{
-		friend class keyboard_grabber;
-	public:
-		keyboard();
-	public:
-		virtual bool is_keyboard_grabbed() const;
-		virtual bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const;
-		virtual bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const;
-		virtual void grab_keyboard(i_keyboard_handler& aKeyboardHandler);
-		virtual void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler);
-		virtual i_keyboard_handler& grabber() const;
-	private:
-		mutable keyboard_grabber iGrabber;
-		std::deque<i_keyboard_handler*> iGrabs;
-	};
+    class keyboard : public i_keyboard
+    {
+    public:
+        define_declared_event(KeyPressed, key_pressed, scan_code_e, key_code_e, key_modifiers_e)
+        define_declared_event(KeyReleased, key_released, scan_code_e, key_code_e, key_modifiers_e)
+        define_declared_event(TextInput, text_input, const std::string&)
+        define_declared_event(SysTextInput, sys_text_input, const std::string&)
+    private:
+        friend class keyboard_grabber;
+    public:
+        keyboard();
+    public:
+        bool is_keyboard_grabbed() const override;
+        bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const override;
+        bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const override;
+        void grab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
+        void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
+        i_keyboard_handler& grabber() const override;
+    private:
+        mutable keyboard_grabber iGrabber;
+        std::deque<i_keyboard_handler*> iGrabs;
+    };
 }

@@ -1,7 +1,7 @@
 // texture.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,38 +20,54 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/optional.hpp>
+#include <vector>
+#include <optional>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/sub_texture.hpp>
 
 namespace neogfx
 {
-	class i_image;
-	class i_native_texture;
+    class i_image;
+    class i_native_texture;
 
-	class texture : public i_texture
-	{
-		// construction
-	public:
-		texture();
-		texture(const neogfx::size& aExtents, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
-		texture(const i_texture& aTexture);
-		texture(const i_image& aImage);
-		~texture();
-		// operations
-	public:
-		virtual type_e type() const;
-		virtual texture_sampling sampling() const;
-		virtual bool is_empty() const;
-		virtual size extents() const;
-		virtual size storage_extents() const;
-		virtual void set_pixels(const rect& aRect, const void* aPixelData);
-	public:
-		virtual std::shared_ptr<i_native_texture> native_texture() const;
-		// attributes
-	private:
-		std::shared_ptr<i_native_texture> iNativeTexture;
-	};
+    class texture : public i_texture
+    {
+        // construction
+    public:
+        texture();
+        texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_colour& aColour = optional_colour());
+        texture(const i_texture& aTexture);
+        texture(const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
+        texture(const i_sub_texture& aSubTexture);
+        ~texture();
+        // operations
+    public:
+        texture_id id() const override;
+        texture_type type() const override;
+        bool is_render_target() const override;
+        const i_sub_texture& as_sub_texture() const override;
+        dimension dpi_scale_factor() const override;
+        texture_sampling sampling() const override;
+        uint32_t samples() const override;
+        texture_data_format data_format() const override;
+        texture_data_type data_type() const override;
+        bool is_empty() const override;
+        size extents() const override;
+        size storage_extents() const override;
+        void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) override;
+        void set_pixels(const i_image& aImage) override;
+        void set_pixel(const point& aPosition, const colour& aColour) override;
+        colour get_pixel(const point& aPosition) const override;
+    public:
+        int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
+    public:
+        std::shared_ptr<i_native_texture> native_texture() const override;
+        // attributes
+    private:
+        std::shared_ptr<i_texture> iNativeTexture;
+        optional_sub_texture iSubTexture;
+    };
 
-	typedef boost::optional<texture> optional_texture;
+    typedef std::optional<texture> optional_texture;
 }

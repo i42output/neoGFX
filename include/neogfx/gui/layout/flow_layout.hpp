@@ -1,7 +1,7 @@
 // flow_layout.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,41 +20,39 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include "layout.hpp"
 
 namespace neogfx
 {
-	class flow_layout : public layout
-	{
-	public:
-		enum flow_direction_e
-		{
-			FlowDirectionHorizontal,
-			FlowDirectionVertical,
-		};
-	public:
-		flow_layout(flow_direction_e aFlowDirection = FlowDirectionHorizontal);
-		flow_layout(i_widget& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
-		flow_layout(i_layout& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
-	public:
-		virtual i_spacer& add_spacer();
-		virtual i_spacer& add_spacer_at(item_index aPosition);
-	public:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
-	public:
-		virtual void layout_items(const point& aPosition, const size& aSize);
-	protected:
-		template <typename AxisPolicy>
-		size do_minimum_size(const optional_size& aAvailableSpace) const;
-		template <typename AxisPolicy>
-		size do_maximum_size(const optional_size& aAvailableSpace) const;
-		template <typename AxisPolicy>
-		void do_layout_items(const point& aPosition, const size& aSize);
-	private:
-		flow_direction_e iFlowDirection;
-	};
+    class flow_layout : public layout
+    {
+    public:
+        enum flow_direction_e
+        {
+            FlowDirectionHorizontal,
+            FlowDirectionVertical,
+        };
+    public:
+        flow_layout(flow_direction_e aFlowDirection = FlowDirectionHorizontal);
+        flow_layout(i_widget& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
+        flow_layout(i_layout& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
+    public:
+        virtual i_spacer& add_spacer();
+        virtual i_spacer& add_spacer_at(item_index aPosition);
+    public:
+        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+        virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+    public:
+        virtual void layout_items(const point& aPosition, const size& aSize);
+    protected:
+        template <typename AxisPolicy>
+        size do_minimum_size(const optional_size& aAvailableSpace) const;
+        template <typename AxisPolicy>
+        size do_maximum_size(const optional_size& aAvailableSpace) const;
+        template <typename AxisPolicy>
+        void do_layout_items(const point& aPosition, const size& aSize);
+    private:
+        flow_direction_e iFlowDirection;
+    };
 }
-
-#include "flow_layout.inl"

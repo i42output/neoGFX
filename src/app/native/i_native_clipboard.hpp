@@ -1,7 +1,7 @@
 // i_native_clipboard.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@
 
 namespace neogfx
 {
-	class i_native_clipboard
-	{
-	public:
-		virtual bool has_text() const = 0;
-		virtual std::string text() const = 0;
-		virtual void set_text(const std::string& aText) = 0;
-	};
+    class i_native_clipboard
+    {
+    public:
+        virtual bool has_text() const = 0;
+        virtual std::string text() const = 0;
+        virtual void set_text(const std::string& aText) = 0;
+    };
 }

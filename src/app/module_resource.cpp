@@ -1,7 +1,7 @@
 // module_resource.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -23,61 +23,61 @@
 
 namespace neogfx
 {
-	module_resource::module_resource(const std::string& aUri, const void* aData, std::size_t aSize) : 
-		iUri(aUri), iData(aData), iSize(aSize)
-	{
-	}
+    module_resource::module_resource(const std::string& aUri, const void* aData, std::size_t aSize) : 
+        iUri(aUri), iData(aData), iSize(aSize)
+    {
+    }
 
-	bool module_resource::available() const
-	{
-		return true;
-	}
+    bool module_resource::available() const
+    {
+        return true;
+    }
 
-	std::pair<bool, double> module_resource::downloading() const
-	{
-		return std::make_pair(false, 100.0);
-	}
+    std::pair<bool, double> module_resource::downloading() const
+    {
+        return std::make_pair(false, 100.0);
+    }
 
-	bool module_resource::error() const
-	{
-		return false;
-	}
+    bool module_resource::error() const
+    {
+        return false;
+    }
 
-	const std::string& module_resource::error_string() const
-	{
-		static const std::string sNoError;
-		return sNoError;
-	}
+    const std::string& module_resource::error_string() const
+    {
+        static const std::string sNoError;
+        return sNoError;
+    }
 
-	const std::string& module_resource::uri() const
-	{
-		return iUri;
-	}
+    const std::string& module_resource::uri() const
+    {
+        return iUri;
+    }
 
-	const void* module_resource::cdata() const
-	{
-		return iData;
-	}
+    const void* module_resource::cdata() const
+    {
+        return iData;
+    }
 
-	const void* module_resource::data() const
-	{
-		return iData;
-	}
+    const void* module_resource::data() const
+    {
+        return iData;
+    }
 
-	void* module_resource::data()
-	{
-		throw const_data();
-	}
+    void* module_resource::data()
+    {
+        throw const_data();
+    }
 
-	std::size_t module_resource::size() const
-	{
-		return iSize;
-	}
+    std::size_t module_resource::size() const
+    {
+        return iSize;
+    }
 
-	module_resource::hash_digest_type module_resource::hash() const
-	{
-		hash_digest_type result{ SHA256_DIGEST_LENGTH };
-		SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
-		return result;
-	}
+    module_resource::hash_digest_type module_resource::hash() const
+    {
+        hash_digest_type result{ SHA256_DIGEST_LENGTH };
+        SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+        return result;
+    }
 }

@@ -1,7 +1,7 @@
 // title_bar.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
@@ -27,46 +28,70 @@
 
 namespace neogfx
 {
-	class title_bar : public widget
-	{
-	public:
-		template <typename WidgetType, widget_part WidgetPart>
-		class non_client_item : public WidgetType
-		{
-		public:
-			using WidgetType::WidgetType;
-		public:
-			widget_part hit_test(const point&) const override
-			{
-				return WidgetPart;
-			}
-		};
-	public:
-		title_bar(i_widget& aParent, const std::string& aTitle = std::string{});
-		title_bar(i_widget& aParent, const i_texture& aIcon, const std::string& aTitle = std::string{});
-		title_bar(i_widget& aParent, const i_image& aIcon, const std::string& aTitle = std::string{});
-		title_bar(i_layout& aLayout, const std::string& aTitle = std::string{});
-		title_bar(i_layout& aLayout, const i_texture& aIcon, const std::string& aTitle = std::string{});
-		title_bar(i_layout& aLayout, const i_image& aIcon, const std::string& aTitle = std::string{});
-	public:
-		const image_widget& icon() const;
-		image_widget& icon();
-		const text_widget& title() const;
-		text_widget& title();
-	public:
-		neogfx::size_policy size_policy() const override;
-	public:
-		widget_part hit_test(const point& aPosition) const override;
-	private:
-		void init();
-	private:
-		horizontal_layout iLayout;
-		non_client_item<image_widget, widget_part::NonClientSystemMenu> iIcon;
-		non_client_item<text_widget, widget_part::NonClientTitleBar> iTitle;
-		horizontal_spacer iSpacer;
-		non_client_item<push_button, widget_part::NonClientMinimizeButton> iMinimizeButton;
-		non_client_item<push_button, widget_part::NonClientMaximizeButton> iMaximizeButton;
-		non_client_item<push_button, widget_part::NonClientMaximizeButton> iRestoreButton;
-		non_client_item<push_button, widget_part::NonClientCloseButton> iCloseButton;
-	};
+    class title_bar : public widget
+    {
+    private:
+        template <typename WidgetType, widget_part WidgetPart>
+        class non_client_item : public WidgetType
+        {
+        public:
+            using WidgetType::WidgetType;
+        public:
+            widget_part hit_test(const point&) const override
+            {
+                return WidgetPart;
+            }
+            bool ignore_non_client_mouse_events() const override
+            {
+                return false;
+            }
+        };
+    private:
+        enum texture_index_e
+        {
+            TextureMinimize,
+            TextureMaximize,
+            TextureRestore,
+            TextureClose
+        };
+    public:
+        title_bar(i_window& aWindow, const std::string& aTitle = std::string{});
+        title_bar(i_window& aWindow, const i_texture& aIcon, const std::string& aTitle = std::string{});
+        title_bar(i_window& aWindow, const i_image& aIcon, const std::string& aTitle = std::string{});
+        title_bar(i_window& aWindow, i_layout& aLayout, const std::string& aTitle = std::string{});
+        title_bar(i_window& aWindow, i_layout& aLayout, const i_texture& aIcon, const std::string& aTitle = std::string{});
+        title_bar(i_window& aWindow, i_layout& aLayout, const i_image& aIcon, const std::string& aTitle = std::string{});
+    public:
+        const image_widget& icon() const;
+        image_widget& icon();
+        const text_widget& title() const;
+        text_widget& title();
+    public:
+        neogfx::size_policy size_policy() const override;
+    public:
+        widget_part hit_test(const point& aPosition) const override;
+    private:
+        void init();
+        void update_textures();
+    private:
+        i_window& iWindow;
+        horizontal_layout iLayout;
+        non_client_item<image_widget, widget_part::NonClientSystemMenu> iIcon;
+        non_client_item<text_widget, widget_part::NonClientTitleBar> iTitle;
+        horizontal_spacer iSpacer;
+        non_client_item<push_button, widget_part::NonClientMinimizeButton> iMinimizeButton;
+        non_client_item<push_button, widget_part::NonClientMaximizeButton> iMaximizeButton;
+        non_client_item<push_button, widget_part::NonClientMaximizeButton> iRestoreButton;
+        non_client_item<push_button, widget_part::NonClientCloseButton> iCloseButton;
+        sink iSink;
+        mutable std::optional<std::pair<colour, texture>> iTextures[4];
+    };
+
+    template <>
+    inline widget_part title_bar::non_client_item<image_widget, widget_part::NonClientSystemMenu>::hit_test(const point&) const
+    {
+        if ((static_cast<const title_bar&>(parent()).iWindow.style() & window_style::SystemMenu) == window_style::SystemMenu)
+            return widget_part::NonClientSystemMenu;
+        return widget_part::NonClientTitleBar;
+    }
 }

@@ -1,7 +1,7 @@
 // line_edit.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -24,11 +24,13 @@
 
 namespace neogfx
 {
-	class line_edit : public text_edit
-	{
-	public:
-		line_edit();
-		line_edit(i_widget& aParent);
-		line_edit(i_layout& aLayout);
-	};
+    class line_edit : public text_edit
+    {
+    public:
+        line_edit(frame_style aFrameStyle = frame_style::SolidFrame);
+        line_edit(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame);
+        line_edit(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame);
+    protected:
+        neogfx::size_policy size_policy() const override;
+    };
 }

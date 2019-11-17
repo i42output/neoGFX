@@ -1,7 +1,7 @@
 // menu_item.cpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -24,71 +24,75 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu_item::menu_item(i_action& aAction) : iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iSelectAnySubMenuItem{ true }
-	{
-	}
+    menu_item::menu_item(i_action& aAction) : 
+        iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iOpenAnySubMenu{ true }
+    {
+    }
 
-	menu_item::menu_item(std::shared_ptr<i_action> aAction) : iContents{ aAction }, iSelectAnySubMenuItem{ true }
-	{
-	}
+    menu_item::menu_item(std::shared_ptr<i_action> aAction) : 
+        iContents{ aAction }, iOpenAnySubMenu{ true }
+    {
+    }
 
-	menu_item::menu_item(i_menu& aSubMenu) : iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iSelectAnySubMenuItem{ true }
-	{
-	}
+    menu_item::menu_item(i_menu& aSubMenu) : 
+        iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iOpenAnySubMenu{ true }
+    {
+    }
 
-	menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : iContents{ aSubMenu }, iSelectAnySubMenuItem{ true }
-	{
-	}
+    menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : 
+        iContents{ aSubMenu }, iOpenAnySubMenu{ true }
+    {
+    }
 
-	menu_item::type_e menu_item::type() const
-	{
-		if (iContents.is<action_pointer>())
-			return Action;
-		else
-			return SubMenu;
-	}
+    menu_item_type menu_item::type() const
+    {
+        if (std::holds_alternative<action_pointer>(iContents))
+            return menu_item_type::Action;
+        else
+            return menu_item_type::SubMenu;
+    }
 
-	const i_action& menu_item::action() const
-	{
-		if (type() != Action)
-			throw wrong_type();
-		return *static_variant_cast<const action_pointer&>(iContents);
-	}
+    const i_action& menu_item::action() const
+    {
+        if (type() != menu_item_type::Action)
+            throw wrong_type();
+        return *static_variant_cast<const action_pointer&>(iContents);
+    }
 
-	i_action& menu_item::action()
-	{
-		return const_cast<i_action&>(const_cast<const menu_item*>(this)->action());
-	}
+    i_action& menu_item::action()
+    {
+        return const_cast<i_action&>(to_const(*this).action());
+    }
 
-	const i_menu& menu_item::sub_menu() const
-	{
-		if (type() != SubMenu)
-			throw wrong_type();
-		return *static_variant_cast<const menu_pointer&>(iContents);
-	}
+    const i_menu& menu_item::sub_menu() const
+    {
+        if (type() != menu_item_type::SubMenu)
+            throw wrong_type();
+        return *static_variant_cast<const menu_pointer&>(iContents);
+    }
 
-	i_menu& menu_item::sub_menu()
-	{
-		return const_cast<i_menu&>(const_cast<const menu_item*>(this)->sub_menu());
-	}
+    i_menu& menu_item::sub_menu()
+    {
+        return const_cast<i_menu&>(to_const(*this).sub_menu());
+    }
 
-	bool menu_item::available() const
-	{
-		if (type() == Action && (action().is_separator() || action().is_disabled()))
-			return false;
-		if (type() == SubMenu && sub_menu().item_count() == 0)
-			return false;
-		return true;
-	}
+    bool menu_item::available() const
+    {
+        if (type() == menu_item_type::Action && (action().is_separator() || action().is_disabled()))
+            return false;
+        if (type() == menu_item_type::SubMenu && sub_menu().count() == 0)
+            return false;
+        return true;
+    }
 
-	void menu_item::select(bool aSelectAnySubMenuItem)
-	{
-		neolib::scoped_flag sf{ iSelectAnySubMenuItem, aSelectAnySubMenuItem };
-		selected.trigger();
-	}
+    void menu_item::select(bool aOpenAnySubMenu)
+    {
+        neolib::scoped_flag sf{ iOpenAnySubMenu, aOpenAnySubMenu };
+        Selected.trigger();
+    }
 
-	bool menu_item::select_any_sub_menu_item() const
-	{
-		return iSelectAnySubMenuItem;
-	}
+    bool menu_item::open_any_sub_menu() const
+    {
+        return iOpenAnySubMenu;
+    }
 }

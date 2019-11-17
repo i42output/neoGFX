@@ -1,7 +1,7 @@
 // i_document.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@
 
 namespace neogfx
 {
-	class i_document
-	{
-	public:
-		virtual ~i_document() {}
-	public:
-		virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) = 0;
-	};
+    class i_document
+    {
+    public:
+        virtual ~i_document() {}
+    public:
+        virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) = 0;
+    };
 }

@@ -1,7 +1,7 @@
 // opengl_texture_manager.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -23,16 +23,64 @@
 
 namespace neogfx
 {
-	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, texture_sampling aSampling, const optional_colour& aColour)
-	{
-		return add_texture(std::make_shared<opengl_texture>(aExtents, aSampling, aColour));
-	}
+    std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_colour& aColour)
+    {
+        switch (aDataFormat)
+        {
+        case texture_data_format::RGBA:
+        case texture_data_format::SubPixel:
+        default:
+            switch (aDataType)
+            {
+            case texture_data_type::UnsignedByte:
+            default:
+                return add_texture(std::make_shared<opengl_texture<std::array<uint8_t,4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+            case texture_data_type::Float:
+                return add_texture(std::make_shared<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+            }
+            break;
+        case texture_data_format::Red:
+            switch (aDataType)
+            {
+            case texture_data_type::UnsignedByte:
+            default:
+                return add_texture(std::make_shared<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+            case texture_data_type::Float:
+                return add_texture(std::make_shared<opengl_texture<float>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+            }
+            break;
+        }
+    }
 
-	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const i_image& aImage)
-	{
-		auto existing = find_texture(aImage);
-		if (existing != textures().end())
-			return join_texture(*existing->lock());
-		return add_texture(std::make_shared<opengl_texture>(aImage));
-	}
+    std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType)
+    {
+        auto existing = find_texture(aImage);
+        if (existing != textures().end())
+            return existing->first;
+        switch (aDataFormat)
+        {
+        case texture_data_format::RGBA:
+        case texture_data_format::SubPixel:
+        default:
+            switch (aDataType)
+            {
+            case texture_data_type::UnsignedByte:
+            default:
+                return add_texture(std::make_shared<opengl_texture<std::array<uint8_t, 4>>>(*this, allocate_texture_id(), aImage, aDataFormat));
+            case texture_data_type::Float:
+                return add_texture(std::make_shared<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aImage, aDataFormat));
+            }
+            break;
+        case texture_data_format::Red:
+            switch (aDataType)
+            {
+            case texture_data_type::UnsignedByte:
+            default:
+                return add_texture(std::make_shared<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aImage, aDataFormat));
+            case texture_data_type::Float:
+                return add_texture(std::make_shared<opengl_texture<float>>(*this, allocate_texture_id(), aImage, aDataFormat));
+            }
+            break;
+        }
+    }
 }

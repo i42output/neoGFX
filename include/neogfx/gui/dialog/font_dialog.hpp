@@ -1,7 +1,7 @@
 // font_dialog.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,38 +22,46 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
+#include <neogfx/gui/widget/drop_list.hpp>
+#include <neogfx/gui/widget/group_box.hpp>
 
 namespace neogfx
 {
-	class font_dialog : public dialog
-	{
-	public:
-		event<> selection_changed;
-	public:
-		typedef std::array<std::pair<std::string, neogfx::font>, 16> custom_font_list;
-	private:
-		font_dialog(const neogfx::font& aCurrentFont = neogfx::font{});
-		font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{});
-		~font_dialog();
-	public:
-		neogfx::font current_font() const;
-		neogfx::font selected_font() const;
-		void select_font(const neogfx::font& aFont);
-		const custom_font_list& custom_fonts() const;
-		custom_font_list& custom_fonts();
-	private:
-		void init();
-		void select_font(const neogfx::font& aFont, const i_widget& aUpdatingWidget);
-		custom_font_list::iterator current_custom_font() const;
-		void set_current_custom_font(custom_font_list::iterator aCustomFont);
-		void update_widgets(const i_widget& aUpdatingWidget);
-	private:
-		neogfx::font iCurrentFont;
-		neogfx::font iSelectedFont;
-		custom_font_list iCustomFonts;
-		custom_font_list::iterator iCurrentCustomFont;
-		bool iUpdatingWidgets;
-		vertical_layout iLayout;
-		push_button iAddToCustomFonts;
-	};
+    class font_dialog : public dialog
+    {
+    public:
+        define_event(SelectionChanged, selection_changed)
+    public:
+        font_dialog(const neogfx::font& aCurrentFont = neogfx::font{});
+        font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{});
+        ~font_dialog();
+    public:
+        neogfx::font current_font() const;
+        neogfx::font selected_font() const;
+        void select_font(const neogfx::font& aFont);
+    protected:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+    private:
+        void init();
+        void update_selected_font(const i_widget& aUpdatingWidget);
+    private:
+        sink iSink;
+        bool iUpdating;
+        neogfx::font iCurrentFont;
+        neogfx::font iSelectedFont;
+        horizontal_layout iLayout0;
+        vertical_layout iLayout1;
+        label iFamilyLabel;
+        drop_list iFamilyPicker;
+        vertical_layout iLayout2;
+        horizontal_layout iLayout3;
+        vertical_layout iLayout4;
+        label iStyleLabel;
+        drop_list iStylePicker;
+        vertical_layout iLayout5;
+        label iSizeLabel;
+        drop_list iSizePicker;
+        group_box iSampleBox;
+        text_widget iSample;
+    };
 }

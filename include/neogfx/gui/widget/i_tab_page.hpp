@@ -1,7 +1,7 @@
 // i_tab_page.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -25,19 +25,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	class i_tab;
+    class i_tab;
 
-	class i_tab_page
-	{
-	public:
-		event<> selected;
-		event<> deselected;
-	public:
-		virtual ~i_tab_page() {}
-	public:
-		virtual const i_tab& tab() const = 0;
-		virtual i_tab& tab() = 0;
-		virtual const i_widget& as_widget() const = 0;
-		virtual i_widget& as_widget() = 0;
-	};
+    class i_tab_page
+    {
+    public:
+        declare_event(selected)
+        declare_event(deselected)
+    public:
+        virtual ~i_tab_page() {}
+    public:
+        virtual const i_tab& tab() const = 0;
+        virtual i_tab& tab() = 0;
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
+    };
 }

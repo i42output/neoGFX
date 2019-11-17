@@ -1,7 +1,7 @@
 // window_events.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -21,141 +21,170 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/keyboard.hpp>
 
 namespace neogfx
 {
-	class window_event
-	{
-	public:
-		typedef neolib::variant<neogfx::size> parameter_type;
-		enum type_e
-		{
-			Paint,
-			Close,
-			Resizing,
-			Resized,
-			SizeChanged,
-			Enter,
-			Leave,
-			FocusGained,
-			FocusLost
-		};
-	public:
-		window_event(type_e aType, const parameter_type& aParameter = parameter_type()) :
-			iType(aType), iParameter(aParameter)
-		{
-		}
-	public:
-		type_e type() const
-		{
-			return iType;
-		}
-		neogfx::size size() const
-		{
-			return static_variant_cast<neogfx::size>(iParameter);
-		}
-		void set_size(const neogfx::size& aSize)
-		{
-			static_variant_cast<neogfx::size&>(iParameter) = aSize;;
-		}
-	private:
-		type_e iType;
-		parameter_type iParameter;
-	};
+    enum class window_event_type
+    {
+        Paint,
+        Close,
+        Enabled,
+        Disabled,
+        Resizing,
+        Resized,
+        SizeChanged,
+        Maximized,
+        Iconized,
+        Restored,
+        Enter,
+        Leave,
+        NonClientEnter,
+        NonClientLeave,
+        FocusGained,
+        FocusLost,
+        TitleTextChanged
+    };
 
-	class mouse_event
-	{
-	public:
-		typedef neolib::variant<neogfx::mouse_wheel, neogfx::delta, neogfx::mouse_button, neogfx::point, neogfx::key_modifiers_e> parameter_type;
-		enum type_e
-		{
-			WheelScrolled,
-			ButtonPressed,
-			ButtonDoubleClicked,
-			ButtonReleased,
-			Moved
-		};
-	public:
-		mouse_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
-			iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
-		{
-		}
-	public:
-		type_e type() const
-		{
-			return iType;
-		}
-		neogfx::mouse_wheel mouse_wheel() const
-		{
-			return static_variant_cast<neogfx::mouse_wheel>(iParameter1);
-		}
-		neogfx::delta delta() const
-		{
-			return static_variant_cast<neogfx::delta>(iParameter2);
-		}
-		neogfx::mouse_button mouse_button() const
-		{
-			return static_variant_cast<neogfx::mouse_button>(iParameter1);
-		}
-		neogfx::point position() const
-		{
-			return static_variant_cast<neogfx::point>(iType != Moved ? iParameter2 : iParameter1);
-		}
-		neogfx::key_modifiers_e key_modifiers() const
-		{
-			return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
-		}
-	private:
-		type_e iType;
-		parameter_type iParameter1;
-		parameter_type iParameter2;
-		parameter_type iParameter3;
-	};
+    class window_event
+    {
+    public:
+        typedef neolib::variant<neogfx::size, neogfx::point> parameter_type;
+    public:
+        window_event(window_event_type aType, const parameter_type& aParameter = parameter_type()) :
+            iType(aType), iParameter(aParameter)
+        {
+        }
+    public:
+        window_event_type type() const
+        {
+            return iType;
+        }
+        neogfx::size extents() const
+        {
+            return static_variant_cast<neogfx::size>(iParameter);
+        }
+        neogfx::point position() const
+        {
+            return static_variant_cast<neogfx::point>(iParameter);
+        }
+        void set_extents(const neogfx::size& aExtents)
+        {
+            static_variant_cast<neogfx::size&>(iParameter) = aExtents;
+        }
+        void set_position(const neogfx::point& aPosition)
+        {
+            static_variant_cast<neogfx::point&>(iParameter) = aPosition;
+        }
+    private:
+        window_event_type iType;
+        parameter_type iParameter;
+    };
 
-	class keyboard_event
-	{
-	public:
-		typedef neolib::variant<neogfx::scan_code_e, neogfx::key_code_e, neogfx::key_modifiers_e, std::string> parameter_type;
-		enum type_e
-		{
-			KeyPressed,
-			KeyReleased,
-			TextInput,
-			SysTextInput
-		};
-	public:
-		keyboard_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
-			iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
-		{
-		}
-	public:
-		type_e type() const
-		{
-			return iType;
-		}
-		neogfx::scan_code_e scan_code() const
-		{
-			return static_variant_cast<neogfx::scan_code_e>(iParameter1);
-		}
-		neogfx::key_code_e key_code() const
-		{
-			return static_variant_cast<neogfx::key_code_e>(iParameter2);
-		}
-		neogfx::key_modifiers_e key_modifiers() const
-		{
-			return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
-		}
-		std::string text() const
-		{
-			return static_variant_cast<std::string>(iParameter1);
-		}
-	private:
-		type_e iType;
-		parameter_type iParameter1;
-		parameter_type iParameter2;
-		parameter_type iParameter3;
-	};
+    enum class mouse_event_location
+    {
+        Client,
+        NonClient
+    };
+
+    enum class mouse_event_type
+    {
+        WheelScrolled,
+        ButtonClicked,
+        ButtonDoubleClicked,
+        ButtonReleased,
+        Moved
+    };
+
+    template <mouse_event_location Location>
+    class basic_mouse_event
+    {
+    public:
+        typedef neolib::variant<neogfx::point, neogfx::delta, neogfx::mouse_button, neogfx::mouse_wheel, neogfx::key_modifiers_e> parameter_type;
+    public:
+        basic_mouse_event(mouse_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
+            iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
+        {
+        }
+    public:
+        mouse_event_type type() const
+        {
+            return iType;
+        }
+        neogfx::point position() const
+        {
+            return static_variant_cast<neogfx::point>(iParameter1);
+        }
+        neogfx::delta delta() const
+        {
+            return static_variant_cast<neogfx::delta>(iParameter1);
+        }
+        neogfx::mouse_button mouse_button() const
+        {
+            return static_variant_cast<neogfx::mouse_button>(iParameter2);
+        }
+        neogfx::mouse_wheel mouse_wheel() const
+        {
+            return static_variant_cast<neogfx::mouse_wheel>(iParameter2);
+        }
+        neogfx::key_modifiers_e key_modifiers() const
+        {
+            return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
+        }
+    private:
+        mouse_event_type iType;
+        parameter_type iParameter1;
+        parameter_type iParameter2;
+        parameter_type iParameter3;
+    };
+
+    typedef basic_mouse_event<mouse_event_location::Client> mouse_event;
+    typedef basic_mouse_event<mouse_event_location::NonClient> non_client_mouse_event;
+
+    enum class keyboard_event_type
+    {
+        KeyPressed,
+        KeyReleased,
+        TextInput,
+        SysTextInput
+    };
+
+    class keyboard_event
+    {
+    public:
+        typedef neolib::variant<neogfx::scan_code_e, neogfx::key_code_e, neogfx::key_modifiers_e, std::string> parameter_type;
+    public:
+        keyboard_event(keyboard_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
+            iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
+        {
+        }
+    public:
+        keyboard_event_type type() const
+        {
+            return iType;
+        }
+        neogfx::scan_code_e scan_code() const
+        {
+            return static_variant_cast<neogfx::scan_code_e>(iParameter1);
+        }
+        neogfx::key_code_e key_code() const
+        {
+            return static_variant_cast<neogfx::key_code_e>(iParameter2);
+        }
+        neogfx::key_modifiers_e key_modifiers() const
+        {
+            return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
+        }
+        std::string text() const
+        {
+            return static_variant_cast<std::string>(iParameter1);
+        }
+    private:
+        keyboard_event_type iType;
+        parameter_type iParameter1;
+        parameter_type iParameter2;
+        parameter_type iParameter3;
+    };
 }

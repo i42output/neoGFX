@@ -1,0 +1,8 @@
+{
+    namespace: DesignStudio
+
+    resource: {
+        file: resources/neoGFX.png
+        file: resources/logo_i42.png
+    }
+}
