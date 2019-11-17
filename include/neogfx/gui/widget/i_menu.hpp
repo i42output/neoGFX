@@ -21,11 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_action.hpp>
-#include "i_widget.hpp"
-#include "i_menu_item.hpp"
+#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_menu_item.hpp>
 
 namespace neogfx
 {
+    enum class menu_type : uint32_t
+    {
+        MenuBar,
+        Popup
+    };
+
     class i_menu
     {
     public:
@@ -43,11 +49,6 @@ namespace neogfx
         declare_event(selection_cleared)
         declare_event(open_sub_menu, i_menu&)
     public:
-        enum type_e
-        {
-            MenuBar,
-            Popup
-        };
         typedef uint32_t item_index;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_menu::no_parent") {} };
@@ -64,7 +65,8 @@ namespace neogfx
         virtual i_widget& as_widget() = 0;
         virtual bool has_parent() const = 0;
         virtual i_menu& parent() = 0;
-        virtual type_e type() const = 0;
+        virtual void set_parent(i_menu& aParent) = 0;
+        virtual menu_type type() const = 0;
         virtual const std::string& title() const = 0;
         virtual void set_title(const std::string& aTitle) = 0;
         virtual const i_texture& image() const = 0;
@@ -74,10 +76,12 @@ namespace neogfx
         virtual uint32_t count() const = 0;
         virtual const i_menu_item& item_at(item_index aItemIndex) const = 0;
         virtual i_menu_item& item_at(item_index aItemIndex) = 0;
+        virtual void add_sub_menu(i_menu& aSubMenu) = 0;
         virtual i_menu& add_sub_menu(const std::string& aSubMenuTitle) = 0;
         virtual i_action& add_action(i_action& aAction) = 0;
         virtual i_action& add_action(std::shared_ptr<i_action> aAction) = 0;
         virtual void add_separator() = 0;
+        virtual void insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu) = 0;
         virtual i_menu& insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle) = 0;
         virtual void insert_action_at(item_index aItemIndex, i_action& aAction) = 0;
         virtual void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) = 0;

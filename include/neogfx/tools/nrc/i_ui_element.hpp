@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neolib/neolib.hpp>
 #include <neolib/i_reference_counted.hpp>
+#include <neolib/i_optional.hpp>
 #include <neolib/i_string.hpp>
 #include <neolib/i_vector.hpp>
 #include <neogfx/app/i_app.hpp>
@@ -35,27 +36,28 @@ namespace neogfx::nrc
     {
         Invalid         = 0x0000000000000000,
 
-        MASK_CATEGORY   = 0x00000000FFFFFFFF,
-        MASK_TYPE       = 0xFFFFFFFF00000000,
-
         App             = 0x0000000000000001,
         Action          = 0x0000000000000002,
         Widget          = 0x0000000000000004,
         Layout          = 0x0000000000000008,
         Menu            = 0x0000000000000010,
+        Custom          = 0x0000000080000000,
 
         Window          = 0x0000000100000000 | Widget,
         MenuBar         = 0x0000000200000000 | Widget | Menu,
+
+        MASK_CATEGORY   = 0x00000000FFFFFFFF,
+        MASK_TYPE       = 0xFFFFFFFF00000000
     };
 
     inline constexpr ui_element_type operator|(ui_element_type aLhs, ui_element_type aRhs)
     {
-        return static_cast<ui_element_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<ui_element_type>(static_cast<uint64_t>(aLhs) | static_cast<uint64_t>(aRhs));
     }
 
     inline constexpr ui_element_type operator&(ui_element_type aLhs, ui_element_type aRhs)
     {
-        return static_cast<ui_element_type>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+        return static_cast<ui_element_type>(static_cast<uint64_t>(aLhs) & static_cast<uint64_t>(aRhs));
     }
 
     inline constexpr ui_element_type category(ui_element_type aType)
@@ -71,6 +73,7 @@ namespace neogfx::nrc
     class i_ui_element : public neolib::i_reference_counted
     {
     public:
+        struct element_is_anonymous : std::logic_error { element_is_anonymous() : std::logic_error{ "neogfx::nrc::i_ui_element::element_is_anonymous" } {} };
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::nrc::i_ui_element::no_parent" } {} };
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error{ "neogfx::nrc::i_ui_element::wrong_type" } {} };
         struct ui_element_not_found : std::runtime_error { ui_element_not_found() : std::runtime_error{ "neogfx::nrc::i_ui_element::ui_element_not_found" } {} };
@@ -83,7 +86,10 @@ namespace neogfx::nrc
     public:
         virtual const i_ui_element_parser& parser() const = 0;
     public:
+        virtual bool anonymous() const = 0;
         virtual const neolib::i_string& id() const = 0;
+        virtual const neolib::i_string& anonymous_id() const = 0;
+        virtual void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const = 0;
         virtual ui_element_type type() const = 0;
     public:
         virtual bool has_parent() const = 0;
@@ -103,9 +109,15 @@ namespace neogfx::nrc
         virtual void instantiate(i_widget& aWidget) = 0;
         virtual void instantiate(i_layout& aLayout) = 0;
     public:
+        neolib::string generate_anonymous_id() const
+        {
+            neolib::string newAnonymousId;
+            generate_anonymous_id(newAnonymousId);
+            return newAnonymousId;
+        }
         const i_ui_element& find(const neolib::i_string& aId) const
         {
-            if (id() == aId)
+            if (!anonymous() && id() == aId)
                 return *this;
             if (has_parent())
                 return parent().find(aId);

@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/i_reference_counted.hpp>
+#include <neolib/optional.hpp>
 #include <neolib/string.hpp>
 #include <neolib/i_vector.hpp>
 #include <neolib/simple_variant.hpp>
@@ -41,6 +42,8 @@ namespace neogfx::nrc
         typedef neolib::i_vector<neolib::i_simple_variant> array_data_t;
         // operations
     public:
+        virtual const neolib::i_string& element_namespace() const = 0;
+        virtual void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const = 0;
         virtual void indent(int32_t aLevel, neolib::i_string& aResult) const = 0;
         virtual void emit(const neolib::i_string& aText) const = 0;
         // implementation
@@ -52,6 +55,12 @@ namespace neogfx::nrc
         virtual array_data_t& do_get_array_data(const neolib::i_string& aKey) = 0;
         // helpers
     public:
+        neolib::string generate_anonymous_id() const
+        {
+            neolib::string result;
+            generate_anonymous_id(result);
+            return result;
+        }
         std::string indent(int32_t aLevel) const
         {
             neolib::string result;
@@ -79,17 +88,17 @@ namespace neogfx::nrc
             return do_get_array_data(neolib::string{ aKey });
         }
         template <typename T>
-        const T& get(const std::string& aKey) const
+        const abstract_t<T>& get(const std::string& aKey) const
         {
-            return get_data(aKey).get<T>();
+            return get_data(aKey).get<abstract_t<T>>();
         }
         template <typename T>
-        T& get(const std::string& aKey)
+        abstract_t<T>& get(const std::string& aKey)
         {
-            return get_data(aKey).get<T>();
+            return get_data(aKey).get<abstract_t<T>>();
         }
         template <typename T>
-        std::optional<T> get_optional(const std::string& aKey) const
+        neolib::optional<T> get_optional(const std::string& aKey) const
         {
             if (data_exists(aKey))
                 return get_data(aKey).get<abstract_t<T>>();
@@ -97,7 +106,7 @@ namespace neogfx::nrc
                 return {};
         }
         template <typename T, typename U>
-        const T& get(const std::string& aKey, const U& aDefault) const
+        const abstract_t<T>& get(const std::string& aKey, const U& aDefault) const
         {
             if (data_exists(aKey))
                 return get_data(aKey).get<abstract_t<T>>();
@@ -105,7 +114,7 @@ namespace neogfx::nrc
                 return aDefault;
         }
         template <typename T, typename U>
-        T& get(const std::string& aKey, U& aDefault)
+        abstract_t<T>& get(const std::string& aKey, U& aDefault)
         {
             if (data_exists(aKey))
                 return get_data(aKey).get<abstract_t<T>>();

@@ -60,7 +60,7 @@ namespace neogfx::nrc
         {
             { "action", [](i_ui_element& aParent) -> i_ui_element* { return new action{ aParent }; } },
             { "window", [](i_ui_element& aParent) -> i_ui_element* { return new window{ aParent }; } },
-            { "status_bar", [](i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParent }; } }
+            { "status_bar", [](i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParent }; } },
             { "menu_bar", [](i_ui_element& aParent) -> i_ui_element* { return new menu_bar{ aParent }; } },
             { "menu", [](i_ui_element& aParent) -> i_ui_element* { return new menu{ aParent }; } }
         };

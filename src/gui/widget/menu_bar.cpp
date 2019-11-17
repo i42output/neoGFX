@@ -25,17 +25,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    menu_bar::menu_bar() : menu(MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
+    menu_bar::menu_bar() : menu(menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
     {
         init();
     }
 
-    menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu(MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
+    menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu(menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
     {
         init();
     }
 
-    menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu(MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
+    menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu(menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
     {
         init();
     }
@@ -95,7 +95,7 @@ namespace neogfx
             if (has_selected_item() && item_at(selected_item()).available())
             {
                 auto& selectedItem = item_at(selected_item());
-                if (selectedItem.type() == i_menu_item::SubMenu)
+                if (selectedItem.type() == menu_item_type::SubMenu)
                 {
                     if (!selectedItem.sub_menu().is_open())
                         OpenSubMenu.trigger(selectedItem.sub_menu());
@@ -108,14 +108,14 @@ namespace neogfx
             if (has_selected_item() && item_at(selected_item()).available())
             {
                 auto& selectedItem = item_at(selected_item());
-                if (selectedItem.type() == i_menu_item::Action)
+                if (selectedItem.type() == menu_item_type::Action)
                 {
                     selectedItem.action().triggered().async_trigger();
                     if (selectedItem.action().is_checkable())
                         selectedItem.action().toggle();
                     clear_selection();
                 }
-                else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
+                else if (selectedItem.type() == menu_item_type::SubMenu && !selectedItem.sub_menu().is_open())
                     OpenSubMenu.trigger(selectedItem.sub_menu());
             }
             break;
@@ -171,11 +171,11 @@ namespace neogfx
         {
             if (iOpenSubMenu->has_menu())
             {
-                if (aMenuItem.type() == i_menu_item::Action ||
-                    (aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.available()))
+                if (aMenuItem.type() == menu_item_type::Action ||
+                    (aMenuItem.type() == menu_item_type::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.available()))
                 {
                     close_sub_menu(false);
-                    if (aMenuItem.type() == i_menu_item::SubMenu)
+                    if (aMenuItem.type() == menu_item_type::SubMenu)
                         OpenSubMenu.trigger(aMenuItem.sub_menu());
                 }
             }

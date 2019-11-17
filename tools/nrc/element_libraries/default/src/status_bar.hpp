@@ -28,7 +28,7 @@ namespace neogfx::nrc
     {
     public:
         status_bar(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get<neolib::i_string>("id"), ui_element_type::Widget }
+            ui_element<>{ aParent, aParent.parser().get<neolib::string>("id"), ui_element_type::Widget }
         {
         }
     public:
@@ -64,6 +64,5 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neogfx::basic_size<length>> iDefaultSize;
     };
 }

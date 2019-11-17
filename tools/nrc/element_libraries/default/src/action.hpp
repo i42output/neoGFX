@@ -28,7 +28,7 @@ namespace neogfx::nrc
     {
     public:
         action(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get<neolib::i_string>("id"), ui_element_type::Action },
+            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), ui_element_type::Action },
             iCheckable{ aParent.parser().get_optional<bool>("checkable") },
             iText{ aParent.parser().get_optional<neolib::string>("text") },
             iImage{ aParent.parser().get_optional<neolib::string>("image") },
@@ -54,9 +54,21 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if (iText)
-                emit(",\n"
-                    "   %1%{ \"%2%\"_t }", id(), *iText);
+            if ((parent().type() & ui_element_type::Menu) == ui_element_type::Menu)
+            {
+                if (iText)
+                    emit(",\n"
+                        "   %1%{ %2%, \"%3%\"_t }", id(), parent().id(), *iText);
+                else
+                    emit(",\n"
+                        "   %1%{ %2% }", id(), parent().id(), *iText);
+            }
+            else
+            {
+                if (iText)
+                    emit(",\n"
+                        "   %1%{ \"%2%\"_t }", id(), *iText);
+            }
             ui_element<>::emit_ctor();
         }
         void emit_body() const override
@@ -69,7 +81,6 @@ namespace neogfx::nrc
                 emit("   %1%.set_shortcut(\"%2%\");\n", id(), *iShortcut);
             if (iCheckedImage)
                 emit("   %1%.set_checked_image(\"%2%\");\n", id(), *iCheckedImage);
-            emit("   %1%.add_action(%2%);\n", parent().id(), id());
             ui_element<>::emit_body();
         }
     protected:

@@ -171,8 +171,8 @@ namespace neogfx
                 service<i_keyboard>().grab_keyboard(*this);
             if (iOpenSubMenu->has_menu() && iOpenSubMenu->menu().is_open())
             {
-                if (aMenuItem.type() == i_menu_item::Action ||
-                    (aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
+                if (aMenuItem.type() == menu_item_type::Action ||
+                    (aMenuItem.type() == menu_item_type::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
                 {
                     iOpenSubMenu->menu().close();
                 }
@@ -285,7 +285,7 @@ namespace neogfx
         case ScanCode_LEFT:
             if (menu().has_parent())
             {
-                if (menu().parent().type() == i_menu::Popup)
+                if (menu().parent().type() == menu_type::Popup)
                     menu().close();
                 else if (menu().parent().has_selected_item())
                     menu().parent().select_item_at(menu().parent().previous_available_item(menu().parent().selected_item()));
@@ -294,7 +294,7 @@ namespace neogfx
         case ScanCode_RIGHT:
             if (menu().has_selected_item())
             {
-                if (menu().item_at(menu().selected_item()).type() == i_menu_item::SubMenu)
+                if (menu().item_at(menu().selected_item()).type() == menu_item_type::SubMenu)
                 {
                     auto& subMenu = menu().item_at(menu().selected_item()).sub_menu();
                     if (!subMenu.is_open())
@@ -310,11 +310,11 @@ namespace neogfx
                     if (m != &menu())
                     {
                         if (m->has_selected_item())
-                            m->select_item_at(m->next_available_item(m->selected_item()), m->type() == i_menu::MenuBar);
+                            m->select_item_at(m->next_available_item(m->selected_item()), m->type() == menu_type::MenuBar);
                     }
                 }
             }
-            else if (menu().has_parent() && menu().parent().type() == i_menu::MenuBar)
+            else if (menu().has_parent() && menu().parent().type() == menu_type::MenuBar)
             {
                 if (menu().parent().has_selected_item())
                     menu().parent().select_item_at(menu().parent().next_available_item(menu().parent().selected_item()));
@@ -324,21 +324,21 @@ namespace neogfx
             if (menu().has_selected_item() && menu().item_at(menu().selected_item()).available())
             {
                 auto& selectedItem = menu().item_at(menu().selected_item());
-                if (selectedItem.type() == i_menu_item::Action)
+                if (selectedItem.type() == menu_item_type::Action)
                 {
                     selectedItem.action().triggered().async_trigger();
                     if (selectedItem.action().is_checkable())
                         selectedItem.action().toggle();
                     menu().clear_selection();
                     i_menu* menuToClose = &menu();
-                    while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
+                    while (menuToClose->has_parent() && menuToClose->parent().type() == menu_type::Popup)
                         menuToClose = &menuToClose->parent();
-                    if (menuToClose->type() == i_menu::Popup)
+                    if (menuToClose->type() == menu_type::Popup)
                         menuToClose->close();
-                    if (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::MenuBar)
+                    if (menuToClose->has_parent() && menuToClose->parent().type() == menu_type::MenuBar)
                         menuToClose->parent().clear_selection();
                 }
-                else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
+                else if (selectedItem.type() == menu_item_type::SubMenu && !selectedItem.sub_menu().is_open())
                     menu().open_sub_menu().trigger(selectedItem.sub_menu());
             }
             break;
@@ -396,7 +396,7 @@ namespace neogfx
             ourRect.position().x += (desktopRect.right() - ourRect.right());
         if (has_menu() && menu().has_parent() && has_parent_window(false))
         {
-            if (menu().parent().type() == i_menu::MenuBar)
+            if (menu().parent().type() == menu_type::MenuBar)
             {
                 if (iParentWidget != nullptr)
                 {

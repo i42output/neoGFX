@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/app/action.hpp>
 #include <neogfx/app/i_help.hpp>
 #include <neogfx/gfx/texture.hpp>
-#include "i_menu.hpp"
+#include <neogfx/gui/widget/i_menu.hpp>
 
 namespace neogfx
 {
@@ -44,15 +44,16 @@ namespace neogfx
         typedef std::unique_ptr<i_menu_item> item_pointer;
         typedef std::vector<item_pointer> item_list;
     public:
-        menu(i_menu& aParent, type_e aType = Popup, const std::string& aTitle = std::string());
-        menu(type_e aType = Popup, const std::string& aTitle = std::string());
+        menu(i_menu& aParent, menu_type aType = menu_type::Popup, const std::string& aTitle = std::string());
+        menu(menu_type aType = menu_type::Popup, const std::string& aTitle = std::string());
         ~menu();
     public:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
         bool has_parent() const override;
         i_menu& parent() override;
-        type_e type() const override;
+        void set_parent(i_menu& aParent) override;
+        menu_type type() const override;
         const std::string& title() const override;
         void set_title(const std::string& aTitle) override;
         const i_texture& image() const override;
@@ -62,10 +63,12 @@ namespace neogfx
         uint32_t count() const override;
         const i_menu_item& item_at(item_index aItemIndex) const override;
         i_menu_item& item_at(item_index aItemIndex) override;
+        void add_sub_menu(i_menu& aSubMenu) override;
         i_menu& add_sub_menu(const std::string& aSubMenuTitle) override;
         i_action& add_action(i_action& aAction) override;
         i_action& add_action(std::shared_ptr<i_action> aAction) override;
         void add_separator() override;
+        void insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu) override;
         i_menu& insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuText) override;
         void insert_action_at(item_index aItemIndex, i_action& aAction) override;
         void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) override;
@@ -89,7 +92,7 @@ namespace neogfx
         void set_modal(bool aModal) override;
     private:
         i_menu* iParent;
-        type_e iType;
+        menu_type iType;
         std::string iTitle;
         texture iImage;
         item_list iItems;

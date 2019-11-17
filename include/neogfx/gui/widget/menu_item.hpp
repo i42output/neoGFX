@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_menu_item.hpp"
+#include <neogfx/gui/widget/i_menu_item.hpp>
 
 namespace neogfx
 {
@@ -41,7 +41,7 @@ namespace neogfx
         menu_item(i_menu& aSubMenu);
         menu_item(std::shared_ptr<i_menu> aSubMenu);
     public:
-        type_e type() const override;
+        menu_item_type type() const override;
         const i_action& action() const override;
         i_action& action() override;
         const i_menu& sub_menu() const override;

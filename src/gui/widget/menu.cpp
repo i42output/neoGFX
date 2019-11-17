@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    menu::menu(type_e aType, const std::string& aTitle) : 
+    menu::menu(menu_type aType, const std::string& aTitle) :
         iParent{ nullptr }, 
         iType{ aType }, 
         iTitle{ aTitle }, 
@@ -33,13 +33,14 @@ namespace neogfx
     {
     }
 
-    menu::menu(i_menu& aParent, type_e aType, const std::string& aTitle) : 
+    menu::menu(i_menu& aParent, menu_type aType, const std::string& aTitle) :
         iParent{ &aParent }, 
         iType{ aType }, 
         iTitle{ aTitle }, 
         iOpenCount{ 0 }, 
         iModal{ false }
     {
+        aParent.add_sub_menu(*this);
     }
 
     menu::~menu()
@@ -68,7 +69,12 @@ namespace neogfx
         throw no_parent();
     }
 
-    menu::type_e menu::type() const
+    void menu::set_parent(i_menu& aParent)
+    {
+        iParent = &aParent;
+    }
+
+    menu_type menu::type() const
     {
         return iType;
     }
@@ -124,6 +130,11 @@ namespace neogfx
         return const_cast<i_menu_item&>(to_const(*this).item_at(aItemIndex));
     }
 
+    void menu::add_sub_menu(i_menu& aSubMenu)
+    {
+        insert_sub_menu_at(count(), aSubMenu);
+    }
+
     i_menu& menu::add_sub_menu(const std::string& aSubMenuTitle)
     {
         return insert_sub_menu_at(count(), aSubMenuTitle);
@@ -146,9 +157,17 @@ namespace neogfx
         insert_separator_at(count());
     }
 
+    void menu::insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu)
+    {
+        auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aSubMenu));
+        (**newItem).sub_menu().set_parent(*this);
+        ItemAdded.trigger(aItemIndex);
+    }
+
     i_menu& menu::insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle)
     {
-        auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(*this, Popup, aSubMenuTitle)));
+        auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(menu_type::Popup, aSubMenuTitle)));
+        (**newItem).sub_menu().set_parent(*this);
         ItemAdded.trigger(aItemIndex);
         return (**newItem).sub_menu();
     }
@@ -197,7 +216,7 @@ namespace neogfx
     menu::item_index menu::find(const i_menu& aSubMenu) const
     {
         for (item_index i = 0; i < iItems.size(); ++i)
-            if (iItems[i]->type() == i_menu_item::SubMenu && &iItems[i]->sub_menu() == &aSubMenu)
+            if (iItems[i]->type() == menu_item_type::SubMenu && &iItems[i]->sub_menu() == &aSubMenu)
                 return i;
         throw item_not_found();
     }

@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx::nrc
 {
     ui_parser::ui_parser(const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput) :
-        iRoot{ aRoot }, iOutput{ aOutput }, iCurrentNode{ nullptr }
+        iRoot{ aRoot }, iOutput{ aOutput }, iNamespace{ aNamespace }, iCurrentNode{ nullptr }, iAnonymousIdCounter{ 0u }
     {
         for (auto const& plugin : aPluginManager.plugins())
         {
@@ -53,6 +53,16 @@ namespace neogfx::nrc
         emit(neolib::string{ (boost::format(
             " };\n"
             "}\n")).str() });
+    }
+
+    const neolib::i_string& ui_parser::element_namespace() const
+    {
+        return iNamespace;
+    }
+
+    void ui_parser::generate_anonymous_id(neolib::i_string& aNewAnonymousId) const
+    {
+        aNewAnonymousId = neolib::string { element_namespace() + "_" + boost::lexical_cast<std::string>(++iAnonymousIdCounter) };
     }
 
     void ui_parser::indent(int32_t aLevel, neolib::i_string& aResult) const

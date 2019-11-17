@@ -33,12 +33,16 @@ namespace neogfx::nrc
 {
     class ui_parser : public neolib::reference_counted<i_ui_element_parser>
     {
+        typedef neolib::reference_counted<i_ui_element_parser> base_type;
     public:
         typedef neolib::simple_variant data_t;
         typedef neolib::vector<neolib::simple_variant> array_data_t;
     public:
         ui_parser(const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
     public:
+        const neolib::i_string& element_namespace() const override;
+        using base_type::generate_anonymous_id;
+        void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const override;
         using i_ui_element_parser::indent;
         void indent(int32_t aLevel, neolib::i_string& aResult) const override;
         void emit(const neolib::i_string& aText) const override;
@@ -57,9 +61,11 @@ namespace neogfx::nrc
         const neolib::fjson_object& iRoot;
         std::ofstream& iOutput;
         std::vector<neolib::ref_ptr<i_ui_element_library>> iLibraries;
+        neolib::string iNamespace;
         std::vector<neolib::ref_ptr<i_ui_element>> iRootElements;
         mutable const neolib::fjson_value* iCurrentNode;
         mutable std::map<std::pair<const neolib::fjson_value*, std::string>, data_t> iDataCache;
         mutable std::map<std::pair<const neolib::fjson_value*, std::string>, array_data_t> iArrayDataCache;
+        mutable uint32_t iAnonymousIdCounter;
     };
 }

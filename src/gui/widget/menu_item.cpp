@@ -44,17 +44,17 @@ namespace neogfx
     {
     }
 
-    menu_item::type_e menu_item::type() const
+    menu_item_type menu_item::type() const
     {
         if (std::holds_alternative<action_pointer>(iContents))
-            return Action;
+            return menu_item_type::Action;
         else
-            return SubMenu;
+            return menu_item_type::SubMenu;
     }
 
     const i_action& menu_item::action() const
     {
-        if (type() != Action)
+        if (type() != menu_item_type::Action)
             throw wrong_type();
         return *static_variant_cast<const action_pointer&>(iContents);
     }
@@ -66,7 +66,7 @@ namespace neogfx
 
     const i_menu& menu_item::sub_menu() const
     {
-        if (type() != SubMenu)
+        if (type() != menu_item_type::SubMenu)
             throw wrong_type();
         return *static_variant_cast<const menu_pointer&>(iContents);
     }
@@ -78,9 +78,9 @@ namespace neogfx
 
     bool menu_item::available() const
     {
-        if (type() == Action && (action().is_separator() || action().is_disabled()))
+        if (type() == menu_item_type::Action && (action().is_separator() || action().is_disabled()))
             return false;
-        if (type() == SubMenu && sub_menu().count() == 0)
+        if (type() == menu_item_type::SubMenu && sub_menu().count() == 0)
             return false;
         return true;
     }

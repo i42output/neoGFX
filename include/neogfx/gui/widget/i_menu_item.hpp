@@ -26,21 +26,21 @@ namespace neogfx
 {
     class i_menu;
 
+    enum class menu_item_type : uint32_t
+    {
+        Action,
+        SubMenu
+    };
+
     class i_menu_item
     {
     public:
         declare_event(selected)
         declare_event(deselected)
     public:
-        enum type_e
-        {
-            Action,
-            SubMenu,
-        };
-    public:
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::i_menu_item::wrong_type") {} };
     public:
-        virtual type_e type() const = 0;
+        virtual menu_item_type type() const = 0;
         virtual const i_action& action() const = 0;
         virtual i_action& action() = 0;
         virtual const i_menu& sub_menu() const = 0;

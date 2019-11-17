@@ -28,7 +28,8 @@ namespace neogfx::nrc
     {
     public:
         menu(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get<neolib::i_string>("id"), ui_element_type::Menu }
+            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), ui_element_type::Menu },
+            iTitle{ aParent.parser().get_optional<neolib::string>("title") }
         {
         }
     public:
@@ -49,13 +50,21 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            todo
-            if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
-                emit(",\n"
-                    "   %1%{ %2%.menu_layout() }", id(), parent().id());
-            else if (is_widget_or_layout(parent().type()))
-                emit(",\n"
-                    "   %1%{ %2% }", id(), parent().id());
+            if ((parent().type() & ui_element_type::Menu) == ui_element_type::Menu)
+            {
+                if (iTitle)
+                    emit(",\n"
+                        "   %1%{ %2%, neogfx::menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
+                else
+                    emit(",\n"
+                        "   %1%{ %2% }", id(), parent().id());
+            }
+            else
+            {
+                if (iTitle)
+                    emit(",\n"
+                        "   %1%{ neogfx::menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
+            }
             ui_element<>::emit_ctor();
         }
         void emit_body() const override
@@ -65,6 +74,6 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neogfx::basic_size<length>> iDefaultSize;
+        std::optional<neolib::string> iTitle;
     };
 }

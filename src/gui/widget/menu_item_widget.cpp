@@ -63,13 +63,13 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy{ menu().type() == i_menu::type_e::Popup ? neogfx::size_policy::Expanding : neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ menu().type() == menu_type::Popup ? neogfx::size_policy::Expanding : neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
     }
 
     size menu_item_widget::minimum_size(const optional_size&) const
     {
         size result = widget::minimum_size();
-        if (menu_item().type() == i_menu_item::Action && menu_item().action().is_separator())
+        if (menu_item().type() == menu_item_type::Action && menu_item().action().is_separator())
             result.cy = units_converter(*this).from_device_units(3.0_spx);
         return result;
     }
@@ -78,9 +78,9 @@ namespace neogfx
     {
         if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())))
         {
-            bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
+            bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
             colour fillColour = background_colour().dark() ? colour::Black : colour::White;
-            if (openSubMenu && menu().type() == i_menu::MenuBar)
+            if (openSubMenu && menu().type() == menu_type::MenuBar)
             {
                 if (fillColour.similar_intensity(service<i_app>().current_style().palette().colour(), 0.05))
                     fillColour = service<i_app>().current_style().palette().selection_colour();
@@ -94,12 +94,12 @@ namespace neogfx
 
     void menu_item_widget::paint(i_graphics_context& aGraphicsContext) const
     {
-        if (menu_item().type() != i_menu_item::Action || !menu_item().action().is_separator())
+        if (menu_item().type() != menu_item_type::Action || !menu_item().action().is_separator())
         {
             widget::paint(aGraphicsContext);
-            if (menu_item().type() == i_menu_item::SubMenu && menu().type() == i_menu::Popup)
+            if (menu_item().type() == menu_item_type::SubMenu && menu().type() == menu_type::Popup)
             {
-                bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
+                bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
                 colour ink = openSubMenu ? service<i_app>().current_style().palette().selection_colour()
                     : background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
                 if (iSubMenuArrow == std::nullopt || iSubMenuArrow->first != ink)
@@ -191,7 +191,7 @@ namespace neogfx
         widget::mouse_entered(aPosition);
         update();
         if (menu_item().available())
-            menu().select_item_at(menu().find(menu_item()), menu_item().type() == i_menu_item::SubMenu);
+            menu().select_item_at(menu().find(menu_item()), menu_item().type() == menu_item_type::SubMenu);
     }
 
     void menu_item_widget::mouse_left()
@@ -199,21 +199,21 @@ namespace neogfx
         widget::mouse_left();
         update();
         if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())) &&
-            (menu_item().type() == i_menu_item::Action || (!menu_item().sub_menu().is_open() && !iSubMenuOpener)))
+            (menu_item().type() == menu_item_type::Action || (!menu_item().sub_menu().is_open() && !iSubMenuOpener)))
             menu().clear_selection();
     }
 
     void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (aButton == mouse_button::Left && menu_item().type() == i_menu_item::SubMenu)
+        if (aButton == mouse_button::Left && menu_item().type() == menu_item_type::SubMenu)
             select_item();
     }
 
     void menu_item_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
         widget::mouse_button_released(aButton, aPosition);
-        if (aButton == mouse_button::Left && menu_item().type() == i_menu_item::Action)
+        if (aButton == mouse_button::Left && menu_item().type() == menu_item_type::Action)
             select_item();
     }
 
@@ -244,7 +244,7 @@ namespace neogfx
 
     bool menu_item_widget::help_active() const
     {
-        return menu_item().type() == i_menu_item::Action &&
+        return menu_item().type() == menu_item_type::Action &&
             menu().has_selected_item() && menu().find(menu_item()) == menu().selected_item();
     }
 
@@ -263,7 +263,7 @@ namespace neogfx
 
     point menu_item_widget::sub_menu_position() const
     {
-        if (menu().type() == i_menu::MenuBar)
+        if (menu().type() == menu_type::MenuBar)
             return non_client_rect().bottom_left() + root().window_position();
         else
             return non_client_rect().top_right() + root().window_position();
@@ -272,9 +272,9 @@ namespace neogfx
     void menu_item_widget::init()
     {
         set_margins(neogfx::margins{});
-        iLayout.set_margins(dpi_scale(neogfx::margins{ iGap, dpi_scale(2.0), iGap * (menu().type() == i_menu::Popup ? 2.0 : 1.0), dpi_scale(2.0) }));
+        iLayout.set_margins(dpi_scale(neogfx::margins{ iGap, dpi_scale(2.0), iGap * (menu().type() == menu_type::Popup ? 2.0 : 1.0), dpi_scale(2.0) }));
         iLayout.set_spacing(dpi_scale(size{ iGap, 0.0 }));
-        if (menu().type() == i_menu::Popup)
+        if (menu().type() == menu_type::Popup)
             iIcon.set_fixed_size(dpi_scale(iIconSize));
         else
             iIcon.set_fixed_size(size{});
@@ -289,7 +289,7 @@ namespace neogfx
         };
         iSink += iText.TextChanged(text_updated);
         text_updated();
-        if (menu_item().type() == i_menu_item::Action)
+        if (menu_item().type() == menu_item_type::Action)
         {
             auto action_changed = [this]()
             {
@@ -341,12 +341,12 @@ namespace neogfx
                 }
                 if (!iIcon.image().is_empty())
                     iIcon.set_fixed_size(dpi_scale(iIconSize));
-                else if (menu().type() == i_menu::MenuBar)
+                else if (menu().type() == menu_type::MenuBar)
                     iIcon.set_fixed_size(size{});
                 iText.set_text(menu_item().action().menu_text());
-                if (menu().type() != i_menu::MenuBar)
+                if (menu().type() != menu_type::MenuBar)
                     iShortcutText.set_text(menu_item().action().shortcut() != std::nullopt ? menu_item().action().shortcut()->as_text() : std::string());
-                iSpacer.set_minimum_size(dpi_scale(size{ menu_item().action().shortcut() != std::nullopt && menu().type() != i_menu::MenuBar ? iGap * 2.0 : 0.0, 0.0 }));
+                iSpacer.set_minimum_size(dpi_scale(size{ menu_item().action().shortcut() != std::nullopt && menu().type() != menu_type::MenuBar ? iGap * 2.0 : 0.0, 0.0 }));
                 enable(menu_item().action().is_enabled());
             };
             iSink += menu_item().action().changed(action_changed);
@@ -370,9 +370,9 @@ namespace neogfx
         }
         iSink += menu_item().selected([this]()
         {
-            if (menu_item().type() == i_menu_item::Action)
+            if (menu_item().type() == menu_item_type::Action)
                 service<i_app>().help().activate(*this);
-            else if (menu_item().type() == i_menu_item::SubMenu && menu_item().open_any_sub_menu() && menu().type() == i_menu::Popup)
+            else if (menu_item().type() == menu_item_type::SubMenu && menu_item().open_any_sub_menu() && menu().type() == menu_type::Popup)
             {
                 if (!iSubMenuOpener)
                 {
@@ -390,7 +390,7 @@ namespace neogfx
         });
         iSink += menu_item().deselected([this]()
         {
-            if (menu_item().type() == i_menu_item::Action)
+            if (menu_item().type() == menu_item_type::Action)
                 service<i_app>().help().deactivate(*this);
             iSubMenuOpener.reset();
         });
@@ -401,7 +401,7 @@ namespace neogfx
         destroyed_flag destroyed{ *this };
         if (!menu_item().available())
             return;
-        if (menu_item().type() == i_menu_item::Action)
+        if (menu_item().type() == menu_item_type::Action)
         {
             menu().clear_selection();
             if (destroyed)
@@ -416,9 +416,9 @@ namespace neogfx
             i_menu* menuToClose = &menu();
             while (menuToClose->has_parent())
                 menuToClose = &menuToClose->parent();
-            if (menuToClose->type() == i_menu::MenuBar)
+            if (menuToClose->type() == menu_type::MenuBar)
                 menuToClose->clear_selection();
-            else if (menuToClose->type() == i_menu::Popup && menuToClose->is_open())
+            else if (menuToClose->type() == menu_type::Popup && menuToClose->is_open())
                 menuToClose->close();
             if (destroyed)
                 return;
@@ -435,7 +435,7 @@ namespace neogfx
                     return;
                 update();
             }
-            else if (menu().type() == i_menu::MenuBar)
+            else if (menu().type() == menu_type::MenuBar)
             {
                 menu_item().sub_menu().close();
                 if (destroyed)
