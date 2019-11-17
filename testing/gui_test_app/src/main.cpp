@@ -209,7 +209,6 @@ int main(int argc, char* argv[])
 
         ng::window& window = ui.mainWindow;
 
-        ng::status_bar statusBar{ window.status_bar_layout() };
         auto& layout0 = window.client_layout();
 
         bool showFps = false;

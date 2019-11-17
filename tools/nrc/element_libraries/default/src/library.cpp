@@ -24,13 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "app.hpp"
 #include "action.hpp"
 #include "window.hpp"
+#include "status_bar.hpp"
 
 namespace neogfx::nrc
 {
     default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
-        iElements{ "app", "action", "window" }
+        iElements{ "app", "action", "window", "status_bar" }
     {
     }
 
@@ -56,7 +57,8 @@ namespace neogfx::nrc
         static const std::map<std::string, std::function<i_ui_element*(i_ui_element&)>> sFactoryMethods =
         {
             { "action", [](i_ui_element& aParent) -> i_ui_element* { return new action{ aParent }; } },
-            { "window", [](i_ui_element& aParent) -> i_ui_element* { return new window{ aParent }; } }
+            { "window", [](i_ui_element& aParent) -> i_ui_element* { return new window{ aParent }; } },
+            { "status_bar", [](i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParent }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())

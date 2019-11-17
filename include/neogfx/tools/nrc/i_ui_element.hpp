@@ -31,13 +31,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::nrc
 {
-    enum class ui_element_type
+    enum class ui_element_type : uint32_t
     {
-        App,
-        Action,
-        Widget,
-        Layout
+        MASK_CATEGORY   = 0x000000FF,
+        MASK_TYPE       = 0xFFFFFF00,
+
+        App             = 0x00000001,
+        Action          = 0x00000002,
+        Widget          = 0x00000003,
+        Layout          = 0x00000004,
+
+        Window          = 0x00000100 | Widget,
     };
+
+    inline constexpr ui_element_type operator|(ui_element_type aLhs, ui_element_type aRhs)
+    {
+        return static_cast<ui_element_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr ui_element_type operator&(ui_element_type aLhs, ui_element_type aRhs)
+    {
+        return static_cast<ui_element_type>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr ui_element_type category(ui_element_type aType)
+    {
+        return aType & ui_element_type::MASK_CATEGORY;
+    }
+
+    inline constexpr bool is_widget_or_layout(ui_element_type aType)
+    {
+        switch (category(aType))
+        {
+        case ui_element_type::Widget:
+        case ui_element_type::Layout:
+            return true;
+        default:
+            return false;
+        }
+    }
 
     class i_ui_element : public neolib::i_reference_counted
     {

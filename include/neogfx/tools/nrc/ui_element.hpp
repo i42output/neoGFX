@@ -100,6 +100,22 @@ namespace neogfx::nrc
         {
         }
     protected:
+        void emit_preamble() const override
+        {
+            for (auto const& child : children())
+                child->emit_preamble();
+        }
+        void emit_ctor() const override
+        {
+            for (auto const& child : children())
+                child->emit_ctor();
+        }
+        void emit_body() const override
+        {
+            for (auto const& child : children())
+                child->emit_body();
+        }
+    protected:
         void emit(const std::string& aArgument) const
         {
             parser().emit(neolib::string{ aArgument });

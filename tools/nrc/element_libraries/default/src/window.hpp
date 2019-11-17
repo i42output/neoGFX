@@ -28,7 +28,7 @@ namespace neogfx::nrc
     {
     public:
         window(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get<neolib::i_string>("id"), ui_element_type::Widget }
+            ui_element<>{ aParent, aParent.parser().get<neolib::i_string>("id"), ui_element_type::Window }
         {
             if (aParent.parser().data_exists("default_size"))
             {
@@ -70,8 +70,7 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             emit("  neogfx::window %1%;\n", id());
-            for (auto const& child : children())
-                child->emit_preamble();
+            ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
         {
@@ -91,10 +90,11 @@ namespace neogfx::nrc
                         "   %1%{ neogfx::size{ %2%, %3% } }", id(), iDefaultSize->cx, iDefaultSize->cy);
                 break;
             }
-           
+            ui_element<>::emit_ctor();
         }
         void emit_body() const override
         {
+            ui_element<>::emit_body();
         }
     protected:
         using ui_element<>::emit;

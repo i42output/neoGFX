@@ -50,14 +50,14 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             emit("  neogfx::action %1%;\n", id());
-            for (auto const& child : children())
-                child->emit_preamble();
+            ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
         {
             if (iText)
                 emit(",\n"
                     "   %1%{ \"%2%\"_t }", id(), *iText);
+            ui_element<>::emit_ctor();
         }
         void emit_body() const override
         {
@@ -70,6 +70,7 @@ namespace neogfx::nrc
             if (iCheckedImage)
                 emit("   %1%.set_checked_image(\"%2%\");\n", id(), *iCheckedImage);
             emit("   %1%.add_action(%2%);\n", parent().id(), id());
+            ui_element<>::emit_body();
         }
     protected:
         using ui_element<>::emit;

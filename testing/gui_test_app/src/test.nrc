@@ -56,35 +56,35 @@
             }
             window: {
                 id: mainWindow
-                default_size: [ 800spx 800spx ]/*
+                default_size: [ 800spx 800spx ]
                 status_bar: {
                     id: statusBar
-                }
+                }/*
                 menu_bar: {
                     id: menu
                     menu: {
                         title: "&File"
-                        action: app.actionFileNew
-                        action: app.actionFileOpen
+                        action: appTest.actionFileNew
+                        action: appTest.actionFileOpen
                         action: separator
-                        action: app.actionFileClose
+                        action: appTest.actionFileClose
                         action: separator
-                        action: app.actionFileSave
+                        action: appTest.actionFileSave
                         action: separator
-                        action: app.actionFileExit
+                        action: appTest.actionFileExit
                     }
                     menu: {
                         title: "&Edit"
-                        action: app.actionUndo
-                        action: app.actionRedo
+                        action: appTest.actionUndo
+                        action: appTest.actionRedo
                         action: separator
-                        action: app.actionCut
-                        action: app.actionCopy
-                        action: app.actionPaste
+                        action: appTest.actionCut
+                        action: appTest.actionCopy
+                        action: appTest.actionPaste
                         action: actionPasteAndGo
-                        action: app.actionDelete
+                        action: appTest.actionDelete
                         action: separator
-                        action: app.actionSelectAll
+                        action: appTest.actionSelectAll
                     }
                     menu: {
                         title: "&View"
@@ -162,9 +162,9 @@
                 }
                 toolbar: {
                     id: toolbar
-                    action: app.actionFileNew
-                    action: app.actionFileOpen
-                    action: app.actionFileSave
+                    action: appTest.actionFileNew
+                    action: appTest.actionFileOpen
+                    action: appTest.actionFileSave
                     action: separator
                     action: actionContacts
                     action: actionAddFavourite
@@ -174,612 +174,610 @@
                     action: { id: actionManagePlugins text: "Manage Plugins..." image: ":/closed/resources/caw_toolbar.naa#manage_plugins.png" }
                     action: actionMute
                     action: separator
-                    action: app.actionCut
-                    action: app.actionCopy
-                    action: app.actionPaste
+                    action: appTest.actionCut
+                    action: appTest.actionCopy
+                    action: appTest.actionPaste
                     action: actionPasteAndGo
                     action: separator
                     action: { id: actionCheckForUpdates text: "Check for Updates..." image: ":/closed/resources/caw_toolbar.naa#setup.png" }
                 }
-                client_layout: {
-                    tab_page_container: {
-                        tab_page: {
-                            id: pageButtons
-                            tab_text: "Buttons"
-                            vertical_layout: {
-                                id: layoutButtons
-                                margin: 8px
-                                horizontal_layout: {
-                                    id: layoutTopButtons
-                                    push_button: {
-                                        id: button0
-                                        label: {
-                                            placement: ImageTextVertical
-                                        }
-                                        text: "This is the neoGFX test application."
-                                        image: {
-                                            uri: ":/test/resources/neoGFX.png"
-                                            minimum_size: [ 32spx 32spx ]
-                                            maximum_size: [ 160spx max ]
-                                        }
-                                        size_policy: Expanding
-                                        foreground_colour: LightGoldenrodYellow
-                                    }
-                                    push_button: {
-                                        id: button1
-                                        text: "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement."
-                                        foreground_colour: LightGoldenrod
-                                    }
-                                    push_button: {
-                                        id: buttonGenerateUuid
-                                        text: "&Generate UUID"
-                                    }
-                                }
-                                horizontal_layout: {
-                                    id: layoutInternational
-                                    push_button: {
-                                        id: button2
-                                        text: "ويقفز الثعلب البني السريع فوق الكلب الكسول"
-                                        foreground_colour: Goldenrod
-                                    }
-                                    push_button: {
-                                        id: button3
-                                        text: "שועל חום קפיצות מעל הכלב העצלן"
-                                        foreground_colour: DarkGoldenrod
-                                    }
-                                    push_button: {
-                                        id: buttonJapan
-                                        text: "クジラを食べないでください。"
-                                    }
-                                    push_button: {
-                                        id: buttonChina
-                                        text: "请停止食用犬"
-                                    }
-                                }
+                tab_page_container: {
+                    tab_page: {
+                        id: pageButtons
+                        tab_text: "Buttons"
+                        vertical_layout: {
+                            id: layoutButtons
+                            margin: 8px
+                            horizontal_layout: {
+                                id: layoutTopButtons
                                 push_button: {
-                                    id: button5
-                                    text: "sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo"
-                                }
-                                horizontal_layout: {
-                                    id: layoutDropList
-                                    drop_list: {
-                                        id: dropList
-                                        items: [ "Red" "Green" "Blue" ]
-                                    }
-                                    drop_list: {
-                                        id: dropList2
-                                        items: [ "Square" "Triangle" "Circle" ]
-                                    }
-                                    drop_list: {
-                                        id: dropList3
-                                    }
-                                    drop_list: {
-                                        id: dropList4
-                                    }
-                                    check_box: {
-                                        id: toggleEditable
-                                        text: "Toggle Editable"
-                                    }
-                                }
-                                horizontal_layout: {
-                                    id: layoutEdit
-                                    text_edit: {
-                                        id: textEdit
-                                        focus_policy: [ Default ConsumeTabKey ]
-                                        tab_stop_hint: "00000000"
-                                    }
-                                    slider: {
-                                        id: effectWidthSlider
-                                        orientation: Vertical
-                                        minimum: 1
-                                        maximum: 10
-                                        step: 1
-                                        value: 5
-                                    }
-                                    double_slider: {
-                                        id: effectAux1Slider
-                                        orientation: Vertical
-                                        minimum: 0.1
-                                        maximum: 10.0
-                                        step: 0.1
-                                        value: 1.0
-                                    }
-                                    text_edit: {
-                                        id: smallTextEdit
-                                        maximum_width: 100
-                                        alignment: Right
-                                    }
-                                }
-                                horizontal_layout: {
-                                    id: layoutLineEdits
-                                    vertical_layout: {
-                                        id: layoutLineEdits2
-                                        text_field: {
-                                            id: textField1
-                                            label: "First field:"
-                                            hint: "Enter text"
-                                            placement: LabelLeft
-                                        }
-                                        text_field: {
-                                            id: textField2
-                                            label: "Second field:"
-                                            hint: "Enter text"
-                                            placement: LabelLeft
-                                        }
-                                        anchor: {
-                                            constraint: MinimumSize
-                                            objects: [ textField1.label textField2.label ]
-                                        }
-                                    }
-                                    vertical_layout: {
-                                        id: layoutLineEdits3
-                                        text_field: {
-                                            id: textField3
-                                            label: "Third field (label above)"
-                                            hint: "Enter text"
-                                            placement: LabelAbove
-                                        }
-                                        text_field: {
-                                            id: textField4
-                                            label: "Fourth field (label above)"
-                                            hint: "Enter text"
-                                            placement: LabelAbove
-                                        }
-                                    }
-                                    vertical_layout: {
-                                        id: layoutSpinners
-                                        horizontal_layout: {
-                                            id: layoutSpinners2
-                                            double_spin_box: {
-                                                id: spinBox1
-                                                minimum: -100.0
-                                                maximum: 100.0
-                                                step: 0.1
-                                            }
-                                            double_slider: {
-                                                id: slider1
-                                                minimum: -100.0
-                                                maximum: 100.0
-                                                step: 0.1
-                                            }
-                                            double_spin_box: {
-                                                id: spinBox2
-                                                minimum: -10
-                                                maximum: 20
-                                                step: 0.5
-                                            }
-                                        }
-                                        vertical_spacer: {}
-                                    }
-                                }
-                                horizontal_layout: {
-                                    id: layout2
+                                    id: button0
                                     label: {
-                                        id: lable1
-                                        text: "Label 1:"
+                                        placement: ImageTextVertical
                                     }
-                                    push_button: {
-                                        id: button6
-                                        text: "RGB <-> HSV\ncolour space\nconversion test"
+                                    text: "This is the neoGFX test application."
+                                    image: {
+                                        uri: ":/test/resources/neoGFX.png"
+                                        minimum_size: [ 32spx 32spx ]
+                                        maximum_size: [ 160spx max ]
                                     }
-                                    spacer: {
-                                        weight: 2.0
-                                    }
-                                    push_button: {
-                                        id: button7
-                                        text: "Toggle\n&mute."
-                                        foreground_colour: LightCoral
-                                        maximum_size: [ 128spx 64spx ]
-
-                                    }
-                                    spacer: {
-                                        weight: 1.0
-                                    }
-                                    push_button: {
-                                        id: button8
-                                        text: "Enable/disable\ncontacts action."
-                                        foreground_colour: [ 255 235 160 ]
-                                        maximum_size: [ 128spx 64spx ]
-
-                                    }
-                                    group_box: {
-                                        id: groupBox
-                                        text: "Group Box"
-                                        item_layout: {
-                                            check_box: {
-                                                id: triState
-                                                text: "Tristate checkbo&x"
-                                                checkable: TriState
-                                            }
-                                            check_box: {
-                                                id: wordWrap
-                                                text: "Editor word wrap"
-                                            }
-                                            check_box: {
-                                                id: columns
-                                                text: "Columns"
-                                            }
-                                            check_box: {
-                                                id: groupBoxCheckable
-                                                text: "Group Box Checkable"
-                                            }
-                                            gradient_widget: {
-                                                id: gradientWidget
-                                            }
-                                            vertical_spacer: {}
-                                        }
-                                    }
-                                    vertical_layout: {
-                                        id: layout4
-                                        horizontal_layout: {
-                                            id: layout7
-                                            check_box: {
-                                                id: buttonKerning
-                                                text: "kern"
-                                            }
-                                            check_box: {
-                                                id: buttonSubpixel
-                                                text: "subpix"
-                                            }
-                                        }
-                                        horizontal_layout: {
-                                            id: layoutColourPickers
-                                            push_button: {
-                                                id: themeColour
-                                                text: "theme"
-                                                image: ":/closed/resources/caw_toolbar.naa#colour.png"
-                                            }
-                                            push_button: {
-                                                id: themeFont
-                                                text: "font"
-                                                image: ":/closed/resources/caw_toolbar.naa#font.png"
-                                            }
-                                            push_button: {
-                                                id: editColour
-                                                text: "edit"
-                                                image: ":/closed/resources/caw_toolbar.naa#colour.png"
-                                            }
-                                        }
-                                        widget: {
-                                            id: lw
-                                            margins: 0
-                                            grid_layout: {
-                                                id: layoutEffects
-                                                rows: 2
-                                                columns: 2
-                                                alignment: [ Left VCentre ]
-                                                margins: 0
-                                                radio_button: {
-                                                    id: editNormal
-                                                    text: "normal"
-                                                }
-                                                radio_button: {
-                                                    id: editOutline
-                                                    text: "outline"
-                                                }
-                                                radio_button: {
-                                                    id: editGlow
-                                                    text: "glow"
-                                                }
-                                                radio_button: {
-                                                    id: editShadow
-                                                    text: "shadow"
-                                                }
-                                            }
-                                        }
-                                        radio_button: {
-                                            id: radio1
-                                            text: "Radio 1"
-                                        }
-                                        radio_button: {
-                                            id: radioSliderFont
-                                            text: "Slider changes\nfont size"
-                                        }
-                                        radio_button: {
-                                            id: radio3
-                                            text: "Radio 3"
-                                        }
-                                        radio_button: {
-                                            id: radioThemeColour
-                                            text: "Slider changes\ntheme colour"
-                                        }
-                                        vertical_spacer: {}
-                                    }
-                                    vertical_layout: {
-                                        id: keypadLayout
-                                        push_button: {
-                                            id: button9
-                                            text: "Default/Slate\nStyle"
-                                            foreground_colour: Aquamarine
-                                        }
-                                        grid_layout: {
-                                            id: keypad
-                                            rows: 4
-                                            columns: 3
-                                            minimum_size: [ 100 0 ]
-                                            spacing: 0
-                                        }
-                                    }
-                                }
-                                horizontal_layout: {
-                                    id: layout3
-                                }
-                            }
-                        }
-                        tab_page: {
-                            id: pageMdi
-                            tab_text: "MDI"
-                        }
-                        tab_page: {
-                            id: pageMessageBox
-                            tab_text: "Message Boxes"
-                            horizontal_layout: {
-                                id: pageLayoutMessageBox
-                                group_box: {
-                                    id: groupMessageBoxIcons
-                                    text: "Icons"
-                                    item_layout: {
-                                        radio_button: {
-                                            id: radioMessageBoxIconInformation
-                                            text: "Information"
-                                            image: {
-                                                uri: ":/neogfx/resources/icons.naa#information.png"
-                                                size: 24spx
-                                            }
-                                        }
-                                        radio_button: {
-                                            id: radioMessageBoxIconQuestion
-                                            text: "Question"
-                                            image: {
-                                                uri: ":/neogfx/resources/icons.naa#question.png"
-                                                size: 24spx
-                                            }
-                                        }
-                                        radio_button: {
-                                            id: radioMessageBoxIconWarning
-                                            text: "Warning"
-                                            image: {
-                                                uri: ":/neogfx/resources/icons.naa#warning.png"
-                                                size: 24spx
-                                            }
-                                        }
-                                        radio_button: {
-                                            id: radioMessageBoxIconStop
-                                            text: "Stop"
-                                            image: {
-                                                uri: ":/neogfx/resources/icons.naa#stop.png"
-                                                size: 24spx
-                                            }
-                                        }
-                                        radio_button: {
-                                            id: radioMessageBoxIconError
-                                            text: "Error"
-                                            image: {
-                                                uri: ":/neogfx/resources/icons.naa#error.png"
-                                                size: 24spx
-                                            }
-                                        }
-                                        radio_button: {
-                                            id: radioMessageBoxIconCritical
-                                            text: "Critical"
-                                            image: {
-                                                uri: ":/neogfx/resources/icons.naa#critical.png"
-                                                size: 24spx
-                                            }
-                                        }
-                                    }
-                                }
-                                group_box: {
-                                    id: groupMessageBoxButtons
-                                    text: "Buttons"
-                                }
-                                group_box: {
-                                    id: groupMessageBoxText
-                                    text: "Text"
-                                    item_layout: {
-                                        label: {
-                                            text: "Title:"
-                                        }
-                                        line_edit: {
-                                            id: lineEditMessageBoxTitle
-                                            text: "neoGFX Message Box Test"
-                                        }
-                                        label: {
-                                            text: "Text:"
-                                        }
-                                        text_edit: {
-                                            id: textEditMessageBoxText
-                                            text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
-                                        }
-                                        label: {
-                                            text: "Detailed Text:"
-                                        }
-                                        text_edit: {
-                                            id: textEditMessageBoxDetailedText
-                                            text: "This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank."
-                                            minimum_size: [ 256spx 128spx ]
-                                            size_policy: Minimum
-                                        }
-                                    }
+                                    size_policy: Expanding
+                                    foreground_colour: LightGoldenrodYellow
                                 }
                                 push_button: {
-                                    id: buttonOpenMessageBox
-                                    text: "Open Message Box"
-                                    size_policy: Minimum
-                                }
-                                label: {
-                                    id: lableMessageBoxResult
-                                }
-                            }
-                        }
-                        tab_page: {
-                            id: pageItemViews
-                            tab_text: "Item Views"
-                            vertical_layout: {
-                                id: layoutItemViews
-                                table_view: {
-                                    id: tableView1
-                                    minimum_size: [ 128 128 ]
-                                }
-                                table_view: {
-                                    id: tableView2
-                                    minimum_size: [ 128 128 ]
+                                    id: button1
+                                    text: "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement."
+                                    foreground_colour: LightGoldenrod
                                 }
                                 push_button: {
-                                    id: button10
-                                    text: "Toggle List\nHeader View"
-                                }
-                                horizontal_layout: {
-                                    id: layoutTableViewTweaks
-                                    alignment: Top
-                                    spacer: {}
-                                    vertical_layout: {
-                                        id: layoutTableViewSelection
-                                        weight: 0
-                                        radio_button: {
-                                            id: radioNoTableViewSelection
-                                            text: "No selection"
-                                        }
-                                        radio_button: {
-                                            id: radioSingleTableViewSelection
-                                            text: "Single selection"
-                                        }
-                                        radio_button: {
-                                            id: radioMultipleTableViewSelection
-                                            text: "Multiple selection"
-                                        }
-                                        radio_button: {
-                                            id: radioExtendedTableViewSelection
-                                            text: "Extended selection"
-                                        }
-                                    }
-                                    group_box: {
-                                        id: groupColumn5
-                                        text: "Column 5"
-                                        item_layout: {
-                                            check_box: {
-                                                id: checkColumn5ReadOnly
-                                                text: "Read only"
-                                            }
-                                            check_box: {
-                                                id: checkColumn5Unselectable
-                                                text: "Unselectable"
-                                            }
-                                            vertical_spacer: {}
-                                        }
-                                    }
-                                    spacer: {}
+                                    id: buttonGenerateUuid
+                                    text: "&Generate UUID"
                                 }
                             }
-                        }
-                        tab_page: {
-                            id: pageLots
-                            tab_text: "Lots"
-                        }
-                        tab_page: {
-                            id: pageImages
-                            tab_text: "Images"
                             horizontal_layout: {
+                                id: layoutInternational
+                                push_button: {
+                                    id: button2
+                                    text: "ويقفز الثعلب البني السريع فوق الكلب الكسول"
+                                    foreground_colour: Goldenrod
+                                }
+                                push_button: {
+                                    id: button3
+                                    text: "שועל חום קפיצות מעל הכלב העצלן"
+                                    foreground_colour: DarkGoldenrod
+                                }
+                                push_button: {
+                                    id: buttonJapan
+                                    text: "クジラを食べないでください。"
+                                }
+                                push_button: {
+                                    id: buttonChina
+                                    text: "请停止食用犬"
+                                }
+                            }
+                            push_button: {
+                                id: button5
+                                text: "sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo"
+                            }
+                            horizontal_layout: {
+                                id: layoutDropList
+                                drop_list: {
+                                    id: dropList
+                                    items: [ "Red" "Green" "Blue" ]
+                                }
+                                drop_list: {
+                                    id: dropList2
+                                    items: [ "Square" "Triangle" "Circle" ]
+                                }
+                                drop_list: {
+                                    id: dropList3
+                                }
+                                drop_list: {
+                                    id: dropList4
+                                }
+                                check_box: {
+                                    id: toggleEditable
+                                    text: "Toggle Editable"
+                                }
+                            }
+                            horizontal_layout: {
+                                id: layoutEdit
+                                text_edit: {
+                                    id: textEdit
+                                    focus_policy: [ Default ConsumeTabKey ]
+                                    tab_stop_hint: "00000000"
+                                }
+                                slider: {
+                                    id: effectWidthSlider
+                                    orientation: Vertical
+                                    minimum: 1
+                                    maximum: 10
+                                    step: 1
+                                    value: 5
+                                }
+                                double_slider: {
+                                    id: effectAux1Slider
+                                    orientation: Vertical
+                                    minimum: 0.1
+                                    maximum: 10.0
+                                    step: 0.1
+                                    value: 1.0
+                                }
+                                text_edit: {
+                                    id: smallTextEdit
+                                    maximum_width: 100
+                                    alignment: Right
+                                }
+                            }
+                            horizontal_layout: {
+                                id: layoutLineEdits
                                 vertical_layout: {
-                                    image_widget: {
-                                        image: ":/test/resources/channel_256.png"
-                                        aspect_ratio: Ignore
-                                        background_colour: Red
-                                        size_policy: Expanding
-                                        minimum_size: 0
+                                    id: layoutLineEdits2
+                                    text_field: {
+                                        id: textField1
+                                        label: "First field:"
+                                        hint: "Enter text"
+                                        placement: LabelLeft
                                     }
-                                    image_widget: {
-                                        image: ":/test/resources/channel_256.png"
-                                        aspect_ratio: Keep
-                                        background_colour: Green
-                                        size_policy: Expanding
-                                        minimum_size: 0
+                                    text_field: {
+                                        id: textField2
+                                        label: "Second field:"
+                                        hint: "Enter text"
+                                        placement: LabelLeft
                                     }
-                                    image_widget: {
-                                        image: ":/test/resources/channel_256.png"
-                                        aspect_ratio: KeepExpanding
-                                        background_colour: Blue
-                                        size_policy: Expanding
-                                        minimum_size: 0
-                                    }
-                                    image_widget: {
-                                        image: ":/test/resources/channel_256.png"
-                                        aspect_ratio: Stretch
-                                        background_colour: Magenta
-                                        size_policy: Expanding
-                                        minimum_size: 0
+                                    anchor: {
+                                        constraint: MinimumSize
+                                        objects: [ textField1.label textField2.label ]
                                     }
                                 }
-                                image_widget: {
-                                    image: ":/test/resources/orca.png"
+                                vertical_layout: {
+                                    id: layoutLineEdits3
+                                    text_field: {
+                                        id: textField3
+                                        label: "Third field (label above)"
+                                        hint: "Enter text"
+                                        placement: LabelAbove
+                                    }
+                                    text_field: {
+                                        id: textField4
+                                        label: "Fourth field (label above)"
+                                        hint: "Enter text"
+                                        placement: LabelAbove
+                                    }
                                 }
-                                grid_layout: {
-                                    id: gridLayoutImages
+                                vertical_layout: {
+                                    id: layoutSpinners
+                                    horizontal_layout: {
+                                        id: layoutSpinners2
+                                        double_spin_box: {
+                                            id: spinBox1
+                                            minimum: -100.0
+                                            maximum: 100.0
+                                            step: 0.1
+                                        }
+                                        double_slider: {
+                                            id: slider1
+                                            minimum: -100.0
+                                            maximum: 100.0
+                                            step: 0.1
+                                        }
+                                        double_spin_box: {
+                                            id: spinBox2
+                                            minimum: -10
+                                            maximum: 20
+                                            step: 0.5
+                                        }
+                                    }
+                                    vertical_spacer: {}
                                 }
                             }
-                        }
-                        tab_page: {
-                            id: pageGame
-                            tab_text: "Game"
-                            vertical_layout: {
-                                id: layoutGame
+                            horizontal_layout: {
+                                id: layout2
+                                label: {
+                                    id: lable1
+                                    text: "Label 1:"
+                                }
+                                push_button: {
+                                    id: button6
+                                    text: "RGB <-> HSV\ncolour space\nconversion test"
+                                }
+                                spacer: {
+                                    weight: 2.0
+                                }
+                                push_button: {
+                                    id: button7
+                                    text: "Toggle\n&mute."
+                                    foreground_colour: LightCoral
+                                    maximum_size: [ 128spx 64spx ]
+
+                                }
+                                spacer: {
+                                    weight: 1.0
+                                }
+                                push_button: {
+                                    id: button8
+                                    text: "Enable/disable\ncontacts action."
+                                    foreground_colour: [ 255 235 160 ]
+                                    maximum_size: [ 128spx 64spx ]
+
+                                }
+                                group_box: {
+                                    id: groupBox
+                                    text: "Group Box"
+                                    item_layout: {
+                                        check_box: {
+                                            id: triState
+                                            text: "Tristate checkbo&x"
+                                            checkable: TriState
+                                        }
+                                        check_box: {
+                                            id: wordWrap
+                                            text: "Editor word wrap"
+                                        }
+                                        check_box: {
+                                            id: columns
+                                            text: "Columns"
+                                        }
+                                        check_box: {
+                                            id: groupBoxCheckable
+                                            text: "Group Box Checkable"
+                                        }
+                                        gradient_widget: {
+                                            id: gradientWidget
+                                        }
+                                        vertical_spacer: {}
+                                    }
+                                }
+                                vertical_layout: {
+                                    id: layout4
+                                    horizontal_layout: {
+                                        id: layout7
+                                        check_box: {
+                                            id: buttonKerning
+                                            text: "kern"
+                                        }
+                                        check_box: {
+                                            id: buttonSubpixel
+                                            text: "subpix"
+                                        }
+                                    }
+                                    horizontal_layout: {
+                                        id: layoutColourPickers
+                                        push_button: {
+                                            id: themeColour
+                                            text: "theme"
+                                            image: ":/closed/resources/caw_toolbar.naa#colour.png"
+                                        }
+                                        push_button: {
+                                            id: themeFont
+                                            text: "font"
+                                            image: ":/closed/resources/caw_toolbar.naa#font.png"
+                                        }
+                                        push_button: {
+                                            id: editColour
+                                            text: "edit"
+                                            image: ":/closed/resources/caw_toolbar.naa#colour.png"
+                                        }
+                                    }
+                                    widget: {
+                                        id: lw
+                                        margins: 0
+                                        grid_layout: {
+                                            id: layoutEffects
+                                            rows: 2
+                                            columns: 2
+                                            alignment: [ Left VCentre ]
+                                            margins: 0
+                                            radio_button: {
+                                                id: editNormal
+                                                text: "normal"
+                                            }
+                                            radio_button: {
+                                                id: editOutline
+                                                text: "outline"
+                                            }
+                                            radio_button: {
+                                                id: editGlow
+                                                text: "glow"
+                                            }
+                                            radio_button: {
+                                                id: editShadow
+                                                text: "shadow"
+                                            }
+                                        }
+                                    }
+                                    radio_button: {
+                                        id: radio1
+                                        text: "Radio 1"
+                                    }
+                                    radio_button: {
+                                        id: radioSliderFont
+                                        text: "Slider changes\nfont size"
+                                    }
+                                    radio_button: {
+                                        id: radio3
+                                        text: "Radio 3"
+                                    }
+                                    radio_button: {
+                                        id: radioThemeColour
+                                        text: "Slider changes\ntheme colour"
+                                    }
+                                    vertical_spacer: {}
+                                }
+                                vertical_layout: {
+                                    id: keypadLayout
+                                    push_button: {
+                                        id: button9
+                                        text: "Default/Slate\nStyle"
+                                        foreground_colour: Aquamarine
+                                    }
+                                    grid_layout: {
+                                        id: keypad
+                                        rows: 4
+                                        columns: 3
+                                        minimum_size: [ 100 0 ]
+                                        spacing: 0
+                                    }
+                                }
+                            }
+                            horizontal_layout: {
+                                id: layout3
                             }
                         }
-                        tab_page: {
-                            id: pageDrawing
-                            tab_text: "Drawing"
-                            vertical_layout: {
-                                id: layoutDrawing1
-                                horizontal_layout: {
-                                    id: layoutDrawing2
-                                    size_policy: Minimum
+                    }
+                    tab_page: {
+                        id: pageMdi
+                        tab_text: "MDI"
+                    }
+                    tab_page: {
+                        id: pageMessageBox
+                        tab_text: "Message Boxes"
+                        horizontal_layout: {
+                            id: pageLayoutMessageBox
+                            group_box: {
+                                id: groupMessageBoxIcons
+                                text: "Icons"
+                                item_layout: {
+                                    radio_button: {
+                                        id: radioMessageBoxIconInformation
+                                        text: "Information"
+                                        image: {
+                                            uri: ":/neogfx/resources/icons.naa#information.png"
+                                            size: 24spx
+                                        }
+                                    }
+                                    radio_button: {
+                                        id: radioMessageBoxIconQuestion
+                                        text: "Question"
+                                        image: {
+                                            uri: ":/neogfx/resources/icons.naa#question.png"
+                                            size: 24spx
+                                        }
+                                    }
+                                    radio_button: {
+                                        id: radioMessageBoxIconWarning
+                                        text: "Warning"
+                                        image: {
+                                            uri: ":/neogfx/resources/icons.naa#warning.png"
+                                            size: 24spx
+                                        }
+                                    }
+                                    radio_button: {
+                                        id: radioMessageBoxIconStop
+                                        text: "Stop"
+                                        image: {
+                                            uri: ":/neogfx/resources/icons.naa#stop.png"
+                                            size: 24spx
+                                        }
+                                    }
+                                    radio_button: {
+                                        id: radioMessageBoxIconError
+                                        text: "Error"
+                                        image: {
+                                            uri: ":/neogfx/resources/icons.naa#error.png"
+                                            size: 24spx
+                                        }
+                                    }
+                                    radio_button: {
+                                        id: radioMessageBoxIconCritical
+                                        text: "Critical"
+                                        image: {
+                                            uri: ":/neogfx/resources/icons.naa#critical.png"
+                                            size: 24spx
+                                        }
+                                    }
+                                }
+                            }
+                            group_box: {
+                                id: groupMessageBoxButtons
+                                text: "Buttons"
+                            }
+                            group_box: {
+                                id: groupMessageBoxText
+                                text: "Text"
+                                item_layout: {
                                     label: {
-                                        text: "Easing:"
+                                        text: "Title:"
                                     }
-                                    drop_list: {
-                                        id: dropListEasing
+                                    line_edit: {
+                                        id: lineEditMessageBoxTitle
+                                        text: "neoGFX Message Box Test"
+                                    }
+                                    label: {
+                                        text: "Text:"
+                                    }
+                                    text_edit: {
+                                        id: textEditMessageBoxText
+                                        text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
+                                    }
+                                    label: {
+                                        text: "Detailed Text:"
+                                    }
+                                    text_edit: {
+                                        id: textEditMessageBoxDetailedText
+                                        text: "This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank."
+                                        minimum_size: [ 256spx 128spx ]
                                         size_policy: Minimum
                                     }
                                 }
                             }
+                            push_button: {
+                                id: buttonOpenMessageBox
+                                text: "Open Message Box"
+                                size_policy: Minimum
+                            }
+                            label: {
+                                id: lableMessageBoxResult
+                            }
                         }
-                        tab_page: {
-                            id: pageEditor
-                            tab_text: "Editor"
-                            vertical_layout: {
-                                id: layoutEditor
-                                text_edit: {
-                                    id: textEditEditor
-                                    default_style: {
-                                        text_colour: {
-                                            gradient: [ Red White Horizontal ]
-                                        }
+                    }
+                    tab_page: {
+                        id: pageItemViews
+                        tab_text: "Item Views"
+                        vertical_layout: {
+                            id: layoutItemViews
+                            table_view: {
+                                id: tableView1
+                                minimum_size: [ 128 128 ]
+                            }
+                            table_view: {
+                                id: tableView2
+                                minimum_size: [ 128 128 ]
+                            }
+                            push_button: {
+                                id: button10
+                                text: "Toggle List\nHeader View"
+                            }
+                            horizontal_layout: {
+                                id: layoutTableViewTweaks
+                                alignment: Top
+                                spacer: {}
+                                vertical_layout: {
+                                    id: layoutTableViewSelection
+                                    weight: 0
+                                    radio_button: {
+                                        id: radioNoTableViewSelection
+                                        text: "No selection"
+                                    }
+                                    radio_button: {
+                                        id: radioSingleTableViewSelection
+                                        text: "Single selection"
+                                    }
+                                    radio_button: {
+                                        id: radioMultipleTableViewSelection
+                                        text: "Multiple selection"
+                                    }
+                                    radio_button: {
+                                        id: radioExtendedTableViewSelection
+                                        text: "Extended selection"
                                     }
                                 }
-                                push_button: {
-                                    id: buttonStyle1
-                                    text: "Style 1"
+                                group_box: {
+                                    id: groupColumn5
+                                    text: "Column 5"
+                                    item_layout: {
+                                        check_box: {
+                                            id: checkColumn5ReadOnly
+                                            text: "Read only"
+                                        }
+                                        check_box: {
+                                            id: checkColumn5Unselectable
+                                            text: "Unselectable"
+                                        }
+                                        vertical_spacer: {}
+                                    }
                                 }
-                                push_button: {
-                                    id: buttonStyle2
-                                    text: "Style 2"
+                                spacer: {}
+                            }
+                        }
+                    }
+                    tab_page: {
+                        id: pageLots
+                        tab_text: "Lots"
+                    }
+                    tab_page: {
+                        id: pageImages
+                        tab_text: "Images"
+                        horizontal_layout: {
+                            vertical_layout: {
+                                image_widget: {
+                                    image: ":/test/resources/channel_256.png"
+                                    aspect_ratio: Ignore
+                                    background_colour: Red
+                                    size_policy: Expanding
+                                    minimum_size: 0
+                                }
+                                image_widget: {
+                                    image: ":/test/resources/channel_256.png"
+                                    aspect_ratio: Keep
+                                    background_colour: Green
+                                    size_policy: Expanding
+                                    minimum_size: 0
+                                }
+                                image_widget: {
+                                    image: ":/test/resources/channel_256.png"
+                                    aspect_ratio: KeepExpanding
+                                    background_colour: Blue
+                                    size_policy: Expanding
+                                    minimum_size: 0
+                                }
+                                image_widget: {
+                                    image: ":/test/resources/channel_256.png"
+                                    aspect_ratio: Stretch
+                                    background_colour: Magenta
+                                    size_policy: Expanding
+                                    minimum_size: 0
+                                }
+                            }
+                            image_widget: {
+                                image: ":/test/resources/orca.png"
+                            }
+                            grid_layout: {
+                                id: gridLayoutImages
+                            }
+                        }
+                    }
+                    tab_page: {
+                        id: pageGame
+                        tab_text: "Game"
+                        vertical_layout: {
+                            id: layoutGame
+                        }
+                    }
+                    tab_page: {
+                        id: pageDrawing
+                        tab_text: "Drawing"
+                        vertical_layout: {
+                            id: layoutDrawing1
+                            horizontal_layout: {
+                                id: layoutDrawing2
+                                size_policy: Minimum
+                                label: {
+                                    text: "Easing:"
+                                }
+                                drop_list: {
+                                    id: dropListEasing
+                                    size_policy: Minimum
                                 }
                             }
                         }
-                        tab_page: {
-                            id: pageCircles
-                            tab_text: "Circles"
+                    }
+                    tab_page: {
+                        id: pageEditor
+                        tab_text: "Editor"
+                        vertical_layout: {
+                            id: layoutEditor
+                            text_edit: {
+                                id: textEditEditor
+                                default_style: {
+                                    text_colour: {
+                                        gradient: [ Red White Horizontal ]
+                                    }
+                                }
+                            }
+                            push_button: {
+                                id: buttonStyle1
+                                text: "Style 1"
+                            }
+                            push_button: {
+                                id: buttonStyle2
+                                text: "Style 2"
+                            }
                         }
-                        tab_page: {
-                            id: pageFoo
-                            tab_text: "Foo"
-                            tab_image: ":/test/resources/channel.png"
-                        }
-                        tab_page: {
-                            id: pageBar
-                            tab_text: "Bar"
-                            tab_image: ":/test/resources/channel.png"
-                        }
+                    }
+                    tab_page: {
+                        id: pageCircles
+                        tab_text: "Circles"
+                    }
+                    tab_page: {
+                        id: pageFoo
+                        tab_text: "Foo"
+                        tab_image: ":/test/resources/channel.png"
+                    }
+                    tab_page: {
+                        id: pageBar
+                        tab_text: "Bar"
+                        tab_image: ":/test/resources/channel.png"
                     }
                 }*/
             }
