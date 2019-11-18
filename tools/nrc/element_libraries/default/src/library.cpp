@@ -27,13 +27,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "status_bar.hpp"
 #include "menu_bar.hpp"
 #include "menu.hpp"
+#include "toolbar.hpp"
 
 namespace neogfx::nrc
 {
     default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
-        iElements{ "app", "action", "window", "status_bar", "menu_bar", "menu" }
+        iElements{ "app", "action", "window", "status_bar", "menu_bar", "menu", "toolbar" }
     {
     }
 
@@ -62,7 +63,8 @@ namespace neogfx::nrc
             { "window", [](i_ui_element& aParent) -> i_ui_element* { return new window{ aParent }; } },
             { "status_bar", [](i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParent }; } },
             { "menu_bar", [](i_ui_element& aParent) -> i_ui_element* { return new menu_bar{ aParent }; } },
-            { "menu", [](i_ui_element& aParent) -> i_ui_element* { return new menu{ aParent }; } }
+            { "menu", [](i_ui_element& aParent) -> i_ui_element* { return new menu{ aParent }; } },
+            { "toolbar", [](i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParent }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())

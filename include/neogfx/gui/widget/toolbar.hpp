@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class toolbar : public widget
+    class toolbar : public widget, public i_action_container
     {
     private:
         typedef std::unique_ptr<toolbar_button> button_pointer;
@@ -48,9 +48,11 @@ namespace neogfx
         virtual uint32_t button_count() const;
         virtual const toolbar_button& button(button_index aButtonIndex) const;
         virtual toolbar_button& button(button_index aButtonIndex);
-        virtual i_action& add_action(i_action& aAction);
+        i_action& add_action(i_action& aAction) override;
+        i_action& add_action(std::shared_ptr<i_action> aAction) override;
         virtual void add_separator();
         virtual i_action& insert_action(button_index aButtonIndex, i_action& aAction);
+        virtual i_action& insert_action(button_index aButtonIndex, std::shared_ptr<i_action> aAction);
         virtual void insert_separator(button_index aButtonIndex);
     private:
         size iButtonSize = size{ 32.0, 32.0 };

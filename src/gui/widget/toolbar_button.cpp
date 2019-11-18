@@ -24,19 +24,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     toolbar_button::toolbar_button(i_action& aAction) : 
-        push_button(aAction.button_text(), push_button_style::Toolbar), iAction(aAction)
+        push_button{ aAction.button_text(), push_button_style::Toolbar }, iAction{ std::shared_ptr<i_action>{}, &aAction }
+    {
+        init();
+    }
+
+    toolbar_button::toolbar_button(std::shared_ptr<i_action> aAction) :
+        push_button{ aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_widget& aParent, i_action& aAction) :
-        push_button(aParent, aAction.button_text(), push_button_style::Toolbar), iAction(aAction)
+        push_button{ aParent, aAction.button_text(), push_button_style::Toolbar }, iAction{ std::shared_ptr<i_action>{}, &aAction }
+    {
+        init();
+    }
+
+    toolbar_button::toolbar_button(i_widget& aParent, std::shared_ptr<i_action> aAction) :
+        push_button{ aParent, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_layout& aLayout, i_action& aAction) :
-        push_button(aLayout, aAction.button_text(), push_button_style::Toolbar), iAction(aAction)
+        push_button{ aLayout, aAction.button_text(), push_button_style::Toolbar }, iAction{ std::shared_ptr<i_action>{}, &aAction }
+    {
+        init();
+    }
+
+    toolbar_button::toolbar_button(i_layout& aLayout, std::shared_ptr<i_action> aAction) :
+        push_button{ aLayout, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction }
     {
         init();
     }
@@ -56,30 +74,40 @@ namespace neogfx
         }
     }
 
+    const i_action& toolbar_button::action() const
+    {
+        return *iAction;
+    }
+
+    i_action& toolbar_button::action()
+    {
+        return *iAction;
+    }
+
     neogfx::size_policy toolbar_button::size_policy() const
     {
-        if (push_button::has_size_policy() || !iAction.is_separator())
+        if (push_button::has_size_policy() || !action().is_separator())
             return push_button::size_policy();
         return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
     }
 
     size toolbar_button::minimum_size(const optional_size& aAvailableSpace) const
     {
-        if (push_button::has_minimum_size() || !iAction.is_separator())
+        if (push_button::has_minimum_size() || !action().is_separator())
             return push_button::minimum_size(aAvailableSpace);
         return units_converter(*this).from_device_units(size{ 2.0, 2.0 });
     }    
 
     size toolbar_button::maximum_size(const optional_size& aAvailableSpace) const
     {
-        if (push_button::has_maximum_size() || !iAction.is_separator())
+        if (push_button::has_maximum_size() || !action().is_separator())
             return push_button::maximum_size(aAvailableSpace);
         return size::max_size();
     }
 
     void toolbar_button::paint(i_graphics_context& aGraphicsContext) const
     {
-        if (!iAction.is_separator())
+        if (!action().is_separator())
             push_button::paint(aGraphicsContext);
         else
         {
@@ -121,47 +149,53 @@ namespace neogfx
     void toolbar_button::handle_clicked()
     {
         push_button::handle_clicked();
-        if (iAction.is_enabled() && !iAction.is_separator())
+        if (action().is_enabled() && !action().is_separator())
         {
-            iAction.triggered().async_trigger();
-            if (iAction.is_checkable())
+            action().triggered().async_trigger();
+            if (action().is_checkable())
             {
                 if (is_checked())
-                    iAction.check();
+                    action().check();
                 else
-                    iAction.uncheck();
+                    action().uncheck();
             }
         }
     }
 
     void toolbar_button::init()
     {
-        if (iAction.is_checkable())
-            set_checkable();
-        label().set_placement(label_placement::ImageVertical);
-        text().set_text(iAction.button_text());
-        image().set_image(iAction.image());
-        image().set_aspect_ratio(aspect_ratio::KeepExpanding);
-        iSink += iAction.enabled([this]() { enable(); });
-        iSink += iAction.disabled([this]() { disable(); });
-        enable(iAction.is_enabled());
+        iSink += action().changed([this]() { update_state(); });
+        update_state();
+        iSink += action().enabled([this]() { enable(); });
+        iSink += action().disabled([this]() { disable(); });
+        enable(action().is_enabled());
         auto update_checked = [this]()
         {
             if (is_checked())
             {
-                iAction.check();
-                image().set_image(iAction.checked_image());
+                action().check();
+                image().set_image(action().checked_image());
             }
             else
             {
-                iAction.uncheck();
-                image().set_image(iAction.image());
+                action().uncheck();
+                image().set_image(action().image());
             }
         };
         iSink += Checked(update_checked);
         iSink += Unchecked(update_checked);
-        iSink += iAction.checked([this]() {set_checked(true); });
-        iSink += iAction.unchecked([this]() {set_checked(false); });
-        set_checked(iAction.is_checked());
+        iSink += action().checked([this]() {set_checked(true); });
+        iSink += action().unchecked([this]() {set_checked(false); });
+        set_checked(action().is_checked());
+    }
+
+    void toolbar_button::update_state()
+    {
+        if (action().is_checkable())
+            set_checkable();
+        label().set_placement(label_placement::ImageVertical);
+        text().set_text(action().button_text());
+        image().set_image(action().image());
+        image().set_aspect_ratio(aspect_ratio::KeepExpanding);
     }
 }

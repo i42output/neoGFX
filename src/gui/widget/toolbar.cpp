@@ -79,6 +79,12 @@ namespace neogfx
         return aAction;
     }
 
+    i_action& toolbar::add_action(std::shared_ptr<i_action> aAction)
+    {
+        insert_action(button_count(), aAction);
+        return *aAction;
+    }
+
     void toolbar::add_separator()
     {
         insert_separator(button_count());
@@ -91,6 +97,15 @@ namespace neogfx
         iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), aAction));
         iButtons[aButtonIndex]->image().set_fixed_size(button_image_extents());
         return aAction;
+    }
+
+    i_action& toolbar::insert_action(button_index aButtonIndex, std::shared_ptr<i_action> aAction)
+    {
+        if (aButtonIndex > iButtons.size())
+            throw bad_button_index();
+        iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), aAction));
+        iButtons[aButtonIndex]->image().set_fixed_size(button_image_extents());
+        return *aAction;
     }
 
     void toolbar::insert_separator(button_index aButtonIndex)

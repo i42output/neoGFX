@@ -85,4 +85,11 @@ namespace neogfx
                 check();
         }
     };
+
+    class i_action_container
+    {
+    public:
+        virtual i_action& add_action(i_action& aAction) = 0;
+        virtual i_action& add_action(std::shared_ptr<i_action> aAction) = 0;
+    };
 }

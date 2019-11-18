@@ -42,11 +42,11 @@ namespace neogfx
         action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
         action(const std::string& aText, const i_texture& aImage);
         action(const std::string& aText, const i_image& aImage);
-        action(i_menu& aMenu);
-        action(i_menu& aMenu, const std::string& aText);
-        action(i_menu& aMenu, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
-        action(i_menu& aMenu, const std::string& aText, const i_texture& aImage);
-        action(i_menu& aMenu, const std::string& aText, const i_image& aImage);
+        action(i_action_container& aContainer);
+        action(i_action_container& aContainer, const std::string& aText);
+        action(i_action_container& aContainer, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
+        action(i_action_container& aContainer, const std::string& aText, const i_texture& aImage);
+        action(i_action_container& aContainer, const std::string& aText, const i_image& aImage);
     public:
         bool is_enabled() const override;
         bool is_disabled() const override;
@@ -107,13 +107,13 @@ namespace neogfx
         class action_ref
         {
         public:
-            action_ref(i_menu& aMenu)
+            action_ref(i_action_container& aContainer)
             {
-                aMenu.add_separator();
+                aContainer.add_action(std::make_shared<action>());
             }
-            action_ref(i_menu& aMenu, i_action& aAction)
+            action_ref(i_action_container& aContainer, i_action& aAction)
             {
-                aMenu.add_action(aAction);
+                aContainer.add_action(aAction);
             }
         };
     }

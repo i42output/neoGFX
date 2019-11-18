@@ -48,34 +48,34 @@ namespace neogfx
     {
     }
 
-    action::action(i_menu& aMenu) :
+    action::action(i_action_container& aContainer) :
         action{}
     {
-        aMenu.add_action(*this);
+        aContainer.add_action(*this);
     }
 
-    action::action(i_menu& aMenu, const std::string& aText) :
+    action::action(i_action_container& aContainer, const std::string& aText) :
         action{ aText }
     {
-        aMenu.add_action(*this);
+        aContainer.add_action(*this);
     }
 
-    action::action(i_menu& aMenu, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    action::action(i_action_container& aContainer, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
         action{ aText, aImageUri, aDpiScaleFactor, aSampling }
     {
-        aMenu.add_action(*this);
+        aContainer.add_action(*this);
     }
 
-    action::action(i_menu& aMenu, const std::string& aText, const i_texture& aImage) :
+    action::action(i_action_container& aContainer, const std::string& aText, const i_texture& aImage) :
         action{ aText, aImage }
     {
-        aMenu.add_action(*this);
+        aContainer.add_action(*this);
     }
 
-    action::action(i_menu& aMenu, const std::string& aText, const i_image& aImage) :
+    action::action(i_action_container& aContainer, const std::string& aText, const i_image& aImage) :
         action{ aText, aImage }
     {
-        aMenu.add_action(*this);
+        aContainer.add_action(*this);
     }
 
     bool action::is_enabled() const

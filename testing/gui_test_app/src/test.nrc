@@ -160,9 +160,9 @@
                         id: menuHelp
                         title: "&Help"
                     }
-                }/*
+                }
                 toolbar: {
-                    id: toolbar
+                    id: toolbarTest
                     action: appTest.actionFileNew
                     action: appTest.actionFileOpen
                     action: appTest.actionFileSave
@@ -181,7 +181,7 @@
                     action: actionPasteAndGo
                     action: separator
                     action: { id: actionCheckForUpdates text: "Check for Updates..." image: ":/closed/resources/caw_toolbar.naa#setup.png" }
-                }
+                }/*
                 tab_page_container: {
                     tab_page: {
                         id: pageButtons

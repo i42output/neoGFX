@@ -1,4 +1,4 @@
-// menu_bar.hpp
+// toolbar.hpp
 /*
 neoGFX Resource Compiler
 Copyright(C) 2019 Leigh Johnston
@@ -26,10 +26,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::nrc
 {
-    class menu_bar : public ui_element<>
+    class toolbar : public ui_element<>
     {
     public:
-        menu_bar(i_ui_element& aParent) :
+        toolbar(i_ui_element& aParent) :
             ui_element<>{ aParent, aParent.parser().get<neolib::string>("id"), ui_element_type::MenuBar }
         {
         }
@@ -54,14 +54,14 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  menu_bar %1%;\n", id());
+            emit("  toolbar %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
         {
             if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
                 emit(",\n"
-                    "   %1%{ %2%.menu_layout() }", id(), parent().id());
+                    "   %1%{ %2%.toolbar_layout() }", id(), parent().id());
             else if (is_widget_or_layout(parent().type()))
                 emit(",\n"
                     "   %1%{ %2% }", id(), parent().id());

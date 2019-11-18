@@ -279,28 +279,10 @@ int main(int argc, char* argv[])
             cd.exec();
         });
 
-        ng::toolbar toolbar(window.toolbar_layout());
-        toolbar.add_action(app.action_file_new());
-        toolbar.add_action(app.action_file_open());
-        toolbar.add_action(app.action_file_save());
-        toolbar.add_separator();
-        toolbar.add_action(ui.actionContacts);
-        toolbar.add_action(ui.actionAddFavourite);
-        toolbar.add_action(ui.actionOrganizeFavourites);
-        toolbar.add_action(app.add_action("Keywords...", ":/closed/resources/caw_toolbar.naa#keyword.png"));
-        toolbar.add_action(app.add_action("Settings...", ":/closed/resources/caw_toolbar.naa#settings.png"));
-        toolbar.add_action(app.add_action("Manage Plugins...", ":/closed/resources/caw_toolbar.naa#manage_plugins.png")).triggered([&]()
+        ui.actionManagePlugins.triggered([&]()
             {
                 ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(!ng::service<ng::i_rendering_engine>().frame_rate_limited());
             });
-        toolbar.add_action(ui.actionMute);
-        toolbar.add_separator();
-        toolbar.add_action(app.action_cut());
-        toolbar.add_action(app.action_copy());
-        toolbar.add_action(app.action_paste());
-        toolbar.add_action(ui.actionPasteAndGo);
-        toolbar.add_separator();
-        toolbar.add_action(app.add_action("Check for Updates...", ":/closed/resources/caw_toolbar.naa#setup.png"));
 
         ng::tab_page_container tabContainer(layout0, true);
 

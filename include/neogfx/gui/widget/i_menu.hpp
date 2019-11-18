@@ -32,7 +32,7 @@ namespace neogfx
         Popup
     };
 
-    class i_menu
+    class i_menu : public i_action_container
     {
     public:
         struct no_widget : std::logic_error { no_widget() : std::logic_error{ "neogfx::i_menu::no_widget" } {} };
@@ -78,8 +78,6 @@ namespace neogfx
         virtual i_menu_item& item_at(item_index aItemIndex) = 0;
         virtual void add_sub_menu(i_menu& aSubMenu) = 0;
         virtual i_menu& add_sub_menu(const std::string& aSubMenuTitle) = 0;
-        virtual i_action& add_action(i_action& aAction) = 0;
-        virtual i_action& add_action(std::shared_ptr<i_action> aAction) = 0;
         virtual void add_separator() = 0;
         virtual void insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu) = 0;
         virtual i_menu& insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle) = 0;

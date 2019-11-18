@@ -179,6 +179,7 @@
     <ClInclude Include="..\..\..\src\menu.hpp" />
     <ClInclude Include="..\..\..\src\menu_bar.hpp" />
     <ClInclude Include="..\..\..\src\status_bar.hpp" />
+    <ClInclude Include="..\..\..\src\toolbar.hpp" />
     <ClInclude Include="..\..\..\src\window.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
