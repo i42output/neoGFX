@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
 
+#include "action.hpp"
+
 namespace neogfx::nrc
 {
     class menu : public ui_element<>
@@ -35,6 +37,14 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
+            if (aName == "action")
+            {
+                auto const& reference = aData.get<neolib::i_string>();
+                if (reference == "separator")
+                    new action_ref{ *this };
+                else
+                    new action_ref{ *this, reference };
+            }
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
@@ -45,7 +55,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  neogfx::menu %1%;\n", id());
+            emit("  menu %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -54,7 +64,7 @@ namespace neogfx::nrc
             {
                 if (iTitle)
                     emit(",\n"
-                        "   %1%{ %2%, neogfx::menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
+                        "   %1%{ %2%, menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
                 else
                     emit(",\n"
                         "   %1%{ %2% }", id(), parent().id());
@@ -63,7 +73,7 @@ namespace neogfx::nrc
             {
                 if (iTitle)
                     emit(",\n"
-                        "   %1%{ neogfx::menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
+                        "   %1%{ menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
             }
             ui_element<>::emit_ctor();
         }

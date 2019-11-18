@@ -181,10 +181,10 @@ namespace neogfx
     {
         iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
         ItemAdded.trigger(aItemIndex);
-        aAction->changed([this, &aAction]()
+        aAction->changed([this, aAction]()
         {
             for (item_index i = 0; i < iItems.size(); ++i)
-                if (&(iItems[i]->action()) == &*aAction)
+                if (iItems[i]->type() == menu_item_type::Action && &(iItems[i]->action()) == &*aAction)
                 {
                     ItemChanged.trigger(i);
                     return;

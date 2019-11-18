@@ -49,7 +49,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  neogfx::action %1%;\n", id());
+            emit("  action %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -91,5 +91,49 @@ namespace neogfx::nrc
         std::optional<neolib::string> iImage;
         std::optional<neolib::string> iShortcut;
         std::optional<neolib::string> iCheckedImage;
+    };
+
+    class action_ref : public ui_element<>
+    {
+    public:
+        action_ref(i_ui_element& aParent, const neolib::optional<neolib::string>& aReference = {}) :
+            ui_element<>{ aParent, neolib::optional<neolib::string>{}, ui_element_type::Action | ui_element_type::Reference },
+            iReference{ aReference }
+        {
+        }
+    public:
+        void parse(const neolib::i_string& aName, const data_t& aData) override
+        {
+        }
+        void parse(const neolib::i_string& aName, const array_data_t& aData) override
+        {
+        }
+    protected:
+        void emit() const override
+        {
+        }
+        void emit_preamble() const override
+        {
+            emit("  nrc::action_ref %1%;\n", id());
+            ui_element<>::emit_preamble();
+        }
+        void emit_ctor() const override
+        {
+            if (iReference)
+                emit(",\n"
+                    "   %1%{ %2%, %3% }", id(), parent().id(), *iReference);
+            else
+                emit(",\n"
+                    "   %1%{ %2% }", id(), parent().id());
+            ui_element<>::emit_ctor();
+        }
+        void emit_body() const override
+        {
+            ui_element<>::emit_body();
+        }
+    protected:
+        using ui_element<>::emit;
+    private:
+        neolib::optional<neolib::string> iReference;
     };
 }

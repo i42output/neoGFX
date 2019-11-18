@@ -39,6 +39,7 @@ namespace neogfx::nrc
             "\n"
             "namespace%1%\n"
             "{\n"
+            " using namespace neogfx;\n"
             " using namespace neogfx::unit_literals;\n"
             "\n"
             " struct ui\n"
@@ -187,6 +188,8 @@ namespace neogfx::nrc
                     iCurrentNode = &e;
                     parse(e, *create_element(aElement, neolib::string{ e.name() }));
                 }
+                else if (e.name() != "id")
+                    parse(e, aElement);
             break;
         case neolib::json_type::Array:
             break;
@@ -201,12 +204,14 @@ namespace neogfx::nrc
         case neolib::json_type::Uint:
             break;
         case neolib::json_type::String:
+            aElement.parse(neolib::string{ aNode.name() }, data_t{ neolib::string{ aNode.as<neolib::fjson_string>() } });
             break;
         case neolib::json_type::Bool:
             break;
         case neolib::json_type::Null:
             break;
         case neolib::json_type::Keyword:
+            aElement.parse(neolib::string{ aNode.name() }, data_t{ neolib::string{ aNode.as<neolib::fjson_keyword>().text } });
             break;
         }
     }

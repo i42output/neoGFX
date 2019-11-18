@@ -46,8 +46,11 @@ namespace neogfx::nrc
         Window          = 0x0000000100000000 | Widget,
         MenuBar         = 0x0000000200000000 | Widget | Menu,
 
+        Reference       = 0x1000000000000000,
+
         MASK_CATEGORY   = 0x00000000FFFFFFFF,
-        MASK_TYPE       = 0xFFFFFFFF00000000
+        MASK_TYPE       = 0x0FFFFFFF00000000,
+        MASK_CONTEXT    = 0xF000000000000000
     };
 
     inline constexpr ui_element_type operator|(ui_element_type aLhs, ui_element_type aRhs)

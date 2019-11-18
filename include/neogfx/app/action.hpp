@@ -21,7 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/texture.hpp>
-#include "i_action.hpp"
+#include <neogfx/app/i_action.hpp>
+#include <neogfx/gui/widget/i_menu.hpp>
 
 namespace neogfx
 {
@@ -41,6 +42,11 @@ namespace neogfx
         action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
         action(const std::string& aText, const i_texture& aImage);
         action(const std::string& aText, const i_image& aImage);
+        action(i_menu& aMenu);
+        action(i_menu& aMenu, const std::string& aText);
+        action(i_menu& aMenu, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
+        action(i_menu& aMenu, const std::string& aText, const i_texture& aImage);
+        action(i_menu& aMenu, const std::string& aText, const i_image& aImage);
     public:
         bool is_enabled() const override;
         bool is_disabled() const override;
@@ -95,4 +101,20 @@ namespace neogfx
         texture iCheckedTexture;
         optional_key_sequence iShortcut;
     };
+
+    namespace nrc
+    {
+        class action_ref
+        {
+        public:
+            action_ref(i_menu& aMenu)
+            {
+                aMenu.add_separator();
+            }
+            action_ref(i_menu& aMenu, i_action& aAction)
+            {
+                aMenu.add_action(aAction);
+            }
+        };
+    }
 }

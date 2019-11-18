@@ -40,7 +40,8 @@ namespace neogfx::nrc
         using i_ui_element::wrong_type;
         using i_ui_element::ui_element_not_found;
     public:
-        typedef neolib::vector<neolib::ref_ptr<i_ui_element>> children_t;
+        typedef neolib::ref_ptr<i_ui_element> element_ptr_t;
+        typedef neolib::vector<element_ptr_t> children_t;
         using i_ui_element::data_t;
         using i_ui_element::array_data_t;
     public:

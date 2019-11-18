@@ -69,7 +69,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  neogfx::window %1%;\n", id());
+            emit("  window %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -87,7 +87,7 @@ namespace neogfx::nrc
             default:
                 if (iDefaultSize)
                     emit(",\n"
-                        "   %1%{ neogfx::size{ %2%, %3% } }", id(), iDefaultSize->cx, iDefaultSize->cy);
+                        "   %1%{ size{ %2%, %3% } }", id(), iDefaultSize->cx, iDefaultSize->cy);
                 break;
             }
             ui_element<>::emit_ctor();

@@ -59,7 +59,7 @@
                 default_size: [ 800spx 800spx ]
                 status_bar: {
                     id: statusBar
-                }/*
+                }
                 menu_bar: {
                     id: menuBar
                     menu: {
@@ -90,6 +90,7 @@
                         title: "&View"
                     }
                     menu: {
+                        id: menuFavourites
                         title: "F&avourites"
                         action: actionAddFavourite
                         action: actionOrganizeFavourites
@@ -119,7 +120,7 @@
                     action: actionMute
                     action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons.naa#eyedropper.png" }
                     menu: {
-                        id: testMenu
+                        id: menuTest
                         title: "&Test"
                         action: {
                             id: actionEmacsStyleSequence1
@@ -142,7 +143,7 @@
                         }
                     }
                     menu: {
-                        id: windowMenu
+                        id: menuWindow
                         title: "&Window"
                         action: {
                             id: actionNextTab
@@ -156,10 +157,10 @@
                         }
                     }
                     menu: {
-                        id: helpMenu
+                        id: menuHelp
                         title: "&Help"
                     }
-                }
+                }/*
                 toolbar: {
                     id: toolbar
                     action: appTest.actionFileNew

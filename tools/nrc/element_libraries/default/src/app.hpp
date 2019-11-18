@@ -53,7 +53,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  neogfx::app %1%;\n", id());
+            emit("  app %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

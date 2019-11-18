@@ -258,55 +258,10 @@ int main(int argc, char* argv[])
             ng::service<ng::i_clipboard>().paste();
         });
 
-        ng::menu_bar menu(window.menu_layout());
-
-        auto& fileMenu = menu.add_sub_menu("&File");
-        fileMenu.add_action(app.action_file_new());
-        fileMenu.add_action(app.action_file_open());
-        fileMenu.add_separator();
-        fileMenu.add_action(app.action_file_close());
-        fileMenu.add_separator();
-        fileMenu.add_action(app.action_file_save());
-        fileMenu.add_separator();
-        fileMenu.add_action(app.action_file_exit());
-
-        auto& editMenu = menu.add_sub_menu("&Edit");
-        editMenu.add_action(app.action_undo());
-        editMenu.add_action(app.action_redo());
-        editMenu.add_separator();
-        editMenu.add_action(app.action_cut());
-        editMenu.add_action(app.action_copy());
-        editMenu.add_action(app.action_paste());
-        editMenu.add_action(ui.actionPasteAndGo);
-        editMenu.add_action(app.action_delete());
-        editMenu.add_separator();
-        editMenu.add_action(app.action_select_all());
-        auto& viewMenu = menu.add_sub_menu("&View");
-        auto& addFavouriteAction = app.add_action("Add Favourite...", ":/closed/resources/caw_toolbar.naa#add_favourite.png");
-        auto& organizeFavouritesAction = app.add_action("Organize Favourites...", ":/closed/resources/caw_toolbar.naa#organize_favourites.png");
-
-        auto& favouritesMenu = menu.add_sub_menu("F&avourites");
-        favouritesMenu.add_action(addFavouriteAction);
-        favouritesMenu.add_action(organizeFavouritesAction);
-        favouritesMenu.add_separator();
-        favouritesMenu.add_action(app.add_action("Alice", ":/closed/resources/caw_toolbar.naa#favourite.png"));
-        favouritesMenu.add_action(app.add_action("Bob", ":/closed/resources/caw_toolbar.naa#favourite.png"));
-        favouritesMenu.add_action(app.add_action("Carlos", ":/closed/resources/caw_toolbar.naa#favourite.png"));
-        favouritesMenu.add_action(app.add_action("Dave", ":/closed/resources/caw_toolbar.naa#favourite.png"));
-        auto& menuDrones = favouritesMenu.add_sub_menu("Silent Running Drones");
-        menuDrones.set_image(":/closed/resources/caw_toolbar.naa#folder.png");
-        menuDrones.add_action(app.add_action("Dewey", ":/closed/resources/caw_toolbar.naa#favourite.png"));
-        menuDrones.add_action(app.add_action("Huey", ":/closed/resources/caw_toolbar.naa#favourite.png"));
-        menuDrones.add_action(app.add_action("Louie", ":/closed/resources/caw_toolbar.naa#favourite.png"));
-        auto& subMenu2 = favouritesMenu.add_sub_menu("DC Characters");
-        subMenu2.set_image(":/closed/resources/caw_toolbar.naa#folder.png");
-        auto& subMenu3 = favouritesMenu.add_sub_menu("Marvel Characters");
-        subMenu3.set_image(":/closed/resources/caw_toolbar.naa#folder.png");
-        favouritesMenu.add_separator();
         neolib::random menuPrng{ 0 };
         for (int i = 1; i <= 5; ++i)
         {
-            auto& sm = favouritesMenu.add_sub_menu("More_" + boost::lexical_cast<std::string>(i));
+            auto& sm = ui.menuFavourites.add_sub_menu("More_" + boost::lexical_cast<std::string>(i));
             for (int j = 1; j <= 5; ++j)
             {
                 auto& sm2 = sm.add_sub_menu("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j));
@@ -317,37 +272,12 @@ int main(int argc, char* argv[])
                 }
             }
         }
-        menu.add_action(ui.actionContacts);
-        menu.add_action(ui.actionMute);
-        menu.add_action(app.add_action("&Xyzzy...", ":/neogfx/resources/icons.naa#eyedropper.png"));
 
-        auto& testMenu = menu.add_sub_menu("&Test");
-        testMenu.add_action(app.add_action("Emacs style sequence #1")).set_shortcut("Ctrl+K, Ctrl+B").triggered([&]()
-            {
-                ng::message_box::information(window, "Emacs style sequence #1", "Ctrl+K, Ctrl+B");
-            });
-        testMenu.add_action(app.add_action("Emacs style sequence #2")).set_shortcut("Ctrl+K, Ctrl+K").triggered([&]()
-            {
-                ng::message_box::information(window, "Emacs style sequence #2", "Ctrl+K, Ctrl+K");
-            });
-        testMenu.add_action(ui.actionContacts);
-        testMenu.add_action(ui.actionMute);
-        testMenu.add_action(ui.actionMute);
-        testMenu.add_action(ui.actionMute);
-        testMenu.add_action(ui.actionMute);
-        ng::i_action& colourAction = app.add_action("Colour Dialog...");
-        colourAction.triggered([&window]()
+        ui.actionColourDialog.triggered([&window]()
         {
             ng::colour_dialog cd(window);
             cd.exec();
         });
-        testMenu.add_action(colourAction);
-
-        auto& windowMenu = menu.add_sub_menu("&Window");
-        auto& nextTab = windowMenu.add_action(app.add_action("Next Tab").set_shortcut("Ctrl+Tab"));
-        auto& previousTab = windowMenu.add_action(app.add_action("Previous Tab").set_shortcut("Shift+Ctrl+Tab"));
-
-        auto& helpMenu = menu.add_sub_menu("&Help");
 
         ng::toolbar toolbar(window.toolbar_layout());
         toolbar.add_action(app.action_file_new());
@@ -355,8 +285,8 @@ int main(int argc, char* argv[])
         toolbar.add_action(app.action_file_save());
         toolbar.add_separator();
         toolbar.add_action(ui.actionContacts);
-        toolbar.add_action(addFavouriteAction);
-        toolbar.add_action(organizeFavouritesAction);
+        toolbar.add_action(ui.actionAddFavourite);
+        toolbar.add_action(ui.actionOrganizeFavourites);
         toolbar.add_action(app.add_action("Keywords...", ":/closed/resources/caw_toolbar.naa#keyword.png"));
         toolbar.add_action(app.add_action("Settings...", ":/closed/resources/caw_toolbar.naa#settings.png"));
         toolbar.add_action(app.add_action("Manage Plugins...", ":/closed/resources/caw_toolbar.naa#manage_plugins.png")).triggered([&]()
@@ -374,8 +304,8 @@ int main(int argc, char* argv[])
 
         ng::tab_page_container tabContainer(layout0, true);
 
-        nextTab.triggered([&]() { tabContainer.select_next_tab(); });
-        previousTab.triggered([&]() { tabContainer.select_previous_tab(); });
+        ui.actionNextTab.triggered([&]() { tabContainer.select_next_tab(); });
+        ui.actionPreviousTab.triggered([&]() { tabContainer.select_previous_tab(); });
 
         // Buttons
 
