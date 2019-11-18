@@ -145,11 +145,16 @@ namespace neogfx
         sFirstInstance.compare_exchange_strong(tp, np);
     }
 
-    app::app(const std::string& aName) :
-        app{ 0, nullptr, aName }
+    app::app() :
+        app{ 0, nullptr, std::string{} }
     {
     }
 
+    app::app(int argc, char* argv[]) :
+        app{ argc, argv, std::string{} }
+    {
+    }
+        
     app::app(int argc, char* argv[], const std::string& aName)
         try :
         neolib::async_thread{ "neogfx::app", true },
@@ -266,6 +271,18 @@ namespace neogfx
         std::cerr << "neogfx::app::app: terminating with unknown exception" << std::endl;
         service<i_basic_services>().display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
         throw;
+    }
+
+    app::app(int argc, char* argv[], const std::string& aName, const i_texture& aDefaultWindowIcon) : 
+        app{ argc, argv, aName }
+    {
+        set_default_window_icon(aDefaultWindowIcon);
+    }
+
+    app::app(int argc, char* argv[], const std::string& aName, const i_image& aDefaultWindowIcon) :
+        app{ argc, argv, aName }
+    {
+        set_default_window_icon(aDefaultWindowIcon);
     }
 
     app::~app()

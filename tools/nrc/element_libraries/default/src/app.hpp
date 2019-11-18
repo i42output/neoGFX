@@ -58,16 +58,25 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            emit("   %1%{ argc, argv }", id());
+            if (iName)
+            {
+                if (iDefaultWindowIcon)
+                    emit("   %1%{ argc, argv, \"%2%\", image{ \"%3%\" } }", id(), *iName, *iDefaultWindowIcon);
+                else
+                    emit("   %1%{ argc, argv, \"%2%\" }", id(), *iName);
+            }
+            else
+            {
+                if (iDefaultWindowIcon)
+                    emit("   %1%{ argc, argv, \"\", image{ \"%2%\" } }", id(), *iDefaultWindowIcon);
+                else
+                    emit("   %1%{ argc, argv }", id());
+            }
             ui_element<>::emit_ctor();
             emit("\n");
         }
         void emit_body() const override
         {
-            if (iName)
-                emit("   %1%.set_name(\"%2%\"_t);\n", id(), *iName);
-            if (iDefaultWindowIcon)
-                emit("   %1%.set_default_window_icon(neogfx::image{ \"%2%\" });\n", id(), *iDefaultWindowIcon);
             ui_element<>::emit_body();
         }
     protected:

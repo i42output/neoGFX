@@ -81,8 +81,11 @@ namespace neogfx
         struct style_not_found : std::runtime_error { style_not_found() : std::runtime_error("neogfx::app::style_not_found") {} };
         struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
     public:
-        app(const std::string& aName = std::string());
-        app(int argc, char* argv[], const std::string& aName = std::string());
+        app();
+        app(int argc, char* argv[]);
+        app(int argc, char* argv[], const std::string& aName);
+        app(int argc, char* argv[], const std::string& aName, const i_texture& aDefaultWindowIcon);
+        app(int argc, char* argv[], const std::string& aName, const i_image& aDefaultWindowIcon);
         ~app();
     public:
         static app& instance();
