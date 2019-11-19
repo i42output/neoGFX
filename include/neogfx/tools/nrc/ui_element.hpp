@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/reference_counted.hpp>
 #include <neolib/optional.hpp>
 #include <neolib/vector.hpp>
+#include <neolib/string.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
 
@@ -145,41 +146,27 @@ namespace neogfx::nrc
     protected:
         void emit(const std::string& aArgument) const
         {
-            parser().emit(neolib::string{ aArgument });
+            parser().emit(aArgument);
         }
         template <typename T>
         void emit(const std::string& aFormat, const T& aArgument) const
         {
-            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument)).str() });
+            parser().emit(aFormat, aArgument);
         }
         template <typename T1, typename T2>
         void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2) const
         {
-            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2)).str() });
+            parser().emit(aFormat, aArgument1, aArgument2);
         }
         template <typename T1, typename T2, typename T3>
         void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3) const
         {
-            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3)).str() });
+            parser().emit(aFormat, aArgument1, aArgument2, aArgument3);
         }
         template <typename T1, typename T2, typename T3, typename T4>
         void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4) const
         {
-            parser().emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3) % convert_emit_argument(aArgument4)).str() });
-        }
-    private:
-        template <typename T>
-        static const T& convert_emit_argument(const T& aArgument)
-        {
-            return aArgument;
-        }
-        static std::string convert_emit_argument(const bool& aArgument)
-        {
-            return aArgument ? "true" : "false";
-        }
-        static std::string convert_emit_argument(const length& aArgument)
-        {
-            return aArgument.to_string();
+            parser().emit(aFormat, aArgument1, aArgument2, aArgument3, aArgument4);
         }
     private:
         const i_ui_element_parser& iParser;

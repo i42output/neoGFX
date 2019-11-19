@@ -45,6 +45,7 @@ namespace neogfx::nrc
         void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const override;
         using i_ui_element_parser::indent;
         void indent(int32_t aLevel, neolib::i_string& aResult) const override;
+        using base_type::emit;
         void emit(const neolib::i_string& aText) const override;
     private:
         bool do_data_exists(const neolib::i_string& aKey) const override;
@@ -53,6 +54,8 @@ namespace neogfx::nrc
         const array_data_t& do_get_array_data(const neolib::i_string& aKey) const override;
         array_data_t& do_get_array_data(const neolib::i_string& aKey) override;
     private:
+        std::string headers() const;
+        void next_header(const i_ui_element& aElement, std::set<std::string>& aHeaders) const;
         neolib::ref_ptr<i_ui_element> create_element(const neolib::i_string& aElementType);
         neolib::ref_ptr<i_ui_element> create_element(i_ui_element& aParent, const neolib::i_string& aElementType);
         void parse(const neolib::fjson_value& aNode);

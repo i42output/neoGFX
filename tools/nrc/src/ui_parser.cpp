@@ -34,26 +34,27 @@ namespace neogfx::nrc
                 iLibraries.push_back(library);
         }
 
-        emit(neolib::string{ (boost::format(
+        for (auto const& node : aRoot.contents())
+            parse(node);
+
+        emit(
             "// This is an automatically generated file, do not edit!\n"
             "\n"
-            "namespace%1%\n"
+            "%1%\n"
+            "\n"
+            "namespace%2%\n"
             "{\n"
             " using namespace neogfx;\n"
             " using namespace neogfx::unit_literals;\n"
             "\n"
             " struct ui\n"
-            " {\n") % (!aNamespace.empty() ? " " + aNamespace : "")).str() });
-
-        for (auto const& node : aRoot.contents())
-            parse(node);
+            " {\n", headers(), (!aNamespace.empty() ? " " + aNamespace : ""));
 
         for (auto const& element : iRootElements)
             element->emit();
 
-        emit(neolib::string{ (boost::format(
-            " };\n"
-            "}\n")).str() });
+        emit(" };\n"
+            "}\n");
     }
 
     const neolib::i_string& ui_parser::element_namespace() const
@@ -150,6 +151,25 @@ namespace neogfx::nrc
             if (ch == '\n')
                 newLine = true;
         }
+    }
+
+    std::string ui_parser::headers() const
+    {
+        std::set<std::string> result;
+        for (auto const& e : iRootElements)
+            next_header(*e, result);
+        std::string resultString = "#include <neogfx/neogfx.hpp>";
+        for (auto const& h : result)
+            if (!h.empty())
+                resultString += ("\n#include <" + h + ">");
+        return resultString;
+    }
+
+    void ui_parser::next_header(const i_ui_element& aElement, std::set<std::string>& aHeaders) const
+    {
+        aHeaders.insert(aElement.header().to_std_string());
+        for (auto const& e : aElement.children())
+            next_header(*e, aHeaders);
     }
 
     neolib::ref_ptr<i_ui_element> ui_parser::create_element(const neolib::i_string& aElementType)

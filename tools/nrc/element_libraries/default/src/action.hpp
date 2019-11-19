@@ -37,6 +37,12 @@ namespace neogfx::nrc
         {
         }
     public:
+        const neolib::i_string& header() const override
+        {
+            static const neolib::string sHeader = "neogfx/app/action.hpp";
+            return sHeader;
+        }
+    public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
         }
@@ -100,6 +106,12 @@ namespace neogfx::nrc
             ui_element<>{ aParent, neolib::optional<neolib::string>{}, ui_element_type::Action | ui_element_type::Reference },
             iReference{ aReference }
         {
+        }
+    public:
+        const neolib::i_string& header() const override
+        {
+            static const neolib::string sHeader = "neogfx/app/action.hpp";
+            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override

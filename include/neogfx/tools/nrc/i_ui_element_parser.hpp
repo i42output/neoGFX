@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/string.hpp>
 #include <neolib/i_vector.hpp>
 #include <neolib/simple_variant.hpp>
+#include <neogfx/core/units.hpp>
 
 namespace neogfx::nrc
 {
@@ -67,6 +68,7 @@ namespace neogfx::nrc
             indent(aLevel, result);
             return result.to_std_string();
         }
+    public:
         bool data_exists(const std::string& aKey) const
         {
             return do_data_exists(neolib::string{ aKey });
@@ -120,6 +122,45 @@ namespace neogfx::nrc
                 return get_data(aKey).get<abstract_t<T>>();
             else
                 return aDefault;
+        }
+    public:
+        void emit(const std::string& aArgument) const
+        {
+            emit(neolib::string{ aArgument });
+        }
+        template <typename T>
+        void emit(const std::string& aFormat, const T& aArgument) const
+        {
+            emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument)).str() });
+        }
+        template <typename T1, typename T2>
+        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2) const
+        {
+            emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2)).str() });
+        }
+        template <typename T1, typename T2, typename T3>
+        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3) const
+        {
+            emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3)).str() });
+        }
+        template <typename T1, typename T2, typename T3, typename T4>
+        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4) const
+        {
+            emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3) % convert_emit_argument(aArgument4)).str() });
+        }
+    private:
+        template <typename T>
+        static const T& convert_emit_argument(const T& aArgument)
+        {
+            return aArgument;
+        }
+        static std::string convert_emit_argument(const bool& aArgument)
+        {
+            return aArgument ? "true" : "false";
+        }
+        static std::string convert_emit_argument(const length& aArgument)
+        {
+            return aArgument.to_string();
         }
     };
 }

@@ -3,9 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <neolib/random.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>

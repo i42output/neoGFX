@@ -32,6 +32,12 @@ namespace neogfx::nrc
         {
         }
     public:
+        const neolib::i_string& header() const override
+        {
+            static const neolib::string sHeader = "neogfx/gui/widget/status_bar.hpp";
+            return sHeader;
+        }
+    public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
         }

@@ -89,6 +89,8 @@ namespace neogfx::nrc
     public:
         virtual const i_ui_element_parser& parser() const = 0;
     public:
+        virtual const neolib::i_string& header() const = 0;
+    public:
         virtual bool anonymous() const = 0;
         virtual const neolib::i_string& id() const = 0;
         virtual const neolib::i_string& anonymous_id() const = 0;
