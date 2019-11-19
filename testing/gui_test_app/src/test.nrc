@@ -181,11 +181,12 @@
                     action: actionPasteAndGo
                     action: separator
                     action: { id: actionCheckForUpdates text: "Check for Updates..." image: ":/closed/resources/caw_toolbar.naa#setup.png" }
-                }/*
+                }
                 tab_page_container: {
+                    id: tabPages
                     tab_page: {
                         id: pageButtons
-                        tab_text: "Buttons"
+                        tab_text: "Buttons"/*
                         vertical_layout: {
                             id: layoutButtons
                             margin: 8px
@@ -504,7 +505,7 @@
                             horizontal_layout: {
                                 id: layout3
                             }
-                        }
+                        }*/
                     }
                     tab_page: {
                         id: pageMdi
@@ -512,7 +513,7 @@
                     }
                     tab_page: {
                         id: pageMessageBox
-                        tab_text: "Message Boxes"
+                        tab_text: "Message Boxes"/*
                         horizontal_layout: {
                             id: pageLayoutMessageBox
                             group_box: {
@@ -610,11 +611,11 @@
                             label: {
                                 id: lableMessageBoxResult
                             }
-                        }
+                        }*/
                     }
                     tab_page: {
                         id: pageItemViews
-                        tab_text: "Item Views"
+                        tab_text: "Item Views"/*
                         vertical_layout: {
                             id: layoutItemViews
                             table_view: {
@@ -670,7 +671,7 @@
                                 }
                                 spacer: {}
                             }
-                        }
+                        }*/
                     }
                     tab_page: {
                         id: pageLots
@@ -678,7 +679,7 @@
                     }
                     tab_page: {
                         id: pageImages
-                        tab_text: "Images"
+                        tab_text: "Images"/*
                         horizontal_layout: {
                             vertical_layout: {
                                 image_widget: {
@@ -716,18 +717,18 @@
                             grid_layout: {
                                 id: gridLayoutImages
                             }
-                        }
+                        }*/
                     }
                     tab_page: {
                         id: pageGame
-                        tab_text: "Game"
+                        tab_text: "Game"/*
                         vertical_layout: {
                             id: layoutGame
-                        }
+                        }*/
                     }
                     tab_page: {
                         id: pageDrawing
-                        tab_text: "Drawing"
+                        tab_text: "Drawing"/*
                         vertical_layout: {
                             id: layoutDrawing1
                             horizontal_layout: {
@@ -741,11 +742,11 @@
                                     size_policy: Minimum
                                 }
                             }
-                        }
+                        }*/
                     }
                     tab_page: {
                         id: pageEditor
-                        tab_text: "Editor"
+                        tab_text: "Editor"/*
                         vertical_layout: {
                             id: layoutEditor
                             text_edit: {
@@ -764,7 +765,7 @@
                                 id: buttonStyle2
                                 text: "Style 2"
                             }
-                        }
+                        }*/
                     }
                     tab_page: {
                         id: pageCircles
@@ -780,7 +781,7 @@
                         tab_text: "Bar"
                         tab_image: ":/test/resources/channel.png"
                     }
-                }*/
+                }
             }
         }
     }

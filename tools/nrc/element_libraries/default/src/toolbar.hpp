@@ -30,7 +30,7 @@ namespace neogfx::nrc
     {
     public:
         toolbar(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get<neolib::string>("id"), ui_element_type::MenuBar }
+            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), ui_element_type::MenuBar }
         {
         }
     public:
@@ -65,7 +65,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
+            if ((parent().type() & ui_element_type::MASK_RESERVED) == ui_element_type::Window)
                 emit(",\n"
                     "   %1%{ %2%.toolbar_layout() }", id(), parent().id());
             else if (is_widget_or_layout(parent().type()))

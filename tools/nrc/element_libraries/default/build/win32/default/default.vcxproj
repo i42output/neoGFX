@@ -179,6 +179,8 @@
     <ClInclude Include="..\..\..\src\menu.hpp" />
     <ClInclude Include="..\..\..\src\menu_bar.hpp" />
     <ClInclude Include="..\..\..\src\status_bar.hpp" />
+    <ClInclude Include="..\..\..\src\tab_page.hpp" />
+    <ClInclude Include="..\..\..\src\tab_page_container.hpp" />
     <ClInclude Include="..\..\..\src\toolbar.hpp" />
     <ClInclude Include="..\..\..\src\window.hpp" />
   </ItemGroup>

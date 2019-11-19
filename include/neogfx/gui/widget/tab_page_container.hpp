@@ -35,33 +35,6 @@ namespace neogfx
     public:
         define_declared_event(StyleChanged, style_changed)
         define_declared_event(SelectedTabPageChanged, selected_tab_page_changed, i_tab_page&)
-    public:
-        class default_tab_page : public scrollable_widget, public i_tab_page
-        {
-        public:
-            define_declared_event(Selected, selected)
-            define_declared_event(Deselected, deselected)
-        public:
-            default_tab_page(i_widget& aParent, i_tab& aTab);
-            default_tab_page(i_layout& aLayout, i_tab& aTab);
-        public:
-            neogfx::size_policy size_policy() const override;
-            size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-            size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        public:
-            bool transparent_background() const override;
-            void paint_non_client_after(i_graphics_context& aGraphicsContext) const override;
-        public:
-            colour background_colour() const override;
-        public:
-            const i_tab& tab() const override;
-            i_tab& tab() override;
-            const widget& as_widget() const override;
-            widget& as_widget() override;
-        private:
-            i_tab& iTab;
-            sink iSink;
-        };
     private:
         typedef std::shared_ptr<i_tab_page> tab_page_pointer;
         typedef std::map<const i_tab*, tab_page_pointer> tab_list;
@@ -74,7 +47,7 @@ namespace neogfx
         tab_container_style style() const override;
         void set_style(tab_container_style aStyle) override;
     public:
-        stack_layout& page_layout();
+        stack_layout& page_layout() override;
     public:
         bool has_tabs() const override;
         uint32_t tab_count() const override;

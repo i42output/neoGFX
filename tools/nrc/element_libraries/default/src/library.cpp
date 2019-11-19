@@ -28,13 +28,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu_bar.hpp"
 #include "menu.hpp"
 #include "toolbar.hpp"
+#include "tab_page_container.hpp"
+#include "tab_page.hpp"
+#include "toolbar.hpp"
 
 namespace neogfx::nrc
 {
     default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
-        iElements{ "app", "action", "window", "status_bar", "menu_bar", "menu", "toolbar" }
+        iElements{ "app", "action", "window", "status_bar", "menu_bar", "menu", "toolbar", "tab_page_container", "tab_page" }
     {
     }
 
@@ -64,7 +67,9 @@ namespace neogfx::nrc
             { "status_bar", [](i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParent }; } },
             { "menu_bar", [](i_ui_element& aParent) -> i_ui_element* { return new menu_bar{ aParent }; } },
             { "menu", [](i_ui_element& aParent) -> i_ui_element* { return new menu{ aParent }; } },
-            { "toolbar", [](i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParent }; } }
+            { "toolbar", [](i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParent }; } },
+            { "tab_page_container", [](i_ui_element& aParent) -> i_ui_element* { return new tab_page_container{ aParent }; } },
+            { "tab_page", [](i_ui_element& aParent) -> i_ui_element* { return new tab_page{ aParent }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())

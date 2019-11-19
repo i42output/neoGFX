@@ -36,10 +36,10 @@ namespace neogfx::nrc
         typedef ui_element<Base> self_type;
         typedef neolib::reference_counted<Base> base_type;
     public:
-        using i_ui_element::element_is_anonymous;
         using i_ui_element::no_parent;
         using i_ui_element::wrong_type;
-        using i_ui_element::ui_element_not_found;
+        using i_ui_element::element_not_found;
+        using i_ui_element::element_ill_formed;
     public:
         typedef neolib::ref_ptr<i_ui_element> element_ptr_t;
         typedef neolib::vector<element_ptr_t> children_t;

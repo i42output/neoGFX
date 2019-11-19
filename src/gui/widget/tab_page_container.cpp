@@ -21,107 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/tab_page_container.hpp>
+#include <neogfx/gui/widget/tab_page.hpp>
 
 namespace neogfx
 {
-    tab_page_container::default_tab_page::default_tab_page(i_widget& aParent, i_tab& aTab) :
-        scrollable_widget{ aParent, scrollbar_style::Normal, frame_style::ContainerFrame }, iTab{ aTab }
-    {
-    }
-
-    tab_page_container::default_tab_page::default_tab_page(i_layout& aLayout, i_tab& aTab) :
-        scrollable_widget{ aLayout, scrollbar_style::Normal, frame_style::ContainerFrame }, iTab{ aTab }
-    {
-    }
-
-    neogfx::size_policy tab_page_container::default_tab_page::size_policy() const
-    {
-        if (has_size_policy())
-            return scrollable_widget::size_policy();
-        else
-            return neogfx::size_policy::Expanding;
-    }
-
-    size tab_page_container::default_tab_page::minimum_size(const optional_size& aAvailableSpace) const
-    {
-        if (has_minimum_size())
-            return scrollable_widget::minimum_size(aAvailableSpace);
-        else
-            return size{};
-    }
-
-    size tab_page_container::default_tab_page::maximum_size(const optional_size& aAvailableSpace) const
-    {
-        if (has_maximum_size() || size_policy() != neogfx::size_policy::Expanding)
-            return scrollable_widget::maximum_size(aAvailableSpace);
-        else
-            return size::max_size();
-    }
-
-    bool tab_page_container::default_tab_page::transparent_background() const
-    {
-        return false;
-    }
-
-    void tab_page_container::default_tab_page::paint_non_client_after(i_graphics_context& aGraphicsContext) const
-    {
-        if (iTab.is_selected())
-        {
-            switch (iTab.container().style() & tab_container_style::TabAlignmentMask)
-            {
-            case tab_container_style::TabAlignmentTop:
-            case tab_container_style::TabAlignmentBottom:
-                {
-                    auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(non_client_rect()));
-                    hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
-                    aGraphicsContext.fill_rect(hole, inner_frame_colour());
-                    hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
-                    aGraphicsContext.fill_rect(hole, background_colour());
-                }
-                break;
-            case tab_container_style::TabAlignmentLeft:
-            case tab_container_style::TabAlignmentRight:
-                {
-                    auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ effective_frame_width(), -effective_frame_width() / 2.0 }).intersection(non_client_rect()));
-                    hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ 0.0, effective_frame_width() / 2.0 })));
-                    aGraphicsContext.fill_rect(hole, inner_frame_colour());
-                    hole.deflate(size{ 0.0, effective_frame_width() / 2.0 });
-                    aGraphicsContext.fill_rect(hole, background_colour());
-                }
-                break;
-            }
-        }
-        scrollable_widget::paint_non_client_after(aGraphicsContext);
-    }
-
-    colour tab_page_container::default_tab_page::background_colour() const
-    {
-        if (has_background_colour())
-            return scrollable_widget::background_colour();
-        else
-            return container_background_colour();
-    }
-
-    const i_tab& tab_page_container::default_tab_page::tab() const
-    {
-        return iTab;
-    }
-
-    i_tab& tab_page_container::default_tab_page::tab()
-    {
-        return iTab;
-    }
-
-    const widget& tab_page_container::default_tab_page::as_widget() const
-    {
-        return *this;
-    }
-
-    widget& tab_page_container::default_tab_page::as_widget()
-    {
-        return *this;
-    }
-
     tab_page_container::tab_page_container(bool aClosableTabs, tab_container_style aStyle) :
         widget{}, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
     {
@@ -323,7 +226,7 @@ namespace neogfx
         auto existingTab = iTabs.find(&aTab);
         if (existingTab == iTabs.end())
             throw tab_not_found();
-        existingTab->second = tab_page_pointer(new default_tab_page(page_layout(), aTab));
+        existingTab->second = tab_page_pointer{ new neogfx::tab_page{ page_layout(), aTab } };
         if (aTab.is_selected())
         {
             existingTab->second->as_widget().show();
@@ -339,7 +242,7 @@ namespace neogfx
         auto existingTab = iTabs.find(&aTab);
         if (existingTab == iTabs.end())
             throw tab_not_found();
-        existingTab->second = tab_page_pointer(tab_page_pointer(), &aWidget);
+        existingTab->second = tab_page_pointer{ tab_page_pointer{}, &aWidget };
         if (aTab.is_selected())
         {
             existingTab->second->as_widget().show();

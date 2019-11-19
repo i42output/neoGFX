@@ -3,18 +3,23 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <neolib/random.hpp>
+#include <neogfx/core/easing.hpp>
+#include <neogfx/core/i_animator.hpp>
+#include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
-#include <neogfx/hid/i_surface.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/gui/widget/slider.hpp>
+#include <neogfx/gui/widget/text_field.hpp>
+#include <neogfx/gui/widget/table_view.hpp>
+#include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/dialog/colour_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
-#include <neogfx/gui/widgets.hpp>
-#include <neogfx/core/easing.hpp>
-#include <neogfx/core/i_animator.hpp>
 
 #include "test.ui.hpp"
 
@@ -207,8 +212,6 @@ int main(int argc, char* argv[])
 
         ng::window& window = ui.mainWindow;
 
-        auto& layout0 = window.client_layout();
-
         bool showFps = false;
         bool fullRefresh = false;
         auto fpsFont = window.font().with_size(18);
@@ -282,15 +285,12 @@ int main(int argc, char* argv[])
                 ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(!ng::service<ng::i_rendering_engine>().frame_rate_limited());
             });
 
-        ng::tab_page_container tabContainer(layout0, true);
-
-        ui.actionNextTab.triggered([&]() { tabContainer.select_next_tab(); });
-        ui.actionPreviousTab.triggered([&]() { tabContainer.select_previous_tab(); });
+        ui.actionNextTab.triggered([&]() { ui.tabPages.select_next_tab(); });
+        ui.actionPreviousTab.triggered([&]() { ui.tabPages.select_previous_tab(); });
 
         // Buttons
 
-        ng::i_widget& buttonsPage = tabContainer.add_tab_page("Buttons").as_widget();
-        ng::vertical_layout layoutButtons(buttonsPage);
+        ng::vertical_layout layoutButtons(ui.pageButtons);
         layoutButtons.set_margins(ng::margins(8));
         ng::horizontal_layout topButtons(layoutButtons);
         ng::push_button button0(topButtons, "This is the neoGFX test application.");
@@ -301,16 +301,16 @@ int main(int argc, char* argv[])
         button0.set_size_policy(ng::size_policy::Expanding);
         button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
         ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement.");
-        button1.clicked([&tabContainer]()
+        button1.clicked([&ui]()
         {
-            if (tabContainer.style() == ng::tab_container_style::TabAlignmentTop)
-                tabContainer.set_style(ng::tab_container_style::TabAlignmentBottom);
-            else if (tabContainer.style() == ng::tab_container_style::TabAlignmentBottom)
-                tabContainer.set_style(ng::tab_container_style::TabAlignmentLeft);
-            else if (tabContainer.style() == ng::tab_container_style::TabAlignmentLeft)
-                tabContainer.set_style(ng::tab_container_style::TabAlignmentRight);
-            else if (tabContainer.style() == ng::tab_container_style::TabAlignmentRight)
-                tabContainer.set_style(ng::tab_container_style::TabAlignmentTop);
+            if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentTop)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentBottom);
+            else if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentBottom)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentLeft);
+            else if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentLeft)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentRight);
+            else if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentRight)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentTop);
         });
         ng::push_button buttonGenerateUuid(topButtons, "&Generate UUID");
         ng::horizontal_layout international(layoutButtons);
@@ -451,16 +451,16 @@ int main(int argc, char* argv[])
         ng::group_box groupBox{ layout2, "Group Box" };
         ng::vertical_layout& layoutRadiosAndChecks = static_cast<ng::vertical_layout&>(groupBox.item_layout());
         ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbo&x", ng::button_checkable::TriState);
-        auto showHideTabs = [&triState, &tabContainer]()
+        auto showHideTabs = [&triState, &ui]()
         {
             if (triState.is_checked())
-                tabContainer.hide_tab(8);
+                ui.tabPages.hide_tab(8);
             else
-                tabContainer.show_tab(8);
+                ui.tabPages.show_tab(8);
             if (triState.is_indeterminate())
-                tabContainer.hide_tab(9);
+                ui.tabPages.hide_tab(9);
             else
-                tabContainer.show_tab(9);
+                ui.tabPages.show_tab(9);
         };
         triState.checked([&triState, showHideTabs]()
         {
@@ -727,14 +727,11 @@ int main(int argc, char* argv[])
             }
         }, 16);
 
-        ng::i_widget& mdiPage = tabContainer.add_tab_page("MDI").as_widget();
         app.action_file_new().triggered([&]()
         {
-
         });
 
-        ng::i_widget& messageBoxesPage = tabContainer.add_tab_page("Message Boxes").as_widget();
-        ng::horizontal_layout messageBoxesPageLayout1{ messageBoxesPage };
+        ng::horizontal_layout messageBoxesPageLayout1{ ui.pageMessageBox };
         ng::group_box messageBoxIconsGroup{ messageBoxesPageLayout1, "Icons" };
         ng::radio_button messageBoxIconInformation{ messageBoxIconsGroup.item_layout(), "Information" };
         ng::radio_button messageBoxIconQuestion{ messageBoxIconsGroup.item_layout(), "Question" };
@@ -806,8 +803,7 @@ int main(int argc, char* argv[])
         ng::service<ng::i_window_manager>().save_mouse_cursor();
         ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait);
 
-        ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").as_widget();
-        ng::vertical_layout layoutItemViews(itemViewsPage);
+        ng::vertical_layout layoutItemViews(ui.pageItemViews);
         ng::table_view tableView1(layoutItemViews);
         ng::table_view tableView2(layoutItemViews);
         tableView1.set_minimum_size(ng::size(128, 128));
@@ -924,16 +920,15 @@ int main(int argc, char* argv[])
 
         ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
 
-        auto& w = tabContainer.add_tab_page("Lots").as_widget();
-        ng::vertical_layout l(w);
+        ng::vertical_layout l(ui.pageLots);
         #ifdef NDEBUG
         for (int i = 0; i < 1000; ++i)
         #else
         for (int i = 0; i < 100; ++i)
         #endif
             l.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
-        auto& w2 = tabContainer.add_tab_page("Images").as_widget();
-        ng::horizontal_layout l2(w2);
+
+        ng::horizontal_layout l2(ui.pageImages);
         ng::vertical_layout l3(l2);
         ng::image_widget iw(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Ignore);
         iw.set_background_colour(ng::colour::Red.lighter(0x80));
@@ -964,8 +959,7 @@ int main(int argc, char* argv[])
         }
         ng::image smallHash(":/test/resources/channel.png");
 
-        auto& gamePage = tabContainer.add_tab_page("Game").as_widget();
-        ng::vertical_layout gl(gamePage);
+        ng::vertical_layout gl(ui.pageGame);
         create_game(gl);
 
         neolib::basic_random<uint8_t> rngColour;
@@ -974,9 +968,8 @@ int main(int argc, char* argv[])
             return ng::colour{ rngColour(255), rngColour(255), rngColour(255) };
         };
 
-        auto& tabDrawing = tabContainer.add_tab_page("Drawing").as_widget();
-        ng::vertical_layout tabDrawingLayout1{ tabDrawing };
-        ng::horizontal_layout tabDrawingLayout2{ tabDrawing };
+        ng::vertical_layout tabDrawingLayout1{ ui.pageDrawing };
+        ng::horizontal_layout tabDrawingLayout2{ ui.pageDrawing };
         tabDrawingLayout2.set_size_policy(ng::size_policy::Minimum);
         tabDrawingLayout2.emplace<ng::label>("Easing:");
         ng::basic_item_model<ng::easing> easingItemModel;
@@ -1025,7 +1018,7 @@ int main(int argc, char* argv[])
             test_pattern(texGc, ng::point{}, 1.0, texColour[i], "Render\nTo\nTexture");
         }
 
-        tabDrawing.painting([&](ng::i_graphics_context& aGc)
+        ui.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
             ng::service<ng::i_rendering_engine>().want_game_mode();
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
@@ -1049,10 +1042,10 @@ int main(int argc, char* argv[])
             // easing function demo
             ng::scalar t = static_cast<ng::scalar>(app.program_elapsed_us());
             auto const d = 1000000.0;
-            auto const x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
-            aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
+            auto const x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (ui.pageDrawing.extents().cx - logo.extents().cx);
+            aGc.draw_texture(ng::point{ x, (ui.pageDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
-            auto texLocation = ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
+            auto texLocation = ng::point{ (ui.pageDrawing.extents().cx - 64.0) / 2.0, (ui.pageDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
             aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex[0]);
             aGc.draw_texture(texLocation + ng::point{ 0.0, 65.0 }, tex[1]);
             aGc.draw_texture(texLocation + ng::point{ 65.0, 0.0 }, tex[2]);
@@ -1067,13 +1060,12 @@ int main(int argc, char* argv[])
 
         neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
         {
-            aTimer.set_duration(tabDrawing.can_update() ? 0 : 100);
+            aTimer.set_duration(ui.pageDrawing.can_update() ? 0 : 100);
             aTimer.again();
-            tabDrawing.update();
+            ui.pageDrawing.update();
         }, 100 };
 
-        auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
-        ng::vertical_layout layoutEditor(tabEditor);
+        ng::vertical_layout layoutEditor(ui.pageEditor);
         ng::text_edit textEdit2(layoutEditor);
         textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
         ng::push_button editorStyle1(layoutEditor, "Style 1");
@@ -1087,8 +1079,7 @@ int main(int argc, char* argv[])
             textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
         });
 
-        auto& circlesWidget = tabContainer.add_tab_page("Circles").as_widget();
-        circlesWidget.painting([&circlesWidget, &random_colour](ng::i_graphics_context& aGc)
+        ui.pageCircles.painting([&ui, &random_colour](ng::i_graphics_context& aGc)
         {
             neolib::basic_random<ng::coordinate> prng;
             for (int i = 0; i < 100; ++i)
@@ -1097,25 +1088,23 @@ int main(int argc, char* argv[])
                 {
                 case 0:
                     aGc.draw_circle(
-                        ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().extents().cy - 1) }, prng(255),
+                        ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().extents().cy - 1) }, prng(255),
                         ng::pen{ random_colour(), prng(1, 3) });
                     break;
                 case 1:
                     aGc.draw_circle(
-                        ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().cy - 1) }, prng(255),
+                        ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().cy - 1) }, prng(255),
                         ng::pen{ random_colour(), prng(1, 3) },
                         random_colour().with_alpha(random_colour().red()));
                     break;
                 case 2:
                     aGc.fill_circle(
-                        ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().cy - 1) }, prng(255),
+                        ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().cy - 1) }, prng(255),
                         random_colour().with_alpha(random_colour().red()));
                     break;
                 }
             }
         });
-        tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
-        tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 
         return app.exec();
     }

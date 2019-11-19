@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/i_event.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_tab_container.hpp>
 
 namespace neogfx
@@ -33,6 +34,8 @@ namespace neogfx
         typedef uint32_t tab_index;
     public:
         struct tab_page_not_found : std::logic_error { tab_page_not_found() : std::logic_error("neogfx::i_tab_page_container::tab_page_not_found") {} };
+    public:
+        virtual i_layout& page_layout() = 0;
     public:
         virtual const i_tab_page& tab_page(tab_index aTabIndex) const = 0;
         virtual i_tab_page& tab_page(tab_index aTabIndex) = 0;

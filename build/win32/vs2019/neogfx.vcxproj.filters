@@ -894,6 +894,9 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_property.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_page.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
@@ -1302,6 +1305,9 @@
     </ClCompile>
     <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\tab_page.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

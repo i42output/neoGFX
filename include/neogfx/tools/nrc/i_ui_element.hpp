@@ -34,23 +34,29 @@ namespace neogfx::nrc
 {
     enum class ui_element_type : uint64_t
     {
-        Invalid         = 0x0000000000000000,
+        Invalid             = 0x0000000000000000,
 
-        App             = 0x0000000000000001,
-        Action          = 0x0000000000000002,
-        Widget          = 0x0000000000000004,
-        Layout          = 0x0000000000000008,
-        Menu            = 0x0000000000000010,
-        Custom          = 0x0000000080000000,
+        MASK_RESERVED       = 0x0F000FFF0000FFFF,
+        MASK_USER           = 0x0FFFF000FFFFFFFF,
 
-        Window          = 0x0000000100000000 | Widget,
-        MenuBar         = 0x0000000200000000 | Widget | Menu,
+        MASK_CATEGORY       = 0x00000000FFFFFFFF,
+        MASK_TYPE           = 0x00FFFFFF00000000,
+        MASK_SUBTYPE        = 0x0F00000000000000,
+        MASK_CONTEXT        = 0xF000000000000000,
 
-        Reference       = 0x1000000000000000,
+        App                 = 0x0000000000000001,
+        Action              = 0x0000000000000002,
+        Widget              = 0x0000000000000004,
+        Layout              = 0x0000000000000008,
+        Menu                = 0x0000000000000010,
 
-        MASK_CATEGORY   = 0x00000000FFFFFFFF,
-        MASK_TYPE       = 0x0FFFFFFF00000000,
-        MASK_CONTEXT    = 0xF000000000000000
+        Window              = 0x0000000100000000 | Widget,
+        MenuBar             = 0x0000000200000000 | Widget | Menu,
+        TabPageContainer    = 0x0000000300000000 | Widget,
+
+        Vertical            = 0x0100000000000000,
+        Horizontal          = 0x0200000000000000,
+        Reference           = 0x1000000000000000
     };
 
     inline constexpr ui_element_type operator|(ui_element_type aLhs, ui_element_type aRhs)
@@ -76,10 +82,10 @@ namespace neogfx::nrc
     class i_ui_element : public neolib::i_reference_counted
     {
     public:
-        struct element_is_anonymous : std::logic_error { element_is_anonymous() : std::logic_error{ "neogfx::nrc::i_ui_element::element_is_anonymous" } {} };
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::nrc::i_ui_element::no_parent" } {} };
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error{ "neogfx::nrc::i_ui_element::wrong_type" } {} };
-        struct ui_element_not_found : std::runtime_error { ui_element_not_found() : std::runtime_error{ "neogfx::nrc::i_ui_element::ui_element_not_found" } {} };
+        struct element_not_found : std::runtime_error { element_not_found() : std::runtime_error{ "neogfx::nrc::i_ui_element::element_not_found" } {} };
+        struct element_ill_formed : std::runtime_error { element_ill_formed() : std::runtime_error{ "neogfx::nrc::i_ui_element::element_ill_formed" } {} };
     public:
         typedef neolib::i_vector<neolib::i_ref_ptr<i_ui_element>> children_t;
         typedef i_ui_element_parser::data_t data_t;
@@ -126,7 +132,7 @@ namespace neogfx::nrc
                 return *this;
             if (has_parent())
                 return parent().find(aId);
-            throw ui_element_not_found();
+            throw element_not_found();
         }
         i_ui_element& find(const neolib::i_string& aId)
         {
