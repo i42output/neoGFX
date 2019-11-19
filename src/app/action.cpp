@@ -366,7 +366,7 @@ namespace neogfx
 
     action& action::set_shortcut(const std::string& aShortcut)
     {
-        return set_shortcut(key_sequence(aShortcut));
+        return set_shortcut(key_sequence{ aShortcut });
     }
 
     void action::set_enabled(bool aEnabled)

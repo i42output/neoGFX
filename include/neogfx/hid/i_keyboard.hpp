@@ -639,7 +639,7 @@ namespace neogfx
         typedef std::pair<key_code_e, std::set<key_modifiers_e>> combo_type;
         typedef std::vector<combo_type> sequence_type;
     public:
-        key_sequence(const std::string& aSequence) : iText{ aSequence }
+        explicit key_sequence(const std::string& aSequence) : iText{ aSequence }
         {
             std::vector<neolib::ci_string> sequenceBits;
             neolib::tokens(neolib::make_ci_string(aSequence), neolib::ci_string(", "), sequenceBits);
