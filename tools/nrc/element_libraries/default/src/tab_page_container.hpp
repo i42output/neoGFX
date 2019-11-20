@@ -28,7 +28,8 @@ namespace neogfx::nrc
     {
     public:
         tab_page_container(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), ui_element_type::TabPageContainer }
+            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), ui_element_type::TabPageContainer },
+            iClosableTabs{ aParent.parser().get<bool>("closable_tabs", false) }
         {
         }
     public:
@@ -40,9 +41,11 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
+            ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
+            ui_element<>::parse(aName, aData);
         }
     protected:
         void emit() const override
@@ -56,11 +59,23 @@ namespace neogfx::nrc
         void emit_ctor() const override
         {
             if ((parent().type() & ui_element_type::MASK_RESERVED) == ui_element_type::Window)
-                emit(",\n"
-                    "   %1%{ %2%.client_layout() }", id(), parent().id());
+            {
+                if (!iClosableTabs)
+                    emit(",\n"
+                        "   %1%{ %2%.client_layout() }", id(), parent().id());
+                else
+                    emit(",\n"
+                        "   %1%{ %2%.client_layout(), true }", id(), parent().id());
+            }
             else if (is_widget_or_layout(parent().type()))
-                emit(",\n"
-                    "   %1%{ %2% }", id(), parent().id());
+            {
+                if (!iClosableTabs)
+                    emit(",\n"
+                        "   %1%{ %2% }", id(), parent().id());
+                else
+                    emit(",\n"
+                        "   %1%{ %2%, true }", id(), parent().id());
+            }
             ui_element<>::emit_ctor();
         }
         void emit_body() const override
@@ -70,5 +85,6 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
+        bool iClosableTabs;
     };
 }

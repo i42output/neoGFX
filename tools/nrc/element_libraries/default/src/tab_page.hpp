@@ -43,9 +43,11 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
+            ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
+            ui_element<>::parse(aName, aData);
         }
     protected:
         void emit() const override

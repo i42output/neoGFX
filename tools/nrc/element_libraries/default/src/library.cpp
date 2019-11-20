@@ -31,13 +31,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tab_page_container.hpp"
 #include "tab_page.hpp"
 #include "toolbar.hpp"
+#include "layout.hpp"
 
 namespace neogfx::nrc
 {
     default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
-        iElements{ "app", "action", "window", "status_bar", "menu_bar", "menu", "toolbar", "tab_page_container", "tab_page" }
+        iElements{ 
+            "app", "action", "window", "status_bar", "menu_bar", "menu", "toolbar", "tab_page_container", "tab_page", 
+            "vertical_layout", "horizontal_layout", "grid_layout", "flow_layout", "stack_layout", "border_layout" }
     {
     }
 
@@ -69,7 +72,13 @@ namespace neogfx::nrc
             { "menu", [](i_ui_element& aParent) -> i_ui_element* { return new menu{ aParent }; } },
             { "toolbar", [](i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParent }; } },
             { "tab_page_container", [](i_ui_element& aParent) -> i_ui_element* { return new tab_page_container{ aParent }; } },
-            { "tab_page", [](i_ui_element& aParent) -> i_ui_element* { return new tab_page{ aParent }; } }
+            { "tab_page", [](i_ui_element& aParent) -> i_ui_element* { return new tab_page{ aParent }; } },
+            { "vertical_layout", [](i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aParent }; } },
+            { "horizontal_layout", [](i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aParent }; } },
+            { "grid_layout", [](i_ui_element& aParent) -> i_ui_element* { return new grid_layout{ aParent }; } },
+            { "flow_layout", [](i_ui_element& aParent) -> i_ui_element* { return new flow_layout{ aParent }; } },
+            { "stack_layout", [](i_ui_element& aParent) -> i_ui_element* { return new stack_layout{ aParent }; } },
+            { "border_layout", [](i_ui_element& aParent) -> i_ui_element* { return new border_layout{ aParent }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())

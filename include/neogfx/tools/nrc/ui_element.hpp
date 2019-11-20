@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <algorithm>
 #include <boost/format.hpp>
 #include <neolib/reference_counted.hpp>
 #include <neolib/optional.hpp>
@@ -128,6 +129,20 @@ namespace neogfx::nrc
         {
         }
     protected:
+        void parse(const neolib::i_string& aName, const data_t& aData) override
+        {
+            if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
+                if (aName == "size_policy")
+                    iSizePolicy = size_policy::from_string(aData.get<neolib::i_string>().to_std_string());
+        }
+        void parse(const neolib::i_string& aName, const array_data_t& aData) override
+        {
+            if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
+                if (aName == "size_policy" && !aData.empty())
+                    iSizePolicy = size_policy{
+                        size_policy::from_string(aData[0u].get<neolib::i_string>().to_std_string()).horizontal_size_policy(),
+                        size_policy::from_string(aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string()).vertical_size_policy() };
+        }
         void emit_preamble() const override
         {
             for (auto const& child : children())
@@ -140,6 +155,11 @@ namespace neogfx::nrc
         }
         void emit_body() const override
         {
+            if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
+            {
+                if (iSizePolicy)
+                    emit("   %1%.set_size_policy(%2%);\n", id(), *iSizePolicy);
+            }
             for (auto const& child : children())
                 child->emit_body();
         }
@@ -148,25 +168,10 @@ namespace neogfx::nrc
         {
             parser().emit(aArgument);
         }
-        template <typename T>
-        void emit(const std::string& aFormat, const T& aArgument) const
+        template <typename... Args>
+        void emit(const std::string& aFormat, const Args&... aArguments) const
         {
-            parser().emit(aFormat, aArgument);
-        }
-        template <typename T1, typename T2>
-        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2) const
-        {
-            parser().emit(aFormat, aArgument1, aArgument2);
-        }
-        template <typename T1, typename T2, typename T3>
-        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3) const
-        {
-            parser().emit(aFormat, aArgument1, aArgument2, aArgument3);
-        }
-        template <typename T1, typename T2, typename T3, typename T4>
-        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4) const
-        {
-            parser().emit(aFormat, aArgument1, aArgument2, aArgument3, aArgument4);
+            parser().emit(aFormat, aArguments...);
         }
     private:
         const i_ui_element_parser& iParser;
@@ -176,5 +181,6 @@ namespace neogfx::nrc
         mutable uint32_t iAnonymousIdCounter;
         ui_element_type iType;
         children_t iChildren;
+        std::optional<size_policy> iSizePolicy;
     };
 }

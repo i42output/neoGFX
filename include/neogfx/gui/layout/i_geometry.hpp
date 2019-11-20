@@ -27,6 +27,8 @@ namespace neogfx
     class size_policy
     {
     public:
+        struct bad_string : std::runtime_error { bad_string() : std::runtime_error{ "neogfx::size_policy::bad_string" } {} };
+    public:
         enum size_policy_e
         {
             Fixed,
@@ -95,6 +97,41 @@ namespace neogfx
         void set_aspect_ratio(const optional_size& aAspectRatio)
         {
             iAspectRatio = aAspectRatio;
+        }
+    public:
+        static size_policy from_string(const std::string& aSizePolicy)
+        {
+            static const std::unordered_map<std::string, size_policy_e> mapping
+            {
+                { "Fixed", Fixed },
+                { "Minimum", Minimum },
+                { "Maximum", Maximum },
+                { "Expanding", Expanding },
+                { "ExpandingPixelPerfect", ExpandingPixelPerfect },
+                { "Manual", Manual }
+            };
+            auto const match = mapping.find(aSizePolicy);
+            if (match != mapping.end())
+                return match->second;
+            throw bad_string();
+        }
+        static size_policy from_string(std::string& aHorizontalSizePolicy, std::string& aVerticalSizePolicy)
+        {
+            return size_policy{ from_string(aHorizontalSizePolicy).horizontal_size_policy(), from_string(aVerticalSizePolicy).vertical_size_policy() };
+        }
+        void to_string(std::string& aHorizontalSizePolicy, std::string& aVerticalSizePolicy) const
+        {
+            static const std::unordered_map<size_policy_e, std::string> mapping
+            {
+                { Fixed, "Fixed"},
+                { Minimum, "Minimum" },
+                { Maximum, "Maximum" },
+                { Expanding, "Expanding" },
+                { ExpandingPixelPerfect, "ExpandingPixelPerfect" },
+                { Manual, "Manual" }
+            };
+            aHorizontalSizePolicy = mapping.find(horizontal_size_policy())->second;
+            aVerticalSizePolicy = mapping.find(vertical_size_policy())->second;
         }
     private:
         size_policy_e iHorizontalSizePolicy;

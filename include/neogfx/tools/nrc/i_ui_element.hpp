@@ -36,27 +36,34 @@ namespace neogfx::nrc
     {
         Invalid             = 0x0000000000000000,
 
-        MASK_RESERVED       = 0x0F000FFF0000FFFF,
-        MASK_USER           = 0x0FFFF000FFFFFFFF,
+        MASK_RESERVED       = 0x0000FFFF0000FFFF,
+        MASK_USER           = 0x0FFFFFFFFFFF0000,
 
-        MASK_CATEGORY       = 0x00000000FFFFFFFF,
-        MASK_TYPE           = 0x00FFFFFF00000000,
-        MASK_SUBTYPE        = 0x0F00000000000000,
+        MASK_TYPE           = 0x00000000FFFFFFFF,
+        MASK_SUBCATEGORY    = 0x0000000F00000000,
+        MASK_CATEGORY       = 0x0FFFFFF000000000,
         MASK_CONTEXT        = 0xF000000000000000,
 
-        App                 = 0x0000000000000001,
-        Action              = 0x0000000000000002,
-        Widget              = 0x0000000000000004,
-        Layout              = 0x0000000000000008,
-        Menu                = 0x0000000000000010,
+        HasGeometry         = 0x0000000100000000,
+        LayoutItem          = 0x0000000200000000,
 
-        Window              = 0x0000000100000000 | Widget,
-        MenuBar             = 0x0000000200000000 | Widget | Menu,
-        TabPageContainer    = 0x0000000300000000 | Widget,
+        App                 = 0x0000001000000000,
+        Action              = 0x0000002000000000,
+        Widget              = 0x0000004000000000 | HasGeometry | LayoutItem,
+        Layout              = 0x0000008000000000 | HasGeometry | LayoutItem,
+        Menu                = 0x0000010000000000,
 
-        Vertical            = 0x0100000000000000,
-        Horizontal          = 0x0200000000000000,
-        Reference           = 0x1000000000000000
+        Window              = 0x0000000000000001 | Widget,
+        MenuBar             = 0x0000000000000002 | Widget | Menu,
+        TabPageContainer    = 0x0000000000000003 | Widget,
+        VerticalLayout      = 0x0000000000000004 | Layout,
+        HorizontalLayout    = 0x0000000000000005 | Layout,
+        GridLayout          = 0x0000000000000006 | Layout,
+        FlowLayout          = 0x0000000000000007 | Layout,
+        StackLayout         = 0x0000000000000008 | Layout,
+        BorderLayout        = 0x0000000000000009 | Layout,
+
+        Reference           = 0x1000000000000000,
     };
 
     inline constexpr ui_element_type operator|(ui_element_type aLhs, ui_element_type aRhs)
@@ -137,6 +144,39 @@ namespace neogfx::nrc
         i_ui_element& find(const neolib::i_string& aId)
         {
             return const_cast<i_ui_element&>(to_const(*this).find(aId));
+        }
+    public:
+        length get_length(const std::string& aKey) const
+        {
+            return get_length(parser().get_data(aKey));
+        }
+        std::vector<length> get_lengths(const std::string& aKey) const
+        {
+            return get_lengths(parser().get_array_data(aKey));
+        }
+        static length get_length(const data_t& aVariant)
+        {
+            length result;
+            std::visit([&result](auto&& v)
+            {
+                typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
+                if constexpr (std::is_same_v<vt, double>)
+                    result = length{ v };
+                else if constexpr (std::is_same_v<vt, int64_t>)
+                    result = length{ static_cast<double>(v) };
+                else if constexpr (std::is_same_v<vt, neolib::i_string>)
+                    result = length::from_string(v.to_std_string());
+                else
+                    throw i_ui_element::wrong_type();
+            }, aVariant);
+            return result;
+        }
+        static std::vector<length> get_lengths(const array_data_t& aVariantArray)
+        {
+            std::vector<length> result;
+            for (auto const& e : aVariantArray)
+                result.push_back(i_ui_element::get_length(e));
+            return result;
         }
     };
 }

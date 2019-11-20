@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/i_vector.hpp>
 #include <neolib/simple_variant.hpp>
 #include <neogfx/core/units.hpp>
+#include <neogfx/gui/layout/i_geometry.hpp>
 
 namespace neogfx::nrc
 {
@@ -148,6 +149,11 @@ namespace neogfx::nrc
         {
             emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3) % convert_emit_argument(aArgument4)).str() });
         }
+        template <typename T1, typename T2, typename T3, typename T4, typename T5>
+        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4, const T5& aArgument5) const
+        {
+            emit(neolib::string{ (boost::format(aFormat) % convert_emit_argument(aArgument1) % convert_emit_argument(aArgument2) % convert_emit_argument(aArgument3) % convert_emit_argument(aArgument4) % convert_emit_argument(aArgument5)).str() });
+        }
     private:
         template <typename T>
         static const T& convert_emit_argument(const T& aArgument)
@@ -161,6 +167,15 @@ namespace neogfx::nrc
         static std::string convert_emit_argument(const length& aArgument)
         {
             return aArgument.to_string();
+        }
+        static std::string convert_emit_argument(const size_policy& aArgument)
+        {
+            std::string hp, vp;
+            aArgument.to_string(hp, vp);
+            if (hp == vp)
+                return "size_policy::" + hp;
+            else
+                return "size_policy::" + hp + ", size_policy::" + vp;
         }
     };
 }

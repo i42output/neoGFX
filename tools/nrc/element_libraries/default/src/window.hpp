@@ -32,26 +32,9 @@ namespace neogfx::nrc
         {
             if (aParent.parser().data_exists("default_size"))
             {
-                auto const& ds = aParent.parser().get_array_data("default_size");
-                auto get_length = [](auto&& av) -> length
-                {
-                    length result;
-                    std::visit([&result](auto&& v)
-                    {
-                        typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
-                        if constexpr (std::is_integral_v<vt>)
-                            result = v;
-                        else if constexpr (std::is_same_v<vt, neolib::i_string>)
-                            result = length::from_string(v.to_std_string());
-                        else
-                            throw wrong_type();
-                    }, av);
-                    return result;
-                };
-                if (ds.size() >= 2u)
-                    iDefaultSize.emplace(get_length(ds[0]), get_length(ds[1]));
-                else if (ds.size() >= 1u)
-                    iDefaultSize.emplace(get_length(ds[0]), get_length(ds[0]));
+                auto ds = get_lengths("default_size");
+                if (!ds.empty())
+                    iDefaultSize.emplace(ds[0], ds[std::min<std::size_t>(1u, ds.size() - 1u)]);
                 else
                     iDefaultSize.emplace();
             }
@@ -65,9 +48,11 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
+            ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
+            ui_element<>::parse(aName, aData);
         }
     protected:
         void emit() const override

@@ -193,9 +193,22 @@ namespace neogfx
     public:
         typedef T value_type;
     public:
-        basic_length(value_type aValue = value_type{}, length_units::units aUnits = length_units::Pixels) :
+        explicit basic_length(value_type aValue = value_type{}, length_units::units aUnits = length_units::Pixels) :
             iValue{ aValue }, iUnits{ aUnits }
         {
+        }
+    public:
+        bool operator==(const self_type& aRhs) const
+        {
+            return iValue == aRhs.iValue && iUnits == aRhs.iUnits;
+        }
+        bool operator!=(const self_type& aRhs) const
+        {
+            return !(*this == aRhs);
+        }
+        bool operator<(const self_type& aRhs) const
+        {
+            return std::tie(iValue, iUnits) < std::tie(aRhs.iValue, aRhs.iUnits);
         }
     public:
         operator value_type() const

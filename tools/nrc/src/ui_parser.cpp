@@ -191,9 +191,21 @@ namespace neogfx::nrc
     void ui_parser::parse(const neolib::fjson_value& aNode)
     {
         iCurrentNode = &aNode;
-        auto element = create_element(neolib::string{ aNode.name() });
-        iRootElements.push_back(element);
-        parse(aNode, *element);
+        try
+        {
+            auto element = create_element(neolib::string{ aNode.name() });
+            iRootElements.push_back(element);
+            parse(aNode, *element);
+        }
+        catch (element_type_not_found& e)
+        {
+            #ifndef IGNORE_UNKNOWN_ELEMENTS
+            (void)e;
+            throw;
+            #else
+            std::cerr << "Error: " << e.what() << std::endl;
+            #endif
+        }
     }
 
     void ui_parser::parse(const neolib::fjson_value& aNode, i_ui_element& aElement)
@@ -206,7 +218,19 @@ namespace neogfx::nrc
                 if (e.type() == neolib::json_type::Object)
                 {
                     iCurrentNode = &e;
-                    parse(e, *create_element(aElement, neolib::string{ e.name() }));
+                    try
+                    {
+                        parse(e, *create_element(aElement, neolib::string{ e.name() }));
+                    }
+                    catch (element_type_not_found& e)
+                    {
+                        #ifndef IGNORE_UNKNOWN_ELEMENTS
+                        (void)e;
+                        throw;
+                        #else
+                        std::cerr << "Error: " << e.what() << std::endl;
+                        #endif
+                    }
                 }
                 else if (e.name() != "id")
                     parse(e, aElement);
