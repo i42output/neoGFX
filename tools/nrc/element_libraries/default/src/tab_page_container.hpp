@@ -27,8 +27,8 @@ namespace neogfx::nrc
     class tab_page_container : public ui_element<>
     {
     public:
-        tab_page_container(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), ui_element_type::TabPageContainer },
+        tab_page_container(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::TabPageContainer },
             iClosableTabs{ aParent.parser().get<bool>("closable_tabs", false) }
         {
         }

@@ -38,51 +38,59 @@ namespace neogfx::nrc
     default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
-        iElements{ 
-            "app", "action", "window", "status_bar", "menu_bar", "menu", "toolbar", "tab_page_container", "tab_page", 
+        iRootElements{
+            "app" },
+        iChildElements{
+            "action", "window", "status_bar", "menu_bar", "menu", "toolbar", "tab_page_container", "tab_page", 
             "vertical_layout", "horizontal_layout", "grid_layout", "flow_layout", "stack_layout", "border_layout" }
     {
     }
 
-    const default_ui_element_library::elements_t& default_ui_element_library::elements() const
+    bool default_ui_element_library::handles_element(const neolib::i_string& aElementType) const
     {
-        return iElements;
+        return iRootElements.find(aElementType) != iRootElements.end();
+    }
+
+    bool default_ui_element_library::handles_element(i_ui_element& aParent, const neolib::i_string& aElementType) const
+    {
+        // todo: this logic is too rudimentary for extensibility; check on type category instead.
+        return (aParent.type() & ui_element_type::MASK_RESERVED) != ui_element_type::Invalid && iChildElements.find(aElementType) != iChildElements.end();
     }
 
     i_ui_element* default_ui_element_library::do_create_element(const i_ui_element_parser& aParser, const neolib::i_string& aElementType)
     {
-        static const std::map<std::string, std::function<i_ui_element*(const i_ui_element_parser&)>> sFactoryMethods =
+        static const std::map<std::string, std::function<i_ui_element*(const i_ui_element_library&, const i_ui_element_parser&)>> sFactoryMethods =
         {
-            { "app", [](const i_ui_element_parser& aParser) -> i_ui_element* { return new app{ aParser }; } }
+            { "app", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser) -> i_ui_element* { return new app{ aLibrary, aParser }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())
-            return (method->second)(aParser);
+            return (method->second)(*this, aParser);
         throw unknown_element_type();
     }
 
-    i_ui_element* default_ui_element_library::do_create_element(i_ui_element& aParent, const neolib::i_string& aElementType)
+    i_ui_element* default_ui_element_library::do_create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType)
     {
-        static const std::map<std::string, std::function<i_ui_element*(i_ui_element&)>> sFactoryMethods =
+        static const std::map<std::string, std::function<i_ui_element*(const i_ui_element_library&, const i_ui_element_parser&, i_ui_element&)>> sFactoryMethods =
         {
-            { "action", [](i_ui_element& aParent) -> i_ui_element* { return new action{ aParent }; } },
-            { "window", [](i_ui_element& aParent) -> i_ui_element* { return new window{ aParent }; } },
-            { "status_bar", [](i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParent }; } },
-            { "menu_bar", [](i_ui_element& aParent) -> i_ui_element* { return new menu_bar{ aParent }; } },
-            { "menu", [](i_ui_element& aParent) -> i_ui_element* { return new menu{ aParent }; } },
-            { "toolbar", [](i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParent }; } },
-            { "tab_page_container", [](i_ui_element& aParent) -> i_ui_element* { return new tab_page_container{ aParent }; } },
-            { "tab_page", [](i_ui_element& aParent) -> i_ui_element* { return new tab_page{ aParent }; } },
-            { "vertical_layout", [](i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aParent }; } },
-            { "horizontal_layout", [](i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aParent }; } },
-            { "grid_layout", [](i_ui_element& aParent) -> i_ui_element* { return new grid_layout{ aParent }; } },
-            { "flow_layout", [](i_ui_element& aParent) -> i_ui_element* { return new flow_layout{ aParent }; } },
-            { "stack_layout", [](i_ui_element& aParent) -> i_ui_element* { return new stack_layout{ aParent }; } },
-            { "border_layout", [](i_ui_element& aParent) -> i_ui_element* { return new border_layout{ aParent }; } }
+            { "action", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new action{ aLibrary, aParser, aParent }; } },
+            { "window", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new window{ aLibrary, aParser, aParent }; } },
+            { "status_bar", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aLibrary, aParser, aParent }; } },
+            { "menu_bar", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new menu_bar{ aLibrary, aParser, aParent }; } },
+            { "menu", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new menu{ aLibrary, aParser, aParent }; } },
+            { "toolbar", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aLibrary, aParser, aParent }; } },
+            { "tab_page_container", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new tab_page_container{ aLibrary, aParser, aParent }; } },
+            { "tab_page", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new tab_page{ aLibrary, aParser, aParent }; } },
+            { "vertical_layout", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aLibrary, aParser, aParent }; } },
+            { "horizontal_layout", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aLibrary, aParser, aParent }; } },
+            { "grid_layout", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new grid_layout{ aLibrary, aParser, aParent }; } },
+            { "flow_layout", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new flow_layout{ aLibrary, aParser, aParent }; } },
+            { "stack_layout", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new stack_layout{ aLibrary, aParser, aParent }; } },
+            { "border_layout", [](const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new border_layout{ aLibrary, aParser, aParent }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())
-            return (method->second)(aParent);
+            return (method->second)(*this, aParser, aParent);
         throw unknown_element_type();
     }
 }

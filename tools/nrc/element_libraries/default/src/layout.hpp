@@ -28,8 +28,8 @@ namespace neogfx::nrc
     class basic_layout : public ui_element<>
     {
     public:
-        basic_layout(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), LayoutType }
+        basic_layout(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), LayoutType }
         {
         }
     public:

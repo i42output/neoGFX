@@ -86,6 +86,8 @@ namespace neogfx::nrc
         return ((category(aType) & (ui_element_type::Widget | ui_element_type::Layout)) != ui_element_type::Invalid);
     }
 
+    class i_ui_element_library;
+
     class i_ui_element : public neolib::i_reference_counted
     {
     public:
@@ -100,6 +102,7 @@ namespace neogfx::nrc
     public:
         virtual ~i_ui_element() {}
     public:
+        virtual const i_ui_element_library& library() const = 0;
         virtual const i_ui_element_parser& parser() const = 0;
     public:
         virtual const neolib::i_string& header() const = 0;

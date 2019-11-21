@@ -29,28 +29,28 @@ namespace neogfx
 {
     enum class standard_button : uint32_t
     {
-        Ok                = 0x00000001,
-        Cancel            = 0x00000002,
-        Close            = 0x00000004,
-        Discard            = 0x00000008,
-        Apply            = 0x00000010,
-        Reset            = 0x00000020,
-        RestoreDefaults    = 0x00000040,
-        Yes                = 0x00000080,
-        No                = 0x00000100,
+        Ok              = 0x00000001,
+        Cancel          = 0x00000002,
+        Close           = 0x00000004,
+        Discard         = 0x00000008,
+        Apply           = 0x00000010,
+        Reset           = 0x00000020,
+        RestoreDefaults = 0x00000040,
+        Yes             = 0x00000080,
+        No              = 0x00000100,
         YesToAll        = 0x00000200,
-        NoToAll            = 0x00000400,
-        Abort            = 0x00000800,
-        Retry            = 0x00001000,
-        Ignore            = 0x00002000,
+        NoToAll         = 0x00000400,
+        Abort           = 0x00000800,
+        Retry           = 0x00001000,
+        Ignore          = 0x00002000,
         Open            = 0x00004000,
         Save            = 0x00008000,
-        SaveAll            = 0x00010000,
+        SaveAll         = 0x00010000,
         Help            = 0x00020000,
-        Custom1            = 0x10000000,
-        Custom2            = 0x20000000,
-        Custom3            = 0x40000000,
-        Custom4            = 0x80000000
+        Custom1         = 0x10000000,
+        Custom2         = 0x20000000,
+        Custom3         = 0x40000000,
+        Custom4         = 0x80000000
     };
 
     inline constexpr standard_button operator|(standard_button aLhs, standard_button aRhs)

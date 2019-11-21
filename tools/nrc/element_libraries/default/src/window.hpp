@@ -27,10 +27,10 @@ namespace neogfx::nrc
     class window : public ui_element<>
     {
     public:
-        window(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get<neolib::string>("id"), ui_element_type::Window }
+        window(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aLibrary, aParser, aParent, aParser.get<neolib::string>("id"), ui_element_type::Window }
         {
-            if (aParent.parser().data_exists("default_size"))
+            if (aParser.data_exists("default_size"))
             {
                 auto ds = get_lengths("default_size");
                 if (!ds.empty())

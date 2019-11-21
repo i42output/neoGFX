@@ -39,11 +39,12 @@ namespace neogfx::nrc
         default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);
         // meta
     public:
-        const elements_t& elements() const override;
+        bool handles_element(const neolib::i_string& aElementType) const override;
+        bool handles_element(i_ui_element& aParent, const neolib::i_string& aElementType) const override;
         // implementation
     private:
         i_ui_element* do_create_element(const i_ui_element_parser& aParser, const neolib::i_string& aElementType) override;
-        i_ui_element* do_create_element(i_ui_element& aParent, const neolib::i_string& aElementType) override;
+        i_ui_element* do_create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType) override;
         // meta
     public:
         static const neolib::uuid& library_id() { static const neolib::uuid sId = neolib::make_uuid("6942704C-043E-43A2-9290-CD58E106E65E"); return sId; }
@@ -55,6 +56,7 @@ namespace neogfx::nrc
     private:
         neolib::i_application& iApplication;
         std::string iPluginPath;
-        elements_t iElements;
+        elements_t iRootElements;
+        elements_t iChildElements;
     };
 }

@@ -27,8 +27,8 @@ namespace neogfx::nrc
     class action : public ui_element<>
     {
     public:
-        action(i_ui_element& aParent) :
-            ui_element<>{ aParent, aParent.parser().get_optional<neolib::string>("id"), ui_element_type::Action },
+        action(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Action },
             iCheckable{ aParent.parser().get_optional<bool>("checkable") },
             iText{ aParent.parser().get_optional<neolib::string>("text") },
             iImage{ aParent.parser().get_optional<neolib::string>("image") },
@@ -104,8 +104,8 @@ namespace neogfx::nrc
     class action_ref : public ui_element<>
     {
     public:
-        action_ref(i_ui_element& aParent, const neolib::optional<neolib::string>& aReference = {}) :
-            ui_element<>{ aParent, neolib::optional<neolib::string>{}, ui_element_type::Action | ui_element_type::Reference },
+        action_ref(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::optional<neolib::string>& aReference = {}) :
+            ui_element<>{ aLibrary, aParser, aParent, neolib::optional<neolib::string>{}, ui_element_type::Action | ui_element_type::Reference },
             iReference{ aReference }
         {
         }

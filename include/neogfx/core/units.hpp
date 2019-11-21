@@ -41,7 +41,8 @@ namespace neogfx
             Centimetres,
             Centimeters = units::Centimetres,
             Inches,
-            Percentage
+            Percentage,
+            NoUnitsAsMaximumLength
         };
     };
 
@@ -217,6 +218,8 @@ namespace neogfx
         }
         value_type value() const
         {
+            if (units() == length_units::NoUnitsAsMaximumLength)
+                return std::numeric_limits<value_type>::max();
             return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<length_units::units>::current_units(), unconverted_value());
         }
         value_type unconverted_value() const
@@ -229,6 +232,8 @@ namespace neogfx
         }
         std::string to_string(bool aToEmit = true) const
         {
+            if (units() == length_units::NoUnitsAsMaximumLength)
+                return "max";
             std::ostringstream oss;
             oss << unconverted_value();
             if (aToEmit)
@@ -279,6 +284,8 @@ namespace neogfx
                 { "in", length_units::Inches },
                 { "pct", length_units::Percentage }
             };
+            if (aValue == "max")
+                return self_type{ 0.0, length_units::NoUnitsAsMaximumLength };
             self_type result;
             std::istringstream iss{ aValue };
             iss >> result.iValue;

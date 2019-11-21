@@ -175,7 +175,7 @@ namespace neogfx::nrc
     neolib::ref_ptr<i_ui_element> ui_parser::create_element(const neolib::i_string& aElementType)
     {
         for (auto const& library : iLibraries)
-            if (library->elements().find(aElementType) != library->elements().end())
+            if (library->handles_element(aElementType))
                 return neolib::ref_ptr<i_ui_element>{ library->create_element(*this, aElementType) };
         throw element_type_not_found(aElementType.to_std_string());
     }
@@ -183,8 +183,8 @@ namespace neogfx::nrc
     neolib::ref_ptr<i_ui_element> ui_parser::create_element(i_ui_element& aParent, const neolib::i_string& aElementType)
     {
         for (auto const& library : iLibraries)
-            if (library->elements().find(aElementType) != library->elements().end())
-                return neolib::ref_ptr<i_ui_element>{ library->create_element(aParent, aElementType) };
+            if (library->handles_element(aParent, aElementType))
+                return neolib::ref_ptr<i_ui_element>{ library->create_element(*this, aParent, aElementType) };
         throw element_type_not_found(aElementType.to_std_string());
     }
 
