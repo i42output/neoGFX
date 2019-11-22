@@ -62,7 +62,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::Menu) == ui_element_type::Menu)
+            if ((parent().type() & ui_element_type::HasActions) == ui_element_type::HasActions)
             {
                 if (iText)
                     emit(",\n"

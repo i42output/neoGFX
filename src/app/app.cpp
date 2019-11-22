@@ -509,6 +509,12 @@ namespace neogfx
         return *a->second;
     }
 
+    i_action& app::add_action(std::shared_ptr<i_action> aAction)
+    {
+        auto a = iActions.emplace(aAction->text(), aAction);
+        return *a->second;
+    }
+
     i_action& app::add_action(const std::string& aText)
     {
         auto a = iActions.emplace(aText, std::make_shared<action>(aText));

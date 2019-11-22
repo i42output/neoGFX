@@ -57,7 +57,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
+            if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
                 emit(",\n"
                     "   %1%{ %2%.status_bar_layout() }", id(), parent().id());
             else if (is_widget_or_layout(parent().type()))

@@ -58,7 +58,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
+            if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
             {
                 if (!iClosableTabs)
                     emit(",\n"

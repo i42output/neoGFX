@@ -105,6 +105,7 @@ namespace neogfx::nrc
             { "toolbar", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParser, aParent }; } },
             { "tab_page_container", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new tab_page_container{ aParser, aParent }; } },
             { "tab_page", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new tab_page{ aParser, aParent }; } },
+            { "push_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new push_button{ aParser, aParent }; } },
             { "vertical_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aParser, aParent }; } },
             { "horizontal_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aParser, aParent }; } },
             { "grid_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new grid_layout{ aParser, aParent }; } },

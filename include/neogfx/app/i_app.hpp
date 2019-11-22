@@ -25,14 +25,13 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/app/i_event_processing_context.hpp>
+#include <neogfx/app/i_action.hpp>
 #include <neogfx/app/i_style.hpp>
 #include <neogfx/app/i18n.hpp>
 
 namespace neogfx
 {
     class i_widget;
-    class i_style;
-    class i_action;
     class i_mnemonic;
     class i_image;
     class i_menu;
@@ -63,7 +62,7 @@ namespace neogfx
         virtual bool nest() const = 0;
     };
 
-    class i_app
+    class i_app : public i_action_container
     {
     public:
         declare_event(execution_started)
@@ -106,7 +105,7 @@ namespace neogfx
         virtual i_action& action_paste() = 0;
         virtual i_action& action_delete() = 0;
         virtual i_action& action_select_all() = 0;
-        virtual i_action& add_action(i_action& aAction) = 0;
+        using i_action_container::add_action;
         virtual i_action& add_action(const std::string& aText) = 0;
         virtual i_action& add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) = 0;
         virtual i_action& add_action(const std::string& aText, const i_texture& aImage) = 0;
