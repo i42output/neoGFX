@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/i_optional.hpp>
 #include <neolib/i_string.hpp>
 #include <neolib/i_vector.hpp>
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -32,61 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::nrc
 {
-    enum class ui_element_type : uint64_t
-    {
-        Invalid             = 0x0000000000000000,
-
-        MASK_RESERVED       = 0x0000FFFF0000FFFF,
-        MASK_USER           = 0x0FFFFFFFFFFF0000,
-
-        MASK_TYPE           = 0x00000000FFFFFFFF,
-        MASK_SUBCATEGORY    = 0x0000000F00000000,
-        MASK_CATEGORY       = 0x0FFFFFF000000000,
-        MASK_CONTEXT        = 0xF000000000000000,
-
-        HasGeometry         = 0x0000000100000000,
-        LayoutItem          = 0x0000000200000000,
-
-        App                 = 0x0000001000000000,
-        Action              = 0x0000002000000000,
-        Widget              = 0x0000004000000000 | HasGeometry | LayoutItem,
-        Layout              = 0x0000008000000000 | HasGeometry | LayoutItem,
-        Menu                = 0x0000010000000000,
-
-        Window              = 0x0000000000000001 | Widget,
-        MenuBar             = 0x0000000000000002 | Widget | Menu,
-        TabPageContainer    = 0x0000000000000003 | Widget,
-        VerticalLayout      = 0x0000000000000004 | Layout,
-        HorizontalLayout    = 0x0000000000000005 | Layout,
-        GridLayout          = 0x0000000000000006 | Layout,
-        FlowLayout          = 0x0000000000000007 | Layout,
-        StackLayout         = 0x0000000000000008 | Layout,
-        BorderLayout        = 0x0000000000000009 | Layout,
-
-        Reference           = 0x1000000000000000,
-    };
-
-    inline constexpr ui_element_type operator|(ui_element_type aLhs, ui_element_type aRhs)
-    {
-        return static_cast<ui_element_type>(static_cast<uint64_t>(aLhs) | static_cast<uint64_t>(aRhs));
-    }
-
-    inline constexpr ui_element_type operator&(ui_element_type aLhs, ui_element_type aRhs)
-    {
-        return static_cast<ui_element_type>(static_cast<uint64_t>(aLhs) & static_cast<uint64_t>(aRhs));
-    }
-
-    inline constexpr ui_element_type category(ui_element_type aType)
-    {
-        return aType & ui_element_type::MASK_CATEGORY;
-    }
+    typedef object_type ui_element_type;
 
     inline constexpr bool is_widget_or_layout(ui_element_type aType)
     {
         return ((category(aType) & (ui_element_type::Widget | ui_element_type::Layout)) != ui_element_type::Invalid);
     }
-
-    class i_ui_element_library;
 
     class i_ui_element : public neolib::i_reference_counted
     {
@@ -102,7 +54,6 @@ namespace neogfx::nrc
     public:
         virtual ~i_ui_element() {}
     public:
-        virtual const i_ui_element_library& library() const = 0;
         virtual const i_ui_element_parser& parser() const = 0;
     public:
         virtual const neolib::i_string& header() const = 0;

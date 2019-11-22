@@ -47,12 +47,12 @@ namespace neogfx::nrc
         using i_ui_element::data_t;
         using i_ui_element::array_data_t;
     public:
-        ui_element(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
-            iLibrary{ aLibrary }, iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
+        ui_element(const i_ui_element_parser& aParser, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
+            iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
         }
-        ui_element(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
-            iLibrary{ aLibrary }, iParser{ aParser }, iParent{ &aParent }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
+        ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
+            iParser{ aParser }, iParent{ &aParent }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
         {
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
         }
@@ -60,10 +60,6 @@ namespace neogfx::nrc
         {
         }
     public:
-        const i_ui_element_library& library() const override
-        {
-            return iLibrary;
-        }
         const i_ui_element_parser& parser() const override
         {
             return iParser;
@@ -178,7 +174,6 @@ namespace neogfx::nrc
             parser().emit(aFormat, aArguments...);
         }
     private:
-        const i_ui_element_library& iLibrary;
         const i_ui_element_parser& iParser;
         i_ui_element* iParent;
         neolib::optional<neolib::string> iId;

@@ -27,8 +27,8 @@ namespace neogfx::nrc
     class app : public ui_element<>
     {
     public:
-        app(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser) :
-            ui_element<>{ aLibrary, aParser, aParser.get<neolib::string>("id"), ui_element_type::App },
+        app(const i_ui_element_parser& aParser) :
+            ui_element<>{ aParser, aParser.get<neolib::string>("id"), ui_element_type::App },
             iName{ aParser.get_optional<neolib::string>("name") },
             iDefaultWindowIcon{ aParser.get_optional<neolib::string>("default_window_icon") }
         {

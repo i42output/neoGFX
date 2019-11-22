@@ -29,8 +29,8 @@ namespace neogfx::nrc
     class menu : public ui_element<>
     {
     public:
-        menu(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Menu },
+        menu(const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Menu },
             iTitle{ aParent.parser().get_optional<neolib::string>("title") }
         {
         }
@@ -47,9 +47,9 @@ namespace neogfx::nrc
             {
                 auto const& reference = aData.get<neolib::i_string>();
                 if (reference == "separator")
-                    new action_ref{ library(), parser(), *this };
+                    new action_ref{ parser(), *this };
                 else
-                    new action_ref{ library(), parser(), *this, reference };
+                    new action_ref{ parser(), *this, reference };
             }
             ui_element<>::parse(aName, aData);
         }

@@ -27,8 +27,8 @@ namespace neogfx::nrc
     class action : public ui_element<>
     {
     public:
-        action(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Action },
+        action(const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Action },
             iCheckable{ aParent.parser().get_optional<bool>("checkable") },
             iText{ aParent.parser().get_optional<neolib::string>("text") },
             iImage{ aParent.parser().get_optional<neolib::string>("image") },
@@ -62,7 +62,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::MASK_RESERVED) == ui_element_type::Menu)
+            if ((parent().type() & ui_element_type::Menu) == ui_element_type::Menu)
             {
                 if (iText)
                     emit(",\n"
@@ -104,8 +104,8 @@ namespace neogfx::nrc
     class action_ref : public ui_element<>
     {
     public:
-        action_ref(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::optional<neolib::string>& aReference = {}) :
-            ui_element<>{ aLibrary, aParser, aParent, neolib::optional<neolib::string>{}, ui_element_type::Action | ui_element_type::Reference },
+        action_ref(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::optional<neolib::string>& aReference = {}) :
+            ui_element<>{ aParser, aParent, neolib::optional<neolib::string>{}, ui_element_type::Action | ui_element_type::Reference },
             iReference{ aReference }
         {
         }

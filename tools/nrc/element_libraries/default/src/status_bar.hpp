@@ -27,8 +27,8 @@ namespace neogfx::nrc
     class status_bar : public ui_element<>
     {
     public:
-        status_bar(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Widget }
+        status_bar(const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::StatusBar }
         {
         }
     public:
@@ -57,7 +57,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::MASK_RESERVED) == ui_element_type::Window)
+            if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
                 emit(",\n"
                     "   %1%{ %2%.status_bar_layout() }", id(), parent().id());
             else if (is_widget_or_layout(parent().type()))

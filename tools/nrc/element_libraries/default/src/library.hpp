@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neolib/reference_counted.hpp>
 #include <neolib/set.hpp>
+#include <neolib/map.hpp>
 #include <neolib/string.hpp>
 #include <neolib/i_application.hpp>
 #include <neolib/version.hpp>
@@ -33,7 +34,9 @@ namespace neogfx::nrc
     {
         // types
     public:
-        typedef neolib::set<neolib::string> elements_t;
+        typedef neolib::string element_type_name_t;
+        typedef neolib::set<element_type_name_t> root_elements_t;
+        typedef neolib::multimap<element_type_name_t, ui_element_type> child_elements_t;
         // construction
     public:
         default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);
@@ -56,7 +59,7 @@ namespace neogfx::nrc
     private:
         neolib::i_application& iApplication;
         std::string iPluginPath;
-        elements_t iRootElements;
-        elements_t iChildElements;
+        root_elements_t iRootElements;
+        child_elements_t iChildElements;
     };
 }

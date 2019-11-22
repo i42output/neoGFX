@@ -27,8 +27,8 @@ namespace neogfx::nrc
     class window : public ui_element<>
     {
     public:
-        window(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aLibrary, aParser, aParent, aParser.get<neolib::string>("id"), ui_element_type::Window }
+        window(const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aParser, aParent, aParser.get<neolib::string>("id"), ui_element_type::Window }
         {
             if (aParser.data_exists("default_size"))
             {

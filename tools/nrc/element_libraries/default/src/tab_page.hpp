@@ -27,8 +27,8 @@ namespace neogfx::nrc
     class tab_page : public ui_element<>
     {
     public:
-        tab_page(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Widget },
+        tab_page(const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::TabPage },
             iTab{ aParent.parser().get_optional<neolib::string>("tab") },
             iTabText{ aParent.parser().get_optional<neolib::string>("tab_text") },
             iTabImage{ aParent.parser().get_optional<neolib::string>("tab_image") }
@@ -60,7 +60,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::MASK_RESERVED) == ui_element_type::Window)
+            if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
             {
                 if (iTab)
                     emit(",\n"
@@ -68,7 +68,7 @@ namespace neogfx::nrc
                 else
                     throw element_ill_formed();
             }
-            else if ((parent().type() & ui_element_type::MASK_RESERVED) == ui_element_type::TabPageContainer)
+            else if ((parent().type() & ui_element_type::TabPageContainer) == ui_element_type::TabPageContainer)
             {
                 if (iTab && !iTabText)
                     emit(",\n"

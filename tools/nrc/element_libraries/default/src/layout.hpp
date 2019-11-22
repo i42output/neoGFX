@@ -28,8 +28,8 @@ namespace neogfx::nrc
     class basic_layout : public ui_element<>
     {
     public:
-        basic_layout(const i_ui_element_library& aLibrary, const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aLibrary, aParser, aParent, aParser.get_optional<neolib::string>("id"), LayoutType }
+        basic_layout(const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), LayoutType }
         {
         }
     public:
@@ -133,7 +133,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::MASK_RESERVED) == ui_element_type::Window)
+            if ((parent().type() & ui_element_type::Window) == ui_element_type::Window)
             {
                 emit(",\n"
                     "   %1%{ %2%.client_layout() }", id(), parent().id());
