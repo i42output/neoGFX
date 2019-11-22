@@ -220,7 +220,9 @@ namespace neogfx::nrc
                     iCurrentNode = &e;
                     try
                     {
-                        parse(e, *create_element(aElement, neolib::string{ e.name() }));
+                        neolib::string elementName{ e.name() };
+                        if (!aElement.consume_element(elementName))
+                            parse(e, *create_element(aElement, elementName));
                     }
                     catch (element_type_not_found& e)
                     {

@@ -129,6 +129,10 @@ namespace neogfx::nrc
         {
         }
     protected:
+        bool consume_element(const neolib::i_string& aElementType) override
+        {
+            return false;
+        }
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)

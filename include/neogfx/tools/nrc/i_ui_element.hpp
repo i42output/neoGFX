@@ -70,6 +70,7 @@ namespace neogfx::nrc
         virtual const children_t& children() const = 0;
         virtual children_t& children() = 0;
     public:
+        virtual bool consume_element(const neolib::i_string& aElementType) = 0;
         virtual void parse(const neolib::i_string& aType, const data_t& aData) = 0;
         virtual void parse(const neolib::i_string& aType, const array_data_t& aData) = 0;
         virtual void emit() const = 0;
