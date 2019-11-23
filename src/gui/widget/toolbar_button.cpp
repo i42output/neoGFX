@@ -88,7 +88,7 @@ namespace neogfx
     {
         if (push_button::has_size_policy() || !action().is_separator())
             return push_button::size_policy();
-        return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+        return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
     size toolbar_button::minimum_size(const optional_size& aAvailableSpace) const

@@ -127,7 +127,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
     size text_field::minimum_size(const optional_size& aAvailableSpace) const
@@ -159,11 +159,11 @@ namespace neogfx
         };
         iInputBoxContainer.Margins.Changed(label_margin_updater);
         label_margin_updater(iInputBoxContainer.Margins);
-        iLabel.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
+        iLabel.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iInputBox.set_margins(neogfx::margins{});
-        iInputBoxLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+        iInputBoxLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iInputBoxLayout.set_margins(neogfx::margins{});
-        iHint.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+        iHint.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iHint.set_alignment(alignment::Left | alignment::VCentre);
         iHelp.set_margins(neogfx::margins{});
         iHelp.set_alignment(alignment::Left | alignment::VCentre);

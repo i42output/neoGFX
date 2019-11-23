@@ -207,14 +207,14 @@ namespace neogfx
         iRight.set_spacing(neogfx::size{});
         iBottom.set_spacing(neogfx::size{});
 
-        set_size_policy(neogfx::size_policy::Expanding);
-        iRows.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding });
-        iTop.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
-        iMiddle.set_size_policy(neogfx::size_policy::Expanding);
-        iLeft.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-        iCentre.set_size_policy(neogfx::size_policy::Expanding);
-        iRight.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-        iBottom.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+        set_size_policy(size_constraint::Expanding);
+        iRows.set_size_policy(neogfx::size_policy{ size_constraint::Expanding });
+        iTop.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iMiddle.set_size_policy(size_constraint::Expanding);
+        iLeft.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+        iCentre.set_size_policy(size_constraint::Expanding);
+        iRight.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+        iBottom.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
 
         set_alive();
         invalidate();

@@ -105,7 +105,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy{neogfx::size_policy::Expanding, neogfx::size_policy::Minimum};
+        return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
     }
 
     margins button::margins() const
@@ -315,7 +315,7 @@ namespace neogfx
         DoubleClicked.set_trigger_type(event_trigger_type::Asynchronous);
 
         layout().set_margins(neogfx::margins(0.0));
-        iLabel.set_size_policy(neogfx::size_policy::Expanding);
+        iLabel.set_size_policy(size_constraint::Expanding);
 
         set_focus_policy(focus_policy::TabFocus);
 

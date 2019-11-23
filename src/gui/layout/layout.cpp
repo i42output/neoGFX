@@ -544,15 +544,15 @@ namespace neogfx
     {
         if (has_size_policy())
             return *iSizePolicy;
-        neogfx::size_policy result{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
+        neogfx::size_policy result{ size_constraint::Minimum, size_constraint::Minimum };
         for (auto& i : items())
         {
             if (i.is_spacer())
                 continue;
-            if (i.size_policy().horizontal_size_policy() == neogfx::size_policy::Expanding)
-                result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
-            if (i.size_policy().vertical_size_policy() == neogfx::size_policy::Expanding)
-                result.set_vertical_size_policy(neogfx::size_policy::Expanding);
+            if (i.size_policy().horizontal_size_policy() == size_constraint::Expanding)
+                result.set_horizontal_size_policy(size_constraint::Expanding);
+            if (i.size_policy().vertical_size_policy() == size_constraint::Expanding)
+                result.set_vertical_size_policy(size_constraint::Expanding);
         }
         return result;
     }

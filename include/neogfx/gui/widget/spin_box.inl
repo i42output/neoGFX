@@ -85,7 +85,7 @@ namespace neogfx
     {
         if (framed_widget::has_size_policy())
             return framed_widget::size_policy();
-        return neogfx::size_policy{ text_box().size_hint() ? neogfx::size_policy::Minimum : neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ text_box().size_hint() ? size_constraint::Minimum : size_constraint::Expanding, size_constraint::Minimum };
     }
 
     template <typename T>
@@ -178,14 +178,14 @@ namespace neogfx
         iStepUpButton.set_minimum_size(spx(SPIN_BUTTON_MINIMUM_SIZE));
         iStepUpButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
         iStepUpButton.label().image().set_snap(2.0); // up and down buttons want to draw arrow texture at same size so use a snap of 2 pixels
-        iStepUpButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+        iStepUpButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
         iStepUpButton.Clicked.set_trigger_type(event_trigger_type::Synchronous);
         iStepUpButton.DoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
         iStepDownButton.set_margins(neogfx::margins{});
         iStepDownButton.set_minimum_size(spx(SPIN_BUTTON_MINIMUM_SIZE));
         iStepDownButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
         iStepDownButton.label().image().set_snap(2.0);
-        iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+        iStepDownButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
         iStepDownButton.Clicked.set_trigger_type(event_trigger_type::Synchronous);
         iStepDownButton.DoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
         iTextBox.set_frame_style(frame_style::NoFrame);

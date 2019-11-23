@@ -62,8 +62,8 @@ namespace neogfx
         static size::dimension_type& cy(size& aSize) { return aSize.cy; }
         static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
         static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
-        static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.horizontal_size_policy(aIgnoreBits); }
-        static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.vertical_size_policy(aIgnoreBits); }
+        static neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.horizontal_size_policy(aIgnoreBits); }
+        static neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.vertical_size_policy(aIgnoreBits); }
     };
 
     template <typename Layout>
@@ -84,8 +84,8 @@ namespace neogfx
         static size::dimension_type& cy(size& aSize) { return aSize.cx; }
         static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
         static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
-        static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnorePixelPerfect = true) { return aSizePolicy.vertical_size_policy(aIgnorePixelPerfect); }
-        static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnorePixelPerfect = true) { return aSizePolicy.horizontal_size_policy(aIgnorePixelPerfect); }
+        static neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnorePixelPerfect = true) { return aSizePolicy.vertical_size_policy(aIgnorePixelPerfect); }
+        static neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnorePixelPerfect = true) { return aSizePolicy.horizontal_size_policy(aIgnorePixelPerfect); }
     };
 
     namespace
@@ -185,9 +185,9 @@ namespace neogfx
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
         {
             size result;
-            if (AxisPolicy::size_policy_x(size_policy()) == neogfx::size_policy::Expanding)
+            if (AxisPolicy::size_policy_x(size_policy()) == size_constraint::Expanding)
                 AxisPolicy::cx(result) = size::max_dimension();
-            if (AxisPolicy::size_policy_y(size_policy()) == neogfx::size_policy::Expanding)
+            if (AxisPolicy::size_policy_y(size_policy()) == size_constraint::Expanding)
                 AxisPolicy::cy(result) = size::max_dimension();
             return result;
         }
@@ -205,7 +205,7 @@ namespace neogfx
             if (!item.is_spacer() && (AxisPolicy::cx(itemMaxSize) == 0.0 || AxisPolicy::cy(itemMaxSize) == 0.0))
                 ++itemsZeroSized;
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), 
-                AxisPolicy::size_policy_y(size_policy()) == size_policy::Expanding || AxisPolicy::size_policy_y(size_policy()) == size_policy::Maximum ? 
+                AxisPolicy::size_policy_y(size_policy()) == size_constraint::Expanding || AxisPolicy::size_policy_y(size_policy()) == size_constraint::Maximum ? 
                     AxisPolicy::cy(itemMaxSize) : AxisPolicy::cy(item.minimum_size(availableSpaceForChildren)));
             if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(itemMaxSize) != size::max_dimension())
                 AxisPolicy::cx(result) += AxisPolicy::cx(itemMaxSize);
@@ -226,9 +226,9 @@ namespace neogfx
             AxisPolicy::cy(result) += AxisPolicy::cy(margins());
             AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
         }
-        if (AxisPolicy::cx(result) == 0.0 && AxisPolicy::size_policy_x(size_policy()) == neogfx::size_policy::Expanding)
+        if (AxisPolicy::cx(result) == 0.0 && AxisPolicy::size_policy_x(size_policy()) == size_constraint::Expanding)
             AxisPolicy::cx(result) = size::max_dimension();
-        if (AxisPolicy::cy(result) == 0.0 && AxisPolicy::size_policy_y(size_policy()) == neogfx::size_policy::Expanding)
+        if (AxisPolicy::cy(result) == 0.0 && AxisPolicy::size_policy_y(size_policy()) == size_constraint::Expanding)
             AxisPolicy::cy(result) = size::max_dimension();
         return result;
     }
@@ -260,14 +260,14 @@ namespace neogfx
         {
             if (!item.visible())
                 continue;
-            if (AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum)
+            if (AxisPolicy::size_policy_x(item.size_policy()) == size_constraint::Minimum)
             {
                 itemDispositions[&item] = TooSmall;
                 leftover -= AxisPolicy::cx(item.minimum_size(availableSize));
                 if (leftover < 0.0)
                     leftover = 0.0;
             }
-            else if (AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Fixed)
+            else if (AxisPolicy::size_policy_x(item.size_policy()) == size_constraint::Fixed)
             {
                 itemDispositions[&item] = FixedSize;
                 leftover -= AxisPolicy::cx(item.minimum_size(availableSize));
@@ -297,7 +297,7 @@ namespace neogfx
                 if (minSize < weightedSize && maxSize > weightedSize)
                 {
                     disposition = Weighted;
-                    if (AxisPolicy::size_policy_x(item.size_policy(), false) == neogfx::size_policy::ExpandingPixelPerfect)
+                    if (AxisPolicy::size_policy_x(item.size_policy(), false) == size_constraint::ExpandingPixelPerfect)
                     {
                         if (--itemsUsingLeftover == 0)
                             break;
@@ -341,11 +341,11 @@ namespace neogfx
             if (disposition == FixedSize)
                 AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
             else if (disposition == TooSmall)
-                AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum ? itemMinSize : itemMaxSize);
+                AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == size_constraint::Minimum ? itemMinSize : itemMaxSize);
             else if (disposition == Weighted && leftover > 0.0)
             {
                 uint32_t bit = 0;
-                if (AxisPolicy::size_policy_x(item.size_policy(), false) != neogfx::size_policy::ExpandingPixelPerfect)
+                if (AxisPolicy::size_policy_x(item.size_policy(), false) != size_constraint::ExpandingPixelPerfect)
                     bit = (bitsLeft != 0 ? bits() : 0);
                 AxisPolicy::cx(s) = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize) + static_cast<size::dimension_type>(bit - previousBit);
                 previousBit = bit;

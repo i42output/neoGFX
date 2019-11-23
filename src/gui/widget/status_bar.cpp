@@ -35,7 +35,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+        return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
     size status_bar::separator::minimum_size(const optional_size& aAvailableSpace) const
@@ -94,7 +94,7 @@ namespace neogfx
 
     neogfx::size_policy status_bar::keyboard_lock_status::size_policy() const
     {
-        return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+        return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
     status_bar::size_grip::size_grip(i_layout& aLayout) : 
@@ -106,7 +106,7 @@ namespace neogfx
 
     neogfx::size_policy status_bar::size_grip::size_policy() const
     {
-        return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+        return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
     widget_part status_bar::size_grip::hit_test(const point&) const
@@ -233,7 +233,7 @@ namespace neogfx
 
     neogfx::size_policy status_bar::size_policy() const
     {
-        return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
     bool status_bar::can_defer_layout() const
@@ -250,15 +250,15 @@ namespace neogfx
     {
         set_margins(neogfx::margins{});
         iLayout.set_margins(neogfx::margins{});
-        iLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+        iLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalLayout.set_margins(neogfx::margins{});
-        iNormalLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+        iNormalLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMessageLayout.set_margins(neogfx::margins{});
-        iMessageLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
-        iMessageWidget.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+        iMessageLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iMessageWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iIdleLayout.set_margins(neogfx::margins{});
-        iIdleLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
-        iIdleWidget.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+        iIdleLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetContainer.set_margins(neogfx::margins{});
         iNormalWidgetLayout.set_margins(neogfx::margins{});
         iPermanentWidgetLayout.set_margins(neogfx::margins{});

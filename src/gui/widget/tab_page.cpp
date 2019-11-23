@@ -50,7 +50,7 @@ namespace neogfx
         if (has_size_policy())
             return scrollable_widget::size_policy();
         else
-            return neogfx::size_policy::Expanding;
+            return size_constraint::Expanding;
     }
 
     size tab_page::minimum_size(const optional_size& aAvailableSpace) const
@@ -63,7 +63,7 @@ namespace neogfx
 
     size tab_page::maximum_size(const optional_size& aAvailableSpace) const
     {
-        if (has_maximum_size() || size_policy() != neogfx::size_policy::Expanding)
+        if (has_maximum_size() || size_policy() != size_constraint::Expanding)
             return scrollable_widget::maximum_size(aAvailableSpace);
         else
             return size::max_size();

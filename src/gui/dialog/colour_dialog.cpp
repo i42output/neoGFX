@@ -874,19 +874,19 @@ namespace neogfx
         iRightBottomLayout.set_spacing(standardSpacing / 2.0);
         iChannelLayout.set_margins(neogfx::margins{});
         iChannelLayout.set_spacing(standardSpacing / 2.0);
-        iScreenPicker.set_size_policy(size_policy::Minimum);
+        iScreenPicker.set_size_policy(size_constraint::Minimum);
         iSink += iScreenPicker.AsyncClicked([&, this]()
         {
             iScreenPickerActive = true;
             surface().as_surface_window().set_capture(*this);
         });
-        iH.first.set_size_policy(size_policy::Minimum); iH.first.label().text().set_text("&Hue:"_t); iH.second.set_size_policy(size_policy::Minimum); iH.second.text_box().set_size_hint(size_hint{ "359.9" }); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
-        iS.first.set_size_policy(size_policy::Minimum); iS.first.label().text().set_text("&Sat:"_t); iS.second.set_size_policy(size_policy::Minimum); iS.second.text_box().set_size_hint(size_hint{ "100.0" }); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
-        iV.first.set_size_policy(size_policy::Minimum); iV.first.label().text().set_text("&Val:"_t); iV.second.set_size_policy(size_policy::Minimum); iV.second.text_box().set_size_hint(size_hint{ "100.0" }); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
-        iR.first.set_size_policy(size_policy::Minimum); iR.first.label().text().set_text("&Red:"_t); iR.second.set_size_policy(size_policy::Minimum); iR.second.text_box().set_size_hint(size_hint{ "255" }); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
-        iG.first.set_size_policy(size_policy::Minimum); iG.first.label().text().set_text("&Green:"_t); iG.second.set_size_policy(size_policy::Minimum); iG.second.text_box().set_size_hint(size_hint{ "255" }); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
-        iB.first.set_size_policy(size_policy::Minimum); iB.first.label().text().set_text("&Blue:"_t); iB.second.set_size_policy(size_policy::Minimum); iB.second.text_box().set_size_hint(size_hint{ "255" }); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
-        iA.first.set_size_policy(size_policy::Minimum); iA.first.label().text().set_text("&Alpha:"_t); iA.second.set_size_policy(size_policy::Minimum); iA.second.text_box().set_size_hint(size_hint{ "255" }); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
+        iH.first.set_size_policy(size_constraint::Minimum); iH.first.label().text().set_text("&Hue:"_t); iH.second.set_size_policy(size_constraint::Minimum); iH.second.text_box().set_size_hint(size_hint{ "359.9" }); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
+        iS.first.set_size_policy(size_constraint::Minimum); iS.first.label().text().set_text("&Sat:"_t); iS.second.set_size_policy(size_constraint::Minimum); iS.second.text_box().set_size_hint(size_hint{ "100.0" }); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
+        iV.first.set_size_policy(size_constraint::Minimum); iV.first.label().text().set_text("&Val:"_t); iV.second.set_size_policy(size_constraint::Minimum); iV.second.text_box().set_size_hint(size_hint{ "100.0" }); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
+        iR.first.set_size_policy(size_constraint::Minimum); iR.first.label().text().set_text("&Red:"_t); iR.second.set_size_policy(size_constraint::Minimum); iR.second.text_box().set_size_hint(size_hint{ "255" }); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
+        iG.first.set_size_policy(size_constraint::Minimum); iG.first.label().text().set_text("&Green:"_t); iG.second.set_size_policy(size_constraint::Minimum); iG.second.text_box().set_size_hint(size_hint{ "255" }); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
+        iB.first.set_size_policy(size_constraint::Minimum); iB.first.label().text().set_text("&Blue:"_t); iB.second.set_size_policy(size_constraint::Minimum); iB.second.text_box().set_size_hint(size_hint{ "255" }); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
+        iA.first.set_size_policy(size_constraint::Minimum); iA.first.label().text().set_text("&Alpha:"_t); iA.second.set_size_policy(size_constraint::Minimum); iA.second.text_box().set_size_hint(size_hint{ "255" }); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
         iChannelLayout.set_dimensions(4, 4);
         iChannelLayout.add(iH.first); iChannelLayout.add(iH.second);
         iChannelLayout.add(iR.first); iChannelLayout.add(iR.second);

@@ -63,7 +63,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy{ menu().type() == menu_type::Popup ? neogfx::size_policy::Expanding : neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ menu().type() == menu_type::Popup ? size_constraint::Expanding : size_constraint::Minimum, size_constraint::Minimum };
     }
 
     size menu_item_widget::minimum_size(const optional_size&) const

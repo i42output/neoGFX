@@ -594,16 +594,16 @@ namespace neogfx
             if (has_layout())
             {
                 layout_items_started();
-                if (is_root() && size_policy() != neogfx::size_policy::Manual)
+                if (is_root() && size_policy() != size_constraint::Manual)
                 {
                     size desiredSize = extents();
                     switch (size_policy().horizontal_size_policy())
                     {
-                    case neogfx::size_policy::Fixed:
-                    case neogfx::size_policy::Minimum:
+                    case size_constraint::Fixed:
+                    case size_constraint::Minimum:
                         desiredSize.cx = minimum_size(extents()).cx;
                         break;
-                    case neogfx::size_policy::Maximum:
+                    case size_constraint::Maximum:
                         desiredSize.cx = maximum_size(extents()).cx;
                         break;
                     default:
@@ -611,11 +611,11 @@ namespace neogfx
                     }
                     switch (size_policy().vertical_size_policy())
                     {
-                    case neogfx::size_policy::Fixed:
-                    case neogfx::size_policy::Minimum:
+                    case size_constraint::Fixed:
+                    case size_constraint::Minimum:
                         desiredSize.cy = minimum_size(extents()).cy;
                         break;
-                    case neogfx::size_policy::Maximum:
+                    case size_constraint::Maximum:
                         desiredSize.cy = maximum_size(extents()).cy;
                         break;
                     default:
@@ -813,7 +813,7 @@ namespace neogfx
         if (has_size_policy())
             return *SizePolicy;
         else
-            return size_policy::Expanding;
+            return size_constraint::Expanding;
     }
 
     void widget::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
@@ -892,7 +892,7 @@ namespace neogfx
     {
         if (has_maximum_size())
             return units_converter(*this).from_device_units(*MaximumSize);
-        else if (size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed)
+        else if (size_policy() == size_constraint::Minimum || size_policy() == size_constraint::Fixed)
             return minimum_size(aAvailableSpace);
         else if (has_layout())
         {

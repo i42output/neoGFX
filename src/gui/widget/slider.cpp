@@ -161,9 +161,9 @@ namespace neogfx
     {
         set_margins(neogfx::margins{});
         if (iType == Horizontal)
-            set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+            set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         else
-            set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+            set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
 
         auto step_up = [this]()
         {

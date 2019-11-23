@@ -392,12 +392,12 @@ namespace neogfx
                 button.text().set_text(presentation_model().column_heading_text(i));
                 if (!expand_last_column() || i != presentation_model().columns() - 1)
                     button.set_size_policy(iType == header_view::HorizontalHeader ?
-                        neogfx::size_policy{ neogfx::size_policy::Fixed, neogfx::size_policy::Expanding } :
-                        neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Fixed });
+                        neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding } :
+                        neogfx::size_policy{ size_constraint::Expanding, size_constraint::Fixed });
                 else
                     button.set_size_policy(iType == header_view::HorizontalHeader ?
-                        neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
-                        neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+                        neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum } :
+                        neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
                 button.set_minimum_size(optional_size{});
                 button.set_maximum_size(optional_size{});
                 button.enable(true);
@@ -451,8 +451,8 @@ namespace neogfx
             {
                 button.text().set_text(std::string());
                 button.set_size_policy(iType == header_view::HorizontalHeader ?
-                    neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
-                    neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+                    neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum } :
+                    neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
                 button.set_minimum_size(size{});
                 button.enable(false);
             }

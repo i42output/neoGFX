@@ -30,7 +30,7 @@ namespace video_poker
         iCardSprite{ neogfx::game::null_entity }
     {
         set_margins(neogfx::margins{});
-        set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
+        set_size_policy(neogfx::size_constraint::Expanding, kBridgeCardSize);
         set_ignore_mouse_events(true);
         iCanvas.LayoutCompleted([this]() { update_sprite_geometry(); });
         iCanvas.EntityClicked([this](neogfx::game::entity_id aEntity)
@@ -127,10 +127,10 @@ namespace video_poker
         iHoldButton{ iVerticalLayout, "HOLD\n CANCEL " },
         iCard{ nullptr }
     {
-        set_size_policy(neogfx::size_policy::ExpandingPixelPerfect);
+        set_size_policy(neogfx::size_constraint::ExpandingPixelPerfect);
         iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
         set_ignore_mouse_events(true);
-        iHoldButton.set_size_policy(neogfx::size_policy::Minimum);
+        iHoldButton.set_size_policy(neogfx::size_constraint::Minimum);
         iHoldButton.set_foreground_colour(neogfx::colour::Black);
         iHoldButton.text().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
         iHoldButton.text().set_text_appearance(neogfx::text_appearance{ neogfx::colour::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::colour::Black.with_alpha(128) } });

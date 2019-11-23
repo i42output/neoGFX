@@ -400,7 +400,7 @@ namespace neogfx
 
     void tab_button::init()
     {
-        set_size_policy(neogfx::size_policy::Minimum);
+        set_size_policy(size_constraint::Minimum);
         auto update_image = [this]()
         {
             if (iStandardImageSize)

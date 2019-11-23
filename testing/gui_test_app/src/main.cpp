@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
         button0.image().set_image(ng::image{ ":/test/resources/neoGFX.png" });
         button0.image().set_minimum_size(ng::size{ 32_spx, 32_spx });
         button0.image().set_maximum_size(ng::size{ 160_spx, std::numeric_limits<ng::dimension>::max() });
-        button0.set_size_policy(ng::size_policy::Expanding);
+        button0.set_size_policy(ng::size_constraint::Expanding);
         button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
         ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement.");
         button1.clicked([&ui]()
@@ -778,7 +778,7 @@ int main(int argc, char* argv[])
         messageBoxDetailedText.set_text("This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank.");
         messageBoxDetailedText.set_minimum_size(ng::size{ 256_spx, 128_spx });
         ng::push_button openMessageBox{ messageBoxesPageLayout1, "Open Message Box" };
-        openMessageBox.set_size_policy(ng::size_policy::Minimum);
+        openMessageBox.set_size_policy(ng::size_constraint::Minimum);
         ng::label messageBoxResult{ messageBoxesPageLayout1 };
         openMessageBox.clicked([&]()
         {
@@ -932,19 +932,19 @@ int main(int argc, char* argv[])
         ng::vertical_layout l3(l2);
         ng::image_widget iw(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Ignore);
         iw.set_background_colour(ng::colour::Red.lighter(0x80));
-        iw.set_size_policy(ng::size_policy::Expanding);
+        iw.set_size_policy(ng::size_constraint::Expanding);
         iw.set_minimum_size(ng::size{});
         ng::image_widget iw2(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Keep);
         iw2.set_background_colour(ng::colour::Green.lighter(0x80));
-        iw2.set_size_policy(ng::size_policy::Expanding);
+        iw2.set_size_policy(ng::size_constraint::Expanding);
         iw2.set_minimum_size(ng::size{});
         ng::image_widget iw3(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::KeepExpanding);
         iw3.set_background_colour(ng::colour::Blue.lighter(0x80));
-        iw3.set_size_policy(ng::size_policy::Expanding);
+        iw3.set_size_policy(ng::size_constraint::Expanding);
         iw3.set_minimum_size(ng::size{});
         ng::image_widget iw4(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Stretch);
         iw4.set_background_colour(ng::colour::Magenta.lighter(0x80));
-        iw4.set_size_policy(ng::size_policy::Expanding);
+        iw4.set_size_policy(ng::size_constraint::Expanding);
         iw4.set_minimum_size(ng::size{});
         ng::image_widget iw5(l2, ng::image(":/test/resources/orca.png"));
         ng::grid_layout l4(l2);
@@ -953,7 +953,7 @@ int main(int argc, char* argv[])
         for (uint32_t i = 0; i < 9; ++i)
         {
             auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
-            hashWidget->set_size_policy(ng::size_policy::Expanding);
+            hashWidget->set_size_policy(ng::size_constraint::Expanding);
             hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
             l4.add_item_at_position(i / 3, i % 3, hashWidget);
         }
@@ -970,14 +970,14 @@ int main(int argc, char* argv[])
 
         ng::vertical_layout tabDrawingLayout1{ ui.pageDrawing };
         ng::horizontal_layout tabDrawingLayout2{ ui.pageDrawing };
-        tabDrawingLayout2.set_size_policy(ng::size_policy::Minimum);
+        tabDrawingLayout2.set_size_policy(ng::size_constraint::Minimum);
         tabDrawingLayout2.emplace<ng::label>("Easing:");
         ng::basic_item_model<ng::easing> easingItemModel;
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModel.insert_item(easingItemModel.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
         easing_item_presentation_model easingPresentationModel{ easingItemModel };
         ng::drop_list easingDropDown{ tabDrawingLayout2 };
-        easingDropDown.set_size_policy(ng::size_policy::Minimum);
+        easingDropDown.set_size_policy(ng::size_constraint::Minimum);
         easingDropDown.set_model(easingItemModel);
         easingDropDown.set_presentation_model(easingPresentationModel);
         easingDropDown.selection_model().set_current_index(ng::item_presentation_model_index{ 0 });

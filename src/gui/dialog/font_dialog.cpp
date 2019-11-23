@@ -211,16 +211,16 @@ namespace neogfx
             message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
         });
 
-        client_layout().set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Maximum });
-        iFamilyPicker.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-        iStylePicker.set_size_policy(neogfx::size_policy::Expanding);
-        iSizePicker.set_size_policy(neogfx::size_policy::Expanding);
+        client_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Maximum });
+        iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+        iStylePicker.set_size_policy(size_constraint::Expanding);
+        iSizePicker.set_size_policy(size_constraint::Expanding);
         iLayout1.set_weight(neogfx::size{ 0.0, 1.0 });
         iLayout4.set_weight(neogfx::size{ 3.0, 1.0 });
         iLayout5.set_weight(neogfx::size{ 1.0, 1.0 });
 
-        iSampleBox.set_size_policy(neogfx::size_policy::Expanding);
-        iSample.set_size_policy(neogfx::size_policy::Expanding);
+        iSampleBox.set_size_policy(size_constraint::Expanding);
+        iSample.set_size_policy(size_constraint::Expanding);
         iSample.set_minimum_size(size{ 192.0_spx, 48.0_spx });
         iSample.set_maximum_size(size{ size::max_dimension(), 48.0_spx });
 

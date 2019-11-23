@@ -209,7 +209,7 @@ namespace neogfx
         iAngleSlider.set_step(0.1);
         iExponentGroupBox.set_checkable(true);
         iExponentGroupBox.item_layout().set_alignment(alignment::Right);
-        iLinkedExponents.set_size_policy(size_policy::Expanding);
+        iLinkedExponents.set_size_policy(size_constraint::Expanding);
         iLinkedExponents.set_checked(true);
         iMExponentSpinBox.set_minimum(0.0);
         iMExponentSpinBox.set_maximum(std::numeric_limits<double>::max());

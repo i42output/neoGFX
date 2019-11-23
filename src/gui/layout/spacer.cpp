@@ -195,11 +195,11 @@ namespace neogfx
     {
         if (has_size_policy())
             return *iSizePolicy;
-        neogfx::size_policy result{neogfx::size_policy::Minimum};
+        neogfx::size_policy result{size_constraint::Minimum};
         if (iExpansionPolicy & ExpandHorizontally)
-            result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
+            result.set_horizontal_size_policy(size_constraint::Expanding);
         if (iExpansionPolicy & ExpandVertically)
-            result.set_vertical_size_policy(neogfx::size_policy::Expanding);
+            result.set_vertical_size_policy(size_constraint::Expanding);
         return result;
     }
 

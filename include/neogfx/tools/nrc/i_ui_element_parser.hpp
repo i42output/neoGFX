@@ -173,9 +173,9 @@ namespace neogfx::nrc
             std::string hp, vp;
             aArgument.to_string(hp, vp);
             if (hp == vp)
-                return "size_policy::" + hp;
+                return "size_constraint::" + hp;
             else
-                return "size_policy::" + hp + ", size_policy::" + vp;
+                return "size_constraint::" + hp + ", size_constraint::" + vp;
         }
     };
 }

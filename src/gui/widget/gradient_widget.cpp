@@ -170,7 +170,7 @@ namespace neogfx
 
     size_policy gradient_widget::size_policy() const
     {
-        return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
     size gradient_widget::minimum_size(const optional_size& aAvailableSpace) const

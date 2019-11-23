@@ -604,7 +604,7 @@ namespace neogfx
     {
         if (scrollable_widget::has_size_policy())
             return scrollable_widget::size_policy();
-        return neogfx::size_policy::Manual;
+        return size_constraint::Manual;
     }
 
     bool window::update(const rect& aUpdateRect)

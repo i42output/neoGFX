@@ -177,7 +177,7 @@ namespace neogfx
         set_margins(neogfx::margins{});
         iLayout.set_margins(neogfx::margins{});
         iOptionLayout.set_margins(neogfx::margins{});
-        iOptionLayout.set_size_policy(neogfx::size_policy::Minimum);
+        iOptionLayout.set_size_policy(size_constraint::Minimum);
         iStandardButtonLayout.set_margins(neogfx::margins{});
     }
 

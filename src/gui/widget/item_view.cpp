@@ -233,7 +233,7 @@ namespace neogfx
     {
         if (has_size_policy())
             return scrollable_widget::size_policy();
-        return size_policy::Expanding;
+        return size_constraint::Expanding;
     }
 
     void item_view::paint(i_graphics_context& aGraphicsContext) const

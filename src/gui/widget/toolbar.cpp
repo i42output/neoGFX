@@ -41,7 +41,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy::Minimum;
+        return size_constraint::Minimum;
     }
 
     size toolbar::button_image_extents() const

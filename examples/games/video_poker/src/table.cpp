@@ -108,7 +108,7 @@ namespace video_poker
         iSpacer4.set_weight(neogfx::size{ 0.1 });
         auto set_bet_button_apperance = [](neogfx::push_button& aButton)
         {
-            aButton.set_size_policy(neogfx::size_policy::Minimum, neogfx::size{ 1.0 });
+            aButton.set_size_policy(neogfx::size_constraint::Minimum, neogfx::size{ 1.0 });
             aButton.set_weight(neogfx::size{});
             aButton.set_foreground_colour(neogfx::colour::White);
             aButton.text().set_size_hint(neogfx::size_hint{ "MAX\nBET" });

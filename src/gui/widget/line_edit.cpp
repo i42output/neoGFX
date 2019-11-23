@@ -41,6 +41,6 @@ namespace neogfx
     {
         if (text_edit::has_size_policy())
             return text_edit::size_policy();
-        return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 }

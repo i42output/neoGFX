@@ -137,7 +137,7 @@ namespace neogfx
 
     neogfx::size_policy title_bar::size_policy() const
     {
-        return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
     widget_part title_bar::hit_test(const point&) const
@@ -156,10 +156,10 @@ namespace neogfx
             icon().set_fixed_size(iconSize);
         else
             icon().set_fixed_size(iconSize.min(icon().image().extents()));
-        iMinimizeButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
-        iMaximizeButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
-        iRestoreButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
-        iCloseButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
+        iMinimizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
+        iMaximizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
+        iRestoreButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
+        iCloseButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
         {
             size iconSize{ 24.0_spx };

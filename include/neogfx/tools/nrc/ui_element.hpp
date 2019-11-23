@@ -137,15 +137,15 @@ namespace neogfx::nrc
         {
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
                 if (aName == "size_policy")
-                    iSizePolicy = size_policy::from_string(aData.get<neolib::i_string>().to_std_string());
+                    iSizePolicy = neolib::string_to_enum<size_constraint>(aData.get<neolib::i_string>());
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
                 if (aName == "size_policy" && !aData.empty())
-                    iSizePolicy = size_policy{
-                        size_policy::from_string(aData[0u].get<neolib::i_string>().to_std_string()).horizontal_size_policy(),
-                        size_policy::from_string(aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string()).vertical_size_policy() };
+                    iSizePolicy = size_policy::from_string(
+                        aData[0u].get<neolib::i_string>().to_std_string(),
+                        aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string());
         }
         void emit_preamble() const override
         {

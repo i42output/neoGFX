@@ -20,69 +20,82 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_enum.hpp>
 #include <neogfx/core/units.hpp>
+
+namespace neogfx
+{
+    enum class size_constraint : uint32_t
+    {
+        Fixed,
+        Minimum,
+        Maximum,
+        Expanding,
+        ExpandingPixelPerfect, // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
+        Manual
+    };
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::size_constraint> neolib::enum_enumerators_v<neogfx::size_constraint>
+{
+    declare_enum_string(neogfx::size_constraint, Fixed)
+    declare_enum_string(neogfx::size_constraint, Minimum)
+    declare_enum_string(neogfx::size_constraint, Maximum)
+    declare_enum_string(neogfx::size_constraint, Expanding)
+    declare_enum_string(neogfx::size_constraint, ExpandingPixelPerfect)
+    declare_enum_string(neogfx::size_constraint, Manual)
+};
 
 namespace neogfx
 {
     class size_policy
     {
     public:
-        struct bad_string : std::runtime_error { bad_string() : std::runtime_error{ "neogfx::size_policy::bad_string" } {} };
+        struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("size_policy::no_aspect_ratio") {} };
     public:
-        enum size_policy_e
-        {
-            Fixed,
-            Minimum,
-            Maximum,
-            Expanding,
-            ExpandingPixelPerfect, // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
-            Manual
-        };
-    public:
-        struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("neogfx::size_policy::no_aspect_ratio") {} };
-    public:
-        size_policy(size_policy_e aSizePolicy, const optional_size& aAspectRatio = optional_size{}) :
-            iHorizontalSizePolicy{ aSizePolicy }, iVerticalSizePolicy{ aSizePolicy }, iAspectRatio{ aAspectRatio }
+        size_policy(size_constraint aConstraint, const optional_size& aAspectRatio = optional_size{}) :
+            iHorizontalConstraint{ aConstraint }, iVerticalConstraint{ aConstraint }, iAspectRatio{ aAspectRatio }
         {
         }
-        size_policy(size_policy_e aHorizontalSizePolicy, size_policy_e aVerticalSizePolicy, const optional_size& aAspectRatio = optional_size{}) :
-            iHorizontalSizePolicy{ aHorizontalSizePolicy }, iVerticalSizePolicy{ aVerticalSizePolicy }, iAspectRatio{ aAspectRatio }
+        size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, const optional_size& aAspectRatio = optional_size{}) :
+            iHorizontalConstraint{ aHorizontalConstraint }, iVerticalConstraint{ aVerticalConstraint }, iAspectRatio{ aAspectRatio }
         {
         }
     public:
         bool operator==(const size_policy& aRhs) const
         {
-            return iHorizontalSizePolicy == aRhs.iHorizontalSizePolicy && iVerticalSizePolicy == aRhs.iVerticalSizePolicy && iAspectRatio == aRhs.iAspectRatio;
+            return iHorizontalConstraint == aRhs.iHorizontalConstraint && iVerticalConstraint == aRhs.iVerticalConstraint && iAspectRatio == aRhs.iAspectRatio;
         }
         bool operator!=(const size_policy& aRhs) const
         {
             return !(*this == aRhs);
         }
     public:
-        size_policy_e horizontal_size_policy(bool aIgnorePixelPerfect = true) const
+        size_constraint horizontal_size_policy(bool aIgnorePixelPerfect = true) const
         {
-            if (iHorizontalSizePolicy != ExpandingPixelPerfect)
-                return iHorizontalSizePolicy;
-            return aIgnorePixelPerfect ? Expanding : ExpandingPixelPerfect;
+            if (iHorizontalConstraint != size_constraint::ExpandingPixelPerfect)
+                return iHorizontalConstraint;
+            return aIgnorePixelPerfect ? size_constraint::Expanding : size_constraint::ExpandingPixelPerfect;
         }
-        size_policy_e vertical_size_policy(bool aIgnorePixelPerfect = true) const
+        size_constraint vertical_size_policy(bool aIgnorePixelPerfect = true) const
         {
-            if (iVerticalSizePolicy != ExpandingPixelPerfect)
-                return iVerticalSizePolicy;
-            return aIgnorePixelPerfect ? Expanding : ExpandingPixelPerfect;
+            if (iVerticalConstraint != size_constraint::ExpandingPixelPerfect)
+                return iVerticalConstraint;
+            return aIgnorePixelPerfect ? size_constraint::Expanding : size_constraint::ExpandingPixelPerfect;
         }
-        void set_size_policy(size_policy_e aSizePolicy)
+        void set_size_policy(size_constraint aConstraint)
         {
-            iHorizontalSizePolicy = aSizePolicy;
-            iVerticalSizePolicy = aSizePolicy;
+            iHorizontalConstraint = aConstraint;
+            iVerticalConstraint = aConstraint;
         }
-        void set_horizontal_size_policy(size_policy_e aHorizontalSizePolicy)
+        void set_horizontal_size_policy(size_constraint aHorizontalConstraint)
         {
-            iHorizontalSizePolicy = aHorizontalSizePolicy;
+            iHorizontalConstraint = aHorizontalConstraint;
         }
-        void set_vertical_size_policy(size_policy_e aVerticalSizePolicy)
+        void set_vertical_size_policy(size_constraint aVerticalConstraint)
         {
-            iVerticalSizePolicy = aVerticalSizePolicy;
+            iVerticalConstraint = aVerticalConstraint;
         }
         bool maintain_aspect_ratio() const
         {
@@ -99,43 +112,20 @@ namespace neogfx
             iAspectRatio = aAspectRatio;
         }
     public:
-        static size_policy from_string(const std::string& aSizePolicy)
+        static size_policy from_string(const std::string& aHorizontalConstraint, const std::string& aVerticalConstraint)
         {
-            static const std::unordered_map<std::string, size_policy_e> mapping
-            {
-                { "Fixed", Fixed },
-                { "Minimum", Minimum },
-                { "Maximum", Maximum },
-                { "Expanding", Expanding },
-                { "ExpandingPixelPerfect", ExpandingPixelPerfect },
-                { "Manual", Manual }
-            };
-            auto const match = mapping.find(aSizePolicy);
-            if (match != mapping.end())
-                return match->second;
-            throw bad_string();
+            return size_policy{
+                neolib::string_to_enum<size_constraint>(aHorizontalConstraint),
+                neolib::string_to_enum<size_constraint>(aVerticalConstraint) };
         }
-        static size_policy from_string(std::string& aHorizontalSizePolicy, std::string& aVerticalSizePolicy)
+        void to_string(std::string& aHorizontalConstraint, std::string& aVerticalConstraint) const
         {
-            return size_policy{ from_string(aHorizontalSizePolicy).horizontal_size_policy(), from_string(aVerticalSizePolicy).vertical_size_policy() };
-        }
-        void to_string(std::string& aHorizontalSizePolicy, std::string& aVerticalSizePolicy) const
-        {
-            static const std::unordered_map<size_policy_e, std::string> mapping
-            {
-                { Fixed, "Fixed"},
-                { Minimum, "Minimum" },
-                { Maximum, "Maximum" },
-                { Expanding, "Expanding" },
-                { ExpandingPixelPerfect, "ExpandingPixelPerfect" },
-                { Manual, "Manual" }
-            };
-            aHorizontalSizePolicy = mapping.find(horizontal_size_policy())->second;
-            aVerticalSizePolicy = mapping.find(vertical_size_policy())->second;
+            aHorizontalConstraint = neolib::enum_to_string(horizontal_size_policy());
+            aVerticalConstraint = neolib::enum_to_string(vertical_size_policy());
         }
     private:
-        size_policy_e iHorizontalSizePolicy;
-        size_policy_e iVerticalSizePolicy;
+        size_constraint iHorizontalConstraint;
+        size_constraint iVerticalConstraint;
         optional_size iAspectRatio;
     };
 
@@ -166,21 +156,21 @@ namespace neogfx
         virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) = 0;
         // helpers
     public:
-        void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, bool aUpdateLayout = true)
+        void set_size_policy(neogfx::size_constraint aConstraint, bool aUpdateLayout = true)
         {
-            set_size_policy(neogfx::size_policy{ aSizePolicy }, aUpdateLayout);
+            set_size_policy(neogfx::size_policy{ aConstraint }, aUpdateLayout);
         }
-        void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, const size& aAspectRatio, bool aUpdateLayout = true)
+        void set_size_policy(neogfx::size_constraint aConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
         {
-            set_size_policy(neogfx::size_policy{ aSizePolicy, aAspectRatio }, aUpdateLayout);
+            set_size_policy(neogfx::size_policy{ aConstraint, aAspectRatio }, aUpdateLayout);
         }
-        void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, bool aUpdateLayout = true)
+        void set_size_policy(neogfx::size_constraint aHorizontalConstraint, neogfx::size_constraint aVerticalConstraint, bool aUpdateLayout = true)
         {
-            set_size_policy(neogfx::size_policy{ aHorizontalSizePolicy, aVerticalSizePolicy }, aUpdateLayout);
+            set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint }, aUpdateLayout);
         }
-        void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, const size& aAspectRatio, bool aUpdateLayout = true)
+        void set_size_policy(neogfx::size_constraint aHorizontalConstraint, neogfx::size_constraint aVerticalConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
         {
-            set_size_policy(neogfx::size_policy{ aHorizontalSizePolicy, aVerticalSizePolicy, aAspectRatio }, aUpdateLayout);
+            set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint, aAspectRatio }, aUpdateLayout);
         }
         void set_fixed_size(const size& aSize, bool aUpdateLayout = true)
         {

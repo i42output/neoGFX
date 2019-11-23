@@ -69,7 +69,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy::Minimum;
+        return size_constraint::Minimum;
     }
 
     size image_widget::minimum_size(const optional_size& aAvailableSpace) const

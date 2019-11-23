@@ -175,7 +175,7 @@ namespace neogfx
         iView{ client_layout(), aDropList }
     {
         client_layout().set_margins(neogfx::margins{});
-        client_layout().set_size_policy(neogfx::size_policy::Expanding);
+        client_layout().set_size_policy(size_constraint::Expanding);
         update_placement();
         show();
     }
@@ -233,7 +233,7 @@ namespace neogfx
     {
         if (window::has_size_policy())
             return window::size_policy();
-        return neogfx::size_policy::Minimum;
+        return size_constraint::Minimum;
     }
 
     size drop_list_popup::minimum_size(const optional_size&) const
@@ -895,9 +895,9 @@ namespace neogfx
         if (widget::has_size_policy())
             return widget::size_policy();
         if (list_always_visible())
-            return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+            return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
         else
-            return neogfx::size_policy::Minimum;
+            return size_constraint::Minimum;
     }
 
     size drop_list::minimum_size(const optional_size& aAvailableSpace) const
@@ -992,7 +992,7 @@ namespace neogfx
 
             inputWidget.clicked([this]() { handle_clicked(); });
 
-            inputWidget.set_size_policy(size_policy::Expanding);
+            inputWidget.set_size_policy(size_constraint::Expanding);
             
             auto& inputLabelLayout = inputWidget.label().layout();
             inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
@@ -1021,7 +1021,7 @@ namespace neogfx
                 }
             });
 
-            inputWidget.set_size_policy(size_policy::Expanding);
+            inputWidget.set_size_policy(size_constraint::Expanding);
 
             inputWidget.layout().add(iDownArrow);
 

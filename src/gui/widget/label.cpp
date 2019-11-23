@@ -200,7 +200,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy::Minimum;
+        return size_constraint::Minimum;
     }
 
     void label::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
