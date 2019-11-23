@@ -135,23 +135,17 @@ namespace neogfx::nrc
         {
             if (aElementType == "label" && (type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
             {
-                if (parser().data_exists("size"))
-                    emplace_lengths_2(iLabelFixedSize, get_lengths("size"));
-                if (parser().data_exists("minimum_size"))
-                    emplace_lengths_2(iLabelMinimumSize, get_lengths("minimum_size"));
-                if (parser().data_exists("maximum_size"))
-                    emplace_lengths_2(iLabelMaximumSize, get_lengths("maximum_size"));
+                emplace_lengths_2("size", iLabelFixedSize);
+                emplace_lengths_2("minimum_size", iLabelMinimumSize);
+                emplace_lengths_2("maximum_size", iLabelMaximumSize);
                 iLabelPlacement = parser().get_optional_enum<label_placement>("placement");
                 return true;
             }
             else if (aElementType == "image" && (type() & ui_element_type::HasImage) == ui_element_type::HasImage)
             {
-                if (parser().data_exists("size"))
-                    emplace_lengths_2(iImageFixedSize, get_lengths("size"));
-                if (parser().data_exists("minimum_size"))
-                    emplace_lengths_2(iImageMinimumSize, get_lengths("minimum_size"));
-                if (parser().data_exists("maximum_size"))
-                    emplace_lengths_2(iImageMaximumSize, get_lengths("maximum_size"));
+                emplace_lengths_2("size", iImageFixedSize);
+                emplace_lengths_2("minimum_size", iImageMinimumSize);
+                emplace_lengths_2("maximum_size", iImageMaximumSize);
                 iImageUri = parser().get_optional<neolib::string>("uri");
                 return true;
             }
@@ -197,13 +191,13 @@ namespace neogfx::nrc
                         aData[0u].get<neolib::i_string>().to_std_string(),
                         aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string());
                 else if (aName == "margin")
-                    handled = true, emplace_lengths_4(iMargin, get_lengths(aData));
+                    handled = true, emplace_lengths_4("margin", iMargin);
                 else if (aName == "size")
-                    handled = true, emplace_lengths_2(iFixedSize, get_lengths(aData));
+                    handled = true, emplace_lengths_2("size", iFixedSize);
                 else if (aName == "minimum_size")
-                    handled = true, emplace_lengths_2(iMinimumSize, get_lengths(aData));
+                    handled = true, emplace_lengths_2("minimum_size", iMinimumSize);
                 else if (aName == "maximum_size")
-                    handled = true, emplace_lengths_2(iMaximumSize, get_lengths(aData));
+                    handled = true, emplace_lengths_2("maximum_size", iMaximumSize);
             }
             if ((type() & ui_element_type::HasColour) == ui_element_type::HasColour)
             {
@@ -276,6 +270,55 @@ namespace neogfx::nrc
                 child->emit_body();
         }
     protected:
+        neolib::string window_layout() const
+        {
+            switch (type() & ui_element_type::MASK_RESERVED_SPECIFIC)
+            {
+            case ui_element_type::MenuBar:
+                return "menu_layout";
+            case ui_element_type::Toolbar:
+                return "toolbar_layout";
+            case ui_element_type::StatusBar:
+                return "status_bar_layout";
+            default:
+                return "client_layout";
+            }
+        }
+        void emit_generic_ctor(const std::optional<neolib::string>& aText = {}) const
+        {
+            if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
+            {
+                if (aText)
+                {
+                    emit(",\n"
+                        "   %1%{ %2%.%3%(), \"%4%\"_t }", id(), parent().id(), window_layout(), *aText);
+                }
+                else
+                    emit(",\n"
+                        "   %1%{ %2%.%3%() }", id(), parent().id(), window_layout());
+            }
+            else if ((parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::GroupBox)
+            {
+                if (aText)
+                {
+                    emit(",\n"
+                        "   %1%{ %2%.item_layout(), \"%4%\"_t }", id(), parent().id(), *aText);
+                }
+                else
+                    emit(",\n"
+                        "   %1%{ %2%.item_layout() }", id(), parent().id());
+            }
+            else if (is_widget_or_layout(parent().type()))
+            {
+                if (aText)
+                    emit(",\n"
+                        "   %1%{ %2%, \"%3%\"_t }", id(), parent().id(), *aText);
+                else
+                    emit(",\n"
+                        "   %1%{ %2% }", id(), parent().id());
+            }
+        }
+    protected:
         using base_type::get_length;
         using base_type::get_lengths;
         using base_type::get_colour;
@@ -289,35 +332,49 @@ namespace neogfx::nrc
         {
             parser().emit(aFormat, base_type::convert_emit_argument(aArguments)...);
         }
-    private:
+    protected:
         template <typename Target>
-        void emplace_lengths_2(Target& aTarget, const std::vector<length>& aLengths)
+        void emplace_lengths_2(const neolib::string& aKey, Target& aTarget)
         {
-            switch (aLengths.size())
+            std::vector<length> lengths;
+            if (parser().data_exists(aKey))
+                lengths.push_back(get_length(parser().get_data(aKey)));
+            else if (parser().array_data_exists(aKey))
+                lengths = get_lengths(parser().get_array_data(aKey));
+            else
+                return;
+            switch (lengths.size())
             {
             case 1:
-                aTarget.emplace(aLengths[0]);
+                aTarget.emplace(lengths[0]);
                 break;
             case 2:
-                aTarget.emplace(aLengths[0], aLengths[1]);
+                aTarget.emplace(lengths[0], lengths[1]);
                 break;
             default:
                 throw element_ill_formed();
             }
         }
         template <typename Target>
-        void emplace_lengths_4(Target& aTarget, const std::vector<length>& aLengths)
+        void emplace_lengths_4(const neolib::string& aKey, Target& aTarget)
         {
-            switch (aLengths.size())
+            std::vector<length> lengths;
+            if (parser().data_exists(aKey))
+                lengths.push_back(get_length(parser().get_data(aKey)));
+            else if (parser().array_data_exists(aKey))
+                lengths = get_lengths(parser().get_array_data(aKey));
+            else
+                return;
+            switch (lengths.size())
             {
             case 1:
-                aTarget.emplace(aLengths[0]);
+                aTarget.emplace(lengths[0]);
                 break;
             case 2:
-                aTarget.emplace(aLengths[0], aLengths[1]);
+                aTarget.emplace(lengths[0], lengths[1]);
                 break;
             case 4:
-                aTarget.emplace(aLengths[0], aLengths[1], aLengths[2], aLengths[3]);
+                aTarget.emplace(lengths[0], lengths[1], lengths[2], lengths[3]);
                 break;
             default:
                 throw element_ill_formed();

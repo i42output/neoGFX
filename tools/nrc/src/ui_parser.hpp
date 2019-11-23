@@ -49,6 +49,7 @@ namespace neogfx::nrc
         void emit(const neolib::i_string& aText) const override;
     private:
         bool do_data_exists(const neolib::i_string& aKey) const override;
+        bool do_array_data_exists(const neolib::i_string& aKey) const override;
         const data_t& do_get_data(const neolib::i_string& aKey) const override;
         data_t& do_get_data(const neolib::i_string& aKey) override;
         const array_data_t& do_get_array_data(const neolib::i_string& aKey) const override;

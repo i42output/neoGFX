@@ -60,10 +60,8 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "text")
-                iText = aData.get<neolib::i_string>();
-            else if (aName == "checkable")
-                iCheckable = parser().get_optional_enum<button_checkable>(aName);
+            if (aName == "checkable")
+                iCheckable = ui_element<>::get_enum<button_checkable>(aData);
             else
                 ui_element<>::parse(aName, aData);
         }
@@ -77,29 +75,23 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  basic_button %1%;\n", id());
+            switch (ButtonType)
+            {
+            case ui_element_type::PushButton:
+                emit("  push_button %1%;\n", id());
+                break;
+            case ui_element_type::CheckBox:
+                emit("  check_box %1%;\n", id());
+                break;
+            case ui_element_type::RadioButton:
+                emit("  radio_button %1%;\n", id());
+                break;
+            }
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
-            {
-                if (iText)
-                    emit(",\n"
-                        "   %1%{ %2%.client_layout(), \"%3%\"_t }", id(), parent().id(), *iText);
-                else
-                    emit(",\n"
-                        "   %1%{ %2%.client_layout() }", id(), parent().id());
-            }
-            else if (is_widget_or_layout(parent().type()))
-            {
-                if (iText)
-                    emit(",\n"
-                        "   %1%{ %2%, \"%3%\"_t }", id(), parent().id(), *iText);
-                else
-                    emit(",\n"
-                        "   %1%{ %2% }", id(), parent().id());
-            }
+            ui_element<>::emit_generic_ctor();
             ui_element<>::emit_ctor();
         }
         void emit_body() const override
@@ -111,7 +103,6 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neolib::string> iText;
         std::optional<button_checkable> iCheckable;
     };
 

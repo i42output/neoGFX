@@ -103,6 +103,11 @@ namespace neogfx::nrc
             return const_cast<i_ui_element&>(to_const(*this).find(aId));
         }
     public:
+        template <typename T>
+        T get_enum(const data_t& aVariant) const
+        {
+            return neolib::string_to_enum<T>(aVariant.get<neolib::i_string>());
+        }
         length get_length(const std::string& aKey) const
         {
             return get_length(parser().get_data(aKey));

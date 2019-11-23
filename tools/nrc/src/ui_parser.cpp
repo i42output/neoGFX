@@ -74,7 +74,14 @@ namespace neogfx::nrc
 
     bool ui_parser::do_data_exists(const neolib::i_string& aKey) const
     {
-        return iCurrentNode->as<neolib::fjson_object>().has(aKey.to_std_string());
+        auto const& currentObject = iCurrentNode->as<neolib::fjson_object>();
+        return currentObject.has(aKey.to_std_string()) && currentObject.at(aKey.to_std_string()).type() != neolib::json_type::Array;
+    }
+
+    bool ui_parser::do_array_data_exists(const neolib::i_string& aKey) const
+    {
+        auto const& currentObject = iCurrentNode->as<neolib::fjson_object>();
+        return currentObject.has(aKey.to_std_string()) && currentObject.at(aKey.to_std_string()).type() == neolib::json_type::Array;
     }
 
     const ui_parser::data_t& ui_parser::do_get_data(const neolib::i_string& aKey) const
@@ -107,7 +114,7 @@ namespace neogfx::nrc
         
     const ui_parser::array_data_t& ui_parser::do_get_array_data(const neolib::i_string& aKey) const
     {
-        if (!data_exists(aKey))
+        if (!array_data_exists(aKey))
             throw element_data_not_found(aKey.to_std_string());
         auto const& value = iCurrentNode->as<neolib::fjson_object>().at(aKey.to_std_string()).as<neolib::fjson_array>();
         auto& arrayData = iArrayDataCache[std::make_pair(iCurrentNode, aKey.to_std_string())];

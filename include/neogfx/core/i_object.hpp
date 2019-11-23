@@ -72,6 +72,7 @@ namespace neogfx
         StatusBar                       = 0x0000000000000012 | Widget,
         TabPageContainer                = 0x0000000000000020 | Widget,
         TabPage                         = 0x0000000000000021 | Widget,
+        GroupBox                        = 0x0000000000000030 | Widget,
         PushButton                      = 0x0000000000000100 | Button,
         CheckBox                        = 0x0000000000000101 | Button,
         RadioButton                     = 0x0000000000000102 | Button,

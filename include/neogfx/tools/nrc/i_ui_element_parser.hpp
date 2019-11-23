@@ -58,6 +58,7 @@ namespace neogfx::nrc
         // implementation
     private:
         virtual bool do_data_exists(const neolib::i_string& aKey) const = 0;
+        virtual bool do_array_data_exists(const neolib::i_string& aKey) const = 0;
         virtual const data_t& do_get_data(const neolib::i_string& aKey) const = 0;
         virtual data_t& do_get_data(const neolib::i_string& aKey) = 0;
         virtual const array_data_t& do_get_array_data(const neolib::i_string& aKey) const = 0;
@@ -80,6 +81,10 @@ namespace neogfx::nrc
         bool data_exists(const std::string& aKey) const
         {
             return do_data_exists(neolib::string{ aKey });
+        }
+        bool array_data_exists(const std::string& aKey) const
+        {
+            return do_array_data_exists(neolib::string{ aKey });
         }
         const data_t& get_data(const std::string& aKey) const
         {

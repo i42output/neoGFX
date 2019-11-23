@@ -177,6 +177,7 @@
     <ClInclude Include="..\..\..\src\action.hpp" />
     <ClInclude Include="..\..\..\src\app.hpp" />
     <ClInclude Include="..\..\..\src\button.hpp" />
+    <ClInclude Include="..\..\..\src\group_box.hpp" />
     <ClInclude Include="..\..\..\src\layout.hpp" />
     <ClInclude Include="..\..\..\src\library.hpp" />
     <ClInclude Include="..\..\..\src\menu.hpp" />

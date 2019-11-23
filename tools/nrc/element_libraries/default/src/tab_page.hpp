@@ -62,15 +62,7 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
-            {
-                if (iTab)
-                    emit(",\n"
-                        "   %1%{ %2%.client_layout(), %3% }", id(), parent().id(), *iTab);
-                else
-                    throw element_ill_formed();
-            }
-            else if ((parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::TabPageContainer)
+            if ((parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::TabPageContainer)
             {
                 if (iTab && !iTabText)
                     emit(",\n"
@@ -81,14 +73,8 @@ namespace neogfx::nrc
                 else
                     throw element_ill_formed();
             }
-            else if (is_widget_or_layout(parent().type()))
-            {
-                if (iTab)
-                    emit(",\n"
-                        "   %1%{ %2%, %3% }", id(), parent().id(), *iTab);
-                else
-                    throw element_ill_formed();
-            }
+            else
+                ui_element<>::emit_generic_ctor();
             ui_element<>::emit_ctor();
         }
         void emit_body() const override

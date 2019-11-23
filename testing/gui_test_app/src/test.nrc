@@ -386,29 +386,27 @@
                                 group_box: {
                                     id: groupBox
                                     text: "Group Box"
-                                    item_layout: {
-                                        check_box: {
-                                            id: triState
-                                            text: "Tristate checkbo&x"
-                                            checkable: TriState
-                                        }
-                                        check_box: {
-                                            id: wordWrap
-                                            text: "Editor word wrap"
-                                        }
-                                        check_box: {
-                                            id: columns
-                                            text: "Columns"
-                                        }
-                                        check_box: {
-                                            id: groupBoxCheckable
-                                            text: "Group Box Checkable"
-                                        }
-                                        gradient_widget: {
-                                            id: gradientWidget
-                                        }
-                                        vertical_spacer: {}
+                                    check_box: {
+                                        id: triState
+                                        text: "Tristate checkbo&x"
+                                        checkable: TriState
                                     }
+                                    check_box: {
+                                        id: wordWrap
+                                        text: "Editor word wrap"
+                                    }
+                                    check_box: {
+                                        id: columns
+                                        text: "Columns"
+                                    }
+                                    check_box: {
+                                        id: groupBoxCheckable
+                                        text: "Group Box Checkable"
+                                    }
+                                    gradient_widget: {
+                                        id: gradientWidget
+                                    }
+                                    vertical_spacer: {}
                                 }
                                 vertical_layout: {
                                     id: layout4
@@ -519,54 +517,52 @@
                             group_box: {
                                 id: groupMessageBoxIcons
                                 text: "Icons"
-                                item_layout: {
-                                    radio_button: {
-                                        id: radioMessageBoxIconInformation
-                                        text: "Information"
-                                        image: {
-                                            uri: ":/neogfx/resources/icons.naa#information.png"
-                                            size: 24spx
-                                        }
+                                radio_button: {
+                                    id: radioMessageBoxIconInformation
+                                    text: "Information"
+                                    image: {
+                                        uri: ":/neogfx/resources/icons.naa#information.png"
+                                        size: 24spx
                                     }
-                                    radio_button: {
-                                        id: radioMessageBoxIconQuestion
-                                        text: "Question"
-                                        image: {
-                                            uri: ":/neogfx/resources/icons.naa#question.png"
-                                            size: 24spx
-                                        }
+                                }
+                                radio_button: {
+                                    id: radioMessageBoxIconQuestion
+                                    text: "Question"
+                                    image: {
+                                        uri: ":/neogfx/resources/icons.naa#question.png"
+                                        size: 24spx
                                     }
-                                    radio_button: {
-                                        id: radioMessageBoxIconWarning
-                                        text: "Warning"
-                                        image: {
-                                            uri: ":/neogfx/resources/icons.naa#warning.png"
-                                            size: 24spx
-                                        }
+                                }
+                                radio_button: {
+                                    id: radioMessageBoxIconWarning
+                                    text: "Warning"
+                                    image: {
+                                        uri: ":/neogfx/resources/icons.naa#warning.png"
+                                        size: 24spx
                                     }
-                                    radio_button: {
-                                        id: radioMessageBoxIconStop
-                                        text: "Stop"
-                                        image: {
-                                            uri: ":/neogfx/resources/icons.naa#stop.png"
-                                            size: 24spx
-                                        }
+                                }
+                                radio_button: {
+                                    id: radioMessageBoxIconStop
+                                    text: "Stop"
+                                    image: {
+                                        uri: ":/neogfx/resources/icons.naa#stop.png"
+                                        size: 24spx
                                     }
-                                    radio_button: {
-                                        id: radioMessageBoxIconError
-                                        text: "Error"
-                                        image: {
-                                            uri: ":/neogfx/resources/icons.naa#error.png"
-                                            size: 24spx
-                                        }
+                                }
+                                radio_button: {
+                                    id: radioMessageBoxIconError
+                                    text: "Error"
+                                    image: {
+                                        uri: ":/neogfx/resources/icons.naa#error.png"
+                                        size: 24spx
                                     }
-                                    radio_button: {
-                                        id: radioMessageBoxIconCritical
-                                        text: "Critical"
-                                        image: {
-                                            uri: ":/neogfx/resources/icons.naa#critical.png"
-                                            size: 24spx
-                                        }
+                                }
+                                radio_button: {
+                                    id: radioMessageBoxIconCritical
+                                    text: "Critical"
+                                    image: {
+                                        uri: ":/neogfx/resources/icons.naa#critical.png"
+                                        size: 24spx
                                     }
                                 }
                             }
@@ -577,30 +573,28 @@
                             group_box: {
                                 id: groupMessageBoxText
                                 text: "Text"
-                                item_layout: {
-                                    label: {
-                                        text: "Title:"
-                                    }
-                                    line_edit: {
-                                        id: lineEditMessageBoxTitle
-                                        text: "neoGFX Message Box Test"
-                                    }
-                                    label: {
-                                        text: "Text:"
-                                    }
-                                    text_edit: {
-                                        id: textEditMessageBoxText
-                                        text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
-                                    }
-                                    label: {
-                                        text: "Detailed Text:"
-                                    }
-                                    text_edit: {
-                                        id: textEditMessageBoxDetailedText
-                                        text: "This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank."
-                                        minimum_size: [ 256spx 128spx ]
-                                        size_policy: Minimum
-                                    }
+                                label: {
+                                    text: "Title:"
+                                }
+                                line_edit: {
+                                    id: lineEditMessageBoxTitle
+                                    text: "neoGFX Message Box Test"
+                                }
+                                label: {
+                                    text: "Text:"
+                                }
+                                text_edit: {
+                                    id: textEditMessageBoxText
+                                    text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
+                                }
+                                label: {
+                                    text: "Detailed Text:"
+                                }
+                                text_edit: {
+                                    id: textEditMessageBoxDetailedText
+                                    text: "This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank."
+                                    minimum_size: [ 256spx 128spx ]
+                                    size_policy: Minimum
                                 }
                             }
                             push_button: {
@@ -657,17 +651,15 @@
                                 group_box: {
                                     id: groupColumn5
                                     text: "Column 5"
-                                    item_layout: {
-                                        check_box: {
-                                            id: checkColumn5ReadOnly
-                                            text: "Read only"
-                                        }
-                                        check_box: {
-                                            id: checkColumn5Unselectable
-                                            text: "Unselectable"
-                                        }
-                                        vertical_spacer: {}
+                                    check_box: {
+                                        id: checkColumn5ReadOnly
+                                        text: "Read only"
                                     }
+                                    check_box: {
+                                        id: checkColumn5Unselectable
+                                        text: "Unselectable"
+                                    }
+                                    vertical_spacer: {}
                                 }
                                 spacer: {}
                             }

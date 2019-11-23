@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tab_page_container.hpp"
 #include "tab_page.hpp"
 #include "button.hpp"
+#include "group_box.hpp"
 #include "layout.hpp"
 
 namespace neogfx::nrc
@@ -55,6 +56,7 @@ namespace neogfx::nrc
             { "push_button", ui_element_type::LayoutItem },
             { "check_box", ui_element_type::LayoutItem },
             { "radio_button", ui_element_type::LayoutItem },
+            { "group_box", ui_element_type::LayoutItem },
             { "vertical_layout", ui_element_type::LayoutItem },
             { "horizontal_layout", ui_element_type::LayoutItem },
             { "grid_layout", ui_element_type::LayoutItem },
@@ -110,6 +112,7 @@ namespace neogfx::nrc
             { "push_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new push_button{ aParser, aParent }; } },
             { "check_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new check_box{ aParser, aParent }; } },
             { "radio_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new radio_button{ aParser, aParent }; } },
+            { "group_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new group_box{ aParser, aParent }; } },
             { "vertical_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aParser, aParent }; } },
             { "horizontal_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aParser, aParent }; } },
             { "grid_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new grid_layout{ aParser, aParent }; } },
