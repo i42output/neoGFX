@@ -26,7 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/i_string.hpp>
 #include <neolib/i_vector.hpp>
 #include <neogfx/core/i_object.hpp>
+#include <neogfx/core/units.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/tools/nrc/i_ui_element_parser.hpp>
@@ -122,7 +124,7 @@ namespace neogfx::nrc
                 else if constexpr (std::is_same_v<vt, neolib::i_string>)
                     result = length::from_string(v.to_std_string());
                 else
-                    throw i_ui_element::wrong_type();
+                    throw wrong_type();
             }, aVariant);
             return result;
         }
@@ -130,8 +132,101 @@ namespace neogfx::nrc
         {
             std::vector<length> result;
             for (auto const& e : aVariantArray)
-                result.push_back(i_ui_element::get_length(e));
+                result.push_back(get_length(e));
             return result;
+        }
+        static colour get_colour(const data_t& aVariant)
+        {
+            colour result;
+            std::visit([&result](auto&& v)
+            {
+                typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
+                if constexpr (std::is_same_v<vt, int64_t>)
+                    result = colour{ static_cast<uint32_t>(v) };
+                else if constexpr (std::is_same_v<vt, neolib::i_string>)
+                    result = v.to_std_string();
+                else
+                    throw wrong_type();
+            }, aVariant);
+            return result;
+        }
+        static colour get_colour(const array_data_t& aVariantArray)
+        {
+            if (aVariantArray.size() == 3)
+                return colour{ neolib::get_as<uint8_t>(aVariantArray[0]), neolib::get_as<uint8_t>(aVariantArray[1]), neolib::get_as<uint8_t>(aVariantArray[2]) };
+            else if (aVariantArray.size() == 4)
+                return colour{ neolib::get_as<uint8_t>(aVariantArray[0]), neolib::get_as<uint8_t>(aVariantArray[1]), neolib::get_as<uint8_t>(aVariantArray[2]), neolib::get_as<uint8_t>(aVariantArray[3]) };
+            else
+                throw element_ill_formed();
+        }
+    protected:
+        template <typename T>
+        static const T& convert_emit_argument(const T& aArgument)
+        {
+            return aArgument;
+        }
+        static std::string convert_emit_argument(const bool& aArgument)
+        {
+            return aArgument ? "true" : "false";
+        }
+        static std::string convert_emit_argument(const neolib::i_string& aArgument)
+        {
+            std::string result;
+            for (auto const ch : aArgument)
+            {
+                switch (ch)
+                {
+                case '\b':
+                    result += "\\b";
+                    continue;
+                case '\f':
+                    result += "\\f";
+                    continue;
+                case '\n':
+                    result += "\\n";
+                    continue;
+                case '\r':
+                    result += "\\r";
+                    continue;
+                case '\t':
+                    result += "\\t";
+                    continue;
+                case '\\':
+                case '\"':
+                case '\'':
+                    result += '\\';
+                    break;
+                }
+                result += ch;
+            }
+            return result;
+        }
+        static std::string convert_emit_argument(const neolib::string& aArgument)
+        {
+            return convert_emit_argument(static_cast<const neolib::i_string&>(aArgument));
+        }
+        static std::string convert_emit_argument(const std::string& aArgument)
+        {
+            return convert_emit_argument(neolib::string{ aArgument });
+        }
+        static std::string convert_emit_argument(const length& aArgument)
+        {
+            return aArgument.to_string(true);
+        }
+        static std::string convert_emit_argument(const size_policy& aArgument)
+        {
+            std::string hp, vp;
+            aArgument.to_string(hp, vp);
+            if (hp == vp)
+                return "size_constraint::" + hp;
+            else
+                return "size_constraint::" + hp + ", size_constraint::" + vp;
+        }
+        static std::string convert_emit_argument(const colour& aArgument)
+        {
+            std::ostringstream result;
+            result << "0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << aArgument.value() << "u";
+            return result.str();
         }
     };
 }

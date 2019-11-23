@@ -59,7 +59,7 @@
     <ClInclude Include="..\..\..\src\layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\push_button.hpp">
+    <ClInclude Include="..\..\..\src\button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

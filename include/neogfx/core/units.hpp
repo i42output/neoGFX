@@ -233,7 +233,7 @@ namespace neogfx
         std::string to_string(bool aToEmit = true) const
         {
             if (units() == length_units::NoUnitsAsMaximumLength)
-                return "max";
+                return (aToEmit ? "std::numeric_limits<dimension>::max()" : "max");
             std::ostringstream oss;
             oss << unconverted_value();
             if (aToEmit)

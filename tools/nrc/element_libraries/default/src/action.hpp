@@ -45,6 +45,8 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
+            if (aName == "checkable" || aName == "text" || aName == "image" || aName == "shortcut" || aName == "checked_image")
+                return;
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override

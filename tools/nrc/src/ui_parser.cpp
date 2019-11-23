@@ -185,7 +185,7 @@ namespace neogfx::nrc
         for (auto const& library : iLibraries)
             if (library->handles_element(aParent, aElementType))
                 return neolib::ref_ptr<i_ui_element>{ library->create_element(*this, aParent, aElementType) };
-        throw element_type_not_found(aElementType.to_std_string());
+        throw element_type_not_found(aElementType.to_std_string(), aParent.id().to_std_string());
     }
 
     void ui_parser::parse(const neolib::fjson_value& aNode)
@@ -203,7 +203,7 @@ namespace neogfx::nrc
             (void)e;
             throw;
             #else
-            std::cerr << "Error: " << e.what() << std::endl;
+            std::cerr << "error: nrc: " << e.what() << std::endl;
             #endif
         }
     }
@@ -230,7 +230,7 @@ namespace neogfx::nrc
                         (void)e;
                         throw;
                         #else
-                        std::cerr << "Error: " << e.what() << std::endl;
+                        std::cerr << "error: nrc: " << e.what() << std::endl;
                         #endif
                     }
                 }

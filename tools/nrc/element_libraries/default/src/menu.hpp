@@ -43,7 +43,9 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "action")
+            if (aName == "title")
+                return;
+            else if (aName == "action")
             {
                 auto const& reference = aData.get<neolib::i_string>();
                 if (reference == "separator")
@@ -51,7 +53,8 @@ namespace neogfx::nrc
                 else
                     new action_ref{ parser(), *this, reference };
             }
-            ui_element<>::parse(aName, aData);
+            else
+                ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {

@@ -28,10 +28,11 @@ namespace neogfx
     template <typename T>
     class anchor_constraint : public std::function<T(const T&, const T&)>
     {
+        typedef std::function<T(const T&, const T&)> base_type;
     public:
         typedef T value_type;
     public:
-        using function::function;
+        using base_type::base_type;
     public:
         static anchor_constraint<T> equal_to;
         static anchor_constraint<T> min;

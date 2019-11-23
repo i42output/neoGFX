@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_enum.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
@@ -43,7 +44,27 @@ namespace neogfx
         ImageSpacerTextHorizontal,
         ImageSpacerTextVertical
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::label_placement> neolib::enum_enumerators_v<neogfx::label_placement>
+{
+    declare_enum_string(neogfx::label_placement, TextHorizontal)
+    declare_enum_string(neogfx::label_placement, TextVertical)
+    declare_enum_string(neogfx::label_placement, ImageHorizontal)
+    declare_enum_string(neogfx::label_placement, ImageVertical)
+    declare_enum_string(neogfx::label_placement, TextImageHorizontal)
+    declare_enum_string(neogfx::label_placement, TextImageVertical)
+    declare_enum_string(neogfx::label_placement, ImageTextHorizontal)
+    declare_enum_string(neogfx::label_placement, ImageTextVertical)
+    declare_enum_string(neogfx::label_placement, TextSpacerImageHorizontal)
+    declare_enum_string(neogfx::label_placement, TextSpacerImageVertical)
+    declare_enum_string(neogfx::label_placement, ImageSpacerTextHorizontal)
+    declare_enum_string(neogfx::label_placement, ImageSpacerTextVertical)
+};
+
+namespace neogfx
+{
     typedef text_widget_type label_type;
 
     class label : public widget

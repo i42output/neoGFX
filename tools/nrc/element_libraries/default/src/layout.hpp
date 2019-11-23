@@ -74,30 +74,10 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "margin")
-                iMargin.emplace(get_length(aData));
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            if (aName == "margin")
-            {
-                auto margin = get_lengths(aData);
-                switch (margin.size())
-                {
-                case 1:
-                    iMargin.emplace(margin[0]);
-                    break;
-                case 2:
-                    iMargin.emplace(margin[0], margin[1]);
-                    break;
-                case 4:
-                    iMargin.emplace(margin[0], margin[1], margin[2], margin[3]);
-                    break;
-                default:
-                    throw element_ill_formed();
-                }
-            }
             ui_element<>::parse(aName, aData);
         }
     protected:
@@ -147,25 +127,11 @@ namespace neogfx::nrc
         }
         void emit_body() const override
         {
-            if (iMargin)
-            {
-                auto const& margin = *iMargin;
-                if (margin.left == margin.right && margin.top == margin.bottom)
-                {
-                    if (margin.left == margin.top)
-                        emit("   %1%.set_margins(margins{ %2% });\n", id(), margin.left);
-                    else
-                        emit("   %1%.set_margins(margins{ %2%, %3% });\n", id(), margin.left, margin.top);
-                }
-                else 
-                    emit("   %1%.set_margins(margins{ %2%, %3%, %4%, %5% });\n", id(), margin.left, margin.top, margin.right, margin.bottom);
-            }
             ui_element<>::emit_body();
         }
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neogfx::basic_margins<length>> iMargin;
     };
 
     typedef basic_layout<ui_element_type::VerticalLayout> vertical_layout;

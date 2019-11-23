@@ -30,7 +30,18 @@ namespace neogfx
         BiState,
         TriState
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::button_checkable> neolib::enum_enumerators_v<neogfx::button_checkable>
+{
+    declare_enum_string(neogfx::button_checkable, NotCheckable)
+    declare_enum_string(neogfx::button_checkable, BiState)
+    declare_enum_string(neogfx::button_checkable, TriState)
+};
+
+namespace neogfx
+{
     class i_button : public virtual i_skinnable_item
     {
     public:
