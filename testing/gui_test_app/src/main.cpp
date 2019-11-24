@@ -332,14 +332,13 @@ int main(int argc, char* argv[])
             dropList3.set_editable(!dropList3.editable());
             dropList4.set_editable(!dropList4.editable());
         });
-        ng::text_edit textEdit(ui.layoutEdit);
-        ui.buttonGenerateUuid.clicked([&]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
-        dropList.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
-        textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
-        textEdit.set_tab_stop_hint("00000000");
+        ui.buttonGenerateUuid.clicked([&]() { ui.textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
+        dropList.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
+        dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
+        ui.textEdit.set_focus_policy(ui.textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
+        ui.textEdit.set_tab_stop_hint("00000000");
         ng::slider effectWidthSlider{ ui.layoutEdit, ng::slider::Vertical };
         effectWidthSlider.set_minimum(1);
         effectWidthSlider.set_maximum(10);
@@ -350,9 +349,6 @@ int main(int argc, char* argv[])
         effectAux1Slider.set_maximum(10.0);
         effectAux1Slider.set_step(0.1);
         effectAux1Slider.set_value(1.0);
-        ng::text_edit smallTextEdit(ui.layoutEdit);
-        smallTextEdit.set_maximum_width(100);
-        smallTextEdit.set_alignment(ng::alignment::Right);
         ng::text_field textField1(ui.layoutLineEdits2, "First field:", "Enter text", ng::text_field_placement::LabelLeft);
         ng::text_field textField2(ui.layoutLineEdits2, "Second field:", "Enter text", ng::text_field_placement::LabelLeft);
         ng::text_field textField3(ui.layoutLineEdits3, "Third field (label above)", "Enter text", ng::text_field_placement::LabelAbove);
@@ -387,7 +383,7 @@ int main(int argc, char* argv[])
             auto& button = ui.layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
             ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
             button.set_foreground_colour(randomColour);
-            button.clicked([&app, &textEdit, randomColour]() { textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
+            button.clicked([&, randomColour]() { ui.textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
             transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
         }
         ui.layout3.LayoutCompleted([&ui, &transitions, &transitionPrng]()
@@ -425,13 +421,13 @@ int main(int argc, char* argv[])
             showHideTabs();
         });
         ui.checkWordWrap.check();
-        ui.checkWordWrap.checked([&textEdit]()
+        ui.checkWordWrap.checked([&]()
         {
-            textEdit.set_word_wrap(true);
+            ui.textEdit.set_word_wrap(true);
         });
-        ui.checkWordWrap.Unchecked([&textEdit]()
+        ui.checkWordWrap.Unchecked([&]()
         {
-            textEdit.set_word_wrap(false);
+            ui.textEdit.set_word_wrap(false);
         });
         ui.checkPassword.checked([&textField2]()
         {
@@ -456,22 +452,22 @@ int main(int argc, char* argv[])
             ui.groupBox.set_checkable(false);
         });
         ng::gradient_widget gradientWidget(ui.groupBox.item_layout());
-        ui.checkColumns.checked([&textEdit, &gradientWidget, &ui]()
+        ui.checkColumns.checked([&]()
         {
             ui.checkPassword.disable();
-            textEdit.set_columns(3);
-            gradientWidget.GradientChanged([&gradientWidget, &textEdit]()
+            ui.textEdit.set_columns(3);
+            gradientWidget.GradientChanged([&]()
             {
-                auto cs = textEdit.column(2);
+                auto cs = ui.textEdit.column(2);
                 cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, gradientWidget.gradient() } });
-                textEdit.set_column(2, cs);
-            }, textEdit);
+                ui.textEdit.set_column(2, cs);
+            }, ui.textEdit);
         });
-        ui.checkColumns.Unchecked([&textEdit, &gradientWidget, &ui]()
+        ui.checkColumns.Unchecked([&]()
         {
             ui.checkPassword.enable();
-            textEdit.remove_columns();
-            gradientWidget.GradientChanged.unsubscribe(textEdit);
+            ui.textEdit.remove_columns();
+            gradientWidget.GradientChanged.unsubscribe(ui.textEdit);
         });
         ui.checkKerning.Toggled([&app, &ui]()
         {
@@ -492,58 +488,58 @@ int main(int argc, char* argv[])
         ui.checkSubpixel.check();
         ui.editNormal.checked([&]()
         {
-            auto s = textEdit.default_style();
+            auto s = ui.textEdit.default_style();
             s.set_text_effect(ng::optional_text_effect{});
-            textEdit.set_default_style(s);
+            ui.textEdit.set_default_style(s);
         });
         ui.editOutline.checked([&]()
         {
             effectWidthSlider.set_value(1);
-            auto s = textEdit.default_style();
+            auto s = ui.textEdit.default_style();
             s.set_text_colour(app.current_style().palette().text_colour().light() ? ng::colour::Black : ng::colour::White);
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_colour() });
-            textEdit.set_default_style(s);
+            ui.textEdit.set_default_style(s);
         });
         ui.editGlow.checked([&]()
         {
             effectWidthSlider.set_value(5);
-            auto s = textEdit.default_style();
+            auto s = ui.textEdit.default_style();
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::colour::Orange.with_lightness(0.9) });
-            textEdit.set_default_style(s);
+            ui.textEdit.set_default_style(s);
         });
         effectWidthSlider.ValueChanged([&]()
         {
-            auto s = textEdit.default_style();
+            auto s = ui.textEdit.default_style();
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
             s.set_text_effect(ng::text_effect{ ui.editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->colour(), effectWidthSlider.value(), textEffect->aux1() });
-            textEdit.set_default_style(s);
+            ui.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
-            auto column = textEdit.column(0);
+            auto column = ui.textEdit.column(0);
             column.set_margins(effectWidthSlider.value());
-            textEdit.set_column(0, column);
-            smallTextEdit.set_text(oss.str());
+            ui.textEdit.set_column(0, column);
+            ui.textEditSmall.set_text(oss.str());
         });
         effectAux1Slider.ValueChanged([&]()
         {
             ui.editGlow.check();
-            auto s = textEdit.default_style();
+            auto s = ui.textEdit.default_style();
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->colour(), textEffect->width(), effectAux1Slider.value() });
-            textEdit.set_default_style(s);
+            ui.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
-            smallTextEdit.set_text(oss.str());
+            ui.textEditSmall.set_text(oss.str());
         });
         ui.editShadow.checked([&]()
         {
-            auto s = textEdit.default_style();
+            auto s = ui.textEdit.default_style();
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, ng::colour::Black });
-            textEdit.set_default_style(s);
+            ui.textEdit.set_default_style(s);
         });
         ui.radioSliderFont.checked([&slider1, &app]()
         {
@@ -609,7 +605,7 @@ int main(int argc, char* argv[])
             if (colourPicker.exec() == ng::dialog_result::Accepted)
             {
                 sInk = colourPicker.selected_colour();
-                textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+                ui.textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
                 textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
                 textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
             }
@@ -626,8 +622,8 @@ int main(int argc, char* argv[])
         });
         for (uint32_t row = 0; row < 3; ++row)
             for (uint32_t col = 0; col < 3; ++col)
-                ui.keypad.add_item_at_position(row, col, std::make_shared<keypad_button>(textEdit, row * 3 + col + 1));
-        ui.keypad.add_item_at_position(3, 1, std::make_shared<keypad_button>(textEdit, 0));
+                ui.keypad.add_item_at_position(row, col, std::make_shared<keypad_button>(ui.textEdit, row * 3 + col + 1));
+        ui.keypad.add_item_at_position(3, 1, std::make_shared<keypad_button>(ui.textEdit, 0));
         ui.keypad.add_span(3, 1, 1, 2);
 
         neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
@@ -663,29 +659,21 @@ int main(int argc, char* argv[])
             }
             standardButton <<= 1;
         }
-        ng::line_edit messageBoxTitle{ ui.groupMessageBoxText.item_layout() };
-        messageBoxTitle.set_text("neoGFX Message Box Test");
-        ng::text_edit messageBoxText{ ui.groupMessageBoxText.item_layout() };
-        messageBoxText.set_text("This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line");
-        messageBoxText.set_minimum_size(ng::size{ 256_spx, 128_spx });
-        ng::text_edit messageBoxDetailedText{ ui.groupMessageBoxText.item_layout() };
-        messageBoxDetailedText.set_text("This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank.");
-        messageBoxDetailedText.set_minimum_size(ng::size{ 256_spx, 128_spx });
         ui.buttonOpenMessageBox.clicked([&]()
         {
             ng::standard_button result;
             if (ui.radioMessageBoxIconInformation.is_checked())
-                result = ng::message_box::information(window, messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+                result = ng::message_box::information(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (ui.radioMessageBoxIconQuestion.is_checked())
-                result = ng::message_box::question(window, messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+                result = ng::message_box::question(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (ui.radioMessageBoxIconWarning.is_checked())
-                result = ng::message_box::warning(window, messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+                result = ng::message_box::warning(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (ui.radioMessageBoxIconStop.is_checked())
-                result = ng::message_box::stop(window, messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+                result = ng::message_box::stop(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (ui.radioMessageBoxIconError.is_checked())
-                result = ng::message_box::error(window, messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+                result = ng::message_box::error(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (ui.radioMessageBoxIconCritical.is_checked())
-                result = ng::message_box::critical(window, messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+                result = ng::message_box::critical(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             ui.labelMessageBoxResult.text().set_text("Result = " + ng::dialog_button_box::standard_button_details(result).second);
         });
 
@@ -914,15 +902,14 @@ int main(int argc, char* argv[])
             ui.pageDrawing.update();
         }, 100 };
 
-        ng::text_edit textEdit2(ui.layoutEditor);
-        textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
-        ui.buttonStyle1.clicked([&textEdit2]()
+        ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
+        ui.buttonStyle1.clicked([&ui]()
         {
-            textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
+            ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
         });
-        ui.buttonStyle2.clicked([&textEdit2]()
+        ui.buttonStyle2.clicked([&ui]()
         {
-            textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
+            ui.textEditEditor.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
         });
 
         ui.pageCircles.painting([&ui, &random_colour](ng::i_graphics_context& aGc)

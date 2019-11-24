@@ -288,7 +288,7 @@
                                     value: 1.0
                                 }
                                 text_edit: {
-                                    id: smallTextEdit
+                                    id: textEditSmall
                                     maximum_width: 100
                                     alignment: Right
                                 }
@@ -591,6 +591,8 @@
                                 text_edit: {
                                     id: textEditMessageBoxText
                                     text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
+                                    minimum_size: [ 256spx 128spx ]
+                                    size_policy: Minimum
                                 }
                                 label: {
                                     text: "Detailed Text:"

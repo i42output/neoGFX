@@ -115,12 +115,14 @@
     <ClInclude Include="..\..\..\src\label.hpp" />
     <ClInclude Include="..\..\..\src\layout.hpp" />
     <ClInclude Include="..\..\..\src\library.hpp" />
+    <ClInclude Include="..\..\..\src\line_edit.hpp" />
     <ClInclude Include="..\..\..\src\menu.hpp" />
     <ClInclude Include="..\..\..\src\menu_bar.hpp" />
     <ClInclude Include="..\..\..\src\spacer.hpp" />
     <ClInclude Include="..\..\..\src\status_bar.hpp" />
     <ClInclude Include="..\..\..\src\tab_page.hpp" />
     <ClInclude Include="..\..\..\src\tab_page_container.hpp" />
+    <ClInclude Include="..\..\..\src\text_edit.hpp" />
     <ClInclude Include="..\..\..\src\text_widget.hpp" />
     <ClInclude Include="..\..\..\src\toolbar.hpp" />
     <ClInclude Include="..\..\..\src\widget.hpp" />

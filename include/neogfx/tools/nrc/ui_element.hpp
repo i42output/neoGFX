@@ -306,10 +306,17 @@ namespace neogfx::nrc
             {
                 if ((type() & ui_element_type::HasText) == ui_element_type::HasText)
                 {
-                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::TextWidget)
+                    switch (type() & ui_element_type::MASK_RESERVED_SPECIFIC)
+                    {
+                    case ui_element_type::TextWidget:
+                    case ui_element_type::TextEdit:
+                    case ui_element_type::LineEdit:
                         emit("   %1%.set_text(\"%2%\"_t);\n", id(), *iText);
-                    else
+                        break;
+                    default:
                         emit("   %1%.text().set_text(\"%2%\"_t);\n", id(), *iText);
+                        break;
+                    }   
                 }
                 else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
                     emit("   %1%.label().text().set_text(\"%2%\"_t);\n", id(), *iText);

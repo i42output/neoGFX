@@ -37,6 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tab_page.hpp"
 #include "button.hpp"
 #include "label.hpp"
+#include "line_edit.hpp"
+#include "text_edit.hpp"
 #include "group_box.hpp"
 #include "layout.hpp"
 #include "spacer.hpp"
@@ -67,6 +69,8 @@ namespace neogfx::nrc
             { "label", ui_element_type::LayoutItem },
             { ".label", ui_element_type::HasLabel },
             { ".image", ui_element_type::HasImage },
+            { "text_edit", ui_element_type::LayoutItem },
+            { "line_edit", ui_element_type::LayoutItem },
             { "group_box", ui_element_type::LayoutItem },
             { "vertical_layout", ui_element_type::LayoutItem },
             { "horizontal_layout", ui_element_type::LayoutItem },
@@ -130,6 +134,8 @@ namespace neogfx::nrc
             { "check_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new check_box{ aParser, aParent }; } },
             { "radio_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new radio_button{ aParser, aParent }; } },
             { "label", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new label{ aParser, aParent }; } },
+            { "text_edit", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_edit{ aParser, aParent }; } },
+            { "line_edit", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new line_edit{ aParser, aParent }; } },
             { "group_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new group_box{ aParser, aParent }; } },
             { "vertical_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aParser, aParent }; } },
             { "horizontal_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aParser, aParent }; } },
