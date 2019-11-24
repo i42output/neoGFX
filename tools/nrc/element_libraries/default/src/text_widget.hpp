@@ -34,7 +34,7 @@ namespace neogfx::nrc
     public:
         const neolib::i_string& header() const override
         {
-            static const neolib::string sHeader = "neogfx/gui/text_widget/text_widget.hpp";
+            static const neolib::string sHeader = "neogfx/gui/widget/text_widget.hpp";
             return sHeader;
         }
     public:
