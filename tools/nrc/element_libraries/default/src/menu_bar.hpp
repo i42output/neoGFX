@@ -32,6 +32,7 @@ namespace neogfx::nrc
         menu_bar(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::MenuBar }
         {
+            add_data_names({ "action" });
         }
     public:
         const neolib::i_string& header() const override
@@ -50,8 +51,7 @@ namespace neogfx::nrc
                 else
                     new action_ref{ parser(), *this, reference };
             }
-            else
-                ui_element<>::parse(aName, aData);
+            ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {

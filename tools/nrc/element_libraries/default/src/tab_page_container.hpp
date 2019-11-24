@@ -31,6 +31,7 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::TabPageContainer },
             iClosableTabs{ aParent.parser().get<bool>("closable_tabs", false) }
         {
+            add_data_names({ "closable_tabs" });
         }
     public:
         const neolib::i_string& header() const override

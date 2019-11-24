@@ -33,6 +33,7 @@ namespace neogfx::nrc
             iTabText{ aParent.parser().get_optional<neolib::string>("tab_text") },
             iTabImage{ aParent.parser().get_optional<neolib::string>("tab_image") }
         {
+            add_data_names({ "tab_text", "tab_image" });
         }
     public:
         const neolib::i_string& header() const override
@@ -43,8 +44,6 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "tab_text" || aName == "tab_image")
-                return;
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
@@ -71,7 +70,7 @@ namespace neogfx::nrc
                     emit(",\n"
                         "   %1%{ %2%, \"%3%\"_t }", id(), parent().id(), *iTabText);
                 else
-                    throw element_ill_formed();
+                    throw element_ill_formed(id().to_std_string());
             }
             else
                 ui_element<>::emit_generic_ctor();

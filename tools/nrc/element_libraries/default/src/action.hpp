@@ -35,6 +35,7 @@ namespace neogfx::nrc
             iShortcut{ aParent.parser().get_optional<neolib::string>("shortcut") },
             iCheckedImage{ aParent.parser().get_optional<neolib::string>("checked_image") }
         {
+            add_data_names({ "checkable", "text", "image", "shortcut", "checked_image" });
         }
     public:
         const neolib::i_string& header() const override
@@ -45,8 +46,6 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "checkable" || aName == "text" || aName == "image" || aName == "shortcut" || aName == "checked_image")
-                return;
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override

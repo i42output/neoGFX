@@ -132,11 +132,11 @@ namespace neogfx::nrc
         aOutput << "extern \"C\" void* nrc_" << symbol << " = &nrc::" << symbol << ";" << std::endl << std::endl;
     }
 
-    void parse_ui(neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
+    void parse_ui(const boost::filesystem::path& aInputFilename, neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
     {
         auto const& ui = aItem.as<neolib::fjson_object>();
         auto ns = aNamespace + (ui.has("namespace") ? "/" + ui.at("namespace").text() : "");
-        ui_parser uiParser{ aPluginManager, ns, ui, aOutput };
+        ui_parser uiParser{ aInputFilename, aPluginManager, ns, ui, aOutput };
     }
 }
 
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
                         std::cout << "Creating " << uiOutputPath << "..." << std::endl;
                         uiOutput.emplace(uiOutputPath);
                     }
-                    parse_ui(app.plugin_manager(), ns, item, *uiOutput);
+                    parse_ui(inputFileName, app.plugin_manager(), ns, item, *uiOutput);
                 }
             }
         }

@@ -236,6 +236,7 @@
                                 push_button: {
                                     id: buttonChina
                                     text: "请停止食用犬"
+                                    foreground_colour: CadetBlue
                                 }
                             }
                             push_button: {
@@ -372,7 +373,6 @@
                                     text: "Toggle\n&mute."
                                     foreground_colour: LightCoral
                                     maximum_size: [ 128spx 64spx ]
-
                                 }
                                 spacer: {
                                     weight: 1.0
@@ -387,20 +387,24 @@
                                     id: groupBox
                                     text: "Group Box"
                                     check_box: {
-                                        id: triState
+                                        id: checkTriState
                                         text: "Tristate checkbo&x"
                                         checkable: TriState
                                     }
                                     check_box: {
-                                        id: wordWrap
+                                        id: checkWordWrap
                                         text: "Editor word wrap"
                                     }
                                     check_box: {
-                                        id: columns
+                                        id: checkPassword
+                                        text: "Password"
+                                    }
+                                    check_box: {
+                                        id: checkColumns
                                         text: "Columns"
                                     }
                                     check_box: {
-                                        id: groupBoxCheckable
+                                        id: checkGroupBoxCheckable
                                         text: "Group Box Checkable"
                                     }
                                     gradient_widget: {
@@ -413,11 +417,11 @@
                                     horizontal_layout: {
                                         id: layout7
                                         check_box: {
-                                            id: buttonKerning
+                                            id: checkKerning
                                             text: "kern"
                                         }
                                         check_box: {
-                                            id: buttonSubpixel
+                                            id: checkSubpixel
                                             text: "subpix"
                                         }
                                     }
@@ -477,6 +481,7 @@
                                     radio_button: {
                                         id: radio3
                                         text: "Radio 3"
+                                        enabled: false
                                     }
                                     radio_button: {
                                         id: radioThemeColour

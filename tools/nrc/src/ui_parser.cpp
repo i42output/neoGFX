@@ -24,8 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::nrc
 {
-    ui_parser::ui_parser(const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput) :
-        iRoot{ aRoot }, iOutput{ aOutput }, iNamespace{ aNamespace }, iCurrentNode{ nullptr }, iAnonymousIdCounter{ 0u }
+    ui_parser::ui_parser(const boost::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput) :
+        iInputFilename{ aInputFilename }, iRoot{ aRoot }, iOutput{ aOutput }, iNamespace{ aNamespace }, iCurrentNode{ nullptr }, iAnonymousIdCounter{ 0u }
     {
         for (auto const& plugin : aPluginManager.plugins())
         {
@@ -34,8 +34,16 @@ namespace neogfx::nrc
                 iLibraries.push_back(library);
         }
 
-        for (auto const& node : aRoot.contents())
-            parse(node);
+        try
+        {
+            for (auto const& node : aRoot.contents())
+                parse(node);
+        }
+        catch (std::exception & e)
+        {
+            std::cerr << source_location() << ": error: nrc: " << e.what() << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
 
         emit(
             "// This is an automatically generated file, do not edit!\n"
@@ -72,24 +80,34 @@ namespace neogfx::nrc
         aResult = std::string(aLevel * 4, ' '); // todo: make indentation configurable
     }
 
+    void ui_parser::do_source_location(neolib::i_string& aLocation) const
+    {
+        auto const& absolutePath = boost::filesystem::absolute(iInputFilename).string();
+        if (iCurrentNode != nullptr)
+        {
+            auto const& location = iCurrentNode->document_source_location();
+            aLocation = absolutePath + "(" + std::to_string(location.line) + "," + std::to_string(location.column) + ")";
+        }
+        else
+            aLocation = absolutePath;
+    }
+
     bool ui_parser::do_data_exists(const neolib::i_string& aKey) const
     {
-        auto const& currentObject = iCurrentNode->as<neolib::fjson_object>();
-        return currentObject.has(aKey.to_std_string()) && currentObject.at(aKey.to_std_string()).type() != neolib::json_type::Array;
+        return current_object().has(aKey.to_std_string()) && current_object().at(aKey.to_std_string()).type() != neolib::json_type::Array;
     }
 
     bool ui_parser::do_array_data_exists(const neolib::i_string& aKey) const
     {
-        auto const& currentObject = iCurrentNode->as<neolib::fjson_object>();
-        return currentObject.has(aKey.to_std_string()) && currentObject.at(aKey.to_std_string()).type() == neolib::json_type::Array;
+        return current_object().has(aKey.to_std_string()) && current_object().at(aKey.to_std_string()).type() == neolib::json_type::Array;
     }
 
     const ui_parser::data_t& ui_parser::do_get_data(const neolib::i_string& aKey) const
     {
         if (!data_exists(aKey))
             throw element_data_not_found(aKey.to_std_string());
-        auto const& value = iCurrentNode->as<neolib::fjson_object>().at(aKey.to_std_string());
-        auto& data = iDataCache[std::make_pair(iCurrentNode, aKey.to_std_string())];
+        auto const& value = current_object().at(aKey.to_std_string());
+        auto& data = iDataCache[std::make_pair(&current_object(), aKey.to_std_string())];
         value.visit([&data](auto&& v)
         {
             typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
@@ -116,8 +134,12 @@ namespace neogfx::nrc
     {
         if (!array_data_exists(aKey))
             throw element_data_not_found(aKey.to_std_string());
-        auto const& value = iCurrentNode->as<neolib::fjson_object>().at(aKey.to_std_string()).as<neolib::fjson_array>();
-        auto& arrayData = iArrayDataCache[std::make_pair(iCurrentNode, aKey.to_std_string())];
+        auto const& value = current_object().at(aKey.to_std_string()).as<neolib::fjson_array>();
+        auto const cacheKey = std::make_pair(&current_object(), aKey.to_std_string());
+        auto const existing = iArrayDataCache.find(cacheKey);
+        if (existing != iArrayDataCache.end())
+            return existing->second;
+        auto& arrayData = iArrayDataCache[cacheKey];
         for(auto const& e : value.contents())
             e.visit([&arrayData](auto&& v)
             {
@@ -195,6 +217,14 @@ namespace neogfx::nrc
         throw element_type_not_found(aElementType.to_std_string(), aParent.id().to_std_string());
     }
 
+    const neolib::fjson_object& ui_parser::current_object() const
+    {
+        if (iCurrentNode->type() == neolib::json_type::Object)
+            return iCurrentNode->as<neolib::fjson_object>();
+        else
+            return iCurrentNode->parent().as<neolib::fjson_object>();
+    }
+
     void ui_parser::parse(const neolib::fjson_value& aNode)
     {
         iCurrentNode = &aNode;
@@ -210,7 +240,7 @@ namespace neogfx::nrc
             (void)e;
             throw;
             #else
-            std::cerr << "error: nrc: " << e.what() << std::endl;
+            std::cerr << source_location() << ": error: nrc: " << e.what() << std::endl;
             #endif
         }
     }
@@ -237,7 +267,7 @@ namespace neogfx::nrc
                         (void)e;
                         throw;
                         #else
-                        std::cerr << "error: nrc: " << e.what() << std::endl;
+                        std::cerr << source_location() << ": error: nrc: " << e.what() << std::endl;
                         #endif
                     }
                 }
@@ -245,26 +275,10 @@ namespace neogfx::nrc
                     parse(e, aElement);
             break;
         case neolib::json_type::Array:
+            aElement.parse(neolib::string{ aNode.name() }, get_array_data(aNode.name()) );
             break;
-        case neolib::json_type::Double:
-            break;
-        case neolib::json_type::Int64:
-            break;
-        case neolib::json_type::Uint64:
-            break;
-        case neolib::json_type::Int:
-            break;
-        case neolib::json_type::Uint:
-            break;
-        case neolib::json_type::String:
-            aElement.parse(neolib::string{ aNode.name() }, data_t{ neolib::string{ aNode.as<neolib::fjson_string>() } });
-            break;
-        case neolib::json_type::Bool:
-            break;
-        case neolib::json_type::Null:
-            break;
-        case neolib::json_type::Keyword:
-            aElement.parse(neolib::string{ aNode.name() }, data_t{ neolib::string{ aNode.as<neolib::fjson_keyword>().text } });
+        default:
+            aElement.parse(neolib::string{ aNode.name() }, get_data(aNode.name()));
             break;
         }
     }

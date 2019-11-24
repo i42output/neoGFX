@@ -48,14 +48,18 @@ namespace neogfx::nrc
         typedef neolib::vector<element_ptr_t> children_t;
         using i_ui_element::data_t;
         using i_ui_element::array_data_t;
+    protected:
+        typedef std::set<std::string> data_names_t;
     public:
         ui_element(const i_ui_element_parser& aParser, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
             iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
+            init();
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
             iParser{ aParser }, iParent{ &aParent }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
         {
+            init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
         }
         ~ui_element()
@@ -131,6 +135,14 @@ namespace neogfx::nrc
         {
         }
     protected:
+        const data_names_t& data_names() const
+        {
+            return iDataNames;
+        }
+        void add_data_names(const data_names_t& aNames)
+        {
+            iDataNames.insert(aNames.begin(), aNames.end());
+        }
         bool consume_element(const neolib::i_string& aElementType) override
         {
             if (aElementType == "label" && (type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
@@ -146,68 +158,58 @@ namespace neogfx::nrc
                 emplace_lengths_2("size", iImageFixedSize);
                 emplace_lengths_2("minimum_size", iImageMinimumSize);
                 emplace_lengths_2("maximum_size", iImageMaximumSize);
-                iImageUri = parser().get_optional<neolib::string>("uri");
+                iImage = parser().get_optional<neolib::string>("uri");
                 return true;
             }
             return false;
         }
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            bool handled = false;
-            if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
+            if (data_names().find(aName) == data_names().end())
             {
-                if (aName == "size_policy")
-                    handled = true, iSizePolicy = neolib::string_to_enum<size_constraint>(aData.get<neolib::i_string>());
-                if (aName == "margin")
-                    handled = true, iMargin.emplace(get_length(aData));
+                std::cerr << parser().source_location() << ": warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
+                return;
             }
-            if ((type() & ui_element_type::HasText) == ui_element_type::HasText)
-                if (aName == "text")
-                    handled = true, iText = aData.get<neolib::i_string>();
-            if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-                if (aName == "image")
-                    handled = true, iImageUri = aData.get<neolib::i_string>();
-            if ((type() & ui_element_type::HasColour) == ui_element_type::HasColour)
-            {
-                if (aName == "foreground_colour")
-                    handled = true, iForegroundColour = get_colour(aData);
-                else if (aName == "background_colour")
-                    handled = true, iBackgroundColour = get_colour(aData);
-                else if (aName == "opacity")
-                    handled = true, iOpacity = aData.get<double>();
-                else if (aName == "transparency")
-                    handled = true, iOpacity = 1.0 - aData.get<double>();
-            }
-            if (!handled)
-                std::cerr << "warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
+            if (aName == "size_policy")
+                iSizePolicy = neolib::string_to_enum<size_constraint>(aData.get<neolib::i_string>());
+            else if (aName == "margin")
+                iMargin.emplace(get_length(aData));
+            else if (aName == "text")
+                iText = aData.get<neolib::i_string>();
+            else if (aName == "image")
+                iImage = aData.get<neolib::i_string>();
+            else if (aName == "foreground_colour")
+                iForegroundColour = get_colour(aData);
+            else if (aName == "background_colour")
+                iBackgroundColour = get_colour(aData);
+            else if (aName == "opacity")
+                iOpacity = aData.get<double>();
+            else if (aName == "transparency")
+                iOpacity = 1.0 - aData.get<double>();
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            bool handled = false;
-            if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
+            if (data_names().find(aName) == data_names().end())
             {
-                if (aName == "size_policy" && !aData.empty())
-                    handled = true, iSizePolicy = size_policy::from_string(
-                        aData[0u].get<neolib::i_string>().to_std_string(),
-                        aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string());
-                else if (aName == "margin")
-                    handled = true, emplace_lengths_4("margin", iMargin);
-                else if (aName == "size")
-                    handled = true, emplace_lengths_2("size", iFixedSize);
-                else if (aName == "minimum_size")
-                    handled = true, emplace_lengths_2("minimum_size", iMinimumSize);
-                else if (aName == "maximum_size")
-                    handled = true, emplace_lengths_2("maximum_size", iMaximumSize);
+                std::cerr << parser().source_location() << ": warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
+                return;
             }
-            if ((type() & ui_element_type::HasColour) == ui_element_type::HasColour)
-            {
-                if (aName == "foreground_colour")
-                    handled = true, iForegroundColour = get_colour(aData);
-                else if (aName == "background_colour")
-                    handled = true, iBackgroundColour = get_colour(aData);
-            }
-            if (!handled)
-                std::cerr << "warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
+            if (aName == "size_policy" && !aData.empty())
+                iSizePolicy = size_policy::from_string(
+                    aData[0u].get<neolib::i_string>().to_std_string(),
+                    aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string());
+            else if (aName == "margin")
+                emplace_lengths_4("margin", iMargin);
+            else if (aName == "size")
+                emplace_lengths_2("size", iFixedSize);
+            else if (aName == "minimum_size")
+                emplace_lengths_2("minimum_size", iMinimumSize);
+            else if (aName == "maximum_size")
+                emplace_lengths_2("maximum_size", iMaximumSize);
+            else if (aName == "foreground_colour")
+                iForegroundColour = get_colour(aData);
+            else if (aName == "background_colour")
+                iBackgroundColour = get_colour(aData);
         }
         void emit_preamble() const override
         {
@@ -256,15 +258,35 @@ namespace neogfx::nrc
                 emit("   %1%.image().set_minimum_size(size{ %2%, %3% });\n", id(), iImageMinimumSize->cx, iImageMinimumSize->cy);
             if (iImageMaximumSize)
                 emit("   %1%.image().set_maximum_size(size{ %2%, %3% });\n", id(), iImageMaximumSize->cx, iImageMaximumSize->cy);
-            if (iImageUri)
-                emit("   %1%.image().set_image(image{ \"%2%\" });\n", id(), *iImageUri);
+            if (iImage)
+            {
+                if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
+                {
+                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
+                        emit("   %1%.set_image(image{ \"%2%\" });\n", id(), *iImage);
+                    else
+                        emit("   %1%.image().set_image(image{ \"%2%\" });\n", id(), *iImage);
+                }
+                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+                    emit("   %1%.label().image().set_image(image{ \"%2%\" });\n", id(), *iImage);
+            }
             if (iText)
-                emit("   %1%.text().set_text(\"%2%\"_t);\n", id(), *iText);
+            {
+                if ((type() & ui_element_type::HasText) == ui_element_type::HasText)
+                {
+                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::TextWidget)
+                        emit("   %1%.set_text(\"%2%\"_t);\n", id(), *iText);
+                    else
+                        emit("   %1%.text().set_text(\"%2%\"_t);\n", id(), *iText);
+                }
+                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+                    emit("   %1%.label().text().set_text(\"%2%\"_t);\n", id(), *iText);
+            }
             if (iOpacity)
                 emit("   %1%.set_opacity(%2%);\n", id(), *iOpacity);
             if (iForegroundColour)
                 emit("   %1%.set_foreground_colour(colour{ %2% });\n", id(), *iForegroundColour);
-            if (iForegroundColour)
+            if (iBackgroundColour)
                 emit("   %1%.set_background_colour(colour{ %2% });\n", id(), *iBackgroundColour);
             for (auto const& child : children())
                 child->emit_body();
@@ -352,7 +374,7 @@ namespace neogfx::nrc
                 aTarget.emplace(lengths[0], lengths[1]);
                 break;
             default:
-                throw element_ill_formed();
+                throw element_ill_formed(id().to_std_string());
             }
         }
         template <typename Target>
@@ -377,12 +399,25 @@ namespace neogfx::nrc
                 aTarget.emplace(lengths[0], lengths[1], lengths[2], lengths[3]);
                 break;
             default:
-                throw element_ill_formed();
+                throw element_ill_formed(id().to_std_string());
             }
+        }
+    private:
+        void init()
+        {
+            if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
+                add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size" });
+            if ((type() & (ui_element_type::HasText | ui_element_type::HasLabel)) != ui_element_type::None)
+                add_data_names({ "text" });
+            if ((type() & (ui_element_type::HasImage | ui_element_type::HasLabel)) != ui_element_type::None)
+                add_data_names({ "image" });
+            if ((type() & ui_element_type::HasColour) == ui_element_type::HasColour)
+                add_data_names({ "foreground_colour", "background_colour", "opacity", "transparency" });
         }
     private:
         const i_ui_element_parser& iParser;
         i_ui_element* iParent;
+        data_names_t iDataNames;
         neolib::optional<neolib::string> iId;
         mutable neolib::optional<neolib::string> iAnonymousId;
         mutable uint32_t iAnonymousIdCounter;
@@ -398,7 +433,7 @@ namespace neogfx::nrc
         std::optional<basic_size<length>> iLabelMaximumSize;
         std::optional<label_placement> iLabelPlacement;
         std::optional<string> iText;
-        std::optional<string> iImageUri;
+        std::optional<string> iImage;
         std::optional<basic_size<length>> iImageFixedSize;
         std::optional<basic_size<length>> iImageMinimumSize;
         std::optional<basic_size<length>> iImageMaximumSize;

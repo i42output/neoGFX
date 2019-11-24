@@ -40,6 +40,12 @@ namespace neogfx
         {
             set_destroyed();
         }
+        // type
+    public:
+        object_type type() const override
+        {
+            return object_type{};
+        }
         // i_lifetime
     public:
         void set_destroying() override

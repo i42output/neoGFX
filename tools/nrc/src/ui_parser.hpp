@@ -38,7 +38,7 @@ namespace neogfx::nrc
         typedef neolib::simple_variant data_t;
         typedef neolib::vector<neolib::simple_variant> array_data_t;
     public:
-        ui_parser(const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
+        ui_parser(const boost::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
     public:
         const neolib::i_string& element_namespace() const override;
         using base_type::generate_anonymous_id;
@@ -48,6 +48,7 @@ namespace neogfx::nrc
         using base_type::emit;
         void emit(const neolib::i_string& aText) const override;
     private:
+        void do_source_location(neolib::i_string& aLocation) const override;
         bool do_data_exists(const neolib::i_string& aKey) const override;
         bool do_array_data_exists(const neolib::i_string& aKey) const override;
         const data_t& do_get_data(const neolib::i_string& aKey) const override;
@@ -59,17 +60,19 @@ namespace neogfx::nrc
         void next_header(const i_ui_element& aElement, std::set<std::string>& aHeaders) const;
         neolib::ref_ptr<i_ui_element> create_element(const neolib::i_string& aElementType);
         neolib::ref_ptr<i_ui_element> create_element(i_ui_element& aParent, const neolib::i_string& aElementType);
+        const neolib::fjson_object& current_object() const;
         void parse(const neolib::fjson_value& aNode);
         void parse(const neolib::fjson_value& aNode, i_ui_element& aElement);
     private:
+        const boost::filesystem::path& iInputFilename;
         const neolib::fjson_object& iRoot;
         std::ofstream& iOutput;
         std::vector<neolib::ref_ptr<i_ui_element_library>> iLibraries;
         neolib::string iNamespace;
         std::vector<neolib::ref_ptr<i_ui_element>> iRootElements;
         mutable const neolib::fjson_value* iCurrentNode;
-        mutable std::map<std::pair<const neolib::fjson_value*, std::string>, data_t> iDataCache;
-        mutable std::map<std::pair<const neolib::fjson_value*, std::string>, array_data_t> iArrayDataCache;
+        mutable std::map<std::pair<const neolib::fjson_object*, std::string>, data_t> iDataCache;
+        mutable std::map<std::pair<const neolib::fjson_object*, std::string>, array_data_t> iArrayDataCache;
         mutable uint32_t iAnonymousIdCounter;
     };
 }

@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/i_optional.hpp>
 #include <neolib/i_string.hpp>
 #include <neolib/i_vector.hpp>
-#include <neogfx/core/i_object.hpp>
+#include <neogfx/core/object_type.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
@@ -47,8 +47,8 @@ namespace neogfx::nrc
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::nrc::i_ui_element::no_parent" } {} };
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error{ "neogfx::nrc::i_ui_element::wrong_type" } {} };
-        struct element_not_found : std::runtime_error { element_not_found() : std::runtime_error{ "neogfx::nrc::i_ui_element::element_not_found" } {} };
-        struct element_ill_formed : std::runtime_error { element_ill_formed() : std::runtime_error{ "neogfx::nrc::i_ui_element::element_ill_formed" } {} };
+        struct element_not_found : std::runtime_error { element_not_found(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
+        struct element_ill_formed : std::runtime_error { element_ill_formed(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
     public:
         typedef neolib::i_vector<neolib::i_ref_ptr<i_ui_element>> children_t;
         typedef i_ui_element_parser::data_t data_t;
@@ -96,7 +96,7 @@ namespace neogfx::nrc
                 return *this;
             if (has_parent())
                 return parent().find(aId);
-            throw element_not_found();
+            throw element_not_found(aId.to_std_string());
         }
         i_ui_element& find(const neolib::i_string& aId)
         {
@@ -116,7 +116,7 @@ namespace neogfx::nrc
         {
             return get_lengths(parser().get_array_data(aKey));
         }
-        static length get_length(const data_t& aVariant)
+        length get_length(const data_t& aVariant) const
         {
             length result;
             std::visit([&result](auto&& v)
@@ -133,14 +133,14 @@ namespace neogfx::nrc
             }, aVariant);
             return result;
         }
-        static std::vector<length> get_lengths(const array_data_t& aVariantArray)
+        std::vector<length> get_lengths(const array_data_t& aVariantArray) const
         {
             std::vector<length> result;
             for (auto const& e : aVariantArray)
                 result.push_back(get_length(e));
             return result;
         }
-        static colour get_colour(const data_t& aVariant)
+        colour get_colour(const data_t& aVariant) const
         {
             colour result;
             std::visit([&result](auto&& v)
@@ -155,14 +155,14 @@ namespace neogfx::nrc
             }, aVariant);
             return result;
         }
-        static colour get_colour(const array_data_t& aVariantArray)
+        colour get_colour(const array_data_t& aVariantArray) const
         {
             if (aVariantArray.size() == 3)
                 return colour{ neolib::get_as<uint8_t>(aVariantArray[0]), neolib::get_as<uint8_t>(aVariantArray[1]), neolib::get_as<uint8_t>(aVariantArray[2]) };
             else if (aVariantArray.size() == 4)
                 return colour{ neolib::get_as<uint8_t>(aVariantArray[0]), neolib::get_as<uint8_t>(aVariantArray[1]), neolib::get_as<uint8_t>(aVariantArray[2]), neolib::get_as<uint8_t>(aVariantArray[3]) };
             else
-                throw element_ill_formed();
+                throw element_ill_formed(id().to_std_string());
         }
     protected:
         template <typename T>

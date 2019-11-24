@@ -57,6 +57,7 @@ namespace neogfx::nrc
         virtual void emit(const neolib::i_string& aText) const = 0;
         // implementation
     private:
+        virtual void do_source_location(neolib::i_string& aLocation) const = 0;
         virtual bool do_data_exists(const neolib::i_string& aKey) const = 0;
         virtual bool do_array_data_exists(const neolib::i_string& aKey) const = 0;
         virtual const data_t& do_get_data(const neolib::i_string& aKey) const = 0;
@@ -78,6 +79,12 @@ namespace neogfx::nrc
             return result.to_std_string();
         }
     public:
+        std::string source_location() const
+        {
+            neolib::string location;
+            do_source_location(location);
+            return location.to_std_string();
+        }
         bool data_exists(const std::string& aKey) const
         {
             return do_data_exists(neolib::string{ aKey });

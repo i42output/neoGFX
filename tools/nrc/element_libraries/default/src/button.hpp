@@ -32,6 +32,7 @@ namespace neogfx::nrc
         basic_button(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ButtonType }
         {
+            add_data_names({ "checkable" });
         }
     public:
         const neolib::i_string& header() const override
@@ -62,8 +63,7 @@ namespace neogfx::nrc
         {
             if (aName == "checkable")
                 iCheckable = ui_element<>::get_enum<button_checkable>(aData);
-            else
-                ui_element<>::parse(aName, aData);
+            ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {

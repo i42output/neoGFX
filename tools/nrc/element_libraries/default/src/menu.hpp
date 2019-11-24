@@ -31,8 +31,10 @@ namespace neogfx::nrc
     public:
         menu(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Menu },
-            iTitle{ aParent.parser().get_optional<neolib::string>("title") }
+            iTitle{ aParent.parser().get_optional<neolib::string>("title") },
+            iImage{ aParent.parser().get_optional<neolib::string>("image") }
         {
+            add_data_names({ "title", "image", "action" });
         }
     public:
         const neolib::i_string& header() const override
@@ -43,9 +45,7 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "title")
-                return;
-            else if (aName == "action")
+            if (aName == "action")
             {
                 auto const& reference = aData.get<neolib::i_string>();
                 if (reference == "separator")
@@ -53,8 +53,7 @@ namespace neogfx::nrc
                 else
                     new action_ref{ parser(), *this, reference };
             }
-            else
-                ui_element<>::parse(aName, aData);
+            ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
@@ -91,10 +90,13 @@ namespace neogfx::nrc
         void emit_body() const override
         {
             ui_element<>::emit_body();
+            if (iImage)
+                emit("   %1%.set_image(image{ \"%2%\" });\n", id(), *iImage);
         }
     protected:
         using ui_element<>::emit;
     private:
         std::optional<neolib::string> iTitle;
+        std::optional<neolib::string> iImage;
     };
 }

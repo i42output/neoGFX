@@ -25,6 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "app.hpp"
 #include "action.hpp"
 #include "window.hpp"
+#include "widget.hpp"
+#include "text_widget.hpp"
+#include "image_widget.hpp"
 #include "menu.hpp"
 #include "toolbar.hpp"
 #include "menu_bar.hpp"
@@ -33,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tab_page_container.hpp"
 #include "tab_page.hpp"
 #include "button.hpp"
+#include "label.hpp"
 #include "group_box.hpp"
 #include "layout.hpp"
 
@@ -48,6 +52,9 @@ namespace neogfx::nrc
             { "action", ui_element_type::HasActions },
             { "menu", ui_element_type::Menu },
             { "window", ui_element_type::None },
+            { "widget", ui_element_type::LayoutItem },
+            { "text_widget", ui_element_type::LayoutItem },
+            { "image_widget", ui_element_type::LayoutItem },
             { "menu_bar", ui_element_type::LayoutItem },
             { "toolbar", ui_element_type::LayoutItem },
             { "status_bar", ui_element_type::LayoutItem },
@@ -56,6 +63,7 @@ namespace neogfx::nrc
             { "push_button", ui_element_type::LayoutItem },
             { "check_box", ui_element_type::LayoutItem },
             { "radio_button", ui_element_type::LayoutItem },
+            { "label", ui_element_type::LayoutItem },
             { "group_box", ui_element_type::LayoutItem },
             { "vertical_layout", ui_element_type::LayoutItem },
             { "horizontal_layout", ui_element_type::LayoutItem },
@@ -103,6 +111,9 @@ namespace neogfx::nrc
         {
             { "action", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new action{ aParser, aParent }; } },
             { "window", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new window{ aParser, aParent }; } },
+            { "widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new widget{ aParser, aParent }; } },
+            { "text_widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_widget{ aParser, aParent }; } },
+            { "image_widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new image_widget{ aParser, aParent }; } },
             { "status_bar", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParser, aParent }; } },
             { "menu_bar", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new menu_bar{ aParser, aParent }; } },
             { "menu", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new menu{ aParser, aParent }; } },
@@ -112,6 +123,7 @@ namespace neogfx::nrc
             { "push_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new push_button{ aParser, aParent }; } },
             { "check_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new check_box{ aParser, aParent }; } },
             { "radio_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new radio_button{ aParser, aParent }; } },
+            { "label", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new label{ aParser, aParent }; } },
             { "group_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new group_box{ aParser, aParent }; } },
             { "vertical_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aParser, aParent }; } },
             { "horizontal_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aParser, aParent }; } },
