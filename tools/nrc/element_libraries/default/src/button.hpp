@@ -97,7 +97,7 @@ namespace neogfx::nrc
         void emit_body() const override
         {
             if (iCheckable)
-                emit("   %1%.set_checkable(button_checkable::%2%);\n", id(), neolib::enum_to_string(*iCheckable));
+                emit("   %1%.set_checkable(%2%);\n", id(), enum_to_string("button_checkable", *iCheckable));
             ui_element<>::emit_body();
         }
     protected:

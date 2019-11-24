@@ -172,6 +172,8 @@ namespace neogfx::nrc
             }
             if (aName == "size_policy")
                 iSizePolicy = neolib::string_to_enum<size_constraint>(aData.get<neolib::i_string>());
+            else if (aName == "alignment")
+                iAlignment = neolib::string_to_enum<alignment>(aData.get<neolib::i_string>());
             else if (aName == "margin")
                 iMargin.emplace(get_length(aData));
             else if (aName == "text")
@@ -198,6 +200,16 @@ namespace neogfx::nrc
                 iSizePolicy = size_policy::from_string(
                     aData[0u].get<neolib::i_string>().to_std_string(),
                     aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string());
+            else if (aName == "alignment")
+            {
+                for (auto const& a : aData)
+                {
+                    if (iAlignment == std::nullopt)
+                        iAlignment = neolib::string_to_enum<alignment>(a.get<neolib::i_string>());
+                    else
+                        iAlignment = *iAlignment | neolib::string_to_enum<alignment>(a.get<neolib::i_string>());;
+                }
+            }
             else if (aName == "margin")
                 emplace_lengths_4("margin", iMargin);
             else if (aName == "size")
@@ -225,6 +237,8 @@ namespace neogfx::nrc
         {
             if (iSizePolicy)
                 emit("   %1%.set_size_policy(%2%);\n", id(), *iSizePolicy);
+            if (iAlignment)
+                emit("   %1%.set_alignment(%2%);\n", id(), enum_to_string("alignment", *iAlignment));
             if (iFixedSize)
                 emit("   %1%.set_fixed_size(size{ %2%, %3% });\n", id(), iFixedSize->cx, iFixedSize->cy);
             if (iMinimumSize)
@@ -251,7 +265,7 @@ namespace neogfx::nrc
             if (iLabelMaximumSize)
                 emit("   %1%.label().set_maximum_size(size{ %2%, %3% });\n", id(), iLabelMaximumSize->cx, iLabelMaximumSize->cy);
             if (iLabelPlacement)
-                emit("   %1%.label().set_placement(label_placement::%2%);\n", id(), neolib::enum_to_string(*iLabelPlacement));
+                emit("   %1%.label().set_placement(%2%);\n", id(), enum_to_string("label_placement", *iLabelPlacement));
             if (iImageFixedSize)
                 emit("   %1%.image().set_fixed_size(size{ %2%, %3% });\n", id(), iImageFixedSize->cx, iImageFixedSize->cy);
             if (iImageMinimumSize)
@@ -341,6 +355,7 @@ namespace neogfx::nrc
             }
         }
     protected:
+        using base_type::enum_to_string;
         using base_type::get_length;
         using base_type::get_lengths;
         using base_type::get_colour;
@@ -407,6 +422,8 @@ namespace neogfx::nrc
         {
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
                 add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size" });
+            if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
+                add_data_names({ "alignment" });
             if ((type() & (ui_element_type::HasText | ui_element_type::HasLabel)) != ui_element_type::None)
                 add_data_names({ "text" });
             if ((type() & (ui_element_type::HasImage | ui_element_type::HasLabel)) != ui_element_type::None)
@@ -424,6 +441,7 @@ namespace neogfx::nrc
         ui_element_type iType;
         children_t iChildren;
         std::optional<size_policy> iSizePolicy;
+        std::optional<alignment> iAlignment;
         std::optional<basic_size<length>> iFixedSize;
         std::optional<basic_size<length>> iMinimumSize;
         std::optional<basic_size<length>> iMaximumSize;

@@ -165,6 +165,15 @@ namespace neogfx::nrc
                 throw element_ill_formed(id().to_std_string());
         }
     protected:
+        template <typename Enum>
+        static std::string enum_to_string(const std::string& aEnumName, Enum aEnumValue) 
+        {
+            auto es = neolib::enum_to_string(aEnumValue);
+            if (es[0] != '0')
+                return aEnumName + "::" + es;
+            else
+                return "static_cast<" + aEnumName + ">(" + es + ")";
+        }
         template <typename T>
         static const T& convert_emit_argument(const T& aArgument)
         {

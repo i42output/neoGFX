@@ -20,9 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_enum.hpp>
 
 namespace neogfx
-{ 
+{
     enum class alignment : uint32_t
     {
         None = 0x0000,
@@ -38,7 +39,27 @@ namespace neogfx
         Horizontal = Left | Centre | Right | Justify,
         Vertical = Top | VCentre | Bottom
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::alignment> neolib::enum_enumerators_v<neogfx::alignment>
+{
+    declare_enum_string(neogfx::alignment, None)
+    declare_enum_string(neogfx::alignment, Left)
+    declare_enum_string(neogfx::alignment, Right)
+    declare_enum_string(neogfx::alignment, Centre)
+    declare_enum_string(neogfx::alignment, Center)
+    declare_enum_string(neogfx::alignment, Justify)
+    declare_enum_string(neogfx::alignment, Top)
+    declare_enum_string(neogfx::alignment, VCentre)
+    declare_enum_string(neogfx::alignment, VCenter)
+    declare_enum_string(neogfx::alignment, Bottom)
+    declare_enum_string(neogfx::alignment, Horizontal) 
+    declare_enum_string(neogfx::alignment, Vertical)
+};
+
+namespace neogfx
+{
     inline constexpr alignment operator|(alignment aLhs, alignment aRhs)
     {
         return static_cast<alignment>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
