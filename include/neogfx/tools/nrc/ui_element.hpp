@@ -139,9 +139,9 @@ namespace neogfx::nrc
         {
             return iDataNames;
         }
-        void add_data_names(const data_names_t& aNames)
+        void add_data_names(data_names_t aNames)
         {
-            iDataNames.insert(aNames.begin(), aNames.end());
+            iDataNames.merge(aNames);
         }
         bool consume_element(const neolib::i_string& aElementType) override
         {
@@ -226,11 +226,11 @@ namespace neogfx::nrc
             if (iSizePolicy)
                 emit("   %1%.set_size_policy(%2%);\n", id(), *iSizePolicy);
             if (iFixedSize)
-                emit("   %1%.set_fixed_size(size{ %2%, %3 });\n", id(), iFixedSize->cx, iFixedSize->cy);
+                emit("   %1%.set_fixed_size(size{ %2%, %3% });\n", id(), iFixedSize->cx, iFixedSize->cy);
             if (iMinimumSize)
-                emit("   %1%.set_minimum_size(size{ %2%, %3 });\n", id(), iMinimumSize->cx, iMinimumSize->cy);
+                emit("   %1%.set_minimum_size(size{ %2%, %3% });\n", id(), iMinimumSize->cx, iMinimumSize->cy);
             if (iMaximumSize)
-                emit("   %1%.set_maximum_size(size{ %2%, %3 });\n", id(), iMaximumSize->cx, iMaximumSize->cy);
+                emit("   %1%.set_maximum_size(size{ %2%, %3% });\n", id(), iMaximumSize->cx, iMaximumSize->cy);
             if (iMargin)
             {
                 auto const& margin = *iMargin;
