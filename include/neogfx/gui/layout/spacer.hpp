@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_spacer.hpp"
+#include <neogfx/gui/layout/i_spacer.hpp>
 
 namespace neogfx
 {
@@ -32,8 +32,8 @@ namespace neogfx
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };
         struct margins_unsupported : std::logic_error { margins_unsupported() : std::logic_error("neogfx::spacer::margins_unsupported") {} };
     public:
-        spacer(expansion_policy_e aExpansionPolicy);
-        spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy);
+        spacer(neogfx::expansion_policy aExpansionPolicy);
+        spacer(i_layout& aParent, neogfx::expansion_policy aExpansionPolicy);
         virtual ~spacer();
     public:
         bool is_layout() const override;
@@ -55,8 +55,8 @@ namespace neogfx
         const i_layout_item_proxy& layout_item_proxy() const override;
         i_layout_item_proxy& layout_item_proxy() override;
     public:
-        expansion_policy_e expansion_policy() const override;
-        void set_expansion_policy(expansion_policy_e aExpansionPolicy) override;
+        neogfx::expansion_policy expansion_policy() const override;
+        void set_expansion_policy(neogfx::expansion_policy aExpansionPolicy) override;
     public:
         bool high_dpi() const override;
         dimension dpi_scale_factor() const override;
@@ -97,7 +97,7 @@ namespace neogfx
         optional_size iMinimumSize;
         optional_size iMaximumSize;
         optional_margins iMargins;
-        expansion_policy_e iExpansionPolicy;
+        neogfx::expansion_policy iExpansionPolicy;
         optional_size iWeight;
     };
 

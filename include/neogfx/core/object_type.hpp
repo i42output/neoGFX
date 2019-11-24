@@ -83,6 +83,9 @@ namespace neogfx
         FlowLayout                      = 0x0000000000000903 | Layout,
         StackLayout                     = 0x0000000000000904 | Layout,
         BorderLayout                    = 0x0000000000000905 | Layout,
+        Spacer                          = 0x0000000000000920 | LayoutItem,
+        VerticalSpacer                  = 0x0000000000000921 | LayoutItem,
+        HorizontalSpacer                = 0x0000000000000922 | LayoutItem,
 
         Value                           = 0x0000000000000000,
         Reference                       = 0x1000000000000000,

@@ -7,10 +7,6 @@
 #include <neogfx/core/i_animator.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/gui/layout/vertical_layout.hpp>
-#include <neogfx/gui/layout/horizontal_layout.hpp>
-#include <neogfx/gui/layout/grid_layout.hpp>
-#include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/slider.hpp>
@@ -329,8 +325,7 @@ int main(int argc, char* argv[])
                 randomString += static_cast<char>('A' + prng('z' - 'A'));
             dropList4.model().insert_item(dropList4.model().end(), randomString);
         }
-        ng::check_box toggleEditable{ ui.layoutDropList, "Toggle Editable" };
-        toggleEditable.Toggled([&]()
+        ui.toggleEditable.Toggled([&]()
         {
             dropList.set_editable(!dropList.editable());
             dropList2.set_editable(!dropList2.editable());
@@ -380,12 +375,9 @@ int main(int argc, char* argv[])
         spinBox2.set_minimum(-10);
         spinBox2.set_maximum(20);
         spinBox2.set_step(0.5);
-        ng::label label1(ui.layout2, "Label 1:");
         bool colourCycle = false;
         ui.button6.clicked([&colourCycle]() { colourCycle = !colourCycle; });
-        ui.layout2.add_spacer().set_weight(ng::size(2.0f));
         ui.button7.clicked([&ui]() { ui.actionMute.toggle(); });
-        ui.layout2.add_spacer().set_weight(ng::size(1.0));
         ui.button8.clicked([&ui]() { if (ui.actionContacts.is_enabled()) ui.actionContacts.disable(); else ui.actionContacts.enable(); });
         prng.seed(3);
         auto transitionPrng = prng;
@@ -463,7 +455,7 @@ int main(int argc, char* argv[])
             showFps = false;
             ui.groupBox.set_checkable(false);
         });
-        ng::gradient_widget gradientWidget(ui.layoutRadiosAndChecks);
+        ng::gradient_widget gradientWidget(ui.groupBox.item_layout());
         ui.checkColumns.checked([&textEdit, &gradientWidget, &ui]()
         {
             ui.checkPassword.disable();
@@ -481,7 +473,6 @@ int main(int argc, char* argv[])
             textEdit.remove_columns();
             gradientWidget.GradientChanged.unsubscribe(textEdit);
         });
-        ng::vertical_spacer spacerCheckboxes(ui.layoutRadiosAndChecks);
         ui.checkKerning.Toggled([&app, &ui]()
         {
             auto fi = app.current_style().font_info();
@@ -499,9 +490,6 @@ int main(int argc, char* argv[])
                 ng::service<ng::i_rendering_engine>().subpixel_rendering_off();
         });
         ui.checkSubpixel.check();
-        ng::widget lw{ ui.layout4 };
-        lw.set_margins(ng::margins{});
-        ng::grid_layout layoutEffects{ lw, 2, 2, ng::alignment::Left | ng::alignment::VCentre };
         ui.editNormal.checked([&]()
         {
             auto s = textEdit.default_style();
@@ -529,7 +517,7 @@ int main(int argc, char* argv[])
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->colour(), effectWidthSlider.value(), textEffect->aux1() });
+            s.set_text_effect(ng::text_effect{ ui.editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->colour(), effectWidthSlider.value(), textEffect->aux1() });
             textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
@@ -567,7 +555,7 @@ int main(int argc, char* argv[])
             themeColour.set_hue(slider1.normalized_value() * 360.0);
             ng::service<ng::i_app>().current_style().palette().set_colour(themeColour.to_rgb());
         };
-        slider1.ValueChanged([update_theme_colour, &slider1, &ui, &radioThemeColour, &spinBox1, &app]()
+        slider1.ValueChanged([update_theme_colour, &slider1, &ui, &spinBox1, &app]()
         {
             spinBox1.set_value(slider1.value());
             if (ui.radioSliderFont.is_checked())
@@ -654,7 +642,7 @@ int main(int argc, char* argv[])
                 neolib::random prng{ app.program_elapsed_ms() / 5000 };
                 ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
                 randomColour = randomColour.to_hsv().with_brightness(brightness).to_rgb();
-                button6.set_foreground_colour(randomColour);
+                ui.button6.set_foreground_colour(randomColour);
             }
         }, 16);
 
@@ -675,18 +663,14 @@ int main(int argc, char* argv[])
             }
             standardButton <<= 1;
         }
-        ng::label messageBoxTitleLabel{ ui.groupMessageBoxText.item_layout(), "Title:" };
         ng::line_edit messageBoxTitle{ ui.groupMessageBoxText.item_layout() };
         messageBoxTitle.set_text("neoGFX Message Box Test");
-        ng::label messageBoxTextLabel{ ui.groupMessageBoxText.item_layout(), "Text:" };
         ng::text_edit messageBoxText{ ui.groupMessageBoxText.item_layout() };
         messageBoxText.set_text("This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line");
         messageBoxText.set_minimum_size(ng::size{ 256_spx, 128_spx });
-        ng::label messageBoxDetailedTextLabel{ ui.groupMessageBoxText.item_layout(), "Detailed Text:" };
         ng::text_edit messageBoxDetailedText{ ui.groupMessageBoxText.item_layout() };
         messageBoxDetailedText.set_text("This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank.");
         messageBoxDetailedText.set_minimum_size(ng::size{ 256_spx, 128_spx });
-        ng::label messageBoxResult{ ui.pageLayoutMessageBox };
         ui.buttonOpenMessageBox.clicked([&]()
         {
             ng::standard_button result;
@@ -710,13 +694,11 @@ int main(int argc, char* argv[])
         ng::service<ng::i_window_manager>().save_mouse_cursor();
         ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait);
 
-        ng::vertical_layout layoutItemViews(ui.pageItemViews);
-        ng::table_view tableView1(layoutItemViews);
-        ng::table_view tableView2(layoutItemViews);
+        ng::table_view tableView1(ui.layoutItemViews);
+        ng::table_view tableView2(ui.layoutItemViews);
         tableView1.set_minimum_size(ng::size(128, 128));
         tableView2.set_minimum_size(ng::size(128, 128));
-        ng::push_button button10(layoutItemViews, "Toggle List\nHeader View");
-        button10.clicked([&tableView1, &tableView2]()
+        ui.button10.clicked([&tableView1, &tableView2]()
         {
             if (tableView1.column_header().visible())
                 tableView1.column_header().hide();
@@ -727,20 +709,6 @@ int main(int argc, char* argv[])
             else
                 tableView2.column_header().show();
         });
-        ng::horizontal_layout tableViewTweaks(layoutItemViews);
-        tableViewTweaks.set_alignment(ng::alignment::Top);
-        tableViewTweaks.add_spacer();
-        ng::vertical_layout tableViewSelection(tableViewTweaks);
-        tableViewSelection.set_weight(ng::size{});
-        ng::radio_button noSelection(tableViewSelection, "No selection");
-        ng::radio_button singleSelection(tableViewSelection, "Single selection");
-        ng::radio_button multipleSelection(tableViewSelection, "Multiple selection");
-        ng::radio_button extendedSelection(tableViewSelection, "Extended selection");
-        ng::group_box column5(tableViewTweaks, "Column 5");
-        ng::check_box column5ReadOnly(column5.item_layout(), "Read only");
-        ng::check_box column5Unselectable(column5.item_layout(), "Unselectable");
-        ng::vertical_spacer column5Spacer(column5.item_layout());
-        tableViewTweaks.add_spacer();
 
         my_item_model itemModel;
         #ifdef NDEBUG
@@ -793,10 +761,10 @@ int main(int argc, char* argv[])
             itemModel.set_column_name(5, heading);
         };
 
-        column5ReadOnly.checked([&]() {    itemModel.set_column_read_only(5, true); update_column5_heading(); });
-        column5ReadOnly.Unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
-        column5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
-        column5Unselectable.Unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
+        ui.checkColumn5ReadOnly.checked([&]() { itemModel.set_column_read_only(5, true); update_column5_heading(); });
+        ui.checkColumn5ReadOnly.Unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
+        ui.checkColumn5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
+        ui.checkColumn5Unselectable.Unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
 
         itemModel.set_column_min_value(0, 0u);
         itemModel.set_column_max_value(0, 9999u);
@@ -827,47 +795,25 @@ int main(int argc, char* argv[])
 
         ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
 
-        ng::vertical_layout l(ui.pageLots);
         #ifdef NDEBUG
         for (int i = 0; i < 1000; ++i)
         #else
         for (int i = 0; i < 100; ++i)
         #endif
-            l.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
+            ui.layoutLots.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
 
-        ng::horizontal_layout l2(ui.pageImages);
-        ng::vertical_layout l3(l2);
-        ng::image_widget iw(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Ignore);
-        iw.set_background_colour(ng::colour::Red.lighter(0x80));
-        iw.set_size_policy(ng::size_constraint::Expanding);
-        iw.set_minimum_size(ng::size{});
-        ng::image_widget iw2(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Keep);
-        iw2.set_background_colour(ng::colour::Green.lighter(0x80));
-        iw2.set_size_policy(ng::size_constraint::Expanding);
-        iw2.set_minimum_size(ng::size{});
-        ng::image_widget iw3(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::KeepExpanding);
-        iw3.set_background_colour(ng::colour::Blue.lighter(0x80));
-        iw3.set_size_policy(ng::size_constraint::Expanding);
-        iw3.set_minimum_size(ng::size{});
-        ng::image_widget iw4(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Stretch);
-        iw4.set_background_colour(ng::colour::Magenta.lighter(0x80));
-        iw4.set_size_policy(ng::size_constraint::Expanding);
-        iw4.set_minimum_size(ng::size{});
-        ng::image_widget iw5(l2, ng::image(":/test/resources/orca.png"));
-        ng::grid_layout l4(l2);
-        l4.set_spacing(ng::size{});
+        ui.gridLayoutImages.set_spacing(ng::size{});
         ng::image hash(":/test/resources/channel_32.png");
         for (uint32_t i = 0; i < 9; ++i)
         {
             auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
             hashWidget->set_size_policy(ng::size_constraint::Expanding);
             hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
-            l4.add_item_at_position(i / 3, i % 3, hashWidget);
+            ui.gridLayoutImages.add_item_at_position(i / 3, i % 3, hashWidget);
         }
         ng::image smallHash(":/test/resources/channel.png");
 
-        ng::vertical_layout gl(ui.pageGame);
-        create_game(gl);
+        create_game(ui.layoutGame);
 
         neolib::basic_random<uint8_t> rngColour;
         auto random_colour = [&]()
@@ -875,15 +821,11 @@ int main(int argc, char* argv[])
             return ng::colour{ rngColour(255), rngColour(255), rngColour(255) };
         };
 
-        ng::vertical_layout tabDrawingLayout1{ ui.pageDrawing };
-        ng::horizontal_layout tabDrawingLayout2{ ui.pageDrawing };
-        tabDrawingLayout2.set_size_policy(ng::size_constraint::Minimum);
-        tabDrawingLayout2.emplace<ng::label>("Easing:");
         ng::basic_item_model<ng::easing> easingItemModel;
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModel.insert_item(easingItemModel.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
         easing_item_presentation_model easingPresentationModel{ easingItemModel };
-        ng::drop_list easingDropDown{ tabDrawingLayout2 };
+        ng::drop_list easingDropDown{ ui.layoutDrawing2 };
         easingDropDown.set_size_policy(ng::size_constraint::Minimum);
         easingDropDown.set_model(easingItemModel);
         easingDropDown.set_presentation_model(easingPresentationModel);
@@ -972,16 +914,13 @@ int main(int argc, char* argv[])
             ui.pageDrawing.update();
         }, 100 };
 
-        ng::vertical_layout layoutEditor(ui.pageEditor);
-        ng::text_edit textEdit2(layoutEditor);
+        ng::text_edit textEdit2(ui.layoutEditor);
         textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
-        ng::push_button editorStyle1(layoutEditor, "Style 1");
-        editorStyle1.clicked([&textEdit2]()
+        ui.buttonStyle1.clicked([&textEdit2]()
         {
             textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
         });
-        ng::push_button editorStyle2(layoutEditor, "Style 2");
-        editorStyle2.clicked([&textEdit2]()
+        ui.buttonStyle2.clicked([&textEdit2]()
         {
             textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
         });

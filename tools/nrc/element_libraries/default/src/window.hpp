@@ -31,7 +31,7 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, aParser.get<neolib::string>("id"), ui_element_type::Window }
         {
             add_data_names({ "default_size" });
-            emplace_lengths_2("default_size", iDefaultSize);
+            emplace_2<length>("default_size", iDefaultSize);
         }
     public:
         const neolib::i_string& header() const override

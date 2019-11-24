@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_enum.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
 
 namespace neogfx
@@ -27,19 +28,40 @@ namespace neogfx
     class i_widget;
     class i_layout;
 
+    enum class expansion_policy : uint32_t
+    {
+        ExpandHorizontally  = 0x0001,
+        ExpandVertically    = 0x0002
+    };
+
+    inline constexpr expansion_policy operator|(expansion_policy aLhs, expansion_policy aRhs)
+    {
+        return static_cast<expansion_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr expansion_policy operator&(expansion_policy aLhs, expansion_policy aRhs)
+    {
+        return static_cast<expansion_policy>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+    }
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::expansion_policy> neolib::enum_enumerators_v<neogfx::expansion_policy>
+{
+    declare_enum_string(neogfx::expansion_policy, ExpandHorizontally)
+    declare_enum_string(neogfx::expansion_policy, ExpandVertically)
+};
+
+namespace neogfx
+{
     class i_spacer : public i_layout_item
     {
     public:
-        enum expansion_policy_e
-        {
-            ExpandHorizontally    = 0x01,
-            ExpandVertically    = 0x02
-        };
         typedef std::optional<size> optional_weight;
     public:
         virtual ~i_spacer() {}
     public:
-        virtual expansion_policy_e expansion_policy() const = 0;
-        virtual void set_expansion_policy(expansion_policy_e aExpansionPolicy) = 0;
+        virtual neogfx::expansion_policy expansion_policy() const = 0;
+        virtual void set_expansion_policy(neogfx::expansion_policy aExpansionPolicy) = 0;
     };
 }

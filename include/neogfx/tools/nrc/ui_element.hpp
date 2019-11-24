@@ -41,8 +41,6 @@ namespace neogfx::nrc
     public:
         using i_ui_element::no_parent;
         using i_ui_element::wrong_type;
-        using i_ui_element::element_not_found;
-        using i_ui_element::element_ill_formed;
     public:
         typedef neolib::ref_ptr<i_ui_element> element_ptr_t;
         typedef neolib::vector<element_ptr_t> children_t;
@@ -135,6 +133,13 @@ namespace neogfx::nrc
         {
         }
     protected:
+        using i_ui_element::enum_to_string;
+        using i_ui_element::get_scalar;
+        using i_ui_element::get_scalars;
+        using i_ui_element::emplace_2;
+        using i_ui_element::emplace_4;
+        using i_ui_element::get_colour;
+    protected:
         const data_names_t& data_names() const
         {
             return iDataNames;
@@ -145,19 +150,22 @@ namespace neogfx::nrc
         }
         bool consume_element(const neolib::i_string& aElementType) override
         {
-            if (aElementType == "label" && (type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+            if (aElementType == ".label" && (type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
             {
-                emplace_lengths_2("size", iLabelFixedSize);
-                emplace_lengths_2("minimum_size", iLabelMinimumSize);
-                emplace_lengths_2("maximum_size", iLabelMaximumSize);
+                emplace_2<length>("size", iLabelFixedSize);
+                emplace_2<length>("minimum_size", iLabelMinimumSize);
+                emplace_2<length>("maximum_size", iLabelMaximumSize);
+                emplace_2<double>("weight", iLabelWeight);
+                iText = parser().get_optional<neolib::string>("text");
                 iLabelPlacement = parser().get_optional_enum<label_placement>("placement");
                 return true;
             }
-            else if (aElementType == "image" && (type() & ui_element_type::HasImage) == ui_element_type::HasImage)
+            else if (aElementType == ".image" && (type() & ui_element_type::HasImage) == ui_element_type::HasImage)
             {
-                emplace_lengths_2("size", iImageFixedSize);
-                emplace_lengths_2("minimum_size", iImageMinimumSize);
-                emplace_lengths_2("maximum_size", iImageMaximumSize);
+                emplace_2<length>("size", iImageFixedSize);
+                emplace_2<length>("minimum_size", iImageMinimumSize);
+                emplace_2<length>("maximum_size", iImageMaximumSize);
+                emplace_2<double>("weight", iImageWeight);
                 iImage = parser().get_optional<neolib::string>("uri");
                 return true;
             }
@@ -170,12 +178,14 @@ namespace neogfx::nrc
                 std::cerr << parser().source_location() << ": warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
                 return;
             }
-            if (aName == "size_policy")
+            if (aName == "weight")
+                iWeight.emplace(get_scalar<double>(aData));
+            else if (aName == "size_policy")
                 iSizePolicy = neolib::string_to_enum<size_constraint>(aData.get<neolib::i_string>());
             else if (aName == "alignment")
                 iAlignment = neolib::string_to_enum<alignment>(aData.get<neolib::i_string>());
             else if (aName == "margin")
-                iMargin.emplace(get_length(aData));
+                iMargin.emplace(get_scalar<length>(aData));
             else if (aName == "text")
                 iText = aData.get<neolib::i_string>();
             else if (aName == "image")
@@ -211,13 +221,15 @@ namespace neogfx::nrc
                 }
             }
             else if (aName == "margin")
-                emplace_lengths_4("margin", iMargin);
+                emplace_4<length>("margin", iMargin);
             else if (aName == "size")
-                emplace_lengths_2("size", iFixedSize);
+                emplace_2<length>("size", iFixedSize);
             else if (aName == "minimum_size")
-                emplace_lengths_2("minimum_size", iMinimumSize);
+                emplace_2<length>("minimum_size", iMinimumSize);
             else if (aName == "maximum_size")
-                emplace_lengths_2("maximum_size", iMaximumSize);
+                emplace_2<length>("maximum_size", iMaximumSize);
+            else if (aName == "weight")
+                emplace_2<double>("weight", iWeight);
             else if (aName == "foreground_colour")
                 iForegroundColour = get_colour(aData);
             else if (aName == "background_colour")
@@ -245,6 +257,8 @@ namespace neogfx::nrc
                 emit("   %1%.set_minimum_size(size{ %2%, %3% });\n", id(), iMinimumSize->cx, iMinimumSize->cy);
             if (iMaximumSize)
                 emit("   %1%.set_maximum_size(size{ %2%, %3% });\n", id(), iMaximumSize->cx, iMaximumSize->cy);
+            if (iWeight)
+                emit("   %1%.set_weight(size{ %2%, %3% });\n", id(), iWeight->cx, iWeight->cy);
             if (iMargin)
             {
                 auto const& margin = *iMargin;
@@ -264,6 +278,8 @@ namespace neogfx::nrc
                 emit("   %1%.label().set_minimum_size(size{ %2%, %3% });\n", id(), iLabelMinimumSize->cx, iLabelMinimumSize->cy);
             if (iLabelMaximumSize)
                 emit("   %1%.label().set_maximum_size(size{ %2%, %3% });\n", id(), iLabelMaximumSize->cx, iLabelMaximumSize->cy);
+            if (iLabelWeight)
+                emit("   %1%.label().set_weight(size{ %2%, %3% });\n", id(), iLabelWeight->cx, iLabelWeight->cy);
             if (iLabelPlacement)
                 emit("   %1%.label().set_placement(%2%);\n", id(), enum_to_string("label_placement", *iLabelPlacement));
             if (iImageFixedSize)
@@ -272,6 +288,8 @@ namespace neogfx::nrc
                 emit("   %1%.image().set_minimum_size(size{ %2%, %3% });\n", id(), iImageMinimumSize->cx, iImageMinimumSize->cy);
             if (iImageMaximumSize)
                 emit("   %1%.image().set_maximum_size(size{ %2%, %3% });\n", id(), iImageMaximumSize->cx, iImageMaximumSize->cy);
+            if (iImageWeight)
+                emit("   %1%.image().set_weight(size{ %2%, %3% });\n", id(), iImageWeight->cx, iImageWeight->cy);
             if (iImage)
             {
                 if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
@@ -355,11 +373,6 @@ namespace neogfx::nrc
             }
         }
     protected:
-        using base_type::enum_to_string;
-        using base_type::get_length;
-        using base_type::get_lengths;
-        using base_type::get_colour;
-    protected:
         void emit(const std::string& aArgument) const
         {
             parser().emit(aArgument);
@@ -370,58 +383,11 @@ namespace neogfx::nrc
             parser().emit(aFormat, base_type::convert_emit_argument(aArguments)...);
         }
     protected:
-        template <typename Target>
-        void emplace_lengths_2(const neolib::string& aKey, Target& aTarget)
-        {
-            std::vector<length> lengths;
-            if (parser().data_exists(aKey))
-                lengths.push_back(get_length(parser().get_data(aKey)));
-            else if (parser().array_data_exists(aKey))
-                lengths = get_lengths(parser().get_array_data(aKey));
-            else
-                return;
-            switch (lengths.size())
-            {
-            case 1:
-                aTarget.emplace(lengths[0]);
-                break;
-            case 2:
-                aTarget.emplace(lengths[0], lengths[1]);
-                break;
-            default:
-                throw element_ill_formed(id().to_std_string());
-            }
-        }
-        template <typename Target>
-        void emplace_lengths_4(const neolib::string& aKey, Target& aTarget)
-        {
-            std::vector<length> lengths;
-            if (parser().data_exists(aKey))
-                lengths.push_back(get_length(parser().get_data(aKey)));
-            else if (parser().array_data_exists(aKey))
-                lengths = get_lengths(parser().get_array_data(aKey));
-            else
-                return;
-            switch (lengths.size())
-            {
-            case 1:
-                aTarget.emplace(lengths[0]);
-                break;
-            case 2:
-                aTarget.emplace(lengths[0], lengths[1]);
-                break;
-            case 4:
-                aTarget.emplace(lengths[0], lengths[1], lengths[2], lengths[3]);
-                break;
-            default:
-                throw element_ill_formed(id().to_std_string());
-            }
-        }
     private:
         void init()
         {
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
-                add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size" });
+                add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size", "weight" });
             if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
                 add_data_names({ "alignment" });
             if ((type() & (ui_element_type::HasText | ui_element_type::HasLabel)) != ui_element_type::None)
@@ -445,16 +411,19 @@ namespace neogfx::nrc
         std::optional<basic_size<length>> iFixedSize;
         std::optional<basic_size<length>> iMinimumSize;
         std::optional<basic_size<length>> iMaximumSize;
+        std::optional<size> iWeight;
         std::optional<basic_margins<length>> iMargin;
         std::optional<basic_size<length>> iLabelFixedSize;
         std::optional<basic_size<length>> iLabelMinimumSize;
         std::optional<basic_size<length>> iLabelMaximumSize;
+        std::optional<size> iLabelWeight;
         std::optional<label_placement> iLabelPlacement;
         std::optional<string> iText;
         std::optional<string> iImage;
         std::optional<basic_size<length>> iImageFixedSize;
         std::optional<basic_size<length>> iImageMinimumSize;
         std::optional<basic_size<length>> iImageMaximumSize;
+        std::optional<size> iImageWeight;
         std::optional<double> iOpacity;
         std::optional<colour> iForegroundColour;
         std::optional<colour> iBackgroundColour;

@@ -195,7 +195,7 @@
                                 id: layoutTopButtons
                                 push_button: {
                                     id: button0
-                                    label: {
+                                    .label: {
                                         placement: ImageTextVertical
                                     }
                                     text: "This is the neoGFX test application."
@@ -358,7 +358,7 @@
                             horizontal_layout: {
                                 id: layout2
                                 label: {
-                                    id: lable1
+                                    id: label1
                                     text: "Label 1:"
                                 }
                                 push_button: {
@@ -608,7 +608,7 @@
                                 size_policy: Minimum
                             }
                             label: {
-                                id: lableMessageBoxResult
+                                id: labelMessageBoxResult
                             }
                         }
                     }
@@ -673,6 +673,9 @@
                     tab_page: {
                         id: pageLots
                         tab_text: "Lots"
+                        vertical_layout: {
+                            id: layoutLots
+                        }
                     }
                     tab_page: {
                         id: pageImages

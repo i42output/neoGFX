@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "label.hpp"
 #include "group_box.hpp"
 #include "layout.hpp"
+#include "spacer.hpp"
 
 namespace neogfx::nrc
 {
@@ -64,13 +65,18 @@ namespace neogfx::nrc
             { "check_box", ui_element_type::LayoutItem },
             { "radio_button", ui_element_type::LayoutItem },
             { "label", ui_element_type::LayoutItem },
+            { ".label", ui_element_type::HasLabel },
+            { ".image", ui_element_type::HasImage },
             { "group_box", ui_element_type::LayoutItem },
             { "vertical_layout", ui_element_type::LayoutItem },
             { "horizontal_layout", ui_element_type::LayoutItem },
             { "grid_layout", ui_element_type::LayoutItem },
             { "flow_layout", ui_element_type::LayoutItem },
             { "stack_layout", ui_element_type::LayoutItem },
-            { "border_layout", ui_element_type::LayoutItem }
+            { "border_layout", ui_element_type::LayoutItem },
+            { "spacer", ui_element_type::LayoutItem },
+            { "vertical_spacer", ui_element_type::LayoutItem },
+            { "horizontal_spacer", ui_element_type::LayoutItem }
         }
     {
     }
@@ -130,7 +136,10 @@ namespace neogfx::nrc
             { "grid_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new grid_layout{ aParser, aParent }; } },
             { "flow_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new flow_layout{ aParser, aParent }; } },
             { "stack_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new stack_layout{ aParser, aParent }; } },
-            { "border_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new border_layout{ aParser, aParent }; } }
+            { "border_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new border_layout{ aParser, aParent }; } },
+            { "spacer", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new spacer{ aParser, aParent }; } },
+            { "vertical_spacer", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new vertical_spacer{ aParser, aParent }; } },
+            { "horizontal_spacer", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_spacer{ aParser, aParent }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())

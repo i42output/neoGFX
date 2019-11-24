@@ -42,13 +42,14 @@ namespace neogfx::nrc
         return ((category(aType) & (ui_element_type::Widget | ui_element_type::Layout)) != ui_element_type::Invalid);
     }
 
+    struct element_not_found : std::runtime_error { element_not_found(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
+    struct element_ill_formed : std::runtime_error { element_ill_formed(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
+
     class i_ui_element : public neolib::i_reference_counted
     {
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::nrc::i_ui_element::no_parent" } {} };
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error{ "neogfx::nrc::i_ui_element::wrong_type" } {} };
-        struct element_not_found : std::runtime_error { element_not_found(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
-        struct element_ill_formed : std::runtime_error { element_ill_formed(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
     public:
         typedef neolib::i_vector<neolib::i_ref_ptr<i_ui_element>> children_t;
         typedef i_ui_element_parser::data_t data_t;
@@ -108,37 +109,88 @@ namespace neogfx::nrc
         {
             return neolib::string_to_enum<T>(aVariant.get<neolib::i_string>());
         }
-        length get_length(const std::string& aKey) const
+        template <typename T>
+        T get_scalar(const data_t& aVariant) const
         {
-            return get_length(parser().get_data(aKey));
-        }
-        std::vector<length> get_lengths(const std::string& aKey) const
-        {
-            return get_lengths(parser().get_array_data(aKey));
-        }
-        length get_length(const data_t& aVariant) const
-        {
-            length result;
+            T result;
             std::visit([&result](auto&& v)
             {
                 typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
                 if constexpr (std::is_same_v<vt, double>)
-                    result = length{ v };
+                    result = T{ v };
                 else if constexpr (std::is_same_v<vt, int64_t>)
-                    result = length{ static_cast<double>(v) };
-                else if constexpr (std::is_same_v<vt, neolib::i_string>)
-                    result = length::from_string(v.to_std_string());
+                    result = T{ static_cast<double>(v) };
+                else if constexpr (std::is_same_v<vt, neolib::i_string> && std::is_class_v<T>)
+                    result = T::from_string(v.to_std_string());
                 else
                     throw wrong_type();
             }, aVariant);
             return result;
         }
-        std::vector<length> get_lengths(const array_data_t& aVariantArray) const
+        template <typename T>
+        std::vector<T> get_scalars(const array_data_t& aVariantArray) const
         {
-            std::vector<length> result;
+            std::vector<T> result;
             for (auto const& e : aVariantArray)
-                result.push_back(get_length(e));
+                result.push_back(get_scalar<T>(e));
             return result;
+        }
+        template <typename T>
+        T get_scalar(const std::string& aKey) const
+        {
+            return get_scalar<T>(parser().get_data(aKey));
+        }
+        template <typename T>
+        std::vector<T> get_scalars(const std::string& aKey) const
+        {
+            return get_scalars<T>(parser().get_array_data(aKey));
+        }
+        template <typename T, typename Target>
+        void emplace_2(const neolib::string& aKey, Target& aTarget) const
+        {
+            std::vector<T> scalars;
+            if (parser().data_exists(aKey))
+                scalars.push_back(get_scalar<T>(parser().get_data(aKey)));
+            else if (parser().array_data_exists(aKey))
+                scalars = get_scalars<T>(parser().get_array_data(aKey));
+            else
+                return;
+            switch (scalars.size())
+            {
+            case 1:
+                aTarget.emplace(scalars[0]);
+                break;
+            case 2:
+                aTarget.emplace(scalars[0], scalars[1]);
+                break;
+            default:
+                throw element_ill_formed(id().to_std_string());
+            }
+        }
+        template <typename T, typename Target>
+        void emplace_4(const neolib::string& aKey, Target& aTarget) const
+        {
+            std::vector<T> scalars;
+            if (parser().data_exists(aKey))
+                scalars.push_back(get_scalar<T>(parser().get_data(aKey)));
+            else if (parser().array_data_exists(aKey))
+                scalars = get_scalars<T>(parser().get_array_data(aKey));
+            else
+                return;
+            switch (scalars.size())
+            {
+            case 1:
+                aTarget.emplace(scalars[0]);
+                break;
+            case 2:
+                aTarget.emplace(scalars[0], scalars[1]);
+                break;
+            case 4:
+                aTarget.emplace(scalars[0], scalars[1], scalars[2], scalars[3]);
+                break;
+            default:
+                throw element_ill_formed(id().to_std_string());
+            }
         }
         colour get_colour(const data_t& aVariant) const
         {

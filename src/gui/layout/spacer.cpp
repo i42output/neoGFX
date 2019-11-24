@@ -25,13 +25,13 @@
 
 namespace neogfx
 {
-    spacer::spacer(expansion_policy_e aExpansionPolicy) :
+    spacer::spacer(neogfx::expansion_policy aExpansionPolicy) :
         iParentLayout{ nullptr }, 
         iExpansionPolicy{ aExpansionPolicy }
     {
     }
 
-    spacer::spacer(i_layout& aParentLayout, expansion_policy_e aExpansionPolicy) :
+    spacer::spacer(i_layout& aParentLayout, neogfx::expansion_policy aExpansionPolicy) :
         iParentLayout{ nullptr }, 
         iExpansionPolicy{ aExpansionPolicy }
     {
@@ -136,12 +136,12 @@ namespace neogfx
         return parent_layout().find_proxy(*this);
     }
 
-    spacer::expansion_policy_e spacer::expansion_policy() const
+    expansion_policy spacer::expansion_policy() const
     {
         return iExpansionPolicy;
     }
 
-    void spacer::set_expansion_policy(expansion_policy_e aExpansionPolicy)
+    void spacer::set_expansion_policy(neogfx::expansion_policy aExpansionPolicy)
     {
         if (iExpansionPolicy != aExpansionPolicy)
         {
@@ -196,9 +196,9 @@ namespace neogfx
         if (has_size_policy())
             return *iSizePolicy;
         neogfx::size_policy result{size_constraint::Minimum};
-        if (iExpansionPolicy & ExpandHorizontally)
+        if ((iExpansionPolicy & neogfx::expansion_policy::ExpandHorizontally) == neogfx::expansion_policy::ExpandHorizontally)
             result.set_horizontal_size_policy(size_constraint::Expanding);
-        if (iExpansionPolicy & ExpandVertically)
+        if ((iExpansionPolicy & neogfx::expansion_policy::ExpandVertically) == neogfx::expansion_policy::ExpandVertically)
             result.set_vertical_size_policy(size_constraint::Expanding);
         return result;
     }
@@ -320,22 +320,22 @@ namespace neogfx
     }
 
     horizontal_spacer::horizontal_spacer() :
-        spacer(ExpandHorizontally)
+        spacer(neogfx::expansion_policy::ExpandHorizontally)
     {
     }
 
     horizontal_spacer::horizontal_spacer(i_layout& aParent) :
-        spacer(aParent, ExpandHorizontally)
+        spacer(aParent, neogfx::expansion_policy::ExpandHorizontally)
     {
     }
 
     vertical_spacer::vertical_spacer() :
-        spacer(ExpandVertically)
+        spacer(neogfx::expansion_policy::ExpandVertically)
     {
     }
 
     vertical_spacer::vertical_spacer(i_layout& aParent) :
-        spacer(aParent, ExpandVertically)
+        spacer(aParent, neogfx::expansion_policy::ExpandVertically)
     {
     }
 }
