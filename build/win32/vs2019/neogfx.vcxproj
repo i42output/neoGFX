@@ -1,17 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -29,23 +21,10 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -58,58 +37,20 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
-    <TargetName>$(ProjectName)d</TargetName>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)d</TargetName>
-    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
-      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-      <MinimalRebuild>false</MinimalRebuild>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Lib>
-      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
-    </Lib>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -130,34 +71,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Lib>
-      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
@@ -489,21 +402,13 @@
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">glsl2hpp %(Identity)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glsl2hpp %(Identity)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">glsl2hpp %(Identity)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glsl2hpp %(Identity)</Message>
     </CustomBuild>
   </ItemGroup>
@@ -553,7 +458,6 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_rendering_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ShowIncludes>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture.cpp" />
@@ -641,19 +545,15 @@
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Release\GeneratedFiles\icons.res.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
@@ -663,13 +563,9 @@
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl" />
     <CustomBuild Include="..\..\..\src\resources.nrc">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/resources.nrc.cpp</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/resources.nrc.cpp</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/resources.nrc.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/resources.nrc.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
     </CustomBuild>
     <None Include="..\..\..\src\gui\layout\flow_layout.inl" />

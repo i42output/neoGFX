@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
@@ -29,19 +21,6 @@
     <ProjectName>DesignStudio</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -60,12 +39,6 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -73,41 +46,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\..\bin\</OutDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NEOLIB_HOSTED_ENVIRONMENT;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libssl32MTd.lib;libcrypto32MTd.lib;opengl32.lib;neolibd.lib;neogfxd.lib;zlibstaticd.lib;libpng16_staticd.lib;SDL2d.lib;Imm32.lib;version.lib;libglew32d.lib;freetype.lib;harfbuzzd.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(DevDirBoost)\lib;$(DevDirOpenSSL)\lib\VC;$(DevDir3rdParty)\lib;$(DevDirNeolib)\lib;$(DevDirNeogfx)\lib</AdditionalLibraryDirectories>
-      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
-      <ShowProgress>NotSet</ShowProgress>
-      <LinkStatus>false</LinkStatus>
-      <StackReserveSize>8000000</StackReserveSize>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -118,6 +63,7 @@
       <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,32 +72,6 @@
       <AdditionalLibraryDirectories>$(DevDirBoost)\lib;$(DevDirOpenSSL)\lib\VC;$(DevDir3rdParty)\lib;$(DevDirNeolib)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;opengl32.lib;neolibd.lib;neogfxd.lib;zlibstaticd.lib;libpng16_staticd.lib;SDL2-staticd.lib;Imm32.lib;version.lib;libglew32d.lib;freetype.lib;harfbuzzd.lib;winmm.lib;D2d1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libssl32MT.lib;libcrypto32MT.lib;opengl32.lib;neolib.lib;neogfx.lib;zlibstatic.lib;libpng16_static.lib;SDL2.lib;Imm32.lib;version.lib;libglew32.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(DevDirBoost)\lib;$(DevDirOpenSSL)\lib\VC;$(DevDir3rdParty)\lib;$(DevDirNeolib)\lib;$(DevDirNeogfx)\lib</AdditionalLibraryDirectories>
-      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
-      <ShowProgress>NotSet</ShowProgress>
-      <LinkStatus>false</LinkStatus>
-      <StackReserveSize>8000000</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,6 +86,7 @@
       <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -181,11 +102,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.res.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Release\GeneratedFiles\DesignStudio.res.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
@@ -203,10 +122,6 @@
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\DesignStudio.nrc">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/DesignStudio.nrc.cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/DesignStudio.res.cpp</Outputs>

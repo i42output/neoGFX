@@ -125,9 +125,31 @@ namespace neogfx::nrc
     private:
     };
 
+    class grid_layout : public basic_layout<ui_element_type::GridLayout>
+    {
+        typedef basic_layout<ui_element_type::GridLayout> base_type;
+    public:
+        grid_layout(const i_ui_element_parser& aParser, i_ui_element& aParent) :
+            base_type{ aParser, aParent },
+            iRows{ aParser.get_optional<uint32_t>("rows") },
+            iColumns{ aParser.get_optional<uint32_t>("columns") }
+        {
+            add_data_names({ "rows", "columns" });
+        }
+    protected:
+        void emit_body() const override
+        {
+            if (iRows || iColumns)
+                emit("   %1%.set_dimensions(%2%, %3%);\n", id(), iRows ? *iRows : 1u, iColumns ? *iColumns : 1u);
+            base_type::emit_body();
+        }
+    public:
+        std::optional<uint32_t> iRows;
+        std::optional<uint32_t> iColumns;
+    };
+
     typedef basic_layout<ui_element_type::VerticalLayout> vertical_layout;
     typedef basic_layout<ui_element_type::HorizontalLayout> horizontal_layout;
-    typedef basic_layout<ui_element_type::GridLayout> grid_layout;
     typedef basic_layout<ui_element_type::FlowLayout> flow_layout;
     typedef basic_layout<ui_element_type::StackLayout> stack_layout;
     typedef basic_layout<ui_element_type::BorderLayout> border_layout;

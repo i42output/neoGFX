@@ -120,20 +120,25 @@ namespace neogfx::nrc
             return get_data(aKey).get<abstract_t<T>>();
         }
         template <typename T>
-        neolib::optional<T> get_optional(const std::string& aKey) const
+        std::optional<T> get_optional(const std::string& aKey) const
         {
             if (data_exists(aKey))
-                return get_data(aKey).get<abstract_t<T>>();
+            {
+                if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
+                    return static_cast<T>(get_data(aKey).get<int64_t>());
+                else
+                    return get_data(aKey).get<abstract_t<T>>();
+            }
             else
-                return {};
+                return std::optional<T>{};
         }
         template <typename T>
-        neolib::optional<T> get_optional_enum(const std::string& aKey) const
+        std::optional<T> get_optional_enum(const std::string& aKey) const
         {
             if (data_exists(aKey))
                 return neolib::string_to_enum<T>(get_data(aKey).get<neolib::i_string>());
             else
-                return {};
+                return std::optional<T>{};
         }
         template <typename T, typename U>
         const abstract_t<T>& get(const std::string& aKey, const U& aDefault) const
