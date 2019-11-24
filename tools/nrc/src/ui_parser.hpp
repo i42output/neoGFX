@@ -55,6 +55,8 @@ namespace neogfx::nrc
         data_t& do_get_data(const neolib::i_string& aKey) override;
         const array_data_t& do_get_array_data(const neolib::i_string& aKey) const override;
         array_data_t& do_get_array_data(const neolib::i_string& aKey) override;
+        void to_data(const neolib::fjson_value& aNode, data_t& aResult) const;
+        void to_array_data(const neolib::fjson_value& aNode, array_data_t& aResult) const;
     private:
         std::string headers() const;
         void next_header(const i_ui_element& aElement, std::set<std::string>& aHeaders) const;

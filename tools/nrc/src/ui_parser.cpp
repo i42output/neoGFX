@@ -106,9 +106,42 @@ namespace neogfx::nrc
     {
         if (!data_exists(aKey))
             throw element_data_not_found(aKey.to_std_string());
-        auto const& value = current_object().at(aKey.to_std_string());
-        auto& data = iDataCache[std::make_pair(&current_object(), aKey.to_std_string())];
-        value.visit([&data](auto&& v)
+        auto const cacheKey = std::make_pair(&current_object(), aKey.to_std_string());
+        auto const existing = iDataCache.find(cacheKey);
+        if (existing != iDataCache.end())
+            return existing->second;
+        auto& data = iDataCache[cacheKey];
+        to_data(current_object().at(aKey.to_std_string()), data);
+        return data;
+    }
+
+    ui_parser::data_t& ui_parser::do_get_data(const neolib::i_string& aKey)
+    {
+        return const_cast<ui_parser::data_t&>(to_const(*this).do_get_data(aKey));
+    }
+        
+    const ui_parser::array_data_t& ui_parser::do_get_array_data(const neolib::i_string& aKey) const
+    {
+        if (!array_data_exists(aKey))
+            throw element_data_not_found(aKey.to_std_string());
+        auto const cacheKey = std::make_pair(&current_object(), aKey.to_std_string());
+        auto const existing = iArrayDataCache.find(cacheKey);
+        if (existing != iArrayDataCache.end())
+            return existing->second;
+        auto& arrayData = iArrayDataCache[cacheKey];
+        to_array_data(current_object().at(aKey.to_std_string()), arrayData);
+        return arrayData;
+    }
+
+    ui_parser::array_data_t& ui_parser::do_get_array_data(const neolib::i_string& aKey)
+    {
+        return const_cast<ui_parser::array_data_t&>(to_const(*this).do_get_array_data(aKey));
+    }
+
+    void ui_parser::to_data(const neolib::fjson_value& aNode, data_t& aResult) const
+    {
+        auto& data = aResult;
+        aNode.visit([&data](auto&& v)
         {
             typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
             if constexpr (std::is_same_v<vt, bool>)
@@ -122,25 +155,12 @@ namespace neogfx::nrc
             else if constexpr (std::is_same_v<vt, neolib::fjson_keyword>)
                 data = neolib::simple_variant{ neolib::string{v.text} };
         });
-        return data;
     }
-
-    ui_parser::data_t& ui_parser::do_get_data(const neolib::i_string& aKey)
+    
+    void ui_parser::to_array_data(const neolib::fjson_value& aNode, array_data_t& aResult) const
     {
-        return const_cast<ui_parser::data_t&>(to_const(*this).do_get_data(aKey));
-    }
-        
-    const ui_parser::array_data_t& ui_parser::do_get_array_data(const neolib::i_string& aKey) const
-    {
-        if (!array_data_exists(aKey))
-            throw element_data_not_found(aKey.to_std_string());
-        auto const& value = current_object().at(aKey.to_std_string()).as<neolib::fjson_array>();
-        auto const cacheKey = std::make_pair(&current_object(), aKey.to_std_string());
-        auto const existing = iArrayDataCache.find(cacheKey);
-        if (existing != iArrayDataCache.end())
-            return existing->second;
-        auto& arrayData = iArrayDataCache[cacheKey];
-        for(auto const& e : value.contents())
+        auto& arrayData = aResult;
+        for (auto const& e : aNode.as<neolib::fjson_array>().contents())
             e.visit([&arrayData](auto&& v)
             {
                 typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
@@ -157,12 +177,6 @@ namespace neogfx::nrc
                     data = neolib::simple_variant{ neolib::string{v.text} };
                 arrayData.push_back(data);
             });
-        return arrayData;
-    }
-
-    ui_parser::array_data_t& ui_parser::do_get_array_data(const neolib::i_string& aKey)
-    {
-        return const_cast<ui_parser::array_data_t&>(to_const(*this).do_get_array_data(aKey));
     }
 
     void ui_parser::emit(const neolib::i_string& aText) const
@@ -275,10 +289,18 @@ namespace neogfx::nrc
                     parse(e, aElement);
             break;
         case neolib::json_type::Array:
-            aElement.parse(neolib::string{ aNode.name() }, get_array_data(aNode.name()) );
+            {
+                array_data_t arrayData;
+                to_array_data(aNode, arrayData);
+                aElement.parse(neolib::string{ aNode.name() }, arrayData );
+            }
             break;
         default:
-            aElement.parse(neolib::string{ aNode.name() }, get_data(aNode.name()));
+            {
+                data_t data;
+                to_data(aNode, data);
+                aElement.parse(neolib::string{ aNode.name() }, data);
+            }
             break;
         }
     }
