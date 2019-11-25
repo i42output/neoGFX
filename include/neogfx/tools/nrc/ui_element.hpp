@@ -195,6 +195,10 @@ namespace neogfx::nrc
                 iMaximumSize.emplace(get_scalar<length>(aData));
             else if (aName == "margin")
                 iMargin.emplace(get_scalar<length>(aData));
+            else if (aName == "enabled")
+                iEnabled = aData.get<bool>();
+            else if (aName == "disabled")
+                iEnabled = !aData.get<bool>();
             else if (aName == "text")
                 iText = aData.get<neolib::i_string>();
             else if (aName == "image")
@@ -290,6 +294,8 @@ namespace neogfx::nrc
                 else 
                     emit("   %1%.set_margins(margins{ %2%, %3%, %4%, %5% });\n", id(), margin.left, margin.top, margin.right, margin.bottom);
             }
+            if (iEnabled)
+                emit("   %1%.%2%();\n", id(), *iEnabled ? "enable" : "disable");
             if (iLabelFixedSize)
                 emit("   %1%.label().set_fixed_size(size{ %2%, %3% });\n", id(), iLabelFixedSize->cx, iLabelFixedSize->cy);
             if (iLabelMinimumSize)
@@ -435,6 +441,8 @@ namespace neogfx::nrc
     private:
         void init()
         {
+            if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
+                add_data_names({ "enabled", "disabled" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
                 add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size", "weight" });
             if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
@@ -462,6 +470,7 @@ namespace neogfx::nrc
         std::optional<basic_size<length>> iMaximumSize;
         std::optional<size> iWeight;
         std::optional<basic_margins<length>> iMargin;
+        std::optional<bool> iEnabled;
         std::optional<basic_size<length>> iLabelFixedSize;
         std::optional<basic_size<length>> iLabelMinimumSize;
         std::optional<basic_size<length>> iLabelMaximumSize;

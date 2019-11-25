@@ -718,6 +718,7 @@
                             }
                             grid_layout: {
                                 id: gridLayoutImages
+                                spacing: 0
                             }
                         }
                     }

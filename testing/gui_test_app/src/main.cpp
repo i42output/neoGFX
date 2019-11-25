@@ -790,7 +790,6 @@ int main(int argc, char* argv[])
         #endif
             ui.layoutLots.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
 
-        ui.gridLayoutImages.set_spacing(ng::size{});
         ng::image hash(":/test/resources/channel_32.png");
         for (uint32_t i = 0; i < 9; ++i)
         {

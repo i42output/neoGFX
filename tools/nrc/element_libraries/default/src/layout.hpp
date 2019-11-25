@@ -31,6 +31,7 @@ namespace neogfx::nrc
         basic_layout(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), LayoutType }
         {
+            add_data_names({ "spacing" });
         }
     public:
         const neolib::i_string& header() const override
@@ -75,10 +76,14 @@ namespace neogfx::nrc
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
             ui_element<>::parse(aName, aData);
+            if (aName == "spacing")
+                iSpacing.emplace(get_scalar<length>(aData));
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
             ui_element<>::parse(aName, aData);
+            if (aName == "spacing")
+                emplace_2<length>("spacing", iSpacing);
         }
     protected:
         void emit() const override
@@ -118,11 +123,14 @@ namespace neogfx::nrc
         }
         void emit_body() const override
         {
+            if (iSpacing)
+                emit("   %1%.set_spacing(size{ %2%, %3% });\n", id(), iSpacing->cx, iSpacing->cy);
             ui_element<>::emit_body();
         }
     protected:
         using ui_element<>::emit;
     private:
+        std::optional<basic_size<length>> iSpacing;
     };
 
     class grid_layout : public basic_layout<ui_element_type::GridLayout>
