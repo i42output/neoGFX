@@ -794,7 +794,7 @@ int main(int argc, char* argv[])
         ng::image hash(":/test/resources/channel_32.png");
         for (uint32_t i = 0; i < 9; ++i)
         {
-            auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
+            auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal>(i));
             hashWidget->set_size_policy(ng::size_constraint::Expanding);
             hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
             ui.gridLayoutImages.add_item_at_position(i / 3, i % 3, hashWidget);

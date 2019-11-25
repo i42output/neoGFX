@@ -199,7 +199,7 @@
                                         placement: ImageTextVertical
                                     }
                                     text: "This is the neoGFX test application."
-                                    image: {
+                                    .image: {
                                         uri: ":/test/resources/neoGFX.png"
                                         minimum_size: [ 32spx 32spx ]
                                         maximum_size: [ 160spx max ]
@@ -525,7 +525,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconInformation
                                     text: "Information"
-                                    image: {
+                                    .image: {
                                         uri: ":/neogfx/resources/icons.naa#information.png"
                                         size: 24spx
                                     }
@@ -533,7 +533,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconQuestion
                                     text: "Question"
-                                    image: {
+                                    .image: {
                                         uri: ":/neogfx/resources/icons.naa#question.png"
                                         size: 24spx
                                     }
@@ -541,7 +541,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconWarning
                                     text: "Warning"
-                                    image: {
+                                    .image: {
                                         uri: ":/neogfx/resources/icons.naa#warning.png"
                                         size: 24spx
                                     }
@@ -549,7 +549,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconStop
                                     text: "Stop"
-                                    image: {
+                                    .image: {
                                         uri: ":/neogfx/resources/icons.naa#stop.png"
                                         size: 24spx
                                     }
@@ -557,7 +557,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconError
                                     text: "Error"
-                                    image: {
+                                    .image: {
                                         uri: ":/neogfx/resources/icons.naa#error.png"
                                         size: 24spx
                                     }
@@ -565,7 +565,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconCritical
                                     text: "Critical"
-                                    image: {
+                                    .image: {
                                         uri: ":/neogfx/resources/icons.naa#critical.png"
                                         size: 24spx
                                     }

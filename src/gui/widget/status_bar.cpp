@@ -101,7 +101,7 @@ namespace neogfx
         image_widget{ aLayout }
     {
         set_ignore_mouse_events(false);
-        set_placement(cardinal_placement::SouthEast);
+        set_placement(cardinal::SouthEast);
     }
 
     neogfx::size_policy status_bar::size_grip::size_policy() const

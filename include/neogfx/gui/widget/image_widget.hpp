@@ -19,44 +19,24 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_enum.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/texture.hpp>
 
 namespace neogfx
 {
-    enum class aspect_ratio
-    {
-        Ignore,
-        Stretch,
-        Keep,
-        KeepExpanding
-    };
-
-    enum class cardinal_placement
-    {
-        NorthWest,
-        North,
-        NorthEast,
-        West,
-        Centre,
-        East,
-        SouthWest,
-        South,
-        SouthEast
-    };
-
     class image_widget : public widget
     {
     public:
         define_event(ImageChanged, image_changed)
     public:
-        image_widget(const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-        image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-        image_widget(i_widget& aParent, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-        image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-        image_widget(i_layout& aLayout, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-        image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+        image_widget(const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);
+        image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);
+        image_widget(i_widget& aParent, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);
+        image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);
+        image_widget(i_layout& aLayout, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);
+        image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);
     public:
         virtual neogfx::size_policy size_policy() const;
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -67,13 +47,13 @@ namespace neogfx
         void set_image(const i_texture& aImage);
         void set_image(const i_image& aImage);
         void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio);
-        void set_placement(cardinal_placement aPlacement);
+        void set_placement(cardinal aPlacement);
         void set_snap(dimension aSnap);
         void set_dpi_auto_scale(bool aDpiAutoScale);
     private:
         texture iTexture;
         neogfx::aspect_ratio iAspectRatio;
-        cardinal_placement iPlacement;
+        cardinal iPlacement;
         dimension iSnap;
         bool iDpiAutoScale;
     };

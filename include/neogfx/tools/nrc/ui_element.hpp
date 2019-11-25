@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/widget/label.hpp>
+#include <neogfx/gui/widget/image_widget.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
 
 namespace neogfx::nrc
@@ -167,6 +168,8 @@ namespace neogfx::nrc
                 emplace_2<length>("maximum_size", iImageMaximumSize);
                 emplace_2<double>("weight", iImageWeight);
                 iImage = parser().get_optional<neolib::string>("uri");
+                iAspectRatio = parser().get_optional_enum<aspect_ratio>("aspect_ratio");
+                iImagePlacement = parser().get_optional_enum<cardinal>("placement");
                 return true;
             }
             return false;
@@ -184,12 +187,27 @@ namespace neogfx::nrc
                 iSizePolicy = neolib::string_to_enum<size_constraint>(aData.get<neolib::i_string>());
             else if (aName == "alignment")
                 iAlignment = neolib::string_to_enum<alignment>(aData.get<neolib::i_string>());
+            else if (aName == "size")
+                iFixedSize.emplace(get_scalar<length>(aData));
+            else if (aName == "minimum_size")
+                iMinimumSize.emplace(get_scalar<length>(aData));
+            else if (aName == "maximum_size")
+                iMaximumSize.emplace(get_scalar<length>(aData));
             else if (aName == "margin")
                 iMargin.emplace(get_scalar<length>(aData));
             else if (aName == "text")
                 iText = aData.get<neolib::i_string>();
             else if (aName == "image")
                 iImage = aData.get<neolib::i_string>();
+            else if (aName == "aspect_ratio")
+                iAspectRatio = neolib::string_to_enum<aspect_ratio>(aData.get<neolib::i_string>());
+            else if (aName == "placement")
+            {
+                if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+                    iLabelPlacement = neolib::string_to_enum<label_placement>(aData.get<neolib::i_string>());
+                else if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
+                    iImagePlacement = neolib::string_to_enum<cardinal>(aData.get<neolib::i_string>());
+            }
             else if (aName == "foreground_colour")
                 iForegroundColour = get_colour(aData);
             else if (aName == "background_colour")
@@ -220,14 +238,14 @@ namespace neogfx::nrc
                         iAlignment = *iAlignment | neolib::string_to_enum<alignment>(a.get<neolib::i_string>());;
                 }
             }
-            else if (aName == "margin")
-                emplace_4<length>("margin", iMargin);
             else if (aName == "size")
                 emplace_2<length>("size", iFixedSize);
             else if (aName == "minimum_size")
                 emplace_2<length>("minimum_size", iMinimumSize);
             else if (aName == "maximum_size")
                 emplace_2<length>("maximum_size", iMaximumSize);
+            else if (aName == "margin")
+                emplace_4<length>("margin", iMargin);
             else if (aName == "weight")
                 emplace_2<double>("weight", iWeight);
             else if (aName == "foreground_colour")
@@ -301,6 +319,30 @@ namespace neogfx::nrc
                 }
                 else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
                     emit("   %1%.label().image().set_image(image{ \"%2%\" });\n", id(), *iImage);
+            }
+            if (iAspectRatio)
+            {
+                if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
+                {
+                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
+                        emit("   %1%.set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
+                    else
+                        emit("   %1%.image().set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
+                }
+                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+                    emit("   %1%.label().image().set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
+            }
+            if (iImagePlacement)
+            {
+                if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
+                {
+                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
+                        emit("   %1%.set_placement(%2%);\n", id(), enum_to_string("cardinal", *iImagePlacement));
+                    else
+                        emit("   %1%.image().set_placement(%2%);\n", id(), enum_to_string("cardinal", *iImagePlacement));
+                }
+                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+                    emit("   %1%.label().image().set_placement(%2%);\n", id(), enum_to_string("cardinal", *iImagePlacement));
             }
             if (iText)
             {
@@ -400,7 +442,7 @@ namespace neogfx::nrc
             if ((type() & (ui_element_type::HasText | ui_element_type::HasLabel)) != ui_element_type::None)
                 add_data_names({ "text" });
             if ((type() & (ui_element_type::HasImage | ui_element_type::HasLabel)) != ui_element_type::None)
-                add_data_names({ "image" });
+                add_data_names({ "image", "aspect_ratio", "placement" });
             if ((type() & ui_element_type::HasColour) == ui_element_type::HasColour)
                 add_data_names({ "foreground_colour", "background_colour", "opacity", "transparency" });
         }
@@ -427,6 +469,8 @@ namespace neogfx::nrc
         std::optional<label_placement> iLabelPlacement;
         std::optional<string> iText;
         std::optional<string> iImage;
+        std::optional<aspect_ratio> iAspectRatio;
+        std::optional<cardinal> iImagePlacement;
         std::optional<basic_size<length>> iImageFixedSize;
         std::optional<basic_size<length>> iImageMinimumSize;
         std::optional<basic_size<length>> iImageMaximumSize;

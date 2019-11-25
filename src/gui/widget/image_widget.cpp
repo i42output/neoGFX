@@ -23,42 +23,42 @@
 
 namespace neogfx
 {
-    image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+    image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
         iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
     {
         set_margins(neogfx::margins(0.0));
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+    image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
         iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
     {
         set_margins(neogfx::margins(0.0));
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+    image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aParent }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
     {
         set_margins(neogfx::margins(0.0));
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+    image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aParent }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
     {
         set_margins(neogfx::margins(0.0));
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+    image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aLayout }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
     {
         set_margins(neogfx::margins(0.0));
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+    image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aLayout }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
     {
         set_margins(neogfx::margins(0.0));
@@ -171,31 +171,31 @@ namespace neogfx
         }
         switch (iPlacement)
         {
-        case cardinal_placement::NorthWest:
+        case cardinal::NorthWest:
             placementRect.position() = point{};
             break;
-        case cardinal_placement::North:
+        case cardinal::North:
             placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, 0.0 };
             break;
-        case cardinal_placement::NorthEast:
+        case cardinal::NorthEast:
             placementRect.position() = point{ client_rect().width() - placementRect.width(), 0.0 };
             break;
-        case cardinal_placement::West:
+        case cardinal::West:
             placementRect.position() = point{ 0.0, (client_rect().height() - placementRect.cy) / 2.0 };
             break;
-        case cardinal_placement::Centre:
+        case cardinal::Centre:
             placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, (client_rect().height() - placementRect.cy) / 2.0 };
             break;
-        case cardinal_placement::East:
+        case cardinal::East:
             placementRect.position() = point{ client_rect().width() - placementRect.width(), (client_rect().height() - placementRect.cy) / 2.0 };
             break;
-        case cardinal_placement::SouthWest:
+        case cardinal::SouthWest:
             placementRect.position() = point{ 0.0, client_rect().height() - placementRect.height() };
             break;
-        case cardinal_placement::South:
+        case cardinal::South:
             placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, client_rect().height() - placementRect.height() };
             break;
-        case cardinal_placement::SouthEast:
+        case cardinal::SouthEast:
             placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
             break;
         }
@@ -236,7 +236,7 @@ namespace neogfx
         }
     }
 
-    void image_widget::set_placement(cardinal_placement aPlacement)
+    void image_widget::set_placement(cardinal aPlacement)
     {
         if (iPlacement != aPlacement)
         {

@@ -110,6 +110,7 @@
     <ClInclude Include="..\..\..\src\action.hpp" />
     <ClInclude Include="..\..\..\src\app.hpp" />
     <ClInclude Include="..\..\..\src\button.hpp" />
+    <ClInclude Include="..\..\..\src\drop_list.hpp" />
     <ClInclude Include="..\..\..\src\group_box.hpp" />
     <ClInclude Include="..\..\..\src\image_widget.hpp" />
     <ClInclude Include="..\..\..\src\label.hpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="..\..\..\src\menu_bar.hpp" />
     <ClInclude Include="..\..\..\src\spacer.hpp" />
     <ClInclude Include="..\..\..\src\status_bar.hpp" />
+    <ClInclude Include="..\..\..\src\table_view.hpp" />
     <ClInclude Include="..\..\..\src\tab_page.hpp" />
     <ClInclude Include="..\..\..\src\tab_page_container.hpp" />
     <ClInclude Include="..\..\..\src\text_edit.hpp" />

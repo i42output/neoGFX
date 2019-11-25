@@ -34,6 +34,27 @@ namespace neogfx
         ExpandingPixelPerfect, // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
         Manual
     };
+
+    enum class aspect_ratio : uint32_t
+    {
+        Ignore,
+        Stretch,
+        Keep,
+        KeepExpanding
+    };
+
+    enum class cardinal : uint32_t
+    {
+        NorthWest,
+        North,
+        NorthEast,
+        West,
+        Centre,
+        East,
+        SouthWest,
+        South,
+        SouthEast
+    };
 }
 
 template <>
@@ -46,6 +67,30 @@ const neolib::enum_enumerators_t<neogfx::size_constraint> neolib::enum_enumerato
     declare_enum_string(neogfx::size_constraint, ExpandingPixelPerfect)
     declare_enum_string(neogfx::size_constraint, Manual)
 };
+
+template <>
+const neolib::enum_enumerators_t<neogfx::aspect_ratio> neolib::enum_enumerators_v<neogfx::aspect_ratio>
+{
+    declare_enum_string(neogfx::aspect_ratio, Ignore)
+    declare_enum_string(neogfx::aspect_ratio, Stretch)
+    declare_enum_string(neogfx::aspect_ratio, Keep)
+    declare_enum_string(neogfx::aspect_ratio, KeepExpanding)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::cardinal> neolib::enum_enumerators_v<neogfx::cardinal>
+{
+    declare_enum_string(neogfx::cardinal, NorthWest)
+    declare_enum_string(neogfx::cardinal, North)
+    declare_enum_string(neogfx::cardinal, NorthEast)
+    declare_enum_string(neogfx::cardinal, West)
+    declare_enum_string(neogfx::cardinal, Centre)
+    declare_enum_string(neogfx::cardinal, East)
+    declare_enum_string(neogfx::cardinal, SouthWest)
+    declare_enum_string(neogfx::cardinal, South)
+    declare_enum_string(neogfx::cardinal, SouthEast)
+};
+
 
 namespace neogfx
 {
