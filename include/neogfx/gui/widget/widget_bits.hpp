@@ -92,18 +92,36 @@ namespace neogfx
 
     enum class focus_policy : uint32_t
     {
-        NoFocus                = 0x00000000,
-        ClickFocus            = 0x00000001,
-        TabFocus            = 0x00000002,
-        ClickTabFocus        = ClickFocus | TabFocus,
-        StrongFocus            = ClickTabFocus,
-        WheelFocus            = 0x00000004, // todo
-        PointerFocus        = 0x00000008, // todo
-        ConsumeTabKey        = 0x10000000,
-        ConsumeReturnKey    = 0x20000000,
-        IgnoreNonClient        = 0x40000000
+        NoFocus           = 0x00000000,
+        ClickFocus        = 0x00000001,
+        TabFocus          = 0x00000002,
+        ClickTabFocus     = ClickFocus | TabFocus,
+        StrongFocus       = ClickTabFocus,
+        WheelFocus        = 0x00000004, // todo
+        PointerFocus      = 0x00000008, // todo
+        ConsumeTabKey     = 0x10000000,
+        ConsumeReturnKey  = 0x20000000,
+        IgnoreNonClient   = 0x40000000
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::focus_policy> neolib::enum_enumerators_v<neogfx::focus_policy>
+{
+    declare_enum_string(neogfx::focus_policy, NoFocus)
+    declare_enum_string(neogfx::focus_policy, ClickFocus)
+    declare_enum_string(neogfx::focus_policy, TabFocus)
+    declare_enum_string(neogfx::focus_policy, ClickTabFocus)
+    declare_enum_string(neogfx::focus_policy, StrongFocus)
+    declare_enum_string(neogfx::focus_policy, WheelFocus)
+    declare_enum_string(neogfx::focus_policy, PointerFocus)
+    declare_enum_string(neogfx::focus_policy, ConsumeTabKey)
+    declare_enum_string(neogfx::focus_policy, ConsumeReturnKey)
+    declare_enum_string(neogfx::focus_policy, IgnoreNonClient)
+};
+
+namespace neogfx
+{
     enum class focus_event
     {
         FocusGained,

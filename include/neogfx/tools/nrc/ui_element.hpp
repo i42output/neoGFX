@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/string.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
@@ -135,6 +136,7 @@ namespace neogfx::nrc
         }
     protected:
         using i_ui_element::enum_to_string;
+        using i_ui_element::get_enum;
         using i_ui_element::get_scalar;
         using i_ui_element::get_scalars;
         using i_ui_element::emplace_2;
@@ -184,9 +186,9 @@ namespace neogfx::nrc
             if (aName == "weight")
                 iWeight.emplace(get_scalar<double>(aData));
             else if (aName == "size_policy")
-                iSizePolicy = neolib::string_to_enum<size_constraint>(aData.get<neolib::i_string>());
+                iSizePolicy = get_enum<size_constraint>(aData);
             else if (aName == "alignment")
-                iAlignment = neolib::string_to_enum<alignment>(aData.get<neolib::i_string>());
+                iAlignment = get_enum<alignment>(aData);
             else if (aName == "size")
                 iFixedSize.emplace(get_scalar<length>(aData));
             else if (aName == "minimum_size")
@@ -199,18 +201,20 @@ namespace neogfx::nrc
                 iEnabled = aData.get<bool>();
             else if (aName == "disabled")
                 iEnabled = !aData.get<bool>();
+            else if (aName == "focus_policy")
+                iFocusPolicy.first = get_enum<focus_policy>(aData);
             else if (aName == "text")
                 iText = aData.get<neolib::i_string>();
             else if (aName == "image")
                 iImage = aData.get<neolib::i_string>();
             else if (aName == "aspect_ratio")
-                iAspectRatio = neolib::string_to_enum<aspect_ratio>(aData.get<neolib::i_string>());
+                iAspectRatio = get_enum<aspect_ratio>(aData);
             else if (aName == "placement")
             {
                 if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-                    iLabelPlacement = neolib::string_to_enum<label_placement>(aData.get<neolib::i_string>());
+                    iLabelPlacement = get_enum<label_placement>(aData);
                 else if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-                    iImagePlacement = neolib::string_to_enum<cardinal>(aData.get<neolib::i_string>());
+                    iImagePlacement = get_enum<cardinal>(aData);
             }
             else if (aName == "foreground_colour")
                 iForegroundColour = get_colour(aData);
@@ -221,27 +225,19 @@ namespace neogfx::nrc
             else if (aName == "transparency")
                 iOpacity = 1.0 - aData.get<double>();
         }
-        void parse(const neolib::i_string& aName, const array_data_t& aData) override
+        void parse(const neolib::i_string& aName, const array_data_t& aArrayData) override
         {
             if (data_names().find(aName) == data_names().end())
             {
                 std::cerr << parser().source_location() << ": warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
                 return;
             }
-            if (aName == "size_policy" && !aData.empty())
+            if (aName == "size_policy" && !aArrayData.empty())
                 iSizePolicy = size_policy::from_string(
-                    aData[0u].get<neolib::i_string>().to_std_string(),
-                    aData[std::min<std::size_t>(1u, aData.size() - 1u)].get<neolib::i_string>().to_std_string());
+                    aArrayData[0u].get<neolib::i_string>().to_std_string(),
+                    aArrayData[std::min<std::size_t>(1u, aArrayData.size() - 1u)].get<neolib::i_string>().to_std_string());
             else if (aName == "alignment")
-            {
-                for (auto const& a : aData)
-                {
-                    if (iAlignment == std::nullopt)
-                        iAlignment = neolib::string_to_enum<alignment>(a.get<neolib::i_string>());
-                    else
-                        iAlignment = *iAlignment | neolib::string_to_enum<alignment>(a.get<neolib::i_string>());;
-                }
-            }
+                iAlignment = get_enum<alignment>(aArrayData);
             else if (aName == "size")
                 emplace_2<length>("size", iFixedSize);
             else if (aName == "minimum_size")
@@ -252,10 +248,12 @@ namespace neogfx::nrc
                 emplace_4<length>("margin", iMargin);
             else if (aName == "weight")
                 emplace_2<double>("weight", iWeight);
+            else if (aName == "focus_policy")
+                iFocusPolicy.first = get_enum<focus_policy>(aArrayData, iFocusPolicy.second, "Default");
             else if (aName == "foreground_colour")
-                iForegroundColour = get_colour(aData);
+                iForegroundColour = get_colour(aArrayData);
             else if (aName == "background_colour")
-                iBackgroundColour = get_colour(aData);
+                iBackgroundColour = get_colour(aArrayData);
         }
         void emit_preamble() const override
         {
@@ -296,6 +294,13 @@ namespace neogfx::nrc
             }
             if (iEnabled)
                 emit("   %1%.%2%();\n", id(), *iEnabled ? "enable" : "disable");
+            if (iFocusPolicy.first)
+            {
+                if (!iFocusPolicy.second)
+                    emit("   %1%.set_focus_policy(%2%);\n", id(), enum_to_string("focus_policy", *iFocusPolicy.first));
+                else
+                    emit("   %1%.set_focus_policy(%1%.focus_policy() | %2%);\n", id(), enum_to_string("focus_policy", *iFocusPolicy.first));
+            }
             if (iLabelFixedSize)
                 emit("   %1%.label().set_fixed_size(size{ %2%, %3% });\n", id(), iLabelFixedSize->cx, iLabelFixedSize->cy);
             if (iLabelMinimumSize)
@@ -442,7 +447,7 @@ namespace neogfx::nrc
         void init()
         {
             if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
-                add_data_names({ "enabled", "disabled" });
+                add_data_names({ "enabled", "disabled", "focus_policy" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
                 add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size", "weight" });
             if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
@@ -471,6 +476,7 @@ namespace neogfx::nrc
         std::optional<size> iWeight;
         std::optional<basic_margins<length>> iMargin;
         std::optional<bool> iEnabled;
+        std::pair<std::optional<focus_policy>, bool> iFocusPolicy;
         std::optional<basic_size<length>> iLabelFixedSize;
         std::optional<basic_size<length>> iLabelMinimumSize;
         std::optional<basic_size<length>> iLabelMaximumSize;

@@ -105,12 +105,40 @@ namespace neogfx::nrc
         }
     public:
         template <typename T>
-        T get_enum(const data_t& aVariant) const
+        T get_enum(const data_t& aData) const
         {
-            return neolib::string_to_enum<T>(aVariant.get<neolib::i_string>());
+            return neolib::string_to_enum<T>(aData.get<neolib::i_string>());
         }
         template <typename T>
-        T get_scalar(const data_t& aVariant) const
+        T get_enum(const array_data_t& aArrayData) const
+        {
+            bool ignore;
+            return get_enum<T>(aArrayData, ignore);
+        }
+        template <typename T>
+        T get_enum(const array_data_t& aArrayData, bool& aUseDefault, const std::optional<std::string>& aDefault = {}) const
+        {
+            T result = {};
+            aUseDefault = false;
+            bool first = true;
+            for (auto const& a : aArrayData)
+            {
+                auto const& e = a.get<neolib::i_string>();
+                if (aDefault && e == aDefault)
+                {
+                    aUseDefault = true;
+                    continue;
+                }
+                if (first)
+                    result = neolib::string_to_enum<T>(e);
+                else
+                    result = static_cast<T>(static_cast<std::underlying_type_t<T>>(result) | static_cast<std::underlying_type_t<T>>(neolib::string_to_enum<alignment>(e)));
+                first = false;
+            }
+            return result;
+        }
+        template <typename T>
+        T get_scalar(const data_t& aData) const
         {
             T result;
             std::visit([&result](auto&& v)
@@ -124,14 +152,14 @@ namespace neogfx::nrc
                     result = T::from_string(v.to_std_string());
                 else
                     throw wrong_type();
-            }, aVariant);
+            }, aData);
             return result;
         }
         template <typename T>
-        std::vector<T> get_scalars(const array_data_t& aVariantArray) const
+        std::vector<T> get_scalars(const array_data_t& aArrayData) const
         {
             std::vector<T> result;
-            for (auto const& e : aVariantArray)
+            for (auto const& e : aArrayData)
                 result.push_back(get_scalar<T>(e));
             return result;
         }
@@ -192,7 +220,7 @@ namespace neogfx::nrc
                 throw element_ill_formed(id().to_std_string());
             }
         }
-        colour get_colour(const data_t& aVariant) const
+        colour get_colour(const data_t& aData) const
         {
             colour result;
             std::visit([&result](auto&& v)
@@ -204,15 +232,15 @@ namespace neogfx::nrc
                     result = v.to_std_string();
                 else
                     throw wrong_type();
-            }, aVariant);
+            }, aData);
             return result;
         }
-        colour get_colour(const array_data_t& aVariantArray) const
+        colour get_colour(const array_data_t& aArrayData) const
         {
-            if (aVariantArray.size() == 3)
-                return colour{ neolib::get_as<uint8_t>(aVariantArray[0]), neolib::get_as<uint8_t>(aVariantArray[1]), neolib::get_as<uint8_t>(aVariantArray[2]) };
-            else if (aVariantArray.size() == 4)
-                return colour{ neolib::get_as<uint8_t>(aVariantArray[0]), neolib::get_as<uint8_t>(aVariantArray[1]), neolib::get_as<uint8_t>(aVariantArray[2]), neolib::get_as<uint8_t>(aVariantArray[3]) };
+            if (aArrayData.size() == 3)
+                return colour{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]) };
+            else if (aArrayData.size() == 4)
+                return colour{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]), neolib::get_as<uint8_t>(aArrayData[3]) };
             else
                 throw element_ill_formed(id().to_std_string());
         }
