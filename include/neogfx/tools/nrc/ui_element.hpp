@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
+#include <neogfx/gui/widget/text_field.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
 
 namespace neogfx::nrc
@@ -215,6 +216,13 @@ namespace neogfx::nrc
             else if (aName == "focus_policy")
                 iFocusPolicy.first = get_enum<focus_policy>(aData);
             else if (aName == "text")
+            {
+                if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) != ui_element_type::TextField)
+                    iText = aData.get<neolib::i_string>();
+                else
+                    iFieldText = aData.get<neolib::i_string>();
+            }
+            else if (aName == "label")
                 iText = aData.get<neolib::i_string>();
             else if (aName == "image")
                 iImage = aData.get<neolib::i_string>();
@@ -222,10 +230,15 @@ namespace neogfx::nrc
                 iAspectRatio = get_enum<aspect_ratio>(aData);
             else if (aName == "placement")
             {
-                if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-                    iLabelPlacement = get_enum<label_placement>(aData);
-                else if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-                    iImagePlacement = get_enum<cardinal>(aData);
+                if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) != ui_element_type::TextField)
+                {
+                    if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+                        iLabelPlacement = get_enum<label_placement>(aData);
+                    else if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
+                        iImagePlacement = get_enum<cardinal>(aData);
+                }
+                else
+                    iTextFieldPlacement = get_enum<text_field_placement>(aData);
             }
             else if (aName == "foreground_colour")
                 iForegroundColour = get_colour(aData);
@@ -322,6 +335,8 @@ namespace neogfx::nrc
                 emit("   %1%.label().set_weight(size{ %2%, %3% });\n", id(), iLabelWeight->cx, iLabelWeight->cy);
             if (iLabelPlacement)
                 emit("   %1%.label().set_placement(%2%);\n", id(), enum_to_string("label_placement", *iLabelPlacement));
+            if (iTextFieldPlacement)
+                emit("   %1%.set_placement(%2%);\n", id(), enum_to_string("text_field_placement", *iTextFieldPlacement));
             if (iImageFixedSize)
                 emit("   %1%.image().set_fixed_size(size{ %2%, %3% });\n", id(), iImageFixedSize->cx, iImageFixedSize->cy);
             if (iImageMinimumSize)
@@ -385,6 +400,8 @@ namespace neogfx::nrc
                 else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
                     emit("   %1%.label().text().set_text(\"%2%\"_t);\n", id(), *iText);
             }
+            if (iFieldText)
+                emit("   %1%.input_box().set_text(\"%2%\"_t);\n", id(), *iFieldText);
             if (iOpacity)
                 emit("   %1%.set_opacity(%2%);\n", id(), *iOpacity);
             if (iForegroundColour)
@@ -493,7 +510,9 @@ namespace neogfx::nrc
         std::optional<basic_size<length>> iLabelMaximumSize;
         std::optional<size> iLabelWeight;
         std::optional<label_placement> iLabelPlacement;
+        std::optional<text_field_placement> iTextFieldPlacement;
         std::optional<string> iText;
+        std::optional<string> iFieldText;
         std::optional<string> iImage;
         std::optional<aspect_ratio> iAspectRatio;
         std::optional<cardinal> iImagePlacement;

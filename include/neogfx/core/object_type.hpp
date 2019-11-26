@@ -77,6 +77,7 @@ namespace neogfx
         Label                           = 0x0000000000000110 | Widget | HasText | HasImage,
         TextEdit                        = 0x0000000000000120 | Widget | HasAlignment | HasText,
         LineEdit                        = 0x0000000000000121 | Widget | HasAlignment | HasText,
+        TextField                       = 0x0000000000000122 | Widget | HasLabel,
         DropList                        = 0x0000000000000130 | Widget,
         TableView                       = 0x0000000000000131 | Widget,
         VerticalLayout                  = 0x0000000000000900 | Layout,

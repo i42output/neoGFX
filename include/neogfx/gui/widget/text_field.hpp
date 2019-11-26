@@ -25,12 +25,22 @@
 
 namespace neogfx
 {
-    enum class text_field_placement
+    enum class text_field_placement : uint32_t
     {
         LabelLeft,
         LabelAbove
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::text_field_placement> neolib::enum_enumerators_v<neogfx::text_field_placement>
+{
+    declare_enum_string(neogfx::text_field_placement, LabelLeft)
+    declare_enum_string(neogfx::text_field_placement, LabelAbove)
+};
+
+namespace neogfx
+{
     class text_field : public widget
     {
     private:
@@ -52,6 +62,8 @@ namespace neogfx
         line_edit& input_box();
         const text_widget& hint() const;
         text_widget& hint();
+        text_field_placement placement() const;
+        void set_placement(text_field_placement aPlacement);
         const text_widget& help() const;
         text_widget& help();
     protected:

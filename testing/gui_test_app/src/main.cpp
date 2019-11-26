@@ -305,38 +305,34 @@ int main(int argc, char* argv[])
             else 
                 ui.buttonChina.set_maximum_size(ng::size{ 128_spx, 64_spx });
         });
-        ng::drop_list dropList(ui.layoutDropList);
-        dropList.model().insert_item(dropList.model().end(), "Red");
-        dropList.model().insert_item(dropList.model().end(), "Green");
-        dropList.model().insert_item(dropList.model().end(), "Blue");
-        ng::drop_list dropList2(ui.layoutDropList);
-        dropList2.model().insert_item(dropList2.model().end(), "Square");
-        dropList2.model().insert_item(dropList2.model().end(), "Triangle");
-        dropList2.model().insert_item(dropList2.model().end(), "Circle");
-        ng::drop_list dropList3(ui.layoutDropList);
+        ui.dropList.model().insert_item(ui.dropList.model().end(), "Red");
+        ui.dropList.model().insert_item(ui.dropList.model().end(), "Green");
+        ui.dropList.model().insert_item(ui.dropList.model().end(), "Blue");
+        ui.dropList2.model().insert_item(ui.dropList2.model().end(), "Square");
+        ui.dropList2.model().insert_item(ui.dropList2.model().end(), "Triangle");
+        ui.dropList2.model().insert_item(ui.dropList2.model().end(), "Circle");
         for (int32_t i = 1; i <= 100; ++i)
-            dropList3.model().insert_item(dropList3.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
-        ng::drop_list dropList4(ui.layoutDropList);
+            ui.dropList3.model().insert_item(ui.dropList3.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
         neolib::random prng;
         for (int32_t i = 1; i <= 250; ++i)
         {
             std::string randomString;
             for (uint32_t j = prng(12); j-- > 0;)
                 randomString += static_cast<char>('A' + prng('z' - 'A'));
-            dropList4.model().insert_item(dropList4.model().end(), randomString);
+            ui.dropList4.model().insert_item(ui.dropList4.model().end(), randomString);
         }
         ui.toggleEditable.Toggled([&]()
         {
-            dropList.set_editable(!dropList.editable());
-            dropList2.set_editable(!dropList2.editable());
-            dropList3.set_editable(!dropList3.editable());
-            dropList4.set_editable(!dropList4.editable());
+            ui.dropList.set_editable(!ui.dropList.editable());
+            ui.dropList2.set_editable(!ui.dropList2.editable());
+            ui.dropList3.set_editable(!ui.dropList3.editable());
+            ui.dropList4.set_editable(!ui.dropList4.editable());
         });
         ui.buttonGenerateUuid.clicked([&]() { ui.textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
-        dropList.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
-        dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
+        ui.dropList.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
+        ui.dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
+        ui.dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
+        ui.dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
         ng::slider effectWidthSlider{ ui.layoutEdit, ng::slider::Vertical };
         effectWidthSlider.set_minimum(1);
         effectWidthSlider.set_maximum(10);
@@ -347,14 +343,10 @@ int main(int argc, char* argv[])
         effectAux1Slider.set_maximum(10.0);
         effectAux1Slider.set_step(0.1);
         effectAux1Slider.set_value(1.0);
-        ng::text_field textField1(ui.layoutLineEdits2, "First field:", "Enter text", ng::text_field_placement::LabelLeft);
-        ng::text_field textField2(ui.layoutLineEdits2, "Second field:", "Enter text", ng::text_field_placement::LabelLeft);
-        ng::text_field textField3(ui.layoutLineEdits3, "Third field (label above)", "Enter text", ng::text_field_placement::LabelAbove);
-        ng::text_field textField4(ui.layoutLineEdits3, "Fourth field (label above)", "Enter text", ng::text_field_placement::LabelAbove);
-        ng::layout_as_same_size(textField1.label(), textField2.label());
-        textField1.input_box().TextChanged([&ui, &textField1]()
+        ng::layout_as_same_size(ui.textField1.label(), ui.textField2.label());
+        ui.textField1.input_box().TextChanged([&ui]()
         {
-            ui.button1.text().set_text(textField1.input_box().text());
+            ui.button1.text().set_text(ui.textField1.input_box().text());
         });
         ng::double_spin_box spinBox1(ui.layoutSpinners2);
         spinBox1.set_minimum(-100.0);
@@ -427,15 +419,15 @@ int main(int argc, char* argv[])
         {
             ui.textEdit.set_word_wrap(false);
         });
-        ui.checkPassword.checked([&textField2]()
+        ui.checkPassword.checked([&]()
         {
-            textField2.hint().set_text("Enter password");
-            textField2.input_box().set_password(true);
+            ui.textField2.hint().set_text("Enter password");
+            ui.textField2.input_box().set_password(true);
         });
-        ui.checkPassword.Unchecked([&textField2]()
+        ui.checkPassword.Unchecked([&]()
         {
-            textField2.hint().set_text("Enter text");
-            textField2.input_box().set_password(false);
+            ui.textField2.hint().set_text("Enter text");
+            ui.textField2.input_box().set_password(false);
         });
         ui.checkGroupBoxCheckable.checked([&showFps, &fullRefresh, &ui]()
         {
@@ -604,8 +596,8 @@ int main(int argc, char* argv[])
             {
                 sInk = colourPicker.selected_colour();
                 ui.textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
-                textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
-                textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+                ui.textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+                ui.textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
             }
             sCustomColours = colourPicker.custom_colours();
         });

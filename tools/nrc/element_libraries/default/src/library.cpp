@@ -37,8 +37,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tab_page.hpp"
 #include "button.hpp"
 #include "label.hpp"
-#include "line_edit.hpp"
 #include "text_edit.hpp"
+#include "line_edit.hpp"
+#include "text_field.hpp"
 #include "drop_list.hpp"
 #include "table_view.hpp"
 #include "group_box.hpp"
@@ -73,6 +74,7 @@ namespace neogfx::nrc
             { ".image", ui_element_type::HasImage },
             { "text_edit", ui_element_type::LayoutItem },
             { "line_edit", ui_element_type::LayoutItem },
+            { "text_field", ui_element_type::LayoutItem },
             { "drop_list", ui_element_type::LayoutItem },
             { "table_view", ui_element_type::LayoutItem },
             { "group_box", ui_element_type::LayoutItem },
@@ -140,6 +142,7 @@ namespace neogfx::nrc
             { "label", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new label{ aParser, aParent }; } },
             { "text_edit", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_edit{ aParser, aParent }; } },
             { "line_edit", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new line_edit{ aParser, aParent }; } },
+            { "text_field", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_field{ aParser, aParent }; } },
             { "drop_list", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new drop_list{ aParser, aParent }; } },
             { "table_view", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new table_view{ aParser, aParent }; } },
             { "group_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new group_box{ aParser, aParent }; } },

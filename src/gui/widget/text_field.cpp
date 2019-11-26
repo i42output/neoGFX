@@ -113,6 +113,28 @@ namespace neogfx
         return iHint;
     }
 
+    text_field_placement text_field::placement() const
+    {
+        return iPlacement;
+    }
+
+    void text_field::set_placement(text_field_placement aPlacement)
+    {
+        if (iPlacement != aPlacement)
+        {
+            iPlacement = aPlacement;
+            switch (iPlacement)
+            {
+            case text_field_placement::LabelLeft:
+                iInputLayout.add_at(0, iLabel);
+                break;
+            case text_field_placement::LabelAbove:
+                iLayout.add_at(0, iLabel);
+                break;
+            }
+        }
+    }
+
     const text_widget& text_field::help() const
     {
         return iHelp;
