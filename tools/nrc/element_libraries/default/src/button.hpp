@@ -30,7 +30,7 @@ namespace neogfx::nrc
     {
     public:
         basic_button(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ButtonType }
+            ui_element<>{ aParser, aParent, ButtonType }
         {
             add_data_names({ "checkable" });
         }

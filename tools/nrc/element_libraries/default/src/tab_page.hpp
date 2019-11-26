@@ -28,7 +28,7 @@ namespace neogfx::nrc
     {
     public:
         tab_page(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::TabPage },
+            ui_element<>{ aParser, aParent, ui_element_type::TabPage },
             iTab{ aParent.parser().get_optional<neolib::string>("tab") },
             iTabText{ aParent.parser().get_optional<neolib::string>("tab_text") },
             iTabImage{ aParent.parser().get_optional<neolib::string>("tab_image") }

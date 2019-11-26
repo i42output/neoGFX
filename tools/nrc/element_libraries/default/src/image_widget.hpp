@@ -28,7 +28,7 @@ namespace neogfx::nrc
     {
     public:
         image_widget(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::ImageWidget }
+            ui_element<>{ aParser, aParent, ui_element_type::ImageWidget }
         {
         }
     public:

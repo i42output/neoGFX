@@ -51,12 +51,23 @@ namespace neogfx::nrc
     protected:
         typedef std::set<std::string> data_names_t;
     public:
-        ui_element(const i_ui_element_parser& aParser, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
+        ui_element(const i_ui_element_parser& aParser, ui_element_type aType) :
+            iParser{ aParser }, iParent{ nullptr }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
+        {
+            init();
+        }
+        ui_element(const i_ui_element_parser& aParser, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
             iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
             init();
         }
-        ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::optional<neolib::string>& aId, ui_element_type aType) :
+        ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType) :
+            iParser{ aParser }, iParent{ &aParent }, iAnonymousIdCounter{ 0u }, iId{ aParser.get_optional<neolib::string>("id") }, iType{ aType }
+        {
+            init();
+            parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
+        }
+        ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
             iParser{ aParser }, iParent{ &aParent }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
         {
             init();

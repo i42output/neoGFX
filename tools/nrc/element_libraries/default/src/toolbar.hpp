@@ -30,7 +30,7 @@ namespace neogfx::nrc
     {
     public:
         toolbar(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Toolbar }
+            ui_element<>{ aParser, aParent, ui_element_type::Toolbar }
         {
             add_data_names({ "action" });
         }

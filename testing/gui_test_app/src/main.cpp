@@ -337,7 +337,6 @@ int main(int argc, char* argv[])
         dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
         dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
         dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
-        ui.textEdit.set_tab_stop_hint("00000000");
         ng::slider effectWidthSlider{ ui.layoutEdit, ng::slider::Vertical };
         effectWidthSlider.set_minimum(1);
         effectWidthSlider.set_maximum(10);

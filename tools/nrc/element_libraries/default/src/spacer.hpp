@@ -30,7 +30,7 @@ namespace neogfx::nrc
     {
     public:
         basic_spacer(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), SpacerType }
+            ui_element<>{ aParser, aParent, SpacerType }
         {
         }
     public:

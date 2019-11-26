@@ -27,9 +27,10 @@ namespace neogfx::nrc
     class text_edit : public ui_element<>
     {
     public:
-        text_edit(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::TextEdit }
+        text_edit(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aElementType = ui_element_type::TextEdit) :
+            ui_element<>{ aParser, aParent, aElementType }
         {
+            add_data_names({ "tab_stop_hint" });
         }
     public:
         const neolib::i_string& header() const override
@@ -41,6 +42,8 @@ namespace neogfx::nrc
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
             ui_element<>::parse(aName, aData);
+            if (aName == "tab_stop_hint")
+                iTabStopHint = aData.get<neolib::i_string>();
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
@@ -52,7 +55,8 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  text_edit %1%;\n", id());
+            if (type() == ui_element_type::TextEdit)
+                emit("  text_edit %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -63,9 +67,12 @@ namespace neogfx::nrc
         void emit_body() const override
         {
             ui_element<>::emit_body();
+            if (iTabStopHint)
+                emit("   %1%.set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
         }
     protected:
         using ui_element<>::emit;
     private:
+        std::optional<string> iTabStopHint;
     };
 }

@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
+#include "text_edit.hpp"
 
 namespace neogfx::nrc
 {
-    class line_edit : public ui_element<>
+    class line_edit : public text_edit
     {
     public:
         line_edit(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::LineEdit }
+            text_edit{ aParser, aParent, ui_element_type::LineEdit }
         {
         }
     public:
@@ -40,11 +41,11 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            ui_element<>::parse(aName, aData);
+            text_edit::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            ui_element<>::parse(aName, aData);
+            text_edit::parse(aName, aData);
         }
     protected:
         void emit() const override
@@ -53,16 +54,15 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             emit("  line_edit %1%;\n", id());
-            ui_element<>::emit_preamble();
+            text_edit::emit_preamble();
         }
         void emit_ctor() const override
         {
-            ui_element<>::emit_generic_ctor();
-            ui_element<>::emit_ctor();
+            text_edit::emit_ctor();
         }
         void emit_body() const override
         {
-            ui_element<>::emit_body();
+            text_edit::emit_body();
         }
     protected:
         using ui_element<>::emit;

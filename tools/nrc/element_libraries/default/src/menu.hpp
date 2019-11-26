@@ -30,7 +30,7 @@ namespace neogfx::nrc
     {
     public:
         menu(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), ui_element_type::Menu },
+            ui_element<>{ aParser, aParent, ui_element_type::Menu },
             iTitle{ aParent.parser().get_optional<neolib::string>("title") },
             iImage{ aParent.parser().get_optional<neolib::string>("image") }
         {

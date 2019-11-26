@@ -29,7 +29,7 @@ namespace neogfx::nrc
     {
     public:
         basic_layout(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get_optional<neolib::string>("id"), LayoutType }
+            ui_element<>{ aParser, aParent, LayoutType }
         {
             add_data_names({ "spacing" });
         }

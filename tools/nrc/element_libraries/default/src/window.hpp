@@ -28,7 +28,7 @@ namespace neogfx::nrc
     {
     public:
         window(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, aParser.get<neolib::string>("id"), ui_element_type::Window }
+            ui_element<>{ aParser, aParent, ui_element_type::Window, aParser.get<neolib::string>("id") }
         {
             add_data_names({ "default_size" });
             emplace_2<length>("default_size", iDefaultSize);
