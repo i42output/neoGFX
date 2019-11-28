@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include "layout.hpp"
+#include <neogfx/gui/layout/layout.hpp>
 
 namespace neogfx
 {

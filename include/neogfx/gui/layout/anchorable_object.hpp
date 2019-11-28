@@ -21,34 +21,43 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/object.hpp>
-#include <neogfx/gui/layout/i_anchors.hpp>
+#include <neogfx/gui/layout/i_anchorable_object.hpp>
 
 namespace neogfx
 {
     template <typename Base>
-    class anchorable_object : public object<Base>, public i_anchors
+    class anchorable_object : public object<Base>
     {
+        typedef anchorable_object<Base> self_type;
+        typedef Base base_type;
+        // types
     public:
-        const i_anchors& anchors() const override
-        {
-            return *this;
-        }
-        i_anchors& anchors() override
-        {
-            return *this;
-        }
-        // i_properties
+        using base_type::abstract_type;
+        typedef neolib::map<neolib::string, i_anchor_base*> anchor_map_type;
+        // operations
     public:
-        void register_anchor(i_anchor_base& aAnchor) override
+        void anchor_to(i_anchorable_object& aRhs, const neolib::i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const neolib::i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
-            iAnchors.emplace(aAnchor.name(), &aAnchor);
+            auto lhsAnchor = anchors().find(aLhsAnchor);
+            auto rhsAnchor = aRhs.anchors().find(aRhsAnchor);
+            if (lhsAnchor == anchors().end())
+                throw anchor_not_found(aLhsAnchor);
+            if (rhsAnchor == aRhs.anchors().end())
+                throw anchor_not_found(aRhsAnchor);
+            lhsAnchor->second()->constrain(*rhsAnchor->second(), aLhsFunction, aRhsFunction);
         }
-        const neogfx::anchor_map& anchor_map() const override
+        // state
+    public:
+        const anchor_map_type& anchors() const override
+        {
+            return iAnchors;
+        }
+        anchor_map_type& anchors() override
         {
             return iAnchors;
         }
         // state
     private:
-        neogfx::anchor_map iAnchors;
+        anchor_map_type iAnchors;
     };
 }

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
+#include <neogfx/gui/layout/i_anchorable_object.hpp>
 
 namespace neogfx
 {
@@ -28,7 +29,7 @@ namespace neogfx
     class i_widget;
     class i_layout_item_proxy;
 
-    class i_layout_item : public i_geometry
+    class i_layout_item : public i_geometry, public i_anchorable_object
     {
     public:
         struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::i_layout_item::not_a_layout") {} };

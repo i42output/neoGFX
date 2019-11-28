@@ -22,7 +22,6 @@
 #include <neogfx/neogfx.hpp>
 #include <unordered_set>
 #include <neogfx/core/event.hpp>
-#include <neogfx/gui/layout/i_anchorable_object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
@@ -37,7 +36,7 @@ namespace neogfx
     class i_surface;
     class i_layout;
 
-    class i_widget : public i_anchorable_object, public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
+    class i_widget : public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
     {
     public:
         declare_event(visibility_changed)

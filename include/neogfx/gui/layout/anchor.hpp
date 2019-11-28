@@ -30,32 +30,69 @@ namespace neogfx
     {
         typedef i_anchor<T, GetterArgs...> base_type;
     public:
-        typedef typename base_type::value_type value_type;
-        typedef typename base_type::constraint constraint;
+        using typename base_type::abstract_type;
+        using typename base_type::value_type;
+        using typename base_type::constraint;
     private:
         typedef std::function<value_type(GetterArgs...)> value_getter_t;
-        typedef std::pair<constraint, std::shared_ptr<base_type>> constraint_entry_t;
+        typedef std::pair<constraint, std::shared_ptr<i_anchor_base>> constraint_entry_t;
         typedef std::vector<constraint_entry_t> constraint_entries_t;
     public:
         anchor(i_anchorable_object& aOwner, const std::string& aName, value_getter_t aValueGetter) :
             iOwner{ aOwner }, iName { aName }, iValueGetter{ aValueGetter }
         {
-            aOwner.anchors().register_anchor(*this);
+            iOwner.anchors()[name()] = this;
+        }
+        ~anchor()
+        {
+            auto iter = iOwner.anchors().find(name());
+            if (iter != iOwner.anchors().end())
+                iOwner.anchors().erase(iter);
         }
     public:
-        const std::string& name() const override
+        const neolib::string& name() const override
         {
             return iName;
         }
+    public:
+        void constrain(i_anchor_base& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) override
+        {
+            constrain(aRhs, aRhsFunction);
+            aRhs.constrain(*this, aLhsFunction);
+        }
+        void constrain(i_anchor_base& aOther, anchor_constraint_function aOtherFunction) override
+        {
+            switch (aOtherFunction)
+            {
+            case anchor_constraint_function::Identity:
+                add_constraint(constraint::identity, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::Equal:
+                add_constraint(constraint::equal, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::Min:
+                add_constraint(constraint::min, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::Max:
+                add_constraint(constraint::max, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::Custom:
+                // todo
+                break;
+            default:
+                break;
+            }
+        }
+    public:
         value_type value(GetterArgs... aArguments) const override
         {
             return iValueGetter(std::forward<GetterArgs>(aArguments)...);
         }
-        void add_constraint(constraint aConstraint, base_type& aOtherAnchor) override
+        void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) override
         {
-            add_constraint(aConstraint, std::shared_ptr<base_type>{ std::shared_ptr<base_type>{}, &aOtherAnchor });
+            add_constraint(aConstraint, std::shared_ptr<base_type>{ std::shared_ptr<abstract_type>{}, &aOtherAnchor });
         }
-        void add_constraint(constraint aConstraint, std::shared_ptr<base_type> aOtherAnchor) override
+        void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) override
         {
             iConstraints.push_back(constraint_entry_t{ aConstraint, aOtherAnchor });
         }
@@ -63,23 +100,15 @@ namespace neogfx
         {
             auto result = value(std::forward<GetterArgs>(aArguments)...);
             for (auto const& c : iConstraints)
-                result = c.first(result, c.second->value(std::forward<GetterArgs>(aArguments)...));
+                result = c.first(result, static_cast<base_type&>(*c.second).value(std::forward<GetterArgs>(aArguments)...));
             return result;
         }
     private:
         i_anchorable_object& iOwner;
-        std::string iName;
+        neolib::string iName;
         value_getter_t iValueGetter;
         constraint_entries_t iConstraints;
     };
-
-    inline void layout_as_same_size(i_anchorable_object& aFirst, i_anchorable_object& aSecond)
-    {
-        auto& first = *aFirst.anchors().anchor_map().find("MinimumSize")->second;
-        auto& second = *aSecond.anchors().anchor_map().find("MinimumSize")->second;
-        first.as<size, const optional_size&>().add_constraint(anchor_constraint<size>::max, second.as<size, const optional_size&>());
-        second.as<size, const optional_size&>().add_constraint(anchor_constraint<size>::max, first.as<size, const optional_size&>());
-    }
 
     #define define_anchor( name, getter, ... ) neogfx::anchor<__VA_ARGS__> Anchor_##name = { *this, #name ##s, getter };
 }

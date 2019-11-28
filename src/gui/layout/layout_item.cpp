@@ -63,6 +63,21 @@ namespace neogfx
         return iSubject;
     }
 
+    void layout_item::anchor_to(i_anchorable_object& aRhs, const neolib::i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const neolib::i_string& aRhsAnchor, anchor_constraint_function aRhsFunction)
+    {
+        return subject().anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
+    }
+
+    const layout_item::anchor_map_type& layout_item::anchors() const
+    {
+        return subject().anchors();
+    }
+
+    layout_item::anchor_map_type& layout_item::anchors()
+    {
+        return subject().anchors();
+    }
+
     bool layout_item::is_layout() const
     {
         return subject().is_layout();
@@ -265,7 +280,13 @@ namespace neogfx
         else
         {
             if (iMinimumSizeAnchor == std::nullopt)
-                iMinimumSizeAnchor = is_widget() ? static_cast<i_anchor<size, optional_size>*>(&*as_widget().anchors().anchor_map().find("MinimumSize")->second) : nullptr;
+            {   
+                auto anchorIter = anchors().find(neolib::string{ "MinimumSize" });
+                if (anchorIter != anchors().end())
+                    iMinimumSizeAnchor = static_cast<i_anchor<size, optional_size>*>(anchorIter->second());
+                else
+                    iMinimumSizeAnchor = nullptr;
+            }
             if (*iMinimumSizeAnchor == nullptr)
                 iMinimumSize = subject().minimum_size(aAvailableSpace);
             else

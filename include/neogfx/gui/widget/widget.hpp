@@ -23,8 +23,8 @@
 #include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
-#include <neogfx/gui/layout/anchorable_object.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
+#include <neogfx/gui/layout/anchorable_object.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
@@ -265,7 +265,7 @@ namespace neogfx
         class layout_timer;
         std::unique_ptr<layout_timer> iLayoutTimer;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
-        // properties
+        // properties / anchors
     public:
         struct property_category
         {

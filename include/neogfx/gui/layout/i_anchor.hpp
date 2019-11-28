@@ -21,7 +21,30 @@
 
 #include <neogfx/neogfx.hpp>
 #include <functional>
+#include <neolib/i_enum.hpp>
 #include <neogfx/core/geometrical.hpp>
+
+namespace neogfx
+{
+    enum class anchor_constraint_function : uint32_t
+    {
+        Identity,
+        Equal,
+        Min,
+        Max,
+        Custom // todo
+    };
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::anchor_constraint_function> neolib::enum_enumerators_v<neogfx::anchor_constraint_function>
+{
+    declare_enum_string(neogfx::anchor_constraint_function, Identity)
+    declare_enum_string(neogfx::anchor_constraint_function, Equal)
+    declare_enum_string(neogfx::anchor_constraint_function, Min)
+    declare_enum_string(neogfx::anchor_constraint_function, Max)
+    declare_enum_string(neogfx::anchor_constraint_function, Custom)
+};
 
 namespace neogfx
 {
@@ -34,13 +57,16 @@ namespace neogfx
     public:
         using base_type::base_type;
     public:
-        static anchor_constraint<T> equal_to;
+        static anchor_constraint<T> identity;
+        static anchor_constraint<T> equal;
         static anchor_constraint<T> min;
         static anchor_constraint<T> max;
     };
 
     template <typename T>
-    anchor_constraint<T> anchor_constraint<T>::equal_to = [](const T&, const T& rhs) -> T { return rhs; };
+    anchor_constraint<T> anchor_constraint<T>::identity = [](const T& lhs, const T&) -> T { return lhs; };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::equal = [](const T&, const T& rhs) -> T { return rhs; };
     template <typename T>
     anchor_constraint<T> anchor_constraint<T>::min = [](const T& lhs, const T& rhs) -> T { return std::min(lhs, rhs); };
     template <typename T>
@@ -51,10 +77,16 @@ namespace neogfx
 
     class i_anchor_base
     {
+        // construction
     public:
         virtual ~i_anchor_base() {}
+        // meta
     public:
-        virtual const std::string& name() const = 0;
+        virtual const neolib::i_string& name() const = 0;
+        // operations
+    public:
+        virtual void constrain(i_anchor_base& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) = 0;
+        virtual void constrain(i_anchor_base& aOther, anchor_constraint_function aOtherFunction) = 0;
         // helpers
     public:
         template <typename T, typename... GetterArgs>
@@ -68,12 +100,13 @@ namespace neogfx
     {
         typedef i_anchor<T, GetterArgs...> self_type;
     public:
+        typedef self_type abstract_type;
         typedef T value_type;
         typedef anchor_constraint<value_type> constraint;
     public:
         virtual value_type value(GetterArgs... aArguments) const = 0;
-        virtual void add_constraint(constraint aConstraint, self_type& aOtherAnchor) = 0;
-        virtual void add_constraint(constraint aConstraint, std::shared_ptr<self_type> aOtherAnchor) = 0;
+        virtual void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) = 0;
+        virtual void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) = 0;
         virtual value_type evaluate_constraints(GetterArgs... aArguments) const = 0;
     };
 

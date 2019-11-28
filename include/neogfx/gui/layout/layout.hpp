@@ -25,14 +25,16 @@
 #include <neolib/variant.hpp>
 #include <neolib/lifetime.hpp>
 #include <neogfx/core/units.hpp>
-#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
+#include <neogfx/gui/layout/anchor.hpp>
+#include <neogfx/gui/layout/anchorable_object.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 
 namespace neogfx
 {
     class i_spacer;
 
-    class layout : public i_layout
+    class layout : public anchorable_object<i_layout>
     {
     public:
         define_declared_event(LayoutCompleted, layout_completed)
@@ -192,5 +194,8 @@ namespace neogfx
         bool iLayoutStarted;
         uint32_t iLayoutId;
         bool iInvalidated;
+        // properties / anchors
+    public:
+        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, const optional_size&)
     };
 }

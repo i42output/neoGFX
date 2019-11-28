@@ -20,18 +20,23 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/object.hpp>
 #include <neogfx/gui/layout/i_anchor.hpp>
 #include <neogfx/gui/layout/i_layout_item_proxy.hpp>
 
 namespace neogfx
 {
-    class layout_item : public i_layout_item_proxy
+    class layout_item : public object<i_layout_item_proxy>
     {
     public:
         layout_item(i_layout_item& aItem);
         layout_item(std::shared_ptr<i_layout_item> aItem);
         layout_item(const layout_item& aOther);
         ~layout_item();
+    public:
+        void anchor_to(i_anchorable_object& aRhs, const neolib::i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const neolib::i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
+        const anchor_map_type& anchors() const override;
+        anchor_map_type& anchors() override;
     public:
         bool is_layout() const override;
         const i_layout& as_layout() const override;

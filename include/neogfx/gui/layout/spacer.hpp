@@ -20,13 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gui/layout/anchor.hpp>
+#include <neogfx/gui/layout/anchorable_object.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 
 namespace neogfx
 {
     class i_layout;
 
-    class spacer : public i_spacer
+    class spacer : public anchorable_object<i_spacer>
     {
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };
@@ -99,6 +101,9 @@ namespace neogfx
         optional_margins iMargins;
         neogfx::expansion_policy iExpansionPolicy;
         optional_size iWeight;
+        // properties / anchors
+    public:
+        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, const optional_size&)
     };
 
     class horizontal_spacer : public spacer

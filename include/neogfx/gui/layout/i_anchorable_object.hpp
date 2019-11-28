@@ -20,15 +20,38 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/map.hpp>
+#include <neolib/string.hpp>
 #include <neogfx/core/object.hpp>
-#include <neogfx/gui/layout/i_anchors.hpp>
+#include <neogfx/gui/layout/i_anchor.hpp>
 
 namespace neogfx
 {
+    struct anchor_not_found : std::runtime_error { anchor_not_found(const std::string& aAnchor) : std::runtime_error{ "neoGFX: Anchor '" + aAnchor + "' not found." } {} };
+
     class i_anchorable_object : public virtual i_object
     {
+        // types
     public:
-        virtual const i_anchors& anchors() const = 0;
-        virtual i_anchors& anchors() = 0;
+        typedef i_anchorable_object abstract_type;
+        typedef neolib::i_map<neolib::i_string, i_anchor_base*> anchor_map_type;
+        // operations
+    public:
+        virtual void anchor_to(i_anchorable_object& aRhs, const neolib::i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const neolib::i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) = 0;
+        // state
+    public:
+        virtual const anchor_map_type& anchors() const = 0;
+        virtual anchor_map_type& anchors() = 0;
+        // helpers
+    public:
+        void anchor_to(i_anchorable_object& aRhs, const std::string& aLhsAnchor, const std::string& aRhsAnchor)
+        {
+            return anchor_to(aRhs, neolib::string{ aLhsAnchor }, neolib::string{ aRhsAnchor });
+        }
     };
+
+    inline void layout_as_same_size(i_anchorable_object& aFirst, i_anchorable_object& aSecond)
+    {
+        aFirst.anchor_to(aSecond, neolib::string{ "MinimumSize" }, anchor_constraint_function::Max, neolib::string{ "MinimumSize" }, anchor_constraint_function::Max);
+    }
 }
