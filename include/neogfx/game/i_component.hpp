@@ -36,11 +36,11 @@ namespace neogfx::game
         virtual const component_id& id() const = 0;
     public:
         virtual bool is_data_optional() const = 0;
-        virtual const neolib::i_string& name() const = 0;
+        virtual const i_string& name() const = 0;
         virtual uint32_t field_count() const = 0;
         virtual component_data_field_type field_type(uint32_t aFieldIndex) const = 0;
         virtual neolib::uuid field_type_id(uint32_t aFieldIndex) const = 0;
-        virtual const neolib::i_string& field_name(uint32_t aFieldIndex) const = 0;
+        virtual const i_string& field_name(uint32_t aFieldIndex) const = 0;
     };
 
     class i_shared_component : public i_component_base

@@ -44,9 +44,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0xf0481779, 0xc203, 0x4c7c, 0x9d8d, { 0x9d, 0x3d, 0xaf, 0x34, 0x71, 0x58 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Rigid Body";
+                static const string sName = "Rigid Body";
                 return sName;
             }
             static uint32_t field_count()
@@ -73,9 +73,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] = 
+                static const string sFieldNames[] = 
                 {
                     "Position",
                     "Mass",

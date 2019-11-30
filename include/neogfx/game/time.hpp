@@ -31,7 +31,7 @@ namespace neogfx::game
         time(game::i_ecs& aEcs);
     public:
         const system_id& id() const override;
-        const neolib::i_string& name() const override;
+        const i_string& name() const override;
     public:
         void apply() override;
     public:
@@ -45,9 +45,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x714a0e4a, 0xd0be, 0x4737, 0xbd25, { 0xe8, 0x3e, 0x2a, 0x5c, 0xd7, 0x65 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Time";
+                static const string sName = "Time";
                 return sName;
             }
         };

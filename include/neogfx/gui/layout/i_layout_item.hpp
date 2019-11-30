@@ -55,8 +55,8 @@ namespace neogfx
         virtual i_widget& layout_owner() = 0;
         virtual void set_layout_owner(i_widget* aOwner) = 0;
         virtual bool is_proxy() const = 0;
-        virtual const i_layout_item_proxy& layout_item_proxy() const = 0;
-        virtual i_layout_item_proxy& layout_item_proxy() = 0;
+        virtual const i_layout_item_proxy& proxy_for_layout() const = 0;
+        virtual i_layout_item_proxy& proxy_for_layout() = 0;
     public:
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:

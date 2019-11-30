@@ -34,7 +34,7 @@ namespace neogfx::game
     {
     public:
         virtual const entity_archetype_id& id() const = 0;
-        virtual const neolib::i_string& name() const = 0;
+        virtual const i_string& name() const = 0;
         virtual const neolib::i_set<component_id>& components() const = 0;
         virtual neolib::i_set<component_id>& components() = 0;
         virtual void populate_default_components(i_ecs& aEcs, entity_id aEntity) = 0;

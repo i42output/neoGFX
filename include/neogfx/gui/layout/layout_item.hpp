@@ -1,7 +1,7 @@
 // layout_item.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,86 +20,34 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/object.hpp>
-#include <neogfx/gui/layout/i_anchor.hpp>
-#include <neogfx/gui/layout/i_layout_item_proxy.hpp>
+#include <neogfx/gui/layout/i_layout_item.hpp>
+#include <neogfx/gui/layout/anchor.hpp>
+#include <neogfx/gui/layout/anchorable_object.hpp>
 
 namespace neogfx
 {
-    class layout_item : public object<i_layout_item_proxy>
+    template <typename Base>
+    class layout_item : public anchorable_object<Base>
     {
+        typedef layout_item<Base> self_type;
+        typedef anchorable_object<Base> base_type;
+        // types
     public:
-        layout_item(i_layout_item& aItem);
-        layout_item(std::shared_ptr<i_layout_item> aItem);
-        layout_item(const layout_item& aOther);
-        ~layout_item();
+        using typename base_type::abstract_type;
+        // properties / anchors
     public:
-        void anchor_to(i_anchorable_object& aRhs, const neolib::i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const neolib::i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
-        const anchor_map_type& anchors() const override;
-        anchor_map_type& anchors() override;
-    public:
-        bool is_layout() const override;
-        const i_layout& as_layout() const override;
-        i_layout& as_layout() override;
-        bool is_widget() const override;
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
-    public:
-        bool is_spacer() const;
-    public:
-        bool has_parent_layout() const override;
-        const i_layout& parent_layout() const override;
-        i_layout& parent_layout() override;
-        void set_parent_layout(i_layout* aParentLayout);
-        bool has_layout_owner() const override;
-        const i_widget& layout_owner() const override;
-        i_widget& layout_owner() override;
-        void set_layout_owner(i_widget* aOwner) override;
-        bool is_proxy() const override;
-        const i_layout_item_proxy& layout_item_proxy() const override;
-        i_layout_item_proxy& layout_item_proxy() override;
-    public:
-        bool high_dpi() const override;
-        dimension dpi_scale_factor() const override;
-    public:
-        bool device_metrics_available() const override;
-        const i_device_metrics& device_metrics() const override;
-    public:
-        point position() const override;
-        void set_position(const point& aPosition) override;
-        size extents() const override;
-        void set_extents(const size& aExtents) override;
-        bool has_size_policy() const override;
-        neogfx::size_policy size_policy() const override;
-        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        bool has_weight() const override;
-        size weight() const override;
-        void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
-        bool has_minimum_size() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
-        bool has_maximum_size() const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
-    public:
-        bool has_margins() const override;
-        neogfx::margins margins() const override;
-        void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
-    public:
-        bool visible() const override;
-    public:
-        void layout_as(const point& aPosition, const size& aSize) override;
-    public:
-        const i_layout_item& subject() const override;
-        i_layout_item& subject() override;
-        std::shared_ptr<i_layout_item> subject_ptr() override;
-    public:
-        bool operator==(const layout_item& aOther) const;
-    private:
-        std::shared_ptr<i_layout_item> iSubject;
-        mutable std::pair<uint32_t, uint32_t> iLayoutId;
-        mutable size iMinimumSize;
-        mutable size iMaximumSize;
-        mutable std::optional<i_anchor<size, optional_size>*> iMinimumSizeAnchor;
+        define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem)
+        define_property(property_category::soft_geometry, point, Position)
+        define_property(property_category::soft_geometry, size, Size)
+        define_optional_property(property_category::hard_geometry, optional_margins, Margins, margins)
+        define_optional_property(property_category::hard_geometry, optional_size_policy, SizePolicy, size_policy)
+        define_optional_property(property_category::hard_geometry, optional_size, Weight, weight)
+        define_optional_property(property_category::hard_geometry, optional_size, MinimumSize, minimum_size)
+        define_optional_property(property_category::hard_geometry, optional_size, MaximumSize, maximum_size)
+        define_anchor(Position)
+        define_anchor(Size)
+        define_anchor(Margins)
+        define_anchor(MinimumSize)
+        define_anchor(MaximumSize)
     };
 }

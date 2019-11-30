@@ -41,9 +41,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x57fe17a3, 0x4f8, 0x4386, 0x8dad, { 0xf2, 0x1d, 0x5f, 0xd8, 0xe2, 0x6b } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Animation";
+                static const string sName = "Animation";
                 return sName;
             }
             static uint32_t field_count()
@@ -74,9 +74,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Frame Durations",
                     "Frame Filters"

@@ -33,7 +33,7 @@ namespace neogfx::game
         ~simple_physics();
     public:
         const system_id& id() const override;
-        const neolib::i_string& name() const override;
+        const i_string& name() const override;
     public:
         void apply() override;
         void terminate() override;
@@ -49,9 +49,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8,{ 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Simple Physics";
+                static const string sName = "Simple Physics";
                 return sName;
             }
         };

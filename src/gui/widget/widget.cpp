@@ -564,7 +564,7 @@ namespace neogfx
             auto itemIndex = parent_layout().find(*this);
             if (itemIndex == std::nullopt)
                 throw i_layout::item_not_found();
-            aOwner->add(std::dynamic_pointer_cast<i_widget>(layout_item_proxy().subject_ptr()));
+            aOwner->add(std::dynamic_pointer_cast<i_widget>(proxy_for_layout().subject_ptr()));
         }
     }
 
@@ -573,12 +573,12 @@ namespace neogfx
         return false;
     }
 
-    const i_layout_item_proxy& widget::layout_item_proxy() const
+    const i_layout_item_proxy& widget::proxy_for_layout() const
     {
         return parent_layout().find_proxy(*this);
     }
 
-    i_layout_item_proxy& widget::layout_item_proxy()
+    i_layout_item_proxy& widget::proxy_for_layout()
     {
         return parent_layout().find_proxy(*this);
     }

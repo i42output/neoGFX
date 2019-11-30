@@ -20,26 +20,29 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/optional.hpp>
+#include <neogfx/core/property.hpp>
 #include <neogfx/gui/layout/i_anchorable_object.hpp>
 #include <neogfx/gui/layout/i_anchor.hpp>
 
 namespace neogfx
 {
-    template <typename T, typename... GetterArgs>
-    class anchor : public i_anchor<T, GetterArgs...>
+    template <typename Property>
+    class anchor : public i_calculating_anchor<neolib::optional_t<typename Property::value_type>, typename Property::calculator_function_type>
     {
-        typedef i_anchor<T, GetterArgs...> base_type;
+        typedef i_calculating_anchor<neolib::optional_t<typename Property::value_type>, typename Property::calculator_function_type> base_type;
     public:
+        typedef Property property_type;
         using typename base_type::abstract_type;
         using typename base_type::value_type;
         using typename base_type::constraint;
     private:
-        typedef std::function<value_type(GetterArgs...)> value_getter_t;
-        typedef std::pair<constraint, std::shared_ptr<i_anchor_base>> constraint_entry_t;
+        typedef typename property_type::calculator_function_type calculator_function_type;
+        typedef std::pair<constraint, std::shared_ptr<i_anchor>> constraint_entry_t;
         typedef std::vector<constraint_entry_t> constraint_entries_t;
     public:
-        anchor(i_anchorable_object& aOwner, const std::string& aName, value_getter_t aValueGetter) :
-            iOwner{ aOwner }, iName { aName }, iValueGetter{ aValueGetter }
+        anchor(i_anchorable_object& aOwner, i_property& aProperty) :
+            iOwner{ aOwner }, iProperty{ aProperty }
         {
             iOwner.anchors()[name()] = this;
         }
@@ -50,17 +53,25 @@ namespace neogfx
                 iOwner.anchors().erase(iter);
         }
     public:
-        const neolib::string& name() const override
+        const i_string& name() const override
         {
-            return iName;
+            return property().name();
+        }
+        const i_property& property() const override
+        {
+            return iProperty;
+        }
+        i_property& property() override
+        {
+            return iProperty;
         }
     public:
-        void constrain(i_anchor_base& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) override
+        void constrain(i_anchor& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) override
         {
             constrain(aRhs, aRhsFunction);
             aRhs.constrain(*this, aLhsFunction);
         }
-        void constrain(i_anchor_base& aOther, anchor_constraint_function aOtherFunction) override
+        void constrain(i_anchor& aOther, anchor_constraint_function aOtherFunction) override
         {
             switch (aOtherFunction)
             {
@@ -84,31 +95,47 @@ namespace neogfx
             }
         }
     public:
-        value_type value(GetterArgs... aArguments) const override
+        const value_type& value() const override
         {
-            return iValueGetter(std::forward<GetterArgs>(aArguments)...);
+            auto const& v = property().get<value_type>();
+            if constexpr (!neolib::is_optional_v<value_type>)
+                return v;
+            else if (v != std::nullopt)
+                return v;
+            else
+                throw anchor_property_has_no_value();
+        }
+        value_type& value() override
+        {
+            return property().get<value_type>();
         }
         void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) override
         {
-            add_constraint(aConstraint, std::shared_ptr<base_type>{ std::shared_ptr<abstract_type>{}, &aOtherAnchor });
+            add_constraint(aConstraint, std::shared_ptr<abstract_type>{ std::shared_ptr<abstract_type>{}, &aOtherAnchor });
         }
         void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) override
         {
             iConstraints.push_back(constraint_entry_t{ aConstraint, aOtherAnchor });
         }
-        value_type evaluate_constraints(GetterArgs... aArguments) const override
+        neolib::optional_t<value_type> evaluate_constraints() const override
         {
-            auto result = value(std::forward<GetterArgs>(aArguments)...);
+            auto result = value();
             for (auto const& c : iConstraints)
-                result = c.first(result, static_cast<base_type&>(*c.second).value(std::forward<GetterArgs>(aArguments)...));
+                result = c.first(result, static_cast<abstract_type&>(*c.second).value());
+            return result;
+        }
+        neolib::optional_t<value_type> evaluate_constraints(const neolib::i_callable<calculator_function_type>& aCallable) const override
+        {
+            auto result = property().calculate(aCallable);
+            for (auto const& c : iConstraints)
+                result = c.first(result, static_cast<abstract_type&>(*c.second).property().calculate(aCallable));
             return result;
         }
     private:
         i_anchorable_object& iOwner;
-        neolib::string iName;
-        value_getter_t iValueGetter;
+        i_property& iProperty;
         constraint_entries_t iConstraints;
     };
 
-    #define define_anchor( name, getter, ... ) neogfx::anchor<__VA_ARGS__> Anchor_##name = { *this, #name ##s, getter };
+    #define define_anchor( name ) neogfx::anchor<decltype(name)> Anchor_##name = { *this, name, #name ##s };
 }

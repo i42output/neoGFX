@@ -114,7 +114,7 @@ namespace neogfx
         }
 
         template <typename AxisPolicy>
-        inline size::dimension_type weighted_size(const neogfx::layout_item& aItem, const size& aTotalExpanderWeight, const size::dimension_type aLeftover, const size& aAvailableSize)
+        inline size::dimension_type weighted_size(const neogfx::layout_item_proxy& aItem, const size& aTotalExpanderWeight, const size::dimension_type aLeftover, const size& aAvailableSize)
         {
             auto guess = AxisPolicy::cx(aItem.weight()) / AxisPolicy::cx(aTotalExpanderWeight) * aLeftover;
             if (!aItem.size_policy().maintain_aspect_ratio())

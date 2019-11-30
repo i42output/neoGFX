@@ -28,8 +28,6 @@ namespace neogfx
     class i_widget;
     class i_spacer;
 
-    class layout_item;
-
     class i_layout : public i_layout_item
     {
     public:
@@ -38,6 +36,7 @@ namespace neogfx
     public:
         static i_layout* debug;
     public:
+        typedef i_layout abstract_type;
         typedef uint32_t item_index;
         typedef std::optional<item_index> optional_item_index;
     protected:

@@ -21,7 +21,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/layout.hpp>
-#include <neogfx/gui/layout/layout_item.hpp>
+#include <neogfx/gui/layout/layout_item_proxy.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 #include <neogfx/app/i_app.hpp>
 #include "layout.inl"
@@ -179,12 +179,12 @@ namespace neogfx
         return false;
     }
 
-    const i_layout_item_proxy& layout::layout_item_proxy() const
+    const i_layout_item_proxy& layout::proxy_for_layout() const
     {
         return parent_layout().find_proxy(*this);
     }
 
-    i_layout_item_proxy& layout::layout_item_proxy()
+    i_layout_item_proxy& layout::proxy_for_layout()
     {
         return parent_layout().find_proxy(*this);
     }

@@ -121,7 +121,7 @@ namespace neogfx::game
         {
             return detail::crack_component_data<Data>::optional;
         }
-        const neolib::i_string& name() const override
+        const i_string& name() const override
         {
             return data_meta_type::name();
         }
@@ -137,7 +137,7 @@ namespace neogfx::game
         {
             return data_meta_type::field_type_id(aFieldIndex);
         }
-        const neolib::i_string& field_name(uint32_t aFieldIndex) const override
+        const i_string& field_name(uint32_t aFieldIndex) const override
         {
             return data_meta_type::field_name(aFieldIndex);
         }

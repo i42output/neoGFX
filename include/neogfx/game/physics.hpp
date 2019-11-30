@@ -38,9 +38,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x9798003a, 0x655c, 0x409a, 0xbded, { 0xc1, 0x7f, 0xf5, 0xd3, 0x4c, 0x79 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Physics";
+                static const string sName = "Physics";
                 return sName;
             }
             static uint32_t field_count()
@@ -59,9 +59,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] = 
+                static const string sFieldNames[] = 
                 {
                     "Gravitational Constant",
                     "Uniform Gravity"

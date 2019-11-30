@@ -23,13 +23,12 @@
 #include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
-#include <neogfx/gui/layout/anchor.hpp>
-#include <neogfx/gui/layout/anchorable_object.hpp>
+#include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
-    class widget : public anchorable_object<i_widget>
+    class widget : public layout_item<i_widget>
     {
     public:
         define_declared_event(VisibilityChanged, visibility_changed)
@@ -43,6 +42,8 @@ namespace neogfx
         define_declared_event(NonClientMouse, non_client_mouse_event, const neogfx::non_client_mouse_event&)
         define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
         define_declared_event(Focus, focus_event, neogfx::focus_event)
+    public:
+        typedef i_widget abstract_type;
     public:
         widget();
         widget(const widget&) = delete;
@@ -161,8 +162,8 @@ namespace neogfx
         i_widget& layout_owner() override;
         void set_layout_owner(i_widget* aOwner) override;
         bool is_proxy() const override;
-        const i_layout_item_proxy& layout_item_proxy() const override;
-        i_layout_item_proxy& layout_item_proxy() override;
+        const i_layout_item_proxy& proxy_for_layout() const override;
+        i_layout_item_proxy& proxy_for_layout() override;
     public:
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget
@@ -267,23 +268,6 @@ namespace neogfx
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         // properties / anchors
     public:
-        struct property_category
-        {
-            struct soft_geometry {};
-            struct hard_geometry {};
-            struct font {};
-            struct colour {};
-            struct other_appearance {};
-            struct other {};
-        };
-        define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem)
-        define_property(property_category::soft_geometry, point, Position)
-        define_property(property_category::soft_geometry, size, Size)
-        define_property(property_category::hard_geometry, optional_margins, Margins)
-        define_property(property_category::hard_geometry, optional_size_policy, SizePolicy)
-        define_property(property_category::hard_geometry, optional_size, Weight)
-        define_property(property_category::hard_geometry, optional_size, MinimumSize)
-        define_property(property_category::hard_geometry, optional_size, MaximumSize)
         define_property(property_category::hard_geometry, bool, Visible, true)
         define_property(property_category::other_appearance, bool, Enabled, true)
         define_property(property_category::other, neogfx::focus_policy, FocusPolicy, neogfx::focus_policy::NoFocus)
@@ -293,6 +277,5 @@ namespace neogfx
         define_property(property_category::font, optional_font, Font)
         define_property(property_category::other, bool, IgnoreMouseEvents, false)
         define_property(property_category::other, bool, IgnoreNonClientMouseEvents, true)
-        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, const optional_size&)
     };
 }

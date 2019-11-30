@@ -30,7 +30,7 @@ namespace neogfx::game
     {
     public:
         virtual const system_id& id() const = 0;
-        virtual const neolib::i_string& name() const = 0;
+        virtual const i_string& name() const = 0;
     public:
         virtual const neolib::i_set<component_id>& components() const = 0;
         virtual neolib::i_set<component_id>& components() = 0;

@@ -26,6 +26,7 @@
 #include <neolib/lifetime.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
+#include <neogfx/gui/layout/layout_item_proxy.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable_object.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -34,15 +35,17 @@ namespace neogfx
 {
     class i_spacer;
 
-    class layout : public anchorable_object<i_layout>
+    class layout : public layout_item<i_layout>
     {
     public:
         define_declared_event(LayoutCompleted, layout_completed)
         define_declared_event(AlignmentChanged, alignment_changed)
     public:
         struct item_already_added : std::logic_error { item_already_added() : std::logic_error("neogfx::layout::item_already_added") {} };
+    public:
+        typedef i_layout abstract_type;
     protected:
-        typedef layout_item item;
+        typedef layout_item_proxy item;
         typedef std::list<item, neolib::fast_pool_allocator<item>> item_list;
         enum item_type_e
         {
@@ -81,8 +84,8 @@ namespace neogfx
         i_widget& layout_owner() override;
         void set_layout_owner(i_widget* aOwner) override;
         bool is_proxy() const override;
-        const i_layout_item_proxy& layout_item_proxy() const override;
-        i_layout_item_proxy& layout_item_proxy() override;
+        const i_layout_item_proxy& proxy_for_layout() const override;
+        i_layout_item_proxy& proxy_for_layout() override;
     public:
         i_layout_item& add(i_layout_item& aItem) override;
         i_layout_item& add_at(item_index aPosition, i_layout_item& aItem) override;
@@ -194,8 +197,5 @@ namespace neogfx
         bool iLayoutStarted;
         uint32_t iLayoutId;
         bool iInvalidated;
-        // properties / anchors
-    public:
-        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, const optional_size&)
     };
 }

@@ -41,7 +41,7 @@ namespace neogfx::game
         return meta::id();
     }
 
-    const neolib::i_string& game_world::name() const
+    const i_string& game_world::name() const
     {
         return meta::name();
     }

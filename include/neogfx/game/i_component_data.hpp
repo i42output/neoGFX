@@ -31,8 +31,6 @@ namespace neogfx::game
     typedef triangle face;
     typedef std::vector<face> faces_t;
 
-    typedef std::string string;
-
     class i_ecs;
 
     enum class component_data_field_type : uint32_t

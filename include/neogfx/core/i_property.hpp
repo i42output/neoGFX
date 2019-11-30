@@ -22,8 +22,9 @@
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
 #include <neolib/any.hpp>
-#include <neolib/simple_variant.hpp>
+#include <neolib/plugin_variant.hpp>
 #include <neolib/variant.hpp>
+#include <neolib/i_callable.hpp>
 #include <neolib/i_enum.hpp>
 #include <neolib/i_lifetime.hpp>
 #include <neogfx/core/event.hpp>
@@ -36,6 +37,7 @@ namespace neogfx
 {
     typedef neolib::any custom_type;
 
+    // todo: move to neolib::plugin_variant when geometry types are abstractable
     typedef neolib::variant<
         void*,
         bool,
@@ -51,6 +53,12 @@ namespace neogfx
         point,
         rect,
         custom_type> property_variant_t;
+
+    template <typename T>
+    struct property_value_type_checker
+    {
+        static constexpr bool is_custom_type = false;
+    };
 
     class property_variant : public property_variant_t
     {
@@ -103,26 +111,57 @@ namespace neogfx
 
     class i_property
     {
+        // events
     public:
         declare_event(changed, const property_variant&)
         declare_event(changed_from_to, const property_variant&, const property_variant&)
+        // exceptions
     public:
+        struct no_calculator : std::logic_error { no_calculator() : std::logic_error("neogfx::i_property::no_calculator") {} };
         struct no_delegate : std::logic_error { no_delegate() : std::logic_error("neogfx::i_property::no_delegate") {} };
+        // construction
     public:
         virtual ~i_property() {}
+        // object
     public:
         virtual neolib::i_lifetime& as_lifetime() = 0;
+        virtual i_object& owner() const = 0;
+        // operations
     public:
-        virtual const std::string& name() const = 0;
+        virtual const i_string& name() const = 0;
         virtual const std::type_info& type() const = 0;
         virtual const std::type_info& category() const = 0;
         virtual bool optional() const = 0;
-        virtual property_variant get() const = 0;
-        virtual void set(const property_variant& aValue) = 0;
+        virtual property_variant get_as_variant() const = 0;
+        virtual void set_from_variant(const property_variant& aValue) = 0;
         virtual bool has_delegate() const = 0;
         virtual i_property_delegate& delegate() const = 0;
         virtual void set_delegate(i_property_delegate& aDelegate) = 0;
         virtual void unset_delegate() = 0;
+        // implementation
+    protected:
+        virtual const void* data() const = 0;
+        virtual void* data() = 0;
+        virtual void*const* calculator_function() const = 0;
+        // helpers
+    public:
+        template <typename T>
+        const T& get() const
+        {
+            return *static_cast<const T*>(data());
+        }
+        template <typename T>
+        T& get() const
+        {
+            return *static_cast<T*>(data());
+        }
+        template <typename Calculator>
+        auto calculate(const neolib::i_callable<Calculator>& aCallable) const
+        {
+            // why? because we have to type-erase to support plugins and std::function can't be passed across a plugin boundary.
+            auto const calculator = *reinterpret_cast<Calculator const*>(calculator_function());
+            return aCallable(calculator);
+        }
     };
 }
 

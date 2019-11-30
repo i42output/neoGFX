@@ -40,9 +40,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x2a4e96aa, 0x2e1e, 0x48d7, 0xa384, { 0xb, 0xe8, 0x79, 0x3a, 0x7e, 0x94 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Patch";
+                static const string sName = "Patch";
                 return sName;
             }
             static uint32_t field_count()
@@ -73,9 +73,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Material",
                     "Faces"

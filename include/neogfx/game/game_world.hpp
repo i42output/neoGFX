@@ -34,7 +34,7 @@ namespace neogfx::game
         ~game_world();
     public:
         const system_id& id() const override;
-        const neolib::i_string& name() const override;
+        const i_string& name() const override;
     public:
         void apply() override;
     public:
@@ -49,9 +49,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x60495660, 0x7da9, 0x4016, 0x841, { 0x7f, 0x3a, 0xae, 0x7d, 0x1e, 0x53 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Game";
+                static const string sName = "Game";
                 return sName;
             }
         };

@@ -39,9 +39,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0xd614481e, 0x8950, 0x4959, 0x8375, { 0xd8, 0xe0, 0x98, 0xd9, 0x5e, 0xa0 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Broadphase Collider";
+                static const string sName = "Broadphase Collider";
                 return sName;
             }
             static uint32_t field_count()
@@ -61,9 +61,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Mask",
                     "Previous AABB",
@@ -87,9 +87,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0xf13790ab, 0x9334, 0x43e4, 0xb5a, { 0x91, 0xc6, 0xfa, 0x8, 0x73, 0xf7 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Broadphase Collider 2D";
+                static const string sName = "Broadphase Collider 2D";
                 return sName;
             }
             static uint32_t field_count()
@@ -109,9 +109,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Mask",
                     "Previous AABB",

@@ -29,14 +29,15 @@ namespace neogfx
     class anchorable_object : public object<Base>
     {
         typedef anchorable_object<Base> self_type;
-        typedef Base base_type;
+        typedef object<Base> base_type;
         // types
     public:
-        using base_type::abstract_type;
-        typedef neolib::map<neolib::string, i_anchor_base*> anchor_map_type;
+        using typename base_type::abstract_type;
+        typedef neolib::map<string, i_anchor*> anchor_map_type;
         // operations
     public:
-        void anchor_to(i_anchorable_object& aRhs, const neolib::i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const neolib::i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
+        using base_type::anchor_to;
+        void anchor_to(i_anchorable_object& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             auto lhsAnchor = anchors().find(aLhsAnchor);
             auto rhsAnchor = aRhs.anchors().find(aRhsAnchor);

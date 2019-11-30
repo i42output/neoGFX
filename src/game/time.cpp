@@ -42,7 +42,7 @@ namespace neogfx::game
         return meta::id();
     }
 
-    const neolib::i_string& time::name() const
+    const i_string& time::name() const
     {
         return meta::name();
     }

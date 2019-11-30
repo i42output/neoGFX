@@ -284,8 +284,6 @@ int main(int argc, char* argv[])
         ui.actionNextTab.triggered([&]() { ui.tabPages.select_next_tab(); });
         ui.actionPreviousTab.triggered([&]() { ui.tabPages.select_previous_tab(); });
 
-        // Buttons
-
         ui.button1.clicked([&ui]()
         {
             if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentTop)

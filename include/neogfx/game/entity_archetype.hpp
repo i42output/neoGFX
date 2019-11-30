@@ -40,13 +40,13 @@ namespace neogfx::game
         entity_archetype(entity_archetype&& aOther);
     public:
         const entity_archetype_id& id() const override;
-        const neolib::i_string& name() const override;
+        const i_string& name() const override;
         const neolib::i_set<component_id>& components() const override;
         neolib::i_set<component_id>& components() override;
         void populate_default_components(i_ecs& aEcs, entity_id aEntity) override;
     private:
         entity_archetype_id iId;
-        neolib::string iName;
+        string iName;
         component_list iComponents;
     };
 }

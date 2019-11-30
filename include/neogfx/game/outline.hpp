@@ -45,9 +45,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0xcf2bbde0, 0xc7be, 0x48a1, 0xb9dd, { 0x1, 0xc7, 0x6, 0xfb, 0x7b, 0x8d } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Outline";
+                static const string sName = "Outline";
                 return sName;
             }
             static uint32_t field_count()
@@ -81,9 +81,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Width",
                     "Antialiased"

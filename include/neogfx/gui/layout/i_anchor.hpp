@@ -21,7 +21,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <functional>
+#include <neolib/i_callable.hpp>
 #include <neolib/i_enum.hpp>
+#include <neogfx/core/i_property.hpp>
 #include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
@@ -72,59 +74,40 @@ namespace neogfx
     template <typename T>
     anchor_constraint<T> anchor_constraint<T>::max = [](const T& lhs, const T& rhs) -> T { return std::max(lhs, rhs); };
 
-    template <typename T, typename... GetterArgs>
-    class i_anchor;
+    struct anchor_property_has_no_value : std::logic_error { anchor_property_has_no_value() : std::logic_error{ "neogfx::anchor_property_has_no_value" } {} };
 
-    class i_anchor_base
+    class i_anchor
     {
         // construction
     public:
-        virtual ~i_anchor_base() {}
+        virtual ~i_anchor() {}
         // meta
     public:
-        virtual const neolib::i_string& name() const = 0;
+        virtual const i_string& name() const = 0;
+        virtual const i_property& property() const = 0;
+        virtual i_property& property() = 0;
         // operations
     public:
-        virtual void constrain(i_anchor_base& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) = 0;
-        virtual void constrain(i_anchor_base& aOther, anchor_constraint_function aOtherFunction) = 0;
-        // helpers
-    public:
-        template <typename T, typename... GetterArgs>
-        const i_anchor<T, GetterArgs...>& as() const;
-        template <typename T, typename... GetterArgs>
-        i_anchor<T, GetterArgs...>& as();
+        virtual void constrain(i_anchor& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) = 0;
+        virtual void constrain(i_anchor& aOther, anchor_constraint_function aOtherFunction) = 0;
     };
 
-    template <typename T, typename... GetterArgs>
-    class i_anchor : public i_anchor_base
+    template <typename T, typename Calculator>
+    class i_calculating_anchor : public i_anchor
     {
-        typedef i_anchor<T, GetterArgs...> self_type;
+        typedef i_calculating_anchor<T, Calculator> self_type;
     public:
         typedef self_type abstract_type;
         typedef T value_type;
+        typedef Calculator calculator_function_type;
         typedef anchor_constraint<value_type> constraint;
     public:
-        virtual value_type value(GetterArgs... aArguments) const = 0;
+        virtual const value_type& value() const = 0;
+        virtual value_type& value() = 0;
         virtual void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) = 0;
         virtual void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) = 0;
-        virtual value_type evaluate_constraints(GetterArgs... aArguments) const = 0;
-    };
-
-    template <typename T, typename... GetterArgs>
-    inline const i_anchor<T, GetterArgs...>& i_anchor_base::as() const
-    {
-        if constexpr (ndebug)
-            return static_cast<const i_anchor<T, GetterArgs...>&>(*this);
-        else
-            return dynamic_cast<const i_anchor<T, GetterArgs...>&>(*this);
-    }
-
-    template <typename T, typename... GetterArgs>
-    inline i_anchor<T, GetterArgs...>& i_anchor_base::as()
-    {
-        if constexpr (ndebug)
-            return static_cast<i_anchor<T, GetterArgs...>&>(*this);
-        else
-            return dynamic_cast<i_anchor<T, GetterArgs...>&>(*this);
+    public:
+        virtual value_type evaluate_constraints() const = 0;
+        virtual value_type evaluate_constraints(const neolib::i_callable<calculator_function_type>& aCallable) const = 0;
     };
 }

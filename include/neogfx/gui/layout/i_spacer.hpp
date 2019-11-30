@@ -57,6 +57,7 @@ namespace neogfx
     class i_spacer : public i_layout_item
     {
     public:
+        typedef i_spacer abstract_type;
         typedef std::optional<size> optional_weight;
     public:
         virtual ~i_spacer() {}

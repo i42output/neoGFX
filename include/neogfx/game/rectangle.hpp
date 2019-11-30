@@ -45,9 +45,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x6f45d8be, 0xba9c, 0x4a32, 0xa99e, { 0x37, 0xd3, 0xf2, 0xb4, 0xe7, 0x53 } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Rectangle";
+                static const string sName = "Rectangle";
                 return sName;
             }
             static uint32_t field_count()
@@ -68,9 +68,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Position",
                     "Extents",

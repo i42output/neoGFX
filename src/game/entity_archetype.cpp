@@ -50,7 +50,7 @@ namespace neogfx::game
         return iId;
     }
 
-    const neolib::i_string& entity_archetype::name() const
+    const i_string& entity_archetype::name() const
     {
         return iName;
     }

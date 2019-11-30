@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <string>
+#include <neolib/optional.hpp>
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_property.hpp>
 
@@ -31,23 +32,7 @@
 
 namespace neogfx
 {
-    namespace detail
-    {
-        template <typename T>
-        struct property_optional_type_cracker 
-        { 
-            typedef T type;
-            static constexpr bool optional = false;
-        };
-        template <typename T>
-        struct property_optional_type_cracker<std::optional<T>>
-        {
-            typedef T type;
-            static constexpr bool optional = true;
-        };
-    }
-
-    template <typename T, typename Category>
+    template <typename T, typename Category, typename Calculator = void(*)()>
     class property : public i_property, public neolib::lifetime
     {
         typedef property<T, Category> self_type;
@@ -62,8 +47,7 @@ namespace neogfx
         struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
     public:
         typedef Category category_type;
-    private:
-        typedef detail::property_optional_type_cracker<T> cracker;
+        typedef Calculator calculator_function_type;
     public:
         template <typename ParentType>
         class optional_proxy
@@ -75,8 +59,8 @@ namespace neogfx
             {
             }
         public:
-            template <typename SFINAE = cracker::type>
-            operator const typename std::enable_if<cracker::optional, SFINAE>::type&() const
+            template <typename SFINAE = neolib::optional_t<T>>
+            operator const typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type&() const
             {
                 return *iParent.value();
             }
@@ -86,8 +70,8 @@ namespace neogfx
                 iParent.assign(aValue);
                 return *this;
             }
-            template <typename SFINAE = const cracker::type*>
-            const typename std::enable_if<cracker::optional, SFINAE>::type operator->() const
+            template <typename SFINAE = const neolib::optional_t<T>*>
+            const typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator->() const
             {
                 return &*iParent.value();
             }
@@ -99,7 +83,15 @@ namespace neogfx
         {
             aOwner.properties().register_property(*this);
         }
+        property(i_object& aOwner, const std::string& aName, calculator_function_type aCalculator) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{}
+        {
+            aOwner.properties().register_property(*this);
+        }
         property(i_object& aOwner, const std::string& aName, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iValue { aValue }
+        {
+            aOwner.properties().register_property(*this);
+        }
+        property(i_object& aOwner, const std::string& aName, calculator_function_type aCalculator, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{ aValue }
         {
             aOwner.properties().register_property(*this);
         }
@@ -108,8 +100,12 @@ namespace neogfx
         {
             return *this;
         }
+        i_object& owner() const override
+        {
+            return iOwner;
+        }
     public:
-        const std::string& name() const override
+        const string& name() const override
         {
             return iName;
         }
@@ -123,13 +119,13 @@ namespace neogfx
         }
         bool optional() const override
         {
-            return cracker::optional;
+            return neolib::is_optional_v<T>;
         }
-        property_variant get() const override
+        property_variant get_as_variant() const override
         {
             return iValue;
         }
-        void set(const property_variant& aValue) override
+        void set_from_variant(const property_variant& aValue) override
         {
             std::visit([this](auto&& arg)
             {
@@ -207,17 +203,17 @@ namespace neogfx
             return value();
         }
         template <typename SFINAE = optional_proxy<const self_type>>
-        const typename std::enable_if<cracker::optional, SFINAE>::type operator*() const
+        const typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator*() const
         {
             return optional_proxy<const self_type>{ *this };
         }
         template <typename SFINAE = optional_proxy<self_type>>
-        typename std::enable_if<cracker::optional, SFINAE>::type operator*()
+        typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator*()
         {
             return optional_proxy<self_type>{ *this };
         }
         template <typename SFINAE = optional_proxy<const self_type>>
-        const typename std::enable_if<cracker::optional, SFINAE>::type operator->() const
+        const typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator->() const
         {
             return optional_proxy<const self_type>{ *this };
         }
@@ -240,6 +236,22 @@ namespace neogfx
         bool operator!=(const std::optional<T>& aRhs) const
         {
             return iValue != aRhs;
+        }
+    protected:
+        const void* data() const override
+        {
+            return &iValue;
+        }
+        void* data() override
+        {
+            return &iValue;
+        }
+        void*const* calculator_function() const override
+        {
+            // why? because we have to type-erase to support plugins and std::function can't be passed across a plugin boundary.
+            if (iCalculator != nullptr)
+                return reinterpret_cast<void*const*>(&iCalculator);
+            throw no_calculator();
         }
     private:
         template <typename T2>
@@ -273,12 +285,24 @@ namespace neogfx
         }
     private:
         i_object& iOwner;
-        std::string iName;
+        string iName;
+        calculator_function_type iCalculator;
         mutable value_type iValue;
         i_property_delegate* iDelegate = nullptr;
     };
 
+    namespace property_category
+    {
+        struct soft_geometry {};
+        struct hard_geometry {};
+        struct font {};
+        struct colour {};
+        struct other_appearance {};
+        struct other {};
+    };
+
     #define define_property( category, type, name, ... ) neogfx::property<type, category> name = { *this, #name ##s, __VA_ARGS__ };
+    #define define_optional_property( category, type, name, calculator, ... ) neogfx::property<type, category, decltype(&abstract_type::##calculator)> name = { *this, #name ##s, &abstract_type::##calculator, ##__VA_ARGS__ };
 }
 
 #ifdef _MSC_VER

@@ -44,9 +44,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x13edb5d4, 0x9fae, 0x4dc1, 0xb9e4, { 0x15, 0x49, 0x8b, 0xf, 0xff, 0xe } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Font";
+                static const string sName = "Font";
                 return sName;
             }
             static uint32_t field_count()
@@ -70,9 +70,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Id",
                     "Family Name",

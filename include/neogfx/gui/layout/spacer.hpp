@@ -20,19 +20,20 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/layout/anchor.hpp>
-#include <neogfx/gui/layout/anchorable_object.hpp>
+#include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 
 namespace neogfx
 {
     class i_layout;
 
-    class spacer : public anchorable_object<i_spacer>
+    class spacer : public layout_item<i_spacer>
     {
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };
         struct margins_unsupported : std::logic_error { margins_unsupported() : std::logic_error("neogfx::spacer::margins_unsupported") {} };
+    public:
+        typedef i_spacer abstract_type;
     public:
         spacer(neogfx::expansion_policy aExpansionPolicy);
         spacer(i_layout& aParent, neogfx::expansion_policy aExpansionPolicy);
@@ -54,8 +55,8 @@ namespace neogfx
         i_widget& layout_owner() override;
         void set_layout_owner(i_widget* aOwner) override;
         bool is_proxy() const override;
-        const i_layout_item_proxy& layout_item_proxy() const override;
-        i_layout_item_proxy& layout_item_proxy() override;
+        const i_layout_item_proxy& proxy_for_layout() const override;
+        i_layout_item_proxy& proxy_for_layout() override;
     public:
         neogfx::expansion_policy expansion_policy() const override;
         void set_expansion_policy(neogfx::expansion_policy aExpansionPolicy) override;
@@ -101,9 +102,6 @@ namespace neogfx
         optional_margins iMargins;
         neogfx::expansion_policy iExpansionPolicy;
         optional_size iWeight;
-        // properties / anchors
-    public:
-        define_anchor(MinimumSize, [this](const optional_size& aAvailableSpace) { return minimum_size(aAvailableSpace); }, size, const optional_size&)
     };
 
     class horizontal_spacer : public spacer

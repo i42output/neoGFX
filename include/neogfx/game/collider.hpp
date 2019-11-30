@@ -39,9 +39,9 @@ namespace neogfx::game
                 static const neolib::uuid sId = { 0x55468971, 0xb33e, 0x4e54, 0xa563, { 0xb8, 0x98, 0x3f, 0x22, 0xa, 0xfc } };
                 return sId;
             }
-            static const neolib::i_string& name()
+            static const i_string& name()
             {
-                static const neolib::string sName = "Collider";
+                static const string sName = "Collider";
                 return sName;
             }
             static uint32_t field_count()
@@ -61,9 +61,9 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const neolib::i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(uint32_t aFieldIndex)
             {
-                static const neolib::string sFieldNames[] =
+                static const string sFieldNames[] =
                 {
                     "Origin",
                     "Size",

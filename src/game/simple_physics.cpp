@@ -73,7 +73,7 @@ namespace neogfx::game
         return meta::id();
     }
 
-    const neolib::i_string& simple_physics::name() const
+    const i_string& simple_physics::name() const
     {
         return meta::name();
     }
