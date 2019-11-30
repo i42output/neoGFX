@@ -104,7 +104,7 @@ namespace neogfx
     }
 
     property_transition::property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled) :
-        transition{ aAnimator, aEasingFunction, aDuration, aEnabled }, iProperty{ aProperty }, iPropertyDestroyed{ aProperty.as_lifetime() }, iFrom{ aProperty.get() }, iTo{ aProperty.get() }, iUpdatingProperty{ false }
+        transition{ aAnimator, aEasingFunction, aDuration, aEnabled }, iProperty{ aProperty }, iPropertyDestroyed{ aProperty.as_lifetime() }, iFrom{ aProperty.get_as_variant() }, iTo{ aProperty.get_as_variant() }, iUpdatingProperty{ false }
     {
         iSink += aProperty.changed_from_to([this](const property_variant& aFrom, const property_variant& aTo)
         {
@@ -141,7 +141,7 @@ namespace neogfx
                 std::visit([this, &aFrom](auto&& aTo)
                 {
                     neolib::scoped_flag sf{ iUpdatingProperty };
-                    property().set(mix(mix_value(), aFrom, aTo));
+                    property().set_from_variant(mix(mix_value(), aFrom, aTo));
                 }, to().for_visitor());
             }, from().for_visitor());
         }
@@ -151,7 +151,7 @@ namespace neogfx
 
     bool property_transition::finished() const
     {
-        return property_destroyed() || (transition::finished() && property().get() == to());
+        return property_destroyed() || (transition::finished() && property().get_as_variant() == to());
     }
 
     bool property_transition::property_destroyed() const

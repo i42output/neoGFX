@@ -21,7 +21,6 @@
 
 #include <neogfx/neogfx.hpp>
 #include <functional>
-#include <neolib/i_callable.hpp>
 #include <neolib/i_enum.hpp>
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/core/geometrical.hpp>
@@ -92,22 +91,49 @@ namespace neogfx
         virtual void constrain(i_anchor& aOther, anchor_constraint_function aOtherFunction) = 0;
     };
 
-    template <typename T, typename Calculator>
+    template <typename T, typename PVT, typename... CalculatorArgs>
     class i_calculating_anchor : public i_anchor
     {
-        typedef i_calculating_anchor<T, Calculator> self_type;
+        typedef i_calculating_anchor<T, PVT, CalculatorArgs...> self_type;
     public:
         typedef self_type abstract_type;
         typedef T value_type;
-        typedef Calculator calculator_function_type;
+        typedef PVT property_value_type;
         typedef anchor_constraint<value_type> constraint;
     public:
-        virtual const value_type& value() const = 0;
-        virtual value_type& value() = 0;
+        virtual bool property_set() const = 0;
+        virtual const value_type& property_value() const = 0;
+        virtual value_type& property_value() = 0;
         virtual void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) = 0;
         virtual void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) = 0;
     public:
-        virtual value_type evaluate_constraints() const = 0;
-        virtual value_type evaluate_constraints(const neolib::i_callable<calculator_function_type>& aCallable) const = 0;
+        virtual value_type evaluate_constraints(const CalculatorArgs&... aArgs) const = 0;
     };
+
+    namespace detail
+    {
+        template <template<typename, typename, typename...> class Anchor, typename PVT, typename Callable>
+        struct abstract_anchor_callable_function_cracker;
+        template <template<typename, typename, typename...> class Anchor, typename PVT, typename R, typename C, typename... Args>
+        struct abstract_anchor_callable_function_cracker<Anchor, PVT, R(C::*)(Args...) const>
+        {
+            typedef Anchor<R, PVT, Args...> type;
+            typedef R(C::* callable_type)(Args...) const;
+            typedef PVT property_value_type;
+            typedef R value_type;
+            typedef C class_type;
+        };
+        template <template<typename, typename, typename...> class Anchor, typename PVT, typename R, typename C, typename... Args>
+        struct abstract_anchor_callable_function_cracker<Anchor, PVT, R(C::*)(Args...)>
+        {
+            typedef Anchor<R, PVT, Args...> type;
+            typedef R(C::* callable_type)(Args...);
+            typedef PVT property_value_type;
+            typedef R value_type;
+            typedef C class_type;
+        };
+    }
+
+    template <typename Property>
+    using i_anchor_t = typename detail::abstract_anchor_callable_function_cracker<i_calculating_anchor, typename Property::value_type, typename Property::calculator_function_type>::type;
 }

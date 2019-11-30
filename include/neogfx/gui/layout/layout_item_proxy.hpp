@@ -22,6 +22,8 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/layout/i_anchor.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/i_layout_item_proxy.hpp>
 
 namespace neogfx
@@ -100,6 +102,6 @@ namespace neogfx
         mutable std::pair<uint32_t, uint32_t> iLayoutId;
         mutable size iMinimumSize;
         mutable size iMaximumSize;
-        mutable std::optional<i_calculating_anchor<optional_size, decltype(&i_geometry::minimum_size)>*> iMinimumSizeAnchor;
+        mutable std::optional<const i_anchor_t<decltype(layout_item<i_layout>::MinimumSize)>*> iMinimumSizeAnchor;
     };
 }

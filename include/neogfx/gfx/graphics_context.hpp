@@ -115,40 +115,40 @@ namespace neogfx
         void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const override;
         void fill_path(const path& aPath, const brush& aFill) const override;
         void fill_shape(const game::mesh& aShape, const brush& aFill) const override;
-        size text_extent(const string& aText, const font& aFont) const override;
-        size text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector) const override;
-        size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const override;
-        size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const override;
-        size multiline_text_extent(const string& aText, const font& aFont) const override;
-        size multiline_text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector) const override;
-        size multiline_text_extent(const string& aText, const font& aFont, dimension aMaxWidth) const override;
-        size multiline_text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const override;
+        size text_extent(const std::string& aText, const font& aFont) const override;
+        size text_extent(const std::string& aText, std::function<font(std::string::size_type)> aFontSelector) const override;
+        size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const override;
+        size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const override;
+        size multiline_text_extent(const std::string& aText, const font& aFont) const override;
+        size multiline_text_extent(const std::string& aText, std::function<font(std::string::size_type)> aFontSelector) const override;
+        size multiline_text_extent(const std::string& aText, const font& aFont, dimension aMaxWidth) const override;
+        size multiline_text_extent(const std::string& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const override;
         size glyph_text_extent(const glyph_text& aText) const override;
         size glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const override;
         size multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const override;
-        glyph_text to_glyph_text(const string& aText, const font& aFont) const override;
-        glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const override;
-        glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const override;
+        glyph_text to_glyph_text(const std::string& aText, const font& aFont) const override;
+        glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const override;
+        glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const override;
         glyph_text to_glyph_text(const std::u32string& aText, const font& aFont) const override;
         glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const override;
         glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const override;
-        multiline_glyph_text to_multiline_glyph_text(const string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
-        multiline_glyph_text to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
-        multiline_glyph_text to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
+        multiline_glyph_text to_multiline_glyph_text(const std::string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
+        multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
+        multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(const std::u32string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
-        bool is_text_left_to_right(const string& aText, const font& aFont) const override;
-        bool is_text_right_to_left(const string& aText, const font& aFont) const override;
-        void draw_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance) const override;
-        void draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const override;
-        void draw_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance) const override;
-        void draw_text(const vec3& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const override;
-        void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
-        void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
-        void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
-        void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
+        bool is_text_left_to_right(const std::string& aText, const font& aFont) const override;
+        bool is_text_right_to_left(const std::string& aText, const font& aFont) const override;
+        void draw_text(const point& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance) const override;
+        void draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const override;
+        void draw_text(const vec3& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance) const override;
+        void draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const override;
+        void draw_multiline_text(const point& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
+        void draw_multiline_text(const point& aPoint, const std::string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
+        void draw_multiline_text(const vec3& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
+        void draw_multiline_text(const vec3& aPoint, const std::string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
         void draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const override;
         void draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const override;
         void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const override;
@@ -195,7 +195,7 @@ namespace neogfx
         // helpers
         // own
     private:
-        glyph_text to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
+        glyph_text to_glyph_text_impl(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
         glyph_text to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
         // attributes
     private:

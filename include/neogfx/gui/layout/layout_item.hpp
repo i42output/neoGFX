@@ -33,17 +33,19 @@ namespace neogfx
         typedef anchorable_object<Base> base_type;
         // types
     public:
-        using typename base_type::abstract_type;
+        typedef i_layout_item abstract_type;
+    private:
+        typedef abstract_type property_context_type;
         // properties / anchors
     public:
-        define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem)
-        define_property(property_category::soft_geometry, point, Position)
-        define_property(property_category::soft_geometry, size, Size)
-        define_optional_property(property_category::hard_geometry, optional_margins, Margins, margins)
-        define_optional_property(property_category::hard_geometry, optional_size_policy, SizePolicy, size_policy)
-        define_optional_property(property_category::hard_geometry, optional_size, Weight, weight)
-        define_optional_property(property_category::hard_geometry, optional_size, MinimumSize, minimum_size)
-        define_optional_property(property_category::hard_geometry, optional_size, MaximumSize, maximum_size)
+        // todo: declarations for these in i_layout_item when supported
+        define_property(property_category::soft_geometry, point, Position, position)
+        define_property(property_category::soft_geometry, size, Size, extents)
+        define_property(property_category::hard_geometry, optional_margins, Margins, margins)
+        define_property(property_category::hard_geometry, optional_size_policy, SizePolicy, size_policy)
+        define_property(property_category::hard_geometry, optional_size, Weight, weight)
+        define_property(property_category::hard_geometry, optional_size, MinimumSize, minimum_size)
+        define_property(property_category::hard_geometry, optional_size, MaximumSize, maximum_size)
         define_anchor(Position)
         define_anchor(Size)
         define_anchor(Margins)

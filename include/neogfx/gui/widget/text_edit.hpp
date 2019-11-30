@@ -35,10 +35,13 @@ namespace neogfx
 {
     class text_edit : public scrollable_widget, public i_clipboard_sink, public i_text_document
     {
+        typedef text_edit self_type;
     public:
         define_event(TextFilter, text_filter, const std::string&, bool&)
         define_event(TextChanged, text_changed)
         define_event(DefaultStyleChanged, default_style_changed)
+    private:
+        typedef self_type property_context_type;
     public:
         enum type_e
         {
@@ -493,6 +496,7 @@ namespace neogfx
         bool word_wrap() const;
         void set_word_wrap(bool aWordWrap = true);
         bool password() const;
+        const std::string& password_mask() const;
         void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
@@ -603,10 +607,10 @@ namespace neogfx
         uint32_t iWantedToNotfiyTextChanged;
         bool iOutOfMemory;
     public:
-        define_property(property_category::other, bool, ReadOnly, false)
-        define_property(property_category::other, bool, WordWrap, iType == MultiLine)
-        define_property(property_category::other, bool, Password, false)
-        define_property(property_category::other, std::string, PasswordMask)
-        define_property(property_category::other, neogfx::alignment, Alignment, neogfx::alignment::Left | neogfx::alignment::Top)
+        define_property(property_category::other, bool, ReadOnly, read_only, false)
+        define_property(property_category::other, bool, WordWrap, word_wrap, iType == MultiLine)
+        define_property(property_category::other, bool, Password, password, false)
+        define_property(property_category::other, std::string, PasswordMask, password_mask)
+        define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)
     };
 }

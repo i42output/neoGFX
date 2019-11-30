@@ -913,6 +913,11 @@ namespace neogfx
         return Password;
     }
 
+    const std::string& text_edit::password_mask() const
+    {
+        return PasswordMask;
+    }
+
     void text_edit::set_password(bool aPassword, const std::string& aMask)
     {
         if (Password != aPassword || PasswordMask != aMask)

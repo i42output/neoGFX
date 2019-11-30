@@ -44,6 +44,8 @@ namespace neogfx
         define_declared_event(Focus, focus_event, neogfx::focus_event)
     public:
         typedef i_widget abstract_type;
+    private:
+        typedef abstract_type property_context_type;
     public:
         widget();
         widget(const widget&) = delete;
@@ -268,14 +270,15 @@ namespace neogfx
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         // properties / anchors
     public:
-        define_property(property_category::hard_geometry, bool, Visible, true)
-        define_property(property_category::other_appearance, bool, Enabled, true)
-        define_property(property_category::other, neogfx::focus_policy, FocusPolicy, neogfx::focus_policy::NoFocus)
-        define_property(property_category::other_appearance, double, Opacity, 1.0)
-        define_property(property_category::colour, optional_colour, ForegroundColour)
-        define_property(property_category::colour, optional_colour, BackgroundColour)
-        define_property(property_category::font, optional_font, Font)
-        define_property(property_category::other, bool, IgnoreMouseEvents, false)
-        define_property(property_category::other, bool, IgnoreNonClientMouseEvents, true)
-    };
+        define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem, logical_coordinate_system)
+        define_property(property_category::hard_geometry, bool, Visible, visible, true)
+        define_property(property_category::other_appearance, bool, Enabled, enabled, true)
+        define_property(property_category::other, neogfx::focus_policy, FocusPolicy, focus_policy, neogfx::focus_policy::NoFocus)
+        define_property(property_category::other_appearance, double, Opacity, opacity, 1.0)
+        define_property(property_category::colour, optional_colour, ForegroundColour, foreground_colour)
+        define_property(property_category::colour, optional_colour, BackgroundColour, background_colour)
+        define_property(property_category::font, optional_font, Font, font)
+        define_property(property_category::other, bool, IgnoreMouseEvents, ignore_mouse_events, false)
+        define_property(property_category::other, bool, IgnoreNonClientMouseEvents, ignore_non_client_mouse_events, true)
+   };
 }

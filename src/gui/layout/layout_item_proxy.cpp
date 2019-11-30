@@ -18,7 +18,6 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/callable.hpp>
 #include <neogfx/gui/layout/layout_item_proxy.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
@@ -284,14 +283,14 @@ namespace neogfx
             {   
                 auto anchorIter = anchors().find(string{ "MinimumSize" });
                 if (anchorIter != anchors().end())
-                    iMinimumSizeAnchor = static_cast<i_calculating_anchor<optional_size, decltype(&i_geometry::minimum_size)>*>(anchorIter->second());
+                    iMinimumSizeAnchor = static_cast<const neolib::optional_t<decltype(iMinimumSizeAnchor)>>(anchorIter->second());
                 else
                     iMinimumSizeAnchor = nullptr;
             }
             if (*iMinimumSizeAnchor == nullptr)
                 iMinimumSize = subject().minimum_size(aAvailableSpace);
             else
-                iMinimumSize = (**iMinimumSizeAnchor).evaluate_constraints(neolib::callable<decltype(&i_geometry::minimum_size)>{ aAvailableSpace });
+                iMinimumSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
             if (size_policy().maintain_aspect_ratio())
             {
                 const auto& aspectRatio = size_policy().aspect_ratio();

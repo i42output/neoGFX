@@ -27,17 +27,18 @@
 
 namespace neogfx
 {
-    template <typename Property>
-    class anchor : public i_calculating_anchor<neolib::optional_t<typename Property::value_type>, typename Property::calculator_function_type>
+    template <typename T, typename PVT, class Context, class C, typename... CalculatorArgs>
+    class anchor : public i_calculating_anchor<T, PVT, CalculatorArgs...>
     {
-        typedef i_calculating_anchor<neolib::optional_t<typename Property::value_type>, typename Property::calculator_function_type> base_type;
+        typedef i_calculating_anchor<T, PVT, CalculatorArgs...> base_type;
     public:
-        typedef Property property_type;
         using typename base_type::abstract_type;
         using typename base_type::value_type;
+        using typename base_type::property_value_type;
         using typename base_type::constraint;
+        typedef Context context_type;
     private:
-        typedef typename property_type::calculator_function_type calculator_function_type;
+        typedef T(C::* calculator_function_type)(CalculatorArgs...) const;
         typedef std::pair<constraint, std::shared_ptr<i_anchor>> constraint_entry_t;
         typedef std::vector<constraint_entry_t> constraint_entries_t;
     public:
@@ -95,19 +96,25 @@ namespace neogfx
             }
         }
     public:
-        const value_type& value() const override
+        bool property_set() const
         {
-            auto const& v = property().get<value_type>();
-            if constexpr (!neolib::is_optional_v<value_type>)
-                return v;
-            else if (v != std::nullopt)
-                return v;
+            if constexpr (!neolib::is_optional_v<property_value_type>)
+                return true;
+            else
+                return property().get<property_value_type>() != std::nullopt;
+        }
+        const value_type& property_value() const override
+        {
+            if constexpr (!neolib::is_optional_v<property_value_type>)
+                return property().get<property_value_type>();
+            else if (property_set())
+                return *property().get<property_value_type>();
             else
                 throw anchor_property_has_no_value();
         }
-        value_type& value() override
+        value_type& property_value() override
         {
-            return property().get<value_type>();
+            return const_cast<value_type&>(to_const(*this).property_value());
         }
         void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) override
         {
@@ -117,18 +124,14 @@ namespace neogfx
         {
             iConstraints.push_back(constraint_entry_t{ aConstraint, aOtherAnchor });
         }
-        neolib::optional_t<value_type> evaluate_constraints() const override
+        value_type evaluate_constraints(const CalculatorArgs&... aArgs) const override
         {
-            auto result = value();
+            auto result = (property_set() ? property_value() : property().calculate<context_type, calculator_function_type>(aArgs...));
             for (auto const& c : iConstraints)
-                result = c.first(result, static_cast<abstract_type&>(*c.second).value());
-            return result;
-        }
-        neolib::optional_t<value_type> evaluate_constraints(const neolib::i_callable<calculator_function_type>& aCallable) const override
-        {
-            auto result = property().calculate(aCallable);
-            for (auto const& c : iConstraints)
-                result = c.first(result, static_cast<abstract_type&>(*c.second).property().calculate(aCallable));
+            {
+                auto const& otherAnchor = static_cast<abstract_type&>(*c.second);
+                result = c.first(result, (otherAnchor.property_set() ? otherAnchor.property_value() : otherAnchor.property().calculate<context_type, calculator_function_type>(aArgs...)));
+            }
             return result;
         }
     private:
@@ -137,5 +140,32 @@ namespace neogfx
         constraint_entries_t iConstraints;
     };
 
-    #define define_anchor( name ) neogfx::anchor<decltype(name)> Anchor_##name = { *this, name, #name ##s };
+    namespace detail
+    {
+        template <template<typename, typename, typename, typename...> class Anchor, class Ctx, typename PVT, typename Callable>
+        struct anchor_callable_function_cracker;
+        template <template<typename, typename, typename, typename...> class Anchor, class Ctx, typename PVT, typename R, typename C, typename... Args>
+        struct anchor_callable_function_cracker<Anchor, Ctx, PVT, R(C::*)(Args...) const>
+        {
+            typedef Anchor<R, PVT, std::add_const_t<Ctx>, C, Args...> type;
+            typedef R(C::* callable_type)(Args...) const;
+            typedef PVT property_value_type;
+            typedef R value_type;
+            typedef C class_type;
+        };
+        template <template<typename, typename, typename, typename...> class Anchor, class Ctx, typename PVT, typename R, typename C, typename... Args>
+        struct anchor_callable_function_cracker<Anchor, Ctx, PVT, R(C::*)(Args...)>
+        {
+            typedef Anchor<R, PVT, Ctx, C, Args...> type;
+            typedef R(C::* callable_type)(Args...);
+            typedef PVT property_value_type;
+            typedef R value_type;
+            typedef C class_type;
+        };
+    }
+
+    template <typename Context, typename PVT, typename Callable>
+    using anchor_t = typename detail::anchor_callable_function_cracker<anchor, Context, PVT, Callable>::type;
+
+    #define define_anchor( name ) neogfx::anchor_t<property_context_type, typename decltype(name)::value_type, typename decltype(name)::calculator_function_type> Anchor_##name = { *this, name };
 }

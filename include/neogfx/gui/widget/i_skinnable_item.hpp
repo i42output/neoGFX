@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_widget;
 
-    class i_skinnable_item : public virtual i_object
+    class i_skinnable_item
     {
     public:
         virtual bool is_widget() const = 0;

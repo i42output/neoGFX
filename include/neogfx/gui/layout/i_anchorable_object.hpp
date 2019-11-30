@@ -29,7 +29,7 @@ namespace neogfx
 {
     struct anchor_not_found : std::runtime_error { anchor_not_found(const std::string& aAnchor) : std::runtime_error{ "neoGFX: Anchor '" + aAnchor + "' not found." } {} };
 
-    class i_anchorable_object : public virtual i_object
+    class i_anchorable_object : public i_object
     {
         // types
     public:

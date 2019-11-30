@@ -125,11 +125,11 @@ namespace neogfx
         for (cell_coordinate col = 0; col < aColumn; ++col)
             if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
                 add_spacer_at_position(aRow, col);
-        auto& layout_item_proxy = layout::add(aItem).layout_item_proxy();
-        iCells[cell_coordinates{ aColumn, aRow }] = &layout_item_proxy;
+        auto& proxy = layout::add(aItem).proxy_for_layout();
+        iCells[cell_coordinates{ aColumn, aRow }] = &proxy;
         iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
         iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
-        row_layout(aRow).replace_item_at(aColumn, layout_item_proxy);
+        row_layout(aRow).replace_item_at(aColumn, proxy);
         if (cursor() == cell_coordinates{ aColumn, aRow })
             increment_cursor();
         return *aItem;
@@ -176,7 +176,7 @@ namespace neogfx
     grid_layout::cell_coordinates grid_layout::item_position(const i_layout_item& aItem) const
     {
         for (auto i = iCells.begin(); i != iCells.end(); ++i)
-            if (&i->second->layout_item_proxy().subject() == &aItem)
+            if (&i->second->proxy_for_layout().subject() == &aItem)
                 return cell_coordinates{ i->first.x, i->first.y };
         throw item_not_found();
     }

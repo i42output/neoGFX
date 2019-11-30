@@ -126,12 +126,12 @@ namespace neogfx
         return false;
     }
 
-    const i_layout_item_proxy& spacer::layout_item_proxy() const
+    const i_layout_item_proxy& spacer::proxy_for_layout() const
     {
         return parent_layout().find_proxy(*this);
     }
 
-    i_layout_item_proxy& spacer::layout_item_proxy()
+    i_layout_item_proxy& spacer::proxy_for_layout()
     {
         return parent_layout().find_proxy(*this);
     }

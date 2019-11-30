@@ -57,7 +57,7 @@ namespace neogfx::game
         return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    class i_ecs : public virtual i_object
+    class i_ecs : public i_object
     {
     public:
         declare_event(entity_created, entity_id)

@@ -32,12 +32,13 @@
 
 namespace neogfx
 {
-    template <typename T, typename Category, typename Calculator = void(*)()>
+    template <typename T, typename Category, class Context, typename Calculator = T(*)()>
     class property : public i_property, public neolib::lifetime
     {
-        typedef property<T, Category> self_type;
+        typedef property<T, Category, Context, Calculator> self_type;
     public:
         typedef T value_type;
+        typedef Context context_type;
     public:
         define_declared_event(VariantChanged, changed, const property_variant&)
         define_declared_event(VariantChangedFromTo, changed_from_to, const property_variant&, const property_variant&)
@@ -266,10 +267,10 @@ namespace neogfx
                     iOwner.property_changed(*this);
                 if (destroyed)
                     return *this;
-                VariantChanged.trigger(get());
+                VariantChanged.trigger(get_as_variant());
                 if (destroyed)
                     return *this;
-                VariantChangedFromTo.trigger(property_variant{ previousValue }, get());
+                VariantChangedFromTo.trigger(property_variant{ previousValue }, get_as_variant());
                 if (destroyed)
                     return *this;
                 Changed.trigger(value());
@@ -301,8 +302,7 @@ namespace neogfx
         struct other {};
     };
 
-    #define define_property( category, type, name, ... ) neogfx::property<type, category> name = { *this, #name ##s, __VA_ARGS__ };
-    #define define_optional_property( category, type, name, calculator, ... ) neogfx::property<type, category, decltype(&abstract_type::##calculator)> name = { *this, #name ##s, &abstract_type::##calculator, ##__VA_ARGS__ };
+    #define define_property( category, type, name, calculator, ... ) neogfx::property<type, category, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, #name ##s, &property_context_type::##calculator, __VA_ARGS__ };
 }
 
 #ifdef _MSC_VER

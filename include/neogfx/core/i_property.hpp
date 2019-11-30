@@ -24,9 +24,9 @@
 #include <neolib/any.hpp>
 #include <neolib/plugin_variant.hpp>
 #include <neolib/variant.hpp>
-#include <neolib/i_callable.hpp>
 #include <neolib/i_enum.hpp>
 #include <neolib/i_lifetime.hpp>
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/colour.hpp>
@@ -35,6 +35,23 @@
 
 namespace neogfx
 {
+    template <typename R, typename... Args>
+    struct callable_function_cracker;
+    template <typename R, class C, typename... Args>
+    struct callable_function_cracker<R(C::*)(Args...) const>
+    {
+        typedef R(C::* callable_type)(Args...) const;
+        typedef R return_type;
+        typedef C class_type;
+    };
+    template <typename R, class C, typename... Args>
+    struct callable_function_cracker<R(C::*)(Args...)>
+    {
+        typedef R(C::* callable_type)(Args...);
+        typedef R return_type;
+        typedef C class_type;
+    };
+
     typedef neolib::any custom_type;
 
     // todo: move to neolib::plugin_variant when geometry types are abstractable
@@ -151,16 +168,19 @@ namespace neogfx
             return *static_cast<const T*>(data());
         }
         template <typename T>
-        T& get() const
+        T& get()
         {
             return *static_cast<T*>(data());
         }
-        template <typename Calculator>
-        auto calculate(const neolib::i_callable<Calculator>& aCallable) const
+        template <typename Context, typename Callable, typename... Args>
+        auto calculate(Args&&... aArgs) const
         {
             // why? because we have to type-erase to support plugins and std::function can't be passed across a plugin boundary.
-            auto const calculator = *reinterpret_cast<Calculator const*>(calculator_function());
-            return aCallable(calculator);
+            auto const calculator = *reinterpret_cast<Callable const*>(calculator_function());
+            if constexpr(std::is_convertible_v<const Context&, const i_object&>)
+                return (static_cast<const Context&>(owner()).*calculator)(std::forward<Args>(aArgs)...);
+            else
+                return (dynamic_cast<const Context&>(owner()).*calculator)(std::forward<Args>(aArgs)...);
         }
     };
 }
