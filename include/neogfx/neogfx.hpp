@@ -26,6 +26,7 @@ using namespace boost::multiprecision;
 
 #include <neolib/stdint.hpp>
 #include <neolib/reference_counted.hpp>
+#include <neolib/string.hpp>
 #include <neogfx/app/i18n.hpp>
 
 namespace neogfx
@@ -34,6 +35,9 @@ namespace neogfx
     using namespace std::string_literals;
 
     using neolib::ref_ptr;
+
+    using neolib::i_string;
+    using neolib::string;
 
     template <typename Component>
     Component& service();
@@ -45,14 +49,14 @@ namespace neogfx
     inline const std::string to_string(const std::basic_string<CharT, Traits, Allocator>& aString)
     {
         static_assert(sizeof(CharT) == sizeof(char));
-        return std::string{ reinterpret_cast<const char*>(aString.c_str()), aString.size() };
+        return std::string{ aString.c_str(), aString.size() };
     }
 
     template <typename CharT, std::size_t Size>
     inline const std::string to_string(const CharT (&aString)[Size])
     {
         static_assert(sizeof(CharT) == sizeof(char));
-        return std::string{ reinterpret_cast<const char*>(aString), Size };
+        return std::string{ &aString[0], Size };
     }
 
     struct not_yet_implemented : std::runtime_error

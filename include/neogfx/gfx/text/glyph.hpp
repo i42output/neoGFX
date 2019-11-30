@@ -34,11 +34,8 @@ namespace neogfx
     template <>
     i_font_manager& service<i_font_manager>();
 
-    typedef std::string string;
-    typedef string::value_type character;
-
     // case insensitive text
-    typedef std::basic_string<character, neolib::ci_char_traits<std::char_traits<character> > > ci_string;
+    typedef std::basic_string<char, neolib::ci_char_traits<std::char_traits<char> > > ci_string;
 
     enum class text_category : uint8_t
     {

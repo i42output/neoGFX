@@ -53,6 +53,7 @@ namespace neogfx
     public:
         static i_widget* debug;
     public:
+        typedef i_widget abstract_type;
         typedef std::vector<std::shared_ptr<i_widget>> widget_list;
     protected:
         typedef std::unordered_set<rect> update_rect_list;
