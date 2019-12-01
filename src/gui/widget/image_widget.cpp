@@ -207,20 +207,20 @@ namespace neogfx
         return iTexture;
     }
 
-    void image_widget::set_image(const i_texture& aTexture)
+    void image_widget::set_image(const std::string& aImageUri)
     {
-        size oldSize = minimum_size();
-        iTexture = aTexture;
-        ImageChanged.trigger();
-        if (oldSize != minimum_size() && has_managing_layout())
-            managing_layout().layout_items(true);
-        update();
+        set_image(neogfx::image{ aImageUri });
     }
 
     void image_widget::set_image(const i_image& aImage)
     {
+        set_image(texture{ aImage });
+    }
+
+    void image_widget::set_image(const i_texture& aTexture)
+    {
         size oldSize = minimum_size();
-        iTexture = aImage;
+        iTexture = aTexture;
         ImageChanged.trigger();
         if (oldSize != minimum_size() && has_managing_layout())
             managing_layout().layout_items(true);

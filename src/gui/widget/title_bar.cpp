@@ -460,9 +460,9 @@ namespace neogfx
                         "neogfx::title_bar::iTextures[HighDpiTextureClose]::" + ink.to_string(),
                         sCloseHighDpiTexturePattern, { { "paper", colour{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
         }
-        iMinimizeButton.image().set_image(iTextures[TextureMinimize]->second);
-        iMaximizeButton.image().set_image(iTextures[TextureMaximize]->second);
-        iRestoreButton.image().set_image(iTextures[TextureRestore]->second);
-        iCloseButton.image().set_image(iTextures[TextureClose]->second);
+        iMinimizeButton.set_image(iTextures[TextureMinimize]->second);
+        iMaximizeButton.set_image(iTextures[TextureMaximize]->second);
+        iRestoreButton.set_image(iTextures[TextureRestore]->second);
+        iCloseButton.set_image(iTextures[TextureClose]->second);
     }
 }

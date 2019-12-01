@@ -174,6 +174,36 @@ namespace neogfx
             set_checked(true);
     }
 
+    const std::string& button::text() const
+    {
+        return label().text();
+    }
+
+    void button::set_text(const std::string& aText)
+    {
+        label().set_text(aText);
+    }
+
+    const texture& button::image() const
+    {
+        return label().image();
+    }
+
+    void button::set_image(const std::string& aImageUri)
+    {
+        label().set_image(neogfx::image{ aImageUri });
+    }
+
+    void button::set_image(const neogfx::image& aImage)
+    {
+        label().set_image(aImage);
+    }
+
+    void button::set_image(const texture& aImage)
+    {
+        label().set_image(aImage);
+    }
+
     const neogfx::label& button::label() const
     {
         return iLabel;
@@ -184,24 +214,24 @@ namespace neogfx
         return iLabel;
     }
 
-    const image_widget& button::image() const
+    const text_widget& button::text_widget() const
     {
-        return label().image();
+        return label().text_widget();
     }
 
-    image_widget& button::image()
+    text_widget& button::text_widget()
     {
-        return label().image();
+        return label().text_widget();
     }
 
-    const text_widget& button::text() const
+    const image_widget& button::image_widget() const
     {
-        return label().text();
+        return label().image_widget();
     }
 
-    text_widget& button::text()
+    image_widget& button::image_widget()
     {
-        return label().text();
+        return label().image_widget();
     }
 
     void button::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -296,7 +326,7 @@ namespace neogfx
 
     std::string button::mnemonic() const
     {
-        return mnemonic_from_text(label().text().text());
+        return mnemonic_from_text(label().text());
     }
 
     void button::mnemonic_execute()
@@ -306,7 +336,7 @@ namespace neogfx
 
     i_widget& button::mnemonic_widget()
     {
-        return label().text();
+        return label().text_widget();
     }
 
     void button::init()
@@ -321,13 +351,13 @@ namespace neogfx
 
         auto label_text_updated = [this]()
         {
-            auto m = mnemonic_from_text(label().text().text());
+            auto m = mnemonic_from_text(label().text());
             if (!m.empty())
                 service<i_app>().add_mnemonic(*this);
             else
                 service<i_app>().remove_mnemonic(*this);
         };
-        iSink = label().text().TextChanged(label_text_updated);
+        iSink = label().text_widget().TextChanged(label_text_updated);
         label_text_updated();
     }
 }

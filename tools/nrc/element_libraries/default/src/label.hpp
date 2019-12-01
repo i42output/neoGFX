@@ -31,6 +31,10 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, ui_element_type::Label }
         {
         }
+        label(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t) :
+            ui_element<>{ aParser, aParent, member_element, ui_element_type::Label }
+        {
+        }
     public:
         const neolib::i_string& header() const override
         {
@@ -52,7 +56,8 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  label %1%;\n", id());
+            if (!is_member_element())
+                emit("  label %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

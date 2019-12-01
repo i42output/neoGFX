@@ -53,23 +53,29 @@ namespace neogfx::nrc
         typedef std::set<std::string> data_names_t;
     public:
         ui_element(const i_ui_element_parser& aParser, ui_element_type aType) :
-            iParser{ aParser }, iParent{ nullptr }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
+            iParser{ aParser }, iParent{ nullptr }, iMemberElement{ false }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
             init();
         }
         ui_element(const i_ui_element_parser& aParser, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
-            iParser{ aParser }, iParent{ nullptr }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
+            iParser{ aParser }, iParent{ nullptr }, iMemberElement{ false }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
             init();
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType) :
-            iParser{ aParser }, iParent{ &aParent }, iAnonymousIdCounter{ 0u }, iId{ aParser.get_optional<neolib::string>("id") }, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aParser.get_optional<neolib::string>("id") }, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
-            iParser{ aParser }, iParent{ &aParent }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
+        {
+            init();
+            parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
+        }
+        ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t, ui_element_type aType) :
+            iParser{ aParser }, iParent{ &aParent }, iMemberElement{ true }, iAnonymousIdCounter{ 0u }, iId{}, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
@@ -83,6 +89,10 @@ namespace neogfx::nrc
             return iParser;
         }
     public:
+        bool is_member_element() const override
+        {
+            return iMemberElement;
+        }
         bool anonymous() const override
         {
             return !iId;
@@ -97,10 +107,27 @@ namespace neogfx::nrc
         {
             if (!iAnonymousId)
             {
-                if (has_parent())
-                    iAnonymousId = parent().generate_anonymous_id();
+                if (!is_member_element())
+                {
+                    if (has_parent())
+                        iAnonymousId = parent().generate_anonymous_id();
+                    else
+                        iAnonymousId = parser().generate_anonymous_id();
+                }
                 else
-                    iAnonymousId = parser().generate_anonymous_id();
+                {
+                    switch (type() & ui_element_type::MASK_RESERVED_SPECIFIC)
+                    {
+                    case ui_element_type::Label:
+                        iAnonymousId = parent().id() + ".label()";
+                        break;
+                    case ui_element_type::ImageWidget:
+                        iAnonymousId = parent().id() + ".image_widget()";
+                        break;
+                    default:
+                        throw unsupported_member_element();
+                    }
+                }
             }
             return *iAnonymousId;
         }
@@ -163,31 +190,6 @@ namespace neogfx::nrc
         {
             iDataNames.merge(aNames);
         }
-        bool consume_element(const neolib::i_string& aElementType) override
-        {
-            if (aElementType == ".label" && (type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-            {
-                emplace_2<length>("size", iLabelFixedSize);
-                emplace_2<length>("minimum_size", iLabelMinimumSize);
-                emplace_2<length>("maximum_size", iLabelMaximumSize);
-                emplace_2<double>("weight", iLabelWeight);
-                iText = parser().get_optional<neolib::string>("text");
-                iLabelPlacement = parser().get_optional_enum<label_placement>("placement");
-                return true;
-            }
-            else if (aElementType == ".image" && (type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-            {
-                emplace_2<length>("size", iImageFixedSize);
-                emplace_2<length>("minimum_size", iImageMinimumSize);
-                emplace_2<length>("maximum_size", iImageMaximumSize);
-                emplace_2<double>("weight", iImageWeight);
-                iImage = parser().get_optional<neolib::string>("uri");
-                iAspectRatio = parser().get_optional_enum<aspect_ratio>("aspect_ratio");
-                iImagePlacement = parser().get_optional_enum<cardinal>("placement");
-                return true;
-            }
-            return false;
-        }
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
             if (data_names().find(aName) == data_names().end())
@@ -205,8 +207,16 @@ namespace neogfx::nrc
                 iFixedSize.emplace(get_scalar<length>(aData));
             else if (aName == "minimum_size")
                 iMinimumSize.emplace(get_scalar<length>(aData));
+            else if (aName == "minimum_width")
+                iMinimumWidth.emplace(get_scalar<length>(aData));
+            else if (aName == "minimum_height")
+                iMinimumHeight.emplace(get_scalar<length>(aData));
             else if (aName == "maximum_size")
                 iMaximumSize.emplace(get_scalar<length>(aData));
+            else if (aName == "maximum_width")
+                iMaximumWidth.emplace(get_scalar<length>(aData));
+            else if (aName == "maximum_height")
+                iMaximumHeight.emplace(get_scalar<length>(aData));
             else if (aName == "margin")
                 iMargin.emplace(get_scalar<length>(aData));
             else if (aName == "enabled")
@@ -224,7 +234,7 @@ namespace neogfx::nrc
             }
             else if (aName == "label")
                 iText = aData.get<neolib::i_string>();
-            else if (aName == "image")
+            else if (aName == "image" || (aName == "uri" && (type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget))
                 iImage = aData.get<neolib::i_string>();
             else if (aName == "aspect_ratio")
                 iAspectRatio = get_enum<aspect_ratio>(aData);
@@ -232,9 +242,9 @@ namespace neogfx::nrc
             {
                 if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) != ui_element_type::TextField)
                 {
-                    if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
+                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::Label || (type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
                         iLabelPlacement = get_enum<label_placement>(aData);
-                    else if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
+                    else if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget || (type() & ui_element_type::HasImage) == ui_element_type::HasImage)
                         iImagePlacement = get_enum<cardinal>(aData);
                 }
                 else
@@ -299,8 +309,16 @@ namespace neogfx::nrc
                 emit("   %1%.set_fixed_size(size{ %2%, %3% });\n", id(), iFixedSize->cx, iFixedSize->cy);
             if (iMinimumSize)
                 emit("   %1%.set_minimum_size(size{ %2%, %3% });\n", id(), iMinimumSize->cx, iMinimumSize->cy);
+            if (iMinimumWidth)
+                emit("   %1%.set_minimum_width(%2%);\n", id(), *iMinimumWidth);
+            if (iMinimumHeight)
+                emit("   %1%.set_minimum_height(%2%);\n", id(), *iMinimumHeight);
             if (iMaximumSize)
                 emit("   %1%.set_maximum_size(size{ %2%, %3% });\n", id(), iMaximumSize->cx, iMaximumSize->cy);
+            if (iMaximumWidth)
+                emit("   %1%.set_maximum_width(%2%);\n", id(), *iMaximumWidth);
+            if (iMaximumHeight)
+                emit("   %1%.set_maximum_height(%2%);\n", id(), *iMaximumHeight);
             if (iWeight)
                 emit("   %1%.set_weight(size{ %2%, %3% });\n", id(), iWeight->cx, iWeight->cy);
             if (iMargin)
@@ -325,81 +343,18 @@ namespace neogfx::nrc
                 else
                     emit("   %1%.set_focus_policy(%1%.focus_policy() | %2%);\n", id(), enum_to_string("focus_policy", *iFocusPolicy.first));
             }
-            if (iLabelFixedSize)
-                emit("   %1%.label().set_fixed_size(size{ %2%, %3% });\n", id(), iLabelFixedSize->cx, iLabelFixedSize->cy);
-            if (iLabelMinimumSize)
-                emit("   %1%.label().set_minimum_size(size{ %2%, %3% });\n", id(), iLabelMinimumSize->cx, iLabelMinimumSize->cy);
-            if (iLabelMaximumSize)
-                emit("   %1%.label().set_maximum_size(size{ %2%, %3% });\n", id(), iLabelMaximumSize->cx, iLabelMaximumSize->cy);
-            if (iLabelWeight)
-                emit("   %1%.label().set_weight(size{ %2%, %3% });\n", id(), iLabelWeight->cx, iLabelWeight->cy);
             if (iLabelPlacement)
-                emit("   %1%.label().set_placement(%2%);\n", id(), enum_to_string("label_placement", *iLabelPlacement));
+                emit("   %1%.set_placement(%2%);\n", id(), enum_to_string("label_placement", *iLabelPlacement));
             if (iTextFieldPlacement)
                 emit("   %1%.set_placement(%2%);\n", id(), enum_to_string("text_field_placement", *iTextFieldPlacement));
-            if (iImageFixedSize)
-                emit("   %1%.image().set_fixed_size(size{ %2%, %3% });\n", id(), iImageFixedSize->cx, iImageFixedSize->cy);
-            if (iImageMinimumSize)
-                emit("   %1%.image().set_minimum_size(size{ %2%, %3% });\n", id(), iImageMinimumSize->cx, iImageMinimumSize->cy);
-            if (iImageMaximumSize)
-                emit("   %1%.image().set_maximum_size(size{ %2%, %3% });\n", id(), iImageMaximumSize->cx, iImageMaximumSize->cy);
-            if (iImageWeight)
-                emit("   %1%.image().set_weight(size{ %2%, %3% });\n", id(), iImageWeight->cx, iImageWeight->cy);
             if (iImage)
-            {
-                if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-                {
-                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
-                        emit("   %1%.set_image(image{ \"%2%\" });\n", id(), *iImage);
-                    else
-                        emit("   %1%.image().set_image(image{ \"%2%\" });\n", id(), *iImage);
-                }
-                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-                    emit("   %1%.label().image().set_image(image{ \"%2%\" });\n", id(), *iImage);
-            }
+                emit("   %1%.set_image(image{ \"%2%\" });\n", id(), *iImage);
             if (iAspectRatio)
-            {
-                if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-                {
-                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
-                        emit("   %1%.set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
-                    else
-                        emit("   %1%.image().set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
-                }
-                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-                    emit("   %1%.label().image().set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
-            }
+                emit("   %1%.set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
             if (iImagePlacement)
-            {
-                if ((type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-                {
-                    if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
-                        emit("   %1%.set_placement(%2%);\n", id(), enum_to_string("cardinal", *iImagePlacement));
-                    else
-                        emit("   %1%.image().set_placement(%2%);\n", id(), enum_to_string("cardinal", *iImagePlacement));
-                }
-                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-                    emit("   %1%.label().image().set_placement(%2%);\n", id(), enum_to_string("cardinal", *iImagePlacement));
-            }
+                emit("   %1%.set_placement(%2%);\n", id(), enum_to_string("cardinal", *iImagePlacement));
             if (iText)
-            {
-                if ((type() & ui_element_type::HasText) == ui_element_type::HasText)
-                {
-                    switch (type() & ui_element_type::MASK_RESERVED_SPECIFIC)
-                    {
-                    case ui_element_type::TextWidget:
-                    case ui_element_type::TextEdit:
-                    case ui_element_type::LineEdit:
-                        emit("   %1%.set_text(\"%2%\"_t);\n", id(), *iText);
-                        break;
-                    default:
-                        emit("   %1%.text().set_text(\"%2%\"_t);\n", id(), *iText);
-                        break;
-                    }   
-                }
-                else if ((type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-                    emit("   %1%.label().text().set_text(\"%2%\"_t);\n", id(), *iText);
-            }
+                emit("   %1%.set_text(\"%2%\"_t);\n", id(), *iText);
             if (iFieldText)
                 emit("   %1%.input_box().set_text(\"%2%\"_t);\n", id(), *iFieldText);
             if (iOpacity)
@@ -428,6 +383,8 @@ namespace neogfx::nrc
         }
         void emit_generic_ctor(const std::optional<neolib::string>& aText = {}) const
         {
+            if (is_member_element())
+                return;
             if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
             {
                 if (aText)
@@ -477,19 +434,22 @@ namespace neogfx::nrc
             if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
                 add_data_names({ "enabled", "disabled", "focus_policy" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
-                add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size", "weight" });
+                add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size", "minimum_width", "minimum_height", "maximum_width", "maximum_height", "weight" });
             if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
                 add_data_names({ "alignment" });
             if ((type() & (ui_element_type::HasText | ui_element_type::HasLabel)) != ui_element_type::None)
                 add_data_names({ "text" });
             if ((type() & (ui_element_type::HasImage | ui_element_type::HasLabel)) != ui_element_type::None)
                 add_data_names({ "image", "aspect_ratio", "placement" });
+            if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
+                add_data_names({ "uri" });
             if ((type() & ui_element_type::HasColour) == ui_element_type::HasColour)
                 add_data_names({ "foreground_colour", "background_colour", "opacity", "transparency" });
         }
     private:
         const i_ui_element_parser& iParser;
         i_ui_element* iParent;
+        bool iMemberElement;
         data_names_t iDataNames;
         neolib::optional<neolib::string> iId;
         mutable neolib::optional<neolib::string> iAnonymousId;
@@ -501,14 +461,14 @@ namespace neogfx::nrc
         std::optional<basic_size<length>> iFixedSize;
         std::optional<basic_size<length>> iMinimumSize;
         std::optional<basic_size<length>> iMaximumSize;
+        std::optional<length> iMinimumWidth;
+        std::optional<length> iMinimumHeight;
+        std::optional<length> iMaximumWidth;
+        std::optional<length> iMaximumHeight;
         std::optional<size> iWeight;
         std::optional<basic_margins<length>> iMargin;
         std::optional<bool> iEnabled;
         std::pair<std::optional<focus_policy>, bool> iFocusPolicy;
-        std::optional<basic_size<length>> iLabelFixedSize;
-        std::optional<basic_size<length>> iLabelMinimumSize;
-        std::optional<basic_size<length>> iLabelMaximumSize;
-        std::optional<size> iLabelWeight;
         std::optional<label_placement> iLabelPlacement;
         std::optional<text_field_placement> iTextFieldPlacement;
         std::optional<string> iText;
@@ -516,10 +476,6 @@ namespace neogfx::nrc
         std::optional<string> iImage;
         std::optional<aspect_ratio> iAspectRatio;
         std::optional<cardinal> iImagePlacement;
-        std::optional<basic_size<length>> iImageFixedSize;
-        std::optional<basic_size<length>> iImageMinimumSize;
-        std::optional<basic_size<length>> iImageMaximumSize;
-        std::optional<size> iImageWeight;
         std::optional<double> iOpacity;
         std::optional<colour> iForegroundColour;
         std::optional<colour> iBackgroundColour;

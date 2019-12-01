@@ -140,11 +140,11 @@ namespace neogfx
         size result = button::minimum_size(aAvailableSpace);
         if (iStyle == push_button_style::ButtonBox)
         {
-            if (iStandardButtonWidth == std::nullopt || iStandardButtonWidth->first != label().text().font())
+            if (iStandardButtonWidth == std::nullopt || iStandardButtonWidth->first != label().text_widget().font())
             {
                 graphics_context gc{ *this, graphics_context::type::Unattached };
-                iStandardButtonWidth.emplace(label().text().font(), gc.text_extent("#StdButton", label().text().font()));
-                iStandardButtonWidth->second.cx += (result.cx - label().text().minimum_size(aAvailableSpace).cx);
+                iStandardButtonWidth.emplace(label().text_widget().font(), gc.text_extent("#StdButton", label().text_widget().font()));
+                iStandardButtonWidth->second.cx += (result.cx - label().text_widget().minimum_size(aAvailableSpace).cx);
             }
             result.cx = std::max(result.cx, iStandardButtonWidth->second.cx);
         }
@@ -415,7 +415,7 @@ namespace neogfx
             set_margins(neogfx::margins{ 1.0_spx, 2.0_spx });
             layout().set_margins(neogfx::margins{});
             label().set_margins(neogfx::margins{});
-            label().text().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
+            label().text_widget().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
         }
         else if (iStyle == push_button_style::Toolbar)
         {

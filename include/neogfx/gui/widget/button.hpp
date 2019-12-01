@@ -78,12 +78,18 @@ namespace neogfx
         void toggle() override;
         // button
     public:
+        const std::string& text() const;
+        void set_text(const std::string& aText);
+        const texture& image() const;
+        void set_image(const std::string& aImageUri);
+        void set_image(const neogfx::image& aImage);
+        void set_image(const texture& aImage);
         const neogfx::label& label() const;
         neogfx::label& label();
-        const image_widget& image() const;
-        image_widget& image();
-        const text_widget& text() const;
-        text_widget& text();
+        const neogfx::text_widget& text_widget() const;
+        neogfx::text_widget& text_widget();
+        const neogfx::image_widget& image_widget() const;
+        neogfx::image_widget& image_widget();
         // widget
     protected:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;

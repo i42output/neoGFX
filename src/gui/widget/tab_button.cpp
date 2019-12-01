@@ -57,13 +57,13 @@ namespace neogfx
             scoped_units su{ *this, units::Pixels };
             if (entered())
             {
-                double radius = std::sqrt(std::pow(image().image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
+                double radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
                 aGraphicsContext.fill_circle(
-                    to_client_coordinates(image().to_window_coordinates(image().client_rect().centre())), radius, service<i_app>().current_style().palette().text_colour());
+                    to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().centre())), radius, service<i_app>().current_style().palette().text_colour());
             }
             if (has_focus())
             {
-                rect focusRect = to_client_coordinates(image().to_window_coordinates(rect{ image().client_rect().centre() - image().image().extents() / 2.0, image().image().extents() }));
+                rect focusRect = to_client_coordinates(image_widget().to_window_coordinates(rect{ image_widget().client_rect().centre() - image().extents() / 2.0, image().extents() }));
                 focusRect.inflate(2.0, 2.0);
                 aGraphicsContext.draw_focus_rect(focusRect);
             }
@@ -162,7 +162,7 @@ namespace neogfx
             else
                 iTextureState = TextureOff;
             if (iTextureState != oldState)
-                image().set_image(iTextures[iTextureState]->second);
+                set_image(iTextures[iTextureState]->second);
         }
     protected:
         void mouse_entered(const point& aPosition) override
@@ -258,22 +258,22 @@ namespace neogfx
 
     const std::string& tab_button::text() const
     {
-        return push_button::text().text();
+        return push_button::text();
     }
 
     void tab_button::set_text(const std::string& aText)
     {
-        push_button::text().set_text(aText);
+        push_button::set_text(aText);
     }
 
     void tab_button::set_image(const i_texture& aTexture)
     {
-        push_button::image().set_image(aTexture);
+        push_button::set_image(aTexture);
     }
 
     void tab_button::set_image(const i_image& aImage)
     {
-        push_button::image().set_image(aImage);
+        push_button::set_image(aImage);
     }
 
     const i_widget& tab_button::as_widget() const
@@ -405,14 +405,14 @@ namespace neogfx
         {
             if (iStandardImageSize)
             {
-                push_button::image().set_fixed_size(dpi_select(size{ 16.0, 16.0 }, size{ 32.0, 32.0 }));
-                push_button::image().set_aspect_ratio(aspect_ratio::KeepExpanding);
+                image_widget().set_fixed_size(dpi_select(size{ 16.0, 16.0 }, size{ 32.0, 32.0 }));
+                image_widget().set_aspect_ratio(aspect_ratio::KeepExpanding);
             }
             else
             {
-                push_button::image().set_minimum_size(optional_size{});
-                push_button::image().set_maximum_size(optional_size{});
-                push_button::image().set_aspect_ratio(aspect_ratio::Keep);
+                image_widget().set_minimum_size(optional_size{});
+                image_widget().set_maximum_size(optional_size{});
+                image_widget().set_aspect_ratio(aspect_ratio::Keep);
             }
             label().layout().invalidate();
         };

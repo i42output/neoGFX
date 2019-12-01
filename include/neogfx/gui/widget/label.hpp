@@ -87,16 +87,25 @@ namespace neogfx
         label(i_layout& aLayout, const i_image& aImage, label_type aType = label_type::MultiLine, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
         ~label();
     public:
+        const grid_layout& layout() const override;
+        grid_layout& layout() override;
+    public:
         neogfx::size_policy size_policy() const override;
         using widget::set_size_policy;
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
     public:
+        const std::string& text() const;
+        void set_text(const std::string& aText);
+        const texture& image() const;
+        void set_image(const std::string& aImageUri);
+        void set_image(const neogfx::image& aImage);
+        void set_image(const texture& aImage);
         label_placement placement() const;
         void set_placement(label_placement aPlacement);
-        const image_widget& image() const;
-        image_widget& image();
-        const text_widget& text() const;
-        text_widget& text();
+        const neogfx::text_widget& text_widget() const;
+        neogfx::text_widget& text_widget();
+        const neogfx::image_widget& image_widget() const;
+        neogfx::image_widget& image_widget();
         const i_spacer& centre_spacer() const;
         i_spacer& centre_spacer();
         bool has_buddy() const;
@@ -113,8 +122,8 @@ namespace neogfx
         alignment iAlignment;
         label_placement iPlacement;
         grid_layout iLayout;
-        image_widget iImage;
-        text_widget iText;
+        neogfx::text_widget iText;
+        neogfx::image_widget iImage;
         i_spacer* iCentreSpacer;
         std::shared_ptr<i_widget> iBuddy;
     };

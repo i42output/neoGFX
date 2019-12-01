@@ -505,7 +505,7 @@ namespace neogfx
         colour default_text_colour() const;
     public:
         void clear();
-        std::string text() const;
+        const std::string& text() const;
         std::size_t set_text(const std::string& aText);
         std::size_t set_text(const std::string& aText, const style& aStyle);
         std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
@@ -580,6 +580,7 @@ namespace neogfx
         std::u32string iNormalizedTextBuffer;
         document_text iPreviousText;
         document_text iText;
+        mutable std::optional<std::string> iUtf8TextCache;
         document_glyphs iGlyphs;
         glyph_paragraphs iGlyphParagraphs;
         glyph_columns iGlyphColumns;

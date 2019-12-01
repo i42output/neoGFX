@@ -83,6 +83,16 @@ namespace neogfx
         init();
     }
 
+    const std::string& text_field::text() const
+    {
+        return input_box().text();
+    }
+
+    void text_field::set_text(const std::string& aText)
+    {
+        input_box().set_text(aText);
+    }
+
     const label& text_field::label() const
     {
         return iLabel;

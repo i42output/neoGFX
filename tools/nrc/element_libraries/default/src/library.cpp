@@ -140,6 +140,8 @@ namespace neogfx::nrc
             { "check_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new check_box{ aParser, aParent }; } },
             { "radio_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new radio_button{ aParser, aParent }; } },
             { "label", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new label{ aParser, aParent }; } },
+            { ".label", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new label{ aParser, aParent, member_element }; } },
+            { ".image", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new image_widget{ aParser, aParent, member_element }; } },
             { "text_edit", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_edit{ aParser, aParent }; } },
             { "line_edit", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new line_edit{ aParser, aParent }; } },
             { "text_field", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_field{ aParser, aParent }; } },

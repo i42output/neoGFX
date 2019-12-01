@@ -37,6 +37,9 @@ namespace neogfx::nrc
 {
     typedef object_type ui_element_type;
 
+    struct member_element_t {};
+    const member_element_t member_element;
+
     inline constexpr bool is_widget_or_layout(ui_element_type aType)
     {
         return ((category(aType) & (ui_element_type::Widget | ui_element_type::Layout)) != ui_element_type::Invalid);
@@ -44,6 +47,7 @@ namespace neogfx::nrc
 
     struct element_not_found : std::runtime_error { element_not_found(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
     struct element_ill_formed : std::runtime_error { element_ill_formed(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
+    struct unsupported_member_element : std::runtime_error { unsupported_member_element() : std::runtime_error{ "Unsupported member element." } {} };
 
     class i_ui_element : public neolib::i_reference_counted
     {
@@ -61,6 +65,7 @@ namespace neogfx::nrc
     public:
         virtual const neolib::i_string& header() const = 0;
     public:
+        virtual bool is_member_element() const = 0;
         virtual bool anonymous() const = 0;
         virtual const neolib::i_string& id() const = 0;
         virtual const neolib::i_string& anonymous_id() const = 0;
@@ -73,7 +78,6 @@ namespace neogfx::nrc
         virtual const children_t& children() const = 0;
         virtual children_t& children() = 0;
     public:
-        virtual bool consume_element(const neolib::i_string& aElementType) = 0;
         virtual void parse(const neolib::i_string& aType, const data_t& aData) = 0;
         virtual void parse(const neolib::i_string& aType, const array_data_t& aData) = 0;
         virtual void emit() const = 0;

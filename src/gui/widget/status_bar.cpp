@@ -63,31 +63,31 @@ namespace neogfx
     {
         iLayout.add(std::make_shared<separator>());
         auto insertLock = std::make_shared<label>();
-        insertLock->text().set_size_hint(size_hint{ "Insert" });
+        insertLock->text_widget().set_size_hint(size_hint{ "Insert" });
         iLayout.add(insertLock);
         iLayout.add(std::make_shared<separator>());
         auto capsLock = std::make_shared<label>();
-        capsLock->text().set_size_hint(size_hint{ "CAP" });
+        capsLock->text_widget().set_size_hint(size_hint{ "CAP" });
         iLayout.add(capsLock);
         iLayout.add(std::make_shared<separator>());
         auto numLock = std::make_shared<label>();
-        numLock->text().set_size_hint(size_hint{ "NUM" });
+        numLock->text_widget().set_size_hint(size_hint{ "NUM" });
         iLayout.add(numLock);
         iLayout.add(std::make_shared<separator>());
         auto scrlLock = std::make_shared<label>();
-        scrlLock->text().set_size_hint(size_hint{ "SCRL" });
+        scrlLock->text_widget().set_size_hint(size_hint{ "SCRL" });
         iLayout.add(scrlLock);
         iUpdater = std::make_unique<neolib::callback_timer>(service<neolib::async_task>(), root().surface().as_lifetime(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             const auto& keyboard = service<i_keyboard>();
-            insertLock->text().set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
+            insertLock->set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
                 "Insert" : std::string{});
-            capsLock->text().set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?
+            capsLock->set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?
                 "CAP" : std::string{});
-            numLock->text().set_text((keyboard.locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock ?
+            numLock->set_text((keyboard.locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock ?
                 "NUM" : std::string{});
-            scrlLock->text().set_text((keyboard.locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock ?
+            scrlLock->set_text((keyboard.locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock ?
                 "SCRL" : std::string{});
         }, 100);
     }
@@ -341,7 +341,7 @@ namespace neogfx
     void status_bar::update_widgets()
     {
         bool showMessage = (iStyle & style::DisplayMessage) == style::DisplayMessage && have_message();
-        iMessageWidget.text().set_text(have_message() ? message() : std::string{});
+        iMessageWidget.set_text(have_message() ? message() : std::string{});
         iMessageWidget.show(showMessage);
         iIdleWidget.show(!showMessage);
         iNormalWidgetContainer.show(!showMessage);

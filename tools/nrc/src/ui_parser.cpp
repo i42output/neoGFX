@@ -272,8 +272,7 @@ namespace neogfx::nrc
                     try
                     {
                         neolib::string elementName{ e.name() };
-                        if (!aElement.consume_element(elementName))
-                            parse(e, *create_element(aElement, elementName));
+                        parse(e, *create_element(aElement, elementName));
                     }
                     catch (element_type_not_found& e)
                     {

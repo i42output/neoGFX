@@ -444,19 +444,19 @@ namespace neogfx
             }
             const i_widget& image_widget() const override
             {
-                return push_button::image();
+                return push_button::image_widget();
             }
             i_widget& image_widget() override
             {
-                return push_button::image();
+                return push_button::image_widget();
             }
             const i_widget& text_widget() const override
             {
-                return push_button::text();
+                return push_button::text_widget();
             }
             i_widget& text_widget() override
             {
-                return push_button::text();
+                return push_button::text_widget();
             }
             size spacing() const override
             {
@@ -468,20 +468,20 @@ namespace neogfx
             }
             const i_texture& image() const override
             {
-                return push_button::image().image();
+                return push_button::image();
             }
             void set_image(const i_texture& aImage) override
             {
-                push_button::image().set_image(aImage);
-                push_button::image().show(!aImage.is_empty());
+                push_button::set_image(aImage);
+                push_button::image_widget().show(!aImage.is_empty());
             }
-            std::string text() const override
+            const std::string& text() const override
             {
-                return push_button::text().text();
+                return push_button::text();
             }
             void set_text(const std::string& aText) override
             {
-                return push_button::text().set_text(aText);
+                return push_button::set_text(aText);
             }
         };
 
@@ -554,7 +554,7 @@ namespace neogfx
                 iImage.show(!aImage.is_empty());
 
             }
-            std::string text() const override
+            const std::string& text() const override
             {
                 return iEditor.text();
             }

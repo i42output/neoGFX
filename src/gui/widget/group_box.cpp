@@ -40,6 +40,16 @@ namespace neogfx
         init();
     }
 
+    const std::string& group_box::text() const
+    {
+        return label().text();
+    }
+
+    void group_box::set_text(const std::string& aText)
+    {
+        label().set_text(aText);
+    }
+
     bool group_box::is_checkable() const
     {
         return std::holds_alternative<check_box_ptr>(iTitle);
@@ -49,7 +59,7 @@ namespace neogfx
     {
         if (is_checkable() != aCheckable)
         {
-            std::string text = label().text().text();
+            auto const& text = label().text();
             iTitle = neolib::none;
             if (aCheckable)
             {

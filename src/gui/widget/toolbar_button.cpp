@@ -174,12 +174,12 @@ namespace neogfx
             if (is_checked())
             {
                 action().check();
-                image().set_image(action().checked_image());
+                image_widget().set_image(action().checked_image());
             }
             else
             {
                 action().uncheck();
-                image().set_image(action().image());
+                image_widget().set_image(action().image());
             }
         };
         iSink += Checked(update_checked);
@@ -194,8 +194,8 @@ namespace neogfx
         if (action().is_checkable())
             set_checkable();
         label().set_placement(label_placement::ImageVertical);
-        text().set_text(action().button_text());
-        image().set_image(action().image());
-        image().set_aspect_ratio(aspect_ratio::KeepExpanding);
+        set_text(action().button_text());
+        set_image(action().image());
+        image_widget().set_aspect_ratio(aspect_ratio::KeepExpanding);
     }
 }

@@ -652,6 +652,8 @@ namespace neogfx
     {
         // todo: more intelligent undo
         iText.swap(iPreviousText);
+        iUtf8TextCache = std::nullopt;
+
         refresh_paragraph(iText.begin(), 0);
         update();
         cursor().set_position(iText.size());
@@ -1197,10 +1199,14 @@ namespace neogfx
             iGlyphColumns[i].lines().clear();
     }
 
-    std::string text_edit::text() const
+    const std::string& text_edit::text() const
     {
-        std::u32string u32text{ iText.begin(), iText.end() };
-        return neolib::utf32_to_utf8(u32text);
+        if (iUtf8TextCache == std::nullopt)
+        {
+            std::u32string u32text{ iText.begin(), iText.end() };
+            iUtf8TextCache = neolib::utf32_to_utf8(u32text);
+        }
+        return *iUtf8TextCache;
     }
 
     std::size_t text_edit::set_text(const std::string& aText)
@@ -1227,10 +1233,14 @@ namespace neogfx
     {
         if (aStart == aEnd)
             return;
+
         auto eraseBegin = iText.begin() + aStart;
         auto eraseEnd = iText.begin() + aEnd;
         auto eraseAmount = eraseEnd - eraseBegin;
+
         iPreviousText = iText;
+        iUtf8TextCache = std::nullopt;
+
         refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
         update();
         if (iPreviousText != iText)
@@ -1406,6 +1416,7 @@ namespace neogfx
             return 0;
 
         iPreviousText = iText;
+        iUtf8TextCache = std::nullopt;
 
         if (aClearFirst)
             iText.clear();

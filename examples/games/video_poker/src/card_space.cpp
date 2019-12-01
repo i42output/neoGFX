@@ -132,8 +132,8 @@ namespace video_poker
         set_ignore_mouse_events(true);
         iHoldButton.set_size_policy(neogfx::size_constraint::Minimum);
         iHoldButton.set_foreground_colour(neogfx::colour::Black);
-        iHoldButton.text().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
-        iHoldButton.text().set_text_appearance(neogfx::text_appearance{ neogfx::colour::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::colour::Black.with_alpha(128) } });
+        iHoldButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
+        iHoldButton.text_widget().set_text_appearance(neogfx::text_appearance{ neogfx::colour::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::colour::Black.with_alpha(128) } });
         iHoldButton.set_checkable();
         auto update_hold = [this]() 
         { 

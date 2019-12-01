@@ -344,7 +344,7 @@ int main(int argc, char* argv[])
         ng::layout_as_same_size(ui.textField1.label(), ui.textField2.label());
         ui.textField1.input_box().TextChanged([&ui]()
         {
-            ui.button1.text().set_text(ui.textField1.input_box().text());
+            ui.button1.set_text(ui.textField1.input_box().text());
         });
         ng::double_spin_box spinBox1(ui.layoutSpinners2);
         spinBox1.set_minimum(-100.0);
@@ -662,7 +662,7 @@ int main(int argc, char* argv[])
                 result = ng::message_box::error(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (ui.radioMessageBoxIconCritical.is_checked())
                 result = ng::message_box::critical(window, ui.lineEditMessageBoxTitle.text(), ui.textEditMessageBoxText.text(), ui.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
-            ui.labelMessageBoxResult.text().set_text("Result = " + ng::dialog_button_box::standard_button_details(result).second);
+            ui.labelMessageBoxResult.set_text("Result = " + ng::dialog_button_box::standard_button_details(result).second);
         });
 
         // Item Views

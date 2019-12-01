@@ -299,19 +299,21 @@
                                     id: layoutLineEdits2
                                     text_field: {
                                         id: textField1
-                                        label: "First field:"
+                                        .label: {
+                                            text: "First field:"
+                                            anchor_to: [textField2.label MinimumSize max]
+                                        }
                                         hint: "Enter text"
                                         placement: LabelLeft
                                     }
                                     text_field: {
                                         id: textField2
-                                        label: "Second field:"
+                                        .label: {
+                                            text: "Second field:"
+                                            anchor_to: [textField1.label MinimumSize max]
+                                        }
                                         hint: "Enter text"
                                         placement: LabelLeft
-                                    }
-                                    anchor: {
-                                        constraint: MinimumSize
-                                        objects: [ textField1.label textField2.label ]
                                     }
                                 }
                                 vertical_layout: {

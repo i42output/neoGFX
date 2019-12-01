@@ -389,7 +389,7 @@ namespace neogfx
             }
             if (i < presentation_model().columns())
             {
-                button.text().set_text(presentation_model().column_heading_text(i));
+                button.set_text(presentation_model().column_heading_text(i));
                 if (!expand_last_column() || i != presentation_model().columns() - 1)
                     button.set_size_policy(iType == header_view::HorizontalHeader ?
                         neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding } :
@@ -449,7 +449,7 @@ namespace neogfx
             }
             else if (!expand_last_column())
             {
-                button.text().set_text(std::string());
+                button.set_text(std::string());
                 button.set_size_policy(iType == header_view::HorizontalHeader ?
                     neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum } :
                     neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });

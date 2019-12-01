@@ -35,7 +35,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        dimension const length = std::ceil(units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text().font().height() * (2.0 / 3.0)));
+        dimension const length = std::ceil(units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text_widget().font().height() * (2.0 / 3.0)));
         return rasterize(size{ std::max<dimension>(length, 3.5_mm) });
     }
 
@@ -80,7 +80,7 @@ namespace neogfx
         layout().add_spacer();
         if (!any_siblings_on())
             set_on();
-        text().set_alignment(alignment::Left | alignment::VCentre);
+        text_widget().set_alignment(alignment::Left | alignment::VCentre);
     }
 
     radio_button::radio_button(i_widget& aParent, const std::string& aText) :
@@ -92,7 +92,7 @@ namespace neogfx
         layout().add_spacer();
         if (!any_siblings_on())
             set_on();
-        text().set_alignment(alignment::Left | alignment::VCentre);
+        text_widget().set_alignment(alignment::Left | alignment::VCentre);
     }
 
     radio_button::radio_button(i_layout& aLayout, const std::string& aText) :
@@ -104,7 +104,7 @@ namespace neogfx
         layout().add_spacer();
         if (!any_siblings_on())
             set_on();
-        text().set_alignment(alignment::Left | alignment::VCentre);
+        text_widget().set_alignment(alignment::Left | alignment::VCentre);
     }
 
     bool radio_button::is_on() const

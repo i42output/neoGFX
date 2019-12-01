@@ -34,7 +34,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        dimension const length = std::ceil(units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text().font().height() * (2.0 / 3.0)));
+        dimension const length = std::ceil(units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text_widget().font().height() * (2.0 / 3.0)));
         return rasterize(size{ std::max<dimension>(length, 3.5_mm) });
     }
 
@@ -82,7 +82,7 @@ namespace neogfx
         set_margins(neogfx::margins(0.0));
         layout().set_margins(neogfx::margins(0.0));
         layout().add_spacer();
-        text().set_alignment(alignment::Left | alignment::VCentre);
+        label().text_widget().set_alignment(alignment::Left | alignment::VCentre);
     }
 
     check_box::check_box(i_widget& aParent, const std::string& aText, button_checkable aCheckable) :
@@ -92,7 +92,7 @@ namespace neogfx
         set_margins(neogfx::margins(0.0));
         layout().set_margins(neogfx::margins(0.0));
         layout().add_spacer();
-        text().set_alignment(alignment::Left | alignment::VCentre);
+        label().text_widget().set_alignment(alignment::Left | alignment::VCentre);
     }
 
     check_box::check_box(i_layout& aLayout, const std::string& aText, button_checkable aCheckable) :
@@ -102,7 +102,7 @@ namespace neogfx
         set_margins(neogfx::margins(0.0));
         layout().set_margins(neogfx::margins(0.0));
         layout().add_spacer();
-        text().set_alignment(alignment::Left | alignment::VCentre);
+        label().text_widget().set_alignment(alignment::Left | alignment::VCentre);
     }
 
     neogfx::size_policy check_box::size_policy() const
