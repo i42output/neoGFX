@@ -20,7 +20,23 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "widget.hpp"
+#include <neogfx/gui/widget/widget.hpp>
+
+namespace neogfx
+{
+    enum class slider_orientation : uint32_t
+    {
+        Horizontal,
+        Vertical
+    };
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::slider_orientation> neolib::enum_enumerators_v<neogfx::slider_orientation>
+{
+    declare_enum_string(neogfx::slider_orientation, Horizontal)
+    declare_enum_string(neogfx::slider_orientation, Vertical)
+};
 
 namespace neogfx
 {
@@ -30,15 +46,9 @@ namespace neogfx
         define_event(ValueChanged, value_changed)
         define_event(ConstraintsChanged, constraints_changed)
     public:
-        enum type_e
-        {
-            Horizontal,
-            Vertical
-        };
-    public:
-        slider_impl(type_e aType = Horizontal);
-        slider_impl(i_widget& aParent, type_e aType = Horizontal);
-        slider_impl(i_layout& aLayout, type_e aType = Horizontal);
+        slider_impl(slider_orientation aOrientation = slider_orientation::Horizontal);
+        slider_impl(i_widget& aParent, slider_orientation aOrientation = slider_orientation::Horizontal);
+        slider_impl(i_layout& aLayout, slider_orientation aOrientation = slider_orientation::Horizontal);
         ~slider_impl();
     public:
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -61,7 +71,7 @@ namespace neogfx
         double normalized_value_from_position(const point& aPosition) const;
         point normalized_value_to_position(double aValue) const;
     private:
-        type_e iType;
+        slider_orientation iOrientation;
         double iNormalizedValue;
         optional_point iDragOffset;
     };
@@ -72,9 +82,9 @@ namespace neogfx
     public:
         typedef T value_type;
     public:
-        basic_slider(type_e aType = Horizontal);
-        basic_slider(i_widget& aParent, type_e aType = Horizontal);
-        basic_slider(i_layout& aLayout, type_e aType = Horizontal);
+        basic_slider(slider_orientation aOrientation = slider_orientation::Horizontal);
+        basic_slider(i_widget& aParent, slider_orientation aOrientation = slider_orientation::Horizontal);
+        basic_slider(i_layout& aLayout, slider_orientation aOrientation = slider_orientation::Horizontal);
     public:
         value_type minimum() const;
         void set_minimum(value_type aMinimum);

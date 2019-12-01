@@ -421,7 +421,7 @@ namespace neogfx
     template <typename T>
     inline const std::string& basic_spin_box<T>::format() const
     {
-        return iForamt;
+        return iFormat;
     }
 
     template <typename T>

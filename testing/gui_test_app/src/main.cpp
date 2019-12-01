@@ -9,8 +9,6 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
-#include <neogfx/gui/widget/slider.hpp>
-#include <neogfx/gui/widget/text_field.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/dialog/colour_dialog.hpp>
@@ -331,34 +329,12 @@ int main(int argc, char* argv[])
         ui.dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
         ui.dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
         ui.dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
-        ng::slider effectWidthSlider{ ui.layoutEdit, ng::slider::Vertical };
-        effectWidthSlider.set_minimum(1);
-        effectWidthSlider.set_maximum(10);
-        effectWidthSlider.set_step(1);
-        effectWidthSlider.set_value(5);
-        ng::double_slider effectAux1Slider{ ui.layoutEdit, ng::slider::Vertical };
-        effectAux1Slider.set_minimum(0.1);
-        effectAux1Slider.set_maximum(10.0);
-        effectAux1Slider.set_step(0.1);
-        effectAux1Slider.set_value(1.0);
         ng::layout_as_same_size(ui.textField1.label(), ui.textField2.label());
         ui.textField1.input_box().TextChanged([&ui]()
         {
             ui.button1.set_text(ui.textField1.input_box().text());
         });
-        ng::double_spin_box spinBox1(ui.layoutSpinners2);
-        spinBox1.set_minimum(-100.0);
-        spinBox1.set_maximum(100.0);
-        spinBox1.set_step(0.1);
-        ng::double_slider slider1(ui.layoutSpinners2);
-        slider1.set_minimum(-100.0);
-        slider1.set_maximum(100.0);
-        slider1.set_step(0.1);
-        spinBox1.ValueChanged([&slider1, &spinBox1]() {slider1.set_value(spinBox1.value()); });
-        ng::double_spin_box spinBox2(ui.layoutSpinners2);
-        spinBox2.set_minimum(-10);
-        spinBox2.set_maximum(20);
-        spinBox2.set_step(0.5);
+        ui.spinBox1.ValueChanged([&ui]() { ui.slider1.set_value(ui.spinBox1.value()); });
         bool colourCycle = false;
         ui.button6.clicked([&colourCycle]() { colourCycle = !colourCycle; });
         ui.button7.clicked([&ui]() { ui.actionMute.toggle(); });
@@ -482,7 +458,7 @@ int main(int argc, char* argv[])
         });
         ui.editOutline.checked([&]()
         {
-            effectWidthSlider.set_value(1);
+            ui.effectWidthSlider.set_value(1);
             auto s = ui.textEdit.default_style();
             s.set_text_colour(app.current_style().palette().text_colour().light() ? ng::colour::Black : ng::colour::White);
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_colour() });
@@ -490,37 +466,37 @@ int main(int argc, char* argv[])
         });
         ui.editGlow.checked([&]()
         {
-            effectWidthSlider.set_value(5);
+            ui.effectWidthSlider.set_value(5);
             auto s = ui.textEdit.default_style();
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::colour::Orange.with_lightness(0.9) });
             ui.textEdit.set_default_style(s);
         });
-        effectWidthSlider.ValueChanged([&]()
+        ui.effectWidthSlider.ValueChanged([&]()
         {
             auto s = ui.textEdit.default_style();
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ ui.editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->colour(), effectWidthSlider.value(), textEffect->aux1() });
+            s.set_text_effect(ng::text_effect{ ui.editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->colour(), ui.effectWidthSlider.value(), textEffect->aux1() });
             ui.textEdit.set_default_style(s);
             std::ostringstream oss;
-            oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
+            oss << ui.effectWidthSlider.value() << std::endl << ui.effectAux1Slider.value() << std::endl;
             auto column = ui.textEdit.column(0);
-            column.set_margins(effectWidthSlider.value());
+            column.set_margins(ui.effectWidthSlider.value());
             ui.textEdit.set_column(0, column);
             ui.textEditSmall.set_text(oss.str());
         });
-        effectAux1Slider.ValueChanged([&]()
+        ui.effectAux1Slider.ValueChanged([&]()
         {
             ui.editGlow.check();
             auto s = ui.textEdit.default_style();
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->colour(), textEffect->width(), effectAux1Slider.value() });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->colour(), textEffect->width(), ui.effectAux1Slider.value() });
             ui.textEdit.set_default_style(s);
             std::ostringstream oss;
-            oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
+            oss << ui.effectWidthSlider.value() << std::endl << ui.effectAux1Slider.value() << std::endl;
             ui.textEditSmall.set_text(oss.str());
         });
         ui.editShadow.checked([&]()
@@ -529,28 +505,28 @@ int main(int argc, char* argv[])
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, ng::colour::Black });
             ui.textEdit.set_default_style(s);
         });
-        ui.radioSliderFont.checked([&slider1, &app]()
+        ui.radioSliderFont.checked([&ui, &app]()
         {
-            app.current_style().set_font_info(app.current_style().font_info().with_size(slider1.normalized_value() * 18.0 + 4));
+            app.current_style().set_font_info(app.current_style().font_info().with_size(ui.slider1.normalized_value() * 18.0 + 4));
         });
-        auto update_theme_colour = [&slider1]()
+        auto update_theme_colour = [&ui]()
         {
             auto themeColour = ng::service<ng::i_app>().current_style().palette().colour().to_hsv();
-            themeColour.set_hue(slider1.normalized_value() * 360.0);
+            themeColour.set_hue(ui.slider1.normalized_value() * 360.0);
             ng::service<ng::i_app>().current_style().palette().set_colour(themeColour.to_rgb());
         };
-        slider1.ValueChanged([update_theme_colour, &slider1, &ui, &spinBox1, &app]()
+        ui.slider1.ValueChanged([update_theme_colour, &ui, &app]()
         {
-            spinBox1.set_value(slider1.value());
+            ui.spinBox1.set_value(ui.slider1.value());
             if (ui.radioSliderFont.is_checked())
-                app.current_style().set_font_info(app.current_style().font_info().with_size(slider1.normalized_value() * 18.0 + 4));
+                app.current_style().set_font_info(app.current_style().font_info().with_size(ui.slider1.normalized_value() * 18.0 + 4));
             else if (ui.radioThemeColour.is_checked())
                 update_theme_colour();
         });
-        slider1.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
-        ui.radioThemeColour.checked([update_theme_colour, &slider1, &app]()
+        ui.slider1.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
+        ui.radioThemeColour.checked([update_theme_colour, &ui, &app]()
         {
-            slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().colour().to_hsv().hue() / 360.0);
+            ui.slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().colour().to_hsv().hue() / 360.0);
             update_theme_colour();
         });
 

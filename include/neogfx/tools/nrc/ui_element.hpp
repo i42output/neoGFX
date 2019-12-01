@@ -362,55 +362,56 @@ namespace neogfx::nrc
                 child->emit_body();
         }
     protected:
-        neolib::string window_layout() const
+        neolib::string layout() const
         {
-            switch (type() & ui_element_type::MASK_RESERVED_SPECIFIC)
+            if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
             {
-            case ui_element_type::MenuBar:
-                return "menu_layout";
-            case ui_element_type::Toolbar:
-                return "toolbar_layout";
-            case ui_element_type::StatusBar:
-                return "status_bar_layout";
-            default:
-                return "client_layout";
+                switch (type() & ui_element_type::MASK_RESERVED_SPECIFIC)
+                {
+                case ui_element_type::MenuBar:
+                    return ".menu_layout()";
+                case ui_element_type::Toolbar:
+                    return ".toolbar_layout()";
+                case ui_element_type::StatusBar:
+                    return ".status_bar_layout()";
+                default:
+                    return ".client_layout()";
+                }
             }
+            else if ((parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::GroupBox)
+                return ".item_layout()";
+            else
+                return "";
         }
-        void emit_generic_ctor(const std::optional<neolib::string>& aText = {}) const
+        void emit_generic_ctor() const
         {
             if (is_member_element())
                 return;
-            if ((parent().type() & ui_element_type::MASK_RESERVED_GENERIC) == ui_element_type::Window)
-            {
-                if (aText)
-                {
-                    emit(",\n"
-                        "   %1%{ %2%.%3%(), \"%4%\"_t }", id(), parent().id(), window_layout(), *aText);
-                }
-                else
-                    emit(",\n"
-                        "   %1%{ %2%.%3%() }", id(), parent().id(), window_layout());
-            }
-            else if ((parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::GroupBox)
-            {
-                if (aText)
-                {
-                    emit(",\n"
-                        "   %1%{ %2%.item_layout(), \"%4%\"_t }", id(), parent().id(), *aText);
-                }
-                else
-                    emit(",\n"
-                        "   %1%{ %2%.item_layout() }", id(), parent().id());
-            }
-            else if (is_widget_or_layout(parent().type()))
-            {
-                if (aText)
-                    emit(",\n"
-                        "   %1%{ %2%, \"%3%\"_t }", id(), parent().id(), *aText);
-                else
-                    emit(",\n"
-                        "   %1%{ %2% }", id(), parent().id());
-            }
+            emit(",\n"
+                "   %1%{ %2%%3% }", id(), parent().id(), layout());
+        }
+        void emit_generic_ctor(const std::optional<neolib::string>& aText) const
+        {
+            if (is_member_element())
+                return;
+            emit(",\n"
+                "   %1%{ %2%%3%, \"%4%\"_t }", id(), parent().id(), layout(), *aText);
+        }
+        template <typename Enum>
+        std::enable_if_t<std::is_enum_v<Enum>, void> emit_generic_ctor(const std::string& aEnumName, Enum aEnum) const
+        {
+            if (is_member_element())
+                return;
+            emit(",\n"
+                "   %1%{ %2%%3%, %4% }", id(), parent().id(), layout(), enum_to_string(aEnumName, aEnum));
+        }
+        template <typename T>
+        void emit_generic_ctor(const T& aArgument) const
+        {
+            if (is_member_element())
+                return;
+            emit(",\n"
+                "   %1%{ %2%%3%, %4% }", id(), parent().id(), layout(), aArgument);
         }
     protected:
         void emit(const std::string& aArgument) const

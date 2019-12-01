@@ -23,24 +23,24 @@
 
 namespace neogfx
 {
-    slider_impl::slider_impl(type_e aType) :
-        iType(aType),
+    slider_impl::slider_impl(slider_orientation aOrientation) :
+        iOrientation(aOrientation),
         iNormalizedValue{ 0.0 }
     {
         init();
     }
 
-    slider_impl::slider_impl(i_widget& aParent, type_e aType) :
+    slider_impl::slider_impl(i_widget& aParent, slider_orientation aOrientation) :
         widget(aParent),
-        iType(aType),
+        iOrientation(aOrientation),
         iNormalizedValue{ 0.0 }
     {
         init();
     }
 
-    slider_impl::slider_impl(i_layout& aLayout, type_e aType) :
+    slider_impl::slider_impl(i_layout& aLayout, slider_orientation aOrientation) :
         widget(aLayout),
-        iType(aType),
+        iOrientation(aOrientation),
         iNormalizedValue{ 0.0 }
     {
         init();
@@ -54,7 +54,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        return iType == Horizontal ? size{ 96_spx, 22_spx } : size{ 22_spx, 96_spx };
+        return iOrientation == slider_orientation::Horizontal ? size{ 96_spx, 22_spx } : size{ 22_spx, 96_spx };
     }
 
     void slider_impl::paint(i_graphics_context& aGraphicsContext) const
@@ -68,7 +68,7 @@ namespace neogfx
         rectBarBox.deflate(size{ 1.0, 1.0 });
         point selection = normalized_value_to_position(normalized_value());
         rect selectionRect = rectBarBox;
-        if (iType == Horizontal)
+        if (iOrientation == slider_orientation::Horizontal)
             selectionRect.cx = selection.x - selectionRect.x;
         else
         {
@@ -100,7 +100,7 @@ namespace neogfx
             if (indicator_box().contains(aPosition))
             {
                 iDragOffset = aPosition - indicator_box().centre();
-                if (iType == Horizontal)
+                if (iOrientation == slider_orientation::Horizontal)
                     set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
                 else
                     set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
@@ -140,7 +140,7 @@ namespace neogfx
         widget::mouse_moved(aPosition);
         if (iDragOffset != std::nullopt)
         {
-            if (iType == Horizontal)
+            if (iOrientation == slider_orientation::Horizontal)
                 set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
             else
                 set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
@@ -160,7 +160,7 @@ namespace neogfx
     void slider_impl::init()
     {
         set_margins(neogfx::margins{});
-        if (iType == Horizontal)
+        if (iOrientation == slider_orientation::Horizontal)
             set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         else
             set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
@@ -178,7 +178,7 @@ namespace neogfx
     rect slider_impl::bar_box() const
     {
         rect result = client_rect(false);
-        result.deflate(size{ std::ceil((iType == Horizontal ? result.height() : result.width()) / 2.5) });
+        result.deflate(size{ std::ceil((iOrientation == slider_orientation::Horizontal ? result.height() : result.width()) / 2.5) });
         result.deflate(size{ 1.0, 1.0 });
         return result;
     }
@@ -186,13 +186,13 @@ namespace neogfx
     rect slider_impl::indicator_box() const
     {
         rect result{ normalized_value_to_position(normalized_value()), size{} };
-        result.inflate(size{ std::ceil((iType == Horizontal ? client_rect(false).height() : client_rect(false).width()) / 3.0) });
+        result.inflate(size{ std::ceil((iOrientation == slider_orientation::Horizontal ? client_rect(false).height() : client_rect(false).width()) / 3.0) });
         return result;
     }
 
     double slider_impl::normalized_value_from_position(const point& aPosition) const
     {
-        if (iType == Horizontal)
+        if (iOrientation == slider_orientation::Horizontal)
             return std::max(0.0, std::min(aPosition.x - bar_box().x, bar_box().right())) / bar_box().cx;
         else
             return 1.0 - std::max(0.0, std::min(aPosition.y - bar_box().y, bar_box().bottom())) / bar_box().cy;
@@ -201,7 +201,7 @@ namespace neogfx
     point slider_impl::normalized_value_to_position(double aValue) const
     {
         const rect rectBarBox = bar_box();
-        if (iType == Horizontal)
+        if (iOrientation == slider_orientation::Horizontal)
             return point{ rectBarBox.x + rectBarBox.cx * aValue, rectBarBox.centre().y };
         else
             return point{ rectBarBox.centre().x, rectBarBox.y + rectBarBox.cy * (1.0 - aValue) };

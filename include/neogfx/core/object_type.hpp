@@ -80,6 +80,8 @@ namespace neogfx
         TextField                       = 0x0000000000000122 | Widget | HasLabel,
         DropList                        = 0x0000000000000130 | Widget,
         TableView                       = 0x0000000000000131 | Widget,
+        Slider                          = 0x0000000000000140 | Widget,
+        DoubleSlider                    = 0x0000000000000141 | Widget,
         VerticalLayout                  = 0x0000000000000900 | Layout,
         HorizontalLayout                = 0x0000000000000901 | Layout,
         GridLayout                      = 0x0000000000000902 | Layout,

@@ -20,25 +20,24 @@
 #pragma once
 
 #include <neolib/raii.hpp>
-#include "slider.hpp"
 
 namespace neogfx
 {
     template <typename T>
-    inline basic_slider<T>::basic_slider(type_e aType) :
-        slider_impl(aType), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
+    inline basic_slider<T>::basic_slider(slider_orientation aOrientation) :
+        slider_impl(aOrientation), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
     {
     }
 
     template <typename T>
-    inline basic_slider<T>::basic_slider(i_widget& aParent, type_e aType) :
-        slider_impl(aParent, aType), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
+    inline basic_slider<T>::basic_slider(i_widget& aParent, slider_orientation aOrientation) :
+        slider_impl(aParent, aOrientation), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
     {
     }
 
     template <typename T>
-    inline basic_slider<T>::basic_slider(i_layout& aLayout, type_e aType) :
-        slider_impl(aLayout, aType), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
+    inline basic_slider<T>::basic_slider(i_layout& aLayout, slider_orientation aOrientation) :
+        slider_impl(aLayout, aOrientation), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
     {
     }
 

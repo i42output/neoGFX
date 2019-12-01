@@ -149,9 +149,9 @@ namespace neogfx::nrc
             {
                 typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
                 if constexpr (std::is_same_v<vt, double>)
-                    result = T{ v };
+                    result = static_cast<T>(v);
                 else if constexpr (std::is_same_v<vt, int64_t>)
-                    result = T{ static_cast<double>(v) };
+                    result = static_cast<T>(v);
                 else if constexpr (std::is_same_v<vt, neolib::i_string> && std::is_class_v<T>)
                     result = T::from_string(v.to_std_string());
                 else
