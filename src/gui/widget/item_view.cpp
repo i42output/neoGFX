@@ -132,14 +132,14 @@ namespace neogfx
         iPresentationModel = aPresentationModel;
         if (has_presentation_model())
         {
-            presentation_model().item_model_changed([this](const i_item_model& aItemModel) { item_model_changed(aItemModel); });
-            presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
-            presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
-            presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
-            presentation_model().items_sorting([this]() { items_sorting(); });
-            presentation_model().items_sorted([this]() { items_sorted(); });
-            presentation_model().items_filtering([this]() { items_filtering(); });
-            presentation_model().items_filtered([this]() { items_filtered(); });
+            iPresentationModelSink += presentation_model().item_model_changed([this](const i_item_model& aItemModel) { item_model_changed(aItemModel); });
+            iPresentationModelSink += presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
+            iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
+            iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
+            iPresentationModelSink += presentation_model().items_filtering([this]() { items_filtering(); });
+            iPresentationModelSink += presentation_model().items_filtered([this]() { items_filtered(); });
         }
         if (has_presentation_model() && has_model())
             presentation_model().set_item_model(model());

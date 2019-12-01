@@ -5,4 +5,9 @@
         ref: resources
         file: resources/icons/neoGFX.png
     }
+
+    resource: {
+        ref: languages
+        file: resources/language-subtag-registry.txt
+    }
 }

@@ -3,6 +3,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\nrc.cpp" />
     <ClCompile Include="..\..\..\src\ui_parser.cpp" />
+    <ClCompile Include="..\..\..\src\resource_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\nrc\i_ui_element.hpp" />
@@ -11,6 +12,7 @@
     <ClInclude Include="..\..\..\src\ui_parser.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\nrc\i_ui_element_library.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\nrc\ui_element_library_plugin.hpp" />
+    <ClInclude Include="..\..\..\src\resource_parser.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
