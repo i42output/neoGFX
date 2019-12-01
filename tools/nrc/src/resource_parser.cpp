@@ -52,6 +52,8 @@ namespace neogfx::nrc
         iOutput << "namespace nrc" << std::endl << "{" << std::endl;
         iOutput << "namespace" << std::endl << "{" << std::endl;
 
+        auto nextResourceIndex = iResourceIndex;
+
         for (const auto& resourceItem : resource.contents())
         {
             auto process_file = [&](const neolib::fjson_string& aInputFilename)
@@ -63,7 +65,7 @@ namespace neogfx::nrc
                     resourcePath += "/";
                 resourcePath += aInputFilename;
                 std::ifstream resourceFile(resourcePath, std::ios_base::in | std::ios_base::binary);
-                iOutput << "\tconst unsigned char resource_" << iResourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
+                iOutput << "\tconst unsigned char resource_" << nextResourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
                 const std::size_t kBufferSize = 32;
                 bool doneSome = false;
                 unsigned char buffer[kBufferSize];
@@ -96,7 +98,7 @@ namespace neogfx::nrc
                 if (resourceFile.fail() && !resourceFile.eof())
                     throw failed_to_read_resource_file(resourcePath);
                 iOutput << "\t};" << std::endl;
-                ++iResourceIndex;
+                ++nextResourceIndex;
             };
 
             if (resourceItem.name() == "file")
@@ -109,11 +111,11 @@ namespace neogfx::nrc
         }
 
         iOutput << "\n\tstruct register_" << "resource_" << iResourceIndex << std::endl << "\t{" << std::endl;
-        iOutput << "\t\tregister_" << "resource_" << iResourceIndex<< "()" << std::endl << "\t\t{" << std::endl;
-        for (std::size_t i = 0; i < resourcePaths.size(); ++i)
+        iOutput << "\t\tregister_" << "resource_" << iResourceIndex << "()" << std::endl << "\t\t{" << std::endl;
+        for (std::size_t i = 0; i < resourcePaths.size(); ++i, ++iResourceIndex)
         {
             iOutput << "\t\t\tneogfx::resource_manager::instance().add_module_resource("
-                << "\":/" << resourcePaths[i] << "\", " << "resource_" << i << "_data, " << "sizeof(resource_" << i << "_data)"
+                << "\":/" << resourcePaths[i] << "\", " << "resource_" << iResourceIndex << "_data, " << "sizeof(resource_" << iResourceIndex << "_data)"
                 << ");" << std::endl;
         }
 
