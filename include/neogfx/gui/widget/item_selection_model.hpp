@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
@@ -55,6 +55,7 @@ namespace neogfx
         }
         ~item_selection_model()
         {
+            iSink.clear();
             set_destroying();
         }
     public:

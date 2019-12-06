@@ -26,7 +26,7 @@
 
 #include <neolib/vecarray.hpp>
 #include <neolib/segmented_array.hpp>
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 
 #include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
@@ -89,6 +89,7 @@ namespace neogfx
         ~basic_item_presentation_model()
         {
             set_destroying();
+            iItemModelSink.clear();
         }
     public:
         bool initializing() const override

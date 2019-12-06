@@ -24,6 +24,7 @@
 #include <optional>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/async_thread.hpp>
+#include <neolib/timer.hpp>
 
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/event_processing_context.hpp>
@@ -148,7 +149,6 @@ namespace neogfx
         bool text_input(const std::string& aText) override;
         bool sys_text_input(const std::string& aText) override;
     private:
-        neolib::async_event_queue iAsyncEventQueue;
         neogfx::program_options iProgramOptions;
         loader iLoader;
         std::string iName;

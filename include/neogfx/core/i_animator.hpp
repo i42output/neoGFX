@@ -20,7 +20,6 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/cookie_jar.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_property.hpp>
@@ -31,11 +30,12 @@ namespace neogfx
 
     class i_animator;
 
-    class i_transition : public neolib::i_cookie_jar_item
+    class i_transition
     {
     public:
         virtual ~i_transition() {}
     public:
+        virtual transition_id id() const = 0;
         virtual i_animator& animator() const = 0;
         virtual bool enabled() const = 0;
         virtual bool disable_when_finished() const = 0;

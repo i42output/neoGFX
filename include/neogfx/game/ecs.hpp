@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/game/i_ecs.hpp>
 

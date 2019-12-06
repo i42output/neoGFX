@@ -23,7 +23,7 @@
 #include <D2d1.h>
 #endif
 
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -113,7 +113,7 @@ namespace neogfx
 
     bool native_window::pump_event()
     {
-        neolib::scoped_counter sc{ iProcessingEvent };
+        neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
         if (iEventQueue.empty())
             return false;
         auto e = iEventQueue.front();
@@ -125,7 +125,7 @@ namespace neogfx
     void native_window::handle_event(const native_event& aEvent)
     {
         neolib::destroyed_flag destroyed{ *this };
-        neolib::scoped_counter sc{ iProcessingEvent };
+        neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
         iCurrentEvent = aEvent;
         handle_event();
         if (!destroyed)
@@ -149,7 +149,7 @@ namespace neogfx
     void native_window::handle_event()
     {
         neolib::destroyed_flag destroyed{ *this };
-        neolib::scoped_counter sc{ iProcessingEvent };
+        neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
         if (!Filter.trigger(iCurrentEvent))
         {
             if (destroyed)

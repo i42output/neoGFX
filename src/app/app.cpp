@@ -21,7 +21,7 @@
 #include <string>
 #include <atomic>
 #include <boost/locale.hpp> 
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 #include <neolib/string_utils.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/app.hpp>
@@ -158,7 +158,6 @@ namespace neogfx
     app::app(int argc, char* argv[], const std::string& aName)
         try :
         neolib::async_thread{ "neogfx::app", true },
-        iAsyncEventQueue{ static_cast<neolib::async_task&>(*this) },
         iProgramOptions{ argc, argv },
         iLoader{ iProgramOptions, *this },
         iName{ aName },
@@ -334,12 +333,12 @@ namespace neogfx
                         thread::sleep(1);
                 }
             }
-            iAsyncEventQueue.terminate();
+            neolib::async_event_queue::instance().terminate();
             return *iQuitResultCode;
         }
         catch (std::exception& e)
         {
-            iAsyncEventQueue.terminate();
+            neolib::async_event_queue::instance().terminate();
             halt();
             std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
@@ -347,7 +346,7 @@ namespace neogfx
         }
         catch (...)
         {
-            iAsyncEventQueue.terminate();
+            neolib::async_event_queue::instance().terminate();
             halt();
             std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
@@ -657,7 +656,7 @@ namespace neogfx
         bool didSome = false;
         try
         {
-            didSome = iAsyncEventQueue.exec();
+            didSome = neolib::async_event_queue::instance().exec();
             if (!in()) // not app thread
                 return didSome;
             

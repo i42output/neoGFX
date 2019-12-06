@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <SDL.h>
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/gui/window/i_window.hpp>
@@ -185,25 +185,25 @@ namespace neogfx
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle)
     {
-        neolib::scoped_counter sc(iCreatingWindow);
+        neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
         return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle });
     }
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
     {
-        neolib::scoped_counter sc(iCreatingWindow);
+        neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
         return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle });
     }
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
     {
-        neolib::scoped_counter sc(iCreatingWindow);
+        neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
         return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle });
     }
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle)
     {
-        neolib::scoped_counter sc(iCreatingWindow);
+        neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
         sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
         if (parent != nullptr)
             return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, *parent, aVideoMode, aWindowTitle, aStyle });
@@ -213,7 +213,7 @@ namespace neogfx
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
     {
-        neolib::scoped_counter sc(iCreatingWindow);
+        neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
         sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
         if (parent != nullptr)
             return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle });
@@ -223,7 +223,7 @@ namespace neogfx
 
     std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
     {
-        neolib::scoped_counter sc(iCreatingWindow);
+        neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
         sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
         if (parent != nullptr)
             return std::unique_ptr<i_native_window>(new sdl_window{ *this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle });

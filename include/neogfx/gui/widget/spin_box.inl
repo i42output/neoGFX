@@ -22,7 +22,7 @@
 #include "spin_box.hpp"
 #include <cmath>
 #include <boost/format.hpp>
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -309,8 +309,7 @@ namespace neogfx
             "011111111111111110"
             "111111111111111111"
         };
-        iUpArrow = std::make_pair(ink,
-            !high_dpi() ?
+        iUpArrow.emplace(ink, !high_dpi() ?
             image{ "neogfx::basic_spin_box<T>::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } } :
             image{ "neogfx::basic_spin_box<T>::iUpArrowHighDpi::" + ink.to_string(), sUpArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
         const char* sDownArrowImagePattern
@@ -341,8 +340,7 @@ namespace neogfx
             "000000011110000000"
             "000000001100000000"
         };
-        iDownArrow = std::make_pair(ink,
-            !high_dpi() ?
+        iDownArrow.emplace(ink, !high_dpi() ?
             image{ "neogfx::basic_spin_box<T>::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } } :
             image{ "neogfx::basic_spin_box<T>::iDownArrowHighDpi::" + ink.to_string(), sDownArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
         iStepUpButton.label().set_placement(label_placement::ImageVertical);

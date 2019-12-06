@@ -31,6 +31,7 @@ namespace neogfx
     public:
         transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled = true);
     public:
+        transition_id id() const override;
         i_animator& animator() const override;
         bool enabled() const override;
         bool disable_when_finished() const override;
@@ -43,8 +44,6 @@ namespace neogfx
         bool finished() const override;
     public:
         void reset() override;
-    public:
-        transition_id cookie() const override;
     private:
         i_animator& iAnimator;
         transition_id iId;
@@ -94,7 +93,7 @@ namespace neogfx
         void next_frame();
     private:
         neolib::callback_timer iTimer;
-        neolib::cookie_jar<std::unique_ptr<i_transition>> iTransitions;
+        neolib::jar<std::unique_ptr<i_transition>> iTransitions;
         std::chrono::time_point<std::chrono::high_resolution_clock> iZeroHour;
         double iAnimationTime;
     };

@@ -35,7 +35,7 @@ namespace neogames
             typedef basic_card<game_traits> card_type;
             typedef basic_deck<game_traits> deck_type;
         private:
-            typedef boost::optional<card_type> optional_card;
+            typedef std::optional<card_type> optional_card;
             typedef std::array<optional_card, game_traits::hand_size> cards;
             typedef typename cards::size_type size_type;
         public:
@@ -50,7 +50,7 @@ namespace neogames
             {
                 if (aSlotIndex >= iCards.size())
                     throw bad_slot_index();
-                return iCards[aSlotIndex] != boost::none;
+                return iCards[aSlotIndex] != std::nullopt;
             }
             const card_type& card_at(size_type aSlotIndex) const
             {
@@ -84,7 +84,7 @@ namespace neogames
                 for (auto& slot : iCards)
                     if (!slot || slot->discarded())
                     {
-                        slot = aDeck.deal_card();
+                        slot.emplace(aDeck.deal_card());
                         return true;
                     }
                 return false;
@@ -93,7 +93,7 @@ namespace neogames
             {
                 if (aSlotIndex >= iCards.size())
                     throw bad_slot_index();
-                iCards[aSlotIndex] = boost::none;
+                iCards[aSlotIndex] = std::nullopt;
             }
         private:
             cards iCards;

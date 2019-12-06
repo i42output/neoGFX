@@ -72,7 +72,7 @@ namespace neogfx
 
     void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)
     {
-        textures().add(texture_list_entry{ texture_pointer{ texture_pointer{}, &aSubTexture }, 0u });
+        textures().add(aSubTexture.id(), texture_list_entry{ texture_pointer{ texture_pointer{}, &aSubTexture }, 0u });
     }
 
     void texture_manager::remove_sub_texture(i_sub_texture& aSubTexture)
@@ -120,7 +120,7 @@ namespace neogfx
     {
         // cleanup opportunity
         cleanup();
-        return textures().add(texture_list_entry{ aTexture, 0u })->first;
+        return textures().add(aTexture->id(), texture_list_entry{ aTexture, 0u })->first;
     }
 
     void texture_manager::cleanup()
@@ -129,7 +129,7 @@ namespace neogfx
         {
             auto& texture = *i;
             if (texture.first->type() == texture_type::Texture && texture.first.use_count() == 1 && texture.second == 0u)
-                i = textures().remove(*i);
+                i = textures().erase(i);
             else
                 ++i;
         }

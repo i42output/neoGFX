@@ -300,7 +300,7 @@ void create_game(ng::i_layout& aLayout)
         {
             auto newPos = ng::point{ e.position() - canvas.origin() };
             newPos.y = canvas.extents().cy - newPos.y;
-            ng::game::component_lock_guard<ng::game::rigid_body> lg{ canvas.ecs() };
+            ng::game::component_scoped_lock<ng::game::rigid_body> lock{ canvas.ecs() };
             canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
         }
     });

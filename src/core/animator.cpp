@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/scoped.hpp>
 #include <neogfx/core/animator.hpp>
 
 namespace neogfx
@@ -38,6 +39,11 @@ namespace neogfx
     transition::transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled) :
         iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }
     {
+    }
+
+    transition_id transition::id() const
+    {
+        return iId;
     }
 
     i_animator& transition::animator() const
@@ -96,11 +102,6 @@ namespace neogfx
     void transition::reset()
     {
         iStartTime = std::nullopt;
-    }
-
-    transition_id transition::cookie() const
-    {
-        return iId;
     }
 
     property_transition::property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled) :
@@ -177,7 +178,7 @@ namespace neogfx
 
     transition_id animator::add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled)
     {
-        return (**iTransitions.add(std::make_unique<property_transition>(*this, aProperty, aEasingFunction, aDuration, aEnabled))).cookie();
+        return iTransitions.emplace(std::make_unique<property_transition>(*this, aProperty, aEasingFunction, aDuration, aEnabled));
     }
 
     void animator::remove_transition(transition_id aTransitionId)

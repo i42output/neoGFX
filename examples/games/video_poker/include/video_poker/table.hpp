@@ -70,8 +70,8 @@ namespace video_poker
         table_state iState;
         credit_t iCredits;
         credit_t iStake;
-        boost::optional<deck> iDeck;
-        boost::optional<hand> iHand;
+        std::optional<deck> iDeck;
+        std::optional<hand> iHand;
         neogfx::game::canvas& iCanvas;
         neogfx::vertical_layout iMainLayout;
         neogfx::label iLabelTitle;

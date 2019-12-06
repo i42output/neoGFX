@@ -19,7 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/thread.hpp>
+#include <neolib/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/clock.hpp>
@@ -30,21 +30,19 @@
 
 namespace neogfx::game
 {
-    class simple_physics::thread : public neolib::thread
+    class simple_physics::thread : public neolib::async_thread
     {
     public:
-        thread(simple_physics& aOwner) : neolib::thread{ "neogfx::game::simple_physics::thread" }, iOwner{ aOwner }
+        thread(simple_physics& aOwner) : neolib::async_thread{ "neogfx::game::simple_physics::thread" }, iOwner{ aOwner }
         {
             start();
         }
     public:
-        void exec() override
+        void do_work() override
         {
-            while (!finished())
-            {
-                iOwner.apply();
-                iOwner.yield();
-            }
+            async_thread::do_work();
+            iOwner.apply();
+            iOwner.yield();
         }
     private:
         simple_physics& iOwner;
@@ -95,7 +93,7 @@ namespace neogfx::game
         while (worldClock.time <= now)
         {
             yield();
-            component_lock_guard<rigid_body> lgRigidBodies{ ecs() };
+            component_scoped_lock<rigid_body> lgRigidBodies{ ecs() };
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
@@ -134,7 +132,7 @@ namespace neogfx::game
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
-            shared_component_lock_guard<clock> lgClock{ ecs() };
+            shared_component_scoped_lock<clock> lgClock{ ecs() };
             worldClock.time += worldClock.timeStep;
         }
     }

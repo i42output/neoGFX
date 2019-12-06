@@ -189,18 +189,18 @@ namespace neogfx::game
             scoped_snapshot(self_type& aOwner) :
                 iOwner{ aOwner }
             {
-                std::lock_guard<std::recursive_mutex> lg{ iOwner.mutex() };
+                std::scoped_lock<std::recursive_mutex> lock{ iOwner.mutex() };
                 ++iOwner.iUsingSnapshot;
             }
             scoped_snapshot(const scoped_snapshot& aOther) :
                 iOwner{ aOther.iOwner }
             {
-                std::lock_guard<std::recursive_mutex> lg{ iOwner.mutex() };
+                std::scoped_lock<std::recursive_mutex> lock{ iOwner.mutex() };
                 ++iOwner.iUsingSnapshot;
             }
             ~scoped_snapshot()
             {
-                std::lock_guard<std::recursive_mutex> lg{ iOwner.mutex() };
+                std::scoped_lock<std::recursive_mutex> lock{ iOwner.mutex() };
                 --iOwner.iUsingSnapshot;
             }
         public:
@@ -309,7 +309,7 @@ namespace neogfx::game
             free_indices().push_back(reverseIndex);
             if (have_snapshot())
             {
-                std::lock_guard<std::recursive_mutex> lg{ mutex() };
+                std::scoped_lock<std::recursive_mutex> lock{ mutex() };
                 if (have_snapshot())
                 {
                     auto ss = snapshot();
@@ -343,7 +343,7 @@ namespace neogfx::game
         }
         void take_snapshot()
         {
-            std::lock_guard<std::recursive_mutex> lg{ mutex() };
+            std::scoped_lock<std::recursive_mutex> lock{ mutex() };
             if (!iUsingSnapshot)
             {
                 if (iSnapshot == nullptr)
@@ -355,7 +355,7 @@ namespace neogfx::game
         }
         scoped_snapshot snapshot()
         {
-            std::lock_guard<std::recursive_mutex> lg{ mutex() };
+            std::scoped_lock<std::recursive_mutex> lock{ mutex() };
             return scoped_snapshot{ *this };
         }
         template <typename Compare>

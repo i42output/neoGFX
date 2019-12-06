@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/item_view.hpp>

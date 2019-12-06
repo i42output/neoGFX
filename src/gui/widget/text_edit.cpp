@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 #include <neolib/thread.hpp>
 
 #include <neogfx/gui/widget/text_edit.hpp>

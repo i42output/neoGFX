@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/cookie_jar.hpp>
+#include <neolib/jar.hpp>
 #include <neolib/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
 

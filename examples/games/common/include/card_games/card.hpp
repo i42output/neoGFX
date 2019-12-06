@@ -28,6 +28,7 @@ namespace neogames
         template <typename GameTraits>
         class basic_card
         {
+            typedef basic_card<GameTraits> self_type;
         public:
             neogfx::event<basic_card&> changed;
             neogfx::event<basic_card&> destroyed;
@@ -76,6 +77,20 @@ namespace neogames
             ~basic_card()
             {
                 destroyed.trigger(*this);
+            }
+            self_type& operator=(const self_type& aOther)
+            {
+                iValue = aOther.iValue;
+                iSuit = aOther.iSuit;
+                iDiscarded = aOther.iDiscarded;
+                return *this;
+            }
+        public:
+            void swap(self_type& aOther)
+            {
+                std::swap(iValue, aOther.iValue);
+                std::swap(iSuit, aOther.iSuit);
+                std::swap(iDiscarded, aOther.iDiscarded);
             }
         public:
             operator value() const 
@@ -181,6 +196,12 @@ namespace neogames
             suit iSuit;
             bool iDiscarded;
         };
+
+        template <typename GameTraits>
+        inline void swap(basic_card<GameTraits>& aLhs, basic_card<GameTraits>& aRhs)
+        {
+            aLhs.swap(aRhs);
+        }
 
         typedef basic_card<default_game_traits> card;
     }

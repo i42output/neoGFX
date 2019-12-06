@@ -71,6 +71,7 @@ namespace video_poker
     void card_widget::set_card(video_poker::card& aCard)
     {
         iCard = &aCard;
+        iSink.clear();
         iSink += card().changed([this](video_poker::card&) { update_sprite_geometry();  iCanvas.update(); });
         if (iCardSprite != neogfx::game::null_entity)
             iCanvas.ecs().destroy_entity(iCardSprite);
@@ -174,6 +175,7 @@ namespace video_poker
     {
         iCard = &aCard;
         iCardWidget.set_card(card());
+        iSink.clear();
         iSink += card().changed([this](video_poker::card&) { update_widgets(); });
         iSink += card().destroyed([this](video_poker::card&) { clear_card(); });
         update_widgets();

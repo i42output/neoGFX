@@ -414,7 +414,7 @@ namespace neogfx
         };
         if (iTextures[TextureMinimize] == std::nullopt || iTextures[TextureMinimize]->first != ink)
         {
-            iTextures[TextureMinimize] = std::make_pair(
+            iTextures[TextureMinimize].emplace(
                 ink,
                 !high_dpi() ? 
                     neogfx::image{
@@ -426,7 +426,7 @@ namespace neogfx
         }
         if (iTextures[TextureMaximize] == std::nullopt || iTextures[TextureMaximize]->first != ink)
         {
-            iTextures[TextureMaximize] = std::make_pair(
+            iTextures[TextureMaximize].emplace(
                 ink,
                 !high_dpi() ?
                     neogfx::image{
@@ -438,7 +438,7 @@ namespace neogfx
         }
         if (iTextures[TextureRestore] == std::nullopt || iTextures[TextureRestore]->first != ink)
         {
-            iTextures[TextureRestore] = std::make_pair(
+            iTextures[TextureRestore].emplace(
                 ink,
                 !high_dpi() ?
                     neogfx::image{
@@ -450,7 +450,7 @@ namespace neogfx
         }
         if (iTextures[TextureClose] == std::nullopt || iTextures[TextureClose]->first != ink)
         {
-            iTextures[TextureClose] = std::make_pair(
+            iTextures[TextureClose].emplace(
                 ink,
                 !high_dpi() ?
                     neogfx::image{

@@ -104,7 +104,7 @@ namespace video_poker
         for (auto& valueCount : valueCounter)
             valueCounts.insert(valueCount.second);
 
-        boost::optional<poker_hand> result;
+        std::optional<poker_hand> result;
 
         bool possibleStraight = (valueCounter.size() == GameTraits::hand_size);
         if (possibleStraight)
@@ -128,7 +128,7 @@ namespace video_poker
             }
         }
 
-        if (result == boost::none)
+        if (result == std::nullopt)
         {
             static const std::vector<std::pair<std::vector<uint32_t>, poker_hand>> sValueHandTable
             {

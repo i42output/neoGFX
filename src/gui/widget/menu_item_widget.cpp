@@ -145,10 +145,9 @@ namespace neogfx
                         "001000000000"
                         "000000000000"
                     };
-                    iSubMenuArrow = std::make_pair(ink, 
-                        !high_dpi() ? 
-                            image{ "neogfx::menu_item_widget::sArrowImagePattern::" + ink.to_string(), sArrowImagePattern, { { "paper", colour{} },{ "ink", ink } } } : 
-                            image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
+                    iSubMenuArrow.emplace(ink, !high_dpi() ? 
+                        image{ "neogfx::menu_item_widget::sArrowImagePattern::" + ink.to_string(), sArrowImagePattern, { { "paper", colour{} },{ "ink", ink } } } : 
+                        image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
                 }
                 rect rect = client_rect(false);
                 aGraphicsContext.draw_texture(

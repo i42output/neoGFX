@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/uuid.hpp>
-#include <neolib/cookie_jar.hpp>
+#include <neolib/jar.hpp>
 
 namespace neogfx::game
 {

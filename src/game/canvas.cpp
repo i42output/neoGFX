@@ -116,7 +116,7 @@ namespace neogfx::game
         if (ecs().component_registered<mesh_renderer>())
         {
             aGraphicsContext.clear_depth_buffer();
-            component_lock_guard<mesh_renderer> lgMeshRenderer{ ecs() };
+            component_scoped_lock<mesh_renderer> lgMeshRenderer{ ecs() };
             RenderingEntities.trigger(aGraphicsContext);
             aGraphicsContext.draw_entities(ecs());
             EntitiesRendered.trigger(aGraphicsContext);

@@ -22,9 +22,10 @@
 #include <neogfx/neogfx.hpp>
 #include <set>
 #include <map>
-#include "opengl.hpp"
+#include <neolib/timer.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
+#include "opengl.hpp"
 #include "opengl_texture_manager.hpp"
 #include "opengl_helpers.hpp"
 

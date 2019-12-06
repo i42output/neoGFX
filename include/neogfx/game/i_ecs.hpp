@@ -293,26 +293,26 @@ namespace neogfx::game
     };
 
     template <typename Data>
-    class shared_component_lock_guard
+    class shared_component_scoped_lock
     {
     public:
-        shared_component_lock_guard(const i_ecs& aEcs) :
+        shared_component_scoped_lock(const i_ecs& aEcs) :
             iLockGuard{ aEcs.shared_component<Data>().mutex() }
         {
         }
     private:
-        std::lock_guard<std::recursive_mutex> iLockGuard;
+        std::scoped_lock<std::recursive_mutex> iLockGuard;
     };
 
     template <typename Data>
-    class component_lock_guard
+    class component_scoped_lock
     {
     public:
-        component_lock_guard(const i_ecs& aEcs) :
+        component_scoped_lock(const i_ecs& aEcs) :
             iLockGuard{ aEcs.component<Data>().mutex() }
         {
         }
     private:
-        std::lock_guard<std::recursive_mutex> iLockGuard;
+        std::scoped_lock<std::recursive_mutex> iLockGuard;
     };
 }

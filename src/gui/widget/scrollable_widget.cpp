@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/raii.hpp>
+#include <neolib/scoped.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 
@@ -415,7 +415,7 @@ namespace neogfx
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
             horizontal_scrollbar().set_position(0.0);
         {
-            neolib::scoped_counter sc(iIgnoreScrollbarUpdates);
+            neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
             update_scrollbar_visibility(UsvStageInit);
             if (client_rect().cx > vertical_scrollbar().width() &&
                 client_rect().cy > horizontal_scrollbar().width())

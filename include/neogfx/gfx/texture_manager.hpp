@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <variant>
-#include <neolib/cookie_jar.hpp>
+#include <neolib/jar.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include "i_texture_manager.hpp"
 
@@ -33,7 +33,7 @@ namespace neogfx
     protected:
         typedef std::shared_ptr<i_texture> texture_pointer;
         typedef std::pair<texture_pointer, uint32_t> texture_list_entry;
-        typedef neolib::cookie_jar<texture_list_entry> texture_list;
+        typedef neolib::jar<texture_list_entry> texture_list;
     private:
         friend neolib::cookie item_cookie(const texture_list_entry&);
     protected:

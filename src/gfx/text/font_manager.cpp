@@ -521,7 +521,7 @@ namespace neogfx
         else
         {
             font = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aNewFont));
-            iIdCache.add(id_cache_entry{ font, 0u });
+            iIdCache.add(aNewFont.id(), id_cache_entry{ font, 0u });
         }
         // cleanup opportunity
         cleanup();
@@ -534,7 +534,7 @@ namespace neogfx
         {
             auto& cacheEntry = *i;
             if (cacheEntry.first.use_count() == 1 && cacheEntry.second == 0u)
-                i = iIdCache.remove(*i);
+                i = iIdCache.erase(i);
             else
                 ++i;
         }

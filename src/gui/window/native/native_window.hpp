@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
+#include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include "i_native_window.hpp"
 
