@@ -201,7 +201,7 @@ void create_game(ng::i_layout& aLayout)
     // Instantiate physics...
     ecs.system<ng::game::simple_physics>();
 
-    ~~~~ecs.system<ng::game::game_world>().ApplyingPhysics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+    ecs.system<ng::game::game_world>().ApplyingPhysics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
     {
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
