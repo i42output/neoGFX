@@ -63,7 +63,6 @@ namespace neogfx::game
 
     simple_physics::~simple_physics()
     {
-        terminate();
     }
 
     const system_id& simple_physics::id() const

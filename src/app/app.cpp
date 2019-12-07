@@ -212,21 +212,35 @@ namespace neogfx
             }
         }, 100 },
         iAppContext{ *this, "neogfx::app::iAppContext" },
-        actionFileNew{ action{"&New..."_t, ":/neogfx/resources/icons.naa#new.png"}.set_shortcut("Ctrl+Shift+N") },
-        actionFileOpen{ action{"&Open..."_t, ":/neogfx/resources/icons.naa#open.png"}.set_shortcut("Ctrl+Shift+O") },
-        actionFileClose{ action{"&Close"_t}.set_shortcut("Ctrl+F4") },
+        actionFileNew{ "&New..."_t, ":/neogfx/resources/icons.naa#new.png" },
+        actionFileOpen{ "&Open..."_t, ":/neogfx/resources/icons.naa#open.png" },
+        actionFileClose{ "&Close"_t },
         actionFileCloseAll{ "Close All"_t },
-        actionFileSave{ action{"&Save"_t, ":/neogfx/resources/icons.naa#save.png"}.set_shortcut("Ctrl+S") },
-        actionFileSaveAll{ action{"Save A&ll"_t}.set_shortcut("Ctrl+Shift+S") },
-        actionFileExit{ action{"E&xit"_t}.set_shortcut("Alt+F4") },
-        actionUndo{ action{"Undo"_t, ":/neogfx/resources/icons.naa#undo.png"}.set_shortcut("Ctrl+Z") },
-        actionRedo{ action{"Redo"_t, ":/neogfx/resources/icons.naa#redo.png"}.set_shortcut("Ctrl+Shift+Z") },
-        actionCut{ action{"Cut"_t, ":/neogfx/resources/icons.naa#cut.png"}.set_shortcut("Ctrl+X") },
-        actionCopy{ action{"Copy"_t, ":/neogfx/resources/icons.naa#copy.png"}.set_shortcut("Ctrl+C") },
-        actionPaste{ action{"Paste"_t, ":/neogfx/resources/icons.naa#paste.png"}.set_shortcut("Ctrl+V") },
-        actionDelete{ action{"Delete"_t}.set_shortcut("Del") },
-        actionSelectAll{ action{"Select All"_t}.set_shortcut("Ctrl+A") }
+        actionFileSave{ "&Save"_t, ":/neogfx/resources/icons.naa#save.png" },
+        actionFileSaveAll{ "Save A&ll"_t },
+        actionFileExit{ "E&xit"_t },
+        actionUndo{ "Undo"_t, ":/neogfx/resources/icons.naa#undo.png" },
+        actionRedo{ "Redo"_t, ":/neogfx/resources/icons.naa#redo.png" },
+        actionCut{ "Cut"_t, ":/neogfx/resources/icons.naa#cut.png" },
+        actionCopy{ "Copy"_t, ":/neogfx/resources/icons.naa#copy.png" },
+        actionPaste{ "Paste"_t, ":/neogfx/resources/icons.naa#paste.png" },
+        actionDelete{ "Delete"_t },
+        actionSelectAll{ "Select All"_t }
     {
+        actionFileNew.set_shortcut("Ctrl+Shift+N");
+        actionFileOpen.set_shortcut("Ctrl+Shift+O");
+        actionFileClose.set_shortcut("Ctrl+F4");
+        actionFileSave.set_shortcut("Ctrl+S");
+        actionFileSaveAll.set_shortcut("Ctrl+Shift+S");
+        actionFileExit.set_shortcut("Alt+F4");
+        actionUndo.set_shortcut("Ctrl+Z");
+        actionRedo.set_shortcut("Ctrl+Shift+Z");
+        actionCut.set_shortcut("Ctrl+X");
+        actionCopy.set_shortcut("Ctrl+C");
+        actionPaste.set_shortcut("Ctrl+V");
+        actionDelete.set_shortcut("Del");
+        actionSelectAll.set_shortcut("Ctrl+A");
+
         service<i_keyboard>().grab_keyboard(*this);
 
         style whiteStyle("Default");
@@ -333,12 +347,10 @@ namespace neogfx
                         thread::sleep(1);
                 }
             }
-            neolib::async_event_queue::instance().terminate();
             return *iQuitResultCode;
         }
         catch (std::exception& e)
         {
-            neolib::async_event_queue::instance().terminate();
             halt();
             std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
@@ -346,7 +358,6 @@ namespace neogfx
         }
         catch (...)
         {
-            neolib::async_event_queue::instance().terminate();
             halt();
             std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");

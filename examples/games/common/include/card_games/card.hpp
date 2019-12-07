@@ -74,6 +74,10 @@ namespace neogames
                 iValue{ aValue }, iSuit{ aSuit }, iDiscarded{ false }
             {
             }
+            basic_card(const self_type& aOther) :
+                iValue{ aOther.iValue }, iSuit{ aOther.iSuit }, iDiscarded{ aOther.iDiscarded }
+            {
+            }
             ~basic_card()
             {
                 destroyed.trigger(*this);
