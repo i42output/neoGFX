@@ -42,6 +42,13 @@
                 shortcut: "Alt+C"
             }
             action: {
+                id: actionArcadeMode
+                text: "Toggle Arcade mode"
+                image: ":/closed/resources/caw_toolbar.naa#arcade_mode_off.png"
+                checkable: true
+                checked_image: ":/closed/resources/caw_toolbar.naa#arcade_mode_on.png"
+            }
+            action: {
                 id: actionMute
                 text: "Mute/&Unmute Sound"
                 image: ":/closed/resources/caw_toolbar.naa#mute.png"
@@ -117,6 +124,7 @@
                         action: separator
                     }
                     action: actionContacts
+                    action: actionArcadeMode
                     action: actionMute
                     action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons.naa#eyedropper.png" }
                     menu: {
@@ -171,7 +179,7 @@
                     action: actionAddFavourite
                     action: actionOrganizeFavourites
                     action: { text: "Keywords..." image: ":/closed/resources/caw_toolbar.naa#keyword.png" }
-                    action: { text: "Settings..." image: ":/closed/resources/caw_toolbar.naa#settings.png" }
+                    action: actionArcadeMode
                     action: { id: actionManagePlugins text: "Manage Plugins..." image: ":/closed/resources/caw_toolbar.naa#manage_plugins.png" }
                     action: actionMute
                     action: separator
@@ -370,20 +378,26 @@
                                 spacer: {
                                     weight: 2.0
                                 }
-                                push_button: {
-                                    id: button7
-                                    text: "Toggle\n&mute."
-                                    foreground_colour: LightCoral
-                                    maximum_size: [ 128spx 64spx ]
-                                }
-                                spacer: {
-                                    weight: 1.0
-                                }
-                                push_button: {
-                                    id: button8
-                                    text: "Enable/disable\ncontacts action."
-                                    foreground_colour: [ 255 235 160 ]
-                                    maximum_size: [ 128spx 64spx ]
+                                vertical_layout: 
+                                {
+                                    push_button: {
+                                        id: buttonArcadeMode
+                                        text: "Toggle arcade mode."
+                                        foreground_colour: ForestGreen
+                                        size_policy: Expanding
+                                    }
+                                    push_button: {
+                                        id: button7
+                                        text: "Toggle &mute."
+                                        foreground_colour: LightCoral
+                                        size_policy: Expanding
+                                    }
+                                    push_button: {
+                                        id: button8
+                                        text: "Enable/disable\ncontacts action."
+                                        foreground_colour: [ 255 235 160 ]
+                                        size_policy: Expanding
+                                    }
                                 }
                                 group_box: {
                                     id: groupBox

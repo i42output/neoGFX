@@ -245,6 +245,8 @@ int main(int argc, char* argv[])
                     ui.actionPasteAndGo.disable();
                 }
             }
+            if (ui.actionArcadeMode.is_checked())
+                ng::service<ng::i_rendering_engine>().want_game_mode();
         }, 100 };
 
         ui.actionPasteAndGo.triggered([&app]()
@@ -336,6 +338,7 @@ int main(int argc, char* argv[])
         ui.spinBox1.ValueChanged([&ui]() { ui.slider1.set_value(ui.spinBox1.value()); });
         bool colourCycle = false;
         ui.button6.clicked([&colourCycle]() { colourCycle = !colourCycle; });
+        ui.buttonArcadeMode.clicked([&ui]() { ui.actionArcadeMode.toggle(); });
         ui.button7.clicked([&ui]() { ui.actionMute.toggle(); });
         ui.button8.clicked([&ui]() { if (ui.actionContacts.is_enabled()) ui.actionContacts.disable(); else ui.actionContacts.enable(); });
         prng.seed(3);
