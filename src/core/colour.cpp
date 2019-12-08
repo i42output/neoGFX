@@ -403,10 +403,10 @@ namespace neogfx
         iUseCache{ true },
         iColourStops{ {0.0, colour::Black}, {1.0, colour::Black} },
         iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
-        iDirection{ Horizontal },
-        iOrientation{ TopLeft },
-        iShape{ Ellipse },
-        iSize{ FarthestCorner },
+        iDirection{ gradient_direction::Vertical },
+        iOrientation{ corner::TopLeft },
+        iShape{ gradient_shape::Ellipse },
+        iSize{ gradient_size::FarthestCorner },
         iSmoothness{ 0.0 }
     {
     }
@@ -426,48 +426,48 @@ namespace neogfx
     }
 
     gradient::gradient(const colour& aColour) :
-        gradient{ aColour, Vertical }
+        gradient{ aColour, gradient_direction::Vertical }
     {
     }
 
-    gradient::gradient(const colour& aColour, direction_e aDirection) :
+    gradient::gradient(const colour& aColour, gradient_direction aDirection) :
         gradient{ aColour, aColour, aDirection }
     {
     }
 
-    gradient::gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection) :
+    gradient::gradient(const colour& aColour1, const colour& aColour2, gradient_direction aDirection) :
         iUseCache{ true },
         iColourStops{ {0.0, aColour1}, {1.0, aColour2} },
         iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
         iDirection{ aDirection },
-        iOrientation{ TopLeft },
-        iShape{ Ellipse },
-        iSize{ FarthestCorner },
+        iOrientation{ corner::TopLeft },
+        iShape{ gradient_shape::Ellipse },
+        iSize{ gradient_size::FarthestCorner },
         iSmoothness{ 0.0 }
     { 
     }
 
-    gradient::gradient(const colour_stop_list& aColourStops, direction_e aDirection) :
+    gradient::gradient(const colour_stop_list& aColourStops, gradient_direction aDirection) :
         iUseCache{ true },
         iColourStops{ !aColourStops.empty() ? aColourStops : colour_stop_list{ {0.0, colour::Black}, {1.0, colour::Black} } },
         iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
         iDirection{ aDirection },
-        iOrientation{ TopLeft },
-        iShape{ Ellipse },
-        iSize{ FarthestCorner },
+        iOrientation{ corner::TopLeft },
+        iShape{ gradient_shape::Ellipse },
+        iSize{ gradient_size::FarthestCorner },
         iSmoothness{ 0.0 }
     {
         fix();
     }
 
-    gradient::gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection) :
+    gradient::gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, gradient_direction aDirection) :
         iUseCache{ true },
         iColourStops{ !aColourStops.empty() ? aColourStops : colour_stop_list{ {0.0, colour::Black}, {1.0, colour::Black} } },
         iAlphaStops{ !aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{ {0.0, 255_u8}, {1.0, 255_u8} } },
         iDirection{ aDirection },
-        iOrientation{ TopLeft },
-        iShape{ Ellipse },
-        iSize{ FarthestCorner },
+        iOrientation{ corner::TopLeft },
+        iShape{ gradient_shape::Ellipse },
+        iSize{ gradient_size::FarthestCorner },
         iSmoothness{ 0.0 }
     {
         fix();
@@ -716,24 +716,24 @@ namespace neogfx
         return result;
     }
 
-    gradient::direction_e gradient::direction() const
+    gradient_direction gradient::direction() const
     { 
         return iDirection; 
     }
 
-    void gradient::set_direction(direction_e aDirection)
+    void gradient::set_direction(gradient_direction aDirection)
     {
         iDirection = aDirection;
-        if (iDirection != Diagonal)
-            iOrientation = TopLeft;
-        if (iDirection != Radial)
+        if (iDirection != gradient_direction::Diagonal)
+            iOrientation = corner::TopLeft;
+        if (iDirection != gradient_direction::Radial)
         {
             iExponents = optional_vec2{};
             iCentre = optional_point{};
         }
     }
 
-    gradient gradient::with_direction(direction_e aDirection) const
+    gradient gradient::with_direction(gradient_direction aDirection) const
     {
         gradient result = *this;
         result.set_direction(aDirection);
@@ -757,34 +757,34 @@ namespace neogfx
         return result;
     }
 
-    gradient::shape_e gradient::shape() const
+    gradient_shape gradient::shape() const
     {
         return iShape;
     }
 
-    void gradient::set_shape(shape_e aShape)
+    void gradient::set_shape(gradient_shape aShape)
     {
         iShape = aShape;
     }
 
-    gradient gradient::with_shape(shape_e aShape) const
+    gradient gradient::with_shape(gradient_shape aShape) const
     {
         gradient result = *this;
         result.set_shape(aShape);
         return result;
     }
 
-    gradient::size_e gradient::size() const
+    gradient_size gradient::size() const
     {
         return iSize;
     }
 
-    void gradient::set_size(size_e aSize)
+    void gradient::set_size(gradient_size aSize)
     {
         iSize = aSize;
     }
 
-    gradient gradient::with_size(size_e aSize) const
+    gradient gradient::with_size(gradient_size aSize) const
     {
         gradient result = *this;
         result.set_size(aSize);

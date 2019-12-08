@@ -187,7 +187,7 @@ namespace neogfx
         colour frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
         draw_alpha_background(aGraphicsContext, rectContents, spx(ALPHA_PATTERN_SIZE));
         neogfx::gradient selection = iSelection;
-        selection.set_direction(gradient::Horizontal);
+        selection.set_direction(gradient_direction::Horizontal);
         aGraphicsContext.fill_rect(rectContents, selection);
         rectContents.inflate(size{ spx(BORDER_THICKNESS) });
         aGraphicsContext.draw_rect(rectContents, pen(frameColour.mid(background_colour()), spx(BORDER_THICKNESS)));

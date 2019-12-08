@@ -220,7 +220,7 @@ namespace neogfx
                 {
                     gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
                     gradient::alpha_stop_list{ { 0.0, 0xFF_u8 }, { 1.0, 0x00_u8 } },
-                    type() == scrollbar_type::Vertical ? gradient::Vertical : gradient::Horizontal
+                    type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
                 });
             }
             if (position() != maximum() - page())
@@ -240,7 +240,7 @@ namespace neogfx
                 {
                     gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
                     gradient::alpha_stop_list{ { 0.0, 0x00_u8 },{ 1.0, 0xFF_u8 } },
-                    type() == scrollbar_type::Vertical ? gradient::Vertical : gradient::Horizontal
+                    type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
                 });
             }
         }

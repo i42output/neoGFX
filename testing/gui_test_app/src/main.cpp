@@ -10,7 +10,6 @@
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
-#include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/dialog/colour_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
@@ -146,7 +145,7 @@ public:
             ng::service<ng::i_app>().change_style("Keypad").
                 palette().set_colour(aNumber != 9 ? ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::colour::LightGoldenrod);
             if (aNumber == 9)
-                iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} });
+                iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} });
             else if (aNumber == 8)
                 iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::White });
             else if (aNumber == 0)
@@ -158,7 +157,7 @@ public:
                         ng::gradient{
                             ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0x40),
                             ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0xC0),
-                            ng::gradient::Horizontal},
+                            ng::gradient_direction::Horizontal},
                         ng::colour_or_gradient{} });
         });
     }
@@ -415,15 +414,14 @@ int main(int argc, char* argv[])
             showFps = false;
             ui.groupBox.set_checkable(false);
         });
-        ng::gradient_widget gradientWidget(ui.groupBox.item_layout());
         ui.checkColumns.checked([&]()
         {
             ui.checkPassword.disable();
             ui.textEdit.set_columns(3);
-            gradientWidget.GradientChanged([&]()
+            ui.gradientWidget.GradientChanged([&]()
             {
                 auto cs = ui.textEdit.column(2);
-                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, gradientWidget.gradient() } });
+                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ui.gradientWidget.gradient() } });
                 ui.textEdit.set_column(2, cs);
             }, ui.textEdit);
         });
@@ -431,7 +429,7 @@ int main(int argc, char* argv[])
         {
             ui.checkPassword.enable();
             ui.textEdit.remove_columns();
-            gradientWidget.GradientChanged.unsubscribe(ui.textEdit);
+            ui.gradientWidget.GradientChanged.unsubscribe(ui.textEdit);
         });
         ui.checkKerning.Toggled([&app, &ui]()
         {
@@ -569,9 +567,9 @@ int main(int argc, char* argv[])
             if (colourPicker.exec() == ng::dialog_result::Accepted)
             {
                 sInk = colourPicker.selected_colour();
-                ui.textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
-                ui.textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
-                ui.textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+                ui.textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} }, true);
+                ui.textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} }, true);
+                ui.textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} }, true);
             }
             sCustomColours = colourPicker.custom_colours();
         });
@@ -822,11 +820,11 @@ int main(int argc, char* argv[])
         {
             ng::service<ng::i_rendering_engine>().want_game_mode();
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
-            aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, gradientWidget.gradient().with_direction(ng::gradient::Horizontal));
-            aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, gradientWidget.gradient().with_direction(ng::gradient::Horizontal));
+            aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
+            aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ng::pen{ ng::colour::Blue4, 2.0 });
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 150, 150 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
-            aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, gradientWidget.gradient().with_direction(ng::gradient::Radial));
+            aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Radial));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
             aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
             aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
@@ -865,10 +863,10 @@ int main(int argc, char* argv[])
             ui.pageDrawing.update();
         }, 100 };
 
-        ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
+        ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient_direction::Horizontal), ng::colour_or_gradient()));
         ui.buttonStyle1.clicked([&ui]()
         {
-            ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
+            ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient_direction::Horizontal), ng::colour_or_gradient()));
         });
         ui.buttonStyle2.clicked([&ui]()
         {

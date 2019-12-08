@@ -55,6 +55,14 @@ namespace neogfx
         South,
         SouthEast
     };
+
+    enum class corner : uint32_t
+    {
+        TopLeft,
+        TopRight,
+        BottomRight,
+        BottomLeft
+    };
 }
 
 template <>
@@ -91,6 +99,14 @@ const neolib::enum_enumerators_t<neogfx::cardinal> neolib::enum_enumerators_v<ne
     declare_enum_string(neogfx::cardinal, SouthEast)
 };
 
+template <>
+const neolib::enum_enumerators_t<neogfx::corner> neolib::enum_enumerators_v<neogfx::corner>
+{
+    declare_enum_string(neogfx::corner, TopLeft)
+    declare_enum_string(neogfx::corner, TopRight)
+    declare_enum_string(neogfx::corner, BottomRight)
+    declare_enum_string(neogfx::corner, BottomLeft)
+};
 
 namespace neogfx
 {

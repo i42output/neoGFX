@@ -45,6 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slider.hpp"
 #include "spin_box.hpp"
 #include "group_box.hpp"
+#include "gradient_widget.hpp"
 #include "layout.hpp"
 #include "spacer.hpp"
 
@@ -84,6 +85,7 @@ namespace neogfx::nrc
             { "double_slider", ui_element_type::LayoutItem },
             { "spin_box", ui_element_type::LayoutItem },
             { "double_spin_box", ui_element_type::LayoutItem },
+            { "gradient_widget", ui_element_type::LayoutItem },
             { "vertical_layout", ui_element_type::LayoutItem },
             { "horizontal_layout", ui_element_type::LayoutItem },
             { "grid_layout", ui_element_type::LayoutItem },
@@ -158,6 +160,7 @@ namespace neogfx::nrc
             { "double_slider", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new double_slider{ aParser, aParent }; } },
             { "spin_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new spin_box{ aParser, aParent }; } },
             { "double_spin_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new double_spin_box{ aParser, aParent }; } },
+            { "gradient_widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new gradient_widget{ aParser, aParent }; } },
             { "vertical_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new vertical_layout{ aParser, aParent }; } },
             { "horizontal_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_layout{ aParser, aParent }; } },
             { "grid_layout", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new grid_layout{ aParser, aParent }; } },

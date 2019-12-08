@@ -23,6 +23,7 @@
 #include <type_traits>
 #include <neolib/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/core/hsl_colour.hpp>
 #include <neogfx/core/hsv_colour.hpp>
 
@@ -742,7 +743,7 @@ namespace neogfx
         colour& set_red(component aNewValue);
         colour& set_green(component aNewValue);
         colour& set_blue(component aNewValue);
-        colour with_alpha(component aNewValue) const; 
+        colour with_alpha(component aNewValue) const;
         colour with_red(component aNewValue) const;
         colour with_green(component aNewValue) const;
         colour with_blue(component aNewValue) const;
@@ -807,9 +808,61 @@ namespace neogfx
             ", R: 0x" << std::hex << (int)aColour.red() <<
             ", G: 0x" << std::hex << (int)aColour.green() <<
             ", B: 0x" << std::hex << (int)aColour.blue() << "]";
-        return aStream; 
+        return aStream;
     }
 
+    enum class gradient_direction : uint32_t
+    {
+        Vertical,
+        Horizontal,
+        Diagonal,
+        Rectangular,
+        Radial
+    };
+
+    enum class gradient_shape : uint32_t
+    {
+        Ellipse,
+        Circle
+    };
+
+    enum class gradient_size : uint32_t
+    {
+        ClosestSide,
+        FarthestSide,
+        ClosestCorner,
+        FarthestCorner
+    };
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::gradient_direction> neolib::enum_enumerators_v<neogfx::gradient_direction>
+{
+    declare_enum_string(neogfx::gradient_direction, Vertical)
+    declare_enum_string(neogfx::gradient_direction, Horizontal)
+    declare_enum_string(neogfx::gradient_direction, Diagonal)
+    declare_enum_string(neogfx::gradient_direction, Rectangular)
+    declare_enum_string(neogfx::gradient_direction, Radial)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::gradient_shape> neolib::enum_enumerators_v<neogfx::gradient_shape>
+{
+    declare_enum_string(neogfx::gradient_shape, Ellipse)
+    declare_enum_string(neogfx::gradient_shape, Circle)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::gradient_size> neolib::enum_enumerators_v<neogfx::gradient_size>
+{
+    declare_enum_string(neogfx::gradient_size, ClosestSide)
+    declare_enum_string(neogfx::gradient_size, FarthestSide)
+    declare_enum_string(neogfx::gradient_size, ClosestCorner)
+    declare_enum_string(neogfx::gradient_size, FarthestCorner)
+};
+
+namespace neogfx
+{
     class gradient
     {
         // constants
@@ -817,34 +870,7 @@ namespace neogfx
         static const std::uint32_t MaxStops = 256;
         // types
     public:
-        enum direction_e
-        {
-            Vertical    = 0,
-            Horizontal    = 1,
-            Diagonal    = 2,
-            Rectangular = 3,
-            Radial        = 4
-        };
-        enum corner_e
-        {
-            TopLeft        = 0,
-            TopRight    = 1,
-            BottomRight    = 2,
-            BottomLeft    = 3
-        };
-        typedef neolib::variant<corner_e, double> orientation_type;
-        enum shape_e
-        {
-            Ellipse        = 0,
-            Circle        = 1
-        };
-        enum size_e
-        {
-            ClosestSide        = 0,
-            FarthestSide    = 1,
-            ClosestCorner    = 2,
-            FarthestCorner    = 3
-        };
+        typedef neolib::variant<corner, double> orientation_type;
         typedef std::pair<double, colour> colour_stop;
         typedef std::vector<colour_stop> colour_stop_list;
         typedef std::pair<double, colour::component> alpha_stop;
@@ -856,10 +882,10 @@ namespace neogfx
         gradient();
         gradient(const gradient& aOther);
         explicit gradient(const colour& aColour);
-        gradient(const colour& aColour, direction_e aDirection);
-        gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection = Vertical);
-        gradient(const colour_stop_list& aColourStops, direction_e aDirection = Vertical);
-        gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection = Vertical);
+        gradient(const colour& aColour, gradient_direction aDirection);
+        gradient(const colour& aColour1, const colour& aColour2, gradient_direction aDirection = gradient_direction::Vertical);
+        gradient(const colour_stop_list& aColourStops, gradient_direction aDirection = gradient_direction::Vertical);
+        gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
         // operations
     public:
         bool use_cache() const;
@@ -893,18 +919,18 @@ namespace neogfx
         colour::component alpha_at(double aPos, double aStart, double aEnd) const;
         gradient with_alpha(colour::component aAlpha) const;
         gradient with_combined_alpha(colour::component aAlpha) const;
-        direction_e direction() const;
-        void set_direction(direction_e aDirection);
-        gradient with_direction(direction_e aDirection) const;
+        gradient_direction direction() const;
+        void set_direction(gradient_direction aDirection);
+        gradient with_direction(gradient_direction aDirection) const;
         orientation_type orientation() const;
         void set_orientation(orientation_type aOrientation);
         gradient with_orientation(orientation_type aOrientation) const;
-        shape_e shape() const;
-        void set_shape(shape_e aShape);
-        gradient with_shape(shape_e aShape) const;
-        size_e size() const;
-        void set_size(size_e aSize);
-        gradient with_size(size_e aSize) const;
+        gradient_shape shape() const;
+        void set_shape(gradient_shape aShape);
+        gradient with_shape(gradient_shape aShape) const;
+        gradient_size size() const;
+        void set_size(gradient_size aSize);
+        gradient with_size(gradient_size aSize) const;
         const optional_vec2& exponents() const;
         void set_exponents(const optional_vec2& aExponents);
         gradient with_exponents(const optional_vec2& aExponents) const;
@@ -931,10 +957,10 @@ namespace neogfx
         bool iUseCache;
         colour_stop_list iColourStops;
         alpha_stop_list iAlphaStops;
-        direction_e iDirection;
+        gradient_direction iDirection;
         orientation_type iOrientation;
-        shape_e iShape;
-        size_e iSize;
+        gradient_shape iShape;
+        gradient_size iSize;
         optional_vec2 iExponents;
         optional_point iCentre;
         double iSmoothness;

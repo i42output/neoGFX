@@ -747,7 +747,7 @@ namespace neogfx
         rendering_engine().gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
         rendering_engine().gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
         rendering_engine().gradient_shader_program().set_uniform_variable("radGradientAngle", std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f);
-        rendering_engine().gradient_shader_program().set_uniform_variable("nGradientStartFrom", std::holds_alternative<gradient::corner_e>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<gradient::corner_e>(aGradient.orientation())) : -1);
+        rendering_engine().gradient_shader_program().set_uniform_variable("nGradientStartFrom", std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1);
         rendering_engine().gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
         rendering_engine().gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
         basic_vector<float, 2> gradientExponents = (aGradient.exponents() != std::nullopt ? *aGradient.exponents() : vec2{2.0, 2.0});

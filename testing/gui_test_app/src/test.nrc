@@ -756,11 +756,7 @@
                             id: layoutEditor
                             text_edit: {
                                 id: textEditEditor
-                                default_style: {
-                                    text_colour: {
-                                        gradient: [ Red White Horizontal ]
-                                    }
-                                }
+                                text_colour: [ Horizontal Red White ]
                             }
                             push_button: {
                                 id: buttonStyle1

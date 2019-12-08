@@ -293,3 +293,8 @@ Debug
 /bin
 /tools/nrc/element_libraries/default/build/win32/default/default.vcxproj.user
 /tools/DesignStudio/src/resources/win32/*.aps
+/build/win32/vs2019/x64/Tools
+/tools/DesignStudio/build/win32/vs2019/x64/Tools
+/tools/glsl2hpp/build/win32/vs2019/x64/Tools
+/tools/nrc/build/win32/vs2019/x64/Tools
+/tools/nrc/element_libraries/default/build/win32/default/x64/Tools

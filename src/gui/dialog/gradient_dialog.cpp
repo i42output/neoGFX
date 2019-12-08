@@ -48,7 +48,7 @@ namespace neogfx
             rect cr = client_rect();
             draw_alpha_background(aGc, cr, 16.0_spx);
             aGc.fill_rect(cr, iOwner.gradient());
-            if (iOwner.gradient().direction() == gradient::Radial && iOwner.gradient().centre() != optional_point{})
+            if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().centre() != optional_point{})
             {
                 point centre{ cr.centre().x + cr.width() / 2.0 * iOwner.gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * iOwner.gradient().centre()->y };
                 aGc.draw_circle(centre, 4.0_spx, pen{ colour::White, 2.0 });
@@ -88,7 +88,7 @@ namespace neogfx
     private:
         void animate()
         {
-            if (iOwner.gradient().direction() == gradient::Radial && iOwner.gradient().centre() != optional_point{})
+            if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().centre() != optional_point{})
             {
                 rect cr = client_rect();
                 point centre{ cr.centre().x + cr.width() / 2.0 * iOwner.gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * iOwner.gradient().centre()->y };
@@ -244,28 +244,28 @@ namespace neogfx
         iSmoothnessSpinBox.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSpinBox.value() / 100.0)); });
         iSmoothnessSlider.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSlider.value() / 100.0)); });
 
-        iDirectionHorizontalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Horizontal)); });
-        iDirectionVerticalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Vertical)); });
-        iDirectionDiagonalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Diagonal)); });
-        iDirectionRectangularRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Rectangular)); });
-        iDirectionRadialRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Radial)); });
+        iDirectionHorizontalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient_direction::Horizontal)); });
+        iDirectionVerticalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient_direction::Vertical)); });
+        iDirectionDiagonalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient_direction::Diagonal)); });
+        iDirectionRectangularRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient_direction::Rectangular)); });
+        iDirectionRadialRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient_direction::Radial)); });
 
-        iTopLeftRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(gradient::TopLeft)); });
-        iTopRightRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(gradient::TopRight)); });
-        iBottomRightRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(gradient::BottomRight)); });
-        iBottomLeftRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(gradient::BottomLeft)); });
+        iTopLeftRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(corner::TopLeft)); });
+        iTopRightRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(corner::TopRight)); });
+        iBottomRightRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(corner::BottomRight)); });
+        iBottomLeftRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(corner::BottomLeft)); });
         iAngleRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(0.0)); });
 
         iAngleSpinBox.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_orientation(to_rad(iAngleSpinBox.value()))); });
         iAngleSlider.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_orientation(to_rad(iAngleSlider.value()))); });
 
-        iSizeClosestSideRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient::ClosestSide)); });
-        iSizeFarthestSideRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient::FarthestSide)); });
-        iSizeClosestCornerRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient::ClosestCorner)); });
-        iSizeFarthestCornerRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient::FarthestCorner)); });
+        iSizeClosestSideRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient_size::ClosestSide)); });
+        iSizeFarthestSideRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient_size::FarthestSide)); });
+        iSizeClosestCornerRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient_size::ClosestCorner)); });
+        iSizeFarthestCornerRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient_size::FarthestCorner)); });
 
-        iShapeEllipseRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_shape(gradient::Ellipse)); });
-        iShapeCircleRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_shape(gradient::Circle)); });
+        iShapeEllipseRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_shape(gradient_shape::Ellipse)); });
+        iShapeCircleRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_shape(gradient_shape::Circle)); });
 
         iExponentGroupBox.check_box().checked([this]() { iGradientSelector.set_gradient(gradient().with_exponents(vec2{2.0, 2.0})); });
         iExponentGroupBox.check_box().Unchecked([this]() { iGradientSelector.set_gradient(gradient().with_exponents(optional_vec2{})); });
@@ -323,24 +323,24 @@ namespace neogfx
         neolib::scoped_flag sf{ iUpdatingWidgets };
         iSmoothnessSpinBox.set_value(gradient().smoothness() * 100.0);
         iSmoothnessSlider.set_value(gradient().smoothness() * 100.0);
-        iDirectionHorizontalRadioButton.set_checked(gradient().direction() == gradient::Horizontal);
-        iDirectionVerticalRadioButton.set_checked(gradient().direction() == gradient::Vertical);
-        iDirectionDiagonalRadioButton.set_checked(gradient().direction() == gradient::Diagonal);
-        iDirectionRectangularRadioButton.set_checked(gradient().direction() == gradient::Rectangular);
-        iDirectionRadialRadioButton.set_checked(gradient().direction() == gradient::Radial);
-        iTopLeftRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(gradient::TopLeft));
-        iTopRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(gradient::TopRight));
-        iBottomRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(gradient::BottomRight));
-        iBottomLeftRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(gradient::BottomLeft));
+        iDirectionHorizontalRadioButton.set_checked(gradient().direction() == gradient_direction::Horizontal);
+        iDirectionVerticalRadioButton.set_checked(gradient().direction() == gradient_direction::Vertical);
+        iDirectionDiagonalRadioButton.set_checked(gradient().direction() == gradient_direction::Diagonal);
+        iDirectionRectangularRadioButton.set_checked(gradient().direction() == gradient_direction::Rectangular);
+        iDirectionRadialRadioButton.set_checked(gradient().direction() == gradient_direction::Radial);
+        iTopLeftRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::TopLeft));
+        iTopRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::TopRight));
+        iBottomRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::BottomRight));
+        iBottomLeftRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::BottomLeft));
         iAngleRadioButton.set_checked(std::holds_alternative<double>(gradient().orientation()));
         iAngleSpinBox.set_value(std::holds_alternative<double>(gradient().orientation()) ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);
         iAngleSlider.set_value(std::holds_alternative<double>(gradient().orientation()) ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);
-        iSizeClosestSideRadioButton.set_checked(gradient().size() == gradient::ClosestSide);
-        iSizeFarthestSideRadioButton.set_checked(gradient().size() == gradient::FarthestSide);
-        iSizeClosestCornerRadioButton.set_checked(gradient().size() == gradient::ClosestCorner);
-        iSizeFarthestCornerRadioButton.set_checked(gradient().size() == gradient::FarthestCorner);
-        iShapeEllipseRadioButton.set_checked(gradient().shape() == gradient::Ellipse);
-        iShapeCircleRadioButton.set_checked(gradient().shape() == gradient::Circle);
+        iSizeClosestSideRadioButton.set_checked(gradient().size() == gradient_size::ClosestSide);
+        iSizeFarthestSideRadioButton.set_checked(gradient().size() == gradient_size::FarthestSide);
+        iSizeClosestCornerRadioButton.set_checked(gradient().size() == gradient_size::ClosestCorner);
+        iSizeFarthestCornerRadioButton.set_checked(gradient().size() == gradient_size::FarthestCorner);
+        iShapeEllipseRadioButton.set_checked(gradient().shape() == gradient_shape::Ellipse);
+        iShapeCircleRadioButton.set_checked(gradient().shape() == gradient_shape::Circle);
         auto exponents = gradient().exponents();
         bool specifyExponents = (exponents != std::nullopt);
         iExponentGroupBox.check_box().set_checked(specifyExponents);
@@ -378,16 +378,16 @@ namespace neogfx
         iYCentreSpinBox.enable(specifyCentre);
         switch (gradient().direction())
         {
-        case gradient::Vertical:
-        case gradient::Horizontal:
-        case gradient::Rectangular:
+        case gradient_direction::Vertical:
+        case gradient_direction::Horizontal:
+        case gradient_direction::Rectangular:
             iOrientationGroupBox.hide();
             iSizeGroupBox.hide();
             iShapeGroupBox.hide();
             iExponentGroupBox.hide();
             iCentreGroupBox.hide();
             break;
-        case gradient::Diagonal:
+        case gradient_direction::Diagonal:
             iOrientationGroupBox.show();
             iAngleGroupBox.show(std::holds_alternative<double>(gradient().orientation()));
             iSizeGroupBox.hide();
@@ -395,11 +395,11 @@ namespace neogfx
             iExponentGroupBox.hide();
             iCentreGroupBox.hide();
             break;
-        case gradient::Radial:
+        case gradient_direction::Radial:
             iOrientationGroupBox.hide();
             iSizeGroupBox.show();
             iShapeGroupBox.show();
-            iExponentGroupBox.show(gradient().shape() == gradient::Ellipse);
+            iExponentGroupBox.show(gradient().shape() == gradient_shape::Ellipse);
             iCentreGroupBox.show();
             break;
         }
