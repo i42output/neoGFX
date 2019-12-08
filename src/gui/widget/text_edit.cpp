@@ -494,9 +494,9 @@ namespace neogfx
             if (iType == MultiLine)
             {
                 if (aScanCode == ScanCode_PAGEUP && vertical_scrollbar().position() == vertical_scrollbar().minimum())
-                    cursor().set_position(0, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+                    move_cursor(cursor::StartOfDocument, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
                 else if (aScanCode == ScanCode_PAGEDOWN && vertical_scrollbar().position() == vertical_scrollbar().maximum() - vertical_scrollbar().page())
-                    cursor().set_position(iText.size(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+                    move_cursor(cursor::EndOfDocument, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
                 else
                 {
                     auto pos = point{ glyph_position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
@@ -720,6 +720,17 @@ namespace neogfx
             return;
         switch (aMoveOperation)
         {
+        case cursor::Up:
+        case cursor::Down:
+            if (iCursorHint.x == std::nullopt)
+                iCursorHint.x = glyph_position(cursor_glyph_position(), true).pos.x;
+            break;
+        default:
+            iCursorHint.x = std::nullopt;
+            break;
+        }
+        switch (aMoveOperation)
+        {
         case cursor::StartOfDocument:
             cursor().set_position(0, aMoveAnchor);
             break;
@@ -822,7 +833,7 @@ namespace neogfx
                 if (currentPosition.line != currentPosition.column->lines().begin())
                 {
                     auto const columnRectSansMargins = column_rect(column_index(*currentPosition.column));
-                    cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, std::prev(currentPosition.line)->ypos } +columnRectSansMargins.top_left(), false)).first, aMoveAnchor);
+                    cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ *iCursorHint.x, std::prev(currentPosition.line)->ypos } +columnRectSansMargins.top_left(), false)).first, aMoveAnchor);
                 }
             }
             break;
@@ -833,7 +844,7 @@ namespace neogfx
                 {
                     auto const columnRectSansMargins = column_rect(column_index(*currentPosition.column));
                     if (std::next(currentPosition.line) != currentPosition.column->lines().end())
-                        cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, std::next(currentPosition.line)->ypos } + columnRectSansMargins.top_left(), false)).first, aMoveAnchor);
+                        cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ *iCursorHint.x, std::next(currentPosition.line)->ypos } + columnRectSansMargins.top_left(), false)).first, aMoveAnchor);
                     else if (currentPosition.lineEnd != iGlyphs.end() && currentPosition.lineEnd->is_line_breaking_whitespace())
                         cursor().set_position(iText.size(), aMoveAnchor);
                 }

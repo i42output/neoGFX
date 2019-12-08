@@ -600,6 +600,7 @@ namespace neogfx
         mutable std::optional<std::pair<neogfx::font, size>> iHintedSize;
         optional_dimension iTabStops;
         std::string iTabStopHint;
+        basic_point<std::optional<dimension>> iCursorHint;
         mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
         neolib::callback_timer iAnimator;
         std::optional<neolib::callback_timer> iDragger;
