@@ -272,16 +272,19 @@ namespace neogfx
     void text_edit::paint(i_graphics_context& aGraphicsContext) const
     {
         scrollable_widget::paint(aGraphicsContext);
-        coordinate x = 0.0;
         rect clipRect = default_clip_rect().intersection(client_rect(false));
         if (iOutOfMemory)
         {
             draw_alpha_background(aGraphicsContext, clipRect);
             return;
         }
+        scoped_scissor scissor{ aGraphicsContext, clipRect };
+        if (iDefaultStyle.background_colour() != neolib::none)
+            aGraphicsContext.fill_rect(client_rect(true), to_brush(iDefaultStyle.background_colour()));
+        coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < columns(); ++columnIndex)
         {
-            scoped_scissor scissor(aGraphicsContext, clipRect.intersection(column_rect(columnIndex, true)));
+            scoped_scissor scissor2{ aGraphicsContext, clipRect.intersection(column_rect(columnIndex, true)) };
             auto const& column = static_cast<const glyph_column&>(text_edit::column(columnIndex));
             auto const& columnRectSansMargins = column_rect(columnIndex);
             auto const& lines = column.lines();

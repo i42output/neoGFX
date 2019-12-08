@@ -42,17 +42,23 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            ui_element<>::parse(aName, aData);
             if (aName == "tab_stop_hint")
                 iTabStopHint = aData.get<neolib::i_string>();
             else if (aName == "text_colour")
                 iTextColour = get_colour(aData);
+            else if (aName == "background_colour")
+                iBackgroundColour = get_colour(aData);
+            else
+                ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            ui_element<>::parse(aName, aData);
             if (aName == "text_colour")
                 iTextColour = get_colour_or_gradient(aData);
+            else if (aName == "background_colour")
+                iBackgroundColour = get_colour_or_gradient(aData);
+            else
+                ui_element<>::parse(aName, aData);
         }
     protected:
         void emit() const override
@@ -74,18 +80,30 @@ namespace neogfx::nrc
             ui_element<>::emit_body();
             if (iTabStopHint)
                 emit("   %1%.set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
+            if (iTextColour || iBackgroundColour)
+                emit("   text_edit::style %1%DefaultStyle;\n", id());
             if (iTextColour)
             {
                 if (std::holds_alternative<colour>(*iTextColour))
-                    emit("   %1%.set_default_style(text_edit::style{ optional_font{}, colour{ %2% } });\n", id(), std::get<colour>(*iTextColour));
+                    emit("   %1%DefaultStyle.set_text_colour(colour{ %2% });\n", id(), std::get<colour>(*iTextColour));
                 else
-                    emit("   %1%.set_default_style(text_edit::style{ optional_font{}, gradient{ %2% } });\n", id(), std::get<gradient>(*iTextColour));
+                    emit("   %1%DefaultStyle.set_text_colour(gradient{ %2% });\n", id(), std::get<gradient>(*iTextColour));
             }
+            if (iBackgroundColour)
+            {
+                if (std::holds_alternative<colour>(*iBackgroundColour))
+                    emit("   %1%DefaultStyle.set_background_colour(colour{ %2% });\n", id(), std::get<colour>(*iBackgroundColour));
+                else
+                    emit("   %1%DefaultStyle.set_background_colour(gradient{ %2% });\n", id(), std::get<gradient>(*iBackgroundColour));
+            }
+            if (iTextColour || iBackgroundColour)
+                emit("   %1%.set_default_style(%1%DefaultStyle);\n", id());
         }
     protected:
         using ui_element<>::emit;
     private:
         std::optional<string> iTabStopHint;
         std::optional<colour_or_gradient> iTextColour;
+        std::optional<colour_or_gradient> iBackgroundColour;
     };
 }
