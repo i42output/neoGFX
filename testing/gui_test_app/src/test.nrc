@@ -756,7 +756,7 @@
                             id: layoutEditor
                             text_edit: {
                                 id: textEditEditor
-                                text_colour: [ Horizontal Red White ]
+                                text_colour: [ Horizontal Green White Blue ]
                             }
                             push_button: {
                                 id: buttonStyle1

@@ -248,6 +248,26 @@ namespace neogfx::nrc
             else
                 throw element_ill_formed(id().to_std_string());
         }
+        colour_or_gradient get_colour_or_gradient(const array_data_t& aArrayData) const
+        {
+            if (aArrayData[0].which() == neolib::simple_variant_type::String)
+            {
+                auto gradientDirection = neolib::try_string_to_enum<gradient_direction>(aArrayData[0].get<neolib::i_string>().to_std_string());
+                if (gradientDirection != std::nullopt)
+                {
+                    gradient::colour_stop_list stops;
+                    // todo: full gradient specification support
+                    auto interval = 1.0 / (aArrayData.size() - 2);
+                    for (std::size_t i = 1; i < aArrayData.size(); ++i)
+                        stops.push_back(gradient::colour_stop{ (i - 1) * interval, get_colour(aArrayData[i]) });
+                    return gradient{ stops, *gradientDirection };
+                }
+                else
+                    return get_colour(aArrayData);
+            }
+            else
+                return get_colour(aArrayData);
+        }
     protected:
         template <typename Enum>
         static std::string enum_to_string(const std::string& aEnumName, Enum aEnumValue) 
@@ -324,6 +344,20 @@ namespace neogfx::nrc
         {
             std::ostringstream result;
             result << "0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << aArgument.value() << "u";
+            return result.str();
+        }
+        static std::string convert_emit_argument(const gradient& aArgument)
+        {
+            std::ostringstream result;
+            // todo: full gradient specification support
+            result << "gradient::colour_stop_list{ ";
+            for (auto s = aArgument.colour_begin(); s != aArgument.colour_end(); ++s)
+            {
+                if (s != aArgument.colour_begin())
+                    result << ", ";
+                result << "gradient::colour_stop{ " << s->first << ", colour{ " << convert_emit_argument(s->second) << " } }";
+            }
+            result << " }, " << enum_to_string<gradient_direction>("gradient_direction", aArgument.direction());
             return result.str();
         }
     };

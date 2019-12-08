@@ -45,10 +45,14 @@ namespace neogfx::nrc
             ui_element<>::parse(aName, aData);
             if (aName == "tab_stop_hint")
                 iTabStopHint = aData.get<neolib::i_string>();
+            else if (aName == "text_colour")
+                iTextColour = get_colour(aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
             ui_element<>::parse(aName, aData);
+            if (aName == "text_colour")
+                iTextColour = get_colour_or_gradient(aData);
         }
     protected:
         void emit() const override
@@ -70,6 +74,13 @@ namespace neogfx::nrc
             ui_element<>::emit_body();
             if (iTabStopHint)
                 emit("   %1%.set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
+            if (iTextColour)
+            {
+                if (std::holds_alternative<colour>(*iTextColour))
+                    emit("   %1%.set_default_style(text_edit::style{ optional_font{}, colour{ %2% } });\n", id(), std::get<colour>(*iTextColour));
+                else
+                    emit("   %1%.set_default_style(text_edit::style{ optional_font{}, gradient{ %2% } });\n", id(), std::get<gradient>(*iTextColour));
+            }
         }
     protected:
         using ui_element<>::emit;

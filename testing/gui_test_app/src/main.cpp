@@ -863,14 +863,13 @@ int main(int argc, char* argv[])
             ui.pageDrawing.update();
         }, 100 };
 
-        ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient_direction::Horizontal), ng::colour_or_gradient()));
         ui.buttonStyle1.clicked([&ui]()
         {
-            ui.textEditEditor.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient_direction::Horizontal), ng::colour_or_gradient()));
+            ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient_direction::Horizontal), ng::colour_or_gradient() });
         });
         ui.buttonStyle2.clicked([&ui]()
         {
-            ui.textEditEditor.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
+            ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White });
         });
 
         ui.pageCircles.painting([&ui, &random_colour](ng::i_graphics_context& aGc)
