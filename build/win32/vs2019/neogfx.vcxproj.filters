@@ -903,6 +903,12 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Tools\GeneratedFiles\gradient.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="x64\Debug\GeneratedFiles\gradient.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
@@ -1314,6 +1320,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\layout\layout_item_proxy.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Tools\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Tools\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

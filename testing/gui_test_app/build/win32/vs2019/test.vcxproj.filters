@@ -44,9 +44,6 @@
     <CustomBuild Include="..\..\..\src\test.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\..\..\..\src\closed\toolbar.nrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -68,5 +65,10 @@
     <Image Include="icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\..\src\closed\toolbar.nrc">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
