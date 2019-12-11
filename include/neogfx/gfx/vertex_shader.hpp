@@ -48,13 +48,13 @@ namespace neogfx
             if (a != iAttributes.end())
             {
                 iAttributes.erase(a);
-                invalidate();
+                set_dirty();
             }
         }
         void add_attribute(const i_string& aName, uint32_t aLocation, std::size_t aTypeIndex) override
         {
             iAttributes.emplace(aName, neolib::make_pair(aLocation, aTypeIndex)); 
-            invalidate();
+            set_dirty();
         }
     public:
         bool has_standard_vertex_matrices() const override
@@ -142,7 +142,7 @@ namespace neogfx
             {
                 static const string sSource =
                 {
-                    "void " + name().to_std_string() + "()\n"
+                    "void main()\n"
                     "{\n"
                     "    gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
                     "    OutputCoord = VertexPosition.xy;\n"
@@ -176,7 +176,7 @@ namespace neogfx
             {
                 static const string sSource =
                 {
-                    "void " + name().to_std_string() + "()\n"
+                    "void main()\n"
                     "{\n"
                     "    gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
                     "    OutputCoord = VertexPosition.xy;\n"

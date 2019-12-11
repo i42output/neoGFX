@@ -26,6 +26,7 @@
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/shader_array.hpp>
+#include <neogfx/gfx/i_shader.hpp>
 
 namespace neogfx
 {
@@ -112,6 +113,8 @@ namespace neogfx
         virtual void deactivate_context() = 0;
         virtual opengl_context create_context(const i_render_target& aTarget) = 0;
         virtual void destroy_context(opengl_context aContext) = 0;
+        virtual void* create_shader_object(shader_type aShaderType) = 0;
+        virtual void destroy_shader_object(void* aShaderObject) = 0;
     public:
         virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
         virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;

@@ -46,25 +46,36 @@ namespace neogfx
         {
             add_in_variable<vec2f>("OutputCoord"_s, 0u);
             add_in_variable<vec4f>("Color"_s, 1u);
-            add_out_variable<vec4f>("FragColor"_s, 1u);
+            add_out_variable<vec4f>("FragColor"_s, 0u);
         }
     public:
         const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const override
         {
-            if (aLanguage == shader_language::Glsl)
+            if (iCode == std::nullopt)
             {
-                static const string sSource =
+                if (aLanguage == shader_language::Glsl)
                 {
-                    "void " + name().to_std_string() + "()\n"
-                    "{\n"
-                    "    FragColor = Color;\n"
-                    "}\n",
-                };
-                return sSource;
+                    iCode = fragment_shader::generate_code(aProgram, aLanguage).to_std_string();
+                    replace_tokens(aProgram, aLanguage, *iCode);
+                }
+                else
+                    throw unsupported_language();
             }
-            else
-                throw unsupported_language();
+            return *iCode;
         }
+    protected:
+        void replace_tokens(i_shader_program& aProgram, shader_language aLanguage, i_string& aSource) const override
+        {
+            auto temp = aSource.to_std_string();
+            boost::replace_all(temp, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%(Color)\n");
+            boost::replace_all(temp, "%INVOKE_NEXT_SHADER%", aProgram.is_last_in_stage(*this) ? "" : "    %NEXT_SHADER_NAME%(color)\n");
+            boost::replace_all(temp, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name().to_std_string());
+            boost::replace_all(temp, "%SHADER_NAME%", name().to_std_string());
+            boost::replace_all(temp, "%NEXT_SHADER_NAME%", aProgram.is_last_in_stage(*this) ? "" : aProgram.next_in_stage(*this).name().to_std_string());
+            aSource = temp;
+        }
+    private:
+        mutable std::optional<string> iCode;
     };
 
     class standard_texture_fragment_shader : public standard_fragment_shader
@@ -74,78 +85,83 @@ namespace neogfx
             standard_fragment_shader{ aName }
         {
             add_in_variable<vec2f>("TexCoord"_s, 2u);
-            add_out_variable<vec2f>("FragColor"_s, 2u);
             set_uniform("multisample"_s, false);
-            set_uniform("texDataFormat"_s, static_cast<int>(texture_data_format::RGBA));
-            set_uniform("effect"_s, static_cast<int>(shader_effect::None));
+            set_uniform("texDataFormat"_s, texture_data_format::RGBA);
+            set_uniform("effect"_s, shader_effect::None);
             set_uniform("tex"_s, sampler2D{ 1 });
             set_uniform("texMS"_s, sampler2DMS{ 2 });
         }
     public:
         const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const override
         {
-            if (aLanguage == shader_language::Glsl)
+            if (iCode == std::nullopt)
             {
-                static const string sSource =
+                if (aLanguage == shader_language::Glsl)
                 {
-                    "void " + name().to_std_string() + "()\n"
-                    "{\n"
-                    "    vec4 texel = vec4(0.0);\n"
-                    "    if (!multisample)\n"
-                    "    {\n"
-                    "        texel = texture(tex, vTexCoord).rgba;\n"
-                    "    }\n"
-                    "    else\n"
-                    "    {\n"
-                    "        ivec2 texCoord = ivec2(vTexCoord * texExtents);\n"
-                    "        texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
-                    "    }\n"
-                    "    switch(texDataFormat)\n"
-                    "    {\n"
-                    "    case 1:\n" // RGBA
-                    "    default:\n"
-                    "        break;\n"
-                    "    case 2:\n" // Red
-                    "        texel = vec4(1.0, 1.0, 1.0, texel.r);\n"
-                    "        break;\n"
-                    "    case 3:\n" // SubPixel
-                    "        texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
-                    "        break;\n"
-                    "    }\n"
-                    "    switch(effect)\n"
-                    "    {\n"
-                    "    case 0:\n" // effect: None
-                    "        FragColor = texel.rgba * Color;\n"
-                    "        break;\n"
-                    "    case 1:\n" // effect: Colourize, ColourizeAverage
-                    "        {\n"
-                    "            float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
-                    "            FragColor = vec4(avg, avg, avg, texel.a) * Color;\n"
-                    "        }\n"
-                    "        break;\n"
-                    "    case 2:\n" // effect: ColourizeMaximum
-                    "        {\n"
-                    "            float maxChannel = max(texel.r, max(texel.g, texel.b));\n"
-                    "            FragColor = vec4(maxChannel, maxChannel, maxChannel, texel.a) * Color;\n"
-                    "        }\n"
-                    "        break;\n"
-                    "    case 3:\n" // effect: ColourizeSpot
-                    "        FragColor = vec4(1.0, 1.0, 1.0, texel.a) * Color;\n"
-                    "        break;\n"
-                    "    case 4:\n" // effect: Monochrome
-                    "        {\n"
-                    "            float gray = dot(Color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));\n"
-                    "            FragColor = vec4(gray, gray, gray, texel.a) * Color;\n"
-                    "        }\n"
-                    "        break;\n"
-                    "    }\n"
-                    "}\n"
-                };
-                return sSource;
+                    std::string gen = standard_fragment_shader::generate_code(aProgram, aLanguage).to_std_string();
+                    boost::replace_all(gen, "%CODE%", 
+                        "%SHADER_NAME%(inout vec4 color)\n"
+                        "{\n"
+                        "    vec4 texel = vec4(0.0);\n"
+                        "    if (!multisample)\n"
+                        "    {\n"
+                        "        texel = texture(tex, TexCoord).rgba;\n"
+                        "    }\n"
+                        "    else\n"
+                        "    {\n"
+                        "        ivec2 texCoord = ivec2(TexCoord * texExtents);\n"
+                        "        texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
+                        "    }\n"
+                        "    switch(texDataFormat)\n"
+                        "    {\n"
+                        "    case 1:\n" // RGBA
+                        "    default:\n"
+                        "        break;\n"
+                        "    case 2:\n" // Red
+                        "        texel = vec4(1.0, 1.0, 1.0, texel.r);\n"
+                        "        break;\n"
+                        "    case 3:\n" // SubPixel
+                        "        texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
+                        "        break;\n"
+                        "    }\n"
+                        "    switch(effect)\n"
+                        "    {\n"
+                        "    case 0:\n" // effect: None
+                        "        fragColour = texel.rgba * Color;\n"
+                        "        break;\n"
+                        "    case 1:\n" // effect: Colourize, ColourizeAverage
+                        "        {\n"
+                        "            float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
+                        "            fragColour = vec4(avg, avg, avg, texel.a) * Color;\n"
+                        "        }\n"
+                        "        break;\n"
+                        "    case 2:\n" // effect: ColourizeMaximum
+                        "        {\n"
+                        "            float maxChannel = max(texel.r, max(texel.g, texel.b));\n"
+                        "            fragColour = vec4(maxChannel, maxChannel, maxChannel, texel.a) * Color;\n"
+                        "        }\n"
+                        "        break;\n"
+                        "    case 3:\n" // effect: ColourizeSpot
+                        "        fragColour = vec4(1.0, 1.0, 1.0, texel.a) * Color;\n"
+                        "        break;\n"
+                        "    case 4:\n" // effect: Monochrome
+                        "        {\n"
+                        "            float gray = dot(Color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));\n"
+                        "            fragColour = vec4(gray, gray, gray, texel.a) * Color;\n"
+                        "        }\n"
+                        "        break;\n"
+                        "    }\n"
+                        "%INVOKE_NEXT_SHADER%"
+                        "}\n");
+                    iCode = gen;
+                    replace_tokens(aProgram, aLanguage, *iCode);
+                }
+                else
+                    throw unsupported_language();
             }
-            else
-                throw unsupported_language();
-        private:
+            return *iCode;
         }
+    private:
+        mutable std::optional<string> iCode;
     };
 }

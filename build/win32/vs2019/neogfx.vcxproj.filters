@@ -930,6 +930,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_program.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_shader_program.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
@@ -1349,6 +1352,9 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\shader_program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_shader_program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

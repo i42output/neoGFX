@@ -121,7 +121,7 @@ namespace neogfx
     public:
         typedef self_type asbtract_type;
         typedef abstract_t<shader_value_type> value_type;
-        typedef neolib::i_map<i_string, value_type> uniform_map;
+        typedef neolib::i_map<i_string, neolib::i_pair<value_type, bool>> uniform_map;
     public:
         struct variable_not_found : std::logic_error { variable_not_found() : std::logic_error{ "neogfx::i_shader::variable_not_found" } {} };
         struct unsupported_language : std::logic_error { unsupported_language() : std::logic_error{ "neogfx::i_shader::unsupported_language" } {} };
@@ -130,11 +130,13 @@ namespace neogfx
     public:
         virtual shader_type type() const = 0;
         virtual const i_string& name() const = 0;
+        virtual void* handle() const = 0;
         virtual bool enabled() const = 0;
         virtual void enable() const = 0;
         virtual void disable() const = 0;
-        virtual bool invalidated() const = 0;
-        virtual void invalidate() = 0;
+        virtual bool dirty() const = 0;
+        virtual void set_dirty() = 0;
+        virtual void set_clean() = 0;
     public:
         virtual const uniform_map& uniforms() const = 0;
         virtual void clear_uniform(const i_string& aName) = 0;
@@ -182,6 +184,8 @@ namespace neogfx
     public:
         virtual void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram) = 0;
         virtual const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const = 0;
+    protected:
+        virtual void replace_tokens(i_shader_program& aProgram, shader_language aLanguage, i_string& aSource) const = 0;
     };
 
     template <typename Shader, typename... Args>

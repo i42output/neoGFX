@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <neolib/map.hpp>
 #include <neogfx/gfx/i_shader.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 
 namespace neogfx
 {
@@ -35,14 +37,19 @@ namespace neogfx
         typedef i_shader::value_type abstract_value_type;
         typedef shader_value_type value_type;
     private:
-        typedef neolib::map<string, value_type> uniform_map;
+        typedef neolib::map<string, neolib::pair<value_type, bool>> uniform_map;
     public:
         shader(shader_type aType, const std::string& aName, bool aEnabled = true) : 
             iType{ aType },
             iName{ aName },
             iEnabled{ aEnabled },
-            iInvalidated{ true }
+            iDirty{ true }
         {
+        }
+        ~shader()
+        {
+            if (iHandle != std::nullopt)
+                service<i_rendering_engine>().destroy_shader_object(*iHandle);
         }
     public:
         shader_type type() const override
@@ -53,25 +60,45 @@ namespace neogfx
         {
             return iName;
         }
+        void* handle() const override
+        {
+            if (iHandle == std::nullopt)
+                iHandle = service<i_rendering_engine>().create_shader_object(type());
+            return *iHandle;
+        }
         bool enabled() const override
         {
             return iEnabled;
         }
         void enable() override
         {
-            iEnabled = true;
+            if (!iEnabled)
+            {
+                iEnabled = true;
+                set_dirty();
+            }
         }
         void disable() override
         {
-            iEnabled = false;
+            if (iEnabled)
+            {
+                iEnabled = false;
+                set_dirty();
+            }
         }
-        bool invalidated() const override
+        bool dirty() const override
         {
-            return iInvalidated;
+            return iDirty;
         }
-        void invalidate() override
+        void set_dirty() override
         {
-            iInvalidated = true;
+            iDirty = true;
+        }
+        void set_clean() override
+        {
+            iDirty = false;
+            for (auto& u : iUniforms)
+                u.second().second() = false;
         }
     public:
         const uniform_map& uniforms() const override
@@ -84,22 +111,98 @@ namespace neogfx
             if (u != iUniforms.end())
             {
                 iUniforms.erase(u);
-                invalidate();
+                set_dirty();
             }
         }
+        using i_shader::set_uniform;
         void set_uniform(const i_string& aName, const abstract_value_type& aValue) override
         {
-            if (iUniforms.find(aName) == iUniforms.end() || iUniforms[aName] != aValue)
+            if (iUniforms.find(aName) == iUniforms.end() || iUniforms[aName].which() != aValue.which())
             {
-                iUniforms.emplace(aName, aValue);
-                invalidate();
+                iUniforms.emplace(aName, neolib::make_pair(aValue, true));
+                set_dirty();
             }
+            else if (iUniforms[aName].first != aValue)
+                iUniforms[aName] = neolib::make_pair(aValue, true);
+        }
+    public:
+        const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const
+        {
+            if (aProgram.is_first_in_stage(*this))
+            {
+                if (aLanguage == shader_language::Glsl)
+                {
+                    static const string sOpenGlSource =
+                    {
+                        "#version 400\n"
+                        "precision mediump float;\n"
+                        "\n"
+                        "%UNIFORMS%"
+                        "%VARIABLES%"
+                        "%CODE%"
+                    };
+                    static const string sOpenGlEsSource =
+                    {
+                        "#version 110\n"
+                        "precision mediump float;\n"
+                        "\n"
+                        "%UNIFORMS%"
+                        "%VARIABLES%"
+                        "%CODE%"
+                    };
+                    switch (service<i_rendering_engine>().renderer())
+                    {
+                    case renderer::OpenGL:
+                    case renderer::Software:
+                    default:
+                        return sOpenGlSource;
+                    case renderer::DirectX:
+                        return sOpenGlEsSource;
+                    }
+                }
+                else
+                    throw unsupported_language();
+            }
+            else if (aProgram.is_last_in_stage())
+            {
+                if (aLanguage == shader_language::Glsl)
+                {
+                    static const string source =
+                    {
+                        "%CODE%"
+                        "void main()\n"
+                        "{\n"
+                        "%INVOKE_FIRST_SHADER%"
+                        "}\n"
+                    };
+                    return source;
+                }
+                else
+                    throw unsupported_language();
+            }
+            else
+            {
+                static const string justCode = "%CODE%";
+                return justCode;
+            }
+        }
+    protected:
+        void replace_tokens(i_shader_program& aProgram, shader_language aLanguage, i_string& aSource) const override
+        {
+            auto temp = aSource.to_std_string();
+            boost::replace_all(temp, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%()\n");
+            boost::replace_all(temp, "%INVOKE_NEXT_SHADER%", aProgram.is_last_in_stage(*this) ? "" : "    %NEXT_SHADER_NAME%()\n");
+            boost::replace_all(temp, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name().to_std_string());
+            boost::replace_all(temp, "%SHADER_NAME%", name().to_std_string());
+            boost::replace_all(temp, "%NEXT_SHADER_NAME%", aProgram.is_last_in_stage(*this) ? "" : aProgram.next_in_stage(*this).name().to_std_string());
+            aSource = temp;
         }
     private:
         shader_type iType;
         string iName;
+        mutable std::optional<void*> iHandle;
         bool iEnabled;
-        bool iInvalidated;
+        bool iDirty;
         uniform_map iUniforms;
     };
 }

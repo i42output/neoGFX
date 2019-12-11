@@ -1,4 +1,4 @@
-// shader_program.hpp
+// opengl_shader_program.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2019 Leigh Johnston.  All Rights Reserved.
@@ -20,33 +20,23 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/vector.hpp>
-#include <neolib/map.hpp>
-#include <neogfx/gfx/i_shader_program.hpp>
+#include <neogfx/gfx/shader_program.hpp>
+#include "opengl.hpp"
 
 namespace neogfx
 {
-    class shader_program : public i_shader_program
+    class opengl_shader_program : public shader_program
     {
     public:
-        typedef neolib::vector<neolib::ref_ptr<i_shader>> shader_list;
-    private:
-        typedef neolib::map<neolib::string, neolib::ref_ptr<i_shader>> shader_index;
+        opengl_shader_program();
     public:
-        shader_program();
-    public:
-        const shader_list& shaders() const override;
-        const i_shader& shader(const neolib::i_string& aName) const override;
-        i_shader& shader(const neolib::i_string& aName) override;
-        const i_vertex_shader& vertex_shader() const override;
-        i_vertex_shader& vertex_shader() override;
-        i_shader_program& add_shader(neolib::i_ref_ptr<i_shader>& aShader) = 0;
         bool dirty() const override;
+        void set_dirty() override;
         void compile() override;
         void link() override;
         void use() override;
     private:
-        shader_list iShaders;
-        shader_index iShaderIndex;
+        std::optional<std::string> iCode;
+        std::optional<GLuint> iHandle;
     };
 }

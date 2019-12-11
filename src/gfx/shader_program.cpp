@@ -60,7 +60,15 @@ namespace neogfx
     {
         iShaders.push_back(aShader);
         iShaderIndex.insert(aShader->name(), aShader);
+        set_dirty();
         return *this;
+    }
+
+    bool shader_program::dirty() const
+    {
+        for (auto& s : shaders())
+            if (s->dirty())
+                return true;
     }
 
     void shader_program::compile()
@@ -73,5 +81,10 @@ namespace neogfx
 
     void shader_program::use()
     {
+        if (dirty())
+        {
+            compile();
+            link();
+        }
     }
 }
