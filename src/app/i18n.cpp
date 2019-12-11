@@ -26,9 +26,9 @@
 
 namespace neogfx
 {
-    const neolib::i_map<neolib::i_string, neolib::i_string>& language_codes()
+    const neolib::i_map<i_string, i_string>& language_codes()
     {
-        static const neolib::map<neolib::string, neolib::string> sLanguageCodes
+        static const neolib::map<string, string> sLanguageCodes
         {
         };
         return sLanguageCodes;

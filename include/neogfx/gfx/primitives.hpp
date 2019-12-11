@@ -60,15 +60,15 @@ namespace neogfx
     enum class shader_effect
     {
         None                = 0,
-        Colourize            = 1,
+        Colourize           = 1,
         ColourizeAverage    = Colourize,
         Colorize            = Colourize,
-        ColorizeAverage        = ColourizeAverage,
+        ColorizeAverage     = ColourizeAverage,
         ColourizeMaximum    = 2,
-        ColorizeMaximum        = ColourizeMaximum,
-        ColourizeSpot        = 3,
+        ColorizeMaximum     = ColourizeMaximum,
+        ColourizeSpot       = 3,
         ColorizeSpot        = ColourizeSpot,
-        Monochrome            = 4
+        Monochrome          = 4
     };
 
     enum class blurring_algorithm

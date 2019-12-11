@@ -58,6 +58,9 @@ namespace neogfx
         template <typename T, uint32_t _Size, typename Type>
         class basic_vector<T, _Size, Type, true>
         {
+            typedef basic_vector<T, _Size, Type, true> self_type;
+        public:
+            typedef self_type abstract_type; // todo: abstract base; std::array?
         public:
             enum : uint32_t { Size = _Size };
             typedef Type type;
@@ -166,6 +169,9 @@ namespace neogfx
         template <typename T, uint32_t _Size, typename Type>
         class basic_vector<T, _Size, Type, false>
         {
+            typedef basic_vector<T, _Size, Type, false> self_type;
+        public:
+            typedef self_type abstract_type; // todo: abstract base; std::array?
         public:
             enum : uint32_t { Size = _Size };
             typedef Type type;
@@ -551,6 +557,9 @@ namespace neogfx
         template <typename T, uint32_t Rows, uint32_t Columns>
         class basic_matrix
         {
+            typedef basic_matrix<T, Rows, Columns> self_type;
+        public:
+            typedef self_type abstract_type; // todo: abstract base
         public:
             typedef T value_type;
             typedef basic_vector<T, Columns, row_vector> row_type;
@@ -702,6 +711,74 @@ namespace neogfx
         typedef std::optional<mat14> optional_mat14;
         typedef std::optional<mat24> optional_mat24;
         typedef std::optional<mat34> optional_mat34;
+
+        typedef basic_matrix<float, 1, 1> matrix11f;
+        typedef basic_matrix<float, 2, 2> matrix22f;
+        typedef basic_matrix<float, 2, 1> matrix21f;
+        typedef basic_matrix<float, 1, 2> matrix12f;
+        typedef basic_matrix<float, 3, 3> matrix33f;
+        typedef basic_matrix<float, 3, 1> matrix31f;
+        typedef basic_matrix<float, 3, 2> matrix32f;
+        typedef basic_matrix<float, 1, 3> matrix13f;
+        typedef basic_matrix<float, 2, 3> matrix23f;
+        typedef basic_matrix<float, 4, 4> matrix44f;
+        typedef basic_matrix<float, 4, 1> matrix41f;
+        typedef basic_matrix<float, 4, 2> matrix42f;
+        typedef basic_matrix<float, 4, 3> matrix43f;
+        typedef basic_matrix<float, 1, 4> matrix14f;
+        typedef basic_matrix<float, 2, 4> matrix24f;
+        typedef basic_matrix<float, 3, 4> matrix34f;
+
+        typedef matrix11f mat11f;
+        typedef matrix22f mat22f;
+        typedef matrix21f mat21f;
+        typedef matrix12f mat12f;
+        typedef matrix33f mat33f;
+        typedef matrix31f mat31f;
+        typedef matrix32f mat32f;
+        typedef matrix13f mat13f;
+        typedef matrix23f mat23f;
+        typedef matrix44f mat44f;
+        typedef matrix41f mat41f;
+        typedef matrix42f mat42f;
+        typedef matrix43f mat43f;
+        typedef matrix14f mat14f;
+        typedef matrix24f mat24f;
+        typedef matrix34f mat34f;
+
+        typedef std::optional<matrix11f> optional_matrix11f;
+        typedef std::optional<matrix22f> optional_matrix22f;
+        typedef std::optional<matrix21f> optional_matrix21f;
+        typedef std::optional<matrix12f> optional_matrix12f;
+        typedef std::optional<matrix33f> optional_matrix33f;
+        typedef std::optional<matrix31f> optional_matrix31f;
+        typedef std::optional<matrix32f> optional_matrix32f;
+        typedef std::optional<matrix13f> optional_matrix13f;
+        typedef std::optional<matrix23f> optional_matrix23f;
+        typedef std::optional<matrix44f> optional_matrix44f;
+        typedef std::optional<matrix41f> optional_matrix41f;
+        typedef std::optional<matrix42f> optional_matrix42f;
+        typedef std::optional<matrix43f> optional_matrix43f;
+        typedef std::optional<matrix14f> optional_matrix14f;
+        typedef std::optional<matrix24f> optional_matrix24f;
+        typedef std::optional<matrix34f> optional_matrix34f;
+
+        typedef std::optional<mat11f> optional_mat11f;
+        typedef std::optional<mat22f> optional_mat22f;
+        typedef std::optional<mat21f> optional_mat21f;
+        typedef std::optional<mat12f> optional_mat12f;
+        typedef std::optional<mat33f> optional_mat33f;
+        typedef std::optional<mat31f> optional_mat31f;
+        typedef std::optional<mat32f> optional_mat32f;
+        typedef std::optional<mat13f> optional_mat13f;
+        typedef std::optional<mat23f> optional_mat23f;
+        typedef std::optional<mat44f> optional_mat44f;
+        typedef std::optional<mat41f> optional_mat41f;
+        typedef std::optional<mat42f> optional_mat42f;
+        typedef std::optional<mat43f> optional_mat43f;
+        typedef std::optional<mat14f> optional_mat14f;
+        typedef std::optional<mat24f> optional_mat24f;
+        typedef std::optional<mat34f> optional_mat34f;
 
         template <typename T, uint32_t Rows, uint32_t Columns>
         inline basic_matrix<T, Rows, Columns> operator+(const basic_matrix<T, Rows, Columns>& left, scalar right)

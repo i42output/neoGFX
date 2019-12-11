@@ -1163,7 +1163,7 @@ namespace neogfx
     class graphics_context::glyph_shapes
     {
     public:
-        struct not_using_fallback : std::logic_error { not_using_fallback() : std::logic_error("neogfx::opengl_rendering_context::glyph_shapes::not_using_fallback") {} };
+        struct not_using_fallback : std::logic_error { not_using_fallback() : std::logic_error("neogfx::graphics_context::glyph_shapes::not_using_fallback") {} };
     public:
         class glyphs
         {

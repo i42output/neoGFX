@@ -38,6 +38,7 @@ namespace neogfx
 
     using neolib::i_string;
     using neolib::string;
+    using namespace neolib::string_literals;
 
     template <typename Component>
     Component& service();

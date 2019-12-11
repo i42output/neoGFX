@@ -73,10 +73,10 @@ namespace neogfx
             virtual void* handle() const = 0;
             virtual bool has_projection_matrix() const = 0;
             virtual const optional_mat44& projection_matrix() const = 0;
-            virtual void set_projection_matrix(const i_rendering_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
+            virtual void set_projection_matrix(const i_rendering_context& aRenderingContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
             virtual bool has_transformation_matrix() const = 0;
             virtual const optional_mat44& transformation_matrix() const = 0;
-            virtual void set_transformation_matrix(const i_rendering_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
+            virtual void set_transformation_matrix(const i_rendering_context& aRenderingContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
             virtual void* variable(const std::string& aVariableName) const = 0;
             virtual void set_uniform_variable(const std::string& aName, float aValue) = 0;
             virtual void set_uniform_variable(const std::string& aName, double aValue) = 0;
@@ -123,7 +123,7 @@ namespace neogfx
         virtual i_font_manager& font_manager() = 0;
         virtual i_texture_manager& texture_manager() = 0;
         virtual bool shader_program_active() const = 0;
-        virtual void activate_shader_program(i_rendering_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) = 0;
+        virtual void activate_shader_program(i_rendering_context& aRenderingContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) = 0;
         virtual void deactivate_shader_program() = 0;
     public:
         virtual const i_shader_program& active_shader_program() const = 0;

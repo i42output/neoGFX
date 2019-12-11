@@ -262,6 +262,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\time.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\transformation.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\fragment_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\image.hpp" />
@@ -270,14 +271,19 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_render_target.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_array.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shapes.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp" />
@@ -291,6 +297,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\color_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\colour_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />
@@ -527,6 +534,7 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\shader_program.cpp" />
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
     <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture.cpp" />

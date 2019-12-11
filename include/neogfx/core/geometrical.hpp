@@ -89,6 +89,8 @@ namespace neogfx
         }
     };
 
+    typedef std::optional<logical_coordinates> optional_logical_coordinates;
+
     template <typename CoordinateType>
     class basic_delta 
     { 
