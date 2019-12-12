@@ -170,7 +170,7 @@ namespace neogfx
             {
                 if (aLanguage == shader_language::Glsl)
                 {
-                    neolib::replace_all(aOutput, "%INVOKE_NEXT_SHADER%", "");
+                    aOutput.replace_all("%INVOKE_NEXT_SHADER%"_s, ""_s);
                     static const string source =
                     {
                         "%CODE%"

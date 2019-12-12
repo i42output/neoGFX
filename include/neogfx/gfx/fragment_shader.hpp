@@ -56,10 +56,10 @@ namespace neogfx
                 fragment_shader::generate_code(aProgram, aLanguage, aOutput);
                 if (aProgram.is_last_in_stage(*this))
                 {
-                    neolib::replace_all(aOutput, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%(Color);\n");
-                    neolib::replace_all(aOutput, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name());
+                    aOutput.replace_all("%INVOKE_FIRST_SHADER%"_s, "    %FIRST_SHADER_NAME%(Color);\n"_s);
+                    aOutput.replace_all("%FIRST_SHADER_NAME%"_s, aProgram.first_in_stage(*this).name());
                 }
-                neolib::replace_all(aOutput, "%INVOKE_NEXT_SHADER%", "    %SHADER_NAME%(color);\n");
+                aOutput.replace_all("%INVOKE_NEXT_SHADER%"_s, "    %SHADER_NAME%(color);\n"_s);
             }
             else
                 throw unsupported_language();
@@ -85,7 +85,7 @@ namespace neogfx
                 if (aLanguage == shader_language::Glsl)
                 {
                     standard_fragment_shader::generate_code(aProgram, aLanguage, aOutput);
-                    neolib::replace_all(aOutput, "%CODE%", 
+                    aOutput.replace_all("%CODE%"_s,
                         "%SHADER_NAME%(inout vec4 color)\n"
                         "{\n"
                         "    vec4 texel = vec4(0.0);\n"
@@ -138,14 +138,12 @@ namespace neogfx
                         "        break;\n"
                         "    }\n"
                         "%INVOKE_NEXT_SHADER%"
-                        "}\n");
+                        "}\n"_s);
+                    aOutput.replace_all("%SHADER_NAME%"_s, name());
                 }
                 else
                     throw unsupported_language();
             }
-            return *iCode;
         }
-    private:
-        mutable std::optional<string> iCode;
     };
 }
