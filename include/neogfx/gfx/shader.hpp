@@ -166,7 +166,7 @@ namespace neogfx
                 else
                     throw unsupported_language();
             }
-            else if (aProgram.is_last_in_stage())
+            else if (aProgram.is_last_in_stage(*this))
             {
                 if (aLanguage == shader_language::Glsl)
                 {
