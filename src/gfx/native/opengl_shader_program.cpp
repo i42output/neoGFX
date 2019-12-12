@@ -40,6 +40,10 @@ namespace neogfx
 
     void opengl_shader_program::compile()
     {
+            neolib::replace_all(aSource, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name().to_std_string());
+            neolib::replace_all(aSource, "%SHADER_NAME%", name().to_std_string());
+            neolib::replace_all(aSource, "%NEXT_SHADER_NAME%", aProgram.is_last_in_stage(*this) ? "" : aProgram.next_in_stage(*this).name().to_std_string());
+
         set_dirty();
         for (auto& s : shaders())
         {

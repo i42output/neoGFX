@@ -49,33 +49,17 @@ namespace neogfx
             add_out_variable<vec4f>("FragColor"_s, 0u);
         }
     public:
-        const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const override
+        void generate_code(i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
-            if (iCode == std::nullopt)
+            if (aLanguage == shader_language::Glsl)
             {
-                if (aLanguage == shader_language::Glsl)
-                {
-                    iCode = fragment_shader::generate_code(aProgram, aLanguage).to_std_string();
-                    replace_tokens(aProgram, aLanguage, *iCode);
-                }
-                else
-                    throw unsupported_language();
+                fragment_shader::generate_code(aProgram, aLanguage, aOutput);
+                neolib::replace_all(aOutput, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%(Color)\n");
+                neolib::replace_all(aOutput, "%INVOKE_NEXT_SHADER%", aProgram.is_last_in_stage(*this) ? "" : "    %SHADER_NAME%(color)\n");
             }
-            return *iCode;
+            else
+                throw unsupported_language();
         }
-    protected:
-        void replace_tokens(i_shader_program& aProgram, shader_language aLanguage, i_string& aSource) const override
-        {
-            auto temp = aSource.to_std_string();
-            boost::replace_all(temp, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%(Color)\n");
-            boost::replace_all(temp, "%INVOKE_NEXT_SHADER%", aProgram.is_last_in_stage(*this) ? "" : "    %NEXT_SHADER_NAME%(color)\n");
-            boost::replace_all(temp, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name().to_std_string());
-            boost::replace_all(temp, "%SHADER_NAME%", name().to_std_string());
-            boost::replace_all(temp, "%NEXT_SHADER_NAME%", aProgram.is_last_in_stage(*this) ? "" : aProgram.next_in_stage(*this).name().to_std_string());
-            aSource = temp;
-        }
-    private:
-        mutable std::optional<string> iCode;
     };
 
     class standard_texture_fragment_shader : public standard_fragment_shader
@@ -92,14 +76,12 @@ namespace neogfx
             set_uniform("texMS"_s, sampler2DMS{ 2 });
         }
     public:
-        const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const override
+        void generate_code(i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
-            if (iCode == std::nullopt)
-            {
                 if (aLanguage == shader_language::Glsl)
                 {
-                    std::string gen = standard_fragment_shader::generate_code(aProgram, aLanguage).to_std_string();
-                    boost::replace_all(gen, "%CODE%", 
+                    standard_fragment_shader::generate_code(aProgram, aLanguage, aOutput);
+                    neolib::replace_all(aOutput, "%CODE%", 
                         "%SHADER_NAME%(inout vec4 color)\n"
                         "{\n"
                         "    vec4 texel = vec4(0.0);\n"
@@ -153,8 +135,6 @@ namespace neogfx
                         "    }\n"
                         "%INVOKE_NEXT_SHADER%"
                         "}\n");
-                    iCode = gen;
-                    replace_tokens(aProgram, aLanguage, *iCode);
                 }
                 else
                     throw unsupported_language();

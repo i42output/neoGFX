@@ -20,7 +20,6 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/algorithm/string/replace.hpp>
 #include <neolib/map.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -64,6 +63,8 @@ namespace neogfx
         {
             if (iHandle == std::nullopt)
                 iHandle = service<i_rendering_engine>().create_shader_object(type());
+            if (*iHandle == nullptr)
+                throw failed_to_create_shader_program("Failed to create shader object");
             return *iHandle;
         }
         bool enabled() const override
@@ -126,7 +127,7 @@ namespace neogfx
                 iUniforms[aName] = neolib::make_pair(aValue, true);
         }
     public:
-        const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const
+        void generate_code(i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
         {
             if (aProgram.is_first_in_stage(*this))
             {
@@ -155,9 +156,11 @@ namespace neogfx
                     case renderer::OpenGL:
                     case renderer::Software:
                     default:
-                        return sOpenGlSource;
+                        aOutput = sOpenGlSource;
+                        break;
                     case renderer::DirectX:
-                        return sOpenGlEsSource;
+                        aOutput = sOpenGlEsSource;
+                        break;
                     }
                 }
                 else
@@ -175,27 +178,18 @@ namespace neogfx
                         "%INVOKE_FIRST_SHADER%"
                         "}\n"
                     };
-                    return source;
+                    aOutput += source;
                 }
                 else
                     throw unsupported_language();
             }
             else
             {
-                static const string justCode = "%CODE%";
-                return justCode;
+                if (aLanguage == shader_language::Glsl)
+                    aOutput += "%CODE%"_s;
+                else
+                    throw unsupported_language();
             }
-        }
-    protected:
-        void replace_tokens(i_shader_program& aProgram, shader_language aLanguage, i_string& aSource) const override
-        {
-            auto temp = aSource.to_std_string();
-            boost::replace_all(temp, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%()\n");
-            boost::replace_all(temp, "%INVOKE_NEXT_SHADER%", aProgram.is_last_in_stage(*this) ? "" : "    %NEXT_SHADER_NAME%()\n");
-            boost::replace_all(temp, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name().to_std_string());
-            boost::replace_all(temp, "%SHADER_NAME%", name().to_std_string());
-            boost::replace_all(temp, "%NEXT_SHADER_NAME%", aProgram.is_last_in_stage(*this) ? "" : aProgram.next_in_stage(*this).name().to_std_string());
-            aSource = temp;
         }
     private:
         shader_type iType;

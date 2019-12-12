@@ -183,9 +183,7 @@ namespace neogfx
         }
     public:
         virtual void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram) = 0;
-        virtual const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const = 0;
-    protected:
-        virtual void replace_tokens(i_shader_program& aProgram, shader_language aLanguage, i_string& aSource) const = 0;
+        virtual void generate_code(i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const = 0;
     };
 
     template <typename Shader, typename... Args>
