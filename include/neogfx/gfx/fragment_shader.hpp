@@ -55,7 +55,7 @@ namespace neogfx
             {
                 fragment_shader::generate_code(aProgram, aLanguage, aOutput);
                 neolib::replace_all(aOutput, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%(Color)\n");
-                neolib::replace_all(aOutput, "%INVOKE_NEXT_SHADER%", aProgram.is_last_in_stage(*this) ? "" : "    %SHADER_NAME%(color)\n");
+                neolib::replace_all(aOutput, "%INVOKE_NEXT_SHADER%", "    %SHADER_NAME%(color)\n");
             }
             else
                 throw unsupported_language();
