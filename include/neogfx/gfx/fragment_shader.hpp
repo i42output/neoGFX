@@ -56,10 +56,10 @@ namespace neogfx
                 fragment_shader::generate_code(aProgram, aLanguage, aOutput);
                 if (aProgram.is_last_in_stage(*this))
                 {
-                    neolib::replace_all(aOutput, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%(Color)\n");
+                    neolib::replace_all(aOutput, "%INVOKE_FIRST_SHADER%", "    %FIRST_SHADER_NAME%(Color);\n");
                     neolib::replace_all(aOutput, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name());
                 }
-                neolib::replace_all(aOutput, "%INVOKE_NEXT_SHADER%", "    %SHADER_NAME%(color)\n");
+                neolib::replace_all(aOutput, "%INVOKE_NEXT_SHADER%", "    %SHADER_NAME%(color);\n");
             }
             else
                 throw unsupported_language();
