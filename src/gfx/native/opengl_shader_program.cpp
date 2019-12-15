@@ -89,6 +89,8 @@ namespace neogfx
             for (auto& shader : stage.second())
                 for (auto& uniform : shader->uniforms())
                 {
+                    if (!uniform.second().second() && !updateAllUniforms)
+                        continue;
                     GLint location = glGetUniformLocation(gl_handle(), uniform.first().c_str());
                     GLenum errorCode = glGetError();
                     if (errorCode != GL_NO_ERROR)
