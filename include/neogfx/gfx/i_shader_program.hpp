@@ -48,6 +48,7 @@ namespace neogfx
         // operations
     public:
         virtual const i_string& name() const = 0;
+        virtual bool created() const = 0;
         virtual void* handle() const = 0;
         virtual const stages_t& stages() const = 0;
         virtual const i_shader& shader(const neolib::i_string& aName) const = 0;
@@ -65,7 +66,9 @@ namespace neogfx
         virtual void link() = 0;
         virtual void use() = 0;
         virtual void update_uniforms() = 0;
-        virtual void activate() = 0;
+        virtual bool active() const = 0;
+        virtual void activate(i_rendering_context& aRenderingContext) = 0;
+        virtual void deactivate() = 0;
     public:
         bool have_stage(shader_type aStage) const
         {

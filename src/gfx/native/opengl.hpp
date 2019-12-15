@@ -20,13 +20,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <type_traits>
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include "opengl_error.hpp"
 
 template <typename T>
-inline T to_gl_handle(void* aHandle)
+inline T to_gl_handle(void* aOpaqueHandle)
 {
-    return static_cast<T>(reinterpret_cast<std::ptrdiff_t>(aHandle));
+    return static_cast<T>(reinterpret_cast<std::ptrdiff_t>(aOpaqueHandle));
 }
 
+template <typename T1, typename T2>
+inline std::enable_if_t<std::is_integral_v<T2>, T1> gl_handle_cast(T2 aGlHandle)
+{
+    return static_cast<T1>(aGlHandle);
+}
+
+template <typename T>
+inline void* to_opaque_handle(T aGlHandle)
+{
+    return reinterpret_cast<void*>(static_cast<std::ptrdiff_t>(aGlHandle));
+}

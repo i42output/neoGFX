@@ -134,6 +134,21 @@ namespace neogfx
                 }
     }
 
+    bool opengl_shader_program::active() const
+    {
+        if (!created())
+            return false;
+        GLint activeProgram = 0;
+        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &activeProgram));
+        return static_cast<GLuint>(activeProgram) == gl_handle();
+    }
+
+    void opengl_shader_program::deactivate()
+    {
+        if (active())
+            glCheck(glUseProgram(0));
+    }
+
     GLuint opengl_shader_program::gl_handle() const
     {
         return to_gl_handle<GLuint>(handle());

@@ -212,16 +212,14 @@ namespace neogfx
         static constexpr std::size_t arity = sizeof(attribute_type) / sizeof(value_type);
     public:
         template <typename Buffer>
-        opengl_vertex_attrib_array(Buffer& aBuffer, bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
+        opengl_vertex_attrib_array(Buffer& aBuffer, bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_shader_program& aShaderProgram, const std::string& aVariableName)
         {
             GLint previousBindingHandle;
             glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBindingHandle));
-            if (previousBindingHandle != static_cast<GLint>(aBuffer.handle()))
-            {
+            if (previousBindingHandle != gl_handle_cast<GLint>(aBuffer.handle()))
                 glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
-            }
             GLuint index;
-            glCheck(index = glGetAttribLocation(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(aShaderProgram.handle())), aVariableName.c_str()));
+            glCheck(index = glGetAttribLocation(to_gl_handle<GLuint>(aShaderProgram.handle()), aVariableName.c_str()));
             if (index != -1)
             {
                 glCheck(glVertexAttribPointer(
@@ -233,10 +231,8 @@ namespace neogfx
                     reinterpret_cast<const GLvoid*>(aOffset)));
                 glCheck(glEnableVertexAttribArray(index));
             }
-            if (previousBindingHandle != static_cast<GLint>(aBuffer.handle()))
-            {
+            if (previousBindingHandle != gl_handle_cast<GLint>(aBuffer.handle()))
                 glCheck(glBindBuffer(GL_ARRAY_BUFFER, previousBindingHandle));
-            }
         }
         ~opengl_vertex_attrib_array()
         {
@@ -311,7 +307,7 @@ namespace neogfx
         class instance
         {
         public:
-            instance(const i_rendering_engine::i_shader_program& aShaderProgram, 
+            instance(const i_shader_program& aShaderProgram, 
                 opengl_buffer<vertex_array::value_type>& aVertexBuffer, bool aWithTextureCoords) :
                 iVertexBuffer{ aVertexBuffer },
                 iCapacity{ aVertexBuffer.size() },
@@ -349,13 +345,13 @@ namespace neogfx
             iVertices.reserve(16384);
         }
     public:
-        void instantiate(i_rendering_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
+        void instantiate(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram)
         {
-            do_instantiate(aGraphicsContext, aShaderProgram, false);
+            do_instantiate(aRenderingContext, aShaderProgram, false);
         }
-        void instantiate_with_texture_coords(i_rendering_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
+        void instantiate_with_texture_coords(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram)
         {
-            do_instantiate(aGraphicsContext, aShaderProgram, true);
+            do_instantiate(aRenderingContext, aShaderProgram, true);
         }
         void execute()
         {
@@ -369,7 +365,7 @@ namespace neogfx
             return iVertices.capacity();
         }
     private:
-        void do_instantiate(i_rendering_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram, bool aWithTextureCoords)
+        void do_instantiate(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram, bool aWithTextureCoords)
         {
             if (iInstance.get() == nullptr || iInstance->capacity() != iVertices.capacity() || iShaderProgram != &aShaderProgram || iInstance->has_texture_coords() != aWithTextureCoords)
             {
@@ -378,13 +374,9 @@ namespace neogfx
                 iInstance = std::make_unique<instance>(aShaderProgram, vertex_array::allocator_type::buffer(&iVertices[0]), aWithTextureCoords);
             }
             //iInstance->flush_buffer(iVertices.size());
-            if (iShaderProgram->has_projection_matrix())
-                iShaderProgram->set_projection_matrix(aGraphicsContext);
-            if (iShaderProgram->has_transformation_matrix())
-                iShaderProgram->set_transformation_matrix(aGraphicsContext, iTransformation);
         }
     private:
-        i_rendering_engine::i_shader_program* iShaderProgram;
+        i_shader_program* iShaderProgram;
         std::unique_ptr<instance> iInstance;
         vertex_array iVertices;
         optional_mat44 iTransformation;
@@ -393,21 +385,22 @@ namespace neogfx
     class use_shader_program
     {
     public:
-        use_shader_program(i_rendering_context& aGraphicsContext, i_rendering_engine& aRenderingEngine, i_rendering_engine::i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
-            iGraphicsContext{ aGraphicsContext },
-            iRenderingEngine{ aRenderingEngine },
-            iPreviousProgram{ aRenderingEngine.shader_program_active() ? &aRenderingEngine.active_shader_program() : nullptr }
+        use_shader_program(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
+            iRenderingContext{ aRenderingContext },
+            iCurrentProgram{ aShaderProgram },
+            iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
         {
-            iRenderingEngine.activate_shader_program(iGraphicsContext, aShaderProgram, aProjectionMatrix, aTransformationMatrix);
+            iCurrentProgram.activate(aRenderingContext);
         }
         ~use_shader_program()
         {
+            iCurrentProgram.deactivate();
             if (iPreviousProgram != nullptr)
-                iRenderingEngine.activate_shader_program(iGraphicsContext, *iPreviousProgram, iPreviousProgram->projection_matrix(), iPreviousProgram->transformation_matrix());
+                iPreviousProgram->activate(iRenderingContext);
         }
     private:
-        i_rendering_context& iGraphicsContext;
-        i_rendering_engine& iRenderingEngine;
-        i_rendering_engine::i_shader_program* iPreviousProgram;
+        i_rendering_context& iRenderingContext;
+        i_shader_program& iCurrentProgram;
+        i_shader_program* iPreviousProgram;
     };
 }

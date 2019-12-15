@@ -39,6 +39,7 @@ namespace neogfx
         ~shader_program();
     public:
         const i_string& name() const override;
+        bool created() const override;
         void* handle() const override;
         const stages_t& stages() const override;
         const i_shader& shader(const neolib::i_string& aName) const override;
@@ -52,10 +53,6 @@ namespace neogfx
         i_shader_program& add_shader(neolib::i_ref_ptr<i_shader>& aShader) override;
         bool dirty() const override;
         void set_clean() override;
-        void compile() override;
-        void link() override;
-        void use() override;
-        void update_uniforms() override;
         void activate() override;
     private:
         string iName;

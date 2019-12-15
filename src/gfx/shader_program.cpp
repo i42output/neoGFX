@@ -38,12 +38,20 @@ namespace neogfx
         return iName;
     }
 
+    bool shader_program::created() const
+    {
+        return iHandle != std::nullopt;
+    }
+
     void* shader_program::handle() const
     {
-        if (iHandle == std::nullopt)
-            iHandle = service<i_rendering_engine>().create_shader_program_object();
-        if (*iHandle == nullptr)
-            throw failed_to_create_shader_program("Failed to create shader program object");
+        if (!created())
+        {
+            auto newHandle = service<i_rendering_engine>().create_shader_program_object();
+            if (newHandle == nullptr)
+                throw failed_to_create_shader_program("Failed to create shader program object");
+            iHandle = newHandle;
+        }
         return *iHandle;
     }
 
@@ -135,22 +143,6 @@ namespace neogfx
         for (auto& stage : stages())
             for (auto& shader : stage.second())
                 shader->set_clean();
-    }
-
-    void shader_program::compile()
-    {
-    }
-
-    void shader_program::link()
-    {
-    }
-
-    void shader_program::use()
-    {
-    }
-
-    void shader_program::update_uniforms()
-    {
     }
 
     void shader_program::activate()

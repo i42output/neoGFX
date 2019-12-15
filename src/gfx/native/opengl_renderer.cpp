@@ -86,199 +86,8 @@ namespace neogfx
             iWidgets.erase(iterWidget);
     }
 
-    opengl_renderer::shader_program::shader_program(GLuint aHandle, bool aHasProjectionMatrix, bool aHasTransformationMatrix) :
-        iHandle{ aHandle }, 
-        iHasProjectionMatrix{ aHasProjectionMatrix }, 
-        iHasTransformationMatrix{ aHasTransformationMatrix }
-    {
-    }
-
-    void* opengl_renderer::shader_program::handle() const
-    {
-        return reinterpret_cast<void*>(static_cast<intptr_t>(iHandle));
-    }
-
-    bool opengl_renderer::shader_program::has_projection_matrix() const
-    {
-        return iHasProjectionMatrix;
-    }
-
-    const optional_mat44& opengl_renderer::shader_program::projection_matrix() const
-    {
-        return iProjectionMatrix;
-    }
-
-    void opengl_renderer::shader_program::set_projection_matrix(const i_rendering_context& aGraphicsContext, const optional_mat44& aProjectionMatrix)
-    {
-        if (aProjectionMatrix == std::nullopt)
-        {
-            iLogicalCoordinates = aGraphicsContext.logical_coordinates();
-            double left = iLogicalCoordinates.bottomLeft.x;
-            double right = iLogicalCoordinates.topRight.x;
-            double bottom = iLogicalCoordinates.bottomLeft.y;
-            double top = iLogicalCoordinates.topRight.y;
-            double zFar = 1.0;
-            double zNear = -1.0;
-            mat44 orthoMatrix = mat44{
-                { 2.0 / (right - left), 0.0, 0.0, -(right + left) / (right - left) },
-                { 0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom) },
-                { 0.0, 0.0, -2.0 / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
-                { 0.0, 0.0, 0.0, 1.0 } };
-            set_projection_matrix(aGraphicsContext, orthoMatrix);
-            return;
-        }
-        if (iProjectionMatrix != aProjectionMatrix)
-        {
-            iProjectionMatrix = aProjectionMatrix;
-            set_uniform_matrix("uProjectionMatrix", basic_matrix<float, 4, 4>{ *iProjectionMatrix }.transposed());
-        }
-    }
-
-    bool opengl_renderer::shader_program::has_transformation_matrix() const
-    {
-        return iHasTransformationMatrix;
-    }
-
-    const optional_mat44& opengl_renderer::shader_program::transformation_matrix() const
-    {
-        return iTransformationMatrix;
-    }
-
-    void opengl_renderer::shader_program::set_transformation_matrix(const i_rendering_context& aGraphicsContext, const optional_mat44& aTransformationMatrix)
-    {
-        if (aTransformationMatrix == std::nullopt)
-        {
-            set_transformation_matrix(aGraphicsContext, mat44::identity());
-            return;
-        }
-        if (iTransformationMatrix != aTransformationMatrix)
-        {
-            iTransformationMatrix = aTransformationMatrix;
-            auto transformationMatrix = basic_matrix<float, 4, 4>{ *iTransformationMatrix };
-            set_uniform_matrix("uTransformationMatrix", transformationMatrix);
-        }
-    }
-
-    void* opengl_renderer::shader_program::variable(const std::string& aVariableName) const
-    {
-        auto v = iVariables.find(aVariableName);
-        if (v == iVariables.end())
-            throw variable_not_found();
-        return reinterpret_cast<void*>(static_cast<intptr_t>(v->second));
-    }
-
-    void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, float aValue)
-    {
-        glUniform1f(uniform_location(aName), aValue);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, double aValue)
-    {
-        glUniform1d(uniform_location(aName), aValue);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, int aValue)
-    {
-        glUniform1i(uniform_location(aName), aValue);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, double aValue1, double aValue2)
-    {
-        glUniform2d(uniform_location(aName), aValue1, aValue2);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, float aValue1, float aValue2)
-    {
-        glUniform2f(uniform_location(aName), aValue1, aValue2);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, const vec4f& aVector)
-    {
-        glUniform4f(uniform_location(aName), aVector[0], aVector[1], aVector[2], aVector[3]);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, const vec4& aVector)
-    {
-        glUniform4d(uniform_location(aName), aVector[0], aVector[1], aVector[2], aVector[3]);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray)
-    {
-        glUniform1fv(uniform_location(aName), aSize, aArray);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_array(const std::string& aName, uint32_t aSize, const double* aArray)
-    {
-        glUniform1dv(uniform_location(aName), aSize, aArray);
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_matrix(const std::string& aName, const mat44::template rebind<float>::type& aMatrix)
-    {
-        glUniformMatrix4fv(uniform_location(aName), 1, false, aMatrix.data());
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    void opengl_renderer::shader_program::set_uniform_matrix(const std::string& aName, const mat44::template rebind<double>::type& aMatrix)
-    {
-        glUniformMatrix4dv(uniform_location(aName), 1, false, aMatrix.data());
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-    }
-
-    GLuint opengl_renderer::shader_program::register_variable(const std::string& aVariableName)
-    {
-        GLuint index = static_cast<GLuint>(iVariables.size());
-        iVariables.insert(std::make_pair(aVariableName, index));
-        return index;
-    }
-
-    bool opengl_renderer::shader_program::operator<(const shader_program& aRhs) const
-    {
-        return iHandle < aRhs.iHandle;
-    }
-
-    GLint opengl_renderer::shader_program::uniform_location(const std::string& aName)
-    {
-        GLint var = glGetUniformLocation(iHandle, aName.c_str());
-        GLenum errorCode = glGetError();
-        if (errorCode != GL_NO_ERROR)
-            throw shader_program_error(errorCode);
-        return var;
-    }
-
     opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
         iRenderer{ aRenderer },
-        iActiveProgram {iShaderPrograms.end( )},
         iLimitFrameRate{ true },
         iFrameRateLimit{ 60u },
         iSubpixelRendering{ true },
@@ -315,7 +124,6 @@ namespace neogfx
     {
         // We explictly destroy these OpenGL objects here when context should still exist
         iVertexArrays = std::nullopt;
-        iUncachedGradient = std::nullopt;
         iFontManager = std::nullopt;
         iTextureManager = std::nullopt;
         opengl_buffer_cleanup();
@@ -345,18 +153,34 @@ namespace neogfx
         return *this;
     }
 
+    bool opengl_renderer::is_shader_program_active() const
+    {
+        for (auto const& shaderProgram : shader_programs())
+            if (shaderProgram->active())
+                return true;
+        return false;
+    }
+
+    i_shader_program& opengl_renderer::active_shader_program()
+    {
+        for (auto const& shaderProgram : shader_programs())
+            if (shaderProgram->active())
+                return *shaderProgram;
+        throw no_shader_program_active();
+    }
+
     opengl_renderer::handle opengl_renderer::create_shader_program_object()
     {
         GLuint programHandle = 0;;
         glCheck(programHandle = glCreateProgram());
         if (0 == programHandle)
              throw failed_to_create_shader_program("Failed to create shader program object");
-        return reinterpret_cast<handle>(programHandle);
+        return to_opaque_handle(programHandle);
     }
 
     void opengl_renderer::destroy_shader_program_object(handle aShaderProgramObject)
     {
-        glCheck(glDeleteProgram(reinterpret_cast<GLuint(aShaderProgramObject)));
+        glCheck(glDeleteProgram(to_gl_handle<GLuint>(aShaderProgramObject)));
     }
 
     opengl_renderer::handle opengl_renderer::create_shader_object(shader_type aShaderType)
@@ -389,14 +213,13 @@ namespace neogfx
         glCheck(shaderHandle = glCreateShader(shaderType));
         if (0 == shaderHandle)
             throw failed_to_create_shader();
-        return reinterpret_cast<handle>(shaderHandle);
+        return to_opaque_handle(shaderHandle);
     }
 
     void opengl_renderer::destroy_shader_object(handle aShaderObject)
     {
-        glCheck(glDeleteShader(reinterpret_cast<GLuint(aShaderObject))));
+        glCheck(glDeleteShader(to_gl_handle<GLuint>(aShaderObject)));
     }
-
       
     i_font_manager& opengl_renderer::font_manager()
     {
@@ -410,92 +233,6 @@ namespace neogfx
         if (iTextureManager == std::nullopt)
             iTextureManager.emplace();
         return *iTextureManager;
-    }
-
-    bool opengl_renderer::shader_program_active() const
-    {
-        return iActiveProgram != iShaderPrograms.end();
-    }
-
-    void opengl_renderer::activate_shader_program(i_rendering_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix, const optional_mat44& aTransformationMatrix)
-    {
-        for (auto i = iShaderPrograms.begin(); i != iShaderPrograms.end(); ++i)
-            if (&*i == &aProgram)
-            {
-                if (iActiveProgram != i)
-                {
-                    iActiveProgram = i;
-                    glCheck(glUseProgram(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(iActiveProgram->handle()))));
-                }
-                if (iActiveProgram->has_projection_matrix())
-                    iActiveProgram->set_projection_matrix(aGraphicsContext, aProjectionMatrix);
-                if (iActiveProgram->has_transformation_matrix())
-                    iActiveProgram->set_transformation_matrix(aGraphicsContext, aTransformationMatrix);
-                return;
-            }
-        throw shader_program_not_found();
-    }
-
-    void opengl_renderer::deactivate_shader_program()
-    {
-        if (iActiveProgram == iShaderPrograms.end())
-            throw no_shader_program_active();
-        iActiveProgram = iShaderPrograms.end();
-        glCheck(glUseProgram(0));
-    }
-
-    const opengl_renderer::i_shader_program& opengl_renderer::active_shader_program() const
-    {
-        if (iActiveProgram == iShaderPrograms.end())
-            throw no_shader_program_active();
-        return *iActiveProgram;
-    }
-
-    opengl_renderer::i_shader_program& opengl_renderer::active_shader_program()
-    {
-        if (iActiveProgram == iShaderPrograms.end())
-            throw no_shader_program_active();
-        return *iActiveProgram;
-    }
-
-    const opengl_renderer::i_shader_program& opengl_renderer::default_shader_program() const
-    {
-        return *iDefaultProgram;
-    }
-
-    opengl_renderer::i_shader_program& opengl_renderer::default_shader_program()
-    {
-        return *iDefaultProgram;
-    }
-
-    const opengl_renderer::i_shader_program& opengl_renderer::mesh_shader_program() const
-    {
-        return *iMeshProgram;
-    }
-
-    opengl_renderer::i_shader_program& opengl_renderer::mesh_shader_program()
-    {
-        return *iMeshProgram;
-    }
-
-    const opengl_renderer::i_shader_program& opengl_renderer::gradient_shader_program() const
-    {
-        return *iGradientProgram;
-    }
-
-    opengl_renderer::i_shader_program& opengl_renderer::gradient_shader_program()
-    {
-        return *iGradientProgram;
-    }
-
-    const opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program(bool aSubpixel) const
-    {
-        return aSubpixel ? *iGlyphSubpixelProgram : *iGlyphProgram;
-    }
-
-    opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program(bool aSubpixel)
-    {
-        return aSubpixel ? *iGlyphSubpixelProgram : *iGlyphProgram;
     }
 
     const opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays() const
@@ -565,69 +302,6 @@ namespace neogfx
         iFrameRateLimit = aFps;
     }
 
-    gradient_shader_data& opengl_renderer::gradient_shader_data(const gradient& aGradient)
-    {
-        auto instantiate_gradient = [this, &aGradient](neogfx::gradient_shader_data& aData)
-        {
-            auto combinedStops = aGradient.combined_stops();
-            iGradientStopPositions.reserve(combinedStops.size());
-            iGradientStopColours.reserve(combinedStops.size());
-            iGradientStopPositions.clear();
-            iGradientStopColours.clear();
-            for (const auto& stop : combinedStops)
-            {
-                iGradientStopPositions.push_back(static_cast<float>(stop.first));
-                iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
-            }
-            aData.stopCount = static_cast<uint32_t>(combinedStops.size());
-            aData.stops.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopPositions.size()), 1u } }, &iGradientStopPositions[0]);
-            aData.stopColours.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopColours.size()), 1u } }, &iGradientStopColours[0]);
-            auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
-            aData.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filter[0][0]);
-        };
-        if (aGradient.use_cache())
-        {
-            auto mapResult = iGradientDataCacheMap.try_emplace(aGradient, iGradientDataCache.end());
-            auto mapEntry = mapResult.first;
-            bool newGradient = mapResult.second;
-            if (!newGradient)
-            {
-                auto queueEntry = std::find(iGradientDataCacheQueue.begin(), iGradientDataCacheQueue.end(), mapEntry);
-                if (queueEntry != std::prev(iGradientDataCacheQueue.end()))
-                {
-                    iGradientDataCacheQueue.erase(queueEntry);
-                    iGradientDataCacheQueue.push_back(mapEntry);
-                }
-            }
-            else
-            {
-                if (iGradientDataCache.size() < GRADIENT_DATA_CACHE_QUEUE_SIZE)
-                {
-                    iGradientDataCache.emplace_back();
-                    mapEntry->second = std::prev(iGradientDataCache.end());
-                }
-                else
-                {
-                    auto data = iGradientDataCacheQueue.front()->second;
-                    iGradientDataCacheMap.erase(iGradientDataCacheQueue.front());
-                    iGradientDataCacheQueue.pop_front();
-                    mapEntry->second = data;
-                }
-                iGradientDataCacheQueue.push_back(mapEntry);
-            }
-            if (newGradient)
-                instantiate_gradient(*mapEntry->second);
-            return *mapEntry->second;
-        }
-        else
-        {
-            if (iUncachedGradient == std::nullopt)
-                iUncachedGradient.emplace();
-            instantiate_gradient(*iUncachedGradient);
-            return *iUncachedGradient;
-        }
-    }
-
     bool opengl_renderer::process_events()
     {
         bool didSome = false;
@@ -687,58 +361,6 @@ namespace neogfx
         return 0;
     }    
     
-    opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
-    {
-        bool hasProjectionMatrix = false;
-        bool hasTransformationMatrix = false;
-        for (auto& s : aShaders)
-        {
-            GLuint shader;
-            glCheck(shader = glCreateShader(s.second));
-            if (0 == shader)
-                throw failed_to_create_shader_program("Failed to create shader object");
-            std::string source = s.first;
-            if (source.find("uProjectionMatrix") != std::string::npos)
-                hasProjectionMatrix = true;
-            if (source.find("uTransformationMatrix") != std::string::npos)
-                hasTransformationMatrix = true;
-            if (renderer() == neogfx::renderer::DirectX)
-            {
-                std::size_t v;
-                const std::size_t VERSION_STRING_LENGTH = 12;
-                if ((v = source.find("#version 400")) != std::string::npos)
-                    source.replace(v, VERSION_STRING_LENGTH, "#version 110");
-                else if ((v = source.find("#version 400")) != std::string::npos)
-                    source.replace(v, VERSION_STRING_LENGTH, "#version 110");
-            }
-            const char* codeArray[] = { source.c_str() };
-            glCheck(glShaderSource(shader, 1, codeArray, NULL));
-            glCheck(glCompileShader(shader));
-            GLint result;
-            glCheck(glGetShaderiv(shader, GL_COMPILE_STATUS, &result));
-            if (GL_FALSE == result)
-            {
-                GLint buflen;
-                glCheck(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &buflen));
-                std::vector<GLchar> buf(buflen);
-                glCheck(glGetShaderInfoLog(shader, static_cast<GLsizei>(buf.size()), NULL, &buf[0]));
-                std::string error(&buf[0]);
-                throw failed_to_create_shader_program(error);
-            }
-            glCheck(glAttachShader(programHandle, shader));
-        }
-        shader_program program(programHandle, hasProjectionMatrix, hasTransformationMatrix);
-        for (auto& v : aVariables)
-            glCheck(glBindAttribLocation(programHandle, program.register_variable(v), v.c_str()));
-        auto s = iShaderPrograms.insert(iShaderPrograms.end(), program);
-        glCheck(glLinkProgram(programHandle));
-        GLint result;
-        glCheck(glGetProgramiv(programHandle, GL_LINK_STATUS, &result));
-        if (GL_FALSE == result)
-            throw failed_to_create_shader_program("Failed to link");
-        return s;
-    }
-
     i_texture& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, texture_sampling aSampling)
     {
         auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents));

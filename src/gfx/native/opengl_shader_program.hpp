@@ -35,6 +35,8 @@ namespace neogfx
         void link() override;
         void use() override;
         void update_uniforms() override;
+        bool active() const override;
+        void deactivate() override;
     private:
         GLuint gl_handle() const;
     };

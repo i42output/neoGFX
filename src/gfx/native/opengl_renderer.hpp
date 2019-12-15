@@ -87,6 +87,8 @@ namespace neogfx
         const i_shader_program& shader_program(const neolib::i_string& aName) const override;
         i_shader_program& shader_program(const neolib::i_string& aName) override;
         i_rendering_engine& add_shader_program(neolib::i_ref_ptr<i_shader_program>& aShaderProgram) override;
+        bool is_shader_program_active() const override;
+        i_shader_program& active_shader_program() override;
         handle create_shader_program_object() override;
         void destroy_shader_program_object(handle aShaderProgramObject) override;
         handle create_shader_object(shader_type aShaderType) override;
@@ -94,9 +96,6 @@ namespace neogfx
     public:
         i_font_manager& font_manager() override;
         i_texture_manager& texture_manager() override;
-        bool shader_program_active() const override;
-        void activate_shader_program(i_rendering_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) override;
-        void deactivate_shader_program() override;
     public:
         const opengl_standard_vertex_arrays & vertex_arrays() const override;
         opengl_standard_vertex_arrays& vertex_arrays() override;

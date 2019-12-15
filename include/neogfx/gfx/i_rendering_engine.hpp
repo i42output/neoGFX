@@ -89,6 +89,8 @@ namespace neogfx
         virtual const i_shader_program& shader_program(const neolib::i_string& aName) const = 0;
         virtual i_shader_program& shader_program(const neolib::i_string& aName) = 0;
         virtual i_rendering_engine& add_shader_program(neolib::i_ref_ptr<i_shader_program>& aShaderProgram) = 0;
+        virtual bool is_shader_program_active() const = 0;
+        virtual i_shader_program& active_shader_program() = 0;
         virtual handle create_shader_program_object() = 0;
         virtual void destroy_shader_program_object(handle aShaderProgramObject) = 0;
         virtual handle create_shader_object(shader_type aShaderType) = 0;
@@ -103,9 +105,6 @@ namespace neogfx
         virtual bool creating_window() const = 0;
         virtual i_font_manager& font_manager() = 0;
         virtual i_texture_manager& texture_manager() = 0;
-        virtual bool shader_program_active() const = 0;
-        virtual void activate_shader_program(i_rendering_context& aRenderingContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) = 0;
-        virtual void deactivate_shader_program() = 0;
     public:
         virtual const opengl_standard_vertex_arrays& vertex_arrays() const = 0;
         virtual opengl_standard_vertex_arrays& vertex_arrays() = 0;
