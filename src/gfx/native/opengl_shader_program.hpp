@@ -28,15 +28,14 @@ namespace neogfx
     class opengl_shader_program : public shader_program
     {
     public:
-        opengl_shader_program();
+        opengl_shader_program(const std::string& aName);
     public:
         bool dirty() const override;
-        void set_dirty() override;
         void compile() override;
         void link() override;
         void use() override;
+        void update_uniforms() override;
     private:
-        std::optional<std::string> iCode;
-        std::optional<GLuint> iHandle;
+        GLuint gl_handle() const;
     };
 }

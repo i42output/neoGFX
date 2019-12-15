@@ -42,11 +42,11 @@ namespace neogfx
     public:
         struct no_standard_vertex_matrices : std::logic_error { no_standard_vertex_matrices() : std::logic_error{ "neogfx::i_vertex_shader::no_standard_vertex_matrices" } {} };
     public:
-        typedef neolib::i_map<i_string, neolib::i_pair<uint32_t, std::size_t>> attribute_map;
+        typedef neolib::i_map<i_string, neolib::i_pair<uint32_t, shader_value_type::id_t>> attribute_map;
     public:
         virtual const attribute_map& attributes() const = 0;
         virtual void clear_attribute(const i_string& aName) = 0;
-        virtual void add_attribute(const i_string& aName, uint32_t aLocation, std::size_t aTypeIndex) = 0;
+        virtual void add_attribute(const i_string& aName, uint32_t aLocation, shader_value_type::id_t aType) = 0;
     public:
         virtual bool has_standard_vertex_matrices() const = 0;
         virtual const i_standard_vertex_matrices& standard_vertex_matrices() const = 0;

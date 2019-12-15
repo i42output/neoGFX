@@ -23,11 +23,22 @@
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/shader_array.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
 #include <neogfx/gfx/shader.hpp>
 
 namespace neogfx
 {
+    static const uint32_t GRADIENT_FILTER_SIZE = 15;
+    struct gradient_shader_data
+    {
+        //todo: use a mini atlas for the this
+        uint32_t stopCount;
+        shader_array<float> stops = { size_u32{gradient::MaxStops, 1} };
+        shader_array<std::array<float, 4>> stopColours = { size_u32{gradient::MaxStops, 1} };
+        shader_array<float> filter = { size_u32{GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE} };
+    };
+
     class fragment_shader : public shader<i_shader>
     {
         typedef shader<i_shader> base_type;
@@ -40,6 +51,10 @@ namespace neogfx
 
     class standard_fragment_shader : public fragment_shader
     {
+    private:
+        typedef std::list<neogfx::gradient_shader_data> gradient_data_cache_t;
+        typedef std::map<gradient, gradient_data_cache_t::iterator> gradient_data_cache_map_t;
+        typedef std::deque<gradient_data_cache_map_t::iterator> gradient_data_cache_queue_t;
     public:
         standard_fragment_shader(const std::string& aName = "standard_fragment_shader") :
             fragment_shader{ aName }
@@ -49,21 +64,31 @@ namespace neogfx
             add_out_variable<vec4f>("FragColor"_s, 0u);
         }
     public:
-        void generate_code(i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
             if (aLanguage == shader_language::Glsl)
             {
                 fragment_shader::generate_code(aProgram, aLanguage, aOutput);
-                if (aProgram.is_last_in_stage(*this))
-                {
-                    aOutput.replace_all("%INVOKE_FIRST_SHADER%"_s, "    %FIRST_SHADER_NAME%(Color);\n"_s);
-                    aOutput.replace_all("%FIRST_SHADER_NAME%"_s, aProgram.first_in_stage(*this).name());
-                }
-                aOutput.replace_all("%INVOKE_NEXT_SHADER%"_s, "    %SHADER_NAME%(color);\n"_s);
+                aOutput.replace_all("%PARAMETERS%"_s, "inout vec4 color"_s);
+                aOutput.replace_all("%FIRST_ARGS%"_s, "Color"_s);
+                aOutput.replace_all("%ARGS%"_s, "color"_s);
+                aOutput.replace_all("%CODE"_s,
+                    "void %NAME%(inout vec4 color)\n"
+                    "{\n"
+                    "%CODE%"
+                    "%INVOKE_NEXT%"
+                    "}\n"_s);
             }
             else
                 throw unsupported_language();
         }
+    private:
+        std::vector<float> iGradientStopPositions;
+        std::vector<std::array<float, 4>> iGradientStopColours;
+        gradient_data_cache_t iGradientDataCache;
+        gradient_data_cache_map_t iGradientDataCacheMap;
+        gradient_data_cache_queue_t iGradientDataCacheQueue;
+        std::optional<neogfx::gradient_shader_data> iUncachedGradient;
     };
 
     class standard_texture_fragment_shader : public standard_fragment_shader
@@ -80,14 +105,13 @@ namespace neogfx
             set_uniform("texMS"_s, sampler2DMS{ 2 });
         }
     public:
-        void generate_code(i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
                 if (aLanguage == shader_language::Glsl)
                 {
                     standard_fragment_shader::generate_code(aProgram, aLanguage, aOutput);
-                    aOutput.replace_all("%CODE%"_s,
-                        "%SHADER_NAME%(inout vec4 color)\n"
-                        "{\n"
+                    static const string code 
+                    {
                         "    vec4 texel = vec4(0.0);\n"
                         "    if (!multisample)\n"
                         "    {\n"
@@ -137,9 +161,10 @@ namespace neogfx
                         "        }\n"
                         "        break;\n"
                         "    }\n"
-                        "%INVOKE_NEXT_SHADER%"
-                        "}\n"_s);
-                    aOutput.replace_all("%SHADER_NAME%"_s, name());
+                        "%CODE%"
+                    };
+                    aOutput.replace_all("%CODE%"_s, code);
+                    aOutput.replace_all("%NAME%"_s, name());
                 }
                 else
                     throw unsupported_language();

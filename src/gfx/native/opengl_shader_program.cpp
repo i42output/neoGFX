@@ -21,86 +21,119 @@
 
 namespace neogfx
 {
-    opengl_shader_program::opengl_shader_program()
+    opengl_shader_program::opengl_shader_program(const std::string& aName) : 
+        shader_program{ aName }
     {
-        glCheck(iHandle = glCreateProgram());
-        if (0 == *iHandle)
-            throw failed_to_create_shader_program("Failed to create shader program object");
-    }
-
-    bool opengl_shader_program::dirty() const
-    {
-        return iCode == std::nullopt || shader_program::dirty();
-    }
-
-    void opengl_shader_program::set_dirty()
-    {
-        iCode = std::nullopt;
     }
 
     void opengl_shader_program::compile()
     {
-            neolib::replace_all(aSource, "%FIRST_SHADER_NAME%", aProgram.first_in_stage(*this).name().to_std_string());
-            neolib::replace_all(aSource, "%SHADER_NAME%", name().to_std_string());
-            neolib::replace_all(aSource, "%NEXT_SHADER_NAME%", aProgram.is_last_in_stage(*this) ? "" : aProgram.next_in_stage(*this).name().to_std_string());
+        if (!dirty())
+            return;
 
-        set_dirty();
-        for (auto& s : shaders())
+        for (auto const& stage : stages())
         {
-            GLuint shader;
-            glCheck(shader = glCreateShader(s.second));
-            if (0 == shader)
-                throw failed_to_create_shader_program("Failed to create shader object");
-            std::string source = s.first;
-            if (source.find("uProjectionMatrix") != std::string::npos)
-                hasProjectionMatrix = true;
-            if (source.find("uTransformationMatrix") != std::string::npos)
-                hasTransformationMatrix = true;
-            if (renderer() == neogfx::renderer::DirectX)
-            {
-                std::size_t v;
-                const std::size_t VERSION_STRING_LENGTH = 12;
-                if ((v = source.find("#version 400")) != std::string::npos)
-                    source.replace(v, VERSION_STRING_LENGTH, "#version 110");
-                else if ((v = source.find("#version 400")) != std::string::npos)
-                    source.replace(v, VERSION_STRING_LENGTH, "#version 110");
-            }
-            const char* codeArray[] = { source.c_str() };
-            glCheck(glShaderSource(shader, 1, codeArray, NULL));
-            glCheck(glCompileShader(shader));
+            if (stage_clean(stage.first()))
+                continue;
+            auto const& shaders = stage.second();
+            if (shaders.empty())
+                continue;
+            string code;
+            for (auto const& shader : shaders)
+                shader->generate_code(*this, shader_language::Glsl, code);
+            auto shaderHandle = to_gl_handle<GLuint>(shaders[0]->handle(*this));
+            const char* codeArray[] = { code.c_str() };
+            glCheck(glShaderSource(shaderHandle, 1, codeArray, NULL));
+            glCheck(glCompileShader(shaderHandle));
             GLint result;
-            glCheck(glGetShaderiv(shader, GL_COMPILE_STATUS, &result));
+            glCheck(glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &result));
             if (GL_FALSE == result)
             {
                 GLint buflen;
-                glCheck(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &buflen));
+                glCheck(glGetShaderiv(shaderHandle, GL_INFO_LOG_LENGTH, &buflen));
                 std::vector<GLchar> buf(buflen);
-                glCheck(glGetShaderInfoLog(shader, static_cast<GLsizei>(buf.size()), NULL, &buf[0]));
+                glCheck(glGetShaderInfoLog(shaderHandle, static_cast<GLsizei>(buf.size()), NULL, &buf[0]));
                 std::string error(&buf[0]);
                 throw failed_to_create_shader_program(error);
             }
-            glCheck(glAttachShader(programHandle, shader));
+            glCheck(glAttachShader(gl_handle(), shaderHandle));
         }
-        shader_program program(programHandle, hasProjectionMatrix, hasTransformationMatrix);
-        for (auto& v : aVariables)
-            glCheck(glBindAttribLocation(programHandle, program.register_variable(v), v.c_str()));
-        auto s = iShaderPrograms.insert(iShaderPrograms.end(), program);
-        glCheck(glLinkProgram(programHandle));
-        GLint result;
-        glCheck(glGetProgramiv(programHandle, GL_LINK_STATUS, &result));
-        if (GL_FALSE == result)
-            throw failed_to_create_shader_program("Failed to link");
-        return s;
+        
+        if (have_stage(shader_type::Vertex))
+            for (auto const& vertexShader : stages().at(shader_type::Vertex))
+                for (auto const& attribute : static_cast<const i_vertex_shader&>(*vertexShader).attributes())
+                    glCheck(glBindAttribLocation(gl_handle(), attribute.second().first(), attribute.first().c_str()));
     }
 
     void opengl_shader_program::link()
     {
+        if (!dirty())
+            return;
+
+        glCheck(glLinkProgram(gl_handle()));
+        GLint result;
+        glCheck(glGetProgramiv(gl_handle(), GL_LINK_STATUS, &result));
+        if (GL_FALSE == result)
+            throw failed_to_create_shader_program("Failed to link");
     }
 
     void opengl_shader_program::use()
     {
-        shader_program::use();
-        if (!dirty())
-            glCheck(glUseProgram(*iHandle));
+        glCheck(glUseProgram(gl_handle()));
+    }
+
+    void opengl_shader_program::update_uniforms()
+    {
+        bool const updateAllUniforms = dirty();
+        for (auto& stage : stages())
+            for (auto& shader : stage.second())
+                for (auto& uniform : shader->uniforms())
+                {
+                    GLint location = glGetUniformLocation(gl_handle(), uniform.first().c_str());
+                    GLenum errorCode = glGetError();
+                    if (errorCode != GL_NO_ERROR)
+                        throw shader_program_error(glErrorString(errorCode));
+                    std::visit([this, location](auto&& v)
+                    {
+                        typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> data_type;
+                        if constexpr (std::is_same_v<bool, data_type>)
+                            glCheck(glUniform1i(location, v))
+                        else if constexpr (std::is_same_v<float, data_type>)
+                            glCheck(glUniform1f(location, v))
+                        else if constexpr (std::is_same_v<double, data_type>)
+                            glCheck(glUniform1d(location, v))
+                        else if constexpr (std::is_same_v<int, data_type>)
+                            glCheck(glUniform1i(location, v))
+                        else if constexpr (std::is_same_v<vec2f, data_type>)
+                            glCheck(glUniform2f(location, v[0], v[1]))
+                        else if constexpr (std::is_same_v<vec2, data_type>)
+                            glCheck(glUniform2d(location, v[0], v[1]))
+                        else if constexpr (std::is_same_v<vec3f, data_type>)
+                            glCheck(glUniform3f(location, v[0], v[1], v[2]))
+                        else if constexpr (std::is_same_v<vec3, data_type>)
+                            glCheck(glUniform3d(location, v[0], v[1], v[2]))
+                        else if constexpr (std::is_same_v<vec4f, data_type>)
+                            glCheck(glUniform4f(location, v[0], v[1], v[2], v[3]))
+                        else if constexpr (std::is_same_v<vec4, data_type>)
+                            glCheck(glUniform4d(location, v[0], v[1], v[2], v[3]))
+                        else if constexpr (std::is_same_v<mat4f, data_type>)
+                            glCheck(glUniformMatrix4fv(location, 1, false, v.data()))
+                        else if constexpr (std::is_same_v<mat4, data_type>)
+                            glCheck(glUniformMatrix4dv(location, 1, false, v.data()))
+                        else if constexpr (std::is_same_v<shader_float_array, data_type>)
+                            glCheck(glUniform1fv(location, v.size(), v.data()))
+                        else if constexpr (std::is_same_v<shader_double_array, data_type>)
+                            glCheck(glUniform1dv(location, v.size(), v.data()))
+                        else if constexpr (std::is_same_v<sampler2D, data_type>)
+                            glCheck(glUniform1i(location, v.handle))
+                        else if constexpr (std::is_same_v<sampler2DMS, data_type>)
+                            glCheck(glUniform1i(location, v.handle))
+                    }, uniform.second().first());
+                }
+    }
+
+    GLuint opengl_shader_program::gl_handle() const
+    {
+        return to_gl_handle<GLuint>(handle());
     }
 }

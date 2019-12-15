@@ -23,3 +23,10 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include "opengl_error.hpp"
+
+template <typename T>
+inline T to_gl_handle(void* aHandle)
+{
+    return static_cast<T>(reinterpret_cast<std::ptrdiff_t>(aHandle));
+}
+

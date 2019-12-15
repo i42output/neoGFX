@@ -47,8 +47,8 @@ namespace neogfx
         const i_render_target* active_target() const override;
         void activate_context(const i_render_target& aTarget) override;
         void deactivate_context() override;
-        opengl_context create_context(const i_render_target& aTarget) override;
-        void destroy_context(opengl_context aContext) override;
+        handle create_context(const i_render_target& aTarget) override;
+        void destroy_context(handle aContext) override;
         std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) override;
         std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle) override;
         std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle) override;
@@ -62,7 +62,7 @@ namespace neogfx
     public:
         virtual bool process_events();
     private:
-        opengl_context create_context(void* aNativeSurfaceHandle);
+        handle create_context(void* aNativeSurfaceHandle);
         void* allocate_offscreen_window(const i_render_target* aRenderTarget);
         void deallocate_offscreen_window(const i_render_target* aRenderTarget);
         void activate_current_target();
@@ -73,7 +73,7 @@ namespace neogfx
         bool iDoubleBuffering;
         std::unordered_map<const i_render_target*, void*> iOffscreenWindows;
         void* iDefaultOffscreenWindow;
-        opengl_context iContext;
+        handle iContext;
         uint32_t iCreatingWindow;
         std::vector<const i_render_target*> iTargetStack;
     };

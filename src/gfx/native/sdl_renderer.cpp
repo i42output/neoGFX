@@ -264,9 +264,9 @@ namespace neogfx
             return false;
     }
 
-    sdl_renderer::opengl_context sdl_renderer::create_context(void* aNativeSurfaceHandle)
+    sdl_renderer::handle sdl_renderer::create_context(void* aNativeSurfaceHandle)
     {
-        opengl_context result;
+        handle result;
         glCheck(result = SDL_GL_CreateContext(static_cast<SDL_Window*>(aNativeSurfaceHandle)));
         return result;
     }

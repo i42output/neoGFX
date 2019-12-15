@@ -309,430 +309,95 @@ namespace neogfx
         std::cout << "OpenGL renderer: " << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << std::endl;
         std::cout << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
         std::cout << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
-            
-        iDefaultProgram = create_shader_program(
-            shaders
-        {
-            std::make_pair(
-                std::string(
-                    "#version 400\n"
-                    "precision mediump float;\n"
-                    "uniform mat4 uProjectionMatrix;\n"
-                    "uniform mat4 uTransformationMatrix;\n"
-                    "in mediump vec3 VertexPosition;\n"
-                    "in mediump vec4 VertexColor;\n"
-                    "in mediump vec2 VertexTextureCoord;\n"
-                    "out vec4 Color;\n"
-                    "void main()\n"
-                    "{\n"
-                    "    Color = VertexColor;\n"
-                    "   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                    "}\n"),
-                GL_VERTEX_SHADER),
-            std::make_pair(
-                std::string(
-                    "#version 400\n"
-                    "precision mediump float;\n"
-                    "in vec4 Color;\n"
-                    "out vec4 FragColor;\n"
-                    "void main()\n"
-                    "{\n"
-                    "    FragColor = Color;\n"
-                    "}\n"),
-                GL_FRAGMENT_SHADER) 
-            }, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-
-        iMeshProgram = create_shader_program(
-            shaders
-        {
-            std::make_pair(
-                std::string(
-                    "#version 400\n"
-                    "precision mediump float;\n"
-                    "uniform mat4 uProjectionMatrix;\n"
-                    "uniform mat4 uTransformationMatrix;\n"
-                    "in mediump vec3 VertexPosition;\n"
-                    "in mediump vec4 VertexColor;\n"
-                    "in mediump vec2 VertexTextureCoord;\n"
-                    "out vec4 Color;\n"
-                    "out vec2 vTexCoord;\n"
-                    "void main()\n"
-                    "{\n"
-                    "    Color = VertexColor;\n"
-                    "   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                    "    vTexCoord = VertexTextureCoord;\n"
-                    "}\n"),
-                GL_VERTEX_SHADER),
-            std::make_pair(
-                std::string(
-                    "#version 400\n"
-                    "precision mediump float;\n"
-                    "uniform bool haveTexture;\n"
-                    "uniform bool multisample;\n"
-                    "uniform bool blitBlend;\n"
-                    "uniform int texDataFormat;\n"
-                    "uniform sampler2D tex;\n"
-                    "uniform sampler2DMS texMS;\n"
-                    "uniform int texSamples;\n"
-                    "uniform vec2 texExtents;\n"
-                    "uniform int effect;\n"
-                    "in vec4 Color;\n"
-                    "out vec4 FragColor;\n"
-                    "in vec2 vTexCoord;\n"
-                    "void main()\n"
-                    "{\n"
-                    "    if (!haveTexture)\n"
-                    "    {\n"
-                    "        FragColor = Color;\n"
-                    "        return;\n"
-                    "    }\n"
-                    "    vec4 texel = vec4(0.0);\n"
-                    "    if (!multisample)\n"
-                    "    {\n"
-                    "        texel = texture(tex, vTexCoord).rgba;\n"
-                    "    }\n"
-                    "    else\n"
-                    "    {\n"
-                    "        ivec2 texCoord = ivec2(vTexCoord * texExtents);\n"
-                    "        texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
-                    "    }\n"
-                    "    switch(texDataFormat)\n"
-                    "    {\n"
-                    "    case 1:\n" // RGBA
-                    "    default:\n"
-                    "        break;\n"
-                    "    case 2:\n" // Red
-                    "        texel = vec4(1.0, 1.0, 1.0, texel.r);\n"
-                    "        break;\n"
-                    "    case 3:\n" // SubPixel
-                    "        texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
-                    "        break;\n"
-                    "    }\n"
-                    "    switch(effect)\n"
-                    "    {\n"
-                    "    case 0:\n" // effect: None
-                    "        FragColor = texel.rgba * Color;\n"
-                    "        break;\n"
-                    "    case 1:\n" // effect: Colourize, ColourizeAverage
-                    "        {\n"
-                    "            float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
-                    "            FragColor = vec4(avg, avg, avg, texel.a) * Color;\n"
-                    "        }\n"
-                    "        break;\n"
-                    "    case 2:\n" // effect: ColourizeMaximum
-                    "        {\n"
-                    "            float maxChannel = max(texel.r, max(texel.g, texel.b));\n"
-                    "            FragColor = vec4(maxChannel, maxChannel, maxChannel, texel.a) * Color;\n"
-                    "        }\n"
-                    "        break;\n"
-                    "    case 3:\n" // effect: ColourizeSpot
-                    "        FragColor = vec4(1.0, 1.0, 1.0, texel.a) * Color;\n"
-                    "        break;\n"
-                    "    case 4:\n" // effect: Monochrome
-                    "        {\n"
-                    "            float gray = dot(Color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));\n"
-                    "            FragColor = vec4(gray, gray, gray, texel.a) * Color;\n"
-                    "        }\n"
-                    "        break;\n"
-                    "    }\n"
-                    "}\n"),
-                GL_FRAGMENT_SHADER) 
-            }, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-
-        iGradientProgram = create_shader_program(
-            shaders
-            {
-                std::make_pair(
-                    std::string(
-                        "#version 400\n"
-                        "precision mediump float;\n"
-                        "uniform mat4 uProjectionMatrix;\n"
-                        "uniform mat4 uTransformationMatrix;\n"
-                        "in mediump vec3 VertexPosition;\n"
-                        "in mediump vec4 VertexColor;\n"
-                        "in mediump vec2 VertexTextureCoord;\n"
-                        "out vec4 Color;\n"
-                        "void main()\n"
-                        "{\n"
-                        "    Color = VertexColor;\n"
-                        "   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                        "}\n"),
-                    GL_VERTEX_SHADER),
-                std::make_pair(
-                    glsl::NEOGFX_GRADIENT_FRAG,
-                    GL_FRAGMENT_SHADER)
-            }, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-
-        iGlyphProgram = create_shader_program(
-            shaders
-            {
-                std::make_pair(
-                    std::string(
-                        "#version 400\n"
-                        "precision mediump float;\n"
-                        "uniform mat4 uProjectionMatrix;\n"
-                        "uniform mat4 uTransformationMatrix;\n"
-                        "in mediump vec3 VertexPosition;\n"
-                        "in mediump vec4 VertexColor;\n"
-                        "in mediump vec2 VertexTextureCoord;\n"
-                        "out vec4 Color;\n"
-                        "out vec2 vGlyphTexCoord;\n"
-                        "out vec2 vOutputCoord;\n"
-                        "void main()\n"
-                        "{\n"
-                        "    Color = VertexColor;\n"
-                        "   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                        "    vGlyphTexCoord = VertexTextureCoord;\n"
-                        "   vOutputCoord = VertexPosition.xy;\n"
-                        "}\n"),
-                    GL_VERTEX_SHADER),
-                std::make_pair(
-                    std::string(
-                        "#version 400\n"
-                        "precision mediump float;\n"
-                        "uniform sampler2D glyphTexture;\n"
-                        "uniform vec2 glyphOrigin;\n"
-                        "uniform vec2 outputExtents;\n"
-                        "uniform bool guiCoordinates;\n"
-                        "uniform int subpixel;\n"
-                        "uniform vec4 glyphRect;\n"
-                        "in vec4 Color;\n"
-                        "out vec4 FragColor;\n"
-                        "in vec2 vGlyphTexCoord;\n"
-                        "in vec2 vOutputCoord;\n"
-                        "\n"
-                        "int adjust_y(float y)\n"
-                        "{\n"
-                        "    if (guiCoordinates)\n"
-                        "        return int(outputExtents.y) - 1 - int(y);\n"
-                        "    else\n"
-                        "        return int(y);\n"
-                        "}\n"
-                        "\n"
-                        "void main()\n"
-                        "{\n"
-                        "    float a = 0.0;\n"
-                        "    ivec2 dtpos = ivec2(vOutputCoord.x, adjust_y(vOutputCoord.y));\n"
-                        "    if (subpixel == 1)\n"
-                        "    {\n"
-                        "         vec4 aaaAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-                        "        if (aaaAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
-                        "            a = 1.0;\n"
-                        "        else if (aaaAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
-                        "            discard;\n"
-                        "        else\n"
-                        "            a = (aaaAlpha.r + aaaAlpha.g + aaaAlpha.b) / 3.0;\n"
-                        "    }\n"
-                        "    else\n"
-                        "    {\n"
-                        "        a = texture(glyphTexture, vGlyphTexCoord).r;\n"
-                        "        if (a == 0)\n"
-                        "            discard;\n"
-                        "    }\n"
-                        "    FragColor = vec4(Color.xyz, Color.a * a);\n"
-                        "}\n"),
-                    GL_FRAGMENT_SHADER)
-            },
-            { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-
-        switch (service<i_basic_services>().display(0).subpixel_format())
-        {
-        case subpixel_format::SubpixelFormatRGBHorizontal:
-            iGlyphSubpixelProgram = create_shader_program(
-                shaders
-                {
-                    std::make_pair(
-                        std::string(
-                            "#version 400\n"
-                            "precision mediump float;\n"
-                            "uniform mat4 uProjectionMatrix;\n"
-                            "uniform mat4 uTransformationMatrix;\n"
-                            "in mediump vec3 VertexPosition;\n"
-                            "in mediump vec4 VertexColor;\n"
-                            "in mediump vec2 VertexTextureCoord;\n"
-                            "out vec4 Color;\n"
-                            "out vec2 vGlyphTexCoord;\n"
-                            "out vec2 vOutputCoord;\n"
-                            "void main()\n"
-                            "{\n"
-                            "    Color = VertexColor;\n"
-                            "   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                            "    vGlyphTexCoord = VertexTextureCoord;\n"
-                            "   vOutputCoord = VertexPosition.xy;\n"
-                            "}\n"),
-                        GL_VERTEX_SHADER),
-                    std::make_pair(
-                        std::string(
-                            "#version 400\n"
-                            "precision mediump float;\n"
-                            "uniform sampler2D glyphTexture;\n"
-                            "uniform vec2 glyphOrigin;\n"
-                            "uniform sampler2DMS outputTexture;\n"
-                            "uniform vec2 outputExtents;\n"
-                            "uniform bool guiCoordinates;\n"
-                            "uniform int subpixel;\n"
-                            "uniform vec4 glyphRect;\n"
-                            "in vec4 Color;\n"
-                            "out vec4 FragColor;\n"
-                            "in vec2 vGlyphTexCoord;\n"
-                            "in vec2 vOutputCoord;\n"
-                            "\n"
-                            "int adjust_y(float y)\n"
-                            "{\n"
-                            "    if (guiCoordinates)\n"
-                            "        return int(outputExtents.y) - 1 - int(y);\n"
-                            "    else\n"
-                            "        return int(y);\n"
-                            "}\n"
-                            "void main()\n"
-                            "{\n"
-                            "    ivec2 dtpos = ivec2(vOutputCoord);\n"
-                            "    if (guiCoordinates)\n"
-                            "        dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
-                            "    vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-                            "    if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
-                            "        FragColor = Color;\n"
-                            "    else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
-                            "        discard;\n"
-                            "    else\n"
-                            "    {\n"
-                            "        vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
-                            "        FragColor = vec4(Color.rgb * rgbAlpha.rgb * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.rgb * Color.a), 1.0);\n"
-                            "    }\n"
-                            "}\n"),
-                        GL_FRAGMENT_SHADER)
-                    },
-                    { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-            break;
-        case subpixel_format::SubpixelFormatBGRHorizontal:
-            iGlyphSubpixelProgram = create_shader_program(
-                shaders
-                {
-                    std::make_pair(
-                        std::string(
-                            "#version 400\n"
-                            "precision mediump float;\n"
-                            "uniform mat4 uProjectionMatrix;\n"
-                            "uniform mat4 uTransformationMatrix;\n"
-                            "in mediump vec3 VertexPosition;\n"
-                            "in mediump vec4 VertexColor;\n"
-                            "in mediump vec2 VertexTextureCoord;\n"
-                            "out vec4 Color;\n"
-                            "out vec2 vGlyphTexCoord;\n"
-                            "out vec2 vOutputCoord;\n"
-                            "void main()\n"
-                            "{\n"
-                            "    Color = VertexColor;\n"
-                            "   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                            "    vGlyphTexCoord = VertexTextureCoord;\n"
-                            "   vOutputCoord = VertexPosition.xy;\n"
-                            "}\n"),
-                        GL_VERTEX_SHADER),
-                    std::make_pair(
-                        std::string(
-                            "#version 400\n"
-                            "precision mediump float;\n"
-                            "uniform sampler2D glyphTexture;\n"
-                            "uniform vec2 glyphOrigin;\n"
-                            "uniform sampler2DMS outputTexture;\n"
-                            "uniform vec2 outputExtents;\n"
-                            "uniform bool guiCoordinates;\n"
-                            "uniform int subpixel;\n"
-                            "uniform vec4 glyphRect;\n"
-                            "in vec4 Color;\n"
-                            "out vec4 FragColor;\n"
-                            "in vec2 vGlyphTexCoord;\n"
-                            "in vec2 vOutputCoord;\n"
-                            "\n"
-                            "int adjust_y(float y)\n"
-                            "{\n"
-                            "    if (guiCoordinates)\n"
-                            "        return int(outputExtents.y) - 1 - int(y);\n"
-                            "    else\n"
-                            "        return int(y);\n"
-                            "}\n"
-                            "void main()\n"
-                            "{\n"
-                            "    ivec2 dtpos = ivec2(vOutputCoord);\n"
-                            "    if (guiCoordinates)\n"
-                            "        dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
-                            "    vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-                            "    if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
-                            "        FragColor = Color;\n"
-                            "    else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
-                            "        discard;\n"
-                            "    else\n"
-                            "    {\n"
-                            "        vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
-                            "        FragColor = vec4(Color.rgb * rgbAlpha.bgr * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.bgr * Color.a), 1.0);\n"
-                            "    }\n"
-                            "}\n"),
-                        GL_FRAGMENT_SHADER)
-                    },
-                    { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-            break;
-        case subpixel_format::SubpixelFormatRGBVertical:/* todo */
-        case subpixel_format::SubpixelFormatBGRVertical:/* todo */
-        default:
-            iGlyphSubpixelProgram = create_shader_program(
-                shaders
-                {
-                    std::make_pair(
-                        std::string(
-                            "#version 400\n"
-                            "precision mediump float;\n"
-                            "uniform mat4 uProjectionMatrix;\n"
-                            "uniform mat4 uTransformationMatrix;\n"
-                            "in mediump vec3 VertexPosition;\n"
-                            "in mediump vec4 VertexColor;\n"
-                            "in mediump vec2 VertexTextureCoord;\n"
-                            "out vec4 Color;\n"
-                            "out vec2 vGlyphTexCoord;\n"
-                            "void main()\n"
-                            "{\n"
-                            "    Color = VertexColor;\n"
-                            "   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                            "    vGlyphTexCoord = VertexTextureCoord;\n"
-                            "}\n"),
-                        GL_VERTEX_SHADER),
-                    std::make_pair(
-                        std::string(
-                            "#version 400\n"
-                            "precision mediump float;\n"
-                            "uniform sampler2D glyphTexture;\n"
-                            "uniform vec2 glyphOrigin;\n"
-                            "uniform sampler2D glyphDestinationTexture;\n"
-                            "uniform vec2 glyphTextureOffset;\n"
-                            "uniform vec2 glyphTextureExtents;\n"
-                            "uniform vec2 glyphDestinationTextureExtents;\n"
-                            "in vec4 Color;\n"
-                            "out vec4 FragColor;\n"
-                            "in vec2 vGlyphTexCoord;\n"
-                            "void main()\n"
-                            "{\n"
-                            "    vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-                            "    FragColor = vec4(Color.rgb, (rgbAlpha.r + rgbAlpha.g + rgbAlpha.b) / 3.0);\n"
-                            "}\n"),
-                        GL_FRAGMENT_SHADER)
-                    },
-                    { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-            break;
-        }
     }
 
     void opengl_renderer::cleanup()
     {
         // We explictly destroy these OpenGL objects here when context should still exist
         iVertexArrays = std::nullopt;
-        iGradientDataCacheQueue.clear();
-        iGradientDataCacheMap.clear();
-        iGradientDataCache.clear();
         iUncachedGradient = std::nullopt;
         iFontManager = std::nullopt;
         iTextureManager = std::nullopt;
         opengl_buffer_cleanup();
     }
-       
+
+    const opengl_renderer::shader_program_list& opengl_renderer::shader_programs() const
+    {
+        return iShaderPrograms;
+    }
+
+    const i_shader_program& opengl_renderer::shader_program(const neolib::i_string& aName) const
+    {
+        for (auto const& s : shader_programs())
+            if (s->name() == aName)
+                return *s;
+        throw shader_program_not_found();
+    }
+
+    i_shader_program& opengl_renderer::shader_program(const neolib::i_string& aName)
+    {
+        return const_cast<i_shader_program&>(to_const(*this).shader_program(aName));
+    }
+
+    i_rendering_engine& opengl_renderer::add_shader_program(neolib::i_ref_ptr<i_shader_program>& aShaderProgram)
+    {
+        iShaderPrograms.push_back(aShaderProgram);
+        return *this;
+    }
+
+    opengl_renderer::handle opengl_renderer::create_shader_program_object()
+    {
+        GLuint programHandle = 0;;
+        glCheck(programHandle = glCreateProgram());
+        if (0 == programHandle)
+             throw failed_to_create_shader_program("Failed to create shader program object");
+        return reinterpret_cast<handle>(programHandle);
+    }
+
+    void opengl_renderer::destroy_shader_program_object(handle aShaderProgramObject)
+    {
+        glCheck(glDeleteProgram(reinterpret_cast<GLuint(aShaderProgramObject)));
+    }
+
+    opengl_renderer::handle opengl_renderer::create_shader_object(shader_type aShaderType)
+    {
+        GLenum shaderType;
+        switch (aShaderType)
+        {
+        case shader_type::Compute:
+            shaderType = GL_COMPUTE_SHADER;
+            break;
+        case shader_type::Vertex:
+            shaderType = GL_VERTEX_SHADER;
+            break;
+        case shader_type::TessellationControl:
+            shaderType = GL_TESS_CONTROL_SHADER;
+            break;
+        case shader_type::TessellationEvaluation:
+            shaderType = GL_TESS_EVALUATION_SHADER;
+            break;
+        case shader_type::Geometry:
+            shaderType = GL_GEOMETRY_SHADER;
+            break;
+        case shader_type::Fragment:
+            shaderType = GL_FRAGMENT_SHADER;
+            break;
+        default:
+            throw std::logic_error("neogfx: invalid shader type");
+        }
+        GLuint shaderHandle = 0;
+        glCheck(shaderHandle = glCreateShader(shaderType));
+        if (0 == shaderHandle)
+            throw failed_to_create_shader();
+        return reinterpret_cast<handle>(shaderHandle);
+    }
+
+    void opengl_renderer::destroy_shader_object(handle aShaderObject)
+    {
+        glCheck(glDeleteShader(reinterpret_cast<GLuint(aShaderObject))));
+    }
+
+      
     i_font_manager& opengl_renderer::font_manager()
     {
         if (iFontManager == std::nullopt)
@@ -1024,10 +689,6 @@ namespace neogfx
     
     opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
     {
-        GLuint programHandle;
-        glCheck(programHandle = glCreateProgram());
-        if (0 == programHandle)
-            throw failed_to_create_shader_program("Failed to create shader program object");
         bool hasProjectionMatrix = false;
         bool hasTransformationMatrix = false;
         for (auto& s : aShaders)

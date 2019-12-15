@@ -50,23 +50,20 @@ namespace neogfx
         Glsl
     };
 
-    typedef neolib::vector<float> shader_float_array;
-    typedef neolib::vector<double> shader_double_array;
-    
     enum class shader_data_type : uint32_t
     {
         Boolean,
         Float,
         Double,
         Int,
-        Vec2f,
         Vec2,
-        Vec3f,
+        DVec2,
         Vec3,
-        Vec4f,
+        DVec3,
         Vec4,
-        Mat44f,
-        Mat44,
+        DVec4,
+        Mat4,
+        DMat4,
         FloatArray,
         DoubleArray,
         Sampler2D,
@@ -75,20 +72,33 @@ namespace neogfx
 }
 
 template <>
+const neolib::enum_enumerators_t<neogfx::shader_variable_qualifier> neolib::enum_enumerators_v<neogfx::shader_variable_qualifier>
+{
+    declare_enum_string(neogfx::shader_variable_qualifier, In)
+    declare_enum_string(neogfx::shader_variable_qualifier, Out)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::shader_language> neolib::enum_enumerators_v<neogfx::shader_language>
+{
+    declare_enum_string(neogfx::shader_language, Glsl)
+};
+
+template <>
 const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerators_v<neogfx::shader_data_type>
 {
     declare_enum_string(neogfx::shader_data_type, Boolean)
     declare_enum_string(neogfx::shader_data_type, Float)
     declare_enum_string(neogfx::shader_data_type, Double)
     declare_enum_string(neogfx::shader_data_type, Int)
-    declare_enum_string(neogfx::shader_data_type, Vec2f)
     declare_enum_string(neogfx::shader_data_type, Vec2)
-    declare_enum_string(neogfx::shader_data_type, Vec3f)
+    declare_enum_string(neogfx::shader_data_type, DVec2)
     declare_enum_string(neogfx::shader_data_type, Vec3)
-    declare_enum_string(neogfx::shader_data_type, Vec4f)
+    declare_enum_string(neogfx::shader_data_type, DVec3)
     declare_enum_string(neogfx::shader_data_type, Vec4)
-    declare_enum_string(neogfx::shader_data_type, Mat44f)
-    declare_enum_string(neogfx::shader_data_type, Mat44)
+    declare_enum_string(neogfx::shader_data_type, DVec4)
+    declare_enum_string(neogfx::shader_data_type, Mat4)
+    declare_enum_string(neogfx::shader_data_type, DMat4)
     declare_enum_string(neogfx::shader_data_type, FloatArray)
     declare_enum_string(neogfx::shader_data_type, DoubleArray)
     declare_enum_string(neogfx::shader_data_type, Sampler2D)
@@ -97,6 +107,9 @@ const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerat
 
 namespace neogfx 
 {
+    typedef neolib::vector<float> shader_float_array;
+    typedef neolib::vector<double> shader_double_array;
+
     template <shader_data_type HandleType>
     struct shader_handle
     {
@@ -107,10 +120,10 @@ namespace neogfx
     typedef shader_handle<shader_data_type::Sampler2D> sampler2D;
     typedef shader_handle<shader_data_type::Sampler2DMS> sampler2DMS;
 
-    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec3f, vec3, vec4f, vec4, mat44f, mat44, shader_float_array, shader_double_array, sampler2D, sampler2DMS> shader_value_type;
+    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec3f, vec3, vec4f, vec4, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS> shader_value_type;
 
     typedef uint32_t shader_variable_location;
-    typedef neolib::pair<neolib::pair<shader_variable_location, shader_variable_qualifier>, shader_value_type::index_type> shader_variable;
+    typedef neolib::pair<neolib::pair<shader_variable_location, shader_variable_qualifier>, shader_value_type::id_t> shader_variable;
 
     class i_rendering_context;
     class i_shader_program;
@@ -122,15 +135,17 @@ namespace neogfx
         typedef self_type asbtract_type;
         typedef abstract_t<shader_value_type> value_type;
         typedef neolib::i_map<i_string, neolib::i_pair<value_type, bool>> uniform_map;
+        typedef neolib::i_map<i_string, abstract_t<shader_variable>> variable_map;
     public:
         struct variable_not_found : std::logic_error { variable_not_found() : std::logic_error{ "neogfx::i_shader::variable_not_found" } {} };
+        struct invalid_variable_type : std::logic_error { invalid_variable_type() : std::logic_error{ "neogfx::i_shader::invalid_variable_type" } {} };
         struct unsupported_language : std::logic_error { unsupported_language() : std::logic_error{ "neogfx::i_shader::unsupported_language" } {} };
     public:
         virtual ~i_shader() {}
     public:
         virtual shader_type type() const = 0;
         virtual const i_string& name() const = 0;
-        virtual void* handle() const = 0;
+        virtual void* handle(const i_shader_program& aProgram) const = 0;
         virtual bool enabled() const = 0;
         virtual void enable() const = 0;
         virtual void disable() const = 0;
@@ -169,21 +184,22 @@ namespace neogfx
         {
             set_uniform(aName, shader_double_array{ aArray, aArray + aArraySize });
         }
+        virtual const variable_map& variables() const = 0;
         virtual void clear_variable(const i_string& aName) = 0;
         virtual void add_variable(const i_string& aName, const abstract_t<shader_variable>& aVariable) = 0;
         template <typename T>
         void add_in_variable(const i_string& aName, shader_variable_location aLocation)
         {
-            add_variable(aName, shader_variable{ { aLocation, shader_variable_qualifier::In }, neolib::index_of<T, shader_value_type>() });
+            add_variable(aName, shader_variable{ { aLocation, shader_variable_qualifier::In }, static_cast<shader_value_type::id_t>(neolib::index_of<T, shader_value_type>()) });
         }
         template <typename T>
         void add_out_variable(const i_string& aName, shader_variable_location aLocation)
         {
-            add_variable(aName, shader_variable{ { aLocation, shader_variable_qualifier::Out }, neolib::index_of<T, shader_value_type>() });
+            add_variable(aName, shader_variable{ { aLocation, shader_variable_qualifier::Out }, static_cast<shader_value_type::id_t>(neolib::index_of<T, shader_value_type>()) });
         }
     public:
         virtual void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram) = 0;
-        virtual void generate_code(i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const = 0;
+        virtual void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const = 0;
     };
 
     template <typename Shader, typename... Args>

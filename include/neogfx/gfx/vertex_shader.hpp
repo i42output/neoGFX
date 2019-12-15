@@ -31,7 +31,7 @@ namespace neogfx
     {
         typedef shader<i_vertex_shader> base_type;
     public:
-        typedef neolib::map<string, neolib::pair<uint32_t, std::size_t>> attribute_map;
+        typedef neolib::map<string, neolib::pair<uint32_t, shader_value_type::id_t>> attribute_map;
     public:
         vertex_shader(const std::string& aName) :
             base_type{ shader_type::Vertex, aName }
@@ -51,9 +51,9 @@ namespace neogfx
                 set_dirty();
             }
         }
-        void add_attribute(const i_string& aName, uint32_t aLocation, std::size_t aTypeIndex) override
+        void add_attribute(const i_string& aName, uint32_t aLocation, shader_value_type::id_t aType) override
         {
-            iAttributes.emplace(aName, neolib::make_pair(aLocation, aTypeIndex)); 
+            iAttributes.emplace(aName, neolib::make_pair(aLocation, aType));
             set_dirty();
         }
     public:
@@ -79,8 +79,8 @@ namespace neogfx
         standard_vertex_shader(const std::string& aName = "standard_vertex_shader") :
             vertex_shader{ aName }
         {
-            add_attribute("VertexPosition"_s, 0u, neolib::index_of<vec3f, value_type>());
-            add_attribute("VertexColor"_s, 1u, neolib::index_of<vec4f, value_type>());
+            add_attribute("VertexPosition"_s, 0u, shader_data_type::Vec3);
+            add_attribute("VertexColor"_s, 1u, shader_data_type::Vec4);
             add_out_variable<vec2f>("OutputCoord"_s, 0u);
             add_out_variable<vec4f>("Color"_s, 1u);
         }
@@ -136,7 +136,7 @@ namespace neogfx
             set_uniform("uProjectionMatrix"_s, projection_matrix(aRenderingContext).transposed());
             set_uniform("uTransformationMatrix"_s, transformation_matrix(aRenderingContext));
         }
-        const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const override
+        const i_string& generate_code(const i_shader_program& aProgram, shader_language aLanguage) const override
         {
             if (aLanguage == shader_language::Glsl)
             {
@@ -170,7 +170,7 @@ namespace neogfx
             add_out_variable<vec2f>("TexCoord"_s, 2u);
         }
     public:
-        const i_string& generate_code(i_shader_program& aProgram, shader_language aLanguage) const override
+        const i_string& generate_code(const i_shader_program& aProgram, shader_language aLanguage) const override
         {
             if (aLanguage == shader_language::Glsl)
             {

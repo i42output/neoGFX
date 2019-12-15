@@ -661,6 +661,11 @@ namespace neogfx
         typedef basic_matrix<double, 2, 4> matrix24;
         typedef basic_matrix<double, 3, 4> matrix34;
 
+        typedef matrix11 matrix1;
+        typedef matrix22 matrix2;
+        typedef matrix33 matrix3;
+        typedef matrix44 matrix4;
+
         typedef matrix11 mat11;
         typedef matrix22 mat22;
         typedef matrix21 mat21;
@@ -677,6 +682,11 @@ namespace neogfx
         typedef matrix14 mat14;
         typedef matrix24 mat24;
         typedef matrix34 mat34;
+
+        typedef mat11 mat1;
+        typedef mat22 mat2;
+        typedef mat33 mat3;
+        typedef mat44 mat4;
 
         typedef std::optional<matrix11> optional_matrix11;
         typedef std::optional<matrix22> optional_matrix22;
@@ -695,6 +705,11 @@ namespace neogfx
         typedef std::optional<matrix24> optional_matrix24;
         typedef std::optional<matrix34> optional_matrix34;
 
+        typedef std::optional<matrix11> optional_matrix1;
+        typedef std::optional<matrix22> optional_matrix2;
+        typedef std::optional<matrix33> optional_matrix3;
+        typedef std::optional<matrix44> optional_matrix4;
+
         typedef std::optional<mat11> optional_mat11;
         typedef std::optional<mat22> optional_mat22;
         typedef std::optional<mat21> optional_mat21;
@@ -711,6 +726,11 @@ namespace neogfx
         typedef std::optional<mat14> optional_mat14;
         typedef std::optional<mat24> optional_mat24;
         typedef std::optional<mat34> optional_mat34;
+
+        typedef std::optional<mat11> optional_mat1;
+        typedef std::optional<mat22> optional_mat2;
+        typedef std::optional<mat33> optional_mat3;
+        typedef std::optional<mat44> optional_mat4;
 
         typedef basic_matrix<float, 1, 1> matrix11f;
         typedef basic_matrix<float, 2, 2> matrix22f;
@@ -746,6 +766,11 @@ namespace neogfx
         typedef matrix24f mat24f;
         typedef matrix34f mat34f;
 
+        typedef matrix11f mat1f;
+        typedef matrix22f mat2f;
+        typedef matrix33f mat3f;
+        typedef matrix44f mat4f;
+
         typedef std::optional<matrix11f> optional_matrix11f;
         typedef std::optional<matrix22f> optional_matrix22f;
         typedef std::optional<matrix21f> optional_matrix21f;
@@ -763,6 +788,11 @@ namespace neogfx
         typedef std::optional<matrix24f> optional_matrix24f;
         typedef std::optional<matrix34f> optional_matrix34f;
 
+        typedef std::optional<matrix11f> optional_matrix1f;
+        typedef std::optional<matrix22f> optional_matrix2f;
+        typedef std::optional<matrix33f> optional_matrix3f;
+        typedef std::optional<matrix44f> optional_matrix4f;
+
         typedef std::optional<mat11f> optional_mat11f;
         typedef std::optional<mat22f> optional_mat22f;
         typedef std::optional<mat21f> optional_mat21f;
@@ -779,6 +809,11 @@ namespace neogfx
         typedef std::optional<mat14f> optional_mat14f;
         typedef std::optional<mat24f> optional_mat24f;
         typedef std::optional<mat34f> optional_mat34f;
+
+        typedef std::optional<mat11f> optional_mat1f;
+        typedef std::optional<mat22f> optional_mat2f;
+        typedef std::optional<mat33f> optional_mat3f;
+        typedef std::optional<mat44f> optional_mat4f;
 
         template <typename T, uint32_t Rows, uint32_t Columns>
         inline basic_matrix<T, Rows, Columns> operator+(const basic_matrix<T, Rows, Columns>& left, scalar right)

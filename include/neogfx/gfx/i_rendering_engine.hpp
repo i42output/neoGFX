@@ -25,8 +25,8 @@
 #include <neogfx/gui/window/window_bits.hpp>
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
-#include <neogfx/gfx/shader_array.hpp>
 #include <neogfx/gfx/i_shader.hpp>
+#include <neogfx/gfx/i_shader_program.hpp>
 
 namespace neogfx
 {
@@ -50,49 +50,12 @@ namespace neogfx
         None
     };
 
-    static const uint32_t GRADIENT_FILTER_SIZE = 15;
-    struct gradient_shader_data
-    {
-        //todo: use a mini atlas for the this
-        uint32_t stopCount;
-        shader_array<float> stops = { size_u32{gradient::MaxStops, 1} };
-        shader_array<std::array<float, 4>> stopColours = { size_u32{gradient::MaxStops, 1} };
-        shader_array<float> filter = { size_u32{GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE} };
-    };
-
     class i_rendering_engine
     {
+        // events
     public:
         declare_event(subpixel_rendering_changed)
-    public:
-        typedef void* opengl_context;
-        class i_shader_program
-        {
-        public:
-            struct variable_not_found : std::logic_error { variable_not_found() : std::logic_error("neogfx::i_rendering_engine::i_shader_program::variable_not_found") {} };
-        public:
-            virtual void* handle() const = 0;
-            virtual bool has_projection_matrix() const = 0;
-            virtual const optional_mat44& projection_matrix() const = 0;
-            virtual void set_projection_matrix(const i_rendering_context& aRenderingContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
-            virtual bool has_transformation_matrix() const = 0;
-            virtual const optional_mat44& transformation_matrix() const = 0;
-            virtual void set_transformation_matrix(const i_rendering_context& aRenderingContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) = 0;
-            virtual void* variable(const std::string& aVariableName) const = 0;
-            virtual void set_uniform_variable(const std::string& aName, float aValue) = 0;
-            virtual void set_uniform_variable(const std::string& aName, double aValue) = 0;
-            virtual void set_uniform_variable(const std::string& aName, int aValue) = 0;
-            virtual void set_uniform_variable(const std::string& aName, float aValue1, float aValue2) = 0;
-            virtual void set_uniform_variable(const std::string& aName, double aValue1, double aValue2) = 0;
-            virtual void set_uniform_variable(const std::string& aName, const vec4f& aVector) = 0;
-            virtual void set_uniform_variable(const std::string& aName, const vec4& aVector) = 0;
-            virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray) = 0;
-            virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const double* aArray) = 0;
-            virtual void set_uniform_matrix(const std::string& aName, const mat44::template rebind<float>::type& aMatrix) = 0;
-            virtual void set_uniform_matrix(const std::string& aName, const mat44::template rebind<double>::type& aMatrix) = 0;
-        };
-    public:
-        virtual ~i_rendering_engine() {}
+        // exceptions
     public:
         struct failed_to_initialize : std::runtime_error { failed_to_initialize() : std::runtime_error("neogfx::i_rendering_engine::failed_to_initialize") {} };
         struct context_exists : std::logic_error { context_exists() : std::logic_error("neogfx::i_rendering_engine::context_exists") {} };
@@ -101,6 +64,14 @@ namespace neogfx
         struct no_shader_program_active : std::logic_error { no_shader_program_active() : std::logic_error("neogfx::i_rendering_engine::no_shader_program_active") {} };
         struct shader_program_not_found : std::logic_error { shader_program_not_found() : std::logic_error("neogfx::i_rendering_engine::shader_program_not_found") {} };
         struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
+        // types
+    public:
+        typedef void* handle;
+        typedef neolib::i_vector<neolib::i_ref_ptr<i_shader_program>> shader_program_list;
+        // construction
+    public:
+        virtual ~i_rendering_engine() {}
+        // operations
     public:
         virtual const i_device_metrics& default_screen_metrics() const = 0;
     public:
@@ -111,10 +82,17 @@ namespace neogfx
         virtual const i_render_target* active_target() const = 0;
         virtual void activate_context(const i_render_target& aTarget) = 0;
         virtual void deactivate_context() = 0;
-        virtual opengl_context create_context(const i_render_target& aTarget) = 0;
-        virtual void destroy_context(opengl_context aContext) = 0;
-        virtual void* create_shader_object(shader_type aShaderType) = 0;
-        virtual void destroy_shader_object(void* aShaderObject) = 0;
+        virtual handle create_context(const i_render_target& aTarget) = 0;
+        virtual void destroy_context(handle aContext) = 0;
+    public:
+        virtual const shader_program_list& shader_programs() const = 0;
+        virtual const i_shader_program& shader_program(const neolib::i_string& aName) const = 0;
+        virtual i_shader_program& shader_program(const neolib::i_string& aName) = 0;
+        virtual i_rendering_engine& add_shader_program(neolib::i_ref_ptr<i_shader_program>& aShaderProgram) = 0;
+        virtual handle create_shader_program_object() = 0;
+        virtual void destroy_shader_program_object(handle aShaderProgramObject) = 0;
+        virtual handle create_shader_object(shader_type aShaderType) = 0;
+        virtual void destroy_shader_object(handle aShaderObject) = 0;
     public:
         virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
         virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
@@ -129,17 +107,6 @@ namespace neogfx
         virtual void activate_shader_program(i_rendering_context& aRenderingContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) = 0;
         virtual void deactivate_shader_program() = 0;
     public:
-        virtual const i_shader_program& active_shader_program() const = 0;
-        virtual i_shader_program& active_shader_program() = 0;
-        virtual const i_shader_program& default_shader_program() const = 0;
-        virtual i_shader_program& default_shader_program() = 0;
-        virtual const i_shader_program& mesh_shader_program() const = 0;
-        virtual i_shader_program& mesh_shader_program() = 0;
-        virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const = 0;
-        virtual i_shader_program& glyph_shader_program(bool aSubpixel) = 0;
-        virtual const i_shader_program& gradient_shader_program() const = 0;
-        virtual i_shader_program& gradient_shader_program() = 0;
-    public:
         virtual const opengl_standard_vertex_arrays& vertex_arrays() const = 0;
         virtual opengl_standard_vertex_arrays& vertex_arrays() = 0;
     public:
@@ -149,8 +116,6 @@ namespace neogfx
         virtual bool is_subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_on() = 0;
         virtual void subpixel_rendering_off() = 0;
-    public:
-        virtual neogfx::gradient_shader_data& gradient_shader_data(const gradient& aGradient) = 0;
     public:
         virtual void render_now() = 0;
         virtual bool frame_rate_limited() const = 0;

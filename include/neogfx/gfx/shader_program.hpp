@@ -22,31 +22,45 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/vector.hpp>
 #include <neolib/map.hpp>
+#include <neolib/reference_counted.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
 
 namespace neogfx
 {
-    class shader_program : public i_shader_program
+    class shader_program : public neolib::reference_counted<i_shader_program>
     {
     public:
-        typedef neolib::vector<neolib::ref_ptr<i_shader>> shader_list;
+        typedef neolib::vector<neolib::ref_ptr<i_shader>> shaders_t;
+        typedef neolib::map<shader_type, shaders_t> stages_t;
     private:
         typedef neolib::map<neolib::string, neolib::ref_ptr<i_shader>> shader_index;
     public:
-        shader_program();
+        shader_program(const std::string aName);
+        ~shader_program();
     public:
-        const shader_list& shaders() const override;
+        const i_string& name() const override;
+        void* handle() const override;
+        const stages_t& stages() const override;
         const i_shader& shader(const neolib::i_string& aName) const override;
         i_shader& shader(const neolib::i_string& aName) override;
         const i_vertex_shader& vertex_shader() const override;
         i_vertex_shader& vertex_shader() override;
-        i_shader_program& add_shader(neolib::i_ref_ptr<i_shader>& aShader) = 0;
+        bool is_first_in_stage(const i_shader& aShader) const override;
+        bool is_last_in_stage(const i_shader& aShader) const override;
+        const i_shader& first_in_stage(shader_type aStage) const override;
+        const i_shader& next_in_stage(const i_shader& aPreviousShader) const override;
+        i_shader_program& add_shader(neolib::i_ref_ptr<i_shader>& aShader) override;
         bool dirty() const override;
+        void set_clean() override;
         void compile() override;
         void link() override;
         void use() override;
+        void update_uniforms() override;
+        void activate() override;
     private:
-        shader_list iShaders;
+        string iName;
+        mutable std::optional<void*> iHandle;
+        stages_t iStages;
         shader_index iShaderIndex;
     };
 }
