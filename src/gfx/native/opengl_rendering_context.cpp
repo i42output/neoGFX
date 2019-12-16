@@ -738,51 +738,6 @@ namespace neogfx
         }    
     }
 
-    void opengl_rendering_context::gradient_on(const gradient& aGradient, const rect& aBoundingBox)
-    {
-        basic_rect<float> boundingBox{ aBoundingBox };
-        iShaderProgramStack.emplace_back(*this, iRenderingEngine, rendering_engine().gradient_shader_program());
-        rendering_engine().gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(~logical_coordinates().bottomLeft.y));
-        rendering_engine().gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
-        rendering_engine().gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
-        rendering_engine().gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
-        rendering_engine().gradient_shader_program().set_uniform_variable("radGradientAngle", std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f);
-        rendering_engine().gradient_shader_program().set_uniform_variable("nGradientStartFrom", std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1);
-        rendering_engine().gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
-        rendering_engine().gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
-        basic_vector<float, 2> gradientExponents = (aGradient.exponents() != std::nullopt ? *aGradient.exponents() : vec2{2.0, 2.0});
-        rendering_engine().gradient_shader_program().set_uniform_variable("exponents", gradientExponents.x, gradientExponents.y);
-        basic_point<float> gradientCentre = (aGradient.centre() != std::nullopt ? *aGradient.centre() : point{});
-        rendering_engine().gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
-        rendering_engine().gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(GRADIENT_FILTER_SIZE));
-        auto& gradientArrays = iRenderingEngine.gradient_shader_data(aGradient); 
-        rendering_engine().gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(gradientArrays.stopCount));
-        gradientArrays.stops.data().bind(2);
-        gradientArrays.stopColours.data().bind(3);
-        gradientArrays.filter.data().bind(4);
-        rendering_engine().gradient_shader_program().set_uniform_variable("texStopPositions", 2);
-        rendering_engine().gradient_shader_program().set_uniform_variable("texStopColours", 3);
-        rendering_engine().gradient_shader_program().set_uniform_variable("texFilter", 4);
-        glCheck(glActiveTexture(GL_TEXTURE1));
-    }
-
-    void opengl_rendering_context::gradient_off()
-    {
-        iShaderProgramStack.pop_back();
-    }
-
-    void opengl_rendering_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
-    {
-        // TODO: glLineStipple unavailable in 3.2
-        iLineStippleActive = true;
-    }
-
-    void opengl_rendering_context::line_stipple_off()
-    {
-        // TODO: glLineStipple unavailable in 3.2
-        iLineStippleActive = false;
-    }
-
     bool opengl_rendering_context::is_subpixel_rendering_on() const
     {
         return iSubpixelRendering;

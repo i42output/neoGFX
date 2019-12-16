@@ -38,7 +38,9 @@
 #include "opengl_renderer.hpp"
 #include "i_native_texture.hpp"
 #include "../../gui/window/native/opengl_window.hpp"
-#include "gradient.frag.hpp"
+#include "opengl_shader_program.hpp"
+#include <neogfx/gfx/vertex_shader.hpp>
+#include <neogfx/gfx/fragment_shader.hpp>
 
 namespace neogfx
 {
@@ -118,6 +120,12 @@ namespace neogfx
         std::cout << "OpenGL renderer: " << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << std::endl;
         std::cout << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
         std::cout << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
+
+        auto defaultProgram = neolib::make_ref<opengl_shader_program>("neogfx::default_shader_program"_s).as<i_shader_program>();
+        defaultProgram->add_shader(neolib::make_ref<standard_vertex_shader>().as<i_shader>());
+        defaultProgram->add_shader(neolib::make_ref<standard_gradient_fragment_shader>().as<i_shader>());
+        defaultProgram->add_shader(neolib::make_ref<standard_texture_fragment_shader>().as<i_shader>());
+        add_shader_program(defaultProgram);
     }
 
     void opengl_renderer::cleanup()
@@ -147,10 +155,10 @@ namespace neogfx
         return const_cast<i_shader_program&>(to_const(*this).shader_program(aName));
     }
 
-    i_rendering_engine& opengl_renderer::add_shader_program(neolib::i_ref_ptr<i_shader_program>& aShaderProgram)
+    i_shader_program& opengl_renderer::add_shader_program(const neolib::i_ref_ptr<i_shader_program>& aShaderProgram)
     {
         iShaderPrograms.push_back(aShaderProgram);
-        return *this;
+        return *aShaderProgram;
     }
 
     bool opengl_renderer::is_shader_program_active() const
@@ -167,6 +175,16 @@ namespace neogfx
             if (shaderProgram->active())
                 return *shaderProgram;
         throw no_shader_program_active();
+    }
+
+    const i_shader_program& opengl_renderer::default_shader_program() const
+    {
+        return shader_program("neogfx::default_shader_program"_s);
+    }
+
+    i_shader_program& opengl_renderer::default_shader_program()
+    {
+        return shader_program("neogfx::default_shader_program"_s);
     }
 
     opengl_renderer::handle opengl_renderer::create_shader_program_object()

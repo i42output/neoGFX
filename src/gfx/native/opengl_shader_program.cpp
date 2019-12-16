@@ -40,7 +40,13 @@ namespace neogfx
                 continue;
             string code;
             for (auto const& shader : shaders)
+            {
+                if (shader->disabled())
+                    continue;
                 shader->generate_code(*this, shader_language::Glsl, code);
+                code.replace_all("%FUNCTIONS%"_s, ""_s);
+                code.replace_all("%CODE%"_s, ""_s);
+            }
             auto shaderHandle = to_gl_handle<GLuint>(shaders[0]->handle(*this));
             const char* codeArray[] = { code.c_str() };
             glCheck(glShaderSource(shaderHandle, 1, codeArray, NULL));
@@ -87,51 +93,52 @@ namespace neogfx
         bool const updateAllUniforms = dirty();
         for (auto& stage : stages())
             for (auto& shader : stage.second())
-                for (auto& uniform : shader->uniforms())
-                {
-                    if (!uniform.second().second() && !updateAllUniforms)
-                        continue;
-                    GLint location = glGetUniformLocation(gl_handle(), uniform.first().c_str());
-                    GLenum errorCode = glGetError();
-                    if (errorCode != GL_NO_ERROR)
-                        throw shader_program_error(glErrorString(errorCode));
-                    std::visit([this, location](auto&& v)
+                if (shader->enabled())
+                    for (auto& uniform : shader->uniforms())
                     {
-                        typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> data_type;
-                        if constexpr (std::is_same_v<bool, data_type>)
-                            glCheck(glUniform1i(location, v))
-                        else if constexpr (std::is_same_v<float, data_type>)
-                            glCheck(glUniform1f(location, v))
-                        else if constexpr (std::is_same_v<double, data_type>)
-                            glCheck(glUniform1d(location, v))
-                        else if constexpr (std::is_same_v<int, data_type>)
-                            glCheck(glUniform1i(location, v))
-                        else if constexpr (std::is_same_v<vec2f, data_type>)
-                            glCheck(glUniform2f(location, v[0], v[1]))
-                        else if constexpr (std::is_same_v<vec2, data_type>)
-                            glCheck(glUniform2d(location, v[0], v[1]))
-                        else if constexpr (std::is_same_v<vec3f, data_type>)
-                            glCheck(glUniform3f(location, v[0], v[1], v[2]))
-                        else if constexpr (std::is_same_v<vec3, data_type>)
-                            glCheck(glUniform3d(location, v[0], v[1], v[2]))
-                        else if constexpr (std::is_same_v<vec4f, data_type>)
-                            glCheck(glUniform4f(location, v[0], v[1], v[2], v[3]))
-                        else if constexpr (std::is_same_v<vec4, data_type>)
-                            glCheck(glUniform4d(location, v[0], v[1], v[2], v[3]))
-                        else if constexpr (std::is_same_v<mat4f, data_type>)
-                            glCheck(glUniformMatrix4fv(location, 1, false, v.data()))
-                        else if constexpr (std::is_same_v<mat4, data_type>)
-                            glCheck(glUniformMatrix4dv(location, 1, false, v.data()))
-                        else if constexpr (std::is_same_v<shader_float_array, data_type>)
-                            glCheck(glUniform1fv(location, v.size(), v.data()))
-                        else if constexpr (std::is_same_v<shader_double_array, data_type>)
-                            glCheck(glUniform1dv(location, v.size(), v.data()))
-                        else if constexpr (std::is_same_v<sampler2D, data_type>)
-                            glCheck(glUniform1i(location, v.handle))
-                        else if constexpr (std::is_same_v<sampler2DMS, data_type>)
-                            glCheck(glUniform1i(location, v.handle))
-                    }, uniform.second().first());
-                }
+                        if (!uniform.second().second() && !updateAllUniforms)
+                            continue;
+                        GLint location = glGetUniformLocation(gl_handle(), uniform.first().c_str());
+                        GLenum errorCode = glGetError();
+                        if (errorCode != GL_NO_ERROR)
+                            throw shader_program_error(glErrorString(errorCode));
+                        std::visit([this, location](auto&& v)
+                        {
+                            typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> data_type;
+                            if constexpr (std::is_same_v<bool, data_type>)
+                                glCheck(glUniform1i(location, v))
+                            else if constexpr (std::is_same_v<float, data_type>)
+                                glCheck(glUniform1f(location, v))
+                            else if constexpr (std::is_same_v<double, data_type>)
+                                glCheck(glUniform1d(location, v))
+                            else if constexpr (std::is_same_v<int, data_type>)
+                                glCheck(glUniform1i(location, v))
+                            else if constexpr (std::is_same_v<vec2f, data_type>)
+                                glCheck(glUniform2f(location, v[0], v[1]))
+                            else if constexpr (std::is_same_v<vec2, data_type>)
+                                glCheck(glUniform2d(location, v[0], v[1]))
+                            else if constexpr (std::is_same_v<vec3f, data_type>)
+                                glCheck(glUniform3f(location, v[0], v[1], v[2]))
+                            else if constexpr (std::is_same_v<vec3, data_type>)
+                                glCheck(glUniform3d(location, v[0], v[1], v[2]))
+                            else if constexpr (std::is_same_v<vec4f, data_type>)
+                                glCheck(glUniform4f(location, v[0], v[1], v[2], v[3]))
+                            else if constexpr (std::is_same_v<vec4, data_type>)
+                                glCheck(glUniform4d(location, v[0], v[1], v[2], v[3]))
+                            else if constexpr (std::is_same_v<mat4f, data_type>)
+                                glCheck(glUniformMatrix4fv(location, 1, false, v.data()))
+                            else if constexpr (std::is_same_v<mat4, data_type>)
+                                glCheck(glUniformMatrix4dv(location, 1, false, v.data()))
+                            else if constexpr (std::is_same_v<shader_float_array, data_type>)
+                                glCheck(glUniform1fv(location, v.size(), v.data()))
+                            else if constexpr (std::is_same_v<shader_double_array, data_type>)
+                                glCheck(glUniform1dv(location, v.size(), v.data()))
+                            else if constexpr (std::is_same_v<sampler2D, data_type>)
+                                glCheck(glUniform1i(location, v.handle))
+                            else if constexpr (std::is_same_v<sampler2DMS, data_type>)
+                                glCheck(glUniform1i(location, v.handle))
+                        }, uniform.second().first());
+                    }
     }
 
     bool opengl_shader_program::active() const

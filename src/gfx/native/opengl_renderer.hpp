@@ -86,9 +86,13 @@ namespace neogfx
         const shader_program_list& shader_programs() const override;
         const i_shader_program& shader_program(const neolib::i_string& aName) const override;
         i_shader_program& shader_program(const neolib::i_string& aName) override;
-        i_rendering_engine& add_shader_program(neolib::i_ref_ptr<i_shader_program>& aShaderProgram) override;
+        i_shader_program& add_shader_program(const neolib::i_ref_ptr<i_shader_program>& aShaderProgram) override;
         bool is_shader_program_active() const override;
         i_shader_program& active_shader_program() override;
+    public:
+        const i_shader_program& default_shader_program() const override;
+        i_shader_program& default_shader_program() override;
+    public:
         handle create_shader_program_object() override;
         void destroy_shader_program_object(handle aShaderProgramObject) override;
         handle create_shader_object(shader_type aShaderType) override;
@@ -124,7 +128,7 @@ namespace neogfx
         neogfx::renderer iRenderer;
         mutable std::optional<opengl_texture_manager> iTextureManager;
         mutable std::optional<neogfx::font_manager> iFontManager;
-        shader_program_list iShaderPrograms;
+        mutable shader_program_list iShaderPrograms;
         bool iLimitFrameRate;
         uint32_t iFrameRateLimit;
         bool iSubpixelRendering;

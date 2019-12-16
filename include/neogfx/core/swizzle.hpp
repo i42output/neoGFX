@@ -72,42 +72,31 @@ namespace neogfx
                 assign(aRhs, &v[Indexes]...);
                 return *this;
             }
-            template <typename SFINAE = sizzled_vector_type>
-            swizzle& operator=(const typename std::enable_if<!std::is_same<value_type, sizzled_vector_type>::value, SFINAE>::type& aRhs)
+            template <typename SFINAE = std::enable_if_t<!std::is_same<value_type, sizzled_vector_type>::value, sfinae>>
+            swizzle& operator=(const sizzled_vector_type& aRhs)
             {
                 static_assert(greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
                 assign(std::begin(aRhs.v), &v[Indexes]...);
                 return *this;
             }
-            template <typename SFINAE = sizzled_vector_type>
-            typename std::enable_if<S != 1, SFINAE>::type operator~() const
+            template <typename SFINAE = std::enable_if_t<S != 1, sfinae>>
+            operator sizzled_vector_type() const
             {
                 static_assert(greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
                 return sizzled_vector_type(v[Indexes]...);
             }
-            template <typename SFINAE = sizzled_vector_type>
-            typename const std::enable_if<S == 1, SFINAE>::type& operator~() const
+            template <typename SFINAE = std::enable_if_t<S == 1, sfinae>>
+            operator const value_type&() const
             {
                 return v[first<Indexes...>::value];
             }
-            template <typename SFINAE = sizzled_vector_type>
-            typename std::enable_if<S == 1, SFINAE>::type& operator~()
+            template <typename T, typename SFINAE = std::enable_if_t<S == 1 && std::is_scalar_v<T> && std::is_scalar_v<value_type> && !std::is_same_v<T, value_type>&&, sfinae>>
+            explicit operator T() const
             {
-                return v[first<Indexes...>::value];
+                return static_cast<T>(v[first<Indexes...>::value]);
             }
-            template <typename SFINAE = sizzled_vector_type>
-            operator typename std::enable_if<S != 1, SFINAE>::type() const
-            {
-                static_assert(greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
-                return sizzled_vector_type(v[Indexes]...);
-            }
-            template <typename SFINAE = sizzled_vector_type>
-            operator const typename std::enable_if<S == 1, SFINAE>::type&() const
-            {
-                return v[first<Indexes...>::value];
-            }
-            template <typename SFINAE = sizzled_vector_type>
-            operator  typename std::enable_if<S == 1, SFINAE>::type&()
+            template <typename SFINAE = std::enable_if_t<S == 1, sfinae>>
+            operator value_type&()
             {
                 return v[first<Indexes...>::value];
             }

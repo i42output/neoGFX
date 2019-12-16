@@ -266,6 +266,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\image.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_fragment_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp" />
@@ -464,23 +465,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">false</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glsl2hpp %(Identity)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glsl2hpp %(Identity)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">glsl2hpp %(Identity)</Message>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\app\action.cpp" />

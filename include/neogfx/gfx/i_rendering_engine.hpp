@@ -88,9 +88,13 @@ namespace neogfx
         virtual const shader_program_list& shader_programs() const = 0;
         virtual const i_shader_program& shader_program(const neolib::i_string& aName) const = 0;
         virtual i_shader_program& shader_program(const neolib::i_string& aName) = 0;
-        virtual i_rendering_engine& add_shader_program(neolib::i_ref_ptr<i_shader_program>& aShaderProgram) = 0;
+        virtual i_shader_program& add_shader_program(const neolib::i_ref_ptr<i_shader_program>& aShaderProgram) = 0;
         virtual bool is_shader_program_active() const = 0;
         virtual i_shader_program& active_shader_program() = 0;
+    public:
+        virtual const i_shader_program& default_shader_program() const = 0;
+        virtual i_shader_program& default_shader_program() = 0;
+    public:
         virtual handle create_shader_program_object() = 0;
         virtual void destroy_shader_program_object(handle aShaderProgramObject) = 0;
         virtual handle create_shader_object(shader_type aShaderType) = 0;

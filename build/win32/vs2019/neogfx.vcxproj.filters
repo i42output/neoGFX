@@ -933,11 +933,11 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl_shader_program.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_fragment_shader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\resources.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>

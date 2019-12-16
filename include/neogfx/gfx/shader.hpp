@@ -74,6 +74,10 @@ namespace neogfx
         {
             return iEnabled;
         }
+        bool disabled() const override
+        {
+            return !iEnabled;
+        }
         void enable() override
         {
             if (!iEnabled)
@@ -182,6 +186,7 @@ namespace neogfx
                         "%UNIFORMS%"
                         "%VARIABLES%"
                         "%INVOKE_DECLARATIONS%"
+                        "%FUNCTIONS%"
                         "%CODE%"
                     };
                     switch (service<i_rendering_engine>().renderer())
@@ -197,9 +202,9 @@ namespace neogfx
                     }
                 }
                 else
-                    throw unsupported_language();
+                    throw unsupported_shader_language();
             }
-            else if (aProgram.is_last_in_stage(*this))
+            if (aProgram.is_last_in_stage(*this))
             {
                 if (aLanguage == shader_language::Glsl)
                 {
@@ -212,17 +217,20 @@ namespace neogfx
                         "%INVOKE_FIRST%"
                         "}\n"
                     };
-                    aOutput += source;
+                    if (aProgram.first_in_stage(*this))
+                        aOutput.replace_all("%CODE%"_s, source);
+                    else
+                        aOutput += source;
                 }
                 else
-                    throw unsupported_language();
+                    throw unsupported_shader_language();
             }
-            else
+            if (!aProgram.first_in_stage(*this) && !aProgram.last_in_stage(*this))
             {
                 if (aLanguage == shader_language::Glsl)
                     aOutput += "%CODE%"_s;
                 else
-                    throw unsupported_language();
+                    throw unsupported_shader_language();
             }
             if (aLanguage == shader_language::Glsl)
             {
@@ -354,7 +362,7 @@ namespace neogfx
                 aOutput.replace_all("%INVOKE_NEXT%"_s, "    %NAME%(%ARGS%);\n"_s);
             }
             else
-                throw unsupported_language();
+                throw unsupported_shader_language();
         }
     private:
         shader_type iType;

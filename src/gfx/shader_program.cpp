@@ -118,13 +118,13 @@ namespace neogfx
         throw shader_not_found();
     }
 
-    i_shader_program& shader_program::add_shader(neolib::i_ref_ptr<i_shader>& aShader)
+    i_shader& shader_program::add_shader(neolib::i_ref_ptr<i_shader>& aShader)
     {
         if (iShaderIndex.find(aShader->name()) == iShaderIndex.end())
         {
             iStages[aShader->type()].push_back(aShader);
             iShaderIndex.insert(aShader->name(), aShader);
-            return *this;
+            return *aShader;
         }
         throw shader_name_exists();
     }
@@ -145,7 +145,7 @@ namespace neogfx
                 shader->set_clean();
     }
 
-    void shader_program::activate()
+    void shader_program::activate(i_rendering_context&)
     {
         if (dirty())
         {

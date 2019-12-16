@@ -125,8 +125,6 @@ namespace neogfx
         std::size_t max_operations(const graphics_operation::operation& aOperation);
         void apply_scissor();
         void apply_logical_operation();
-        void gradient_on(const gradient& aGradient, const rect& aBoundingBox);
-        void gradient_off();
         xyz to_shader_vertex(const point& aPoint, coordinate aZ = 0.0) const;
     private:
         i_rendering_engine& iRenderingEngine;

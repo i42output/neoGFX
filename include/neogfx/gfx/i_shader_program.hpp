@@ -31,6 +31,7 @@ namespace neogfx
     struct shader_not_found : std::logic_error { shader_not_found() : std::logic_error{ "neogfx::shader_not_found" } {} };
     struct shader_name_exists : std::logic_error { shader_name_exists() : std::logic_error{ "neogfx::shader_name_exists" } {} };
     struct no_vertex_shader : std::logic_error { no_vertex_shader() : std::logic_error{ "neogfx::no_vertex_shader" } {} };
+    struct no_gradient_shader : std::logic_error { no_gradient_shader() : std::logic_error{ "neogfx::no_gradient_shader" } {} };
     struct shader_last_in_stage : std::logic_error { shader_last_in_stage() : std::logic_error{ "neogfx::shader_last_in_stage" } {} };
     struct failed_to_create_shader : std::runtime_error { failed_to_create_shader() : std::runtime_error("neogfx::failed_to_create_shader") {} };
     struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(const std::string& aReason) : std::runtime_error("neogfx::failed_to_create_shader_program: " + aReason) {} };
@@ -55,11 +56,13 @@ namespace neogfx
         virtual i_shader& shader(const neolib::i_string& aName) = 0;
         virtual const i_vertex_shader& vertex_shader() const = 0;
         virtual i_vertex_shader& vertex_shader() = 0;
+        virtual const i_shader& gradient_shader() const = 0;
+        virtual i_shader& gradient_shader() = 0;
         virtual bool is_first_in_stage(const i_shader& aShader) const = 0;
         virtual bool is_last_in_stage(const i_shader& aShader) const = 0;
         virtual const i_shader& first_in_stage(shader_type aStage) const = 0;
         virtual const i_shader& next_in_stage(const i_shader& aPreviousShader) const = 0;
-        virtual i_shader_program& add_shader(neolib::i_ref_ptr<i_shader>& aShader) = 0;
+        virtual i_shader& add_shader(neolib::i_ref_ptr<i_shader>& aShader) = 0;
         virtual bool dirty() const = 0;
         virtual void set_clean() = 0;
         virtual void compile() = 0;

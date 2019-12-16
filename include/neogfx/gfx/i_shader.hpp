@@ -67,7 +67,8 @@ namespace neogfx
         FloatArray,
         DoubleArray,
         Sampler2D,
-        Sampler2DMS
+        Sampler2DMS,
+        Sampler2DRect
     };
 }
 
@@ -103,6 +104,7 @@ const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerat
     declare_enum_string(neogfx::shader_data_type, DoubleArray)
     declare_enum_string(neogfx::shader_data_type, Sampler2D)
     declare_enum_string(neogfx::shader_data_type, Sampler2DMS)
+    declare_enum_string(neogfx::shader_data_type, Sampler2DRect)
 };
 
 namespace neogfx 
@@ -119,14 +121,19 @@ namespace neogfx
 
     typedef shader_handle<shader_data_type::Sampler2D> sampler2D;
     typedef shader_handle<shader_data_type::Sampler2DMS> sampler2DMS;
+    typedef shader_handle<shader_data_type::Sampler2DRect> sampler2DRect;
 
-    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec3f, vec3, vec4f, vec4, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS> shader_value_type;
+    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec3f, vec3, vec4f, vec4, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
 
     typedef uint32_t shader_variable_location;
     typedef neolib::pair<neolib::pair<shader_variable_location, shader_variable_qualifier>, shader_value_type::id_t> shader_variable;
 
     class i_rendering_context;
     class i_shader_program;
+
+    struct shader_variable_not_found : std::logic_error { shader_variable_not_found() : std::logic_error{ "neogfx::shader_variable_not_found" } {} };
+    struct invalid_shader_variable_type : std::logic_error { invalid_shader_variable_type() : std::logic_error{ "neogfx::invalid_shader_variable_type" } {} };
+    struct unsupported_shader_language : std::logic_error { unsupported_shader_language() : std::logic_error{ "neogfx::unsupported_shader_language" } {} };
 
     class i_shader : public neolib::i_reference_counted
     {
@@ -137,16 +144,13 @@ namespace neogfx
         typedef neolib::i_map<i_string, neolib::i_pair<value_type, bool>> uniform_map;
         typedef neolib::i_map<i_string, abstract_t<shader_variable>> variable_map;
     public:
-        struct variable_not_found : std::logic_error { variable_not_found() : std::logic_error{ "neogfx::i_shader::variable_not_found" } {} };
-        struct invalid_variable_type : std::logic_error { invalid_variable_type() : std::logic_error{ "neogfx::i_shader::invalid_variable_type" } {} };
-        struct unsupported_language : std::logic_error { unsupported_language() : std::logic_error{ "neogfx::i_shader::unsupported_language" } {} };
-    public:
         virtual ~i_shader() {}
     public:
         virtual shader_type type() const = 0;
         virtual const i_string& name() const = 0;
         virtual void* handle(const i_shader_program& aProgram) const = 0;
         virtual bool enabled() const = 0;
+        virtual bool disabled() const = 0;
         virtual void enable() const = 0;
         virtual void disable() const = 0;
         virtual bool dirty() const = 0;

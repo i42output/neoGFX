@@ -136,23 +136,30 @@ namespace neogfx
             set_uniform("uProjectionMatrix"_s, projection_matrix(aRenderingContext).transposed());
             set_uniform("uTransformationMatrix"_s, transformation_matrix(aRenderingContext));
         }
-        const i_string& generate_code(const i_shader_program& aProgram, shader_language aLanguage) const override
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
+            vertex_shader::generate_code(aProgram, aLanguage, aOutput);
             if (aLanguage == shader_language::Glsl)
             {
-                static const string sSource =
+                aOutput.replace_all("%PARAMETERS%"_s, ""_s);
+                aOutput.replace_all("%FIRST_ARGS%"_s, ""_s);
+                aOutput.replace_all("%ARGS%"_s, ""_s);
+                static const string code =
                 {
-                    "void main()\n"
+                    "void %NAME%()\n"
                     "{\n"
                     "    gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
                     "    OutputCoord = VertexPosition.xy;\n"
                     "    Color = VertexColor;\n"
-                    "}\n"
+                    "%CODE%"
+                    "%INVOKE_NEXT%"
+                    "}\n"_s
                 };
-                return sSource;
+                aOutput.replace_all("%CODE"_s, code);
+                aOutput.replace_all("%NAME%"_s, name());
             }
             else
-                throw unsupported_language();
+                throw unsupported_shader_language();
         }
     private:
         attribute_map iAttributes;
@@ -166,28 +173,24 @@ namespace neogfx
         standard_texture_vertex_shader(const std::string& aName = "standard_texture_vertex_shader") :
             standard_vertex_shader{ aName }
         {
-            add_attribute("VertexTextureCoord"_s, 2u, neolib::index_of<vec2f, value_type>());
+            add_attribute("VertexTextureCoord"_s, 2u, shader_data_type::Vec2);
             add_out_variable<vec2f>("TexCoord"_s, 2u);
         }
     public:
-        const i_string& generate_code(const i_shader_program& aProgram, shader_language aLanguage) const override
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
             if (aLanguage == shader_language::Glsl)
             {
-                static const string sSource =
+                static const string code =
                 {
-                    "void main()\n"
-                    "{\n"
-                    "    gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                    "    OutputCoord = VertexPosition.xy;\n"
-                    "    Color = VertexColor;\n"
                     "    TexCoord = VertexTextureCoord;\n"
-                    "}\n"
+                    "%CODE%"
                 };
-                return sSource;
+                aOutput.replace_all("%CODE%"_s, code);
+                aOutput.replace_all("%NAME%"_s, name());
             }
             else
-                throw unsupported_language();
+                throw unsupported_shader_language();
         }
     private:
     };
