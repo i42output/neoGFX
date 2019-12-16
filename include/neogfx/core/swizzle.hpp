@@ -83,7 +83,17 @@ namespace neogfx
             operator sizzled_vector_type() const
             {
                 static_assert(greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
-                return sizzled_vector_type(v[Indexes]...);
+                return sizzled_vector_type{ v[Indexes]... };
+            }
+            template <typename SFINAE = std::enable_if_t<S != 1, sfinae>>
+            sizzled_vector_type operator~() const
+            {
+                return static_cast<sizzled_vector_type>(*this);
+            }
+            template <typename SFINAE = std::enable_if_t<S == 1, sfinae>>
+            const value_type& operator~() const
+            {
+                return v[first<Indexes...>::value];
             }
             template <typename SFINAE = std::enable_if_t<S == 1, sfinae>>
             operator const value_type&() const

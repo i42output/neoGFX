@@ -1054,7 +1054,7 @@ namespace neogfx
             vec2 max;
             aabb_2d() : min{}, max{} {}
             aabb_2d(const vec2& aMin, const vec2& aMax) : min{ aMin }, max{ aMax } {}
-            aabb_2d(const aabb& aAabb) : min{ ~aAabb.min.xy }, max{ ~aAabb.max.xy } {}
+            aabb_2d(const aabb& aAabb) : min{ aAabb.min.xy }, max{ aAabb.max.xy } {}
         };
 
         inline aabb_2d to_aabb_2d(const vertices_t& vertices)

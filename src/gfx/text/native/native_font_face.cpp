@@ -30,6 +30,8 @@
 #include "../../native/i_native_texture.hpp"
 #include "native_font_face.hpp"
 #include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
+#include <neogfx/gfx/i_texture_atlas.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 
 namespace neogfx
