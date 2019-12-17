@@ -84,14 +84,14 @@ namespace neogfx
         shader_array<float> filter = { size_u32{GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE} };
     };
 
-    class standard_gradient_fragment_shader : public standard_fragment_shader<i_gradient_shader>
+    class standard_gradient_shader : public standard_fragment_shader<i_gradient_shader>
     {
     private:
         typedef std::list<neogfx::gradient_shader_data> gradient_data_cache_t;
         typedef std::map<gradient, gradient_data_cache_t::iterator> gradient_data_cache_map_t;
         typedef std::deque<gradient_data_cache_map_t::iterator> gradient_data_cache_queue_t;
     public:
-        standard_gradient_fragment_shader(const std::string& aName = "standard_gradient_fragment_shader") :
+        standard_gradient_shader(const std::string& aName = "standard_gradient_shader") :
             standard_fragment_shader{ aName }
         {
             set_uniform("gradient"_s, false);
@@ -313,7 +313,11 @@ namespace neogfx
                 throw unsupported_shader_language();
         }
     public:
-        void set_gradient(i_rendering_context& aContext, gradient& aGradient, const rect& aBoundingBox) override
+        void clear_gradient()
+        {
+            set_uniform("gradient"_s, false);
+        }
+        void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) override
         {
             basic_rect<float> boundingBox{ aBoundingBox };
             set_uniform("gradientViewportTop"_s, static_cast<float>(aContext.logical_coordinates().bottomLeft.y));
@@ -337,6 +341,7 @@ namespace neogfx
             set_uniform("gradientStopPositions"_s, 2);
             set_uniform("gradientStopColours"_s, 3);
             set_uniform("gradientFilter"_s, 4);
+            set_uniform("gradient"_s, true);
         }
     private:
         std::vector<float> iGradientStopPositions;
@@ -347,16 +352,15 @@ namespace neogfx
         std::optional<neogfx::gradient_shader_data> iUncachedGradient;
     };
 
-    class standard_texture_fragment_shader : public standard_fragment_shader<i_fragment_shader>
+    class standard_texture_shader : public standard_fragment_shader<i_texture_shader>
     {
     public:
-        standard_texture_fragment_shader(const std::string& aName = "standard_texture_fragment_shader") :
+        standard_texture_shader(const std::string& aName = "standard_texture_shader") :
             standard_fragment_shader{ aName }
         {
             add_in_variable<vec2f>("TexCoord"_s, 2u);
-            set_uniform("multisample"_s, false);
-            set_uniform("texDataFormat"_s, texture_data_format::RGBA);
-            set_uniform("effect"_s, shader_effect::None);
+            clear_texture();
+            set_effect(shader_effect::None);
             set_uniform("tex"_s, sampler2D{ 1 });
             set_uniform("texMS"_s, sampler2DMS{ 2 });
         }
@@ -368,54 +372,57 @@ namespace neogfx
             {
                 static const string code 
                 {
-                    "    vec4 texel = vec4(0.0);\n"
-                    "    if (!multisample)\n"
+                    "    if (textureEnabled)\n"
                     "    {\n"
-                    "        texel = texture(tex, TexCoord).rgba;\n"
-                    "    }\n"
-                    "    else\n"
-                    "    {\n"
-                    "        ivec2 texCoord = ivec2(TexCoord * texExtents);\n"
-                    "        texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
-                    "    }\n"
-                    "    switch(texDataFormat)\n"
-                    "    {\n"
-                    "    case 1:\n" // RGBA
-                    "    default:\n"
-                    "        break;\n"
-                    "    case 2:\n" // Red
-                    "        texel = vec4(1.0, 1.0, 1.0, texel.r);\n"
-                    "        break;\n"
-                    "    case 3:\n" // SubPixel
-                    "        texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
-                    "        break;\n"
-                    "    }\n"
-                    "    switch(effect)\n"
-                    "    {\n"
-                    "    case 0:\n" // effect: None
-                    "        color = texel.rgba * color;\n"
-                    "        break;\n"
-                    "    case 1:\n" // effect: Colourize, ColourizeAverage
+                    "        vec4 texel = vec4(0.0);\n"
+                    "        if (!textureMultisample)\n"
                     "        {\n"
-                    "            float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
-                    "            color = vec4(avg, avg, avg, texel.a) * color;\n"
+                    "            texel = texture(tex, TexCoord).rgba;\n"
                     "        }\n"
-                    "        break;\n"
-                    "    case 2:\n" // effect: ColourizeMaximum
+                    "        else\n"
                     "        {\n"
-                    "            float maxChannel = max(texel.r, max(texel.g, texel.b));\n"
-                    "            color = vec4(maxChannel, maxChannel, maxChannel, texel.a) * color;\n"
+                    "            ivec2 texCoord = ivec2(TexCoord * textureExtents);\n"
+                    "            texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
                     "        }\n"
-                    "        break;\n"
-                    "    case 3:\n" // effect: ColourizeSpot
-                    "        color = vec4(1.0, 1.0, 1.0, texel.a) * color;\n"
-                    "        break;\n"
-                    "    case 4:\n" // effect: Monochrome
+                    "        switch(texDataFormat)\n"
                     "        {\n"
-                    "            float gray = dot(color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));\n"
-                    "            color = vec4(gray, gray, gray, texel.a) * color;\n"
+                    "        case 1:\n" // RGBA
+                    "        default:\n"
+                    "            break;\n"
+                    "        case 2:\n" // Red
+                    "            texel = vec4(1.0, 1.0, 1.0, texel.r);\n"
+                    "            break;\n"
+                    "        case 3:\n" // SubPixel
+                    "            texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
+                    "            break;\n"
                     "        }\n"
-                    "        break;\n"
+                    "        switch(effect)\n"
+                    "        {\n"
+                    "        case 0:\n" // effect: None
+                    "            color = texel.rgba * color;\n"
+                    "            break;\n"
+                    "        case 1:\n" // effect: Colourize, ColourizeAverage
+                    "            {\n"
+                    "                float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
+                    "                color = vec4(avg, avg, avg, texel.a) * color;\n"
+                    "            }\n"
+                    "            break;\n"
+                    "        case 2:\n" // effect: ColourizeMaximum
+                    "            {\n"
+                    "                float maxChannel = max(texel.r, max(texel.g, texel.b));\n"
+                    "                color = vec4(maxChannel, maxChannel, maxChannel, texel.a) * color;\n"
+                    "            }\n"
+                    "            break;\n"
+                    "        case 3:\n" // effect: ColourizeSpot
+                    "            color = vec4(1.0, 1.0, 1.0, texel.a) * color;\n"
+                    "            break;\n"
+                    "        case 4:\n" // effect: Monochrome
+                    "            {\n"
+                    "                float gray = dot(color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));\n"
+                    "                color = vec4(gray, gray, gray, texel.a) * color;\n"
+                    "            }\n"
+                    "            break;\n"
+                    "        }\n"
                     "    }\n"
                     "%CODE%"
                 };
@@ -424,6 +431,18 @@ namespace neogfx
             }
             else
                 throw unsupported_shader_language();
+        }
+    public:
+        void clear_texture() override
+        {
+            set_uniform("textureEnabled"_s, false);
+        }
+        void set_texture(const i_texture& aTexture) override
+        {
+            set_uniform("textureEnabled"_s, true);
+            set_uniform("textureDataFormat"_s, aTexture.data_format());
+            set_uniform("textureMultisample"_s, aTexture.sampling());
+            set_uniform("textureExtents"_s, aTexture.storage_extents().to_vec2().as<float>());
         }
     };
 }

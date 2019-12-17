@@ -25,6 +25,7 @@
 #include <neolib/i_reference_counted.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_vertex_shader.hpp>
+#include <neogfx/gfx/i_fragment_shader.hpp>
 
 namespace neogfx
 {
@@ -39,7 +40,10 @@ namespace neogfx
 
     class i_shader_program : public neolib::i_reference_counted
     {
+        typedef i_shader_program self_type;
         // types
+    public:
+        typedef self_type abstract_type;
     public:
         typedef neolib::i_vector<neolib::i_ref_ptr<i_shader>> shaders_t;
         typedef neolib::i_map<shader_type, shaders_t> stages_t;
@@ -56,8 +60,10 @@ namespace neogfx
         virtual i_shader& shader(const neolib::i_string& aName) = 0;
         virtual const i_vertex_shader& vertex_shader() const = 0;
         virtual i_vertex_shader& vertex_shader() = 0;
-        virtual const i_shader& gradient_shader() const = 0;
-        virtual i_shader& gradient_shader() = 0;
+        virtual const i_gradient_shader& gradient_shader() const = 0;
+        virtual i_gradient_shader& gradient_shader() = 0;
+        virtual const i_texture_shader& texture_shader() const = 0;
+        virtual i_texture_shader& texture_shader() = 0;
         virtual bool is_first_in_stage(const i_shader& aShader) const = 0;
         virtual bool is_last_in_stage(const i_shader& aShader) const = 0;
         virtual const i_shader& first_in_stage(shader_type aStage) const = 0;

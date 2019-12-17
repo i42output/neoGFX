@@ -37,10 +37,13 @@ namespace neogfx
         virtual void set_transformation_matrix(const optional_mat44& aProjectionMatrix) = 0;
     };
 
+    struct no_standard_vertex_matrices : std::logic_error { no_standard_vertex_matrices() : std::logic_error{ "neogfx::no_standard_vertex_matrices" } {} };
+
     class i_vertex_shader : public i_shader
     {
+        typedef i_vertex_shader self_type;
     public:
-        struct no_standard_vertex_matrices : std::logic_error { no_standard_vertex_matrices() : std::logic_error{ "neogfx::i_vertex_shader::no_standard_vertex_matrices" } {} };
+        typedef self_type abstract_type;
     public:
         typedef neolib::i_map<i_string, neolib::i_pair<uint32_t, shader_value_type::id_t>> attribute_map;
     public:

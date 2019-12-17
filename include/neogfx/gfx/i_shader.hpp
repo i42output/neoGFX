@@ -151,8 +151,8 @@ namespace neogfx
         virtual void* handle(const i_shader_program& aProgram) const = 0;
         virtual bool enabled() const = 0;
         virtual bool disabled() const = 0;
-        virtual void enable() const = 0;
-        virtual void disable() const = 0;
+        virtual void enable() = 0;
+        virtual void disable() = 0;
         virtual bool dirty() const = 0;
         virtual void set_dirty() = 0;
         virtual void set_clean() = 0;

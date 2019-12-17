@@ -390,13 +390,17 @@ namespace neogfx
             iCurrentProgram{ aShaderProgram },
             iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
         {
-            iCurrentProgram.activate(aRenderingContext);
+            if (&iCurrentProgram != iPreviousProgram)
+                iCurrentProgram.activate(aRenderingContext);
         }
         ~use_shader_program()
         {
-            iCurrentProgram.deactivate();
-            if (iPreviousProgram != nullptr)
-                iPreviousProgram->activate(iRenderingContext);
+            if (&iCurrentProgram != iPreviousProgram)
+            {
+                iCurrentProgram.deactivate();
+                if (iPreviousProgram != nullptr)
+                    iPreviousProgram->activate(iRenderingContext);
+            }
         }
     private:
         i_rendering_context& iRenderingContext;

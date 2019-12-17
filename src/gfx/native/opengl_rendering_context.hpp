@@ -149,5 +149,6 @@ namespace neogfx
         vertices_2d_t iTempTextureCoords;
         sink iSink;
         scoped_render_target iSrt;
+        use_shader_program iUseDefaultShaderProgram;
     };
 }

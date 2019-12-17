@@ -165,9 +165,9 @@ namespace neogfx
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
         iLineStippleActive{ false },
-        iSrt{ iTarget }
+        iSrt{ iTarget },
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([this]() 
@@ -187,9 +187,9 @@ namespace neogfx
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
         iLineStippleActive{ false },
-        iSrt{ iTarget }
+        iSrt{ iTarget },
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([this]()
@@ -210,9 +210,9 @@ namespace neogfx
         iSubpixelRendering{ aOther.iSubpixelRendering },
         iClipCounter{ 0 },
         iLineStippleActive{ false },
-        iSrt{ iTarget }
+        iSrt{ iTarget },
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
         set_blending_mode(iBlendingMode);
         set_smoothing_mode(iSmoothingMode);
         iSink += render_target().target_deactivating([this]()
@@ -278,10 +278,10 @@ namespace neogfx
                 break;
             case neogfx::logical_coordinate_system::AutomaticGame:
                 if (render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-                    std::swap(~result.bottomLeft.y, ~result.topRight.y);
+                    std::swap(result.bottomLeft.y, result.topRight.y);
                 break;
             case neogfx::logical_coordinate_system::AutomaticGui:
-                std::swap(~result.bottomLeft.y, ~result.topRight.y);
+                std::swap(result.bottomLeft.y, result.topRight.y);
                 break;
             }
         }
@@ -504,13 +504,10 @@ namespace neogfx
                 draw_glyph(opBatch);
                 break;
             case graphics_operation::operation_type::DrawMesh:
+                for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    use_shader_program usp{ *this, iRenderingEngine, rendering_engine().mesh_shader_program() };
-                    for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    {
-                        const auto& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
-                        draw_mesh(args.mesh, args.material, args.transformation);
-                    }
+                    const auto& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
+                    draw_mesh(args.mesh, args.material, args.transformation);
                 }
                 break;
             }
@@ -787,13 +784,10 @@ namespace neogfx
 
     void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-        {
-            auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-            gradient_on(gradient, rect{ aFrom, aTo });
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), rect{ aFrom, aTo });
 
         double pixelAdjust = pixel_adjust(aPen);
         auto penColour = std::holds_alternative<colour>(aPen.colour()) ?
@@ -813,20 +807,17 @@ namespace neogfx
         glCheck(glLineWidth(1.0f));
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_rect(const rect& aRect, const pen& aPen)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         scoped_anti_alias saa{ *this, smoothing_mode::None };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-        {
-            auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-            gradient_on(gradient, aRect);
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
 
         glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
         {
@@ -844,18 +835,15 @@ namespace neogfx
         glCheck(glLineWidth(1.0f));
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-        {
-            auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-            gradient_on(gradient, aRect);
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
 
         double pixelAdjust = pixel_adjust(aPen);
         auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, mesh_type::Outline);
@@ -875,18 +863,16 @@ namespace neogfx
         glCheck(glLineWidth(1.0f));
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-        {
-            auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-            gradient_on(gradient, rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), 
+                rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
         auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, mesh_type::Outline);
 
@@ -905,18 +891,16 @@ namespace neogfx
         glCheck(glLineWidth(1.0f));
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-        {
-            auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-            gradient_on(gradient, rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()),
+                rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
         auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline));
 
@@ -935,18 +919,15 @@ namespace neogfx
         glCheck(glLineWidth(1.0f));
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-        {
-            auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-            gradient_on(gradient, aPath.bounding_rect());
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aPath.bounding_rect());
 
         for (std::size_t i = 0; i < aPath.paths().size(); ++i)
         {
@@ -974,20 +955,17 @@ namespace neogfx
         }
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         auto const& vertices = aMesh.vertices;
 
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
-
         if (std::holds_alternative<gradient>(aPen.colour()))
-        {
-            auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-            gradient_on(gradient, bounding_rect(aMesh));
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), bounding_rect(aMesh));
 
         {
             use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
@@ -1002,17 +980,18 @@ namespace neogfx
         }
 
         if (std::holds_alternative<gradient>(aPen.colour()))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         iRenderingEngine.want_game_mode();
         aEcs.component<game::rigid_body>().take_snapshot();
         auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
         auto const& rigidBodies = rigidBodiesSnapshot.data();
         use_vertex_arrays uva{ *this, GL_TRIANGLES, with_textures };
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().mesh_shader_program() };
         for (auto entity : aEcs.component<game::mesh_renderer>().entities())
         {
             if (entity == game::null_entity)
@@ -1031,21 +1010,22 @@ namespace neogfx
 
     void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill, aZpos } };
         fill_rect(graphics_operation::batch{ &op, &op + 1 });
     }
 
     void opengl_rendering_context::fill_rect(const graphics_operation::batch& aFillRectOps)
     {
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         scoped_anti_alias saa{ *this, smoothing_mode::None };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
         {
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
@@ -1066,18 +1046,18 @@ namespace neogfx
         }
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         if (aRect.empty())
             return;
 
-        use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
-
         if (std::holds_alternative<gradient>(aFill))
-            gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), aRect);
 
         auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::Triangles);
         
@@ -1097,13 +1077,16 @@ namespace neogfx
         }
 
         if (std::holds_alternative<gradient>(aFill))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         if (std::holds_alternative<gradient>(aFill))
-            gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
+                rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
         auto vertices = circle_vertices(aCentre, aRadius, 0.0, mesh_type::TriangleFan);
 
@@ -1122,13 +1105,16 @@ namespace neogfx
         }
 
         if (std::holds_alternative<gradient>(aFill))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         if (std::holds_alternative<gradient>(aFill))
-            gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
+                rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
         auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::TriangleFan);
 
@@ -1147,11 +1133,13 @@ namespace neogfx
         }
 
         if (std::holds_alternative<gradient>(aFill))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_path(const path& aPath, const brush& aFill)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         for (std::size_t i = 0; i < aPath.paths().size(); ++i)
         {
             if (aPath.paths()[i].size() > 2)
@@ -1166,7 +1154,8 @@ namespace neogfx
                 }
 
                 if (std::holds_alternative<gradient>(aFill))
-                    gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
+                    rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
+                        rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
 
                 auto vertices = aPath.to_vertices(aPath.paths()[i]);
 
@@ -1187,13 +1176,15 @@ namespace neogfx
                 reset_clip();
 
                 if (std::holds_alternative<gradient>(aFill))
-                    gradient_off();
+                    rendering_engine().default_shader_program().gradient_shader().clear_gradient();
             }
         }
     }
 
     void opengl_rendering_context::fill_shape(const graphics_operation::batch& aFillShapeOps)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         auto& firstOp = static_variant_cast<const graphics_operation::fill_shape&>(*aFillShapeOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
@@ -1208,7 +1199,7 @@ namespace neogfx
                 min.y = std::min(min.y, v.y);
                 max.y = std::max(max.y, v.y);
             }
-            gradient_on(static_variant_cast<const gradient&>(firstOp.fill),
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill),
                 rect{
                     point{ min.x, min.y },
                     size{ max.x - min.y, max.y - min.y } });
@@ -1244,7 +1235,7 @@ namespace neogfx
         }
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            gradient_off();
+            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     namespace
@@ -1279,11 +1270,14 @@ namespace neogfx
 
     void opengl_rendering_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+#if 0 // todo - shader rework
+
         auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
 
         if (firstOp.glyph.is_emoji())
         {
-            use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
             if (firstOp.appearance.paper())
                 fill_rect(rect{ point{ firstOp.point }, glyph_extents(firstOp) }, to_brush(*firstOp.appearance.paper()), firstOp.point.z);
             auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
@@ -1421,8 +1415,7 @@ namespace neogfx
                     }
 
                     if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
-                        gradient_on(
-                            static_variant_cast<const gradient&>(firstOp.appearance.ink()),
+                        rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.appearance.ink()),
                             rect{
                                 point{
                                     vertexArrays.instance()[0].xyz[0],
@@ -1459,11 +1452,13 @@ namespace neogfx
                     glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
 
                     if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
-                        gradient_off();
+                        rendering_engine().default_shader_program().gradient_shader().clear_gradient();
                 }
                 break;
             }
         }
+
+#endif // todo - shader rework
     }
 
     bool opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)
@@ -1473,6 +1468,8 @@ namespace neogfx
     
     bool opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         auto const transformation = aTransformation * (aMeshFilter.transformation != std::nullopt ? *aMeshFilter.transformation : mat44::identity());
 
         auto const& vertices = transformation * (aMeshFilter.mesh != std::nullopt ? *aMeshFilter.mesh : *aMeshFilter.sharedMesh.ptr).vertices;
@@ -1492,6 +1489,8 @@ namespace neogfx
 
     bool opengl_rendering_context::draw_patch(const vertices_t& aVertices, const vertices_2d_t& aTextureVertices, const game::material& aMaterial, const game::faces_t& aFaces)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
         colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
         if (aMaterial.colour != std::nullopt)
             colourizationColour = aMaterial.colour->rgba;
@@ -1501,10 +1500,6 @@ namespace neogfx
         GLint previousTexture = 0;
 
         {
-            use_shader_program usp{ *this, iRenderingEngine, rendering_engine().mesh_shader_program() };
-            rendering_engine().active_shader_program().set_uniform_variable("haveTexture", aMaterial.texture != std::nullopt);
-            rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aMaterial.shaderEffect != std::nullopt ? *aMaterial.shaderEffect : shader_effect::None));
-
             if (aMaterial.texture != std::nullopt)
             {
                 auto const& texture = *service<i_texture_manager>().find_texture(aMaterial.texture->id.cookie());
@@ -1538,27 +1533,16 @@ namespace neogfx
                     uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
                 else
                     uvFixupOffset = aMaterial.texture->subTexture->min;
-                rendering_engine().active_shader_program().set_uniform_variable("texDataFormat", static_cast<int>(texture.data_format()));
-                rendering_engine().active_shader_program().set_uniform_variable("blitBlend", blending_mode() == neogfx::blending_mode::Blit);
-                rendering_engine().active_shader_program().set_uniform_variable("texExtents", static_cast<float>(texture.storage_extents().cx), static_cast<float>(texture.storage_extents().cy));
-                if (texture.sampling() != texture_sampling::Multisample)
-                {
-                    rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
-                    rendering_engine().active_shader_program().set_uniform_variable("multisample", false);
-                }
-                else
-                {
-                    rendering_engine().active_shader_program().set_uniform_variable("texMS", 2);
-                    rendering_engine().active_shader_program().set_uniform_variable("multisample", true);
-                    rendering_engine().active_shader_program().set_uniform_variable("texSamples", static_cast<int>(texture.samples()));
-                }
-
+                rendering_engine().default_shader_program().texture_shader().set_texture(texture);
+                rendering_engine().default_shader_program().texture_shader().set_effect(aMaterial.shaderEffect != std::nullopt ? *aMaterial.shaderEffect : shader_effect::None);
                 if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
                 {
                     glCheck(glEnable(GL_SAMPLE_SHADING));
                     glCheck(glMinSampleShading(1.0));
                 }
             }
+            else
+                rendering_engine().default_shader_program().texture_shader().clear_texture();
 
             for (auto const& face : aFaces)
             {
@@ -1566,10 +1550,10 @@ namespace neogfx
                 {
                     auto const& v = aVertices[faceVertexIndex];
                     auto const logicalCoordinates = logical_coordinates();
-                    if (~v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                        ~v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                        ~v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
-                        ~v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
+                    if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+                        v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+                        v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
+                        v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
                         drawn = true;
                     vec2 uv = {};
                     if (aMaterial.texture != std::nullopt)

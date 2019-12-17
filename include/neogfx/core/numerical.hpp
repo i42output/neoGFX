@@ -27,7 +27,8 @@
 #include <ostream>
 #include <optional>
 #include <boost/math/constants/constants.hpp>
-#include "swizzle.hpp"
+#include <neogfx/core/swizzle.hpp>
+#include <neogfx/core/swizzle_array.hpp>
 
 namespace neogfx
 { 
@@ -56,9 +57,10 @@ namespace neogfx
 
         /* todo: specializations that use SIMD intrinsics. */
         template <typename T, uint32_t _Size, typename Type>
-        class basic_vector<T, _Size, Type, true>
+        class basic_vector<T, _Size, Type, true> : public swizzle_array<basic_vector<T, _Size, Type, true>, T, _Size>
         {
             typedef basic_vector<T, _Size, Type, true> self_type;
+            typedef swizzle_array<basic_vector<T, _Size, Type, true>, T, _Size> base_type;
         public:
             typedef self_type abstract_type; // todo: abstract base; std::array?
         public:
@@ -75,26 +77,28 @@ namespace neogfx
         public:
             template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2, Type> type; };
         public:
-            basic_vector() : v{} {}
+            basic_vector() : base_type{} {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type = 0) : v{ {x} } {}
+            explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type = 0) : base_type{ {x} } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type = 0) : v{ {x, y} } {}
+            explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type = 0) : base_type{ {x, y} } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type = 0) : v{ {x, y, z} } {}
+            explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type = 0) : base_type{ {x, y, z} } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type = 0) : v{ { x, y, z, w } } {}
+            explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type = 0) : base_type{ { x, y, z, w } } {}
             template <typename... Arguments>
-            explicit basic_vector(value_type value, Arguments... aArguments) : v{ {value, aArguments...} } {}
-            basic_vector(const array_type& v) : v{ v } {}
-            basic_vector(const basic_vector& other) : v{ other.v } {}
-            basic_vector(basic_vector&& other) : v{ std::move(other.v) } {}
+            explicit basic_vector(value_type value, Arguments... aArguments) : base_type{ {value, aArguments...} } {}
+            explicit basic_vector(const array_type& v) : base_type{ v } {}
+            template <typename V, typename A, uint32_t S, uint32_t... Indexes>
+            basic_vector(const swizzle<V, A, S, Indexes...>& aSwizzle) : self_type{ ~aSwizzle } {}
+            basic_vector(const self_type& other) : base_type{ other.v } {}
+            basic_vector(self_type&& other) : base_type{ std::move(other.v) } {}
             template <typename T2>
             basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             template <typename T2, uint32_t Size2, typename SFINAE = int>
-            basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : v{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
-            basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
-            basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
+            basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : base_type{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
+            basic_vector& operator=(const self_type& other) { v = other.v; return *this; }
+            basic_vector& operator=(self_type&& other) { v = std::move(other.v); return *this; }
             basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
         public:
             static uint32_t size() { return Size; }
@@ -105,6 +109,12 @@ namespace neogfx
             iterator begin() { return v.begin(); }
             iterator end() { return v.end(); }
             operator const array_type&() const { return v; }
+        public:
+            template <typename T2>
+            basic_vector<T2, Size, Type> as() const
+            {
+                return basic_vector<T2, Size, Type>{ *this };
+            }
         public:
             bool operator==(const basic_vector& right) const { return v == right.v; }
             bool operator!=(const basic_vector& right) const { return v != right.v; }
@@ -123,47 +133,7 @@ namespace neogfx
             basic_vector max(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
             value_type min() const { value_type result = v[0]; for (uint32_t index = 1; index < Size; ++index) result = std::min(v[index], result); return result; }
         public:
-            union
-            {
-                array_type v;
-
-                swizzle<vector_type, 1, 0> x;
-                swizzle<vector_type, 1, 1> y;
-                swizzle<vector_type, 1, 2> z;
-                swizzle<vector_type, 2, 0, 0> xx;
-                swizzle<vector_type, 2, 0, 1> xy;
-                swizzle<vector_type, 2, 0, 2> xz;
-                swizzle<vector_type, 2, 1, 0> yx;
-                swizzle<vector_type, 2, 1, 1> yy;
-                swizzle<vector_type, 2, 1, 2> yz;
-                swizzle<vector_type, 2, 2, 0> zx;
-                swizzle<vector_type, 2, 2, 1> zy;
-                swizzle<vector_type, 2, 2, 2> zz;
-                swizzle<vector_type, 3, 0, 0, 0> xxx;
-                swizzle<vector_type, 3, 0, 0, 1> xxy;
-                swizzle<vector_type, 3, 0, 0, 2> xxz;
-                swizzle<vector_type, 3, 0, 1, 0> xyx;
-                swizzle<vector_type, 3, 0, 1, 1> xyy;
-                swizzle<vector_type, 3, 0, 1, 2> xyz;
-                swizzle<vector_type, 3, 1, 0, 0> yxx;
-                swizzle<vector_type, 3, 1, 0, 1> yxy;
-                swizzle<vector_type, 3, 1, 0, 2> yxz;
-                swizzle<vector_type, 3, 1, 1, 0> yyx;
-                swizzle<vector_type, 3, 1, 1, 1> yyy;
-                swizzle<vector_type, 3, 1, 1, 2> yyz;
-                swizzle<vector_type, 3, 1, 2, 0> yzx;
-                swizzle<vector_type, 3, 1, 2, 1> yzy;
-                swizzle<vector_type, 3, 1, 2, 2> yzz;
-                swizzle<vector_type, 3, 2, 0, 0> zxx;
-                swizzle<vector_type, 3, 2, 0, 1> zxy;
-                swizzle<vector_type, 3, 2, 0, 2> zxz;
-                swizzle<vector_type, 3, 2, 1, 0> zyx;
-                swizzle<vector_type, 3, 2, 1, 1> zyy;
-                swizzle<vector_type, 3, 2, 1, 2> zyz;
-                swizzle<vector_type, 3, 2, 2, 0> zzx;
-                swizzle<vector_type, 3, 2, 2, 1> zzy;
-                swizzle<vector_type, 3, 2, 2, 2> zzz;
-            };
+            using base_type::v;
         };
 
         template <typename T, uint32_t _Size, typename Type>
@@ -199,15 +169,15 @@ namespace neogfx
             explicit basic_vector(const value_type& value, Arguments&&... aArguments) : v{ {value, std::forward<Arguments>(aArguments)...} } {}
             template <typename... Arguments>
             explicit basic_vector(value_type&& value, Arguments&&... aArguments) : v{ {std::move(value), std::forward<Arguments>(aArguments)...} } {}
-            basic_vector(const array_type& v) : v{ v } {}
-            basic_vector(const basic_vector& other) : v{ other.v } {}
-            basic_vector(basic_vector&& other) : v{ std::move(other.v) } {}
+            explicit basic_vector(const array_type& v) : v{ v } {}
+            basic_vector(const self_type& other) : v{ other.v } {}
+            basic_vector(self_type&& other) : v{ std::move(other.v) } {}
             template <typename T2>
             basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             template <typename T2, uint32_t Size2, typename SFINAE = int>
             basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : v{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
-            basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
-            basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
+            basic_vector& operator=(const self_type& other) { v = other.v; return *this; }
+            basic_vector& operator=(self_type&& other) { v = std::move(other.v); return *this; }
             basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
         public:
             static uint32_t size() { return Size; }
@@ -218,6 +188,12 @@ namespace neogfx
             iterator begin() { return v.begin(); }
             iterator end() { return v.end(); }
             operator const array_type&() const { return v; }
+        public:
+            template <typename T2>
+            basic_vector<T2, Size, Type> as() const
+            {
+                return basic_vector<T2, Size, Type>{ *this };
+            }
         public:
             bool operator==(const basic_vector& right) const { return v == right.v; }
             bool operator!=(const basic_vector& right) const { return v != right.v; }
@@ -1018,7 +994,7 @@ namespace neogfx
         inline scalar aabb_volume(const aabb& a)
         {
             auto extents = a.max - a.min;
-            return extents.x * extents.y * (static_cast<scalar>(extents.z) != 0.0 ? extents.z : 1.0);
+            return extents.x * extents.y * (extents.z != 0.0 ? extents.z : 1.0);
         }
 
         inline bool aabb_contains(const aabb& outer, const aabb& inner)

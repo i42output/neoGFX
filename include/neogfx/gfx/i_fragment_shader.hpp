@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 
 namespace neogfx
@@ -29,11 +30,29 @@ namespace neogfx
 
     class i_fragment_shader : public i_shader
     {
+        typedef i_fragment_shader self_type;
+    public:
+        typedef self_type abstract_type;
     };
 
     class i_gradient_shader : public i_fragment_shader
     {
+        typedef i_gradient_shader self_type;
     public:
-        virtual void set_gradient(i_rendering_context& aContext, gradient& aGradient, const rect& aBoundingBox) = 0; // todo: use abstract gradient and rect types when available
+        typedef self_type abstract_type;
+    public:
+        virtual void clear_gradient() = 0;
+        virtual void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) = 0; // todo: use abstract gradient and rect types when available
+    };
+
+    class i_texture_shader : public i_fragment_shader
+    {
+        typedef i_texture_shader self_type;
+    public:
+        typedef self_type abstract_type;
+    public:
+        virtual void clear_texture() = 0;
+        virtual void set_texture(const i_texture& aTexture) = 0;
+        virtual void set_effect(shader_effect aEffect) = 0;
     };
 }
