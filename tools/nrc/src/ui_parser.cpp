@@ -143,7 +143,7 @@ namespace neogfx::nrc
         auto& data = aResult;
         aNode.visit([&data](auto&& v)
         {
-            typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
+            typedef std::decay_t<decltype(v)> vt;
             if constexpr (std::is_same_v<vt, bool>)
                 data = neolib::simple_variant{ v };
             else if constexpr (std::is_integral_v<vt>)
@@ -163,7 +163,7 @@ namespace neogfx::nrc
         for (auto const& e : aNode.as<neolib::fjson_array>().contents())
             e.visit([&arrayData](auto&& v)
             {
-                typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
+                typedef std::decay_t<decltype(v)> vt;
                 data_t data;
                 if constexpr (std::is_same_v<vt, bool>)
                     data = neolib::simple_variant{ v };

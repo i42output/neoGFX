@@ -74,7 +74,7 @@ namespace neogfx
                 assign(aRhs, &v[Indexes]...);
                 return *this;
             }
-            template <typename T, typename SFINAE = std::enable_if_t<std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, swizzle_rebind_t<vector_type, S>>, sfinae>>
+            template <typename T, typename SFINAE = std::enable_if_t<std::is_same_v<std::decay_t<T>, swizzle_rebind_t<vector_type, S>>, sfinae>>
             swizzle& operator=(const T& aRhs)
             {
                 static_assert(greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");

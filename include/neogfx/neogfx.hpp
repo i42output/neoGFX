@@ -26,6 +26,7 @@ using namespace boost::multiprecision;
 
 #include <neolib/stdint.hpp>
 #include <neolib/reference_counted.hpp>
+#include <neolib/enum.hpp>
 #include <neolib/string.hpp>
 #include <neogfx/app/i18n.hpp>
 
@@ -34,7 +35,14 @@ namespace neogfx
     using namespace neolib::stdint_suffix;
     using namespace std::string_literals;
 
+    using neolib::to_const;
+
     using neolib::ref_ptr;
+
+    using neolib::to_abstract_type;
+    using neolib::abstract_t;
+    using neolib::enum_t;
+    using neolib::enum_to_string;
 
     using neolib::i_string;
     using neolib::string;

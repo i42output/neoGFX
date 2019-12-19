@@ -24,6 +24,7 @@
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/shader_array.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
 #include <neogfx/gfx/shader.hpp>
 #include <neogfx/gfx/i_fragment_shader.hpp>
@@ -74,7 +75,7 @@ namespace neogfx
         }
     };
 
-    static const uint32_t GRADIENT_FILTER_SIZE = 15;
+    constexpr uint32_t GRADIENT_FILTER_SIZE = 15;
     struct gradient_shader_data
     {
         //todo: use a mini atlas for the this
@@ -90,6 +91,8 @@ namespace neogfx
         typedef std::list<neogfx::gradient_shader_data> gradient_data_cache_t;
         typedef std::map<gradient, gradient_data_cache_t::iterator> gradient_data_cache_map_t;
         typedef std::deque<gradient_data_cache_map_t::iterator> gradient_data_cache_queue_t;
+    private:
+        static constexpr std::size_t GRADIENT_DATA_CACHE_QUEUE_SIZE = 64;
     public:
         standard_gradient_shader(const std::string& aName = "standard_gradient_shader") :
             standard_fragment_shader{ aName }
@@ -332,9 +335,9 @@ namespace neogfx
             set_uniform("gradientExponents"_s, vec2f{ gradientExponents.x, gradientExponents.y });
             basic_point<float> gradientCentre = (aGradient.centre() != std::nullopt ? *aGradient.centre() : point{});
             set_uniform("gradientCentre"_s, vec2f{ gradientCentre.x, gradientCentre.y });
-            set_uniform("gradientFilterSize"_s, static_cast<int>(GRADIENT_FILTER_SIZE));
-            auto& gradientArrays = iRenderingEngine.gradient_shader_data(aGradient);
-            rendering_engine().gradient_shader_program().set_uniform("gradientStopCount"_s, static_cast<int>(gradientArrays.stopCount));
+            auto& gradientArrays = gradient_shader_data(aGradient);
+            set_uniform("gradientFilterSize"_s, static_cast<int>(gradientArrays.filter.data().extents().cx));
+            set_uniform("gradientStopCount"_s, static_cast<int>(gradientArrays.stopCount));
             gradientArrays.stops.data().bind(2);
             gradientArrays.stopColours.data().bind(3);
             gradientArrays.filter.data().bind(4);
@@ -342,6 +345,69 @@ namespace neogfx
             set_uniform("gradientStopColours"_s, 3);
             set_uniform("gradientFilter"_s, 4);
             set_uniform("gradient"_s, true);
+        }
+    private:
+        neogfx::gradient_shader_data& gradient_shader_data(const gradient& aGradient)
+        {
+            auto instantiate_gradient = [this, &aGradient](neogfx::gradient_shader_data& aData)
+            {
+                auto combinedStops = aGradient.combined_stops();
+                iGradientStopPositions.reserve(combinedStops.size());
+                iGradientStopColours.reserve(combinedStops.size());
+                iGradientStopPositions.clear();
+                iGradientStopColours.clear();
+                for (const auto& stop : combinedStops)
+                {
+                    iGradientStopPositions.push_back(static_cast<float>(stop.first));
+                    iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
+                }
+                aData.stopCount = static_cast<uint32_t>(combinedStops.size());
+                aData.stops.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopPositions.size()), 1u } }, & iGradientStopPositions[0]);
+                aData.stopColours.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopColours.size()), 1u } }, & iGradientStopColours[0]);
+                auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
+                aData.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, & filter[0][0]);
+            };
+            if (aGradient.use_cache())
+            {
+                auto mapResult = iGradientDataCacheMap.try_emplace(aGradient, iGradientDataCache.end());
+                auto mapEntry = mapResult.first;
+                bool newGradient = mapResult.second;
+                if (!newGradient)
+                {
+                    auto queueEntry = std::find(iGradientDataCacheQueue.begin(), iGradientDataCacheQueue.end(), mapEntry);
+                    if (queueEntry != std::prev(iGradientDataCacheQueue.end()))
+                    {
+                        iGradientDataCacheQueue.erase(queueEntry);
+                        iGradientDataCacheQueue.push_back(mapEntry);
+                    }
+                }
+                else
+                {
+                    if (iGradientDataCache.size() < GRADIENT_DATA_CACHE_QUEUE_SIZE)
+                    {
+                        iGradientDataCache.emplace_back();
+                        mapEntry->second = std::prev(iGradientDataCache.end());
+                    }
+                    else
+                    {
+                        auto data = iGradientDataCacheQueue.front()->second;
+                        iGradientDataCacheMap.erase(iGradientDataCacheQueue.front());
+                        iGradientDataCacheQueue.pop_front();
+                        mapEntry->second = data;
+                    }
+                    iGradientDataCacheQueue.push_back(mapEntry);
+                }
+                if (newGradient)
+                    instantiate_gradient(*mapEntry->second);
+                return *mapEntry->second;
+            }
+            else
+            {
+                if (iUncachedGradient == std::nullopt)
+                    iUncachedGradient.emplace();
+                instantiate_gradient(*iUncachedGradient);
+                return *iUncachedGradient;
+            }
         }
     private:
         std::vector<float> iGradientStopPositions;

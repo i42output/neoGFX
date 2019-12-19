@@ -279,9 +279,9 @@ namespace neogfx
             auto e = gradient().exponents(); 
             if (e == std::nullopt) 
                 e = vec2{}; 
-            ~e->x = iMExponentSpinBox.value(); 
+            e->x = iMExponentSpinBox.value(); 
             if (iLinkedExponents.is_checked())
-                ~e->y = ~e->x;
+                e->y = e->x;
             iGradientSelector.set_gradient(gradient().with_exponents(e)); 
         });
 
@@ -292,9 +292,9 @@ namespace neogfx
             auto e = gradient().exponents();
             if (e == std::nullopt)
                 e = vec2{};
-            ~e->y = iNExponentSpinBox.value();
+            e->y = iNExponentSpinBox.value();
             if (iLinkedExponents.is_checked())
-                ~e->x = ~e->y;
+                e->x = e->y;
             iGradientSelector.set_gradient(gradient().with_exponents(e));
         });
 

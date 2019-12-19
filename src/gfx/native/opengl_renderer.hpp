@@ -69,9 +69,7 @@ namespace neogfx
     public:
         typedef neolib::vector<neolib::ref_ptr<i_shader_program>> shader_program_list;
         typedef std::map<std::pair<texture_sampling, size>, texture> ping_pong_buffers_t;
-        // constants
-    private:
-        static constexpr std::size_t GRADIENT_DATA_CACHE_QUEUE_SIZE = 64;
+        typedef i_rendering_engine::handle opengl_context;
         // construction
     public:
         opengl_renderer(neogfx::renderer aRenderer);

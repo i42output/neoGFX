@@ -31,7 +31,7 @@ namespace neogfx
     {
         typedef shader<i_vertex_shader> base_type;
     public:
-        typedef neolib::map<string, neolib::pair<uint32_t, shader_value_type::id_t>> attribute_map;
+        typedef neolib::map<string, neolib::pair<uint32_t, enum_t<shader_data_type>>> attribute_map;
     public:
         vertex_shader(const std::string& aName) :
             base_type{ shader_type::Vertex, aName }
@@ -51,9 +51,9 @@ namespace neogfx
                 set_dirty();
             }
         }
-        void add_attribute(const i_string& aName, uint32_t aLocation, shader_value_type::id_t aType) override
+        void add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) override
         {
-            iAttributes.emplace(aName, neolib::make_pair(aLocation, aType));
+            iAttributes.emplace(aName, neolib::make_pair(aLocation, enum_t<shader_data_type>{ aType }));
             set_dirty();
         }
     public:

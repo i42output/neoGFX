@@ -50,10 +50,11 @@ namespace neogfx
         bool is_last_in_stage(const i_shader& aShader) const override;
         const i_shader& first_in_stage(shader_type aStage) const override;
         const i_shader& next_in_stage(const i_shader& aPreviousShader) const override;
-        i_shader& add_shader(neolib::i_ref_ptr<i_shader>& aShader) override;
+        i_shader& add_shader(const neolib::i_ref_ptr<i_shader>& aShader) override;
         bool dirty() const override;
         void set_clean() override;
-        void activate(i_rendering_context& aRenderingContext) override;
+        void prepare(const i_rendering_context& aRenderingContext) override;
+        void activate(const i_rendering_context& aRenderingContext) override;
     private:
         string iName;
         mutable std::optional<void*> iHandle;

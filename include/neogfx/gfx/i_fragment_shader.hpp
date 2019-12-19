@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
+#include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 

@@ -121,11 +121,7 @@ namespace neogfx
         std::cout << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
         std::cout << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
 
-        auto defaultProgram = neolib::make_ref<opengl_shader_program>("neogfx::default_shader_program"_s).as<i_shader_program>();
-        defaultProgram->add_shader(neolib::make_ref<standard_vertex_shader>().as<i_shader>());
-        defaultProgram->add_shader(neolib::make_ref<standard_gradient_fragment_shader>().as<i_shader>());
-        defaultProgram->add_shader(neolib::make_ref<standard_texture_fragment_shader>().as<i_shader>());
-        add_shader_program(defaultProgram);
+        add_shader_program(neolib::make_ref<opengl_shader_program>("default_shader_program").as<i_shader_program>());
     }
 
     void opengl_renderer::cleanup()

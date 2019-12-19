@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/shader_program.hpp>
+#include <neogfx/gfx/i_fragment_shader.hpp>
 #include "opengl.hpp"
 
 namespace neogfx
@@ -30,7 +31,10 @@ namespace neogfx
     public:
         opengl_shader_program(const std::string& aName);
     public:
-        bool dirty() const override;
+        const i_gradient_shader& gradient_shader() const override;
+        i_gradient_shader& gradient_shader() override;
+        const i_texture_shader& texture_shader() const override;
+        i_texture_shader& texture_shader() override;
         void compile() override;
         void link() override;
         void use() override;
@@ -39,5 +43,8 @@ namespace neogfx
         void deactivate() override;
     private:
         GLuint gl_handle() const;
+    private:
+        ref_ptr<i_gradient_shader> iGradientShader;
+        ref_ptr<i_texture_shader> iTextureShader;
     };
 }

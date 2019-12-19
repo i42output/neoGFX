@@ -18,12 +18,40 @@
 */
 
 #include "opengl_shader_program.hpp"
+#include <neogfx/gfx/vertex_shader.hpp>
+#include <neogfx/gfx/fragment_shader.hpp>
 
 namespace neogfx
 {
     opengl_shader_program::opengl_shader_program(const std::string& aName) : 
         shader_program{ aName }
     {
+        if (aName == "default_shader_program")
+        {
+            add_shader(neolib::make_ref<standard_vertex_shader>().as<i_shader>());
+            iGradientShader = static_cast<i_gradient_shader&>(add_shader(neolib::make_ref<standard_gradient_shader>().as<i_shader>()));
+            iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
+        }
+    }
+
+    const i_gradient_shader& opengl_shader_program::gradient_shader() const
+    {
+        return *iGradientShader;
+    }
+
+    i_gradient_shader& opengl_shader_program::gradient_shader()
+    {
+        return *iGradientShader;
+    }
+
+    const i_texture_shader& opengl_shader_program::texture_shader() const
+    {
+        return *iTextureShader;
+    }
+
+    i_texture_shader& opengl_shader_program::texture_shader()
+    {
+        return *iTextureShader;
     }
 
     void opengl_shader_program::compile()
@@ -104,7 +132,7 @@ namespace neogfx
                             throw shader_program_error(glErrorString(errorCode));
                         std::visit([this, location](auto&& v)
                         {
-                            typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> data_type;
+                            typedef std::decay_t<decltype(v)> data_type;
                             if constexpr (std::is_same_v<bool, data_type>)
                                 glCheck(glUniform1i(location, v))
                             else if constexpr (std::is_same_v<float, data_type>)

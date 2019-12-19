@@ -147,7 +147,7 @@ namespace neogfx::nrc
             T result;
             std::visit([&result](auto&& v)
             {
-                typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
+                typedef std::decay_t<decltype(v)> vt;
                 if constexpr (std::is_same_v<vt, double>)
                     result = static_cast<T>(v);
                 else if constexpr (std::is_same_v<vt, int64_t>)
@@ -229,7 +229,7 @@ namespace neogfx::nrc
             colour result;
             std::visit([&result](auto&& v)
             {
-                typedef std::remove_const_t<std::remove_reference_t<decltype(v)>> vt;
+                typedef std::decay_t<decltype(v)> vt;
                 if constexpr (std::is_same_v<vt, int64_t>)
                     result = colour{ static_cast<uint32_t>(v) };
                 else if constexpr (std::is_same_v<vt, neolib::i_string>)

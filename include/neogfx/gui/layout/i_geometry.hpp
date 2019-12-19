@@ -181,8 +181,8 @@ namespace neogfx
         }
         void to_string(std::string& aHorizontalConstraint, std::string& aVerticalConstraint) const
         {
-            aHorizontalConstraint = neolib::enum_to_string(horizontal_size_policy());
-            aVerticalConstraint = neolib::enum_to_string(vertical_size_policy());
+            aHorizontalConstraint = enum_to_string(horizontal_size_policy());
+            aVerticalConstraint = enum_to_string(vertical_size_policy());
         }
     private:
         size_constraint iHorizontalConstraint;

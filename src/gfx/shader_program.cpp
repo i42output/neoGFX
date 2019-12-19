@@ -118,7 +118,7 @@ namespace neogfx
         throw shader_not_found();
     }
 
-    i_shader& shader_program::add_shader(neolib::i_ref_ptr<i_shader>& aShader)
+    i_shader& shader_program::add_shader(const neolib::i_ref_ptr<i_shader>& aShader)
     {
         if (iShaderIndex.find(aShader->name()) == iShaderIndex.end())
         {
@@ -145,10 +145,18 @@ namespace neogfx
                 shader->set_clean();
     }
 
-    void shader_program::activate(i_rendering_context&)
+    void shader_program::prepare(const i_rendering_context& aRenderingContext)
+    {
+        for (auto& stage : stages())
+            for (auto& shader : stage.second())
+                shader->prepare_uniforms(aRenderingContext, *this);
+    }
+
+    void shader_program::activate(const i_rendering_context& aContext)
     {
         if (dirty())
         {
+            prepare(aContext);
             compile();
             link();
         }

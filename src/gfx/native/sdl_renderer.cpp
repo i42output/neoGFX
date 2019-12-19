@@ -171,7 +171,7 @@ namespace neogfx
         //    std::cerr << "sdl_renderer: context deactivated" << std::endl;
     }
 
-    i_rendering_engine::opengl_context sdl_renderer::create_context(const i_render_target& aTarget)
+    sdl_renderer::opengl_context sdl_renderer::create_context(const i_render_target& aTarget)
     {
         return create_context(aTarget.target_type() == render_target_type::Surface ? aTarget.target_handle() : allocate_offscreen_window(&aTarget));
     }

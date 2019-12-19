@@ -68,15 +68,16 @@ namespace neogfx
         virtual bool is_last_in_stage(const i_shader& aShader) const = 0;
         virtual const i_shader& first_in_stage(shader_type aStage) const = 0;
         virtual const i_shader& next_in_stage(const i_shader& aPreviousShader) const = 0;
-        virtual i_shader& add_shader(neolib::i_ref_ptr<i_shader>& aShader) = 0;
+        virtual i_shader& add_shader(const neolib::i_ref_ptr<i_shader>& aShader) = 0;
         virtual bool dirty() const = 0;
         virtual void set_clean() = 0;
+        virtual void prepare(const i_rendering_context& aRenderingContext) = 0;
         virtual void compile() = 0;
         virtual void link() = 0;
         virtual void use() = 0;
         virtual void update_uniforms() = 0;
         virtual bool active() const = 0;
-        virtual void activate(i_rendering_context& aRenderingContext) = 0;
+        virtual void activate(const i_rendering_context& aRenderingContext) = 0;
         virtual void deactivate() = 0;
     public:
         bool have_stage(shader_type aStage) const

@@ -63,7 +63,7 @@ namespace neogfx
         void* handle(const i_shader_program& aProgram) const override
         {
             if (!aProgram.is_first_in_stage(*this))
-                return aProgram.first_in_stage(*this)
+                return aProgram.first_in_stage(type()).handle(aProgram);
             if (iHandle == std::nullopt)
                 iHandle = service<i_rendering_engine>().create_shader_object(type());
             if (*iHandle == nullptr)
@@ -125,19 +125,19 @@ namespace neogfx
         using i_shader::set_uniform;
         void set_uniform(const i_string& aName, const abstract_value_type& aValue) override
         {
-            if (iUniforms.find(aName) == iUniforms.end() || iUniforms[aName].which() != aValue.which())
+            if (iUniforms.find(aName) == iUniforms.end() || iUniforms[aName].first().which() != aValue.which())
             {
-                iUniforms.emplace(aName, neolib::make_pair(aValue, true));
+                iUniforms.emplace(aName, neolib::make_pair(shader_value_type{ aValue }, true));
                 set_dirty();
             }
-            else if (iUniforms[aName].first != aValue)
+            else if (iUniforms[aName].first() != aValue)
             {
                 if ((iUniforms[aName].first().which() == shader_data_type::FloatArray &&
                     iUniforms[aName].first().get<shader_float_array>().size() != aValue.get<shader_float_array>().size()) ||
                     (iUniforms[aName].first().which() == shader_data_type::DoubleArray &&
                     iUniforms[aName].first().get<shader_double_array>().size() != aValue.get<shader_double_array>().size()))
                     set_dirty();
-                iUniforms[aName] = neolib::make_pair(aValue, true);
+                iUniforms.emplace(aName, neolib::make_pair(shader_value_type{ aValue }, true));
             }
         }
         const variable_map& variables() const override
@@ -155,14 +155,17 @@ namespace neogfx
         }
         void add_variable(const i_string& aName, const abstract_t<shader_variable>& aVariable) override
         {
-            if (iVariables.find(aName) == iVariables.end() || iVariables[aName].second() != aVariable.second().second())
+            if (iVariables.find(aName) == iVariables.end() || iVariables[aName].second() != aVariable.second())
             {
                 iVariables.emplace(aName, aVariable);
                 set_dirty();
             }
         }
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+        void prepare_uniforms(const i_rendering_context&, i_shader_program&) override
+        {
+        }
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
             if (aProgram.is_first_in_stage(*this))
             {
@@ -217,7 +220,7 @@ namespace neogfx
                         "%INVOKE_FIRST%"
                         "}\n"
                     };
-                    if (aProgram.first_in_stage(*this))
+                    if (aProgram.is_first_in_stage(*this))
                         aOutput.replace_all("%CODE%"_s, source);
                     else
                         aOutput += source;
@@ -225,7 +228,7 @@ namespace neogfx
                 else
                     throw unsupported_shader_language();
             }
-            if (!aProgram.first_in_stage(*this) && !aProgram.last_in_stage(*this))
+            if (!aProgram.is_first_in_stage(*this) && !aProgram.is_last_in_stage(*this))
             {
                 if (aLanguage == shader_language::Glsl)
                     aOutput += "%CODE%"_s;
@@ -270,10 +273,10 @@ namespace neogfx
                     case shader_data_type::DVec4:
                         uniformDefinition = "uniform dvec4 %I%;\n"_s;
                         break;
-                    case shader_data_type::Mat44:
+                    case shader_data_type::Mat4:
                         uniformDefinition = "uniform mat4 %I%;\n"_s;
                         break;
-                    case shader_data_type::DMat44:
+                    case shader_data_type::DMat4:
                         uniformDefinition = "uniform dmat4 %I%;\n"_s;
                         break;
                     case shader_data_type::FloatArray:
@@ -298,7 +301,7 @@ namespace neogfx
                 for (auto const& v : variables())
                 {
                     string variableDefinition;
-                    switch (v.second())
+                    switch (v.second().second().value<shader_data_type>())
                     {
                     case shader_data_type::Boolean:
                         variableDefinition = "%L%%Q% mediump bool %I%;\n"_s;
@@ -312,42 +315,34 @@ namespace neogfx
                     case shader_data_type::Int:
                         variableDefinition = "%L%%Q% mediump int %I%;\n"_s;
                         break;
-                    case shader_data_type::Vec2f:
+                    case shader_data_type::Vec2:
                         variableDefinition = "%L%%Q% mediump vec2 %I%;\n"_s;
                         break;
-                    case shader_data_type::Vec2:
+                    case shader_data_type::DVec2:
                         variableDefinition = "%L%%Q% mediump dvec2 %I%;\n"_s;
                         break;
-                    case shader_data_type::Vec3f:
+                    case shader_data_type::Vec3:
                         variableDefinition = "%L%%Q% mediump vec3 %I%;\n"_s;
                         break;
-                    case shader_data_type::Vec3:
+                    case shader_data_type::DVec3:
                         variableDefinition = "%L%%Q% mediump dvec3 %I%;\n"_s;
                         break;
-                    case shader_data_type::Vec4f:
+                    case shader_data_type::Vec4:
                         variableDefinition = "%L%%Q% mediump vec4 %I%;\n"_s;
                         break;
-                    case shader_data_type::Vec4:
+                    case shader_data_type::DVec4:
                         variableDefinition = "%L%%Q% mediump dvec4 %I%;\n"_s;
                         break;
-                    case shader_data_type::Mat44f:
+                    case shader_data_type::Mat4:
                         variableDefinition = "%L%%Q% mediump mat4 %I%;\n"_s;
                         break;
-                    case shader_data_type::Mat44:
+                    case shader_data_type::DMat4:
                         variableDefinition = "%L%%Q% mediump dmat4 %I%;\n"_s;
                         break;
-                    case shader_data_type::FloatArray:
-                        variableDefinition = "%L%%Q% mediump float %I%["_s + string{ std::to_string(u.second().first().get<shader_float_array>().size()) } +"];\n"_s;
-                        break;
-                    case shader_data_type::DoubleArray:
-                        variableDefinition = "%L%%Q% mediump double %I%["_s + string{ std::to_string(u.second().first().get<shader_double_array>().size()) } +"];\n"_s;
-                        break;
-                    default:
-                        throw invalid_variable_type();
                     }
-                    variableDefinition.replace_all("%Q%"_s, neolib::enum_to_string<string>(v.second().first().second()));
+                    variableDefinition.replace_all("%Q%"_s, enum_to_string<shader_variable_qualifier>(v.second().first().second()));
                     variableDefinition.replace_all("%L%"_s, "layout (location = %L%) "_s);
-                    variableDefinition.replace_all("%L%"_s, std::to_string(v.second().first().first()));
+                    variableDefinition.replace_all("%L%"_s, neolib::string{ std::to_string(v.second().first().first()) });
                     variableDefinition.replace_all("%I%"_s, v.first());
                     variableDefinitions += variableDefinition;
                 }
@@ -357,7 +352,7 @@ namespace neogfx
                 {
                     aOutput.replace_all("%INVOKE_DECLARATIONS%"_s, ""_s);
                     aOutput.replace_all("%INVOKE_FIRST%"_s, "    %FIRST_NAME%(%FIRST_ARGS%);\n"_s);
-                    aOutput.replace_all("%FIRST_NAME%"_s, aProgram.first_in_stage(*this).name());
+                    aOutput.replace_all("%FIRST_NAME%"_s, aProgram.first_in_stage(type()).name());
                 }
                 aOutput.replace_all("%INVOKE_NEXT%"_s, "    %NAME%(%ARGS%);\n"_s);
             }

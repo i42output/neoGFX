@@ -39,7 +39,7 @@ namespace neogfx
         Fragment
     };
 
-    enum class shader_variable_qualifier
+    enum class shader_variable_qualifier : uint32_t
     {
         In,
         Out
@@ -126,7 +126,8 @@ namespace neogfx
     typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec3f, vec3, vec4f, vec4, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
 
     typedef uint32_t shader_variable_location;
-    typedef neolib::pair<neolib::pair<shader_variable_location, shader_variable_qualifier>, shader_value_type::id_t> shader_variable;
+    typedef neolib::pair<shader_variable_location, enum_t<shader_variable_qualifier>> shader_variable_lq;
+    typedef neolib::pair<shader_variable_lq, enum_t<shader_data_type>> shader_variable;
 
     class i_rendering_context;
     class i_shader_program;
@@ -194,12 +195,12 @@ namespace neogfx
         template <typename T>
         void add_in_variable(const i_string& aName, shader_variable_location aLocation)
         {
-            add_variable(aName, shader_variable{ { aLocation, shader_variable_qualifier::In }, static_cast<shader_value_type::id_t>(neolib::index_of<T, shader_value_type>()) });
+            add_variable(aName, shader_variable{ shader_variable_lq{ aLocation, shader_variable_qualifier::In }, static_cast<shader_data_type>(neolib::index_of<T, shader_value_type>()) });
         }
         template <typename T>
         void add_out_variable(const i_string& aName, shader_variable_location aLocation)
         {
-            add_variable(aName, shader_variable{ { aLocation, shader_variable_qualifier::Out }, static_cast<shader_value_type::id_t>(neolib::index_of<T, shader_value_type>()) });
+            add_variable(aName, shader_variable{ shader_variable_lq{ aLocation, shader_variable_qualifier::Out }, static_cast<shader_data_type>(neolib::index_of<T, shader_value_type>()) });
         }
     public:
         virtual void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram) = 0;
