@@ -53,7 +53,7 @@ namespace neogfx
         }
         void add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) override
         {
-            iAttributes.emplace(aName, neolib::make_pair(aLocation, enum_t<shader_data_type>{ aType }));
+            iAttributes.emplace(aName, aLocation, enum_t<shader_data_type>{ aType });
             set_dirty();
         }
     public:
@@ -133,8 +133,8 @@ namespace neogfx
     public:
         void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program&) override
         {
-            set_uniform("uProjectionMatrix"_s, projection_matrix(aRenderingContext).transposed());
-            set_uniform("uTransformationMatrix"_s, transformation_matrix(aRenderingContext));
+            set_uniform("uProjectionMatrix"_s, projection_matrix(aRenderingContext).transposed().as<float>());
+            set_uniform("uTransformationMatrix"_s, transformation_matrix(aRenderingContext).as<float>());
         }
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {

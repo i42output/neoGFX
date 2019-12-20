@@ -62,7 +62,7 @@ namespace neogames
             }
             card_type& card_at(size_type aSlotIndex)
             {
-                return const_cast<card_type&>(to_const(*this).card_at(aSlotIndex));
+                return const_cast<card_type&>(neolib::to_const(*this).card_at(aSlotIndex));
             }
             bool contains(typename card_type::value aCardValue) const
             {

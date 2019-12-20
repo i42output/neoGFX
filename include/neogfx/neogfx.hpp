@@ -39,7 +39,7 @@ namespace neogfx
 
     using neolib::ref_ptr;
 
-    using neolib::to_abstract_type;
+    using neolib::to_abstract;
     using neolib::abstract_t;
     using neolib::enum_t;
     using neolib::enum_to_string;

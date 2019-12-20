@@ -560,6 +560,12 @@ namespace neogfx
             basic_matrix& operator=(const basic_matrix& other) { m = other.m; return *this; }
             basic_matrix& operator=(basic_matrix&& other) { m = std::move(other.m); return *this; }
         public:
+            template <typename T2>
+            basic_matrix<T2, Rows, Columns> as() const
+            {
+                return basic_matrix<T2, Rows, Columns>{ *this };
+            }
+        public:
             std::pair<uint32_t, uint32_t> size() const { return std::make_pair(Rows, Columns); }
             const column_type& operator[](uint32_t aColumn) const { return m[aColumn]; }
             column_type& operator[](uint32_t aColumn) { return m[aColumn]; }

@@ -75,6 +75,7 @@ namespace neogfx
                 code.replace_all("%FUNCTIONS%"_s, ""_s);
                 code.replace_all("%CODE%"_s, ""_s);
             }
+            code.replace_all("%INVOKE_NEXT%"_s, ""_s);
             auto shaderHandle = to_gl_handle<GLuint>(shaders[0]->handle(*this));
             const char* codeArray[] = { code.c_str() };
             glCheck(glShaderSource(shaderHandle, 1, codeArray, NULL));

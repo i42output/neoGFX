@@ -735,6 +735,16 @@ namespace neogfx
         }    
     }
 
+    void opengl_rendering_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
+    {
+        // todo
+    }
+
+    void opengl_rendering_context::line_stipple_off()
+    {
+        // todo
+    }
+
     bool opengl_rendering_context::is_subpixel_rendering_on() const
     {
         return iSubpixelRendering;

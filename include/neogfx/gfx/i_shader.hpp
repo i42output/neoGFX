@@ -75,8 +75,8 @@ namespace neogfx
 template <>
 const neolib::enum_enumerators_t<neogfx::shader_variable_qualifier> neolib::enum_enumerators_v<neogfx::shader_variable_qualifier>
 {
-    declare_enum_string(neogfx::shader_variable_qualifier, In)
-    declare_enum_string(neogfx::shader_variable_qualifier, Out)
+    declare_enum_string_explicit(neogfx::shader_variable_qualifier, In, in)
+    declare_enum_string_explicit(neogfx::shader_variable_qualifier, Out, out)
 };
 
 template <>
@@ -164,7 +164,7 @@ namespace neogfx
         template <typename T>
         std::enable_if_t<!std::is_enum_v<T>, void> set_uniform(const i_string& aName, const T& aValue)
         {
-            set_uniform(aName, shader_value_type{ aValue });
+            set_uniform(aName, to_abstract(shader_value_type{ aValue }));
         }
         template <typename Enum>
         std::enable_if_t<std::is_enum_v<Enum>, void> set_uniform(const i_string& aName, Enum aEnum)

@@ -298,3 +298,14 @@ Debug
 /tools/glsl2hpp/build/win32/vs2019/x64/Tools
 /tools/nrc/build/win32/vs2019/x64/Tools
 /tools/nrc/element_libraries/default/build/win32/default/x64/Tools
+/build/win32/vs2019/x64/Tools - Debug
+/build/win32/vs2019/x64/Tools_Debug
+/tools/DesignStudio/build/win32/vs2019/x64/Tools - Debug/DesignStudio.tlog
+/tools/DesignStudio/build/win32/vs2019/x64/Tools - Debug
+/tools/DesignStudio/build/win32/vs2019/x64/Tools_Debug
+/tools/glsl2hpp/build/win32/vs2019/x64/Tools - Debug
+/tools/glsl2hpp/build/win32/vs2019/x64/Tools_Debug
+/tools/nrc/build/win32/vs2019/x64/Tools - Debug
+/tools/nrc/build/win32/vs2019/x64/Tools_Debug
+/tools/nrc/element_libraries/default/build/win32/default/x64/Tools - Debug
+/tools/nrc/element_libraries/default/build/win32/default/x64/Tools_Debug

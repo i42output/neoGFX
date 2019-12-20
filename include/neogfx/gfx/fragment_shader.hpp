@@ -450,7 +450,7 @@ namespace neogfx
                     "            ivec2 texCoord = ivec2(TexCoord * textureExtents);\n"
                     "            texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
                     "        }\n"
-                    "        switch(texDataFormat)\n"
+                    "        switch(textureDataFormat)\n"
                     "        {\n"
                     "        case 1:\n" // RGBA
                     "        default:\n"
@@ -462,7 +462,7 @@ namespace neogfx
                     "            texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
                     "            break;\n"
                     "        }\n"
-                    "        switch(effect)\n"
+                    "        switch(textureEffect)\n"
                     "        {\n"
                     "        case 0:\n" // effect: None
                     "            color = texel.rgba * color;\n"
@@ -509,6 +509,10 @@ namespace neogfx
             set_uniform("textureDataFormat"_s, aTexture.data_format());
             set_uniform("textureMultisample"_s, aTexture.sampling());
             set_uniform("textureExtents"_s, aTexture.storage_extents().to_vec2().as<float>());
+        }
+        void set_effect(shader_effect aEffect) override
+        {
+            set_uniform("textureEffect"_s, aEffect);
         }
     };
 }

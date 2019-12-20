@@ -135,5 +135,6 @@ namespace neogfx
         std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
         ping_pong_buffers_t iPingPongBuffer1s;
         ping_pong_buffers_t iPingPongBuffer2s;
+        ref_ptr<i_shader_program> iDefaultShaderProgram;
     };
 }

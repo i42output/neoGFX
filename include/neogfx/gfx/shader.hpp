@@ -133,9 +133,9 @@ namespace neogfx
             else if (iUniforms[aName].first() != aValue)
             {
                 if ((iUniforms[aName].first().which() == shader_data_type::FloatArray &&
-                    iUniforms[aName].first().get<shader_float_array>().size() != aValue.get<shader_float_array>().size()) ||
+                    iUniforms[aName].first().get<abstract_t<shader_float_array>>().size() != aValue.get<abstract_t<shader_float_array>>().size()) ||
                     (iUniforms[aName].first().which() == shader_data_type::DoubleArray &&
-                    iUniforms[aName].first().get<shader_double_array>().size() != aValue.get<shader_double_array>().size()))
+                    iUniforms[aName].first().get<abstract_t<shader_double_array>>().size() != aValue.get<abstract_t<shader_double_array>>().size()))
                     set_dirty();
                 iUniforms.emplace(aName, neolib::make_pair(shader_value_type{ aValue }, true));
             }
@@ -173,7 +173,7 @@ namespace neogfx
                 {
                     static const string sOpenGlSource =
                     {
-                        "#version 400\n"
+                        "#version 410\n"
                         "precision mediump float;\n"
                         "\n"
                         "%UNIFORMS%"
@@ -280,10 +280,10 @@ namespace neogfx
                         uniformDefinition = "uniform dmat4 %I%;\n"_s;
                         break;
                     case shader_data_type::FloatArray:
-                        uniformDefinition = "uniform float %I%["_s + string{ std::to_string(u.second().first().get<shader_float_array>().size()) } + "];\n"_s;
+                        uniformDefinition = "uniform float %I%["_s + string{ std::to_string(u.second().first().get<abstract_t<shader_float_array>>().size()) } + "];\n"_s;
                         break;
                     case shader_data_type::DoubleArray:
-                        uniformDefinition = "uniform double %I%["_s + string{ std::to_string(u.second().first().get<shader_double_array>().size()) } +"];\n"_s;
+                        uniformDefinition = "uniform double %I%["_s + string{ std::to_string(u.second().first().get<abstract_t<shader_double_array>>().size()) } +"];\n"_s;
                         break;
                     case shader_data_type::Sampler2D:
                         uniformDefinition = "uniform sampler2D %I%;\n"_s;
@@ -304,40 +304,40 @@ namespace neogfx
                     switch (v.second().second().value<shader_data_type>())
                     {
                     case shader_data_type::Boolean:
-                        variableDefinition = "%L%%Q% mediump bool %I%;\n"_s;
+                        variableDefinition = "%L%%Q% bool %I%;\n"_s;
                         break;
                     case shader_data_type::Float:
-                        variableDefinition = "%L%%Q% mediump float %I%;\n"_s;
+                        variableDefinition = "%L%%Q% float %I%;\n"_s;
                         break;
                     case shader_data_type::Double:
-                        variableDefinition = "%L%%Q% mediump double %I%;\n"_s;
+                        variableDefinition = "%L%%Q% double %I%;\n"_s;
                         break;
                     case shader_data_type::Int:
-                        variableDefinition = "%L%%Q% mediump int %I%;\n"_s;
+                        variableDefinition = "%L%%Q% int %I%;\n"_s;
                         break;
                     case shader_data_type::Vec2:
-                        variableDefinition = "%L%%Q% mediump vec2 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% vec2 %I%;\n"_s;
                         break;
                     case shader_data_type::DVec2:
-                        variableDefinition = "%L%%Q% mediump dvec2 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% dvec2 %I%;\n"_s;
                         break;
                     case shader_data_type::Vec3:
-                        variableDefinition = "%L%%Q% mediump vec3 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% vec3 %I%;\n"_s;
                         break;
                     case shader_data_type::DVec3:
-                        variableDefinition = "%L%%Q% mediump dvec3 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% dvec3 %I%;\n"_s;
                         break;
                     case shader_data_type::Vec4:
-                        variableDefinition = "%L%%Q% mediump vec4 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% vec4 %I%;\n"_s;
                         break;
                     case shader_data_type::DVec4:
-                        variableDefinition = "%L%%Q% mediump dvec4 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% dvec4 %I%;\n"_s;
                         break;
                     case shader_data_type::Mat4:
-                        variableDefinition = "%L%%Q% mediump mat4 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% mat4 %I%;\n"_s;
                         break;
                     case shader_data_type::DMat4:
-                        variableDefinition = "%L%%Q% mediump dmat4 %I%;\n"_s;
+                        variableDefinition = "%L%%Q% dmat4 %I%;\n"_s;
                         break;
                     }
                     variableDefinition.replace_all("%Q%"_s, enum_to_string<shader_variable_qualifier>(v.second().first().second()));
@@ -347,7 +347,7 @@ namespace neogfx
                     variableDefinitions += variableDefinition;
                 }
                 aOutput.replace_all("%VARIABLES%"_s, variableDefinitions);
-                aOutput.replace_all("%INVOKE_DECLARATIONS%"_s, "void %NAME%(%PARAMETERS%);%INVOKE_DECLARATIONS%"_s);
+                aOutput.replace_all("%INVOKE_DECLARATIONS%"_s, "void %NAME%(%PARAMETERS%);\n%INVOKE_DECLARATIONS%"_s);
                 if (aProgram.is_last_in_stage(*this))
                 {
                     aOutput.replace_all("%INVOKE_DECLARATIONS%"_s, ""_s);
