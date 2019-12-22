@@ -24,10 +24,10 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <neolib/jar.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/string_ci.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 #include <neogfx/gfx/text/emoji_atlas.hpp>
-#include "i_font_manager.hpp"
+#include <neogfx/gfx/text/i_font_manager.hpp>
 
 namespace neogfx
 {

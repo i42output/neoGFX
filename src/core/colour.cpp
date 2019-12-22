@@ -23,7 +23,7 @@
 #include <iomanip>
 #include <boost/lexical_cast.hpp>
 #include <neolib/vecarray.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/string_ci.hpp>
 #include <neogfx/core/colour.hpp>
 
 namespace neogfx
