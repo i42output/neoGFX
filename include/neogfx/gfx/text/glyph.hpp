@@ -23,7 +23,7 @@
 #include <optional>
 #include <neolib/allocator.hpp>
 #include <neolib/vecarray.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/string_ci.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>

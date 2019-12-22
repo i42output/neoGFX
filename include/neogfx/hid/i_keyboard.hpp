@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <optional>
 #include <neolib/vecarray.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/string_ci.hpp>
 #include <neogfx/core/event.hpp>
 
 namespace neogfx
