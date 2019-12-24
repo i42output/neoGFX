@@ -50,6 +50,7 @@ namespace neogfx
         bool is_last_in_stage(const i_shader& aShader) const override;
         const i_shader& first_in_stage(shader_type aStage) const override;
         const i_shader& next_in_stage(const i_shader& aPreviousShader) const override;
+        const i_shader& last_in_stage(shader_type aStage) const override;
         i_shader& add_shader(const neolib::i_ref_ptr<i_shader>& aShader) override;
         bool dirty() const override;
         void set_clean() override;

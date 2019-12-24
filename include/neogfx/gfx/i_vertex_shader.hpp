@@ -45,11 +45,16 @@ namespace neogfx
     public:
         typedef self_type abstract_type;
     public:
-        typedef neolib::i_map<i_string, neolib::i_pair<uint32_t, abstract_t<enum_t<shader_data_type>>>> attribute_map;
+        typedef neolib::i_map<i_string, abstract_t<shader_variable>*> attribute_map;
     public:
         virtual const attribute_map& attributes() const = 0;
         virtual void clear_attribute(const i_string& aName) = 0;
-        virtual void add_attribute(const i_string& aName, uint32_t aLocation, shader_value_type::id_t aType) = 0;
+        virtual void add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) = 0;
+        template <typename T>
+        void add_attribute(const i_string& aName, shader_variable_location aLocation)
+        {
+            return add_attribute(aName, aLocation, static_cast<shader_data_type>(neolib::index_of<T, shader_value_type>()));
+        }    
     public:
         virtual bool has_standard_vertex_matrices() const = 0;
         virtual const i_standard_vertex_matrices& standard_vertex_matrices() const = 0;

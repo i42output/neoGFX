@@ -29,6 +29,7 @@ namespace neogfx
         if (aName == "default_shader_program")
         {
             add_shader(neolib::make_ref<standard_vertex_shader>().as<i_shader>());
+            iDefaultShader = static_cast<i_fragment_shader&>(add_shader(neolib::make_ref<standard_fragment_shader<>>().as<i_shader>()));
             iGradientShader = static_cast<i_gradient_shader&>(add_shader(neolib::make_ref<standard_gradient_shader>().as<i_shader>()));
             iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
         }
@@ -67,15 +68,41 @@ namespace neogfx
             if (shaders.empty())
                 continue;
             string code;
+            string invokeDeclarations;
+            string invokes;
+            string invokeResults;
+            neolib::set<shader_variable> ins;
+            neolib::set<shader_variable> outs;
             for (auto const& shader : shaders)
             {
                 if (shader->disabled())
                     continue;
+                code += "\n"_s;
+                for (auto const& in : shader->in_variables())
+                    ins.insert(in);
+                for (auto const& out : shader->out_variables())
+                    outs.insert(out);
                 shader->generate_code(*this, shader_language::Glsl, code);
-                code.replace_all("%FUNCTIONS%"_s, ""_s);
-                code.replace_all("%CODE%"_s, ""_s);
+                shader->generate_invoke(*this, shader_language::Glsl, invokes);
             }
-            code.replace_all("%INVOKE_NEXT%"_s, ""_s);
+            for (auto const& out : outs)
+            {
+                auto in = ins.find(out);
+                if (in == ins.end())
+                    throw shader_variable_not_found();
+                invokeDeclarations += "    "_s + enum_to_string<shader_data_type>(out.type()) + " arg"_s + out.name() + " = "_s + in->name() + ";\n"_s;
+                invokeResults += "    "_s + out.name() + " = arg"_s + out.name() + ";\n"_s;
+            }
+            static const string mainFunction =
+            {
+                "\n"
+                "void main()\n"
+                "{\n"
+                "%INVOKES%"
+                "}\n"_s
+            };
+            code += mainFunction;
+            code.replace_all("%INVOKES%"_s, invokeDeclarations + invokes + invokeResults);
             auto shaderHandle = to_gl_handle<GLuint>(shaders[0]->handle(*this));
             const char* codeArray[] = { code.c_str() };
             glCheck(glShaderSource(shaderHandle, 1, codeArray, NULL));
@@ -97,7 +124,7 @@ namespace neogfx
         if (have_stage(shader_type::Vertex))
             for (auto const& vertexShader : stages().at(shader_type::Vertex))
                 for (auto const& attribute : static_cast<const i_vertex_shader&>(*vertexShader).attributes())
-                    glCheck(glBindAttribLocation(gl_handle(), attribute.second().first(), attribute.first().c_str()));
+                    glCheck(glBindAttribLocation(gl_handle(), attribute.second()->location(), attribute.first().c_str()));
     }
 
     void opengl_shader_program::link()

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/map.hpp>
+#include <neolib/set.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 
@@ -37,7 +38,7 @@ namespace neogfx
         typedef shader_value_type value_type;
     private:
         typedef neolib::map<string, neolib::pair<value_type, bool>> uniform_map;
-        typedef neolib::map<string, shader_variable> variable_map;
+        typedef neolib::set<shader_variable> variable_list;
     public:
         shader(shader_type aType, const std::string& aName, bool aEnabled = true) : 
             iType{ aType },
@@ -140,26 +141,41 @@ namespace neogfx
                 iUniforms.emplace(aName, neolib::make_pair(shader_value_type{ aValue }, true));
             }
         }
-        const variable_map& variables() const override
+        const variable_list& in_variables() const override
         {
-            return iVariables;
+            return iInVariables;
+        }
+        const variable_list& out_variables() const override
+        {
+            return iOutVariables;
         }
         void clear_variable(const i_string& aName) override
         {
-            auto v = iVariables.find(aName);
-            if (v != iVariables.end())
-            {
-                iVariables.erase(v);
-                set_dirty();
-            }
+            for (auto v = in_variables().begin(); v != in_variables().end(); ++v)
+                if (v->name() == aName)
+                {
+                    in_variables().erase(v);
+                    return;
+                }
+            for (auto v = out_variables().begin(); v != out_variables().end(); ++v)
+                if (v->name() == aName)
+                {
+                    out_variables().erase(v);
+                    return;
+                }
         }
-        void add_variable(const i_string& aName, const abstract_t<shader_variable>& aVariable) override
+        i_shader_variable& add_variable(const i_shader_variable& aVariable) override
         {
-            if (iVariables.find(aName) == iVariables.end() || iVariables[aName].second() != aVariable.second())
+            auto& variableList = (aVariable.qualifier().value<shader_variable_qualifier>() == shader_variable_qualifier::In ? 
+                iInVariables : iOutVariables);
+            auto existing = variableList.find(aVariable);
+            if (existing == variableList.end() || existing->name() != aVariable.name())
             {
-                iVariables.emplace(aName, aVariable);
+                auto& v = *variableList.insert(aVariable);
                 set_dirty();
+                return v;
             }
+            return *existing;
         }
     public:
         void prepare_uniforms(const i_rendering_context&, i_shader_program&) override
@@ -178,8 +194,7 @@ namespace neogfx
                         "\n"
                         "%UNIFORMS%"
                         "%VARIABLES%"
-                        "%INVOKE_DECLARATIONS%"
-                        "%CODE%"
+                        "\n"_s
                     };
                     static const string sOpenGlEsSource =
                     {
@@ -188,9 +203,7 @@ namespace neogfx
                         "\n"
                         "%UNIFORMS%"
                         "%VARIABLES%"
-                        "%INVOKE_DECLARATIONS%"
-                        "%FUNCTIONS%"
-                        "%CODE%"
+                        "\n"_s
                     };
                     switch (service<i_rendering_engine>().renderer())
                     {
@@ -211,153 +224,81 @@ namespace neogfx
             {
                 if (aLanguage == shader_language::Glsl)
                 {
-                    aOutput.replace_all("%INVOKE_NEXT%"_s, ""_s);
-                    static const string source =
+                    std::map<string, string> uniformDefinitions;
+                    std::map<std::pair<shader_variable_qualifier, shader_variable_location>, string> variableDefinitions;
+                    for (auto const& s : aProgram.stages().at(type()))
                     {
-                        "%CODE%"
-                        "void main()\n"
-                        "{\n"
-                        "%INVOKE_FIRST%"
-                        "}\n"
-                    };
-                    if (aProgram.is_first_in_stage(*this))
-                        aOutput.replace_all("%CODE%"_s, source);
-                    else
-                        aOutput += source;
+                        for (auto const& u : s->uniforms())
+                        {
+                            string uniformDefinition;
+                            switch (u.second().first().which())
+                            {
+                            case shader_data_type::FloatArray:
+                                uniformDefinition = "uniform float %I%["_s + to_string(u.second().first().get<abstract_t<shader_float_array>>().size()) +"];\n"_s;
+                                break;
+                            case shader_data_type::DoubleArray:
+                                uniformDefinition = "uniform double %I%["_s + to_string(u.second().first().get<abstract_t<shader_double_array>>().size()) +"];\n"_s;
+                                break;
+                            default:
+                                uniformDefinition = "uniform %T% %I%;\n"_s;
+                                break;
+                            }
+                            uniformDefinition.replace_all("%T%"_s, enum_to_string(u.second().first().which()));
+                            uniformDefinition.replace_all("%I%"_s, u.first());
+                            uniformDefinitions[u.first()] = uniformDefinition;
+                        }
+                        for (auto const& v : s->in_variables())
+                        {
+                            string variableDefinition = "layout (location = %L%) in %T% %I%;\n"_s;
+                            variableDefinition.replace_all("%T%"_s, enum_to_string<shader_data_type>(v.type()));
+                            variableDefinition.replace_all("%L%"_s, to_string(v.location()));
+                            variableDefinition.replace_all("%I%"_s, v.name());                            
+                            variableDefinitions[std::make_pair(v.qualifier().value<shader_variable_qualifier>(), v.location())] = variableDefinition;
+                        };
+                        for (auto const& v : s->out_variables())
+                        {
+                            string variableDefinition = "layout (location = %L%) out %T% %I%;\n"_s;
+                            variableDefinition.replace_all("%T%"_s, enum_to_string<shader_data_type>(v.type()));
+                            variableDefinition.replace_all("%L%"_s, to_string(v.location()));
+                            variableDefinition.replace_all("%I%"_s, v.name());
+                            variableDefinitions[std::make_pair(v.qualifier().value<shader_variable_qualifier>(), v.location())] = variableDefinition;
+                        };                        
+                    }
+                    string udefs;
+                    for (auto const& udef : uniformDefinitions)
+                        udefs += udef.second;
+                    string vdefs;
+                    for (auto const& vdef : variableDefinitions)
+                        vdefs += vdef.second;
+                    aOutput.replace_all("%UNIFORMS%"_s, udefs);
+                    aOutput.replace_all("%VARIABLES%"_s, vdefs);
                 }
                 else
                     throw unsupported_shader_language();
             }
-            if (!aProgram.is_first_in_stage(*this) && !aProgram.is_last_in_stage(*this))
+        }
+        void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const override
+        {
+            aInvokes += "    "_s + name() + "("_s;
+            bool first = true;
+            for (auto const& out : out_variables())
             {
-                if (aLanguage == shader_language::Glsl)
-                    aOutput += "%CODE%"_s;
+                if (!first)
+                    aInvokes += ", "_s;
                 else
-                    throw unsupported_shader_language();
+                    first = false;
+                aInvokes += ("arg"_s + out.name());
             }
-            if (aLanguage == shader_language::Glsl)
-            {
-                string uniformDefinitions;
-                for (auto const& u : uniforms())
-                {
-                    string uniformDefinition;
-                    switch (u.second().first().which())
-                    {
-                    case shader_data_type::Boolean:
-                        uniformDefinition = "uniform bool %I%;\n"_s;
-                        break;
-                    case shader_data_type::Float:
-                        uniformDefinition = "uniform float %I%;\n"_s;
-                        break;
-                    case shader_data_type::Double:
-                        uniformDefinition = "uniform double %I%;\n"_s;
-                        break;
-                    case shader_data_type::Int:
-                        uniformDefinition = "uniform int %I%;\n"_s;
-                        break;
-                    case shader_data_type::Vec2:
-                        uniformDefinition = "uniform vec2 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DVec2:
-                        uniformDefinition = "uniform dvec2 %I%;\n"_s;
-                        break;
-                    case shader_data_type::Vec3:
-                        uniformDefinition = "uniform vec3 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DVec3:
-                        uniformDefinition = "uniform dvec3 %I%;\n"_s;
-                        break;
-                    case shader_data_type::Vec4:
-                        uniformDefinition = "uniform vec4 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DVec4:
-                        uniformDefinition = "uniform dvec4 %I%;\n"_s;
-                        break;
-                    case shader_data_type::Mat4:
-                        uniformDefinition = "uniform mat4 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DMat4:
-                        uniformDefinition = "uniform dmat4 %I%;\n"_s;
-                        break;
-                    case shader_data_type::FloatArray:
-                        uniformDefinition = "uniform float %I%["_s + string{ std::to_string(u.second().first().get<abstract_t<shader_float_array>>().size()) } + "];\n"_s;
-                        break;
-                    case shader_data_type::DoubleArray:
-                        uniformDefinition = "uniform double %I%["_s + string{ std::to_string(u.second().first().get<abstract_t<shader_double_array>>().size()) } +"];\n"_s;
-                        break;
-                    case shader_data_type::Sampler2D:
-                        uniformDefinition = "uniform sampler2D %I%;\n"_s;
-                        break;
-                    case shader_data_type::Sampler2DMS:
-                        uniformDefinition = "uniform sampler2DMS %I%;\n"_s;
-                        break;
-                    }
-                    uniformDefinition.replace_all("%I%"_s, u.first());
-                    uniformDefinitions += uniformDefinition;
-                }
-                // use of replace_all instead of boost::format? this code will not be critical path as shader source code will not need to change that often
-                aOutput.replace_all("%UNIFORMS%"_s, uniformDefinitions);
-                string variableDefinitions;
-                for (auto const& v : variables())
-                {
-                    string variableDefinition;
-                    switch (v.second().second().value<shader_data_type>())
-                    {
-                    case shader_data_type::Boolean:
-                        variableDefinition = "%L%%Q% bool %I%;\n"_s;
-                        break;
-                    case shader_data_type::Float:
-                        variableDefinition = "%L%%Q% float %I%;\n"_s;
-                        break;
-                    case shader_data_type::Double:
-                        variableDefinition = "%L%%Q% double %I%;\n"_s;
-                        break;
-                    case shader_data_type::Int:
-                        variableDefinition = "%L%%Q% int %I%;\n"_s;
-                        break;
-                    case shader_data_type::Vec2:
-                        variableDefinition = "%L%%Q% vec2 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DVec2:
-                        variableDefinition = "%L%%Q% dvec2 %I%;\n"_s;
-                        break;
-                    case shader_data_type::Vec3:
-                        variableDefinition = "%L%%Q% vec3 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DVec3:
-                        variableDefinition = "%L%%Q% dvec3 %I%;\n"_s;
-                        break;
-                    case shader_data_type::Vec4:
-                        variableDefinition = "%L%%Q% vec4 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DVec4:
-                        variableDefinition = "%L%%Q% dvec4 %I%;\n"_s;
-                        break;
-                    case shader_data_type::Mat4:
-                        variableDefinition = "%L%%Q% mat4 %I%;\n"_s;
-                        break;
-                    case shader_data_type::DMat4:
-                        variableDefinition = "%L%%Q% dmat4 %I%;\n"_s;
-                        break;
-                    }
-                    variableDefinition.replace_all("%Q%"_s, enum_to_string<shader_variable_qualifier>(v.second().first().second()));
-                    variableDefinition.replace_all("%L%"_s, "layout (location = %L%) "_s);
-                    variableDefinition.replace_all("%L%"_s, neolib::string{ std::to_string(v.second().first().first()) });
-                    variableDefinition.replace_all("%I%"_s, v.first());
-                    variableDefinitions += variableDefinition;
-                }
-                aOutput.replace_all("%VARIABLES%"_s, variableDefinitions);
-                aOutput.replace_all("%INVOKE_DECLARATIONS%"_s, "void %NAME%(%PARAMETERS%);\n%INVOKE_DECLARATIONS%"_s);
-                if (aProgram.is_last_in_stage(*this))
-                {
-                    aOutput.replace_all("%INVOKE_DECLARATIONS%"_s, ""_s);
-                    aOutput.replace_all("%INVOKE_FIRST%"_s, "    %FIRST_NAME%(%FIRST_ARGS%);\n"_s);
-                    aOutput.replace_all("%FIRST_NAME%"_s, aProgram.first_in_stage(type()).name());
-                }
-                aOutput.replace_all("%INVOKE_NEXT%"_s, "    %NAME%(%ARGS%);\n"_s);
-            }
-            else
-                throw unsupported_shader_language();
+            aInvokes += ");\n"_s;
+        }
+    protected:
+        variable_list& in_variables()
+        {
+            return iInVariables;
+        }
+        variable_list& out_variables()
+        {
+            return iOutVariables;
         }
     private:
         shader_type iType;
@@ -366,6 +307,7 @@ namespace neogfx
         bool iEnabled;
         bool iDirty;
         uniform_map iUniforms;
-        variable_map iVariables;
+        variable_list iInVariables;
+        variable_list iOutVariables;
     };
 }

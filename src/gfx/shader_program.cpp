@@ -92,16 +92,24 @@ namespace neogfx
 
     bool shader_program::is_last_in_stage(const i_shader& aShader) const
     {
-        auto stage = stages().find(aShader.type());
-        if (stage != stages().end() && !stage->second().empty())
-            return &**std::prev(stage->second().end()) == &aShader;
-        throw shader_not_found();
+        return &last_in_stage(aShader.type()) == &aShader;
     }
 
     const i_shader& shader_program::first_in_stage(shader_type aStage) const
     {
         if (have_stage(aStage))
-            return static_cast<const i_vertex_shader&>(*stages().at(aStage)[0]);
+            for (auto const& shader : stages().at(aStage))
+                if (shader->enabled())
+                    return *shader;
+        throw shader_not_found();
+    }
+
+    const i_shader& shader_program::last_in_stage(shader_type aStage) const
+    {
+        if (have_stage(aStage))
+            for (auto shader = stages().at(aStage).rbegin(); shader != stages().at(aStage).rend(); ++shader)
+                if ((**shader).enabled())
+                    return **shader;
         throw shader_not_found();
     }
 
@@ -111,9 +119,12 @@ namespace neogfx
         if (stage != stages().end())
         {
             auto shader = std::find_if(stage->second().begin(), stage->second().end(), [&aPreviousShader](auto& s) { return &*s == &aPreviousShader; });
-            std::advance(shader, 1);
-            if (shader != stage->second().end())
-                return **shader;
+            while(shader != stage->second().end())
+            {
+                std::advance(shader, 1);
+                if ((**shader).enabled())
+                    return **shader;
+            }
         }
         throw shader_not_found();
     }

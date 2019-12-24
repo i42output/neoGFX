@@ -42,36 +42,36 @@ namespace neogfx
         }
     };
 
-    template <typename Base>
+    template <typename Base = i_fragment_shader>
     class standard_fragment_shader : public fragment_shader<Base>
     {
     public:
         standard_fragment_shader(const std::string& aName = "standard_fragment_shader") :
             fragment_shader{ aName }
         {
-            add_in_variable<vec2f>("OutputCoord"_s, 0u);
+            add_in_variable<vec3f>("Coord"_s, 0u);
             add_in_variable<vec4f>("Color"_s, 1u);
-            add_out_variable<vec4f>("FragColor"_s, 0u);
+            add_out_variable<vec4f>("FragColor"_s, 1u);
         }
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
-            fragment_shader::generate_code(aProgram, aLanguage, aOutput);
-            if (aLanguage == shader_language::Glsl)
+            fragment_shader<Base>::generate_code(aProgram, aLanguage, aOutput);
+            if (aProgram.is_first_in_stage(*this))
             {
-                aOutput.replace_all("%PARAMETERS%"_s, "inout vec4 color"_s);
-                aOutput.replace_all("%FIRST_ARGS%"_s, "Color"_s);
-                aOutput.replace_all("%ARGS%"_s, "color"_s);
-                aOutput.replace_all("%CODE"_s,
-                    "void %NAME%(inout vec4 color)\n"
-                    "{\n"
-                    "%CODE%"
-                    "%INVOKE_NEXT%"
-                    "}\n"_s);
-                aOutput.replace_all("%NAME%"_s, name());
+                if (aLanguage == shader_language::Glsl)
+                {
+                    static const string code =
+                    {
+                        "void standard_fragment_shader(inout vec4 color)\n"
+                        "{\n"
+                        "}\n"_s
+                    };
+                    aOutput += code;
+                }
+                else
+                    throw unsupported_shader_language();
             }
-            else
-                throw unsupported_shader_language();
         }
     };
 
@@ -97,18 +97,15 @@ namespace neogfx
         standard_gradient_shader(const std::string& aName = "standard_gradient_shader") :
             standard_fragment_shader{ aName }
         {
-            set_uniform("gradient"_s, false);
-            set_uniform("gradientStopPositions"_s, sampler2DRect{ 3 });
-            set_uniform("gradientStopColours"_s, sampler2DRect{ 4 });
-            set_uniform("gradientFilter"_s, sampler2DRect{ 5 });
+            disable();
         }
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
-            standard_fragment_shader::generate_code(aProgram, aLanguage, aOutput);
+            standard_fragment_shader<i_gradient_shader>::generate_code(aProgram, aLanguage, aOutput);
             if (aLanguage == shader_language::Glsl)
             {
-                static const string functions
+                static const string code =
                 {
                     "vec4 gradient_colour(in float n)\n"
                     "{\n"
@@ -282,10 +279,10 @@ namespace neogfx
                     "    }\n"
                     "    return gradient_colour(gradientPos);\n"
                     "}\n"
-                };
-                static const string code
-                {
-                    "    if (gradient)\n"
+                    "\n"
+                    "void standard_gradient_shader(inout vec4 color)\n"
+                    "{\n"
+                    "    if (gradientEnabled)\n"
                     "    {\n"
                     "        vec2 viewPos = gl_FragCoord.xy;\n"
                     "        viewPos.y = gradientViewportTop - viewPos.y;\n"
@@ -307,10 +304,9 @@ namespace neogfx
                     "            color = sum;\n"
                     "        }\n"
                     "    }\n"
-                    "%CODE%"
+                    "}\n"_s
                 };
-                aOutput.replace_all("%CODE%"_s, code);
-                aOutput.replace_all("%NAME%"_s, name());
+                aOutput += code;
             }
             else
                 throw unsupported_shader_language();
@@ -318,10 +314,11 @@ namespace neogfx
     public:
         void clear_gradient()
         {
-            set_uniform("gradient"_s, false);
+            set_uniform("gradientEnabled"_s, false);
         }
         void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) override
         {
+            enable();
             basic_rect<float> boundingBox{ aBoundingBox };
             set_uniform("gradientViewportTop"_s, static_cast<float>(aContext.logical_coordinates().bottomLeft.y));
             set_uniform("gradientTopLeft"_s, vec2f{ boundingBox.top_left().x, boundingBox.top_left().y });
@@ -341,10 +338,10 @@ namespace neogfx
             gradientArrays.stops.data().bind(2);
             gradientArrays.stopColours.data().bind(3);
             gradientArrays.filter.data().bind(4);
-            set_uniform("gradientStopPositions"_s, 2);
-            set_uniform("gradientStopColours"_s, 3);
-            set_uniform("gradientFilter"_s, 4);
-            set_uniform("gradient"_s, true);
+            set_uniform("gradientStopPositions"_s, sampler2DRect{ 2 });
+            set_uniform("gradientStopColours"_s, sampler2DRect{ 3 });
+            set_uniform("gradientFilter"_s, sampler2DRect{ 4 });
+            set_uniform("gradientEnabled"_s, true);
         }
     private:
         neogfx::gradient_shader_data& gradient_shader_data(const gradient& aGradient)
@@ -424,20 +421,21 @@ namespace neogfx
         standard_texture_shader(const std::string& aName = "standard_texture_shader") :
             standard_fragment_shader{ aName }
         {
+            disable();
             add_in_variable<vec2f>("TexCoord"_s, 2u);
-            clear_texture();
-            set_effect(shader_effect::None);
             set_uniform("tex"_s, sampler2D{ 1 });
             set_uniform("texMS"_s, sampler2DMS{ 2 });
         }
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
-            standard_fragment_shader::generate_code(aProgram, aLanguage, aOutput);
+            standard_fragment_shader<i_texture_shader>::generate_code(aProgram, aLanguage, aOutput);
             if (aLanguage == shader_language::Glsl)
             {
                 static const string code 
                 {
+                    "void standard_texture_shader(inout vec4 color)\n"
+                    "{\n"
                     "    if (textureEnabled)\n"
                     "    {\n"
                     "        vec4 texel = vec4(0.0);\n"
@@ -447,8 +445,8 @@ namespace neogfx
                     "        }\n"
                     "        else\n"
                     "        {\n"
-                    "            ivec2 texCoord = ivec2(TexCoord * textureExtents);\n"
-                    "            texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
+                    "            ivec2 TexCoord = ivec2(TexCoord * textureExtents);\n"
+                    "            texel = texelFetch(texMS, TexCoord, gl_SampleID).rgba;\n"
                     "        }\n"
                     "        switch(textureDataFormat)\n"
                     "        {\n"
@@ -490,10 +488,9 @@ namespace neogfx
                     "            break;\n"
                     "        }\n"
                     "    }\n"
-                    "%CODE%"
+                    "}\n"_s
                 };
-                aOutput.replace_all("%CODE%"_s, code);
-                aOutput.replace_all("%NAME%"_s, name());
+                aOutput += code;
             }
             else
                 throw unsupported_shader_language();
@@ -505,6 +502,7 @@ namespace neogfx
         }
         void set_texture(const i_texture& aTexture) override
         {
+            enable();
             set_uniform("textureEnabled"_s, true);
             set_uniform("textureDataFormat"_s, aTexture.data_format());
             set_uniform("textureMultisample"_s, aTexture.sampling());

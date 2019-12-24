@@ -41,11 +41,13 @@ namespace neogfx
 
     using neolib::to_abstract;
     using neolib::abstract_t;
+    using neolib::i_enum_t;
     using neolib::enum_t;
     using neolib::enum_to_string;
 
     using neolib::i_string;
     using neolib::string;
+    using neolib::to_string;
     using namespace neolib::string_literals;
 
     template <typename Component>

@@ -44,6 +44,7 @@ namespace neogfx
     private:
         GLuint gl_handle() const;
     private:
+        ref_ptr<i_fragment_shader> iDefaultShader;
         ref_ptr<i_gradient_shader> iGradientShader;
         ref_ptr<i_texture_shader> iTextureShader;
     };

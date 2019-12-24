@@ -68,6 +68,7 @@ namespace neogfx
         virtual bool is_last_in_stage(const i_shader& aShader) const = 0;
         virtual const i_shader& first_in_stage(shader_type aStage) const = 0;
         virtual const i_shader& next_in_stage(const i_shader& aPreviousShader) const = 0;
+        virtual const i_shader& last_in_stage(shader_type aStage) const = 0;
         virtual i_shader& add_shader(const neolib::i_ref_ptr<i_shader>& aShader) = 0;
         virtual bool dirty() const = 0;
         virtual void set_clean() = 0;
@@ -87,13 +88,14 @@ namespace neogfx
         bool stage_clean(shader_type aStage) const
         {
             const i_shader* shader = &first_in_stage(aStage);
-            do
+            for(;;)
             {
                 if (shader->dirty())
                     return false;
+                if (is_last_in_stage(*shader))
+                    return true;
                 shader = &next_in_stage(*shader);
-            } while (!is_last_in_stage(*shader));
-            return true;
+            }
         }
         bool stage_dirty(shader_type aStage) const
         {

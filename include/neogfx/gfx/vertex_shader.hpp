@@ -31,7 +31,7 @@ namespace neogfx
     {
         typedef shader<i_vertex_shader> base_type;
     public:
-        typedef neolib::map<string, neolib::pair<uint32_t, enum_t<shader_data_type>>> attribute_map;
+        typedef neolib::map<string, abstract_t<shader_variable>*> attribute_map;
     public:
         vertex_shader(const std::string& aName) :
             base_type{ shader_type::Vertex, aName }
@@ -48,12 +48,24 @@ namespace neogfx
             if (a != iAttributes.end())
             {
                 iAttributes.erase(a);
+                auto v = in_variables().find(*a->second());
+                if (v != in_variables().end())
+                    in_variables().erase(v);
                 set_dirty();
             }
         }
+        using base_type::add_attribute;
         void add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) override
         {
-            iAttributes.emplace(aName, aLocation, enum_t<shader_data_type>{ aType });
+            iAttributes.emplace(aName, 
+                &add_variable( 
+                    shader_variable
+                    { 
+                        aName, 
+                        aLocation, 
+                        shader_variable_qualifier::In, 
+                        aType 
+                    }));
             set_dirty();
         }
     public:
@@ -73,15 +85,15 @@ namespace neogfx
         attribute_map iAttributes;
     };
 
-    class standard_vertex_shader : public vertex_shader, i_standard_vertex_matrices
+    class standard_vertex_shader : public vertex_shader, public i_standard_vertex_matrices
     {
     public:
         standard_vertex_shader(const std::string& aName = "standard_vertex_shader") :
             vertex_shader{ aName }
         {
-            add_attribute("VertexPosition"_s, 0u, shader_data_type::Vec3);
-            add_attribute("VertexColor"_s, 1u, shader_data_type::Vec4);
-            add_out_variable<vec2f>("OutputCoord"_s, 0u);
+            add_attribute<vec3f>("VertexPosition"_s, 0u);
+            add_attribute<vec4f>("VertexColor"_s, 1u);
+            add_out_variable<vec3f>("Coord"_s, 0u);
             add_out_variable<vec4f>("Color"_s, 1u);
         }
     public:
@@ -141,22 +153,14 @@ namespace neogfx
             vertex_shader::generate_code(aProgram, aLanguage, aOutput);
             if (aLanguage == shader_language::Glsl)
             {
-                aOutput.replace_all("%PARAMETERS%"_s, ""_s);
-                aOutput.replace_all("%FIRST_ARGS%"_s, ""_s);
-                aOutput.replace_all("%ARGS%"_s, ""_s);
                 static const string code =
                 {
-                    "void %NAME%()\n"
+                    "void standard_vertex_shader(inout vec3 coord, inout vec4 color)\n"
                     "{\n"
-                    "    gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-                    "    OutputCoord = VertexPosition.xy;\n"
-                    "    Color = VertexColor;\n"
-                    "%CODE%"
-                    "%INVOKE_NEXT%"
-                    "}\n"_s
+                    "    coord = (uProjectionMatrix * (uTransformationMatrix * vec4(coord, 1.0))).xyz;\n"
+                    "}\n"
                 };
-                aOutput.replace_all("%CODE"_s, code);
-                aOutput.replace_all("%NAME%"_s, name());
+                aOutput += code;
             }
             else
                 throw unsupported_shader_language();
@@ -179,15 +183,17 @@ namespace neogfx
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
+            standard_vertex_shader::generate_code(aProgram, aLanguage, aOutput);
             if (aLanguage == shader_language::Glsl)
             {
                 static const string code =
                 {
-                    "    TexCoord = VertexTextureCoord;\n"
-                    "%CODE%"
+                    "void standard_texture_vertex_shader(inout vec3 coord, inout vec4 color, inout vec2 texCoord)\n"
+                    "{\n"
+                    "    standard_vertex_shader(coord, color);\n"
+                    "}\n"_s
                 };
-                aOutput.replace_all("%CODE%"_s, code);
-                aOutput.replace_all("%NAME%"_s, name());
+                aOutput += code;
             }
             else
                 throw unsupported_shader_language();

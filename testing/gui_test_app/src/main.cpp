@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
             ui.dropList3.set_editable(!ui.dropList3.editable());
             ui.dropList4.set_editable(!ui.dropList4.editable());
         });
-        ui.buttonGenerateUuid.clicked([&]() { ui.textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
+        ui.buttonGenerateUuid.clicked([&]() { ui.textEdit.set_text(to_string(neolib::generate_uuid())); });
         ui.dropList.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
         ui.dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
         ui.dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { ui.textEdit.set_text(aIndex != std::nullopt ? ui.dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
