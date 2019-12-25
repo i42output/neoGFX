@@ -135,6 +135,94 @@ namespace neogfx
 
     typedef uint32_t shader_variable_location;
 
+    class i_shader_uniform
+    {
+    public:
+        virtual const i_string& name() const = 0;
+        virtual const abstract_t<shader_value_type>& value() const = 0;
+        virtual void set_value(const abstract_t<shader_value_type>& aValue) = 0;
+        virtual bool is_dirty() const = 0;
+        virtual void clean() const = 0;
+        virtual bool different_type_to(const abstract_t<shader_value_type>& aValue) const = 0;
+    public:
+        template <typename T>
+        void set_value(const T& aValue)
+        {
+            set_value(to_abstract(shader_value_type{ aValue }));
+        }
+    };
+
+    class shader_uniform : public i_shader_uniform
+    {
+        typedef i_shader_uniform base_type;
+    public:
+        typedef base_type abstract_type;
+    public:
+        template <typename T>
+        shader_uniform(const string& aName, const T& aValue) :
+            iName{ aName }, 
+            iValue{ aValue },
+            iDirty{ true }
+        {
+        }
+        shader_uniform(const i_shader_uniform& aOther) :
+            iName{ aOther.name() },
+            iValue{ aOther.value() },
+            iDirty{ true }
+        {
+        }
+    public:
+        const i_string& name() const override 
+        { 
+            return iName; 
+        }
+        const abstract_t<shader_value_type>& value() const override 
+        { 
+            return iValue; 
+        }
+        void set_value(const abstract_t<shader_value_type>& aValue) override 
+        { 
+            if (iValue != aValue)
+            {
+                iValue = aValue;
+                iDirty = true;
+            }
+        }
+        bool is_dirty() const override 
+        { 
+            return iDirty; 
+        }
+        void clean() const override 
+        { 
+            iDirty = false; 
+        }
+        bool different_type_to(const abstract_t<shader_value_type>& aValue) const
+        {
+            if (value().which() != aValue.which())
+                return true;
+            switch (value().which())
+            {
+            case shader_data_type::FloatArray:
+                return value().get<abstract_t<shader_float_array>>().size() !=
+                    aValue.get<abstract_t<shader_float_array>>().size();
+            case shader_data_type::DoubleArray:
+                return value().get<abstract_t<shader_double_array>>().size() !=
+                    aValue.get<abstract_t<shader_double_array>>().size();
+            default:
+                return false;
+            }
+        }
+    public:
+        bool operator<(const shader_uniform& aRhs) const
+        {
+            return name() < aRhs.name();
+        }
+    public:
+        string iName;
+        shader_value_type iValue;
+        mutable bool iDirty;
+    };
+
     class i_shader_variable
     {
     public:
@@ -164,7 +252,8 @@ namespace neogfx
             iQualifier{ aQualifier },
             iType{ aType },
             iLink{ nullptr }
-        {}
+        {
+        }
         shader_variable(const i_shader_variable& aOther) :
             iName{ aOther.name() },
             iLocation{ aOther.location() },
@@ -176,14 +265,40 @@ namespace neogfx
                 link(aOther.link());
         }
     public:
-        const i_string& name() const override { return iName; }
-        shader_variable_location location() const override { return iLocation; }
-        const i_enum_t<shader_variable_qualifier>& qualifier() const override { return iQualifier; }
-        const i_enum_t<shader_data_type>& type() const override { return iType; }
-        bool has_link() const override { return iLink != nullptr; }
-        const i_shader_variable& link() const override { if (has_link()) return *iLink; throw shader_variable_not_linked(); }
-        void link(const i_shader_variable& aOther) override { iLink = &aOther; }
-        void reset_link() override { iLink = nullptr; }
+        const i_string& name() const override 
+        { 
+            return iName; 
+        }
+        shader_variable_location location() const override 
+        { 
+            return iLocation; 
+        }
+        const i_enum_t<shader_variable_qualifier>& qualifier() const override 
+        { 
+            return iQualifier; 
+        }
+        const i_enum_t<shader_data_type>& type() const override 
+        { 
+            return iType; 
+        }
+        bool has_link() const override 
+        { 
+            return iLink != nullptr; 
+        }
+        const i_shader_variable& link() const override 
+        { 
+            if (has_link()) 
+                return *iLink; 
+            throw shader_variable_not_linked(); 
+        }
+        void link(const i_shader_variable& aOther) override 
+        { 
+            iLink = &aOther; 
+        }
+        void reset_link() override 
+        { 
+            iLink = nullptr; 
+        }
     public:
         bool operator<(const shader_variable& aRhs) const
         {
@@ -206,7 +321,7 @@ namespace neogfx
     public:
         typedef self_type asbtract_type;
         typedef abstract_t<shader_value_type> value_type;
-        typedef neolib::i_map<i_string, neolib::i_pair<value_type, bool>> uniform_map;
+        typedef neolib::i_set<i_shader_uniform> uniform_list;
         typedef neolib::i_set<i_shader_variable> variable_list;
     public:
         virtual ~i_shader() {}
@@ -222,7 +337,7 @@ namespace neogfx
         virtual void set_dirty() = 0;
         virtual void set_clean() = 0;
     public:
-        virtual const uniform_map& uniforms() const = 0;
+        virtual const uniform_list& uniforms() const = 0;
         virtual void clear_uniform(const i_string& aName) = 0;
         virtual void set_uniform(const i_string& aName, const value_type& aValue) = 0;
         template <typename T>

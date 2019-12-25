@@ -126,10 +126,6 @@ namespace neogfx
                 shaderHandle) == attachedShaderHandles.end())
                 glCheck(glAttachShader(gl_handle(), shaderHandle));
         }
-        if (have_stage(shader_type::Vertex))
-            for (auto const& vertexShader : stages().at(shader_type::Vertex))
-                for (auto const& attribute : static_cast<const i_vertex_shader&>(*vertexShader).attributes())
-                    glCheck(glBindAttribLocation(gl_handle(), attribute.second()->location(), attribute.first().c_str()));
     }
 
     void opengl_shader_program::link()
@@ -165,9 +161,10 @@ namespace neogfx
                 if (shader->enabled())
                     for (auto& uniform : shader->uniforms())
                     {
-                        if (!uniform.second().second() && !updateAllUniforms)
+                        if (!uniform.is_dirty() && !updateAllUniforms)
                             continue;
-                        GLint location = glGetUniformLocation(gl_handle(), uniform.first().c_str());
+                        uniform.clean();
+                        GLint location = glGetUniformLocation(gl_handle(), uniform.name().c_str());
                         GLenum errorCode = glGetError();
                         if (errorCode != GL_NO_ERROR)
                             throw shader_program_error(glErrorString(errorCode));
@@ -206,7 +203,7 @@ namespace neogfx
                                 glCheck(glUniform1i(location, v.handle))
                             else if constexpr (std::is_same_v<sampler2DMS, data_type>)
                                 glCheck(glUniform1i(location, v.handle))
-                        }, uniform.second().first());
+                        }, uniform.value());
                     }
     }
 

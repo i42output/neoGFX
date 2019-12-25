@@ -37,7 +37,7 @@ namespace neogfx
         typedef i_shader::value_type abstract_value_type;
         typedef shader_value_type value_type;
     private:
-        typedef neolib::map<string, neolib::pair<value_type, bool>> uniform_map;
+        typedef neolib::set<shader_uniform> uniform_list;
         typedef neolib::set<shader_variable> variable_list;
     public:
         shader(shader_type aType, const std::string& aName, bool aEnabled = true) : 
@@ -106,39 +106,35 @@ namespace neogfx
         void set_clean() override
         {
             iDirty = false;
-            for (auto& u : iUniforms)
-                u.second().second() = false;
         }
     public:
-        const uniform_map& uniforms() const override
+        const uniform_list& uniforms() const override
         {
             return iUniforms;
         }
         void clear_uniform(const i_string& aName) override
         {
-            auto u = iUniforms.find(aName);
-            if (u != iUniforms.end())
+            auto existing = iUniforms.find(shader_uniform{ aName, value_type{} });
+            if (existing != iUniforms.end())
             {
-                iUniforms.erase(u);
+                iUniforms.erase(existing);
                 set_dirty();
             }
         }
         using i_shader::set_uniform;
         void set_uniform(const i_string& aName, const abstract_value_type& aValue) override
         {
-            if (iUniforms.find(aName) == iUniforms.end() || iUniforms[aName].first().which() != aValue.which())
+            auto existing = iUniforms.find(shader_uniform{ aName, aValue });
+            if (existing == iUniforms.end())
             {
-                iUniforms[aName] = neolib::make_pair(shader_value_type{ aValue }, true);
+                iUniforms.insert(shader_uniform{ aName, aValue });
                 set_dirty();
             }
-            else if (iUniforms[aName].first() != aValue)
+            else
             {
-                if ((iUniforms[aName].first().which() == shader_data_type::FloatArray &&
-                    iUniforms[aName].first().get<abstract_t<shader_float_array>>().size() != aValue.get<abstract_t<shader_float_array>>().size()) ||
-                    (iUniforms[aName].first().which() == shader_data_type::DoubleArray &&
-                    iUniforms[aName].first().get<abstract_t<shader_double_array>>().size() != aValue.get<abstract_t<shader_double_array>>().size()))
+                if (existing->different_type_to(aValue))
                     set_dirty();
-                iUniforms[aName] = neolib::make_pair(shader_value_type{ aValue }, true);
+                existing->set_value(aValue);
             }
         }
         const variable_list& in_variables() const override
@@ -169,12 +165,15 @@ namespace neogfx
             auto& variableList = (aVariable.qualifier().value<shader_variable_qualifier>() == shader_variable_qualifier::In ? 
                 iInVariables : iOutVariables);
             auto existing = variableList.find(aVariable);
-            if (existing == variableList.end() || existing->name() != aVariable.name())
+            if (existing == variableList.end())
             {
                 auto& v = *variableList.insert(aVariable);
                 set_dirty();
                 return v;
             }
+            if (existing->name() != aVariable.name())
+                set_dirty();
+            *existing = aVariable;
             return *existing;
         }
     public:
@@ -231,21 +230,21 @@ namespace neogfx
                         for (auto const& u : s->uniforms())
                         {
                             string uniformDefinition;
-                            switch (u.second().first().which())
+                            switch (u.value().which())
                             {
                             case shader_data_type::FloatArray:
-                                uniformDefinition = "uniform float %I%["_s + to_string(u.second().first().get<abstract_t<shader_float_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "uniform float %I%["_s + to_string(u.value().get<abstract_t<shader_float_array>>().size()) +"];\n"_s;
                                 break;
                             case shader_data_type::DoubleArray:
-                                uniformDefinition = "uniform double %I%["_s + to_string(u.second().first().get<abstract_t<shader_double_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "uniform double %I%["_s + to_string(u.value().get<abstract_t<shader_double_array>>().size()) +"];\n"_s;
                                 break;
                             default:
                                 uniformDefinition = "uniform %T% %I%;\n"_s;
                                 break;
                             }
-                            uniformDefinition.replace_all("%T%"_s, enum_to_string(u.second().first().which()));
-                            uniformDefinition.replace_all("%I%"_s, u.first());
-                            uniformDefinitions[u.first()] = uniformDefinition;
+                            uniformDefinition.replace_all("%T%"_s, enum_to_string(u.value().which()));
+                            uniformDefinition.replace_all("%I%"_s, u.name());
+                            uniformDefinitions[u.name()] = uniformDefinition;
                         }
                         for (auto const& v : s->in_variables())
                         {
@@ -306,7 +305,7 @@ namespace neogfx
         mutable std::optional<void*> iHandle;
         bool iEnabled;
         bool iDirty;
-        uniform_map iUniforms;
+        uniform_list iUniforms;
         variable_list iInVariables;
         variable_list iOutVariables;
     };
