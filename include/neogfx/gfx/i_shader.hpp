@@ -110,6 +110,11 @@ const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerat
 
 namespace neogfx 
 {
+    struct shader_variable_not_linked : std::logic_error { shader_variable_not_linked() : std::logic_error{ "neogfx::shader_variable_not_linked" } {} };
+    struct shader_variable_not_found : std::logic_error { shader_variable_not_found() : std::logic_error{ "neogfx::shader_variable_not_found" } {} };
+    struct invalid_shader_variable_type : std::logic_error { invalid_shader_variable_type() : std::logic_error{ "neogfx::invalid_shader_variable_type" } {} };
+    struct unsupported_shader_language : std::logic_error { unsupported_shader_language() : std::logic_error{ "neogfx::unsupported_shader_language" } {} };
+
     typedef neolib::vector<float> shader_float_array;
     typedef neolib::vector<double> shader_double_array;
 
@@ -117,7 +122,9 @@ namespace neogfx
     struct shader_handle
     {
         int handle;
-        typedef shader_handle abstract_type;
+        typedef shader_handle<HandleType> self_type;
+        typedef self_type abstract_type;
+        bool operator==(const self_type& aRhs) const { return handle == aRhs.handle; }
     };
 
     typedef shader_handle<shader_data_type::Sampler2D> sampler2D;
@@ -135,6 +142,10 @@ namespace neogfx
         virtual shader_variable_location location() const = 0;
         virtual const i_enum_t<shader_variable_qualifier>& qualifier() const = 0;
         virtual const i_enum_t<shader_data_type>& type() const = 0;
+        virtual bool has_link() const = 0;
+        virtual const i_shader_variable& link() const = 0;
+        virtual void link(const i_shader_variable& aOther) = 0;
+        virtual void reset_link() = 0;
     };
 
     class shader_variable : public i_shader_variable
@@ -144,26 +155,35 @@ namespace neogfx
         typedef base_type abstract_type;
     public:
         shader_variable(
-            const string& aName,
-            shader_variable_location aLocation,
-            shader_variable_qualifier aQualifier,
-            shader_data_type aType) :
-                iName{ aName },
-                iLocation{ aLocation },
-                iQualifier{ aQualifier },
-                iType{ aType }
+                const string& aName,
+                shader_variable_location aLocation,
+                shader_variable_qualifier aQualifier,
+                shader_data_type aType) :
+            iName{ aName },
+            iLocation{ aLocation },
+            iQualifier{ aQualifier },
+            iType{ aType },
+            iLink{ nullptr }
         {}
         shader_variable(const i_shader_variable& aOther) :
             iName{ aOther.name() },
             iLocation{ aOther.location() },
             iQualifier{ aOther.qualifier() },
-            iType{ aOther.type() }
-        {}
+            iType{ aOther.type() },
+            iLink{ nullptr }
+        {
+            if (aOther.has_link())
+                link(aOther.link());
+        }
     public:
         const i_string& name() const override { return iName; }
         shader_variable_location location() const override { return iLocation; }
         const i_enum_t<shader_variable_qualifier>& qualifier() const override { return iQualifier; }
         const i_enum_t<shader_data_type>& type() const override { return iType; }
+        bool has_link() const override { return iLink != nullptr; }
+        const i_shader_variable& link() const override { if (has_link()) return *iLink; throw shader_variable_not_linked(); }
+        void link(const i_shader_variable& aOther) override { iLink = &aOther; }
+        void reset_link() override { iLink = nullptr; }
     public:
         bool operator<(const shader_variable& aRhs) const
         {
@@ -174,14 +194,11 @@ namespace neogfx
         shader_variable_location iLocation;
         enum_t<shader_variable_qualifier> iQualifier;
         enum_t<shader_data_type> iType;
+        const i_shader_variable* iLink;
     };
 
     class i_rendering_context;
     class i_shader_program;
-
-    struct shader_variable_not_found : std::logic_error { shader_variable_not_found() : std::logic_error{ "neogfx::shader_variable_not_found" } {} };
-    struct invalid_shader_variable_type : std::logic_error { invalid_shader_variable_type() : std::logic_error{ "neogfx::invalid_shader_variable_type" } {} };
-    struct unsupported_shader_language : std::logic_error { unsupported_shader_language() : std::logic_error{ "neogfx::unsupported_shader_language" } {} };
 
     class i_shader : public neolib::i_reference_counted
     {

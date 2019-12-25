@@ -55,18 +55,19 @@ namespace neogfx
             }
         }
         using base_type::add_attribute;
-        void add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) override
+        i_shader_variable& add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) override
         {
-            iAttributes.emplace(aName, 
-                &add_variable( 
-                    shader_variable
-                    { 
-                        aName, 
-                        aLocation, 
-                        shader_variable_qualifier::In, 
-                        aType 
-                    }));
+            auto& in = add_variable(
+                shader_variable
+                {
+                    aName,
+                    aLocation,
+                    shader_variable_qualifier::In,
+                    aType
+                });
+            iAttributes.emplace(aName, &in);
             set_dirty();
+            return in;
         }
     public:
         bool has_standard_vertex_matrices() const override
@@ -91,10 +92,10 @@ namespace neogfx
         standard_vertex_shader(const std::string& aName = "standard_vertex_shader") :
             vertex_shader{ aName }
         {
-            add_attribute<vec3f>("VertexPosition"_s, 0u);
-            add_attribute<vec4f>("VertexColor"_s, 1u);
-            add_out_variable<vec3f>("Coord"_s, 0u);
-            add_out_variable<vec4f>("Color"_s, 1u);
+            auto& coord = add_attribute<vec3f>("VertexPosition"_s, 0u);
+            auto& color = add_attribute<vec4f>("VertexColor"_s, 1u);
+            add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
+            add_out_variable<vec4f>("Color"_s, 1u).link(color);
         }
     public:
         bool has_standard_vertex_matrices() const override
@@ -158,7 +159,8 @@ namespace neogfx
                     "void standard_vertex_shader(inout vec3 coord, inout vec4 color)\n"
                     "{\n"
                     "    coord = (uProjectionMatrix * (uTransformationMatrix * vec4(coord, 1.0))).xyz;\n"
-                    "}\n"
+                    "    gl_Position = vec4(coord, 1.0);\n"
+                    "}\n"_s
                 };
                 aOutput += code;
             }
@@ -166,7 +168,6 @@ namespace neogfx
                 throw unsupported_shader_language();
         }
     private:
-        attribute_map iAttributes;
         optional_mat44 iProjectionMatrix;
         optional_mat44 iTransformationMatrix;
     };
@@ -177,8 +178,8 @@ namespace neogfx
         standard_texture_vertex_shader(const std::string& aName = "standard_texture_vertex_shader") :
             standard_vertex_shader{ aName }
         {
-            add_attribute("VertexTextureCoord"_s, 2u, shader_data_type::Vec2);
-            add_out_variable<vec2f>("TexCoord"_s, 2u);
+            auto& texCoord = add_attribute("VertexTextureCoord"_s, 2u, shader_data_type::Vec2);
+            add_out_variable<vec2f>("TexCoord"_s, 2u).link(texCoord);
         }
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
@@ -198,6 +199,5 @@ namespace neogfx
             else
                 throw unsupported_shader_language();
         }
-    private:
     };
 }

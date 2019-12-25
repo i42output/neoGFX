@@ -1036,7 +1036,6 @@ namespace neogfx
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
-
         {
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
 

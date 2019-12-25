@@ -28,7 +28,7 @@ namespace neogfx
     {
         if (aName == "default_shader_program")
         {
-            add_shader(neolib::make_ref<standard_vertex_shader>().as<i_shader>());
+            add_shader(neolib::make_ref<standard_texture_vertex_shader>().as<i_shader>());
             iDefaultShader = static_cast<i_fragment_shader&>(add_shader(neolib::make_ref<standard_fragment_shader<>>().as<i_shader>()));
             iGradientShader = static_cast<i_gradient_shader&>(add_shader(neolib::make_ref<standard_gradient_shader>().as<i_shader>()));
             iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
@@ -60,6 +60,13 @@ namespace neogfx
         if (!dirty())
             return;
 
+        GLint attachedShaderCount = 0;
+        glCheck(glGetProgramiv(gl_handle(), GL_ATTACHED_SHADERS, &attachedShaderCount));
+        std::vector<GLuint> attachedShaderHandles;
+        attachedShaderHandles.resize(attachedShaderCount);
+        if (attachedShaderCount != 0)
+            glCheck(glGetAttachedShaders(gl_handle(), attachedShaderCount, NULL, &attachedShaderHandles[0]));
+
         for (auto const& stage : stages())
         {
             if (stage_clean(stage.first()))
@@ -87,10 +94,7 @@ namespace neogfx
             }
             for (auto const& out : outs)
             {
-                auto in = ins.find(out);
-                if (in == ins.end())
-                    throw shader_variable_not_found();
-                invokeDeclarations += "    "_s + enum_to_string<shader_data_type>(out.type()) + " arg"_s + out.name() + " = "_s + in->name() + ";\n"_s;
+                invokeDeclarations += "    "_s + enum_to_string<shader_data_type>(out.type()) + " arg"_s + out.name() + " = "_s + out.link().name() + ";\n"_s;
                 invokeResults += "    "_s + out.name() + " = arg"_s + out.name() + ";\n"_s;
             }
             static const string mainFunction =
@@ -118,9 +122,10 @@ namespace neogfx
                 std::string error(&buf[0]);
                 throw failed_to_create_shader_program(error);
             }
-            glCheck(glAttachShader(gl_handle(), shaderHandle));
+            if (std::find(attachedShaderHandles.begin(), attachedShaderHandles.end(), 
+                shaderHandle) == attachedShaderHandles.end())
+                glCheck(glAttachShader(gl_handle(), shaderHandle));
         }
-        
         if (have_stage(shader_type::Vertex))
             for (auto const& vertexShader : stages().at(shader_type::Vertex))
                 for (auto const& attribute : static_cast<const i_vertex_shader&>(*vertexShader).attributes())
@@ -136,7 +141,14 @@ namespace neogfx
         GLint result;
         glCheck(glGetProgramiv(gl_handle(), GL_LINK_STATUS, &result));
         if (GL_FALSE == result)
-            throw failed_to_create_shader_program("Failed to link");
+        {
+            GLint buflen;
+            glCheck(glGetProgramiv(gl_handle(), GL_INFO_LOG_LENGTH, &buflen));
+            std::vector<GLchar> buf(buflen);
+            glCheck(glGetProgramInfoLog(gl_handle(), static_cast<GLsizei>(buf.size()), NULL, &buf[0]));
+            std::string error(&buf[0]);
+            throw failed_to_create_shader_program(error);
+        }
     }
 
     void opengl_shader_program::use()
@@ -144,8 +156,9 @@ namespace neogfx
         glCheck(glUseProgram(gl_handle()));
     }
 
-    void opengl_shader_program::update_uniforms()
+    void opengl_shader_program::update_uniforms(const i_rendering_context& aRenderingContext)
     {
+        prepare_uniforms(aRenderingContext);
         bool const updateAllUniforms = dirty();
         for (auto& stage : stages())
             for (auto& shader : stage.second())

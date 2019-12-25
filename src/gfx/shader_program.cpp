@@ -156,7 +156,7 @@ namespace neogfx
                 shader->set_clean();
     }
 
-    void shader_program::prepare(const i_rendering_context& aRenderingContext)
+    void shader_program::prepare_uniforms(const i_rendering_context& aRenderingContext)
     {
         for (auto& stage : stages())
             for (auto& shader : stage.second())
@@ -167,12 +167,12 @@ namespace neogfx
     {
         if (dirty())
         {
-            prepare(aContext);
+            prepare_uniforms(aContext);
             compile();
             link();
         }
         use();
-        update_uniforms();
+        update_uniforms(aContext);
         set_clean();
     }
 }

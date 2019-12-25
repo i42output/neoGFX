@@ -54,7 +54,7 @@ namespace neogfx
         i_shader& add_shader(const neolib::i_ref_ptr<i_shader>& aShader) override;
         bool dirty() const override;
         void set_clean() override;
-        void prepare(const i_rendering_context& aRenderingContext) override;
+        void prepare_uniforms(const i_rendering_context& aRenderingContext) override;
         void activate(const i_rendering_context& aRenderingContext) override;
     private:
         string iName;

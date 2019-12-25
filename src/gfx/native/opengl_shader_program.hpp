@@ -38,7 +38,7 @@ namespace neogfx
         void compile() override;
         void link() override;
         void use() override;
-        void update_uniforms() override;
+        void update_uniforms(const i_rendering_context& aRenderingContext) override;
         bool active() const override;
         void deactivate() override;
     private:

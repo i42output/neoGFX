@@ -374,6 +374,12 @@ namespace neogfx
                 iInstance = std::make_unique<instance>(aShaderProgram, vertex_array::allocator_type::buffer(&iVertices[0]), aWithTextureCoords);
             }
             //iInstance->flush_buffer(iVertices.size());
+            if (aShaderProgram.vertex_shader().has_standard_vertex_matrices())
+            {
+                auto& standardMatrices = aShaderProgram.vertex_shader().standard_vertex_matrices();
+                standardMatrices.set_transformation_matrix(iTransformation);
+            }
+            aShaderProgram.update_uniforms(aRenderingContext);
         }
     private:
         i_shader_program* iShaderProgram;

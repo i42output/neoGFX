@@ -50,8 +50,8 @@ namespace neogfx
             fragment_shader{ aName }
         {
             add_in_variable<vec3f>("Coord"_s, 0u);
-            add_in_variable<vec4f>("Color"_s, 1u);
-            add_out_variable<vec4f>("FragColor"_s, 1u);
+            auto& fragColor = add_in_variable<vec4f>("Color"_s, 1u);
+            add_out_variable<vec4f>("FragColor"_s, 0u).link(fragColor);
         }
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
@@ -439,7 +439,7 @@ namespace neogfx
                     "    if (textureEnabled)\n"
                     "    {\n"
                     "        vec4 texel = vec4(0.0);\n"
-                    "        if (!textureMultisample)\n"
+                    "        if (textureMultisample < 4)\n"
                     "        {\n"
                     "            texel = texture(tex, TexCoord).rgba;\n"
                     "        }\n"

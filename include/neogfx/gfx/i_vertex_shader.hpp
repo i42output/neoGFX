@@ -49,9 +49,9 @@ namespace neogfx
     public:
         virtual const attribute_map& attributes() const = 0;
         virtual void clear_attribute(const i_string& aName) = 0;
-        virtual void add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) = 0;
+        virtual i_shader_variable& add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) = 0;
         template <typename T>
-        void add_attribute(const i_string& aName, shader_variable_location aLocation)
+        i_shader_variable& add_attribute(const i_string& aName, shader_variable_location aLocation)
         {
             return add_attribute(aName, aLocation, static_cast<shader_data_type>(neolib::index_of<T, shader_value_type>()));
         }    

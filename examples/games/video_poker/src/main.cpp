@@ -8,6 +8,7 @@
 #include <video_poker/table.hpp>
 
 namespace ng = neogfx;
+using namespace ng::unit_literals;
 
 int main(int argc, char* argv[])
 {
@@ -21,7 +22,7 @@ int main(int argc, char* argv[])
 
         ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
 
-        ng::window window{ ng::size{1280, 720} * ng::service<ng::i_surface_manager>().display().metrics().horizontal_dpi() / 96.0 };
+        ng::window window{ ng::size{1280_spx, 720_spx} };
 
         ng::game::canvas canvas{ window.client_layout() };
         canvas.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);

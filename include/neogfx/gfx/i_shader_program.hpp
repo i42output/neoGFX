@@ -72,11 +72,11 @@ namespace neogfx
         virtual i_shader& add_shader(const neolib::i_ref_ptr<i_shader>& aShader) = 0;
         virtual bool dirty() const = 0;
         virtual void set_clean() = 0;
-        virtual void prepare(const i_rendering_context& aRenderingContext) = 0;
+        virtual void prepare_uniforms(const i_rendering_context& aRenderingContext) = 0;
         virtual void compile() = 0;
         virtual void link() = 0;
         virtual void use() = 0;
-        virtual void update_uniforms() = 0;
+        virtual void update_uniforms(const i_rendering_context& aRenderingContext) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aRenderingContext) = 0;
         virtual void deactivate() = 0;

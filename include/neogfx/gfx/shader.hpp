@@ -128,7 +128,7 @@ namespace neogfx
         {
             if (iUniforms.find(aName) == iUniforms.end() || iUniforms[aName].first().which() != aValue.which())
             {
-                iUniforms.emplace(aName, neolib::make_pair(shader_value_type{ aValue }, true));
+                iUniforms[aName] = neolib::make_pair(shader_value_type{ aValue }, true);
                 set_dirty();
             }
             else if (iUniforms[aName].first() != aValue)
@@ -138,7 +138,7 @@ namespace neogfx
                     (iUniforms[aName].first().which() == shader_data_type::DoubleArray &&
                     iUniforms[aName].first().get<abstract_t<shader_double_array>>().size() != aValue.get<abstract_t<shader_double_array>>().size()))
                     set_dirty();
-                iUniforms.emplace(aName, neolib::make_pair(shader_value_type{ aValue }, true));
+                iUniforms[aName] = neolib::make_pair(shader_value_type{ aValue }, true);
             }
         }
         const variable_list& in_variables() const override
