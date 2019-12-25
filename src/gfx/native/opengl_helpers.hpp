@@ -407,6 +407,8 @@ namespace neogfx
                 if (iPreviousProgram != nullptr)
                     iPreviousProgram->activate(iRenderingContext);
             }
+            iCurrentProgram.gradient_shader().clear_gradient();
+            iCurrentProgram.texture_shader().clear_texture();
         }
     private:
         i_rendering_context& iRenderingContext;

@@ -815,9 +815,6 @@ namespace neogfx
             vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{ xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust}, penColour });
         }
         glCheck(glLineWidth(1.0f));
-
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_rect(const rect& aRect, const pen& aPen)
@@ -843,9 +840,6 @@ namespace neogfx
                     vec4f{};
         }
         glCheck(glLineWidth(1.0f));
-
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
@@ -871,9 +865,6 @@ namespace neogfx
                     vec4f{}});
         }
         glCheck(glLineWidth(1.0f));
-
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
@@ -899,9 +890,6 @@ namespace neogfx
                     vec4f{}});
         }
         glCheck(glLineWidth(1.0f));
-
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
@@ -927,9 +915,6 @@ namespace neogfx
                     vec4f{}});
         }
         glCheck(glLineWidth(1.0f));
-
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen)
@@ -963,9 +948,6 @@ namespace neogfx
                     reset_clip();
             }
         }
-
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
@@ -988,9 +970,6 @@ namespace neogfx
                         static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
         }
-
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
@@ -1053,9 +1032,6 @@ namespace neogfx
                         vec4f{};
             }
         }
-
-        if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill)
@@ -1084,9 +1060,6 @@ namespace neogfx
                     vec4f{}}); 
             }
         }
-
-        if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
@@ -1112,9 +1085,6 @@ namespace neogfx
                     vec4f{}});
             }
         }
-
-        if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
@@ -1140,9 +1110,6 @@ namespace neogfx
                     vec4f{}});
             }
         }
-
-        if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     void opengl_rendering_context::fill_path(const path& aPath, const brush& aFill)
@@ -1183,9 +1150,6 @@ namespace neogfx
                 }
 
                 reset_clip();
-
-                if (std::holds_alternative<gradient>(aFill))
-                    rendering_engine().default_shader_program().gradient_shader().clear_gradient();
             }
         }
     }
@@ -1242,9 +1206,6 @@ namespace neogfx
                 }
             }
         }
-
-        if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().clear_gradient();
     }
 
     namespace
@@ -1459,9 +1420,6 @@ namespace neogfx
                     vertexArrays.instance().execute();
 
                     glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
-
-                    if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
-                        rendering_engine().default_shader_program().gradient_shader().clear_gradient();
                 }
                 break;
             }
@@ -1517,10 +1475,19 @@ namespace neogfx
 
                 glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
                 glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(texture.native_texture()->handle()))));
-                if (texture.sampling() != texture_sampling::Multisample)
+                auto sampling = texture.sampling();
+                if (sampling == texture_sampling::Scaled)
                 {
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.sampling() != texture_sampling::Nearest && texture.sampling() != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : texture.sampling() != texture_sampling::Nearest && texture.sampling() != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
+                    auto const extents = size_u32{ texture.extents() };
+                    if (extents / 2u * 2u == extents)
+                        sampling = texture_sampling::Nearest;
+                    else
+                        sampling = texture_sampling::Normal;
+                }
+                if (sampling != texture_sampling::Multisample)
+                {
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
                 }
             }
 

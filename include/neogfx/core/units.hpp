@@ -429,10 +429,18 @@ namespace neogfx
                 return aValue;
             }
         }
-        T const sourceDeviceUnits = length_units_converter(aSourceUnitsContext, aSourceUnits).to_device_units(aValue);
-        T const sourceMillimetres = length_units_converter(aSourceUnitsContext, length_units::Millimetres).from_device_units(sourceDeviceUnits);
-        T const destinationDeviceUnits = length_units_converter(aDestinationUnitsContext, length_units::Millimetres).to_device_units(sourceMillimetres);
-        return length_units_converter(aDestinationUnitsContext, aDestinationUnits).from_device_units(destinationDeviceUnits);
+        T const sourceInDeviceUnits = length_units_converter(aSourceUnitsContext, aSourceUnits).to_device_units(aValue);
+        T const sourceInMillimetres = length_units_converter(aSourceUnitsContext, length_units::Millimetres).from_device_units(sourceInDeviceUnits);
+        T const destinationInDeviceUnits = length_units_converter(aDestinationUnitsContext, length_units::Millimetres).to_device_units(sourceInMillimetres);
+        auto const result = length_units_converter(aDestinationUnitsContext, aDestinationUnits).from_device_units(destinationInDeviceUnits);
+        if (aDestinationUnits == length_units::Pixels || aDestinationUnits == length_units::ScaledPixels)
+        {
+            if constexpr (std::is_scalar_v<T>)
+                return std::round(result);
+            else
+                return result.round();
+        }
+        return result;
     }
 
     template<typename T>

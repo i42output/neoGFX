@@ -376,7 +376,7 @@
                                     text: "RGB <-> HSV\ncolour space\nconversion test"
                                 }
                                 spacer: {
-                                    weight: 2.0
+                                    weight: 0.5
                                 }
                                 vertical_layout: 
                                 {

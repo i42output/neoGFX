@@ -39,12 +39,12 @@ namespace neogfx
     public:
         action();
         action(const std::string& aText);
-        action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
+        action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled);
         action(const std::string& aText, const i_texture& aImage);
         action(const std::string& aText, const i_image& aImage);
         action(i_action_container& aContainer);
         action(i_action_container& aContainer, const std::string& aText);
-        action(i_action_container& aContainer, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
+        action(i_action_container& aContainer, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled);
         action(i_action_container& aContainer, const std::string& aText, const i_texture& aImage);
         action(i_action_container& aContainer, const std::string& aText, const i_image& aImage);
     public:
@@ -75,10 +75,10 @@ namespace neogfx
         action& set_button_text(const optional_text& aButtonText = optional_text()) override;
         action& set_tool_tip_text(const optional_text& aToolTipText = optional_text()) override;
         action& set_help_text(const optional_text& aHelpText = optional_text()) override;
-        action& set_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
+        action& set_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) override;
         action& set_image(const i_image& aImage) override;
         action& set_image(const i_texture& aTexture) override;
-        action& set_checked_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
+        action& set_checked_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) override;
         action& set_checked_image(const i_image& aImage) override;
         action& set_checked_image(const i_texture& aTexture) override;
         action& set_shortcut(const optional_key_sequence& aShortcut) override;

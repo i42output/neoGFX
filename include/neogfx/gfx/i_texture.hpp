@@ -41,6 +41,7 @@ namespace neogfx
         Normal,
         NormalMipmap,
         Nearest,
+        Scaled,
         Data,
         Multisample,
         Multisample4x,

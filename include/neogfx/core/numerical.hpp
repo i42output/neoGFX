@@ -97,9 +97,9 @@ namespace neogfx
             basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             template <typename T2, uint32_t Size2, typename SFINAE = int>
             basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : base_type{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
-            basic_vector& operator=(const self_type& other) { v = other.v; return *this; }
-            basic_vector& operator=(self_type&& other) { v = std::move(other.v); return *this; }
-            basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
+            self_type& operator=(const self_type& other) { v = other.v; return *this; }
+            self_type& operator=(self_type&& other) { v = std::move(other.v); return *this; }
+            self_type& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
         public:
             static uint32_t size() { return Size; }
             value_type operator[](uint32_t aIndex) const { return v[aIndex]; }
@@ -116,22 +116,25 @@ namespace neogfx
                 return basic_vector<T2, Size, Type>{ *this };
             }
         public:
-            bool operator==(const basic_vector& right) const { return v == right.v; }
-            bool operator!=(const basic_vector& right) const { return v != right.v; }
-            basic_vector& operator+=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
-            basic_vector& operator-=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
-            basic_vector& operator*=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
-            basic_vector& operator/=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
-            basic_vector& operator+=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
-            basic_vector& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
-            basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
-            basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
-            basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
+            bool operator==(const self_type& right) const { return v == right.v; }
+            bool operator!=(const self_type& right) const { return v != right.v; }
+            self_type& operator+=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
+            self_type& operator-=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
+            self_type& operator*=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
+            self_type& operator/=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
+            self_type& operator+=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
+            self_type& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
+            self_type& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
+            self_type& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
+            self_type operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
             scalar magnitude() const { scalar ss = 0; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
-            basic_vector normalized() const { basic_vector result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
-            basic_vector min(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
-            basic_vector max(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
+            self_type normalized() const { basic_vector result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
+            self_type min(const basic_vector& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
+            self_type max(const basic_vector& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
             value_type min() const { value_type result = v[0]; for (uint32_t index = 1; index < Size; ++index) result = std::min(v[index], result); return result; }
+            self_type ceil() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::ceil(v[index]); return result; }
+            self_type floor() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::floor(v[index]); return result; }
+            self_type round() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::round(v[index]); return result; }
         public:
             using base_type::v;
         };
@@ -176,9 +179,9 @@ namespace neogfx
             basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             template <typename T2, uint32_t Size2, typename SFINAE = int>
             basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : v{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
-            basic_vector& operator=(const self_type& other) { v = other.v; return *this; }
-            basic_vector& operator=(self_type&& other) { v = std::move(other.v); return *this; }
-            basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
+            self_type& operator=(const self_type& other) { v = other.v; return *this; }
+            self_type& operator=(self_type&& other) { v = std::move(other.v); return *this; }
+            self_type& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
         public:
             static uint32_t size() { return Size; }
             const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
@@ -197,23 +200,26 @@ namespace neogfx
         public:
             bool operator==(const basic_vector& right) const { return v == right.v; }
             bool operator!=(const basic_vector& right) const { return v != right.v; }
-            basic_vector& operator+=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
-            basic_vector& operator-=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
-            basic_vector& operator*=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
-            basic_vector& operator/=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
-            basic_vector& operator+=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
-            basic_vector& operator-=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
-            basic_vector& operator*=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
-            basic_vector& operator/=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
-            basic_vector& operator+=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
-            basic_vector& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
-            basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
-            basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
-            basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
+            self_type& operator+=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
+            self_type& operator-=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
+            self_type& operator*=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
+            self_type& operator/=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
+            self_type& operator+=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
+            self_type& operator-=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
+            self_type& operator*=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
+            self_type& operator/=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
+            self_type& operator+=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
+            self_type& operator-=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
+            self_type& operator*=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
+            self_type& operator/=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
+            self_type operator-() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
             scalar magnitude() const { scalar ss = 0; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
-            basic_vector normalized() const { basic_vector result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
-            basic_vector min(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
-            basic_vector max(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
+            self_type normalized() const { self_type result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
+            self_type min(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
+            self_type max(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
+            self_type ceil() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::ceil(v[index]); return result; }
+            self_type floor() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::floor(v[index]); return result; }
+            self_type round() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::round(v[index]); return result; }
         public:
             array_type v;
         };

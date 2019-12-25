@@ -48,9 +48,7 @@ namespace neogfx
         scoped_scissor scissor(aGraphicsContext, aRect);
         for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
         {
-            bool alt = false;
-            if (static_cast<uint32_t>((x / aAlphaPatternSize)) % 2 == 1)
-                alt = !alt;
+            bool alt = ((static_cast<int32_t>(x / aAlphaPatternSize) % 2) == 1);
             for (coordinate y = 0; y < aRect.height(); y += aAlphaPatternSize)
             {
                 aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ aAlphaPatternSize, aAlphaPatternSize } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });

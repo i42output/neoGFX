@@ -1360,6 +1360,9 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_shader_program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\fragment_shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">

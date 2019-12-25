@@ -203,6 +203,8 @@ namespace neogfx
                                 glCheck(glUniform1i(location, v.handle))
                             else if constexpr (std::is_same_v<sampler2DMS, data_type>)
                                 glCheck(glUniform1i(location, v.handle))
+                            else if constexpr (std::is_same_v<sampler2DRect, data_type>)
+                                glCheck(glUniform1i(location, v.handle))
                         }, uniform.value());
                     }
     }

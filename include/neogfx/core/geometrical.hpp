@@ -34,6 +34,10 @@ namespace neogfx
     typedef default_geometry_value_type dimension;
     typedef default_geometry_value_type coordinate_delta;
 
+    typedef uint32_t coordinate_u32;
+    typedef uint32_t dimension_u32;
+    typedef uint32_t coordinate_delta_u32;
+
     typedef vec2 xy;
     typedef vec3 xyz;
 
@@ -118,6 +122,7 @@ namespace neogfx
         basic_delta operator-() const { return basic_delta(-dx, -dy); }
         basic_delta ceil() const { return basic_delta(std::ceil(dx), std::ceil(dy)); }
         basic_delta floor() const { return basic_delta(std::floor(dx), std::floor(dy)); }
+        basic_delta round() const { return basic_delta(std::round(dx), std::round(dy)); }
         basic_delta min(const basic_delta& other) const { return basic_delta{ std::min(dx, other.dx), std::min(dy, other.dy) }; }
         basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy) }; }
         // attributes
@@ -202,6 +207,7 @@ namespace neogfx
         basic_size& operator/=(dimension_type amount) { cx /= amount; cy /= amount; return *this; }
         basic_size ceil() const { return basic_size(std::ceil(cx), std::ceil(cy)); }
         basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
+        basic_size round() const { return basic_size(std::round(cx), std::round(cy)); }
         basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
         basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
         dimension_type magnitude() const { return std::sqrt(cx * cx + cy * cy); }
@@ -345,6 +351,7 @@ namespace neogfx
         basic_point operator-() const { return basic_point(-x, -y); }
         basic_point ceil() const { return basic_point(std::ceil(x), std::ceil(y)); }
         basic_point floor() const { return basic_point(std::floor(x), std::floor(y)); }
+        basic_point round() const { return basic_point(std::round(x), std::round(y)); }
         basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y) }; }
         basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y) }; }
         // attributes
@@ -671,7 +678,8 @@ namespace neogfx
         }
         basic_rect ceil() const { return basic_rect(point_type::ceil(), size_type::ceil()); }
         basic_rect floor() const { return basic_rect(point_type::floor(), size_type::floor()); }
-        aabb_2d to_aabb_2d() const 
+        basic_rect round() const { return basic_rect(point_type::round(), size_type::round()); }
+        aabb_2d to_aabb_2d() const
         { 
             if constexpr (gui)
                 return aabb_2d{ top_left().to_vec2(), bottom_right().to_vec2() };
@@ -870,6 +878,7 @@ namespace neogfx
     template <typename DimensionType>
     class basic_margins
     {
+        typedef basic_margins<DimensionType> self_type;
         // types
     public:
         typedef DimensionType dimension_type;
@@ -887,20 +896,24 @@ namespace neogfx
             left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}
         // operations
     public:
-        bool operator==(const basic_margins& other) const { return left == other.left && top == other.top && right == other.right && bottom == other.bottom; }
-        bool operator!=(const basic_margins& other) const { return !operator == (other); }
-        basic_margins operator-() const { return basic_margins{ -left, -top, -right, -bottom }; }
-        basic_margins& operator+=(const basic_margins& other) { left += other.left; top += other.top; right += other.right; bottom += other.bottom; return *this; }
-        basic_margins& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
-        basic_margins& operator-=(const basic_margins& other) { left -= other.left; top -= other.top; right -= other.right; bottom -= other.bottom; return *this; }
-        basic_margins& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount; return *this; }
-        basic_margins& operator*=(const basic_margins& other) { left *= other.left; top *= other.top; right *= other.right; bottom *= other.bottom; return *this; }
-        basic_margins& operator*=(dimension_type amount) { left *= amount; top *= amount; right *= amount; bottom *= amount; return *this; }
-        basic_margins& operator/=(const basic_margins& other) { left /= other.left; top /= other.top; right /= other.right; bottom /= other.bottom; return *this; }
-        basic_margins& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
+        bool operator==(const self_type& other) const { return left == other.left && top == other.top && right == other.right && bottom == other.bottom; }
+        bool operator!=(const self_type& other) const { return !operator == (other); }
+        self_type operator-() const { return self_type{ -left, -top, -right, -bottom }; }
+        self_type& operator+=(const self_type& other) { left += other.left; top += other.top; right += other.right; bottom += other.bottom; return *this; }
+        self_type& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
+        self_type& operator-=(const self_type& other) { left -= other.left; top -= other.top; right -= other.right; bottom -= other.bottom; return *this; }
+        self_type& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount; return *this; }
+        self_type& operator*=(const self_type& other) { left *= other.left; top *= other.top; right *= other.right; bottom *= other.bottom; return *this; }
+        self_type& operator*=(dimension_type amount) { left *= amount; top *= amount; right *= amount; bottom *= amount; return *this; }
+        self_type& operator/=(const self_type& other) { left /= other.left; top /= other.top; right /= other.right; bottom /= other.bottom; return *this; }
+        self_type& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
     public:
         point_type top_left() const { return point_type{ left, top }; }
         size_type size() const { return size_type{ left + right, top + bottom }; }
+    public:
+        self_type ceil() const { return self_type{ std::ceil(left), std::ceil(top), std::ceil(right), std::ceil(bottom) }; }
+        self_type floor() const { return self_type{ std::floor(left), std::floor(top), std::floor(right), std::floor(bottom) }; }
+        self_type round() const { return self_type{ std::round(left), std::round(top), std::round(right), std::round(bottom) }; }
         // attributes
     public:
         dimension_type left;

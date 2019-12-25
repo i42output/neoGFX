@@ -603,6 +603,7 @@
     <ClCompile Include="..\..\..\src\game\system.cpp" />
     <ClCompile Include="..\..\..\src\game\text_mesh.cpp" />
     <ClCompile Include="..\..\..\src\game\time.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\fragment_shader.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />
     <ClCompile Include="..\..\..\src\gfx\image.cpp" />

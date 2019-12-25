@@ -55,7 +55,6 @@ namespace neogfx
         virtual i_action& insert_action(button_index aButtonIndex, std::shared_ptr<i_action> aAction);
         virtual void insert_separator(button_index aButtonIndex);
     private:
-        size iButtonSize = size{ 32.0, 32.0 };
         flow_layout iLayout;
         button_list iButtons;
         action iSeparator;
