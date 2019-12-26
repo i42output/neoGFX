@@ -449,7 +449,7 @@ namespace neogfx
                 "ivec2 render_position()\n"
                 "{\n"
                 "    if (glyphGuiCoordinates)\n"
-                "        return ivec2(Coord.x, (glyphRenderTargetExtents.y) - 1 - Coord.y);\n"
+                "        return ivec2(Coord.x, glyphRenderTargetExtents.y - Coord.y);\n"
                 "    else\n"
                 "        return ivec2(Coord.xy);\n"
                 "}\n"
