@@ -637,6 +637,11 @@ namespace neogfx
         }
     }
 
+    subpixel_format graphics_context::subpixel_format() const
+    {
+        return native_context().subpixel_format();
+    }
+
     bool graphics_context::metrics_available() const
     {
         return true;
@@ -1015,19 +1020,19 @@ namespace neogfx
         return result;
     }
 
-    void graphics_context::draw_glyph(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
-        draw_glyph(aPoint.to_vec3(), aFont, aGlyph, aAppearance);
+        draw_glyph(aPoint.to_vec3(), aGlyph, aAppearance);
     }
 
-    void graphics_context::draw_glyph(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
         try
         {
             auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-            native_context().enqueue(graphics_operation::draw_glyph{ adjustedPos, aGlyph, aFont.id(), aAppearance });
+            native_context().enqueue(graphics_operation::draw_glyph{ adjustedPos, aGlyph, aAppearance });
             if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
-                draw_glyph_underline(aPoint, aFont, aGlyph, aAppearance);
+                draw_glyph_underline(aPoint, aGlyph, aAppearance);
         }
         catch (const freetype_error& fe)
         {
@@ -1041,20 +1046,21 @@ namespace neogfx
         }
     }
 
-    void graphics_context::draw_glyph_underline(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
-        draw_glyph_underline(aPoint.to_vec3(), aFont, aGlyph, aAppearance);
+        draw_glyph_underline(aPoint.to_vec3(), aGlyph, aAppearance);
     }
 
-    void graphics_context::draw_glyph_underline(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
+        auto const& font = aGlyph.font();
         auto yLine = logical_coordinates().is_gui_orientation() ?
-            (aFont.height() - 1.0 + aFont.descender()) - aFont.native_font_face().underline_position() :
-            -aFont.descender() + aFont.native_font_face().underline_position();
+            (font.height() - 1.0 + font.descender()) - font.native_font_face().underline_position() :
+            -font.descender() + font.native_font_face().underline_position();
         draw_line(
             aPoint + vec3{ 0.0, yLine },
-            aPoint + vec3{ mnemonics_shown() && aGlyph.mnemonic() ? aGlyph.extents(aFont).cx : aGlyph.advance().cx, yLine },
-            pen{ aAppearance.ink(), aFont.native_font_face().underline_thickness() });
+            aPoint + vec3{ mnemonics_shown() && aGlyph.mnemonic() ? aGlyph.extents(font).cx : aGlyph.advance().cx, yLine },
+            pen{ aAppearance.ink(), font.native_font_face().underline_thickness() });
     }
 
     void graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix) const

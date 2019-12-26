@@ -47,6 +47,6 @@ namespace neogfx
     public:
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
     public:
-        virtual neogfx::subpixel subpixel() const = 0;
+        virtual neogfx::subpixel_format subpixel_format() const = 0;
     };
 }

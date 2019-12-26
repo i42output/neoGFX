@@ -61,33 +61,33 @@ namespace neogfx
         iPixelDensityDpi{ 96.0, 96.0 },
         iRect{ aRect },
         iDesktopRect{ aDesktopRect },
-        iSubpixelFormat{ subpixel::SubpixelFormatNone },
+        iSubpixelFormat{ subpixel_format::None },
         iNativeDisplayHandle{ aNativeDisplayHandle },
         iNativeDeviceContextHandle{ aNativeDeviceContextHandle }
     {
         update_dpi();
 #ifdef WIN32
-        HKEY hkeySubpixelFormat;
-        if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, (L"SOFTWARE\\Microsoft\\Avalon.Graphics\\DISPLAY" + boost::lexical_cast<std::wstring>(index() + 1)).c_str(), 0, KEY_READ, &hkeySubpixelFormat) == ERROR_SUCCESS)
+        HKEY hkey;
+        if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, (L"SOFTWARE\\Microsoft\\Avalon.Graphics\\DISPLAY" + boost::lexical_cast<std::wstring>(index() + 1)).c_str(), 0, KEY_READ, &hkey) == ERROR_SUCCESS)
         {
             DWORD subpixelFormat = 0;
             DWORD cbValue = sizeof(subpixelFormat);
-            if (RegQueryValueEx(hkeySubpixelFormat, L"PixelStructure", NULL, NULL, (LPBYTE)&subpixelFormat, &cbValue) == ERROR_SUCCESS)
+            if (RegQueryValueEx(hkey, L"PixelStructure", NULL, NULL, (LPBYTE)&subpixelFormat, &cbValue) == ERROR_SUCCESS)
             {
                 switch (subpixelFormat)
                 {
                 case 1:
-                    iSubpixelFormat = subpixel::SubpixelFormatRGBHorizontal;
+                    iSubpixelFormat = subpixel_format::RGBHorizontal;
                     break;
                 case 2:
-                    iSubpixelFormat = subpixel::SubpixelFormatBGRHorizontal;
+                    iSubpixelFormat = subpixel_format::BGRHorizontal;
                     break;
                 }
             }
-            ::RegCloseKey(hkeySubpixelFormat);
+            ::RegCloseKey(hkey);
         }
         else
-            iSubpixelFormat = subpixel::SubpixelFormatRGBHorizontal;
+            iSubpixelFormat = subpixel_format::RGBHorizontal;
 #endif
     }
 
@@ -163,7 +163,7 @@ namespace neogfx
         return desktop_rect().deflate(desktop_rect().extents() * 0.167);
     }
 
-    subpixel display::subpixel() const
+    subpixel_format display::subpixel_format() const
     {
         return iSubpixelFormat;
     }

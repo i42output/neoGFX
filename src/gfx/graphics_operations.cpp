@@ -115,8 +115,8 @@ namespace neogfx
                     return false;
                 if (left.glyph.subpixel() != right.glyph.subpixel())
                     return false;
-                const i_glyph_texture& leftGlyphTexture = glyph_texture(left);
-                const i_glyph_texture& rightGlyphTexture = glyph_texture(right);
+                const i_glyph_texture& leftGlyphTexture = left.glyph.glyph_texture();
+                const i_glyph_texture& rightGlyphTexture = right.glyph.glyph_texture();
                 if (leftGlyphTexture.texture().native_texture()->handle() != rightGlyphTexture.texture().native_texture()->handle())
                     return false;
                 if (leftGlyphTexture.subpixel() != rightGlyphTexture.subpixel())

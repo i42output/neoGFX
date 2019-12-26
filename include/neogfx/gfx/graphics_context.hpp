@@ -155,10 +155,10 @@ namespace neogfx
         void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const override;
         void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
         void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
-        void draw_glyph(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const override;
-        void draw_glyph(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const override;
-        void draw_glyph_underline(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const override;
-        void draw_glyph_underline(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
         void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const override;
         void unset_mnemonic() const override;
         bool mnemonics_shown() const override;
@@ -174,6 +174,9 @@ namespace neogfx
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}) const override;
 
         // implementation
+        // from i_rendering_context
+    public:
+        neogfx::subpixel_format subpixel_format() const override;
         // from i_device_metrics
     public:
         bool metrics_available() const override;

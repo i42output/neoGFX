@@ -1227,14 +1227,14 @@ namespace neogfx
         }
     }
 
-    subpixel opengl_rendering_context::subpixel() const
+    subpixel_format opengl_rendering_context::subpixel_format() const
     {
         if (render_target().target_type() == render_target_type::Texture)
-            return neogfx::subpixel::None;
+            return neogfx::subpixel_format::None;
         else if (iWidget != nullptr)
-            return service<i_surface_manager>().display(iWidget->surface()).subpixel();
+            return service<i_surface_manager>().display(iWidget->surface()).subpixel_format();
         // todo: might not be monitor 0!
-        return service<i_basic_services>().display(0).subpixel();
+        return service<i_basic_services>().display(0).subpixel_format();
     }
 
     std::size_t opengl_rendering_context::max_operations(const graphics_operation::operation& aOperation)
@@ -1253,19 +1253,18 @@ namespace neogfx
     void opengl_rendering_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
-
-#if 0 // todo - shader rework
+        disable_anti_alias daa{ *this };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
 
         if (firstOp.glyph.is_emoji())
         {
             if (firstOp.appearance.paper())
-                fill_rect(rect{ point{ firstOp.point }, glyph_extents(firstOp) }, to_brush(*firstOp.appearance.paper()), firstOp.point.z);
+                fill_rect(rect{ point{ firstOp.point }, firstOp.glyph.extents() }, to_brush(*firstOp.appearance.paper()), firstOp.point.z);
             auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
             auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
             draw_mesh(
-                to_ecs_component(rect{ firstOp.point, glyph_extents(firstOp) }),
+                to_ecs_component(rect{ firstOp.point, firstOp.glyph.extents() }),
                 game::material{ 
                     {}, 
                     {}, 
@@ -1273,12 +1272,10 @@ namespace neogfx
                     to_ecs_component(emojiTexture)
                 }, 
                 mat44::identity());
-            glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-            glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
             return;
         }
 
-        const i_glyph_texture& firstGlyphTexture = glyph_texture(firstOp);
+        const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
 
         bool renderEffects = !firstOp.appearance.only_calculate_effect() && firstOp.appearance.effect() && firstOp.appearance.effect()->type() == text_effect_type::Outline;
 
@@ -1298,7 +1295,7 @@ namespace neogfx
                         if (!drawOp.appearance.paper())
                             continue;
 
-                        const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
+                        const font& glyphFont = drawOp.glyph.font();
                         graphics_operation::fill_rect nextOp{ rect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } }, to_brush(*drawOp.appearance.paper()), drawOp.point.z };
                         if (!rects.empty() && !batchable(rects.back(), nextOp))
                         {
@@ -1333,8 +1330,8 @@ namespace neogfx
                         if (drawOp.glyph.is_whitespace())
                             continue;
 
-                        const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
-                        const i_glyph_texture& glyphTexture = glyph_texture(drawOp);
+                        const font& glyphFont = drawOp.glyph.font();
+                        const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 
                         vec3 glyphOrigin(
                             drawOp.point.x + glyphTexture.placement().x,
@@ -1383,19 +1380,6 @@ namespace neogfx
                     if (vertexArrays.instance().empty())
                         continue;
 
-                    glCheck(glActiveTexture(GL_TEXTURE1));
-                    glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                    if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
-                    {
-                        glCheck(glActiveTexture(GL_TEXTURE2));
-                        glCheck(glBindTexture(
-                            render_target().target_texture().sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE,
-                            static_cast<GLuint>(reinterpret_cast<std::intptr_t>(render_target().target_texture().native_texture()->handle()))));
-                        glCheck(glActiveTexture(GL_TEXTURE1));
-                    }
-
                     if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
                         rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.appearance.ink()),
                             rect{
@@ -1406,37 +1390,16 @@ namespace neogfx
                                     vertexArrays.instance()[2].xyz[0],
                                     vertexArrays.instance()[2].xyz[1]} });
 
-                    glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(firstGlyphTexture.texture().native_texture()->handle()))));
-
-                    disable_anti_alias daa{ *this };
-
-                    bool useSubpixelShader = render_target().target_type() == render_target_type::Surface && firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
-
-                    use_shader_program usp{ *this, iRenderingEngine, rendering_engine().glyph_shader_program(useSubpixelShader) };
-
                     auto& shader = rendering_engine().active_shader_program();
-
                     rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
-
-                    shader.set_uniform_variable("guiCoordinates", logical_coordinates().is_gui_orientation());
-                    shader.set_uniform_variable("outputExtents", static_cast<float>(render_target().target_extents().cx), static_cast<float>(render_target().target_extents().cy));
-
-                    shader.set_uniform_variable("glyphTexture", 1);
-
-                    if (useSubpixelShader)
-                        shader.set_uniform_variable("outputTexture", 2);
-
-                    shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
+                    shader.glyph_shader().set_first_glyph(*this, firstOp.glyph);
 
                     vertexArrays.instance().draw(need, glyphCount / 2u);
                     vertexArrays.instance().execute();
-
-                    glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
                 }
                 break;
             }
         }
-#endif // todo - shader rework
     }
 
     bool opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)

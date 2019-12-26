@@ -186,10 +186,10 @@ namespace neogfx
         virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const = 0;
         virtual void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
         virtual void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_glyph(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph_underline(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph_underline(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
         virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const = 0;
         virtual void unset_mnemonic() const = 0;
         virtual bool mnemonics_shown() const = 0;
@@ -211,7 +211,7 @@ namespace neogfx
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aGraphicsContext.draw_glyph(pos + iterGlyph->offset().to_vec3(), iterGlyph->font(aGlyphText), *iterGlyph, aAppearance);
+            aGraphicsContext.draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aAppearance);
             pos.x += iterGlyph->advance().cx;
         }
     }
@@ -224,7 +224,7 @@ namespace neogfx
         vec3 pos{ effectOffset.x, effectOffset.y, 0.0 };
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aPingPongBuffers.first->draw_glyph(pos + iterGlyph->offset().to_vec3(), iterGlyph->font(aGlyphText), *iterGlyph, aGlowColour);
+            aPingPongBuffers.first->draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aGlowColour);
             pos.x += iterGlyph->advance().cx;
         }
     }

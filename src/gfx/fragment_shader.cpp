@@ -449,7 +449,7 @@ namespace neogfx
                 "ivec2 render_position()\n"
                 "{\n"
                 "    if (glyphGuiCoordinates)\n"
-                "        return ivec2(Coord.x, (glyphRenderTargetExtents.y) - 1 - Coord.y;\n"
+                "        return ivec2(Coord.x, (glyphRenderTargetExtents.y) - 1 - Coord.y);\n"
                 "    else\n"
                 "        return ivec2(Coord.xy);\n"
                 "}\n"
@@ -475,10 +475,10 @@ namespace neogfx
                 "                    color = vec4(color.xyz, color.a * a);\n"
                 "                    break;\n"
                 "                case 1:\n" // RGBHorizontal
-                "                    color = vec4(color.rgb * aaaAlpha.rgb * color.a + texelFetch(glyphRenderOutput, render_position(), 0.rgb * (vec3(1.0, 1.0, 1.0) - aaaAlpha.rgb * color.a), 1.0);\n"
+                "                    color = vec4(color.rgb * aaaAlpha.rgb * color.a + texelFetch(glyphRenderOutput, render_position(), 0).rgb * (vec3(1.0, 1.0, 1.0) - aaaAlpha.rgb * color.a), 1.0);\n"
                 "                    break;\n"
                 "                case 2:\n" // BGRHorizontal
-                "                    color = vec4(color.rgb * aaaAlpha.bgr * color.a + texelFetch(glyphRenderOutput, render_position(), 0.rgb * (vec3(1.0, 1.0, 1.0) - aaaAlpha.bgr * color.a), 1.0);\n"
+                "                    color = vec4(color.rgb * aaaAlpha.bgr * color.a + texelFetch(glyphRenderOutput, render_position(), 0).rgb * (vec3(1.0, 1.0, 1.0) - aaaAlpha.bgr * color.a), 1.0);\n"
                 "                    break;\n"
                 "                }\n"
                 "            }\n"
@@ -504,18 +504,19 @@ namespace neogfx
         set_uniform("glyphEnabled"_s, false);
     }
 
-    void standard_glyph_shader::set_glyph(const i_rendering_context& aContext, const i_glyph_texture& aGlyph)
+    void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph)
     {
         enable();
-        aGlyph.texture().bind(6);
-        if (aGlyph.subpixel())
+        aGlyph.glyph_texture().texture().bind(6);
+        bool subpixelRender = aGlyph.subpixel() && aGlyph.glyph_texture().subpixel();
+        if (subpixelRender)
             aContext.render_target().target_texture().bind(7);
         set_uniform("glyphRenderTargetExtents"_s, aContext.render_target().extents().to_vec2().as<int32_t>());
         set_uniform("glyphGuiCoordinates"_s, aContext.logical_coordinates().is_gui_orientation());
         set_uniform("glyphTexture"_s, sampler2D{ 6 });
         set_uniform("glyphRenderOutput"_s, sampler2DMS{ 7 });
-        set_uniform("glyphSubpixel"_s, aGlyph.subpixel());
-        set_uniform("glyphSubpixelFormat"_s, aContext.subpixel());
+        set_uniform("glyphSubpixel"_s, aGlyph.glyph_texture().subpixel());
+        set_uniform("glyphSubpixelFormat"_s, subpixelRender ? aContext.subpixel_format() : subpixel_format::None);
         set_uniform("glyphEnabled"_s, true);
     }
 }

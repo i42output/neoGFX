@@ -71,6 +71,19 @@ namespace neogfx
                 return GL_TEXTURE_2D;
             }
         }
+
+        inline GLenum to_gl_binding_enum(texture_sampling aSampling)
+        {
+            switch (aSampling)
+            {
+            case texture_sampling::Multisample:
+                return GL_TEXTURE_BINDING_2D_MULTISAMPLE;
+            case texture_sampling::Data:
+                return GL_TEXTURE_BINDING_RECTANGLE;
+            default:
+                return GL_TEXTURE_BINDING_2D;
+            }
+        }
     }
 
     template <typename T>
@@ -107,6 +120,7 @@ namespace neogfx
                 glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
                 break;
             case texture_sampling::Nearest:
+            case texture_sampling::Scaled:
                 glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
                 glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
                 break;
@@ -475,7 +489,7 @@ namespace neogfx
         if (aTextureUnit != std::nullopt)
             glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
         GLint previousTexture = 0;
-        glCheck(glGetIntegerv(sampling() != texture_sampling::Multisample ? sampling() != texture_sampling::Data ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_RECTANGLE : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
+        glCheck(glGetIntegerv(to_gl_binding_enum(sampling()), &previousTexture));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
         return previousTexture;
     }

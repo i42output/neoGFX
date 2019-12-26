@@ -277,6 +277,10 @@ namespace neogfx
         { 
             iOffset = aOffset; 
         }
+        size extents() const
+        {
+            return extents(font());
+        }
         size extents(const i_glyph_font_cache& aFontCache) const
         {
             return extents(font(aFontCache));
@@ -337,6 +341,10 @@ namespace neogfx
         void kerning_adjust(float aAdjust) 
         { 
             iAdvance.cx += aAdjust; 
+        }
+        const i_glyph_texture& glyph_texture() const
+        {
+            return glyph_texture(font());
         }
         const i_glyph_texture& glyph_texture(const i_glyph_font_cache& aFontCache) const
         {

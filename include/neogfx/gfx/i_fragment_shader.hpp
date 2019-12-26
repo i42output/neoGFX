@@ -24,7 +24,7 @@
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_texture.hpp>
-#include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 
 namespace neogfx
@@ -66,6 +66,6 @@ namespace neogfx
         typedef self_type abstract_type;
     public:
         virtual void clear_glyph() = 0;
-        virtual void set_glyph(const i_rendering_context& aContext, const i_glyph_texture& aGlyph) = 0;
+        virtual void set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph) = 0;
     };
 }

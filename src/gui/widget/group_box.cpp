@@ -59,7 +59,7 @@ namespace neogfx
     {
         if (is_checkable() != aCheckable)
         {
-            auto const& text = label().text();
+            auto const text = label().text();
             iTitle = neolib::none;
             if (aCheckable)
             {
