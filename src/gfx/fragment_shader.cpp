@@ -264,12 +264,12 @@ namespace neogfx
         auto& gradientArrays = gradient_shader_data(aGradient);
         set_uniform("gradientFilterSize"_s, static_cast<int>(gradientArrays.filter.data().extents().cx));
         set_uniform("gradientStopCount"_s, static_cast<int>(gradientArrays.stopCount));
-        gradientArrays.stops.data().bind(2);
-        gradientArrays.stopColours.data().bind(3);
-        gradientArrays.filter.data().bind(4);
-        set_uniform("gradientStopPositions"_s, sampler2DRect{ 2 });
-        set_uniform("gradientStopColours"_s, sampler2DRect{ 3 });
-        set_uniform("gradientFilter"_s, sampler2DRect{ 4 });
+        gradientArrays.stops.data().bind(3);
+        gradientArrays.stopColours.data().bind(4);
+        gradientArrays.filter.data().bind(5);
+        set_uniform("gradientStopPositions"_s, sampler2DRect{ 3 });
+        set_uniform("gradientStopColours"_s, sampler2DRect{ 4 });
+        set_uniform("gradientFilter"_s, sampler2DRect{ 5 });
         set_uniform("gradientEnabled"_s, true);
     }
 
@@ -337,7 +337,7 @@ namespace neogfx
     }
 
     standard_texture_shader::standard_texture_shader(const std::string& aName) :
-        standard_fragment_shader{ aName }
+        standard_fragment_shader<i_texture_shader>{ aName }
     {
         disable();
         add_in_variable<vec2f>("TexCoord"_s, 2u);
@@ -431,5 +431,91 @@ namespace neogfx
     void standard_texture_shader::set_effect(shader_effect aEffect)
     {
         set_uniform("textureEffect"_s, aEffect);
+    }
+
+    standard_glyph_shader::standard_glyph_shader(const std::string& aName) :
+        standard_fragment_shader<i_glyph_shader>{ aName }
+    {
+        disable();
+    }
+
+    void standard_glyph_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    {
+        standard_fragment_shader<i_glyph_shader>::generate_code(aProgram, aLanguage, aOutput);
+        if (aLanguage == shader_language::Glsl)
+        {
+            static const string code
+            {
+                "ivec2 render_position()\n"
+                "{\n"
+                "    if (glyphGuiCoordinates)\n"
+                "        return ivec2(Coord.x, (glyphRenderTargetExtents.y) - 1 - Coord.y;\n"
+                "    else\n"
+                "        return ivec2(Coord.xy);\n"
+                "}\n"
+                "\n"
+                "void standard_glyph_shader(inout vec4 color)\n"
+                "{\n"
+                "    if (glyphEnabled)\n"
+                "    {\n"
+                "        float a = 0.0;\n"
+                "        if (glyphSubpixel)\n"
+                "        {\n"
+                "            vec4 aaaAlpha = texture(glyphTexture, TexCoord);\n"
+                "            if (aaaAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
+                "                return;\n"
+                "            else if (aaaAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+                "                discard;\n"
+                "            else\n"
+                "            {\n"
+                "                switch(glyphSubpixelFormat)\n"
+                "                {\n"
+                "                default:\n"
+                "                    a = (aaaAlpha.r + aaaAlpha.g + aaaAlpha.b) / 3.0;\n"
+                "                    color = vec4(color.xyz, color.a * a);\n"
+                "                    break;\n"
+                "                case 1:\n" // RGBHorizontal
+                "                    color = vec4(color.rgb * aaaAlpha.rgb * color.a + texelFetch(glyphRenderOutput, render_position(), 0.rgb * (vec3(1.0, 1.0, 1.0) - aaaAlpha.rgb * color.a), 1.0);\n"
+                "                    break;\n"
+                "                case 2:\n" // BGRHorizontal
+                "                    color = vec4(color.rgb * aaaAlpha.bgr * color.a + texelFetch(glyphRenderOutput, render_position(), 0.rgb * (vec3(1.0, 1.0, 1.0) - aaaAlpha.bgr * color.a), 1.0);\n"
+                "                    break;\n"
+                "                }\n"
+                "            }\n"
+                "        }\n"
+                "        else\n"
+                "        {\n"
+                "            a = texture(glyphTexture, TexCoord).r;\n"
+                "            if (a == 0)\n"
+                "                discard;\n"
+                "            color = vec4(color.xyz, color.a * a);\n"
+                "        }\n"
+                "    }\n"
+                "}\n"_s
+            };
+            aOutput += code;
+        }
+        else
+            throw unsupported_shader_language();
+    }
+
+    void standard_glyph_shader::clear_glyph()
+    {
+        set_uniform("glyphEnabled"_s, false);
+    }
+
+    void standard_glyph_shader::set_glyph(const i_rendering_context& aContext, const i_glyph_texture& aGlyph)
+    {
+        enable();
+        aGlyph.texture().bind(6);
+        if (aGlyph.subpixel())
+            aContext.render_target().target_texture().bind(7);
+        set_uniform("glyphRenderTargetExtents"_s, aContext.render_target().extents().to_vec2().as<int32_t>());
+        set_uniform("glyphGuiCoordinates"_s, aContext.logical_coordinates().is_gui_orientation());
+        set_uniform("glyphTexture"_s, sampler2D{ 6 });
+        set_uniform("glyphRenderOutput"_s, sampler2DMS{ 7 });
+        set_uniform("glyphSubpixel"_s, aGlyph.subpixel());
+        set_uniform("glyphSubpixelFormat"_s, aContext.subpixel());
+        set_uniform("glyphEnabled"_s, true);
     }
 }

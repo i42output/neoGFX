@@ -61,7 +61,7 @@ namespace neogfx
         iPixelDensityDpi{ 96.0, 96.0 },
         iRect{ aRect },
         iDesktopRect{ aDesktopRect },
-        iSubpixelFormat{ subpixel_format::SubpixelFormatNone },
+        iSubpixelFormat{ subpixel::SubpixelFormatNone },
         iNativeDisplayHandle{ aNativeDisplayHandle },
         iNativeDeviceContextHandle{ aNativeDeviceContextHandle }
     {
@@ -77,17 +77,17 @@ namespace neogfx
                 switch (subpixelFormat)
                 {
                 case 1:
-                    iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
+                    iSubpixelFormat = subpixel::SubpixelFormatRGBHorizontal;
                     break;
                 case 2:
-                    iSubpixelFormat = subpixel_format::SubpixelFormatBGRHorizontal;
+                    iSubpixelFormat = subpixel::SubpixelFormatBGRHorizontal;
                     break;
                 }
             }
             ::RegCloseKey(hkeySubpixelFormat);
         }
         else
-            iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
+            iSubpixelFormat = subpixel::SubpixelFormatRGBHorizontal;
 #endif
     }
 
@@ -163,7 +163,7 @@ namespace neogfx
         return desktop_rect().deflate(desktop_rect().extents() * 0.167);
     }
 
-    subpixel_format display::subpixel_format() const
+    subpixel display::subpixel() const
     {
         return iSubpixelFormat;
     }

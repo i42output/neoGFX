@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-
+#include <neolib/i_enum.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/core/colour.hpp>
@@ -28,15 +28,28 @@
 
 namespace neogfx
 {
-    enum class subpixel_format
+    enum class subpixel : uint32_t
     {
-        SubpixelFormatNone,
-        SubpixelFormatRGBHorizontal,
-        SubpixelFormatBGRHorizontal,
-        SubpixelFormatRGBVertical,
-        SubpixelFormatBGRVertical
+        None,
+        RGBHorizontal,
+        BGRHorizontal,
+        RGBVertical,
+        BGRVertical
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::subpixel> neolib::enum_enumerators_v<neogfx::subpixel>
+{
+    declare_enum_string(neogfx::subpixel, None)
+    declare_enum_string(neogfx::subpixel, RGBHorizontal)
+    declare_enum_string(neogfx::subpixel, BGRHorizontal)
+    declare_enum_string(neogfx::subpixel, RGBVertical)
+    declare_enum_string(neogfx::subpixel, BGRVertical)
+};
+
+namespace neogfx
+{
     class i_display : public i_units_context
     {
     public:
@@ -54,6 +67,6 @@ namespace neogfx
         virtual window_placement default_window_placement() const = 0;
         virtual colour read_pixel(const point& aPosition) const = 0;
     public:
-        virtual neogfx::subpixel_format subpixel_format() const = 0;
+        virtual neogfx::subpixel subpixel() const = 0;
     };
 }

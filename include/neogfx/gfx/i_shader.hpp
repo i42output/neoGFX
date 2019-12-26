@@ -59,10 +59,13 @@ namespace neogfx
         Int,
         Vec2,
         DVec2,
+        IVec2,
         Vec3,
         DVec3,
+        IVec3,
         Vec4,
         DVec4,
+        IVec4,
         Mat4,
         DMat4,
         FloatArray,
@@ -95,10 +98,13 @@ const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerat
     declare_enum_string_explicit(neogfx::shader_data_type, Int, int)
     declare_enum_string_explicit(neogfx::shader_data_type, Vec2, vec2)
     declare_enum_string_explicit(neogfx::shader_data_type, DVec2, dvec2)
+    declare_enum_string_explicit(neogfx::shader_data_type, IVec2, ivec2)
     declare_enum_string_explicit(neogfx::shader_data_type, Vec3, vec3)
     declare_enum_string_explicit(neogfx::shader_data_type, DVec3, dvec3)
+    declare_enum_string_explicit(neogfx::shader_data_type, IVec3, ivec3)
     declare_enum_string_explicit(neogfx::shader_data_type, Vec4, vec4)
     declare_enum_string_explicit(neogfx::shader_data_type, DVec4, dvec4)
+    declare_enum_string_explicit(neogfx::shader_data_type, IVec4, ivec4)
     declare_enum_string_explicit(neogfx::shader_data_type, Mat4, mat4)
     declare_enum_string_explicit(neogfx::shader_data_type, DMat4, dmat4)
     declare_enum_string(neogfx::shader_data_type, FloatArray)
@@ -131,7 +137,7 @@ namespace neogfx
     typedef shader_handle<shader_data_type::Sampler2DMS> sampler2DMS;
     typedef shader_handle<shader_data_type::Sampler2DRect> sampler2DRect;
 
-    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec3f, vec3, vec4f, vec4, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
+    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec2i32, vec3f, vec3, vec3i32, vec4f, vec4, vec4i32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
 
     typedef uint32_t shader_variable_location;
 

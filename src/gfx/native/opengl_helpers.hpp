@@ -409,6 +409,7 @@ namespace neogfx
             }
             iCurrentProgram.gradient_shader().clear_gradient();
             iCurrentProgram.texture_shader().clear_texture();
+            iCurrentProgram.glyph_shader().clear_glyph();
         }
     private:
         i_rendering_context& iRenderingContext;

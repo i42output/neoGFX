@@ -49,7 +49,7 @@ namespace neogfx
         window_placement default_window_placement() const override;
         colour read_pixel(const point& aPosition) const override;
     public:
-        neogfx::subpixel_format subpixel_format() const override;
+        neogfx::subpixel subpixel() const override;
     public:
         bool metrics_available() const override;
         size extents() const override;
@@ -62,7 +62,7 @@ namespace neogfx
         neogfx::size iPixelDensityDpi;
         mutable neogfx::rect iRect;
         mutable neogfx::rect iDesktopRect;
-        neogfx::subpixel_format iSubpixelFormat;
+        neogfx::subpixel iSubpixelFormat;
         void* iNativeDisplayHandle;
         void* iNativeDeviceContextHandle;
     };

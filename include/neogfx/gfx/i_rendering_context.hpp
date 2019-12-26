@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/hid/i_display.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/graphics_operations.hpp>
 #include <neogfx/gfx/i_render_target.hpp>
@@ -45,5 +46,7 @@ namespace neogfx
         virtual void flush() = 0;
     public:
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
+    public:
+        virtual neogfx::subpixel subpixel() const = 0;
     };
 }

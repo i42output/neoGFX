@@ -21,8 +21,10 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
+#include <neogfx/hid/i_display.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 
 namespace neogfx
@@ -55,5 +57,15 @@ namespace neogfx
         virtual void clear_texture() = 0;
         virtual void set_texture(const i_texture& aTexture) = 0;
         virtual void set_effect(shader_effect aEffect) = 0;
+    };
+
+    class i_glyph_shader : public i_fragment_shader
+    {
+        typedef i_texture_shader self_type;
+    public:
+        typedef self_type abstract_type;
+    public:
+        virtual void clear_glyph() = 0;
+        virtual void set_glyph(const i_rendering_context& aContext, const i_glyph_texture& aGlyph) = 0;
     };
 }

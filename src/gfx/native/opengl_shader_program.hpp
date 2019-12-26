@@ -35,6 +35,8 @@ namespace neogfx
         i_gradient_shader& gradient_shader() override;
         const i_texture_shader& texture_shader() const override;
         i_texture_shader& texture_shader() override;
+        const i_glyph_shader& glyph_shader() const override;
+        i_glyph_shader& glyph_shader() override;
         void compile() override;
         void link() override;
         void use() override;
@@ -47,5 +49,6 @@ namespace neogfx
         ref_ptr<i_fragment_shader> iDefaultShader;
         ref_ptr<i_gradient_shader> iGradientShader;
         ref_ptr<i_texture_shader> iTextureShader;
+        ref_ptr<i_glyph_shader> iGlyphShader;
     };
 }

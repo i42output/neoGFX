@@ -32,17 +32,22 @@ namespace neogfx
             iDefaultShader = static_cast<i_fragment_shader&>(add_shader(neolib::make_ref<standard_fragment_shader<>>().as<i_shader>()));
             iGradientShader = static_cast<i_gradient_shader&>(add_shader(neolib::make_ref<standard_gradient_shader>().as<i_shader>()));
             iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
+            iGlyphShader = static_cast<i_glyph_shader&>(add_shader(neolib::make_ref<standard_glyph_shader>().as<i_shader>()));
         }
     }
 
     const i_gradient_shader& opengl_shader_program::gradient_shader() const
     {
-        return *iGradientShader;
+        if (iGradientShader != nullptr)
+            return *iGradientShader;
+        throw no_gradient_shader();
     }
 
     i_gradient_shader& opengl_shader_program::gradient_shader()
     {
-        return *iGradientShader;
+        if (iGradientShader != nullptr)
+            return *iGradientShader;
+        throw no_gradient_shader();
     }
 
     const i_texture_shader& opengl_shader_program::texture_shader() const
@@ -53,6 +58,20 @@ namespace neogfx
     i_texture_shader& opengl_shader_program::texture_shader()
     {
         return *iTextureShader;
+    }
+
+    const i_glyph_shader& opengl_shader_program::glyph_shader() const
+    {
+        if (iGlyphShader != nullptr)
+            return *iGlyphShader;
+        throw no_glyph_shader();
+    }
+
+    i_glyph_shader& opengl_shader_program::glyph_shader()
+    {
+        if (iGlyphShader != nullptr)
+            return *iGlyphShader;
+        throw no_glyph_shader();
     }
 
     void opengl_shader_program::compile()
@@ -183,14 +202,20 @@ namespace neogfx
                                 glCheck(glUniform2f(location, v[0], v[1]))
                             else if constexpr (std::is_same_v<vec2, data_type>)
                                 glCheck(glUniform2d(location, v[0], v[1]))
+                            else if constexpr (std::is_same_v<vec2i32, data_type>)
+                                glCheck(glUniform2i(location, v[0], v[1]))
                             else if constexpr (std::is_same_v<vec3f, data_type>)
                                 glCheck(glUniform3f(location, v[0], v[1], v[2]))
                             else if constexpr (std::is_same_v<vec3, data_type>)
                                 glCheck(glUniform3d(location, v[0], v[1], v[2]))
+                            else if constexpr (std::is_same_v<vec3i32, data_type>)
+                                glCheck(glUniform3i(location, v[0], v[1], v[2]))
                             else if constexpr (std::is_same_v<vec4f, data_type>)
                                 glCheck(glUniform4f(location, v[0], v[1], v[2], v[3]))
                             else if constexpr (std::is_same_v<vec4, data_type>)
                                 glCheck(glUniform4d(location, v[0], v[1], v[2], v[3]))
+                            else if constexpr (std::is_same_v<vec4i32, data_type>)
+                                glCheck(glUniform4i(location, v[0], v[1], v[2], v[3]))
                             else if constexpr (std::is_same_v<mat4f, data_type>)
                                 glCheck(glUniformMatrix4fv(location, 1, false, v.data()))
                             else if constexpr (std::is_same_v<mat4, data_type>)

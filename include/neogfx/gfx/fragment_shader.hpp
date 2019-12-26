@@ -122,4 +122,15 @@ namespace neogfx
         void set_texture(const i_texture& aTexture) override;
         void set_effect(shader_effect aEffect) override;
     };
+
+    class standard_glyph_shader : public standard_fragment_shader<i_glyph_shader>
+    {
+    public:
+        standard_glyph_shader(const std::string& aName = "standard_glyph_shader");
+    public:
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+    public:
+        void clear_glyph() override;
+        void set_glyph(const i_rendering_context& aContext, const i_glyph_texture& aGlyph) override;
+    };
 }

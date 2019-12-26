@@ -121,6 +121,8 @@ namespace neogfx
         bool draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         bool draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
         bool draw_patch(const vertices_t& aVertices, const vertices_2d_t& aTextureVertices, const game::material& aMaterial, const game::faces_t& aFaces);
+    public:
+        neogfx::subpixel subpixel() const override;
     private:
         std::size_t max_operations(const graphics_operation::operation& aOperation);
         void apply_scissor();

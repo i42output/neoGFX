@@ -19,6 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/text/i_emoji_atlas.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -1225,6 +1227,16 @@ namespace neogfx
         }
     }
 
+    subpixel opengl_rendering_context::subpixel() const
+    {
+        if (render_target().target_type() == render_target_type::Texture)
+            return neogfx::subpixel::None;
+        else if (iWidget != nullptr)
+            return service<i_surface_manager>().display(iWidget->surface()).subpixel();
+        // todo: might not be monitor 0!
+        return service<i_basic_services>().display(0).subpixel();
+    }
+
     std::size_t opengl_rendering_context::max_operations(const graphics_operation::operation& aOperation)
     {
         auto need = 1u;
@@ -1424,7 +1436,6 @@ namespace neogfx
                 break;
             }
         }
-
 #endif // todo - shader rework
     }
 
