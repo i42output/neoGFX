@@ -63,7 +63,7 @@
             }
             window: {
                 id: mainWindow
-                default_size: [ 832spx 832spx ]
+                default_size: [ 960spx 832spx ]
                 status_bar: {
                     id: statusBar
                 }
