@@ -66,10 +66,12 @@ namespace neogfx
             void release() const;
         public:
             const optional_font& font() const;
+            const colour_or_gradient& glyph_colour() const;
             const colour_or_gradient& text_colour() const;
             const colour_or_gradient& background_colour() const;
             const optional_text_effect& text_effect() const;
             void set_font(const optional_font& aFont = optional_font{});
+            void set_glyph_colour(const colour_or_gradient& aColour = colour_or_gradient{});
             void set_text_colour(const colour_or_gradient& aColour = colour_or_gradient{});
             void set_background_colour(const colour_or_gradient& aColour = colour_or_gradient{});
             void set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
@@ -83,6 +85,7 @@ namespace neogfx
             text_edit* iParent;
             mutable uint32_t iUseCount;
             optional_font iFont;
+            colour_or_gradient iGlyphColour;
             colour_or_gradient iTextColour;
             colour_or_gradient iBackgroundColour;
             optional_text_effect iTextEffect;

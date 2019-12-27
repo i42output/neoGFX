@@ -78,6 +78,11 @@ namespace neogfx
         return iFont;
     }
 
+    const colour_or_gradient& text_edit::style::glyph_colour() const
+    {
+        return iGlyphColour;
+    }
+
     const colour_or_gradient& text_edit::style::text_colour() const
     {
         return iTextColour;
@@ -96,6 +101,11 @@ namespace neogfx
     void text_edit::style::set_font(const optional_font& aFont)
     {
         iFont = aFont;
+    }
+
+    void text_edit::style::set_glyph_colour(const colour_or_gradient& aColour)
+    {
+        iGlyphColour = aColour;
     }
 
     void text_edit::style::set_text_colour(const colour_or_gradient& aColour)
@@ -1864,10 +1874,12 @@ namespace neogfx
                         service<i_app>().current_style().palette().selection_colour().light() ? colour::Black : colour::White,
                         has_focus() ? service<i_app>().current_style().palette().selection_colour() : service<i_app>().current_style().palette().selection_colour().with_alpha(64) } :
                     text_appearance{
-                        std::holds_alternative<colour>(style.text_colour()) ?
-                            static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
-                                static_variant_cast<const gradient&>(style.text_colour()).at(((glyphPos.x - column_rect(column_index(aColumn)).x) / column_rect(column_index(aColumn)).width())) :
-                                default_text_colour(),
+                        style.glyph_colour() == neolib::none ?
+                            std::holds_alternative<colour>(style.text_colour()) ?
+                                static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
+                                    static_variant_cast<const gradient&>(style.text_colour()).at(((glyphPos.x - column_rect(column_index(aColumn)).x) / column_rect(column_index(aColumn)).width())) :
+                                    default_text_colour() :
+                            style.glyph_colour(),
                         style.background_colour() != neolib::none ? 
                             optional_text_colour{ neogfx::text_colour{ style.background_colour() } } : 
                             optional_text_colour{},

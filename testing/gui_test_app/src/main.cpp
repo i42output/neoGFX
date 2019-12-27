@@ -283,6 +283,13 @@ int main(int argc, char* argv[])
         ui.actionNextTab.triggered([&]() { ui.tabPages.select_next_tab(); });
         ui.actionPreviousTab.triggered([&]() { ui.tabPages.select_previous_tab(); });
 
+        ui.gradientWidget.gradient_changed([&]()
+        {
+            auto s = ui.textEdit.default_style();
+            s.set_glyph_colour(ui.gradientWidget.gradient());
+            ui.textEdit.set_default_style(s);
+        });
+
         ui.button1.clicked([&ui]()
         {
             if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentTop)

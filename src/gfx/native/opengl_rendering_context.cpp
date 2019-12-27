@@ -1375,20 +1375,14 @@ namespace neogfx
                         vertexArrays.instance().push_back({ outputVertices[3], passColour, iTempTextureCoords[1] });
                         vertexArrays.instance().push_back({ outputVertices[4], passColour, iTempTextureCoords[2] });
                         vertexArrays.instance().push_back({ outputVertices[5], passColour, iTempTextureCoords[3] });
+
+                        if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
+                            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.appearance.ink()),
+                                outputRect);
                     }
 
                     if (vertexArrays.instance().empty())
                         continue;
-
-                    if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
-                        rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.appearance.ink()),
-                            rect{
-                                point{
-                                    vertexArrays.instance()[0].xyz[0],
-                                    vertexArrays.instance()[0].xyz[1]},
-                                point{
-                                    vertexArrays.instance()[2].xyz[0],
-                                    vertexArrays.instance()[2].xyz[1]} });
 
                     auto& shader = rendering_engine().active_shader_program();
                     rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
