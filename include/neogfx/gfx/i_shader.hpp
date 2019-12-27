@@ -154,7 +154,10 @@ namespace neogfx
         template <typename T>
         void set_value(const T& aValue)
         {
-            set_value(to_abstract(shader_value_type{ aValue }));
+            if constexpr (!std::is_enum_v<T>)
+                set_value(to_abstract(shader_value_type{ aValue }));
+            else
+                set_value(to_abstract(shader_value_type{ static_cast<int>(aValue) }));
         }
     };
 
@@ -347,14 +350,12 @@ namespace neogfx
         virtual void clear_uniform(const i_string& aName) = 0;
         virtual void set_uniform(const i_string& aName, const value_type& aValue) = 0;
         template <typename T>
-        std::enable_if_t<!std::is_enum_v<T>, void> set_uniform(const i_string& aName, const T& aValue)
+        void set_uniform(const i_string& aName, const T& aValue)
         {
-            set_uniform(aName, to_abstract(shader_value_type{ aValue }));
-        }
-        template <typename Enum>
-        std::enable_if_t<std::is_enum_v<Enum>, void> set_uniform(const i_string& aName, Enum aEnum)
-        {
-            set_uniform(aName, static_cast<int>(aEnum));
+            if constexpr (!std::is_enum_v<T>)
+                set_uniform(aName, to_abstract(shader_value_type{ aValue }));
+            else
+                set_uniform(aName, to_abstract(shader_value_type{ static_cast<int>(aValue) }));
         }
         template <std::size_t ArraySize>
         void set_uniform(const i_string& aName, const float(&aArray)[ArraySize])

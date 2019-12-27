@@ -146,8 +146,8 @@ namespace neogfx
     public:
         void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program&) override
         {
-            set_uniform("uProjectionMatrix"_s, projection_matrix(aRenderingContext).transposed().as<float>());
-            set_uniform("uTransformationMatrix"_s, transformation_matrix(aRenderingContext).as<float>());
+            uProjectionMatrix = projection_matrix(aRenderingContext).transposed().as<float>();
+            uTransformationMatrix = transformation_matrix(aRenderingContext).as<float>();
         }
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
@@ -169,6 +169,9 @@ namespace neogfx
     private:
         optional_mat44 iProjectionMatrix;
         optional_mat44 iTransformationMatrix;
+    private:
+        cache_uniform(uProjectionMatrix)
+        cache_uniform(uTransformationMatrix)
     };
 
     class standard_texture_vertex_shader : public standard_vertex_shader

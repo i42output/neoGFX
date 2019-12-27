@@ -109,6 +109,23 @@ namespace neogfx
         gradient_data_cache_map_t iGradientDataCacheMap;
         gradient_data_cache_queue_t iGradientDataCacheQueue;
         std::optional<neogfx::gradient_shader_data> iUncachedGradient;
+    private:
+        cache_uniform(uGradientViewportTop)
+        cache_uniform(uGradientTopLeft)
+        cache_uniform(uGradientBottomRight)
+        cache_uniform(uGradientDirection)
+        cache_uniform(uGradientAngle)
+        cache_uniform(uGradientStartFrom)
+        cache_uniform(uGradientSize)
+        cache_uniform(uGradientShape)
+        cache_uniform(uGradientExponents)
+        cache_uniform(uGradientCentre)
+        cache_uniform(uGradientFilterSize)
+        cache_uniform(uGradientStopCount)
+        cache_uniform(uGradientStopPositions)
+        cache_uniform(uGradientStopColours)
+        cache_uniform(uGradientFilter)
+        cache_uniform(uGradientEnabled)
     };
 
     class standard_texture_shader : public standard_fragment_shader<i_texture_shader>
@@ -121,6 +138,12 @@ namespace neogfx
         void clear_texture() override;
         void set_texture(const i_texture& aTexture) override;
         void set_effect(shader_effect aEffect) override;
+    private:
+        cache_uniform(uTextureEnabled)
+        cache_uniform(uTextureDataFormat)
+        cache_uniform(uTextureMultisample)
+        cache_uniform(uTextureExtents)
+        cache_uniform(uTextureEffect)
     };
 
     class standard_glyph_shader : public standard_fragment_shader<i_glyph_shader>
@@ -132,5 +155,13 @@ namespace neogfx
     public:
         void clear_glyph() override;
         void set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph) override;
+    private:
+        cache_uniform(uGlyphRenderTargetExtents)
+        cache_uniform(uGlyphGuiCoordinates)
+        cache_uniform(uGlyphTexture)
+        cache_uniform(uGlyphRenderOutput)
+        cache_uniform(uGlyphSubpixel)
+        cache_uniform(uGlyphSubpixelFormat)
+        cache_uniform(uGlyphEnabled)
     };
 }

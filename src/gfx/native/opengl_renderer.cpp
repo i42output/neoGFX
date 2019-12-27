@@ -130,6 +130,7 @@ namespace neogfx
         iVertexArrays = std::nullopt;
         iFontManager = std::nullopt;
         iTextureManager = std::nullopt;
+        iShaderPrograms.clear();
         opengl_buffer_cleanup();
     }
 

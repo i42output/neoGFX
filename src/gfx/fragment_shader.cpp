@@ -38,7 +38,7 @@ namespace neogfx
                 "vec4 gradient_colour(in float n)\n"
                 "{\n"
                 "    int l = 0;\n"
-                "    int r = gradientStopCount - 1;\n"
+                "    int r = uGradientStopCount - 1;\n"
                 "    int found = -1;\n"
                 "    float pos = 0.0;\n"
                 "    if (n < 0.0)\n"
@@ -48,7 +48,7 @@ namespace neogfx
                 "    while (found == -1)\n"
                 "    {\n"
                 "        int m = (l + r) / 2;\n"
-                "        pos = texelFetch(gradientStopPositions, ivec2(m, 0)).r;\n"
+                "        pos = texelFetch(uGradientStopPositions, ivec2(m, 0)).r;\n"
                 "        if (l > r)\n"
                 "            found = r;\n"
                 "        else\n"
@@ -63,10 +63,10 @@ namespace neogfx
                 "    }\n"
                 "    if (pos >= n && found != 0)\n"
                 "        --found;\n"
-                "    float firstPos = texelFetch(gradientStopPositions, ivec2(found, 0)).r;\n"
-                "    float secondPos = texelFetch(gradientStopPositions, ivec2(found + 1, 0)).r;\n"
-                "    vec4 firstColour = texelFetch(gradientStopColours, ivec2(found, 0));\n"
-                "    vec4 secondColour = texelFetch(gradientStopColours, ivec2(found + 1, 0));\n"
+                "    float firstPos = texelFetch(uGradientStopPositions, ivec2(found, 0)).r;\n"
+                "    float secondPos = texelFetch(uGradientStopPositions, ivec2(found + 1, 0)).r;\n"
+                "    vec4 firstColour = texelFetch(uGradientStopColours, ivec2(found, 0));\n"
+                "    vec4 secondColour = texelFetch(uGradientStopColours, ivec2(found + 1, 0));\n"
                 "    return mix(firstColour, secondColour, (n - firstPos) / (secondPos - firstPos));\n"
                 "}\n"
                 "\n"
@@ -80,27 +80,27 @@ namespace neogfx
                 "    else\n"
                 "        ratio.x = ab.y / ab.x;\n"
                 "    angle = atan(d.y * ratio.y, d.x * ratio.x);\n"
-                "    float x = pow(abs(cos(angle)), 2.0 / gradientExponents.x) * sign(cos(angle)) * ab.x;\n"
-                "    float y = pow(abs(sin(angle)), 2.0 / gradientExponents.y) * sign(sin(angle)) * ab.y;\n"
+                "    float x = pow(abs(cos(angle)), 2.0 / uGradientExponents.x) * sign(cos(angle)) * ab.x;\n"
+                "    float y = pow(abs(sin(angle)), 2.0 / uGradientExponents.y) * sign(sin(angle)) * ab.y;\n"
                 "    return sqrt(x * x + y * y);\n"
                 "}\n"
                 "\n"
                 "vec4 colour_at(vec2 viewPos)\n"
                 "{\n"
-                "    vec2 s = gradientBottomRight - gradientTopLeft;\n"
-                "    vec2 pos = viewPos - gradientTopLeft;\n"
+                "    vec2 s = uGradientBottomRight - uGradientTopLeft;\n"
+                "    vec2 pos = viewPos - uGradientTopLeft;\n"
                 "    pos.x = max(min(pos.x, s.x - 1.0), 0.0);\n"
                 "    pos.y = max(min(pos.y, s.y - 1.0), 0.0);\n"
-                "    float gradientPos;\n"
-                "    if (gradientDirection == 0)\n" /* vertical */
-                "        gradientPos = pos.y / s.y;\n"
-                "    else if (gradientDirection == 1)\n" /* horizontal */
-                "        gradientPos = pos.x / s.x;\n"
-                "    else if (gradientDirection == 2)\n" /* diagonal */
+                "    float uGradientPos;\n"
+                "    if (uGradientDirection == 0)\n" /* vertical */
+                "        uGradientPos = pos.y / s.y;\n"
+                "    else if (uGradientDirection == 1)\n" /* horizontal */
+                "        uGradientPos = pos.x / s.x;\n"
+                "    else if (uGradientDirection == 2)\n" /* diagonal */
                 "    {\n"
                 "        vec2 centre = s / 2.0;\n"
                 "        float angle;\n"
-                "        switch (gradientStartFrom)\n"
+                "        switch (uGradientStartFrom)\n"
                 "        {\n"
                 "        case 0:\n"
                 "            angle = atan(centre.y, -centre.x);\n"
@@ -115,7 +115,7 @@ namespace neogfx
                 "            angle = atan(centre.y, centre.x);\n"
                 "            break;\n"
                 "        default:\n"
-                "            angle = gradientAngle;\n"
+                "            angle = uGradientAngle;\n"
                 "            break;\n"
                 "        }\n"
                 "        pos.y = s.y - pos.y;\n"
@@ -123,9 +123,9 @@ namespace neogfx
                 "        mat2 rot = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));\n"
                 "        pos = rot * pos;\n"
                 "        pos = pos + centre;\n"
-                "        gradientPos = pos.y / s.y;\n"
+                "        uGradientPos = pos.y / s.y;\n"
                 "    }\n"
-                "    else if (gradientDirection == 3)\n" /* rectangular */
+                "    else if (uGradientDirection == 3)\n" /* rectangular */
                 "    {\n"
                 "        float vert = pos.y / s.y;\n"
                 "        if (vert > 0.5)\n"
@@ -133,18 +133,18 @@ namespace neogfx
                 "        float horz = pos.x / s.x;\n"
                 "        if (horz > 0.5)\n"
                 "            horz = 1.0 - horz;\n"
-                "        gradientPos = min(vert, horz) * 2.0;\n"
+                "        uGradientPos = min(vert, horz) * 2.0;\n"
                 "    }\n"
                 "    else\n" /* radial */
                 "    {\n"
                 "        vec2 ab = s / 2.0;\n"
                 "        pos -= ab;\n"
-                "        vec2 centre = ab * gradientCentre;\n"
+                "        vec2 centre = ab * uGradientCentre;\n"
                 "        float d = distance(centre, pos);\n"
-                "        vec2 c1 = gradientTopLeft - gradientTopLeft - ab;\n"
-                "        vec2 c2 = vec2(gradientTopLeft.x, gradientBottomRight.y) - gradientTopLeft - ab;\n"
-                "        vec2 c3 = gradientBottomRight - gradientTopLeft - ab;\n"
-                "        vec2 c4 = vec2(gradientBottomRight.x, gradientTopLeft.y) - gradientTopLeft - ab;\n"
+                "        vec2 c1 = uGradientTopLeft - uGradientTopLeft - ab;\n"
+                "        vec2 c2 = vec2(uGradientTopLeft.x, uGradientBottomRight.y) - uGradientTopLeft - ab;\n"
+                "        vec2 c3 = uGradientBottomRight - uGradientTopLeft - ab;\n"
+                "        vec2 c4 = vec2(uGradientBottomRight.x, uGradientTopLeft.y) - uGradientTopLeft - ab;\n"
                 "        vec2 cc = c1;\n"
                 "        if (distance(centre, c2) < distance(centre, cc))\n"
                 "            cc = c2;\n"
@@ -162,9 +162,9 @@ namespace neogfx
                 "        vec2 cs = vec2(min(abs(-ab.x + centre.x), abs(ab.x + centre.x)), min(abs(-ab.y + centre.y), abs(ab.y + centre.y)));\n"
                 "        vec2 fs = vec2(max(abs(-ab.x + centre.x), abs(ab.x + centre.x)), max(abs(-ab.y + centre.y), abs(ab.y + centre.y)));\n"
                 "        float r;\n"
-                "        if (gradientShape == 0)\n" // Ellipse
+                "        if (uGradientShape == 0)\n" // Ellipse
                 "        {\n"
-                "            switch (gradientSize)\n"
+                "            switch (uGradientSize)\n"
                 "            {\n"
                 "            default:\n"
                 "            case 0:\n" // ClosestSide
@@ -181,9 +181,9 @@ namespace neogfx
                 "                break;\n"
                 "            }\n"
                 "        }\n"
-                "        else if (gradientShape == 1)\n" // Circle
+                "        else if (uGradientShape == 1)\n" // Circle
                 "        {\n"
-                "            switch (gradientSize)\n"
+                "            switch (uGradientSize)\n"
                 "            {\n"
                 "            default:\n"
                 "            case 0:\n"
@@ -201,21 +201,21 @@ namespace neogfx
                 "            }\n"
                 "        }\n"
                 "        if (d < r)\n"
-                "            gradientPos = d / r;\n"
+                "            uGradientPos = d / r;\n"
                 "        else\n"
-                "            gradientPos = 1.0;\n"
+                "            uGradientPos = 1.0;\n"
                 "    }\n"
-                "    return gradient_colour(gradientPos);\n"
+                "    return gradient_colour(uGradientPos);\n"
                 "}\n"
                 "\n"
                 "void standard_gradient_shader(inout vec4 color)\n"
                 "{\n"
-                "    if (gradientEnabled)\n"
+                "    if (uGradientEnabled)\n"
                 "    {\n"
                 "        vec2 viewPos = gl_FragCoord.xy;\n"
-                "        viewPos.y = gradientViewportTop - viewPos.y;\n"
-                "        int d = gradientFilterSize / 2;\n"
-                "        if (texelFetch(gradientFilter, ivec2(d, d)).r == 1.0)\n"
+                "        viewPos.y = uGradientViewportTop - viewPos.y;\n"
+                "        int d = uGradientFilterSize / 2;\n"
+                "        if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)\n"
                 "        {\n"
                 "            color = colour_at(viewPos);\n"  
                 "        }\n"
@@ -226,7 +226,7 @@ namespace neogfx
                 "            {\n"
                 "                for (int fx = -d; fx <= d; ++fx)\n"
                 "                {\n"
-                "                    sum += (colour_at(viewPos + vec2(fx, fy)) * texelFetch(gradientFilter, ivec2(fx + d, fy + d)).r);\n"
+                "                    sum += (colour_at(viewPos + vec2(fx, fy)) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
                 "                }\n"
                 "            }\n"
                 "            color = sum;\n" 
@@ -242,35 +242,35 @@ namespace neogfx
 
     void standard_gradient_shader::clear_gradient()
     {
-        set_uniform("gradientEnabled"_s, false);
+        uGradientEnabled = false;
     }
 
     void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox)
     {
         enable();
         basic_rect<float> boundingBox{ aBoundingBox };
-        set_uniform("gradientViewportTop"_s, static_cast<float>(aContext.logical_coordinates().bottomLeft.y));
-        set_uniform("gradientTopLeft"_s, vec2f{ boundingBox.top_left().x, boundingBox.top_left().y });
-        set_uniform("gradientBottomRight"_s, vec2f{ boundingBox.bottom_right().x, boundingBox.bottom_right().y });
-        set_uniform("gradientDirection"_s, aGradient.direction());
-        set_uniform("gradientAngle"_s, std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f);
-        set_uniform("gradientStartFrom"_s, std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1);
-        set_uniform("gradientSize"_s, aGradient.size());
-        set_uniform("gradientShape"_s, aGradient.shape());
+        uGradientViewportTop = static_cast<float>(aContext.logical_coordinates().bottomLeft.y);
+        uGradientTopLeft = vec2f{ boundingBox.top_left().x, boundingBox.top_left().y };
+        uGradientBottomRight = vec2f{ boundingBox.bottom_right().x, boundingBox.bottom_right().y };
+        uGradientDirection = aGradient.direction();
+        uGradientAngle = std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f;
+        uGradientStartFrom = std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1;
+        uGradientSize = aGradient.size();
+        uGradientShape = aGradient.shape();
         basic_vector<float, 2> gradientExponents = (aGradient.exponents() != std::nullopt ? *aGradient.exponents() : vec2{ 2.0, 2.0 });
-        set_uniform("gradientExponents"_s, vec2f{ gradientExponents.x, gradientExponents.y });
+        uGradientExponents = vec2f{ gradientExponents.x, gradientExponents.y };
         basic_point<float> gradientCentre = (aGradient.centre() != std::nullopt ? *aGradient.centre() : point{});
-        set_uniform("gradientCentre"_s, vec2f{ gradientCentre.x, gradientCentre.y });
+        uGradientCentre = vec2f{ gradientCentre.x, gradientCentre.y };
         auto& gradientArrays = gradient_shader_data(aGradient);
-        set_uniform("gradientFilterSize"_s, static_cast<int>(gradientArrays.filter.data().extents().cx));
-        set_uniform("gradientStopCount"_s, static_cast<int>(gradientArrays.stopCount));
+        uGradientFilterSize = static_cast<int>(gradientArrays.filter.data().extents().cx);
+        uGradientStopCount = static_cast<int>(gradientArrays.stopCount);
         gradientArrays.stops.data().bind(3);
         gradientArrays.stopColours.data().bind(4);
         gradientArrays.filter.data().bind(5);
-        set_uniform("gradientStopPositions"_s, sampler2DRect{ 3 });
-        set_uniform("gradientStopColours"_s, sampler2DRect{ 4 });
-        set_uniform("gradientFilter"_s, sampler2DRect{ 5 });
-        set_uniform("gradientEnabled"_s, true);
+        uGradientStopPositions = sampler2DRect{ 3 };
+        uGradientStopColours = sampler2DRect{ 4 };
+        uGradientFilter = sampler2DRect{ 5 };
+        uGradientEnabled = true;
     }
 
     gradient_shader_data& standard_gradient_shader::gradient_shader_data(const gradient& aGradient)
@@ -343,6 +343,7 @@ namespace neogfx
         add_in_variable<vec2f>("TexCoord"_s, 2u);
         set_uniform("tex"_s, sampler2D{ 1 });
         set_uniform("texMS"_s, sampler2DMS{ 2 });
+        uTextureEffect = shader_effect::None;
     }
 
     void standard_texture_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
@@ -354,19 +355,19 @@ namespace neogfx
             {
                 "void standard_texture_shader(inout vec4 color)\n"
                 "{\n"
-                "    if (textureEnabled)\n"
+                "    if (uTextureEnabled)\n"
                 "    {\n"
                 "        vec4 texel = vec4(0.0);\n"
-                "        if (textureMultisample < 5)\n" // Scaled
+                "        if (uTextureMultisample < 5)\n" // Scaled
                 "        {\n"
                 "            texel = texture(tex, TexCoord).rgba;\n"
                 "        }\n"
                 "        else\n"
                 "        {\n"
-                "            ivec2 TexCoord = ivec2(TexCoord * textureExtents);\n"
+                "            ivec2 TexCoord = ivec2(TexCoord * uTextureExtents);\n"
                 "            texel = texelFetch(texMS, TexCoord, gl_SampleID).rgba;\n"
                 "        }\n"
-                "        switch(textureDataFormat)\n"
+                "        switch(uTextureDataFormat)\n"
                 "        {\n"
                 "        case 1:\n" // RGBA
                 "        default:\n"
@@ -378,7 +379,7 @@ namespace neogfx
                 "            texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
                 "            break;\n"
                 "        }\n"
-                "        switch(textureEffect)\n"
+                "        switch(uTextureEffect)\n"
                 "        {\n"
                 "        case 0:\n" // effect: None
                 "            color = texel.rgba * color;\n"
@@ -416,21 +417,22 @@ namespace neogfx
 
     void standard_texture_shader::clear_texture()
     {
-        set_uniform("textureEnabled"_s, false);
+        uTextureEnabled = false;
+        uTextureEffect = shader_effect::None;
     }
 
     void standard_texture_shader::set_texture(const i_texture& aTexture)
     {
         enable();
-        set_uniform("textureEnabled"_s, true);
-        set_uniform("textureDataFormat"_s, aTexture.data_format());
-        set_uniform("textureMultisample"_s, aTexture.sampling());
-        set_uniform("textureExtents"_s, aTexture.storage_extents().to_vec2().as<float>());
+        uTextureEnabled = true;
+        uTextureDataFormat = aTexture.data_format();
+        uTextureMultisample = aTexture.sampling();
+        uTextureExtents = aTexture.storage_extents().to_vec2().as<float>();
     }
 
     void standard_texture_shader::set_effect(shader_effect aEffect)
     {
-        set_uniform("textureEffect"_s, aEffect);
+        uTextureEffect = aEffect;
     }
 
     standard_glyph_shader::standard_glyph_shader(const std::string& aName) :
@@ -448,33 +450,33 @@ namespace neogfx
             {
                 "ivec2 render_position()\n"
                 "{\n"
-                "    if (glyphGuiCoordinates)\n"
-                "        return ivec2(Coord.x, glyphRenderTargetExtents.y - Coord.y);\n"
+                "    if (uGlyphGuiCoordinates)\n"
+                "        return ivec2(Coord.x, uGlyphRenderTargetExtents.y - Coord.y);\n"
                 "    else\n"
                 "        return ivec2(Coord.xy);\n"
                 "}\n"
                 "\n"
                 "vec3 output_pixel()\n"
                 "{\n"
-                "    return texelFetch(glyphRenderOutput, render_position(), 0).rgb;\n"
+                "    return texelFetch(uGlyphRenderOutput, render_position(), 0).rgb;\n"
                 "}\n"
                 "\n"
                 "\n"
                 "void standard_glyph_shader(inout vec4 color)\n"
                 "{\n"
-                "    if (glyphEnabled)\n"
+                "    if (uGlyphEnabled)\n"
                 "    {\n"
                 "        float a = 0.0;\n"
-                "        if (glyphSubpixel)\n"
+                "        if (uGlyphSubpixel)\n"
                 "        {\n"
-                "            vec4 aaaAlpha = texture(glyphTexture, TexCoord);\n"
+                "            vec4 aaaAlpha = texture(uGlyphTexture, TexCoord);\n"
                 "            if (aaaAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
                 "                return;\n"
                 "            else if (aaaAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
                 "                discard;\n"
                 "            else\n"
                 "            {\n"
-                "                switch(glyphSubpixelFormat)\n"
+                "                switch(uGlyphSubpixelFormat)\n"
                 "                {\n"
                 "                default:\n"
                 "                    a = (aaaAlpha.r + aaaAlpha.g + aaaAlpha.b) / 3.0;\n"
@@ -491,7 +493,7 @@ namespace neogfx
                 "        }\n"
                 "        else\n"
                 "        {\n"
-                "            a = texture(glyphTexture, TexCoord).r;\n"
+                "            a = texture(uGlyphTexture, TexCoord).r;\n"
                 "            if (a == 0)\n"
                 "                discard;\n"
                 "            color = vec4(color.xyz, color.a * a);\n"
@@ -507,7 +509,7 @@ namespace neogfx
 
     void standard_glyph_shader::clear_glyph()
     {
-        set_uniform("glyphEnabled"_s, false);
+        uGlyphEnabled = false;
     }
 
     void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph)
@@ -517,12 +519,12 @@ namespace neogfx
         bool subpixelRender = aGlyph.subpixel() && aGlyph.glyph_texture().subpixel();
         if (subpixelRender)
             aContext.render_target().target_texture().bind(7);
-        set_uniform("glyphRenderTargetExtents"_s, aContext.render_target().extents().to_vec2().as<int32_t>());
-        set_uniform("glyphGuiCoordinates"_s, aContext.logical_coordinates().is_gui_orientation());
-        set_uniform("glyphTexture"_s, sampler2D{ 6 });
-        set_uniform("glyphRenderOutput"_s, sampler2DMS{ 7 });
-        set_uniform("glyphSubpixel"_s, aGlyph.glyph_texture().subpixel());
-        set_uniform("glyphSubpixelFormat"_s, subpixelRender ? aContext.subpixel_format() : subpixel_format::None);
-        set_uniform("glyphEnabled"_s, true);
+        uGlyphRenderTargetExtents = aContext.render_target().extents().to_vec2().as<int32_t>();
+        uGlyphGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
+        uGlyphTexture = sampler2D{ 6 };
+        uGlyphRenderOutput = sampler2DMS{ 7 };
+        uGlyphSubpixel = aGlyph.glyph_texture().subpixel();
+        uGlyphSubpixelFormat = subpixelRender ? aContext.subpixel_format() : subpixel_format::None;
+        uGlyphEnabled = true;
     }
 }

@@ -27,6 +27,8 @@
 
 namespace neogfx
 {
+    #define cache_uniform( uniformName ) cached_uniform uniformName = { *this, #uniformName };
+
     template <typename Base>
     class shader : public neolib::reference_counted<Base>
     {
@@ -36,9 +38,45 @@ namespace neogfx
         using typename base_type::abstract_type;
         typedef i_shader::value_type abstract_value_type;
         typedef shader_value_type value_type;
-    private:
+    protected:
         typedef neolib::set<shader_uniform> uniform_list;
         typedef neolib::set<shader_variable> variable_list;
+        class cached_uniform
+        {
+        public:
+            cached_uniform(shader<Base>& aParent, const char* const aUniformName) :
+                iParent{ aParent }, iUniformName { aUniformName }
+            {
+            }
+        public:
+            i_shader_uniform& uniform()
+            {
+                if (iUniform == std::nullopt)
+                {
+                    auto existing = iParent.uniforms().find(shader_uniform{ string{iUniformName}, value_type{} });
+                    if (existing == iParent.uniforms().end())
+                    {
+                        existing = iParent.uniforms().insert(shader_uniform{ string{iUniformName}, value_type{} });
+                        iParent.set_dirty();
+                    }
+                    iUniform = existing;
+                }
+                return **iUniform;
+            }
+            template <typename T>
+            i_shader_uniform& operator=(const T& aValue)
+            {
+                if constexpr (!std::is_enum_v<T>)
+                    uniform().set_value(value_type{ aValue });
+                else
+                    uniform().set_value(value_type{ static_cast<int>(aValue) });
+                return uniform();
+            }
+        private:
+            shader<Base>& iParent;
+            const char* const iUniformName;
+            std::optional<uniform_list::iterator> iUniform;
+        };
     public:
         shader(shader_type aType, const std::string& aName, bool aEnabled = true) : 
             iType{ aType },
@@ -112,6 +150,12 @@ namespace neogfx
         {
             return iUniforms;
         }
+    protected:
+        uniform_list& uniforms()
+        {
+            return iUniforms;
+        }
+    public:
         void clear_uniform(const i_string& aName) override
         {
             auto existing = iUniforms.find(shader_uniform{ aName, value_type{} });
