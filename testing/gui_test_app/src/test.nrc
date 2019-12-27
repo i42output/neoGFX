@@ -750,9 +750,9 @@
                         tab_text: "Drawing"
                         vertical_layout: {
                             id: layoutDrawing1
+                            spacer: {}
                             horizontal_layout: {
                                 id: layoutDrawing2
-                                size_policy: Minimum
                                 label: {
                                     text: "Easing:"
                                 }
@@ -761,6 +761,7 @@
                                     size_policy: Minimum
                                 }
                             }
+                            spacer: {}
                         }
                     }
                     tab_page: {

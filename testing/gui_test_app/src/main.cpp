@@ -777,12 +777,11 @@ int main(int argc, char* argv[])
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModel.insert_item(easingItemModel.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
         easing_item_presentation_model easingPresentationModel{ easingItemModel };
-        ng::drop_list easingDropDown{ ui.layoutDrawing2 };
-        easingDropDown.set_size_policy(ng::size_constraint::Minimum);
-        easingDropDown.set_model(easingItemModel);
-        easingDropDown.set_presentation_model(easingPresentationModel);
-        easingDropDown.selection_model().set_current_index(ng::item_presentation_model_index{ 0 });
-        easingDropDown.accept_selection();
+        ui.dropListEasing.set_size_policy(ng::size_constraint::Minimum);
+        ui.dropListEasing.set_model(easingItemModel);
+        ui.dropListEasing.set_presentation_model(easingPresentationModel);
+        ui.dropListEasing.selection_model().set_current_index(ng::item_presentation_model_index{ 0 });
+        ui.dropListEasing.accept_selection();
         ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
 
         std::array<ng::texture, 4> tex = 
@@ -843,7 +842,7 @@ int main(int argc, char* argv[])
             // easing function demo
             ng::scalar t = static_cast<ng::scalar>(app.program_elapsed_us());
             auto const d = 1000000.0;
-            auto const x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (ui.pageDrawing.extents().cx - logo.extents().cx);
+            auto const x = ng::ease(easingItemModel.item(ui.dropListEasing.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (ui.pageDrawing.extents().cx - logo.extents().cx);
             aGc.draw_texture(ng::point{ x, (ui.pageDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
             auto texLocation = ng::point{ (ui.pageDrawing.extents().cx - 64.0) / 2.0, (ui.pageDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
