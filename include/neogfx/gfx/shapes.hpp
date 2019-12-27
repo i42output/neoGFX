@@ -72,22 +72,22 @@ namespace neogfx
         }
     }
 
+    typedef temp_vec3_buffer<8> vec3_rect_vertices;
+
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    vec3_rect_vertices rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
+    {
+        vec3_rect_vertices result;
+        calc_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
+        return result;
+    };
+
     template <typename Container, typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
     {
-        temp_vec3_buffer<8> temp;
-        calc_rect_vertices(temp, aRect, aPixelAdjust, aType, aZpos);
+        vec3_rect_vertices temp = rect_vertices(aRect, aPixelAdjust, aType, aZpos);
         return aResult.insert(aResult.end(), temp.begin(), temp.end());
     }
-
-    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    vertices_t rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
-    {
-        vertices_t result;
-        result.reserve(16);
-        back_insert_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
-        return std::move(result);
-    };
 
     vertices_t arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);
     vertices_t circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);

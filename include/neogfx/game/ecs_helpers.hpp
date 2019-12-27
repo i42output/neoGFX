@@ -56,10 +56,11 @@ namespace neogfx
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline game::mesh to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, uint32_t aOffset = 0)
     {
+        auto const rectVertices = rect_vertices(aRect, 0.0, aMeshType);
         return game::mesh
         {
             {
-                rect_vertices(aRect, 0.0, aMeshType)
+                rectVertices.begin(), rectVertices.end()
             },
             {
                 vec2{ 0.0, 1.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 0.0 },

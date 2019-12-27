@@ -1344,7 +1344,7 @@ namespace neogfx
                         texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() }, logical_coordinates(), iTempTextureCoords);
 
                         rect outputRect{ point{ glyphOrigin } +offsetOrigin + point{ static_cast<coordinate>((op.pass() - 1u) % scanlineOffsets), static_cast<coordinate>((op.pass() - 1u) / scanlineOffsets) }, glyphTexture.texture().extents() };
-                        vertices_t outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
+                        auto const outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
 
                         vec4f passColour;
 

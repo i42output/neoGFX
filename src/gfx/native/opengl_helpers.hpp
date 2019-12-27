@@ -367,7 +367,7 @@ namespace neogfx
     private:
         void do_instantiate(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram, bool aWithTextureCoords)
         {
-            if (iInstance.get() == nullptr || iInstance->capacity() != iVertices.capacity() || iShaderProgram != &aShaderProgram || iInstance->has_texture_coords() != aWithTextureCoords)
+            if (iInstance.get() == nullptr || iInstance->capacity() < iVertices.capacity() || iShaderProgram != &aShaderProgram || iInstance->has_texture_coords() != aWithTextureCoords)
             {
                 iShaderProgram = &aShaderProgram;
                 iInstance.reset();
