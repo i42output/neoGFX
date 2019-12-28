@@ -431,7 +431,7 @@ int main(int argc, char* argv[])
             ui.gradientWidget.GradientChanged([&]()
             {
                 auto cs = ui.textEdit.column(2);
-                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ui.gradientWidget.gradient() } });
+                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } });
                 ui.textEdit.set_column(2, cs);
             }, ui.textEdit);
         });

@@ -1376,7 +1376,7 @@ namespace neogfx
                         vertexArrays.instance().push_back({ outputVertices[4], passColour, iTempTextureCoords[2] });
                         vertexArrays.instance().push_back({ outputVertices[5], passColour, iTempTextureCoords[3] });
 
-                        if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
+                        if (pass == 3 && std::holds_alternative<gradient>(firstOp.appearance.ink()))
                             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.appearance.ink()),
                                 outputRect);
                     }
