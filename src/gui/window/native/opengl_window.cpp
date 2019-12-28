@@ -358,6 +358,8 @@ namespace neogfx
 
     void opengl_window::set_destroying()
     {
+        if (!is_alive())
+            return;
         native_window::set_destroying();
         if (iFrameBufferExtents != size{})
         {

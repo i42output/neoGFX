@@ -286,8 +286,12 @@ int main(int argc, char* argv[])
         ui.gradientWidget.gradient_changed([&]()
         {
             auto s = ui.textEdit.default_style();
+            auto s2 = ui.textEditEditor.default_style();
             s.set_glyph_colour(ui.gradientWidget.gradient());
+            s2.set_glyph_colour(ui.gradientWidget.gradient());
+            s2.set_background_colour(ng::colour_or_gradient{});
             ui.textEdit.set_default_style(s);
+            ui.textEditEditor.set_default_style(s2);
         });
 
         ui.button1.clicked([&ui]()
@@ -471,6 +475,9 @@ int main(int argc, char* argv[])
             s.set_text_colour(app.current_style().palette().text_colour().light() ? ng::colour::Black : ng::colour::White);
             s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_colour() });
             ui.textEdit.set_default_style(s);
+            auto s2 = ui.textEditEditor.default_style();
+            s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White });
+            ui.textEditEditor.set_default_style(s2);
         });
         ui.editGlow.checked([&]()
         {

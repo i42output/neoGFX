@@ -463,6 +463,7 @@ namespace neogfx
     {
         if (iHandle != nullptr && is_alive() && (aForce || surface_window().native_window_can_close()))
         {
+            set_destroying();
 #ifdef WIN32
             DestroyWindow(static_cast<HWND>(native_handle()));
 #else
@@ -1030,7 +1031,8 @@ namespace neogfx
                 result = wndproc(hwnd, msg, wparam, lparam);
             break;
         case WM_DESTROY:
-            self.set_destroying();
+            if (self.is_alive())
+                self.set_destroying();
             result = wndproc(hwnd, msg, wparam, lparam);
             break;
         case WM_ERASEBKGND:

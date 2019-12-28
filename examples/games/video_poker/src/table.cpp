@@ -100,8 +100,14 @@ namespace video_poker
         set_ignore_mouse_events(true);
         iMainLayout.set_spacing(neogfx::size{ 16.0 });
         iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
+        auto shiny_text = [](const neogfx::colour& aColour)
+        {
+            return neogfx::text_appearance{
+                neogfx::gradient{ { neogfx::colour::Black, aColour, neogfx::colour::Black } },
+                neogfx::text_effect{neogfx::text_effect_type::Outline, neogfx::colour::White } };
+        };
         iLabelTitle.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
-        iLabelTitle.text_widget().set_text_colour(neogfx::colour::Green);
+        iLabelTitle.text_widget().set_text_appearance(shiny_text(neogfx::colour::Green));
         iSpacer1.set_weight(neogfx::size{ 0.1 });
         iSpacer2.set_weight(neogfx::size{ 0.25 });
         iSpacer3.set_weight(neogfx::size{ 0.25 });
@@ -120,13 +126,13 @@ namespace video_poker
         set_bet_button_apperance(iBetMax);
         set_bet_button_apperance(iDeal);
         iLabelCredits.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCredits.text_widget().set_text_colour(neogfx::colour::Yellow);
+        iLabelCredits.text_widget().set_text_appearance(shiny_text(neogfx::colour::Yellow));
         iLabelCreditsValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCreditsValue.text_widget().set_text_colour(neogfx::colour::White);
+        iLabelCreditsValue.text_widget().set_text_appearance(shiny_text(neogfx::colour::White));
         iLabelStake.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStake.text_widget().set_text_colour(neogfx::colour::Yellow);
+        iLabelStake.text_widget().set_text_appearance(shiny_text(neogfx::colour::Yellow));
         iLabelStakeValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStakeValue.text_widget().set_text_colour(neogfx::colour::White);
+        iLabelStakeValue.text_widget().set_text_appearance(shiny_text(neogfx::colour::White));
 
         iBetMinus.clicked([this]() { bet(-1); });
         iBetPlus.clicked([this]() { bet(+1); });

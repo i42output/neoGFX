@@ -459,6 +459,23 @@ namespace neogfx
     {
         fix();
     }
+    
+    gradient::gradient(const std::initializer_list<colour>& aColours, gradient_direction aDirection) :
+        gradient{}
+    {
+        set_direction(aDirection);
+        colour_stop_list temp;
+        double pos = 0.0;
+        for (auto const& c : aColours)
+        {
+            temp.push_back(colour_stop{ pos, c });
+            if (aColours.size() > 1)
+                pos += (1.0 / (aColours.size() - 1));
+        }
+        colour_stops() = temp;
+        fix();
+    }
+
 
     gradient::gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, gradient_direction aDirection) :
         iUseCache{ true },

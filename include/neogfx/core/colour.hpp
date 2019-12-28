@@ -886,6 +886,7 @@ namespace neogfx
         gradient(const colour& aColour1, const colour& aColour2, gradient_direction aDirection = gradient_direction::Vertical);
         gradient(const colour_stop_list& aColourStops, gradient_direction aDirection = gradient_direction::Vertical);
         gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
+        gradient(const std::initializer_list<colour>& aColours, gradient_direction aDirection = gradient_direction::Vertical);
         // operations
     public:
         bool use_cache() const;
