@@ -57,15 +57,19 @@ namespace neogfx
         Float,
         Double,
         Int,
+        Uint,
         Vec2,
         DVec2,
         IVec2,
+        UVec2,
         Vec3,
         DVec3,
         IVec3,
+        UVec3,
         Vec4,
         DVec4,
         IVec4,
+        UVec4,
         Mat4,
         DMat4,
         FloatArray,
@@ -96,15 +100,19 @@ const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerat
     declare_enum_string_explicit(neogfx::shader_data_type, Float, float)
     declare_enum_string_explicit(neogfx::shader_data_type, Double, double)
     declare_enum_string_explicit(neogfx::shader_data_type, Int, int)
+    declare_enum_string_explicit(neogfx::shader_data_type, Uint, uint)
     declare_enum_string_explicit(neogfx::shader_data_type, Vec2, vec2)
     declare_enum_string_explicit(neogfx::shader_data_type, DVec2, dvec2)
     declare_enum_string_explicit(neogfx::shader_data_type, IVec2, ivec2)
+    declare_enum_string_explicit(neogfx::shader_data_type, UVec2, uvec2)
     declare_enum_string_explicit(neogfx::shader_data_type, Vec3, vec3)
     declare_enum_string_explicit(neogfx::shader_data_type, DVec3, dvec3)
     declare_enum_string_explicit(neogfx::shader_data_type, IVec3, ivec3)
+    declare_enum_string_explicit(neogfx::shader_data_type, UVec3, uvec3)
     declare_enum_string_explicit(neogfx::shader_data_type, Vec4, vec4)
     declare_enum_string_explicit(neogfx::shader_data_type, DVec4, dvec4)
     declare_enum_string_explicit(neogfx::shader_data_type, IVec4, ivec4)
+    declare_enum_string_explicit(neogfx::shader_data_type, UVec4, uvec4)
     declare_enum_string_explicit(neogfx::shader_data_type, Mat4, mat4)
     declare_enum_string_explicit(neogfx::shader_data_type, DMat4, dmat4)
     declare_enum_string(neogfx::shader_data_type, FloatArray)
@@ -137,7 +145,7 @@ namespace neogfx
     typedef shader_handle<shader_data_type::Sampler2DMS> sampler2DMS;
     typedef shader_handle<shader_data_type::Sampler2DRect> sampler2DRect;
 
-    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int, vec2f, vec2, vec2i32, vec3f, vec3, vec3i32, vec4f, vec4, vec4i32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
+    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int32_t, uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
 
     typedef uint32_t shader_variable_location;
 
@@ -154,10 +162,23 @@ namespace neogfx
         template <typename T>
         void set_value(const T& aValue)
         {
-            if constexpr (!std::is_enum_v<T>)
-                set_value(to_abstract(shader_value_type{ aValue }));
+            if constexpr (std::is_integral_v<T>)
+            {
+                if constexpr (std::is_same_v<T, bool>)
+                    set_value(to_abstract(shader_value_type{ aValue }));
+                else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+                    set_value(to_abstract(shader_value_type{ aValue }));
+                else if constexpr (std::is_signed_v<T>)
+                    set_value(to_abstract(shader_value_type{ static_cast<int32_t>(aValue) }));
+                else if constexpr (std::is_unsigned_v<T>)
+                    set_value(to_abstract(shader_value_type{ static_cast<uint32_t>(aValue) }));
+                else
+                    set_value(to_abstract(shader_value_type{ static_cast<int32_t>(aValue) }));
+            }
+            else if constexpr (std::is_enum_v<T>)
+                set_value(to_abstract(shader_value_type{ static_cast<int32_t>(aValue) }));
             else
-                set_value(to_abstract(shader_value_type{ static_cast<int>(aValue) }));
+                set_value(to_abstract(shader_value_type{ aValue }));
         }
     };
 

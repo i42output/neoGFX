@@ -939,6 +939,12 @@
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle_array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_standard_shader_program.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\standard_shader_program.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1354,13 +1360,13 @@
     <ClCompile Include="x64\Tools\GeneratedFiles\resources.res.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\shader_program.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_shader_program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\fragment_shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\standard_shader_program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1378,6 +1384,9 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\gfx\path.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gfx\shader_program.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

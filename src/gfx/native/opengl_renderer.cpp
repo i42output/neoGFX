@@ -121,7 +121,7 @@ namespace neogfx
         std::cout << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
         std::cout << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
 
-        iDefaultShaderProgram = add_shader_program(neolib::make_ref<opengl_shader_program>("default_shader_program").as<i_shader_program>());
+        iDefaultShaderProgram = add_shader_program(neolib::make_ref<opengl_shader_program>().as<i_shader_program>()).as<i_standard_shader_program>();
     }
 
     void opengl_renderer::cleanup()
@@ -174,12 +174,12 @@ namespace neogfx
         throw no_shader_program_active();
     }
 
-    const i_shader_program& opengl_renderer::default_shader_program() const
+    const i_standard_shader_program& opengl_renderer::default_shader_program() const
     {
         return *iDefaultShaderProgram;
     }
 
-    i_shader_program& opengl_renderer::default_shader_program()
+    i_standard_shader_program& opengl_renderer::default_shader_program()
     {
         return *iDefaultShaderProgram;
     }

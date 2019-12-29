@@ -26,7 +26,7 @@
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/i_shader.hpp>
-#include <neogfx/gfx/i_shader_program.hpp>
+#include <neogfx/gfx/i_standard_shader_program.hpp>
 
 namespace neogfx
 {
@@ -92,8 +92,8 @@ namespace neogfx
         virtual bool is_shader_program_active() const = 0;
         virtual i_shader_program& active_shader_program() = 0;
     public:
-        virtual const i_shader_program& default_shader_program() const = 0;
-        virtual i_shader_program& default_shader_program() = 0;
+        virtual const i_standard_shader_program& default_shader_program() const = 0;
+        virtual i_standard_shader_program& default_shader_program() = 0;
     public:
         virtual handle create_shader_program_object() = 0;
         virtual void destroy_shader_program_object(handle aShaderProgramObject) = 0;

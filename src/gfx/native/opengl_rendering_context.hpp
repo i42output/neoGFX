@@ -145,7 +145,6 @@ namespace neogfx
         std::vector<rect> iScissorRects;
         mutable optional_rect iScissorRect;
         GLint iPreviousTexture;
-        bool iLineStippleActive;
         font iLastDrawGlyphFallbackFont;
         std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
         vertices_2d_t iTempTextureCoords;

@@ -166,7 +166,6 @@ namespace neogfx
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
-        iLineStippleActive{ false },
         iSrt{ iTarget },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
@@ -188,7 +187,6 @@ namespace neogfx
         iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
-        iLineStippleActive{ false },
         iSrt{ iTarget },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
@@ -211,7 +209,6 @@ namespace neogfx
         iSmoothingMode{ aOther.iSmoothingMode },
         iSubpixelRendering{ aOther.iSubpixelRendering },
         iClipCounter{ 0 },
-        iLineStippleActive{ false },
         iSrt{ iTarget },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
@@ -739,12 +736,12 @@ namespace neogfx
 
     void opengl_rendering_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
     {
-        // todo
+        rendering_engine().default_shader_program().stipple_shader().set_stipple(aFactor, aPattern);
     }
 
     void opengl_rendering_context::line_stipple_off()
     {
-        // todo
+        rendering_engine().default_shader_program().stipple_shader().clear_stipple();
     }
 
     bool opengl_rendering_context::is_subpixel_rendering_on() const
@@ -1384,7 +1381,7 @@ namespace neogfx
                     if (vertexArrays.instance().empty())
                         continue;
 
-                    auto& shader = rendering_engine().active_shader_program();
+                    auto& shader = rendering_engine().default_shader_program();
                     rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
                     shader.glyph_shader().set_first_glyph(*this, firstOp.glyph);
 

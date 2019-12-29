@@ -164,4 +164,23 @@ namespace neogfx
         cache_uniform(uGlyphSubpixelFormat)
         cache_uniform(uGlyphEnabled)
     };
+
+    class standard_stipple_shader : public standard_fragment_shader<i_stipple_shader>
+    {
+    public:
+        standard_stipple_shader(const std::string& aName = "standard_stipple_shader");
+    public:
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+    public:
+        bool stipple_active() const override;
+        void clear_stipple() override;
+        void set_stipple(uint32_t aFactor, uint16_t aPattern) override;
+        void next_vertex(const vec3& aVertex) override;
+    private:
+        cache_uniform(uStippleFactor)
+        cache_uniform(uStipplePattern)
+        cache_uniform(uStippleCounter)
+        cache_uniform(uStippleVertex)
+        cache_uniform(uStippleEnabled)
+    };
 }

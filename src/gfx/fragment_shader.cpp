@@ -527,4 +527,55 @@ namespace neogfx
         uGlyphSubpixelFormat = subpixelRender ? aContext.subpixel_format() : subpixel_format::None;
         uGlyphEnabled = true;
     }
+
+    standard_stipple_shader::standard_stipple_shader(const std::string& aName) :
+        standard_fragment_shader<i_stipple_shader>{ aName }
+    {
+        disable();
+    }
+
+    void standard_stipple_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    {
+        standard_fragment_shader<i_stipple_shader>::generate_code(aProgram, aLanguage, aOutput);
+        if (aLanguage == shader_language::Glsl)
+        {
+            static const string code
+            {
+                "void standard_stipple_shader(inout vec4 color)\n"
+                "{\n"
+                "    if (ustippleEnabled)\n"
+                "    {\n"
+                "    }\n"
+                "}\n"_s
+            };
+            aOutput += code;
+        }
+        else
+            throw unsupported_shader_language();
+    }
+
+    bool standard_stipple_shader::stipple_active() const
+    {
+        return !uStippleEnabled.uniform().value().empty() && 
+            uStippleEnabled.uniform().value().get<bool>();
+    }
+
+    void standard_stipple_shader::clear_stipple()
+    {
+        uStippleEnabled = false;
+    }
+
+    void standard_stipple_shader::set_stipple(uint32_t aFactor, uint16_t aPattern)
+    {
+        enable();
+        uStippleFactor = aFactor;
+        uStipplePattern = aPattern;
+        uStippleCounter = 0;
+    }
+
+    void standard_stipple_shader::next_vertex(const vec3& aVertex)
+    {
+        uStippleVertex = aVertex.as<float>();
+        uStippleEnabled = true;
+    }
 }

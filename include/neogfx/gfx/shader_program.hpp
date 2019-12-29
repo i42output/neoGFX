@@ -27,7 +27,8 @@
 
 namespace neogfx
 {
-    class shader_program : public neolib::reference_counted<i_shader_program>
+    template <typename Base = i_shader_program>
+    class shader_program : public neolib::reference_counted<Base>
     {
     public:
         typedef neolib::vector<neolib::ref_ptr<i_shader>> shaders_t;
@@ -46,6 +47,8 @@ namespace neogfx
         i_shader& shader(const neolib::i_string& aName) override;
         const i_vertex_shader& vertex_shader() const override;
         i_vertex_shader& vertex_shader() override;
+        const i_fragment_shader& fragment_shader() const override;
+        i_fragment_shader& fragment_shader() override;
         bool is_first_in_stage(const i_shader& aShader) const override;
         bool is_last_in_stage(const i_shader& aShader) const override;
         const i_shader& first_in_stage(shader_type aStage) const override;
@@ -63,3 +66,5 @@ namespace neogfx
         shader_index iShaderIndex;
     };
 }
+
+#include "shader_program.inl"

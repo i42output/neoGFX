@@ -1,4 +1,4 @@
-// shader_program.cpp
+// shader_program.inl
 /*
   neogfx C++ GUI Library
   Copyright (c) 2019 Leigh Johnston.  All Rights Reserved.
@@ -17,33 +17,41 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neogfx/gfx/shader_program.hpp>
+#pragma once
+
+#include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/shader_program.hpp>
 
 namespace neogfx
 {
-    shader_program::shader_program(const std::string aName) :
+    template <typename Base>
+    inline shader_program<Base>::shader_program(const std::string aName) :
         iName{ aName }
     {
     }
 
-    shader_program::~shader_program()
+    template <typename Base>
+    inline shader_program<Base>::~shader_program()
     {
         if (iHandle != std::nullopt)
             service<i_rendering_engine>().destroy_shader_program_object(*iHandle);
     }
 
-    const i_string& shader_program::name() const
+    template <typename Base>
+    inline const i_string& shader_program<Base>::name() const
     {
         return iName;
     }
 
-    bool shader_program::created() const
+    template <typename Base>
+    inline bool shader_program<Base>::created() const
     {
         return iHandle != std::nullopt;
     }
 
-    void* shader_program::handle() const
+    template <typename Base>
+    inline void* shader_program<Base>::handle() const
     {
         if (!created())
         {
@@ -55,12 +63,14 @@ namespace neogfx
         return *iHandle;
     }
 
-    const shader_program::stages_t& shader_program::stages() const
+    template <typename Base>
+    inline const typename shader_program<Base>::stages_t& shader_program<Base>::stages() const
     {
         return iStages;
     }
 
-    const i_shader& shader_program::shader(const neolib::i_string& aName) const
+    template <typename Base>
+    inline const i_shader& shader_program<Base>::shader(const neolib::i_string& aName) const
     {
         auto s = iShaderIndex.find(aName);
         if (s != iShaderIndex.end())
@@ -68,34 +78,54 @@ namespace neogfx
         throw shader_not_found();
     }
 
-    i_shader& shader_program::shader(const neolib::i_string& aName)
+    template <typename Base>
+    inline i_shader& shader_program<Base>::shader(const neolib::i_string& aName)
     {
         return const_cast<i_shader&>(to_const(*this).shader(aName));
     }
 
-    const i_vertex_shader& shader_program::vertex_shader() const
+    template <typename Base>
+    inline const i_vertex_shader& shader_program<Base>::vertex_shader() const
     {
         if (have_stage(shader_type::Vertex))
             return static_cast<const i_vertex_shader&>(*stages().at(shader_type::Vertex)[0]);
         throw no_vertex_shader();
     }
 
-    i_vertex_shader& shader_program::vertex_shader()
+    template <typename Base>
+    inline i_vertex_shader& shader_program<Base>::vertex_shader()
     {
         return const_cast<i_vertex_shader&>(to_const(*this).vertex_shader());
     }
 
-    bool shader_program::is_first_in_stage(const i_shader& aShader) const
+    template <typename Base>
+    inline const i_fragment_shader& shader_program<Base>::fragment_shader() const
+    {
+        if (have_stage(shader_type::Fragment))
+            return static_cast<const i_fragment_shader&>(*stages().at(shader_type::Fragment)[0]);
+        throw no_fragment_shader();
+    }
+
+    template <typename Base>
+    inline i_fragment_shader& shader_program<Base>::fragment_shader()
+    {
+        return const_cast<i_fragment_shader&>(to_const(*this).fragment_shader());
+    }
+
+    template <typename Base>
+    inline bool shader_program<Base>::is_first_in_stage(const i_shader& aShader) const
     {
         return &first_in_stage(aShader.type()) == &aShader;
     }
 
-    bool shader_program::is_last_in_stage(const i_shader& aShader) const
+    template <typename Base>
+    inline bool shader_program<Base>::is_last_in_stage(const i_shader& aShader) const
     {
         return &last_in_stage(aShader.type()) == &aShader;
     }
 
-    const i_shader& shader_program::first_in_stage(shader_type aStage) const
+    template <typename Base>
+    inline const i_shader& shader_program<Base>::first_in_stage(shader_type aStage) const
     {
         if (have_stage(aStage))
             for (auto const& shader : stages().at(aStage))
@@ -104,7 +134,8 @@ namespace neogfx
         throw shader_not_found();
     }
 
-    const i_shader& shader_program::last_in_stage(shader_type aStage) const
+    template <typename Base>
+    inline const i_shader& shader_program<Base>::last_in_stage(shader_type aStage) const
     {
         if (have_stage(aStage))
             for (auto shader = stages().at(aStage).rbegin(); shader != stages().at(aStage).rend(); ++shader)
@@ -113,7 +144,8 @@ namespace neogfx
         throw shader_not_found();
     }
 
-    const i_shader& shader_program::next_in_stage(const i_shader& aPreviousShader) const
+    template <typename Base>
+    inline const i_shader& shader_program<Base>::next_in_stage(const i_shader& aPreviousShader) const
     {
         auto stage = stages().find(aPreviousShader.type());
         if (stage != stages().end())
@@ -129,7 +161,8 @@ namespace neogfx
         throw shader_not_found();
     }
 
-    i_shader& shader_program::add_shader(const neolib::i_ref_ptr<i_shader>& aShader)
+    template <typename Base>
+    inline i_shader& shader_program<Base>::add_shader(const neolib::i_ref_ptr<i_shader>& aShader)
     {
         if (iShaderIndex.find(aShader->name()) == iShaderIndex.end())
         {
@@ -140,7 +173,8 @@ namespace neogfx
         throw shader_name_exists();
     }
 
-    bool shader_program::dirty() const
+    template <typename Base>
+    inline bool shader_program<Base>::dirty() const
     {
         for (auto const& stage : stages())
             for (auto const& shader : stage.second())
@@ -149,21 +183,24 @@ namespace neogfx
         return false;
     }
 
-    void shader_program::set_clean()
+    template <typename Base>
+    inline void shader_program<Base>::set_clean()
     {
         for (auto& stage : stages())
             for (auto& shader : stage.second())
                 shader->set_clean();
     }
 
-    void shader_program::prepare_uniforms(const i_rendering_context& aRenderingContext)
+    template <typename Base>
+    inline void shader_program<Base>::prepare_uniforms(const i_rendering_context& aRenderingContext)
     {
         for (auto& stage : stages())
             for (auto& shader : stage.second())
                 shader->prepare_uniforms(aRenderingContext, *this);
     }
 
-    void shader_program::activate(const i_rendering_context& aContext)
+    template <typename Base>
+    inline void shader_program<Base>::activate(const i_rendering_context& aContext)
     {
         if (dirty())
         {

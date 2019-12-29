@@ -21,22 +21,17 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/shader_program.hpp>
-#include <neogfx/gfx/i_fragment_shader.hpp>
+#include <neogfx/gfx/standard_shader_program.hpp>
 #include "opengl.hpp"
 
 namespace neogfx
 {
-    class opengl_shader_program : public shader_program
+    // todo: this should adapt a generic (non-rendering API specific) shader program object
+    class opengl_shader_program : public standard_shader_program
     {
     public:
-        opengl_shader_program(const std::string& aName);
+        opengl_shader_program(const std::string& aName = "standard_shader_program");
     public:
-        const i_gradient_shader& gradient_shader() const override;
-        i_gradient_shader& gradient_shader() override;
-        const i_texture_shader& texture_shader() const override;
-        i_texture_shader& texture_shader() override;
-        const i_glyph_shader& glyph_shader() const override;
-        i_glyph_shader& glyph_shader() override;
         void compile() override;
         void link() override;
         void use() override;
@@ -45,10 +40,5 @@ namespace neogfx
         void deactivate() override;
     private:
         GLuint gl_handle() const;
-    private:
-        ref_ptr<i_fragment_shader> iDefaultShader;
-        ref_ptr<i_gradient_shader> iGradientShader;
-        ref_ptr<i_texture_shader> iTextureShader;
-        ref_ptr<i_glyph_shader> iGlyphShader;
     };
 }

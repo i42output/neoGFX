@@ -407,9 +407,13 @@ namespace neogfx
                 if (iPreviousProgram != nullptr)
                     iPreviousProgram->activate(iRenderingContext);
             }
-            iCurrentProgram.gradient_shader().clear_gradient();
-            iCurrentProgram.texture_shader().clear_texture();
-            iCurrentProgram.glyph_shader().clear_glyph();
+            if (iCurrentProgram.type() == shader_program_type::Standard)
+            {
+                iCurrentProgram.as<i_standard_shader_program>().gradient_shader().clear_gradient();
+                iCurrentProgram.as<i_standard_shader_program>().texture_shader().clear_texture();
+                iCurrentProgram.as<i_standard_shader_program>().glyph_shader().clear_glyph();
+                iCurrentProgram.as<i_standard_shader_program>().stipple_shader().clear_stipple();
+            }
         }
     private:
         i_rendering_context& iRenderingContext;

@@ -368,6 +368,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_render_target.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader_program.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_standard_shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_atlas.hpp" />
@@ -380,6 +381,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_array.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shapes.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\standard_shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture_atlas.hpp" />
@@ -621,8 +623,8 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\shader_program.cpp" />
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\standard_shader_program.cpp" />
     <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp" />
@@ -737,6 +739,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
+    <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl" />
     <CustomBuild Include="..\..\..\src\resources.nrc">

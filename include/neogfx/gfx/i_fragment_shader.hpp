@@ -68,4 +68,16 @@ namespace neogfx
         virtual void clear_glyph() = 0;
         virtual void set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph) = 0;
     };
+
+    class i_stipple_shader : public i_fragment_shader
+    {
+        typedef i_stipple_shader self_type;
+    public:
+        typedef self_type abstract_type;
+    public:
+        virtual bool stipple_active() const = 0;
+        virtual void clear_stipple() = 0;
+        virtual void set_stipple(uint32_t aFactor, uint16_t aPattern) = 0;
+        virtual void next_vertex(const vec3& aVertex) = 0;
+    };
 }

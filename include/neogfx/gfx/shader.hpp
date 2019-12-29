@@ -49,7 +49,7 @@ namespace neogfx
             {
             }
         public:
-            i_shader_uniform& uniform()
+            const i_shader_uniform& uniform() const
             {
                 if (iUniform == std::nullopt)
                 {
@@ -63,19 +63,20 @@ namespace neogfx
                 }
                 return **iUniform;
             }
+            i_shader_uniform& uniform()
+            {
+                return const_cast<i_shader_uniform&>(to_const(*this).uniform());
+            }
             template <typename T>
             i_shader_uniform& operator=(const T& aValue)
             {
-                if constexpr (!std::is_enum_v<T>)
-                    uniform().set_value(value_type{ aValue });
-                else
-                    uniform().set_value(value_type{ static_cast<int>(aValue) });
+                uniform().set_value(aValue);
                 return uniform();
             }
         private:
             shader<Base>& iParent;
             const char* const iUniformName;
-            std::optional<uniform_list::iterator> iUniform;
+            mutable std::optional<uniform_list::iterator> iUniform;
         };
     public:
         shader(shader_type aType, const std::string& aName, bool aEnabled = true) : 

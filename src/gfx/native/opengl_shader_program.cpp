@@ -17,61 +17,15 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/neogfx.hpp>
+#include <neolib/set.hpp>
 #include "opengl_shader_program.hpp"
-#include <neogfx/gfx/vertex_shader.hpp>
-#include <neogfx/gfx/fragment_shader.hpp>
 
 namespace neogfx
 {
     opengl_shader_program::opengl_shader_program(const std::string& aName) : 
-        shader_program{ aName }
+        standard_shader_program{ aName }
     {
-        if (aName == "default_shader_program")
-        {
-            add_shader(neolib::make_ref<standard_texture_vertex_shader>().as<i_shader>());
-            iDefaultShader = static_cast<i_fragment_shader&>(add_shader(neolib::make_ref<standard_fragment_shader<>>().as<i_shader>()));
-            iGradientShader = static_cast<i_gradient_shader&>(add_shader(neolib::make_ref<standard_gradient_shader>().as<i_shader>()));
-            iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
-            iGlyphShader = static_cast<i_glyph_shader&>(add_shader(neolib::make_ref<standard_glyph_shader>().as<i_shader>()));
-        }
-    }
-
-    const i_gradient_shader& opengl_shader_program::gradient_shader() const
-    {
-        if (iGradientShader != nullptr)
-            return *iGradientShader;
-        throw no_gradient_shader();
-    }
-
-    i_gradient_shader& opengl_shader_program::gradient_shader()
-    {
-        if (iGradientShader != nullptr)
-            return *iGradientShader;
-        throw no_gradient_shader();
-    }
-
-    const i_texture_shader& opengl_shader_program::texture_shader() const
-    {
-        return *iTextureShader;
-    }
-
-    i_texture_shader& opengl_shader_program::texture_shader()
-    {
-        return *iTextureShader;
-    }
-
-    const i_glyph_shader& opengl_shader_program::glyph_shader() const
-    {
-        if (iGlyphShader != nullptr)
-            return *iGlyphShader;
-        throw no_glyph_shader();
-    }
-
-    i_glyph_shader& opengl_shader_program::glyph_shader()
-    {
-        if (iGlyphShader != nullptr)
-            return *iGlyphShader;
-        throw no_glyph_shader();
     }
 
     void opengl_shader_program::compile()

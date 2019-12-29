@@ -32,12 +32,17 @@ namespace neogfx
     struct shader_not_found : std::logic_error { shader_not_found() : std::logic_error{ "neogfx::shader_not_found" } {} };
     struct shader_name_exists : std::logic_error { shader_name_exists() : std::logic_error{ "neogfx::shader_name_exists" } {} };
     struct no_vertex_shader : std::logic_error { no_vertex_shader() : std::logic_error{ "neogfx::no_vertex_shader" } {} };
-    struct no_gradient_shader : std::logic_error { no_gradient_shader() : std::logic_error{ "neogfx::no_gradient_shader" } {} };
-    struct no_glyph_shader : std::logic_error { no_glyph_shader() : std::logic_error{ "neogfx::no_glyph_shader" } {} };
+    struct no_fragment_shader : std::logic_error { no_fragment_shader() : std::logic_error{ "neogfx::no_fragment_shader" } {} };
     struct shader_last_in_stage : std::logic_error { shader_last_in_stage() : std::logic_error{ "neogfx::shader_last_in_stage" } {} };
     struct failed_to_create_shader : std::runtime_error { failed_to_create_shader() : std::runtime_error("neogfx::failed_to_create_shader") {} };
     struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(const std::string& aReason) : std::runtime_error("neogfx::failed_to_create_shader_program: " + aReason) {} };
     struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::shader_program_error: " + aError) {} };
+
+    enum class shader_program_type : uint32_t
+    {
+        Standard,
+        User
+    };
 
     class i_shader_program : public neolib::i_reference_counted
     {
@@ -53,6 +58,7 @@ namespace neogfx
         virtual ~i_shader_program() {}
         // operations
     public:
+        virtual shader_program_type type() const = 0;
         virtual const i_string& name() const = 0;
         virtual bool created() const = 0;
         virtual void* handle() const = 0;
@@ -61,12 +67,8 @@ namespace neogfx
         virtual i_shader& shader(const neolib::i_string& aName) = 0;
         virtual const i_vertex_shader& vertex_shader() const = 0;
         virtual i_vertex_shader& vertex_shader() = 0;
-        virtual const i_gradient_shader& gradient_shader() const = 0;
-        virtual i_gradient_shader& gradient_shader() = 0;
-        virtual const i_texture_shader& texture_shader() const = 0;
-        virtual i_texture_shader& texture_shader() = 0;
-        virtual const i_glyph_shader& glyph_shader() const = 0;
-        virtual i_glyph_shader& glyph_shader() = 0;
+        virtual const i_fragment_shader& fragment_shader() const = 0;
+        virtual i_fragment_shader& fragment_shader() = 0;
         virtual bool is_first_in_stage(const i_shader& aShader) const = 0;
         virtual bool is_last_in_stage(const i_shader& aShader) const = 0;
         virtual const i_shader& first_in_stage(shader_type aStage) const = 0;
@@ -84,6 +86,16 @@ namespace neogfx
         virtual void activate(const i_rendering_context& aRenderingContext) = 0;
         virtual void deactivate() = 0;
     public:
+        template <typename T>
+        const T& as() const
+        {
+            return static_cast<const T&>(*this);
+        }
+        template <typename T>
+        T& as()
+        {
+            return static_cast<T&>(*this);
+        }
         bool have_stage(shader_type aStage) const
         {
             return stages().find(aStage) != stages().end() && !stages().at(aStage).empty();

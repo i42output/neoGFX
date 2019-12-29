@@ -25,7 +25,7 @@
 #include <neolib/timer.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
-#include <neogfx/gfx/i_shader_program.hpp>
+#include <neogfx/gfx/i_standard_shader_program.hpp>
 #include "opengl.hpp"
 #include "opengl_texture_manager.hpp"
 #include "opengl_helpers.hpp"
@@ -88,8 +88,8 @@ namespace neogfx
         bool is_shader_program_active() const override;
         i_shader_program& active_shader_program() override;
     public:
-        const i_shader_program& default_shader_program() const override;
-        i_shader_program& default_shader_program() override;
+        const i_standard_shader_program& default_shader_program() const override;
+        i_standard_shader_program& default_shader_program() override;
     public:
         handle create_shader_program_object() override;
         void destroy_shader_program_object(handle aShaderProgramObject) override;
@@ -135,6 +135,6 @@ namespace neogfx
         std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
         ping_pong_buffers_t iPingPongBuffer1s;
         ping_pong_buffers_t iPingPongBuffer2s;
-        ref_ptr<i_shader_program> iDefaultShaderProgram;
+        ref_ptr<i_standard_shader_program> iDefaultShaderProgram;
     };
 }
