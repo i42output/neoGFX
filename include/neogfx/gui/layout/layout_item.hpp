@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/layout/i_layout_item.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable_object.hpp>
 
@@ -36,6 +36,17 @@ namespace neogfx
         typedef i_layout_item abstract_type;
     private:
         typedef abstract_type property_context_type;
+        // implementation
+    public:
+        void anchor_to(i_anchorable_object& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
+        {
+            base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
+            auto& self = static_cast<i_layout_item&>(*this);
+            if (self.is_layout())
+                self.as_layout().invalidate();
+            else if (self.has_parent_layout())
+                self.parent_layout().invalidate();
+        }
         // properties / anchors
     public:
         // todo: declarations for these in i_layout_item when supported
