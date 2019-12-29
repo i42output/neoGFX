@@ -1447,7 +1447,8 @@ namespace neogfx
                 if (sampling == texture_sampling::Scaled)
                 {
                     auto const extents = size_u32{ texture.extents() };
-                    if (extents / 2u * 2u == extents)
+                    auto const outputRect = game::bounding_rect(aVertices);
+                    if (extents / 2u * 2u == extents && (outputRect.cx > extents.cx || outputRect.cy > extents.cy))
                         sampling = texture_sampling::Nearest;
                     else
                         sampling = texture_sampling::Normal;
