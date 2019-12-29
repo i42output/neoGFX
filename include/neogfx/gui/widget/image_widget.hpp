@@ -30,6 +30,7 @@ namespace neogfx
     {
     public:
         define_event(ImageChanged, image_changed)
+        define_event(ImageGeometryChanged, image_geometry_changed)
     public:
         image_widget(const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);
         image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Centre);

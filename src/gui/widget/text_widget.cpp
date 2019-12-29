@@ -110,6 +110,8 @@ namespace neogfx
         auto appearance = text_appearance();
         if (effectively_disabled())
             appearance = appearance.with_alpha(static_cast<colour::component>(appearance.ink().alpha() * 0.25));
+        if (appearance.effect() != std::nullopt)
+            textPosition += size{ appearance.effect()->width() };
         if (multi_line())
             aGraphicsContext.draw_multiline_glyph_text(textPosition, glyph_text(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal);
         else
@@ -147,8 +149,12 @@ namespace neogfx
             TextChanged.trigger();
             if (has_parent_layout())
                 parent_layout().invalidate();
-            if (oldSize != minimum_size() && has_managing_layout())
-                managing_layout().layout_items();
+            if (oldSize != minimum_size())
+            {
+                TextGeometryChanged.trigger();
+                if (has_managing_layout())
+                    managing_layout().layout_items();
+            }
             update();
         }
     }
@@ -256,6 +262,8 @@ namespace neogfx
             iTextExtent = gc.glyph_text_extent(glyph_text());
         if (iTextExtent->cy == 0.0)
             iTextExtent->cy = font().height();
+        if (has_text_appearance() && text_appearance().effect() != std::nullopt)
+            *iTextExtent += size{ text_appearance().effect().value().width() * 2.0 };
         return *iTextExtent;
     }
 

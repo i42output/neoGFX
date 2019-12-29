@@ -222,8 +222,12 @@ namespace neogfx
         size oldSize = minimum_size();
         iTexture = aTexture;
         ImageChanged.trigger();
-        if (oldSize != minimum_size() && has_managing_layout())
-            managing_layout().layout_items(true);
+        if (oldSize != minimum_size())
+        {
+            ImageGeometryChanged.trigger();
+            if (has_managing_layout())
+                managing_layout().layout_items(true);
+        }
         update();
     }
 
