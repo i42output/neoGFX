@@ -26,6 +26,8 @@ namespace neogfx
 {
     class graphics_context : public i_graphics_context
     {
+    public:
+        struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::graphics_context::not_implemented") {} };
     private:
         friend class generic_surface;
         class glyph_shapes;
@@ -49,7 +51,9 @@ namespace neogfx
         void enqueue(const graphics_operation::operation& aOperation) override;
         void flush() override;
     public:
-        virtual neogfx::logical_coordinates logical_coordinates() const override;
+        neogfx::logical_coordinates logical_coordinates() const override;
+        vec2 offset() const override;
+        void set_offset(const optional_vec2& aOffset) override;
         // i_graphics_context
     public:
         ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_colour& aClearColour = colour{ vec4{0.0, 0.0, 0.0, 0.0} }) const override;

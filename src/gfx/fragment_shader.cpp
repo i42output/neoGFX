@@ -534,6 +534,12 @@ namespace neogfx
         disable();
     }
 
+    void standard_stipple_shader::prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram)
+    {
+        if (stipple_active() && uStippleVertex.uniform().value().empty())
+            throw no_stipple_vertex();
+    }
+
     void standard_stipple_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_stipple_shader>::generate_code(aProgram, aLanguage, aOutput);
@@ -543,8 +549,12 @@ namespace neogfx
             {
                 "void standard_stipple_shader(inout vec4 color)\n"
                 "{\n"
-                "    if (ustippleEnabled)\n"
+                "    if (uStippleEnabled)\n"
                 "    {\n"
+                "        uint d = uint(distance(uStippleVertex, Coord));\n"
+                "        uint patternBit = ((d + uStippleCounter) / uStippleFactor) % 16;\n"
+                "        if ((uStipplePattern & (1 << patternBit)) == 0)\n"
+                "            discard;\n"
                 "    }\n"
                 "}\n"_s
             };
@@ -570,12 +580,21 @@ namespace neogfx
         enable();
         uStippleFactor = aFactor;
         uStipplePattern = aPattern;
-        uStippleCounter = 0;
+        uStippleCounter = 0u;
+        uStippleVertex = vec3f{};
+        uStippleEnabled = true;
     }
 
+    void standard_stipple_shader::first_vertex(const vec3& aVertex)
+    {
+        uStippleCounter = 0u;
+        uStippleVertex = aVertex.as<float>();
+    }
+    
     void standard_stipple_shader::next_vertex(const vec3& aVertex)
     {
+        uStippleCounter = uStippleCounter.uniform().value().get<uint32_t>() +
+            static_cast<uint32_t>(uStippleVertex.uniform().value().get<vec3f>().distance(aVertex.as<float>()));
         uStippleVertex = aVertex.as<float>();
-        uStippleEnabled = true;
     }
 }

@@ -122,19 +122,20 @@ namespace neogfx
             self_type& operator-=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
             self_type& operator*=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
             self_type& operator/=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
-            self_type& operator+=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
-            self_type& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
-            self_type& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
-            self_type& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
-            self_type operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
+            self_type& operator+=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
+            self_type& operator-=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
+            self_type& operator*=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
+            self_type& operator/=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
+            self_type operator-() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
             scalar magnitude() const { scalar ss = 0; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
-            self_type normalized() const { basic_vector result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
-            self_type min(const basic_vector& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
-            self_type max(const basic_vector& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
+            self_type normalized() const { self_type result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
+            self_type min(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
+            self_type max(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
             value_type min() const { value_type result = v[0]; for (uint32_t index = 1; index < Size; ++index) result = std::min(v[index], result); return result; }
             self_type ceil() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::ceil(v[index]); return result; }
             self_type floor() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::floor(v[index]); return result; }
             self_type round() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::round(v[index]); return result; }
+            scalar distance(const self_type& right) const { scalar total = 0; for (uint32_t index = 0; index < Size; ++index) total += ((v[index] - right.v[index]) * (v[index] - right.v[index])); return std::sqrt(total); }
         public:
             using base_type::v;
         };
@@ -220,6 +221,7 @@ namespace neogfx
             self_type ceil() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::ceil(v[index]); return result; }
             self_type floor() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::floor(v[index]); return result; }
             self_type round() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::round(v[index]); return result; }
+            scalar distance(const self_type& right) const { scalar total = 0; for (uint32_t index = 0; index < Size; ++index) total += ((v[index] - right.v[index]) * (v[index] - right.v[index])); return std::sqrt(total); }
         public:
             array_type v;
         };

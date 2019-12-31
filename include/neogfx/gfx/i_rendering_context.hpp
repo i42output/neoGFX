@@ -46,6 +46,8 @@ namespace neogfx
         virtual void flush() = 0;
     public:
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
+        virtual vec2 offset() const = 0;
+        virtual void set_offset(const optional_vec2& aOffset) = 0;
     public:
         virtual neogfx::subpixel_format subpixel_format() const = 0;
     };

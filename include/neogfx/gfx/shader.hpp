@@ -272,6 +272,8 @@ namespace neogfx
                     std::map<std::pair<shader_variable_qualifier, shader_variable_location>, string> variableDefinitions;
                     for (auto const& s : aProgram.stages().at(type()))
                     {
+                        if (s->disabled())
+                            continue;
                         for (auto const& u : s->uniforms())
                         {
                             string uniformDefinition;

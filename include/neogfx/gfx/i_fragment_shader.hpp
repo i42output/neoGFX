@@ -29,6 +29,8 @@
 
 namespace neogfx
 {
+    struct no_stipple_vertex : std::logic_error { no_stipple_vertex() : std::logic_error{ "neogfx::no_stipple_vertex" } {} };
+
     class i_rendering_context;
 
     class i_fragment_shader : public i_shader
@@ -78,6 +80,7 @@ namespace neogfx
         virtual bool stipple_active() const = 0;
         virtual void clear_stipple() = 0;
         virtual void set_stipple(uint32_t aFactor, uint16_t aPattern) = 0;
+        virtual void first_vertex(const vec3& aVertex) = 0;
         virtual void next_vertex(const vec3& aVertex) = 0;
     };
 }

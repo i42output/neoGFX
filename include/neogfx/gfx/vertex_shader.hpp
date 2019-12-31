@@ -89,83 +89,19 @@ namespace neogfx
     class standard_vertex_shader : public vertex_shader, public i_standard_vertex_matrices
     {
     public:
-        standard_vertex_shader(const std::string& aName = "standard_vertex_shader") :
-            vertex_shader{ aName }
-        {
-            auto& coord = add_attribute<vec3f>("VertexPosition"_s, 0u);
-            auto& color = add_attribute<vec4f>("VertexColor"_s, 1u);
-            add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
-            add_out_variable<vec4f>("Color"_s, 1u).link(color);
-        }
+        standard_vertex_shader(const std::string& aName = "standard_vertex_shader");
     public:
-        bool has_standard_vertex_matrices() const override
-        {
-            return true;
-        }
-        const i_standard_vertex_matrices& standard_vertex_matrices() const override
-        {
-            return *this;
-        }
-        i_standard_vertex_matrices& standard_vertex_matrices() override
-        {
-            return *this;
-        }
+        bool has_standard_vertex_matrices() const override;
+        const i_standard_vertex_matrices& standard_vertex_matrices() const override;
+        i_standard_vertex_matrices& standard_vertex_matrices() override;
     public:
-        mat44 projection_matrix(const i_rendering_context& aRenderingContext) const override
-        {
-            if (iProjectionMatrix != std::nullopt)
-                return *iProjectionMatrix;
-            auto const& logicalCoordinates = aRenderingContext.logical_coordinates();
-            double left = logicalCoordinates.bottomLeft.x;
-            double right = logicalCoordinates.topRight.x;
-            double bottom = logicalCoordinates.bottomLeft.y;
-            double top = logicalCoordinates.topRight.y;
-            double zFar = 1.0;
-            double zNear = -1.0;
-            mat44 orthoMatrix = mat44{
-                { 2.0 / (right - left), 0.0, 0.0, -(right + left) / (right - left) },
-                { 0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom) },
-                { 0.0, 0.0, -2.0 / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
-                { 0.0, 0.0, 0.0, 1.0 } };
-            return orthoMatrix;
-        }
-        void set_projection_matrix(const optional_mat44& aProjectionMatrix) override
-        {
-            iProjectionMatrix = aProjectionMatrix;
-        }
-        mat44 transformation_matrix(const i_rendering_context&) const override
-        {
-            if (iTransformationMatrix != std::nullopt)
-                return *iTransformationMatrix;
-            return mat44::identity();
-        }
-        void set_transformation_matrix(const optional_mat44& aTransformationMatrix) override
-        {
-            iTransformationMatrix = aTransformationMatrix;
-        }
+        mat44 projection_matrix(const i_rendering_context& aRenderingContext) const override;
+        void set_projection_matrix(const optional_mat44& aProjectionMatrix) override;
+        mat44 transformation_matrix(const i_rendering_context& aRenderingContext) const override;
+        void set_transformation_matrix(const optional_mat44& aTransformationMatrix) override;
     public:
-        void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program&) override
-        {
-            uProjectionMatrix = projection_matrix(aRenderingContext).transposed().as<float>();
-            uTransformationMatrix = transformation_matrix(aRenderingContext).as<float>();
-        }
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
-        {
-            vertex_shader::generate_code(aProgram, aLanguage, aOutput);
-            if (aLanguage == shader_language::Glsl)
-            {
-                static const string code =
-                {
-                    "void standard_vertex_shader(inout vec3 coord, inout vec4 color)\n"
-                    "{\n"
-                    "    gl_Position = vec4((uProjectionMatrix * (uTransformationMatrix * vec4(coord, 1.0))).xyz, 1.0);\n"
-                    "}\n"_s
-                };
-                aOutput += code;
-            }
-            else
-                throw unsupported_shader_language();
-        }
+        void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program&) override;
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     private:
         optional_mat44 iProjectionMatrix;
         optional_mat44 iTransformationMatrix;
@@ -177,29 +113,8 @@ namespace neogfx
     class standard_texture_vertex_shader : public standard_vertex_shader
     {
     public:
-        standard_texture_vertex_shader(const std::string& aName = "standard_texture_vertex_shader") :
-            standard_vertex_shader{ aName }
-        {
-            auto& texCoord = add_attribute("VertexTextureCoord"_s, 2u, shader_data_type::Vec2);
-            add_out_variable<vec2f>("TexCoord"_s, 2u).link(texCoord);
-        }
+        standard_texture_vertex_shader(const std::string& aName = "standard_texture_vertex_shader");
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
-        {
-            standard_vertex_shader::generate_code(aProgram, aLanguage, aOutput);
-            if (aLanguage == shader_language::Glsl)
-            {
-                static const string code =
-                {
-                    "void standard_texture_vertex_shader(inout vec3 coord, inout vec4 color, inout vec2 texCoord)\n"
-                    "{\n"
-                    "    standard_vertex_shader(coord, color);\n"
-                    "}\n"_s
-                };
-                aOutput += code;
-            }
-            else
-                throw unsupported_shader_language();
-        }
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     };
 }

@@ -58,6 +58,11 @@ namespace neogfx
         virtual const i_device_metrics& device_metrics() const = 0;
         // helpers
     public:
+        template <typename T>
+        std::enable_if_t<std::is_scalar_v<T>, T> dpi_scale(T aValue) const
+        {
+            return static_cast<T>(static_cast<dimension>(aValue) * dpi_scale_factor());
+        }
         dimension dpi_scale(dimension aValue) const
         {
             return aValue * dpi_scale_factor();

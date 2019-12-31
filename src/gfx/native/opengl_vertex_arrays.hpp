@@ -138,6 +138,10 @@ namespace neogfx
             {
                 return vertices().size() == static_cast<std::size_t>(iStart);
             }
+            std::size_t size() const
+            {
+                return end() - begin();
+            }
             const value_type& operator[](std::size_t aOffset) const
             {
                 return *(begin() + aOffset);
@@ -195,11 +199,14 @@ namespace neogfx
             }
             void draw(std::size_t aCount, std::size_t aSkipCount = 1u)
             {
+                if (aCount == 0u)
+                    return;
                 aSkipCount = std::max<std::size_t>(aSkipCount, 1u);
                 if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
                     throw invalid_draw_count();
                 if (static_cast<std::size_t>(iStart) == vertices().size())
                     return;
+                iParent.rendering_engine().active_shader_program().update_uniforms(iParent);
                 if (!iWithTextures)
                     iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
                 else
@@ -315,7 +322,6 @@ namespace neogfx
             }
         private:
             std::shared_ptr<use_vertex_arrays_instance> iInstance;
-
         };
     }
 }

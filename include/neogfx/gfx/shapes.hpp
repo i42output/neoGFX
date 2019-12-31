@@ -38,7 +38,7 @@ namespace neogfx
     using temp_vec3_buffer = neolib::vecarray<vec3, VertexCount, VertexCount, neolib::check<neolib::vecarray_overflow>, std::allocator<vec3>>;
 
     template <std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline void calc_rect_vertices(temp_vec3_buffer<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
+    inline void calc_rect_vertices(temp_vec3_buffer<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
     {
         aResult.clear();
         switch(aType)
@@ -60,14 +60,14 @@ namespace neogfx
             aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
             break;
         case mesh_type::Outline:
-            aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust, aZpos });
-            aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust, aZpos });
-            aResult.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y, aZpos });
-            aResult.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y, aZpos });
+            aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y, aZpos });
+            aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y, aZpos });
+            aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y, aZpos });
+            aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y, aZpos });
+            aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y, aZpos });
             break;
         }
     }
@@ -75,17 +75,17 @@ namespace neogfx
     typedef temp_vec3_buffer<8> vec3_rect_vertices;
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    vec3_rect_vertices rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
+    vec3_rect_vertices rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
     {
         vec3_rect_vertices result;
-        calc_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
+        calc_rect_vertices(result, aRect, aType, aZpos);
         return result;
     };
 
     template <typename Container, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, CoordinateType aPixelAdjust, mesh_type aType, scalar aZpos = 0.0)
+    inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
     {
-        vec3_rect_vertices temp = rect_vertices(aRect, aPixelAdjust, aType, aZpos);
+        vec3_rect_vertices temp = rect_vertices(aRect, aType, aZpos);
         return aResult.insert(aResult.end(), temp.begin(), temp.end());
     }
 

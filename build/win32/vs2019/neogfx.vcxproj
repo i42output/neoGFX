@@ -636,6 +636,7 @@
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font_face.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\glyph_texture.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\vertex_shader.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\colour_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp" />

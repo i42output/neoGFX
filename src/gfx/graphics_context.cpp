@@ -334,6 +334,16 @@ namespace neogfx
         }
     }
 
+    vec2 graphics_context::offset() const
+    {
+        throw not_implemented();
+    }
+
+    void graphics_context::set_offset(const optional_vec2& aOffset)
+    {
+        throw not_implemented();
+    }
+
     void graphics_context::set_default_font(const font& aDefaultFont) const
     {
         iDefaultFont = aDefaultFont;
@@ -438,8 +448,8 @@ namespace neogfx
     void graphics_context::draw_focus_rect(const rect& aRect) const
     {
         push_logical_operation(neogfx::logical_operation::Xor);
-        line_stipple_on(1, 0xAAAA);
-        draw_rect(aRect, pen(colour::White, 1.0));
+        line_stipple_on(dpi_scale(1u), 0x5555);
+        draw_rect(deflate_rect(aRect, delta{ dpi_scale(1.0) - 1.0 }), pen(colour::White, dpi_scale(1.0)));
         line_stipple_off();
         pop_logical_operation();
     }

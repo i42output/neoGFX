@@ -557,6 +557,7 @@ namespace neogfx
         public basic_point<CoordinateType>,
         public basic_size<CoordinateType>
     {
+        typedef basic_rect<CoordinateType, CoordinateSystem> self_type;
         // types
     public:
         typedef CoordinateType coordinate_type;
@@ -588,9 +589,9 @@ namespace neogfx
         // assignment
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
-        basic_rect& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other;  return *this; }
-        basic_rect& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
-        basic_rect& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
+        self_type& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other;  return *this; }
+        self_type& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
+        self_type& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
         // operations
     public:
         basic_vector<basic_vector<coordinate_type, 2>, 4> to_vector() const 
@@ -616,16 +617,16 @@ namespace neogfx
         dimension_type height() const { return cy; }
         bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
         bool operator!=(const basic_rect& other) const { return !operator==(other); }
-        basic_rect& operator*=(const basic_rect& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
-        basic_rect& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
-        basic_rect& operator*=(dimension_type value) { position() *= value; extents() *= value; return *this; }
-        basic_rect& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
-        basic_rect& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
-        basic_rect& operator/=(dimension_type value) { position() /= value; extents() /= value; return *this; }
+        self_type& operator*=(const self_type& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
+        self_type& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
+        self_type& operator*=(dimension_type value) { position() *= value; extents() *= value; return *this; }
+        self_type& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
+        self_type& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
+        self_type& operator/=(dimension_type value) { position() /= value; extents() /= value; return *this; }
         bool contains_x(const point_type& point) const { return point.x >= left() && point.x < right(); }
         bool contains_y(const point_type& point) const { if constexpr (gui) return point.y >= top() && point.y < bottom(); else return point.y >= bottom() && point.y < top(); }
         bool contains(const point_type& point) const { return contains_x(point) && contains_y(point); }
-        bool contains(const basic_rect& other) const 
+        bool contains(const self_type& other) const
         { 
             if constexpr (gui) 
                 return other.left() >= left() && other.right() <= right() && other.top() >= top() && other.bottom() <= bottom(); 
@@ -639,18 +640,34 @@ namespace neogfx
             else
                 return point_type{ left() + static_cast<CoordinateType>(width() / 2), bottom() + static_cast<CoordinateType>(height() / 2) };
         }
-        basic_rect& move(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
-        basic_rect& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * static_cast<CoordinateType>(2); cy += delta.dy * static_cast<CoordinateType>(2); return *this; }
-        basic_rect& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
-        basic_rect& inflate(CoordinateType dx, CoordinateType dy) { return inflate(delta_type(dx, dy)); }
-        basic_rect& deflate(const delta_type& delta) { return inflate(-delta); }
-        basic_rect& deflate(const size_type& size) { return inflate(-size.cx, -size.cy); }
-        basic_rect& deflate(CoordinateType dx, CoordinateType dy) { return inflate(-dx, -dy); }
-        basic_rect intersection(const basic_rect& other) const
+        self_type& move(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
+        self_type& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * static_cast<CoordinateType>(2); cy += delta.dy * static_cast<CoordinateType>(2); return *this; }
+        self_type& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
+        self_type& inflate(CoordinateType dx, CoordinateType dy) { return inflate(delta_type(dx, dy)); }
+        self_type& inflate(CoordinateType left, CoordinateType top, CoordinateType right, CoordinateType bottom) { x -= left; y -= top; cx += (left + right); cy += (top + bottom); return *this; }
+        self_type& deflate(const delta_type& delta) { return inflate(-delta); }
+        self_type& deflate(const size_type& size) { return inflate(-size.cx, -size.cy); }
+        self_type& deflate(CoordinateType dx, CoordinateType dy) { return inflate(-dx, -dy); }
+        self_type& deflate(CoordinateType left, CoordinateType top, CoordinateType right, CoordinateType bottom) { return inflate(-left, -top, -right, -bottom); }
+        template <typename... T>
+        friend self_type inflate_rect(const self_type& aRect, T&&... aAmount)
+        {
+            auto result = aRect;
+            result.inflate(std::forward<T>(aAmount)...);
+            return result;
+        }
+        template <typename... T>
+        friend self_type deflate_rect(const self_type& aRect, T&&... aAmount)
+        {
+            auto result = aRect;
+            result.deflate(std::forward<T>(aAmount)...);
+            return result;
+        }
+        self_type intersection(const self_type& other) const
         {
             if constexpr (gui)
             {
-                basic_rect candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
+                self_type candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
                 if (contains(candidate.centre()) && other.contains(candidate.centre()))
                     return candidate;
                 else
@@ -658,27 +675,27 @@ namespace neogfx
             }
             else
             {
-                basic_rect candidate{ bottom_left().max(other.bottom_left()), top_right().min(other.top_right()) };
+                self_type candidate{ bottom_left().max(other.bottom_left()), top_right().min(other.top_right()) };
                 if (contains(candidate.centre()) && other.contains(candidate.centre()))
                     return candidate;
                 else
                     return basic_rect{};
             }
         }
-        basic_rect combine(const basic_rect& other) const
+        self_type combine(const self_type& other) const
         {
             if constexpr (gui)
-                return basic_rect{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
+                return self_type{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
             else
-                return basic_rect{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
+                return self_type{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
         }
-        basic_rect with_centred_origin() const
+        self_type with_centred_origin() const
         {
-            return basic_rect{ point_type{ -extents() / 2.0 }, extents() };
+            return self_type{ point_type{ -extents() / 2.0 }, extents() };
         }
-        basic_rect ceil() const { return basic_rect(point_type::ceil(), size_type::ceil()); }
-        basic_rect floor() const { return basic_rect(point_type::floor(), size_type::floor()); }
-        basic_rect round() const { return basic_rect(point_type::round(), size_type::round()); }
+        self_type ceil() const { return self_type{ point_type::ceil(), size_type::ceil() }; }
+        self_type floor() const { return self_type{ point_type::floor(), size_type::floor() }; }
+        self_type round() const { return self_type{ point_type::round(), size_type::round() }; }
         aabb_2d to_aabb_2d() const
         { 
             if constexpr (gui)

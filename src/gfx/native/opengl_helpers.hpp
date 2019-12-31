@@ -379,7 +379,6 @@ namespace neogfx
                 auto& standardMatrices = aShaderProgram.vertex_shader().standard_vertex_matrices();
                 standardMatrices.set_transformation_matrix(iTransformation);
             }
-            aShaderProgram.update_uniforms(aRenderingContext);
         }
     private:
         i_shader_program* iShaderProgram;
@@ -396,8 +395,7 @@ namespace neogfx
             iCurrentProgram{ aShaderProgram },
             iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
         {
-            if (&iCurrentProgram != iPreviousProgram)
-                iCurrentProgram.activate(aRenderingContext);
+            iCurrentProgram.activate(aRenderingContext);
         }
         ~use_shader_program()
         {
