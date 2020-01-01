@@ -73,7 +73,7 @@ namespace neogfx
         };
     }
 
-    inline game::mesh to_ecs_component(const vertices_t& aVertices, mesh_type aSourceMeshType = mesh_type::TriangleFan, mesh_type aDestinationMeshType = mesh_type::Triangles)
+    inline game::mesh to_ecs_component(const vertices& aVertices, mesh_type aSourceMeshType = mesh_type::TriangleFan, mesh_type aDestinationMeshType = mesh_type::Triangles)
     {
         // todo
         return game::mesh{};

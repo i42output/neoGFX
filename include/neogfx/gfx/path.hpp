@@ -121,9 +121,9 @@ namespace neogfx
         { 
             return iPaths; 
         }
-        vertices_t to_vertices(const typename paths_type::value_type& aPath) const
+        vertices to_vertices(const typename paths_type::value_type& aPath) const
         {
-            vertices_t result;
+            vertices result;
             result.reserve((aPath.size() + 1) * (iShape == Quads ? 6 : 1));
             if (aPath.size() > 2)
             {

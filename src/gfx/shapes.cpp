@@ -23,9 +23,9 @@
 
 namespace neogfx
 {
-    vertices_t arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments)
+    vertices arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments)
     {
-        vertices_t result;
+        vertices result;
         angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
         uint32_t arcSegments = aArcSegments;
         if (arcSegments == 0)
@@ -67,14 +67,14 @@ namespace neogfx
         return result;
     }
 
-    vertices_t circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
+    vertices circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
     {
         return arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aCentre, aType, aArcSegments);
     }
 
-    vertices_t rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments)
+    vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments)
     {
-        vertices_t result;
+        vertices result;
         auto const topLeft = arc_vertices(
             aRect.top_left() + point{ aRadius, aRadius },
             aRadius,

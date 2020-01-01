@@ -308,8 +308,8 @@ namespace neogfx
         typedef std::optional<vec2_list> optional_vec2_list;
         typedef std::optional<vec3_list> optional_vec3_list;
 
-        typedef vec2_list vertices_2d_t;
-        typedef vec3_list vertices_t;
+        typedef vec2_list vertices_2d;
+        typedef vec3_list vertices;
 
         typedef optional_vec2_list optional_vertices_2d_t;
         typedef optional_vec3_list optional_vertices_t;
@@ -344,7 +344,8 @@ namespace neogfx
         typedef vector3u32 vec3u32;
         typedef vector4u32 vec4u32;
 
-        typedef vec3u32 triangle;
+        typedef std::array<vec3, 3> triangle;
+        typedef std::array<vec3, 4> quad;
 
         template <typename T, uint32_t D, typename Type, bool IsScalar>
         inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
@@ -556,8 +557,8 @@ namespace neogfx
         public:
             basic_matrix() : m{ {} } {}
             basic_matrix(std::initializer_list<std::initializer_list<value_type>> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
-            basic_matrix(const basic_matrix& other) : m{ other.m } {}
-            basic_matrix(basic_matrix&& other) : m{ std::move(other.m) } {}
+            basic_matrix(const self_type& other) : m{ other.m } {}
+            basic_matrix(self_type&& other) : m{ std::move(other.m) } {}
             template <typename T2>
             basic_matrix(const basic_matrix<T2, Rows, Columns>& other)
             {
@@ -565,8 +566,8 @@ namespace neogfx
                     for (uint32_t row = 0; row < Rows; ++row)
                         (*this)[column][row] = static_cast<value_type>(other[column][row]);
             }
-            basic_matrix& operator=(const basic_matrix& other) { m = other.m; return *this; }
-            basic_matrix& operator=(basic_matrix&& other) { m = std::move(other.m); return *this; }
+            self_type& operator=(const self_type& other) { m = other.m; return *this; }
+            self_type& operator=(self_type&& other) { m = std::move(other.m); return *this; }
         public:
             template <typename T2>
             basic_matrix<T2, Rows, Columns> as() const
@@ -579,17 +580,17 @@ namespace neogfx
             column_type& operator[](uint32_t aColumn) { return m[aColumn]; }
             const value_type* data() const { return &m[0].v[0]; }
         public:
-            bool operator==(const basic_matrix& right) const { return m == right.m; }
-            bool operator!=(const basic_matrix& right) const { return m != right.m; }
-            basic_matrix& operator+=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] += value; return *this; }
-            basic_matrix& operator-=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= value; return *this; }
-            basic_matrix& operator*=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] *= value; return *this; }
-            basic_matrix& operator/=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] /= value; return *this; }
-            basic_matrix& operator+=(const basic_matrix& right) { for (uint32_t column = 0; column < Columns; ++column) m[column] += right.m[column]; return *this; }
-            basic_matrix& operator-=(const basic_matrix& right) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= right.m[column]; return *this; }
-            basic_matrix& operator*=(const basic_matrix& right)
+            bool operator==(const self_type& right) const { return m == right.m; }
+            bool operator!=(const self_type& right) const { return m != right.m; }
+            self_type& operator+=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] += value; return *this; }
+            self_type& operator-=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= value; return *this; }
+            self_type& operator*=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] *= value; return *this; }
+            self_type& operator/=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] /= value; return *this; }
+            self_type& operator+=(const self_type& right) { for (uint32_t column = 0; column < Columns; ++column) m[column] += right.m[column]; return *this; }
+            self_type& operator-=(const self_type& right) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= right.m[column]; return *this; }
+            self_type& operator*=(const self_type& right)
             {
-                basic_matrix result;
+                self_type result;
                 for (uint32_t column = 0; column < Columns; ++column)
                     for (uint32_t row = 0; row < Rows; ++row)
                         for (uint32_t index = 0; index < Columns; ++index)
@@ -597,9 +598,9 @@ namespace neogfx
                 *this = result;
                 return *this;
             }
-            basic_matrix operator-() const
+            self_type operator-() const
             {
-                basic_matrix result = *this;
+                self_type result = *this;
                 for (uint32_t column = 0; column < Columns; ++column)
                     for (uint32_t row = 0; row < Rows; ++row)
                         result[column][row] = -result[column][row];
@@ -613,17 +614,17 @@ namespace neogfx
                         result[row][column] = m[column][row];
                 return result;
             }
-            template <typename SFINAE = int>
-            static const basic_matrix& identity(typename std::enable_if<Rows == Columns, SFINAE>::type = 0)
+            template <typename SFINAE = self_type>
+            static const std::enable_if_t<Rows == Columns, SFINAE>& identity()
             {
                 auto make_identity = []()
                 {
-                    basic_matrix result;
+                    self_type result;
                     for (uint32_t diag = 0; diag < Rows; ++diag)
                         result[diag][diag] = static_cast<value_type>(1.0);
                     return result;
                 };
-                static basic_matrix const sIdentity = make_identity();
+                static self_type const sIdentity = make_identity();
                 return sIdentity;
             }
             bool is_identity() const
@@ -1047,7 +1048,7 @@ namespace neogfx
             aabb_2d(const aabb& aAabb) : min{ aAabb.min.xy }, max{ aAabb.max.xy } {}
         };
 
-        inline aabb_2d to_aabb_2d(const vertices_t& vertices)
+        inline aabb_2d to_aabb_2d(const vertices& vertices)
         {
             aabb_2d result = !vertices.empty() ? aabb_2d{ vertices[0].xy, vertices[0].xy } : aabb_2d{};
             for (auto const& v : vertices)
@@ -1130,7 +1131,8 @@ namespace neogfx
 
         inline mat33 rotation_matrix(const vec3& aVectorA, const vec3& aVectorB)
         {
-
+            // todo
+            return mat33::identity();
         }
 
         inline mat33 rotation_matrix(const vec3& aAngles)

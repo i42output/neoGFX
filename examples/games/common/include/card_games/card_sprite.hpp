@@ -119,7 +119,7 @@ namespace neogames
             // Card background shape...
             auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, neogfx::mesh_type::Triangles, 20);
 
-            neogfx::game::mesh mesh{ cardBackgroundVertices, neogfx::vertices_2d_t{cardBackgroundVertices.size(), neogfx::vec2{} }, neogfx::game::default_faces(cardBackgroundVertices) };
+            neogfx::game::mesh mesh{ cardBackgroundVertices, neogfx::vertices_2d{cardBackgroundVertices.size(), neogfx::vec2{} }, neogfx::game::default_faces(cardBackgroundVertices) };
             neogfx::game::mesh_renderer meshRenderer{ neogfx::game::material{ neogfx::to_ecs_component( neogfx::colour::White) } };
 
             auto aabb = neogfx::game::bounding_rect(mesh);

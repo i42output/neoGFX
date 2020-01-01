@@ -124,7 +124,7 @@ namespace neogfx
         void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
         bool draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         bool draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
-        bool draw_patch(const vertices_t& aVertices, const vertices_2d_t& aTextureVertices, const game::material& aMaterial, const game::faces_t& aFaces);
+        bool draw_patch(const vertices& aVertices, const vertices_2d& aTextureVertices, const game::material& aMaterial, const game::faces& aFaces);
     public:
         neogfx::subpixel_format subpixel_format() const override;
     private:
@@ -151,7 +151,7 @@ namespace neogfx
         GLint iPreviousTexture;
         font iLastDrawGlyphFallbackFont;
         std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
-        vertices_2d_t iTempTextureCoords;
+        vertices_2d iTempTextureCoords;
         sink iSink;
         scoped_render_target iSrt;
         use_shader_program iUseDefaultShaderProgram;

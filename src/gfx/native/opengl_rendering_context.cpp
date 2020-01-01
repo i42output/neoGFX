@@ -133,9 +133,9 @@ namespace neogfx
             return path_shape_to_gl_mode(aPath.shape());
         }
 
-        inline vertices_t line_loop_to_lines(const vertices_t& aLineLoop)
+        inline vertices line_loop_to_lines(const vertices& aLineLoop)
         {
-            vertices_t result;
+            vertices result;
             result.reserve(aLineLoop.size() * 2);
             for (auto v = aLineLoop.begin(); v != aLineLoop.end(); ++v)
             {
@@ -146,23 +146,21 @@ namespace neogfx
             return result;
         }
 
-        typedef std::array<vec3, 4> line_triangles_t;
-
-        inline line_triangles_t line_to_triangles(const vec3& aStart, const vec3& aEnd, double aLineWidth)
+        inline quad line_to_quad(const vec3& aStart, const vec3& aEnd, double aLineWidth)
         {
-            auto const r = rotation_matrix(vec3{ 0.0, 1.0, 0.0 }, aEnd - aStart);
-            vec3 const v1{ -aLineWidth / 2.0, -aLineWidth / 2.0, -aLineWidth / 2.0 };
-            vec3 const v2{ -aLineWidth / 2.0, aLineWidth / 2.0, -aLineWidth / 2.0 };
-            auto const l = (aEnd - aStart).magnitude();
-            return line_triangles_t{ r * v1, r * v2, r * (v1 + l), r * (v2 + l) * r };
+            auto const vecLine = aEnd - aStart;
+            auto const r = rotation_matrix(vec3{ 0.0, 1.0, 0.0 }, vecLine);
+            vec3 const v1{ r * vec3{ -aLineWidth / 2.0, -aLineWidth / 2.0, -aLineWidth / 2.0 } };
+            vec3 const v2{ r * vec3{ -aLineWidth / 2.0, aLineWidth / 2.0, -aLineWidth / 2.0 } };
+            return quad{ v1, v2, v1 + vecLine, v2 + vecLine };
         }
 
-        inline void lines_to_triangles(const vertices_t& aLines, double aLineWidth, vertices_t& aTriangles)
+        inline void lines_to_quads(const vertices& aLines, double aLineWidth, vertices& aQuads)
         {
             for (auto v = aLines.begin(); v != aLines.end(); v += 2)
             {
-                line_triangles_t const lineTriangles = line_to_triangles(*v, *(v + 1), aLineWidth);
-                aTriangles.insert(aTriangles.end(), lineTriangles.begin(), lineTriangles.end());
+                quad const q = line_to_quad(*v, *(v + 1), aLineWidth);
+                aQuads.insert(aQuads.end(), q.begin(), q.end());
             }
         }
 
@@ -1281,7 +1279,7 @@ namespace neogfx
 
     namespace
     {
-        void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const neogfx::logical_coordinates& aLogicalCoordinates, vertices_2d_t& aResult)
+        void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const neogfx::logical_coordinates& aLogicalCoordinates, vertices_2d& aResult)
         {
             rect normalizedRect = aTextureRect / aTextureStorageSize;
             aResult.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
@@ -1491,7 +1489,7 @@ namespace neogfx
     }
 
 
-    bool opengl_rendering_context::draw_patch(const vertices_t& aVertices, const vertices_2d_t& aTextureVertices, const game::material& aMaterial, const game::faces_t& aFaces)
+    bool opengl_rendering_context::draw_patch(const vertices& aVertices, const vertices_2d& aTextureVertices, const game::material& aMaterial, const game::faces& aFaces)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 

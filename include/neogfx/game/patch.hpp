@@ -31,7 +31,7 @@ namespace neogfx::game
     struct patch
     {
         material material;
-        faces_t faces;
+        faces faces;
 
         struct meta : i_component_data::meta
         {
