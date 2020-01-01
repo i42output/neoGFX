@@ -1128,7 +1128,12 @@ namespace neogfx
             return result;
         }
 
-        inline mat33 rotation_matrix(vec3 aAngles)
+        inline mat33 rotation_matrix(const vec3& aVectorA, const vec3& aVectorB)
+        {
+
+        }
+
+        inline mat33 rotation_matrix(const vec3& aAngles)
         {
             scalar ax = aAngles.x;
             scalar ay = aAngles.y;
@@ -1146,7 +1151,7 @@ namespace neogfx
             }
         }
 
-        inline mat44 affine_rotation_matrix(vec3 aAngles)
+        inline mat44 affine_rotation_matrix(const vec3& aAngles)
         {
             scalar ax = aAngles.x;
             scalar ay = aAngles.y;
