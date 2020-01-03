@@ -126,8 +126,8 @@ namespace neogfx::game
                 auto p0 = rigidBody1.position;
                 auto a0 = rigidBody1.angle;
                 auto elapsedTime = from_step_time(worldClock.timeStep);
-                rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)) * vec3 { elapsedTime, elapsedTime, elapsedTime };
-                rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
+                rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3{ elapsedTime, elapsedTime, elapsedTime });
+                rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);

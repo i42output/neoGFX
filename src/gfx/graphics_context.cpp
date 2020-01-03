@@ -1157,7 +1157,7 @@ namespace neogfx
     {
         auto adjustedMesh = aMesh;
         for (auto& uv : adjustedMesh.uv)
-            uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv * (aTextureRect.extents() / aTexture.extents()).to_vec2();
+            uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2());
          draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
     }
 

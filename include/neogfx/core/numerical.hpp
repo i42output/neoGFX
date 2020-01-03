@@ -46,6 +46,8 @@ namespace neogfx
             const T zero = static_cast<T>(0.0);
             template <typename T>
             const T one = static_cast<T>(1.0);
+            template <typename T>
+            const T two = static_cast<T>(2.0);
         }
 
         inline angle to_rad(angle aDegrees)
@@ -135,6 +137,7 @@ namespace neogfx
             self_type& operator*=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
             self_type& operator/=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
             self_type operator-() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
+            self_type scale(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = v[index] * right[index]; return result; }
             value_type magnitude() const { value_type ss = constants::zero<value_type>; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
             self_type normalized() const { self_type result; value_type im = constants::one<value_type> / magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] * im; return result; }
             self_type min(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
@@ -144,6 +147,13 @@ namespace neogfx
             self_type floor() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::floor(v[index]); return result; }
             self_type round() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::round(v[index]); return result; }
             value_type distance(const self_type& right) const { value_type total = 0; for (uint32_t index = 0; index < Size; ++index) total += ((v[index] - right.v[index]) * (v[index] - right.v[index])); return std::sqrt(total); }
+            value_type dot(const self_type& right) const
+            {
+                value_type result = constants::zero<value_type>;
+                for (uint32_t index = 0; index < Size; ++index)
+                    result += (v[index] * right[index]);
+                return result;
+            }
             template <typename SFINAE = self_type>
             std::enable_if_t<Size == 3, SFINAE> cross(const self_type& right) const
             {
@@ -222,6 +232,7 @@ namespace neogfx
             self_type& operator*=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
             self_type& operator/=(const self_type& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
             self_type operator-() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
+            self_type scale(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = v[index] * right[index]; return result; }
             value_type magnitude() const { value_type ss = constants::zero<value_type>; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
             self_type normalized() const { self_type result; value_type im = constants::one<value_type> / magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] * im; return result; }
             self_type min(const self_type& right) const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
@@ -230,6 +241,13 @@ namespace neogfx
             self_type floor() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::floor(v[index]); return result; }
             self_type round() const { self_type result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::round(v[index]); return result; }
             value_type distance(const self_type& right) const { value_type total = constants::zero<value_type>; for (uint32_t index = 0; index < Size; ++index) total += ((v[index] - right.v[index]) * (v[index] - right.v[index])); return std::sqrt(total); }
+            value_type dot(const self_type& right) const
+            {
+                value_type result = constants::zero<value_type>;
+                for (uint32_t index = 0; index < Size; ++index)
+                    result += (left[index] * right[index]);
+                return result;
+            }
             std::enable_if_t<Size == 3, self_type> cross(const self_type& right) const
             {
                 return self_type{ y * right.z - z * right.y, z * right.x - x * right.z, x * right.y - y * right.x };
@@ -379,16 +397,6 @@ namespace neogfx
         }
 
         template <typename T, uint32_t D, typename Type, bool IsScalar>
-        inline typename basic_vector<T, D, Type, IsScalar>::value_type operator*(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
-        {
-            typedef typename basic_vector<T, D, Type, IsScalar>::value_type value_type;
-            value_type result = constants::zero<value_type>; 
-            for (uint32_t index = 0; index < D; ++index)
-                result += (left[index] * right[index]); 
-            return result;
-        }
-
-        template <typename T, uint32_t D, typename Type, bool IsScalar>
         inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const T& right)
         {
             basic_vector<T, D, Type, IsScalar> result = left;
@@ -448,6 +456,15 @@ namespace neogfx
             basic_vector<T, D, Type, IsScalar> result = left;
             for (uint32_t i = 0; i < D; ++i)
                 result[i] /= right;
+            return result;
+        }
+
+        template <typename T, uint32_t D, typename Type, bool IsScalar>
+        inline basic_vector<T, D, Type, IsScalar> operator/(const T& left, const basic_vector<T, D, Type, IsScalar>& right)
+        {
+            basic_vector<T, D, Type, IsScalar> result;
+            for (uint32_t i = 0; i < D; ++i)
+                result[i] = left / right[i];
             return result;
         }
 
@@ -533,6 +550,12 @@ namespace neogfx
         inline T operator*(const basic_vector<T, 3, row_vector, IsScalar>& left, const basic_vector<T, 3, column_vector, IsScalar>& right)
         {
             return left[0] * right[0] + left[1] * right[1] + left[2] * right[2];
+        }
+
+        template <typename T, typename Type, bool IsScalar>
+        inline basic_vector<T, 3, Type, IsScalar> midpoint(const basic_vector<T, 3, Type, IsScalar>& left, const basic_vector<T, 3, Type, IsScalar>& right)
+        {
+            return left + (right - left) / constants::two<T>;
         }
 
         /* todo: specializations that use SIMD intrinsics. */
@@ -1142,7 +1165,7 @@ namespace neogfx
         {
             auto const nva = vectorA.normalized();
             auto const nvb = vectorB.normalized();
-            return rotation_matrix(nva.cross(nvb).normalized(), std::acos(nva * nvb));
+            return rotation_matrix(nva.cross(nvb).normalized(), std::acos(nva.dot(nvb)));
         }
 
         inline mat33 rotation_matrix(const vec3& angles)

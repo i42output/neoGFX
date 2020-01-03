@@ -213,12 +213,12 @@ namespace neogfx
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
             if (stippleShader.stipple_active())
             {
-                stippleShader.first_vertex(aInstance.begin()->xyz);
-                aInstance.draw(2u);
+                stippleShader.first_vertex(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz));
+                aInstance.draw(6u);
                 while (!aInstance.empty())
                 {
-                    stippleShader.next_vertex(aInstance.begin()->xyz);
-                    aInstance.draw(2u);
+                    stippleShader.next_vertex(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz));
+                    aInstance.draw(6u);
                 }
             }
         }
@@ -885,18 +885,26 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), rect{ aFrom, aTo });
 
-        auto penColour = std::holds_alternative<colour>(aPen.colour()) ?
-            vec4f{{
-                static_variant_cast<colour>(aPen.colour()).red<float>(),
-                static_variant_cast<colour>(aPen.colour()).green<float>(),
-                static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-            vec4f{};
-
         scoped_line_width slw{ *this, aPen.width() };
-        use_vertex_arrays vertexArrays{ *this, GL_LINES, 2u };
-        vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{ xyz{aFrom.x, aFrom.y}, penColour });
-        vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{ xyz{aTo.x, aTo.y}, penColour });
+
+        vec3_array<2> line = { aFrom.to_vec3(), aTo.to_vec3() };
+        vec3_array<4> quad;
+        lines_to_quads(line, aPen.width(), quad);
+        vec3_array<6> triangles;
+        quads_to_triangles(quad, triangles);
+
+        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+
+        for (auto const& v : triangles)
+            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+                vec4f{{
+                    static_variant_cast<colour>(aPen.colour()).red<float>(),
+                    static_variant_cast<colour>(aPen.colour()).green<float>(),
+                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
+                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                vec4f{} });
+
+        emit_any_stipple(*this, vertexArrays.instance());
     }
 
     void opengl_rendering_context::draw_rect(const rect& aRect, const pen& aPen)
@@ -911,14 +919,23 @@ namespace neogfx
         scoped_line_width slw{ *this, aPen.width() };
 
         vec3_array<8> lines = rect_vertices(slw(aRect), mesh_type::Outline);
+
+        auto& stippleShader = rendering_engine().default_shader_program().stipple_shader();
+        if (stippleShader.stipple_active())
+        {
+            for (auto const& v : lines)
+                std::cout << v << ", ";
+            std::cout << std::endl;
+        }
+
         vec3_array<4 * 4> quads;
         lines_to_quads(lines, aPen.width(), quads);
         vec3_array<4 * 6> triangles;
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 4u * 2u * 3u };
+        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
-        for (const auto& v : triangles)
+        for (auto const& v : triangles)
             vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
@@ -938,10 +955,18 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
 
         scoped_line_width slw{ *this, aPen.width() };
-        auto vertices = rounded_rect_vertices(slw(aRect), aRadius, mesh_type::Outline);
-        use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 
-        for (const auto& v : vertices)
+        auto vertices = rounded_rect_vertices(slw(aRect), aRadius, mesh_type::Outline);
+
+        auto lines = line_loop_to_lines(vertices);
+        vec3_list quads;
+        lines_to_quads(lines, aPen.width(), quads);
+        vec3_list triangles;
+        quads_to_triangles(quads, triangles);
+
+        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+
+        for (auto const& v : triangles)
             vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
@@ -961,16 +986,19 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), 
                 rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
+        scoped_line_width slw{ *this, aPen.width() };
+
         auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, mesh_type::Outline);
 
-        auto& stippleShader = rendering_engine().default_shader_program().stipple_shader();
-        if (stippleShader.stipple_active())
-            vertices = line_loop_to_lines(vertices);
+        auto lines = line_loop_to_lines(vertices);
+        vec3_list quads;
+        lines_to_quads(lines, aPen.width(), quads);
+        vec3_list triangles;
+        quads_to_triangles(quads, triangles);
 
-        scoped_line_width slw{ *this, aPen.width() };
-        use_vertex_arrays vertexArrays{ *this, static_cast<GLenum>(!stippleShader.stipple_active() ? GL_LINE_LOOP : GL_LINES), vertices.size() };
-        
-        for (const auto& v : vertices)
+        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+
+        for (auto const& v : triangles)
             vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
@@ -990,12 +1018,19 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()),
                 rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
-        auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline));
-
         scoped_line_width slw{ *this, aPen.width() };
-        use_vertex_arrays vertexArrays{ *this, GL_LINES, vertices.size() };
 
-        for (const auto& v : vertices)
+        auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline);
+
+        auto lines = line_loop_to_lines(vertices);
+        vec3_list quads;
+        lines_to_quads(lines, aPen.width(), quads);
+        vec3_list triangles;
+        quads_to_triangles(quads, triangles);
+
+        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+
+        for (auto const& v : triangles)
             vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
@@ -1025,7 +1060,7 @@ namespace neogfx
 
                 {
                     use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
-                    for (const auto& v : vertices)
+                    for (auto const& v : vertices)
                         vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                             vec4f{{
                                 static_variant_cast<colour>(aPen.colour()).red<float>(),
@@ -1044,22 +1079,27 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        auto const& vertices = aMesh.vertices;
-
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), bounding_rect(aMesh));
 
-        {
-            use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
-            for (const auto& v : vertices)
-                vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
-                    vec4f{{
-                        static_variant_cast<colour>(aPen.colour()).red<float>(),
-                        static_variant_cast<colour>(aPen.colour()).green<float>(),
-                        static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                        static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{} });
-        }
+        auto const& vertices = aMesh.vertices;
+
+        auto lines = line_loop_to_lines(vertices);
+        vec3_list quads;
+        lines_to_quads(lines, aPen.width(), quads);
+        vec3_list triangles;
+        quads_to_triangles(quads, triangles);
+
+        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+
+        for (auto const& v : triangles)
+            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+                vec4f{{
+                    static_variant_cast<colour>(aPen.colour()).red<float>(),
+                    static_variant_cast<colour>(aPen.colour()).green<float>(),
+                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
+                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                vec4f{} });
     }
 
     void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
@@ -1591,11 +1631,7 @@ namespace neogfx
                         drawn = true;
                     vec2 uv = {};
                     if (aMaterial.texture != std::nullopt)
-                    {
-                        uv = aTextureVertices[faceVertexIndex];
-                        uv = (uv * uvFixupCoefficient + uvFixupOffset);
-                        uv /= textureStorageExtents;
-                    }
+                        uv = (aTextureVertices[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
                     vertexArrays.instance().emplace_back(
                         v,
                         vec4f{{
