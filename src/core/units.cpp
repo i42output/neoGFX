@@ -138,19 +138,19 @@ namespace neogfx
         case length_units::units::ScaledPixels:
             return iContext.dpi_scale(aValue);
         case length_units::units::Points:
-            return aValue * vector2{ (1.0 / 72.0) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 72.0) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ (1.0 / 72.0) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 72.0)* static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Picas:
-            return aValue * vector2{ (1.0 / 6.0) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 6.0) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ (1.0 / 6.0) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 6.0) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Ems:
-            return aValue * vector2{ 1.0 * static_cast<dimension>(iContext.device_metrics().em_size()) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), 1.0 * static_cast<dimension>(iContext.device_metrics().em_size()) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ 1.0 * static_cast<dimension>(iContext.device_metrics().em_size()) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), 1.0 * static_cast<dimension>(iContext.device_metrics().em_size()) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Millimetres:
-            return aValue * vector2{ (1.0 / 25.4) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 25.4) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ (1.0 / 25.4) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 25.4) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Centimetres:
-            return aValue * vector2{ (1.0 / 2.54) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 2.54) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ (1.0 / 2.54) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 2.54) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Inches:
-            return aValue * vector2{ 1.0 * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), 1.0 * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ 1.0 * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), 1.0 * static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Percentage:
-            return vector2{ aExtents.cx, aExtents.cy } * vector2{ aValue[0] / 100.0, aValue[1] / 100.0 };
+            return vector2{ aExtents.cx, aExtents.cy } *= vector2{ aValue.x / 100.0, aValue.y / 100.0 };
         }
     }
 
@@ -310,19 +310,19 @@ namespace neogfx
         case length_units::units::ScaledPixels:
             return aValue / iContext.dpi_scale(1.0);
         case length_units::units::Points:
-            return vector2{ aValue } * vector2{ 72.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 72.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ 72.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 72.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Picas:
-            return vector2{ aValue } * vector2{ 6.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 6.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ 6.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 6.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Ems:
-            return vector2{ aValue } * vector2{ (1.0 / static_cast<scalar>(iContext.device_metrics().em_size())) / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), (1.0 / static_cast<dimension>(iContext.device_metrics().em_size())) / static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ (1.0 / static_cast<scalar>(iContext.device_metrics().em_size())) / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), (1.0 / static_cast<dimension>(iContext.device_metrics().em_size())) / static_cast<dimension>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Millimetres:
-            return vector2{ aValue } * vector2{ 25.4 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 25.4 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ 25.4 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 25.4 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Centimetres:
-            return vector2{ aValue } * vector2{ 2.54 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 2.54 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ 2.54 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 2.54 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Inches:
-            return vector2{ aValue } * vector2{ 1.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 1.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
+            return vector2{ aValue } *= vector2{ 1.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 1.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()) };
         case length_units::units::Percentage:
-            return vector2{ aValue } / vector2{ aExtents.cx, aExtents.cy } *vector2{ 100.0, 100.0 };
+            return (vector2{ aValue } /= vector2{ aExtents.cx, aExtents.cy }) *= vector2{ 100.0, 100.0 };
         }
     }
 

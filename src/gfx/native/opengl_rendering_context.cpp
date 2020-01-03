@@ -149,18 +149,33 @@ namespace neogfx
         inline quad line_to_quad(const vec3& aStart, const vec3& aEnd, double aLineWidth)
         {
             auto const vecLine = aEnd - aStart;
-            auto const r = rotation_matrix(vec3{ 0.0, 1.0, 0.0 }, vecLine);
-            vec3 const v1{ r * vec3{ -aLineWidth / 2.0, -aLineWidth / 2.0, -aLineWidth / 2.0 } };
-            vec3 const v2{ r * vec3{ -aLineWidth / 2.0, aLineWidth / 2.0, -aLineWidth / 2.0 } };
-            return quad{ v1, v2, v1 + vecLine, v2 + vecLine };
+            auto const r = rotation_matrix(vec3{ 1.0, 0.0, 0.0 }, vecLine);
+            auto const v1 = aStart + r * vec3{ -aLineWidth / 2.0, -aLineWidth / 2.0, 0.0 };
+            auto const v2 = aStart + r * vec3{ -aLineWidth / 2.0, aLineWidth / 2.0, 0.0 };
+            return quad{ v1, v2, v2 + vecLine, v1 + vecLine };
         }
 
-        inline void lines_to_quads(const vertices& aLines, double aLineWidth, vertices& aQuads)
+        template <typename VerticesIn, typename VerticesOut>
+        inline void lines_to_quads(const VerticesIn& aLines, double aLineWidth, VerticesOut& aQuads)
         {
             for (auto v = aLines.begin(); v != aLines.end(); v += 2)
             {
-                quad const q = line_to_quad(*v, *(v + 1), aLineWidth);
+                quad const q = line_to_quad(v[0], v[1], aLineWidth);
                 aQuads.insert(aQuads.end(), q.begin(), q.end());
+            }
+        }
+
+        template <typename VerticesIn, typename VerticesOut>
+        inline void quads_to_triangles(const VerticesIn& aQuads, VerticesOut& aTriangles)
+        {
+            for (auto v = aQuads.begin(); v != aQuads.end(); v += 4)
+            {
+                aTriangles.push_back(v[0]);
+                aTriangles.push_back(v[1]);
+                aTriangles.push_back(v[2]);
+                aTriangles.push_back(v[0]);
+                aTriangles.push_back(v[3]);
+                aTriangles.push_back(v[2]);
             }
         }
 
@@ -894,17 +909,23 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
 
         scoped_line_width slw{ *this, aPen.width() };
-        use_vertex_arrays vertexArrays{ *this, GL_LINES, 8u };
 
-        back_insert_rect_vertices(vertexArrays.instance(), slw(aRect), mesh_type::Outline);
-        for (auto& v : vertexArrays.instance())
-            v.rgba = std::holds_alternative<colour>(aPen.colour()) ?
+        vec3_array<8> lines = rect_vertices(slw(aRect), mesh_type::Outline);
+        vec3_array<4 * 4> quads;
+        lines_to_quads(lines, aPen.width(), quads);
+        vec3_array<4 * 6> triangles;
+        quads_to_triangles(quads, triangles);
+
+        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 4u * 2u * 3u };
+
+        for (const auto& v : triangles)
+            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
                     static_variant_cast<colour>(aPen.colour()).blue<float>(),
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{};
+                vec4f{} });
 
         emit_any_stipple(*this, vertexArrays.instance());
     }
@@ -927,7 +948,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
                     static_variant_cast<colour>(aPen.colour()).blue<float>(),
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{}});
+                vec4f{} });
 
         emit_any_stipple(*this, vertexArrays.instance());
     }
@@ -956,7 +977,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
                     static_variant_cast<colour>(aPen.colour()).blue<float>(),
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{}});
+                vec4f{} });
 
         emit_any_stipple(*this, vertexArrays.instance());
     }
@@ -981,7 +1002,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
                     static_variant_cast<colour>(aPen.colour()).blue<float>(),
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{}});
+                vec4f{} });
 
         emit_any_stipple(*this, vertexArrays.instance());
     }
@@ -1011,7 +1032,7 @@ namespace neogfx
                                 static_variant_cast<colour>(aPen.colour()).green<float>(),
                                 static_variant_cast<colour>(aPen.colour()).blue<float>(),
                                 static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                            vec4f{}});
+                            vec4f{} });
                 }
                 if (aPath.shape() == path::ConvexPolygon)
                     reset_clip();
@@ -1037,7 +1058,7 @@ namespace neogfx
                         static_variant_cast<colour>(aPen.colour()).green<float>(),
                         static_variant_cast<colour>(aPen.colour()).blue<float>(),
                         static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{}});
+                    vec4f{} });
         }
     }
 
@@ -1090,15 +1111,16 @@ namespace neogfx
             for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
-                auto newVertices = back_insert_rect_vertices(vertexArrays.instance(), drawOp.rect, mesh_type::Triangles, drawOp.zpos);
-                for (auto i = newVertices; i != vertexArrays.instance().end(); ++i)
-                    i->rgba = std::holds_alternative<colour>(drawOp.fill) ?
-                        vec4f{{
-                            static_variant_cast<const colour&>(drawOp.fill).red<float>(),
-                            static_variant_cast<const colour&>(drawOp.fill).green<float>(),
-                            static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const colour&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{};
+                auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles, drawOp.zpos);
+                for (const auto& v : rectVertices)
+                    vertexArrays.instance().push_back({ v,
+                        std::holds_alternative<colour>(drawOp.fill) ?
+                            vec4f{{
+                                static_variant_cast<const colour&>(drawOp.fill).red<float>(),
+                                static_variant_cast<const colour&>(drawOp.fill).green<float>(),
+                                static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
+                                static_variant_cast<const colour&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                            vec4f{} });
             }
         }
     }
@@ -1571,7 +1593,8 @@ namespace neogfx
                     if (aMaterial.texture != std::nullopt)
                     {
                         uv = aTextureVertices[faceVertexIndex];
-                        uv = (uv * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
+                        uv = (uv * uvFixupCoefficient + uvFixupOffset);
+                        uv /= textureStorageExtents;
                     }
                     vertexArrays.instance().emplace_back(
                         v,

@@ -19,8 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <vector>
-#include <neolib/vecarray.hpp>
+#include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
@@ -34,11 +33,8 @@ namespace neogfx
 
     struct unsupported_mesh_type : std::logic_error { unsupported_mesh_type() : std::logic_error("neogfx::unsupported_mesh_type") {} };
 
-    template <std::size_t VertexCount>
-    using temp_vec3_buffer = neolib::vecarray<vec3, VertexCount, VertexCount, neolib::check<neolib::vecarray_overflow>, std::allocator<vec3>>;
-
     template <std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline void calc_rect_vertices(temp_vec3_buffer<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
+    inline void calc_rect_vertices(vec3_array<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
     {
         aResult.clear();
         switch(aType)
@@ -72,23 +68,13 @@ namespace neogfx
         }
     }
 
-    typedef temp_vec3_buffer<8> vec3_rect_vertices;
-
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    vec3_rect_vertices rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
+    inline vec3_array<8> rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
     {
-        vec3_rect_vertices result;
+        vec3_array<8> result;
         calc_rect_vertices(result, aRect, aType, aZpos);
         return result;
     };
-
-    template <typename Container, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
-    {
-        vec3_rect_vertices temp = rect_vertices(aRect, aType, aZpos);
-        return aResult.insert(aResult.end(), temp.begin(), temp.end());
-    }
-
     vertices arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);
     vertices circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
     vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments = 0);

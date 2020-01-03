@@ -798,7 +798,7 @@ namespace neogfx
 
     inline colour operator*(const colour& aLeft, double aCoefficient)
     {
-        return aLeft.to_vec4() * vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 };
+        return aLeft.to_vec4() *= vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 };
     }
 
     template <typename Elem, typename Traits>
