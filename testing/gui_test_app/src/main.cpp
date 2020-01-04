@@ -835,6 +835,8 @@ int main(int argc, char* argv[])
         ui.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
             ng::service<ng::i_rendering_engine>().want_game_mode();
+            aGc.draw_pixel(ng::point{ 7, 7 }, ng::colour::Blue);
+            aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
             aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));

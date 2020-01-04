@@ -150,8 +150,8 @@ namespace neogfx
         {
             auto const vecLine = aEnd - aStart;
             auto const r = rotation_matrix(vec3{ 1.0, 0.0, 0.0 }, vecLine);
-            auto const v1 = aStart + r * vec3{ -aLineWidth / 2.0, -aLineWidth / 2.0, 0.0 };
-            auto const v2 = aStart + r * vec3{ -aLineWidth / 2.0, aLineWidth / 2.0, 0.0 };
+            auto const v1 = aStart + r * vec3{ 0.0, -aLineWidth / 2.0, 0.0 };
+            auto const v2 = aStart + r * vec3{ 0.0, aLineWidth / 2.0, 0.0 };
             return quad{ v1, v2, v2 + vecLine, v1 + vecLine };
         }
 
@@ -179,36 +179,7 @@ namespace neogfx
             }
         }
 
-        class scoped_line_width
-        {
-        public:
-            scoped_line_width(opengl_rendering_context& aContext, double aWidth) :
-                iContext{ aContext }, iOldPixelAdjust{ aContext.pixel_adjust() }, iOldWidth{}
-            {
-                glCheck(glGetFloatv(GL_LINE_WIDTH, &iOldWidth));
-                glCheck(glLineWidth(static_cast<GLfloat>(aWidth)));
-                auto const adjust = (static_cast<int32_t>(aWidth) % 2 == 1 ? 0.5 : 0.0);
-                iContext.set_pixel_adjust(vec2{ adjust, adjust });
-            }
-            ~scoped_line_width()
-            {
-                glCheck(glLineWidth(static_cast<GLfloat>(iOldWidth)));
-                iContext.set_pixel_adjust(iOldPixelAdjust);
-            }
-        public:
-            rect operator()(const rect& aRect) const
-            {
-                rect adjusted = aRect;
-                adjusted.extents() += size{ *iContext.pixel_adjust() * -2.0 };
-                return adjusted;
-            }
-        private:
-            opengl_rendering_context& iContext;
-            optional_vec2 iOldPixelAdjust;
-            GLfloat iOldWidth;
-        };
-
-        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays_instance& aInstance)
+        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays_instance& aInstance, scalar aCounterUpdateOffset = 0.0)
         {
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
             if (stippleShader.stipple_active())
@@ -217,7 +188,7 @@ namespace neogfx
                 aInstance.draw(6u);
                 while (!aInstance.empty())
                 {
-                    stippleShader.next_vertex(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz));
+                    stippleShader.next_vertex(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz), aCounterUpdateOffset);
                     aInstance.draw(6u);
                 }
             }
@@ -234,7 +205,8 @@ namespace neogfx
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
         iSrt{ iTarget },
-        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
+        iSnapToPixel{ false }
     {
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
@@ -255,7 +227,8 @@ namespace neogfx
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
         iSrt{ iTarget },
-        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
+        iSnapToPixel{ false }
     {
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
@@ -277,7 +250,8 @@ namespace neogfx
         iSubpixelRendering{ aOther.iSubpixelRendering },
         iClipCounter{ 0 },
         iSrt{ iTarget },
-        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
+        iSnapToPixel{ false }
     {
         set_blending_mode(iBlendingMode);
         set_smoothing_mode(iSmoothingMode);
@@ -361,7 +335,7 @@ namespace neogfx
 
     vec2 opengl_rendering_context::offset() const
     {
-        return (pixel_adjust() != std::nullopt ? *pixel_adjust() : vec2{}) + (iOffset != std::nullopt ? *iOffset : vec2{});
+        return (iOffset != std::nullopt ? *iOffset : vec2{}) + (snap_to_pixel() ? 0.5 : 0.0);
     }
 
     void opengl_rendering_context::set_offset(const optional_vec2& aOffset)
@@ -369,14 +343,14 @@ namespace neogfx
         iOffset = aOffset;
     }
 
-    const optional_vec2& opengl_rendering_context::pixel_adjust() const
+    bool opengl_rendering_context::snap_to_pixel() const
     {
-        return iPixelAdjust;
+        return iSnapToPixel;
     }
 
-    void opengl_rendering_context::set_pixel_adjust(const optional_vec2& aAdjust)
+    void opengl_rendering_context::set_snap_to_pixel(bool aSnapToPixel)
     {
-        iPixelAdjust = aAdjust;
+        iSnapToPixel = true;
     }
 
     void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
@@ -440,6 +414,12 @@ namespace neogfx
                     (void)op;
                     reset_clip();
                 }
+                break;
+            case graphics_operation::operation_type::SnapToPixelOn:
+                set_snap_to_pixel(true);
+                break;
+            case graphics_operation::operation_type::SnapToPixelOff:
+                set_snap_to_pixel(false);
                 break;
             case graphics_operation::operation_type::SetOpacity:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -885,9 +865,15 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), rect{ aFrom, aTo });
 
-        scoped_line_width slw{ *this, aPen.width() };
+        auto v1 = aFrom.to_vec3();
+        auto v2 = aTo.to_vec3();
+        if (snap_to_pixel() && static_cast<int32_t>(aPen.width()) % 2 == 0)
+        {
+            v1 -= vec3{ 0.5, 0.5, 0.0 };
+            v2 -= vec3{ 0.5, 0.5, 0.0 };
+        }
 
-        vec3_array<2> line = { aFrom.to_vec3(), aTo.to_vec3() };
+        vec3_array<2> line = { v1, v2 };
         vec3_array<4> quad;
         lines_to_quads(line, aPen.width(), quad);
         vec3_array<6> triangles;
@@ -916,18 +902,15 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
 
-        scoped_line_width slw{ *this, aPen.width() };
-
-        vec3_array<8> lines = rect_vertices(slw(aRect), mesh_type::Outline);
-
-        auto& stippleShader = rendering_engine().default_shader_program().stipple_shader();
-        if (stippleShader.stipple_active())
+        auto adjustedRect = aRect;
+        if (snap_to_pixel())
         {
-            for (auto const& v : lines)
-                std::cout << v << ", ";
-            std::cout << std::endl;
+            if (static_cast<int32_t>(aPen.width()) % 2 == 0)
+                adjustedRect.position() -= point{ 0.5 * aPen.width() / 2.0, 0.5 * aPen.width() / 2.0 };
+            adjustedRect.extents() -= size{ aPen.width() };
         }
 
+        vec3_array<8> lines = rect_vertices(adjustedRect, mesh_type::Outline, 0.0);
         vec3_array<4 * 4> quads;
         lines_to_quads(lines, aPen.width(), quads);
         vec3_array<4 * 6> triangles;
@@ -944,7 +927,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
-        emit_any_stipple(*this, vertexArrays.instance());
+        emit_any_stipple(*this, vertexArrays.instance(), aPen.width());
     }
 
     void opengl_rendering_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
@@ -954,9 +937,15 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
 
-        scoped_line_width slw{ *this, aPen.width() };
+        auto adjustedRect = aRect;
+        if (snap_to_pixel())
+        {
+            if (static_cast<int32_t>(aPen.width()) % 2 == 0)
+                adjustedRect.position() -= point{ 0.5 * aPen.width() / 2.0, 0.5 * aPen.width() / 2.0 };
+            adjustedRect.extents() -= size{ aPen.width() };
+        }
 
-        auto vertices = rounded_rect_vertices(slw(aRect), aRadius, mesh_type::Outline);
+        auto vertices = rounded_rect_vertices(adjustedRect, aRadius, mesh_type::Outline);
 
         auto lines = line_loop_to_lines(vertices);
         vec3_list quads;
@@ -985,8 +974,6 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), 
                 rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
-
-        scoped_line_width slw{ *this, aPen.width() };
 
         auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, mesh_type::Outline);
 
@@ -1018,8 +1005,6 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()),
                 rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
-        scoped_line_width slw{ *this, aPen.width() };
-
         auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline);
 
         auto lines = line_loop_to_lines(vertices);
@@ -1045,6 +1030,8 @@ namespace neogfx
     void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aPath.bounding_rect());
@@ -1105,6 +1092,8 @@ namespace neogfx
     void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         iRenderingEngine.want_game_mode();
         aEcs.component<game::rigid_body>().take_snapshot();
@@ -1383,6 +1372,7 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
         disable_anti_alias daa{ *this };
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
 
@@ -1554,6 +1544,7 @@ namespace neogfx
     bool opengl_rendering_context::draw_patch(const vertices& aVertices, const vertices_2d& aTextureVertices, const game::material& aMaterial, const game::faces& aFaces)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
         if (aMaterial.colour != std::nullopt)

@@ -39,6 +39,8 @@ namespace neogfx
             case ClipToRect: return "ClipToRect";
             case ClipToPath: return "ClipToPath";
             case ResetClip: return "ResetClip";
+            case SnapToPixelOn: return "SnapToPixelOn";
+            case SnapToPixelOff: return "SnapToPixelOff";
             case SetOpacity: return "SetOpacity";
             case SetBlendingMode: return "SetBlendingMode";
             case SetSmoothingMode: return "SetSmoothingMode";

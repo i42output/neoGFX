@@ -77,6 +77,7 @@ namespace neogfx
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
         iLayer{ 0 },
+        iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -93,6 +94,7 @@ namespace neogfx
         iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
         iLayer{ 0 },
+        iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -109,6 +111,7 @@ namespace neogfx
         iOrigin{ aWidget.origin() },
         iExtents{ aWidget.extents() },
         iLayer{ 0 },
+        iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -126,6 +129,7 @@ namespace neogfx
         iOrigin{},
         iExtents{ aTexture.extents() },
         iLayer{ 0 },
+        iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -144,6 +148,7 @@ namespace neogfx
         iLayer{ 0 },
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
+        iSnapToPixel{ aOther.iSnapToPixel },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -749,6 +754,23 @@ namespace neogfx
     void graphics_context::reset_clip() const
     {
         native_context().enqueue(graphics_operation::reset_clip{});
+    }
+
+    bool graphics_context::snap_to_pixel() const
+    {
+        return iSnapToPixel;
+    }
+
+    void graphics_context::set_snap_to_pixel(bool aSnap) const
+    {
+        if (iSnapToPixel != aSnap)
+        {
+            iSnapToPixel = aSnap;
+            if (snap_to_pixel())
+                native_context().enqueue(graphics_operation::snap_to_pixel_on{});
+            else
+                native_context().enqueue(graphics_operation::snap_to_pixel_off{});
+        }
     }
 
     double graphics_context::opacity() const

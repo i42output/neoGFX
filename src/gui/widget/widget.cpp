@@ -1015,6 +1015,7 @@ namespace neogfx
         aGraphicsContext.set_extents(extents());
         aGraphicsContext.set_origin(origin());
 
+        scoped_snap_to_pixel snap{ aGraphicsContext };
         scoped_opacity sc{ aGraphicsContext, opacity() };
 
         {

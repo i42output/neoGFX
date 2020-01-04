@@ -68,6 +68,14 @@ namespace neogfx
         {
         };
 
+        struct snap_to_pixel_on
+        {
+        };
+
+        struct snap_to_pixel_off
+        {
+        };
+
         struct set_opacity
         {
             double opacity;
@@ -254,6 +262,8 @@ namespace neogfx
             clip_to_rect,
             clip_to_path,
             reset_clip,
+            snap_to_pixel_on,
+            snap_to_pixel_off,
             set_opacity,
             set_blending_mode,
             set_smoothing_mode,
@@ -296,6 +306,8 @@ namespace neogfx
             ClipToRect,
             ClipToPath,
             ResetClip,
+            SnapToPixelOn,
+            SnapToPixelOff,
             SetOpacity,
             SetBlendingMode,
             SetSmoothingMode,

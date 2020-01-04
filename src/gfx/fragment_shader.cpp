@@ -591,10 +591,10 @@ namespace neogfx
         uStippleVertex = aVertex.as<float>();
     }
     
-    void standard_stipple_shader::next_vertex(const vec3& aVertex)
+    void standard_stipple_shader::next_vertex(const vec3& aVertex, scalar aCounterUpdateOffset)
     {
         uStippleCounter = uStippleCounter.uniform().value().get<uint32_t>() +
-            static_cast<uint32_t>(uStippleVertex.uniform().value().get<vec3f>().distance(aVertex.as<float>()));
+            static_cast<uint32_t>(uStippleVertex.uniform().value().get<vec3f>().distance(aVertex.as<float>()) + aCounterUpdateOffset);
         uStippleVertex = aVertex.as<float>();
     }
 }

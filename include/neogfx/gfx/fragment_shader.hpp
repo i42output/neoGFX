@@ -177,7 +177,7 @@ namespace neogfx
         void clear_stipple() override;
         void set_stipple(uint32_t aFactor, uint16_t aPattern) override;
         void first_vertex(const vec3& aVertex) override;
-        void next_vertex(const vec3& aVertex) override;
+        void next_vertex(const vec3& aVertex, scalar aCounterUpdateOffset = 0.0) override;
     private:
         cache_uniform(uStippleFactor)
         cache_uniform(uStipplePattern)

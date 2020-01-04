@@ -65,6 +65,7 @@ namespace neogfx
         boxRect.deflate(2.0, 2.0);
         if (static_cast<const check_box&>(parent()).is_checked())
         {
+            scoped_snap_to_pixel snap{ aGraphicsContext, false };
             /* todo: draw tick image eye candy */
             aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
             aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));

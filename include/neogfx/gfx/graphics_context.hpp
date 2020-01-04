@@ -84,6 +84,8 @@ namespace neogfx
         void clip_to(const rect& aRect) const override;
         void clip_to(const path& aPath, dimension aPathOutline = 0) const override;
         void reset_clip() const override;
+        bool snap_to_pixel() const override;
+        void set_snap_to_pixel(bool aSnap) const override;
         double opacity() const override;
         void set_opacity(double aOpacity) const override;
         neogfx::blending_mode blending_mode() const override;
@@ -215,6 +217,7 @@ namespace neogfx
         mutable int32_t iLayer;
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
+        mutable bool iSnapToPixel;
         mutable double iOpacity;
         mutable neogfx::blending_mode iBlendingMode;
         mutable neogfx::smoothing_mode iSmoothingMode;

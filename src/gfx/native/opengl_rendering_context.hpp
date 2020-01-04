@@ -79,8 +79,8 @@ namespace neogfx
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates);
         vec2 offset() const override;
         void set_offset(const optional_vec2& aOffset) override;
-        const optional_vec2& pixel_adjust() const;
-        void set_pixel_adjust(const optional_vec2& aAdjust);
+        bool snap_to_pixel() const;
+        void set_snap_to_pixel(bool aSnapToPixel);
         void scissor_on(const rect& aRect);
         void scissor_off();
         const optional_rect& scissor_rect() const;
@@ -156,6 +156,6 @@ namespace neogfx
         scoped_render_target iSrt;
         use_shader_program iUseDefaultShaderProgram;
         optional_vec2 iOffset;
-        optional_vec2 iPixelAdjust;
+        bool iSnapToPixel;
     };
 }

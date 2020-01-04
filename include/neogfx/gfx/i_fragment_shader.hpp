@@ -81,6 +81,6 @@ namespace neogfx
         virtual void clear_stipple() = 0;
         virtual void set_stipple(uint32_t aFactor, uint16_t aPattern) = 0;
         virtual void first_vertex(const vec3& aVertex) = 0;
-        virtual void next_vertex(const vec3& aVertex) = 0;
+        virtual void next_vertex(const vec3& aVertex, scalar aCounterUpdateOffset = 0.0) = 0;
     };
 }

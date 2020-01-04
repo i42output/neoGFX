@@ -111,6 +111,8 @@ namespace neogfx
         virtual void clip_to(const rect& aRect) const = 0;
         virtual void clip_to(const path& aPath, dimension aPathOutline = 0) const = 0;
         virtual void reset_clip() const = 0;
+        virtual bool snap_to_pixel() const = 0;
+        virtual void set_snap_to_pixel(bool aSnap) const = 0;
         virtual double opacity() const = 0;
         virtual void set_opacity(double aOpacity) const = 0;
         virtual neogfx::blending_mode blending_mode() const = 0;
@@ -319,6 +321,23 @@ namespace neogfx
         const i_graphics_context& iGc;
         logical_coordinate_system iPreviousCoordinateSystem;
         neogfx::logical_coordinates iPreviousCoordinates;
+    };
+
+    class scoped_snap_to_pixel
+    {
+    public:
+        scoped_snap_to_pixel(const i_graphics_context& aGc, bool aSnapToPixel = true) :
+            iGc{ aGc }, iPreviousSnapped{ aGc.snap_to_pixel() }
+        {
+            iGc.set_snap_to_pixel(aSnapToPixel);
+        }
+        ~scoped_snap_to_pixel()
+        {
+            iGc.set_snap_to_pixel(iPreviousSnapped);
+        }
+    private:
+        const i_graphics_context& iGc;
+        bool iPreviousSnapped;
     };
 
     class scoped_opacity
