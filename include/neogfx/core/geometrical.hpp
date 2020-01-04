@@ -34,6 +34,10 @@ namespace neogfx
     typedef default_geometry_value_type dimension;
     typedef default_geometry_value_type coordinate_delta;
 
+    typedef int32_t coordinate_i32;
+    typedef int32_t dimension_i32;
+    typedef int32_t coordinate_delta_i32;
+
     typedef uint32_t coordinate_u32;
     typedef uint32_t dimension_u32;
     typedef uint32_t coordinate_delta_u32;
@@ -1017,6 +1021,11 @@ namespace neogfx
         ret.basic_size::operator-=(right.size());
         return ret;
     }
+
+    typedef basic_size<int32_t> size_i32;
+    typedef basic_delta<int32_t> delta_i32;
+    typedef basic_point<int32_t> point_i32;
+    typedef basic_rect<int32_t> rect_i32;
 
     typedef basic_size<uint32_t> size_u32;
     typedef basic_delta<uint32_t> delta_u32;

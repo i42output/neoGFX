@@ -844,6 +844,11 @@ int main(int argc, char* argv[])
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 150, 150 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Radial));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
+            for (int x = 0; x < 3; ++x)
+            {
+                aGc.fill_rect(ng::rect{ ng::point{ 600.0 + x * 17, 600.0 }, ng::size{ 16, 16 } }, ng::colour::Green);
+                aGc.draw_rect(ng::rect{ ng::point{ 600.0 + x * 17, 600.0 }, ng::size{ 16, 16 } }, ng::pen{ ng::colour::White, 1.0 });
+            }
             aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
             aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
             aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });

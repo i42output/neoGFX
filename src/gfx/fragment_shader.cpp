@@ -551,10 +551,15 @@ namespace neogfx
                 "{\n"
                 "    if (uStippleEnabled)\n"
                 "    {\n"
-                "        uint d = uint(distance(uStippleVertex, Coord));\n"
-                "        uint patternBit = ((d + uStippleCounter) / uStippleFactor) % 16;\n"
-                "        if ((uStipplePattern & (1 << patternBit)) == 0)\n"
+                "        float d = distance(uStippleVertex, Coord);\n"
+                "        if (d < uStippleDiscard)\n"
                 "            discard;\n"
+                "        else\n"
+                "        {\n"
+                "            uint patternBit = ((uint(d) + uStippleCounter) / uStippleFactor) % 16;\n"
+                "            if ((uStipplePattern & (1 << patternBit)) == 0)\n"
+                "                discard;\n"
+                "        }\n"
                 "    }\n"
                 "}\n"_s
             };
@@ -582,19 +587,24 @@ namespace neogfx
         uStipplePattern = aPattern;
         uStippleCounter = 0u;
         uStippleVertex = vec3f{};
+        uStippleDiscard = 0.0f;
         uStippleEnabled = true;
     }
 
-    void standard_stipple_shader::first_vertex(const vec3& aVertex)
+    void standard_stipple_shader::start(const vec3& aFrom, const vec3& aTo)
     {
         uStippleCounter = 0u;
-        uStippleVertex = aVertex.as<float>();
+        uStippleVertex = aFrom.as<float>();
+        uStippleDiscard = 0.0f;
+        iTo = aTo;
     }
     
-    void standard_stipple_shader::next_vertex(const vec3& aVertex, scalar aCounterUpdateOffset)
+    void standard_stipple_shader::next(const vec3& aFrom, const vec3& aTo, scalar aDiscardFor)
     {
-        uStippleCounter = uStippleCounter.uniform().value().get<uint32_t>() +
-            static_cast<uint32_t>(uStippleVertex.uniform().value().get<vec3f>().distance(aVertex.as<float>()) + aCounterUpdateOffset);
-        uStippleVertex = aVertex.as<float>();
+        auto const d = uStippleVertex.uniform().value().get<vec3f>().distance(aFrom.as<float>()) - (iTo.as<float>().distance(aFrom.as<float>()));
+        uStippleCounter = uStippleCounter.uniform().value().get<uint32_t>() + static_cast<uint32_t>(d);
+        uStippleVertex = aFrom.as<float>();
+        uStippleDiscard = static_cast<float>(aDiscardFor);
+        iTo = aTo;
     }
 }

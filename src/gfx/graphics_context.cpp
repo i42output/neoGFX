@@ -253,9 +253,9 @@ namespace neogfx
     {
         path result = aValue;
         result.set_position(to_device_units(result.position()));
-        for (std::size_t i = 0; i < result.paths().size(); ++i)
-            for (std::size_t j = 0; j < result.paths()[i].size(); ++j)
-                result.paths()[i][j] = to_device_units(result.paths()[i][j]);
+        for (std::size_t i = 0; i < result.sub_paths().size(); ++i)
+            for (std::size_t j = 0; j < result.sub_paths()[i].size(); ++j)
+                result.sub_paths()[i][j] = to_device_units(result.sub_paths()[i][j]);
         return result;
     }
 
@@ -283,9 +283,9 @@ namespace neogfx
     {
         path result = aValue;
         result.set_position(from_device_units(result.position()));
-        for (std::size_t i = 0; i < result.paths().size(); ++i)
-            for (std::size_t j = 0; j < result.paths()[i].size(); ++j)
-                result.paths()[i][j] = from_device_units(result.paths()[i][j]);
+        for (std::size_t i = 0; i < result.sub_paths().size(); ++i)
+            for (std::size_t j = 0; j < result.sub_paths()[i].size(); ++j)
+                result.sub_paths()[i][j] = from_device_units(result.sub_paths()[i][j]);
         return result;
     }
 
@@ -746,7 +746,7 @@ namespace neogfx
     void graphics_context::clip_to(const path& aPath, dimension aPathOutline) const
     {
         path path = to_device_units(aPath);
-        path.set_shape(path::ConvexPolygon);
+        path.set_shape(path_shape::ConvexPolygon);
         path.set_position(path.position() + iOrigin);
         native_context().enqueue(graphics_operation::clip_to_path{ path, aPathOutline });
     }

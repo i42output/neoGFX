@@ -39,8 +39,8 @@ namespace neogfx
         coordinate_type minY = std::numeric_limits<coordinate_type>::max();
         coordinate_type maxX = std::numeric_limits<coordinate_type>::min();
         coordinate_type maxY = std::numeric_limits<coordinate_type>::min();
-        for (auto const& path : iPaths)
-            for (auto const& point : path)
+        for (auto const& sub_path : iSubPaths)
+            for (auto const& point : sub_path)
             {
                 minX = std::min(minX, point.x);
                 minY = std::min(minY, point.y);
@@ -81,16 +81,16 @@ namespace neogfx
         mesh_type boundingRect = bounding_rect() + aOrigin;
         typedef std::vector<line_type> lines_t;
         typename lines_t::size_type lineCount = 0;
-        for (auto const& path : iPaths)
-            lineCount += !path.empty() ? path.size() - 1 : 0;
+        for (auto const& sub_path : iSubPaths)
+            lineCount += !sub_path.empty() ? sub_path.size() - 1 : 0;
         lines_t lines;
         lines.reserve(lineCount);
-        for (auto const& path : iPaths)
+        for (auto const& sub_path : iSubPaths)
         {
-            if (path.size() > 1)
+            if (sub_path.size() > 1)
             {
-                point_type ptPrevious = path[0] + aOrigin;
-                for (auto pt = path.begin() + 1; pt != path.end(); ++pt)
+                point_type ptPrevious = sub_path[0] + aOrigin;
+                for (auto pt = sub_path.begin() + 1; pt != sub_path.end(); ++pt)
                 {
                     auto const ptAdjusted = *pt + aOrigin;
                     lines.push_back(line_type(ptPrevious, ptAdjusted));

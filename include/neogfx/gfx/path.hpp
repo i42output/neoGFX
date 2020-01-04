@@ -20,23 +20,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/vecarray.hpp>
 
 namespace neogfx
 {
+    enum class path_shape : uint32_t
+    {
+        Vertices,
+        Quads,
+        Lines,
+        LineLoop,
+        LineStrip,
+        ConvexPolygon
+    };
+
     template <typename PointType>
     class basic_path
     {
         // types
     public:
-        enum shape_type_e
-        {
-            Vertices,
-            Quads,
-            Lines,
-            LineLoop,
-            LineStrip,
-            ConvexPolygon,
-        };
         typedef PointType point_type;
         typedef typename point_type::coordinate_type coordinate_type;
         typedef typename point_type::coordinate_type coordinate_delta_type;
@@ -45,9 +47,9 @@ namespace neogfx
         typedef basic_delta<coordinate_type> delta_type;
         typedef basic_rect<coordinate_type> mesh_type;
         typedef basic_line<coordinate_type> line_type;
-        typedef std::vector<point_type> path_type;
-        typedef std::vector<path_type> paths_type;
-        typedef typename paths_type::size_type paths_size_type;
+        typedef neolib::vecarray<point_type, 16, -1> sub_path_type;
+        typedef neolib::vecarray<sub_path_type, 1, -1> sub_paths_type;
+        typedef typename sub_paths_type::size_type sub_paths_size_type;
         struct clip_rect_list : std::vector<mesh_type>
         {
             bool contains(const point_type& aPoint) const
@@ -81,13 +83,12 @@ namespace neogfx
         typedef std::vector<intersect> intersect_list;
         // construction
     public:
-        basic_path(shape_type_e aShape = ConvexPolygon, paths_size_type aPathCountHint = 0) : iShape(aShape)
+        basic_path(path_shape aShape = path_shape::ConvexPolygon, sub_paths_size_type aPathCountHint = 0) : iShape(aShape)
         {
-            iPaths.reserve(aPathCountHint);
+            iSubPaths.reserve(aPathCountHint);
         }
-        basic_path(const mesh_type& aRect, shape_type_e aShape = ConvexPolygon) : iShape(aShape)
+        basic_path(const mesh_type& aRect, path_shape aShape = path_shape::ConvexPolygon) : iShape(aShape)
         {
-            iPaths.reserve(5);
             move_to(aRect.top_left());
             line_to(aRect.top_right());
             line_to(aRect.bottom_right());
@@ -96,11 +97,11 @@ namespace neogfx
         }
         // operations
     public:
-        shape_type_e shape() const 
+        path_shape shape() const 
         {        
             return iShape; 
         }
-        void set_shape(shape_type_e aShape) 
+        void set_shape(path_shape aShape) 
         { 
             iShape = aShape; 
         }
@@ -113,21 +114,21 @@ namespace neogfx
             iPosition = aPosition; 
             iBoundingRect.reset();
         }
-        const paths_type& paths() const 
+        const sub_paths_type& sub_paths() const 
         { 
-            return iPaths; 
+            return iSubPaths; 
         }
-        paths_type& paths() 
+        sub_paths_type& sub_paths()
         { 
-            return iPaths; 
+            return iSubPaths; 
         }
-        vertices to_vertices(const typename paths_type::value_type& aPath) const
+        vertices to_vertices(const typename sub_paths_type::value_type& aPath) const
         {
             vertices result;
-            result.reserve((aPath.size() + 1) * (iShape == Quads ? 6 : 1));
+            result.reserve((aPath.size() + 1) * (iShape == path_shape::Quads ? 6 : 1));
             if (aPath.size() > 2)
             {
-                if (iShape == ConvexPolygon)
+                if (iShape == path_shape::ConvexPolygon)
                 {
                     result.push_back(xyz{ bounding_rect(false).centre().x + position().x, bounding_rect(false).centre().y + position().y });
                 }
@@ -135,7 +136,7 @@ namespace neogfx
                 {
                     switch (iShape)
                     {
-                    case Quads:
+                    case path_shape::Quads:
                         if (vi + 1 != aPath.end())
                         {
                             result.push_back(xyz{ vi->x + position().x, vi->y + position().y });
@@ -144,29 +145,29 @@ namespace neogfx
                             result.push_back(xyz{ (vi + 1)->x + position().x, (vi + 1)->y + position().y });
                         }
                         break;
-                    case ConvexPolygon:
+                    case path_shape::ConvexPolygon:
                     default:
                         result.push_back(xyz{ vi->x + position().x, vi->y + position().y });
                         break;
                     }
                 }
-                if (iShape == LineLoop && aPath[0] == aPath[aPath.size() - 1])
+                if (iShape == path_shape::LineLoop && aPath[0] == aPath[aPath.size() - 1])
                 {
                     result.pop_back();
                 }
-                else if (iShape == ConvexPolygon && aPath[0] != aPath[aPath.size() - 1])
+                else if (iShape == path_shape::ConvexPolygon && aPath[0] != aPath[aPath.size() - 1])
                 {
                     result.push_back(xyz{ aPath[0].x, aPath[0].y });
                 }
             }
             return result;
         }
-        void move_to(const point_type& aPoint, paths_size_type aLineCountHint = 0)
+        void move_to(const point_type& aPoint, sub_paths_size_type aLineCountHint = 0)
         {
             iPointFrom = aPoint;
             iLineCountHint = aLineCountHint;
         }
-        void move_to(coordinate_type aX, coordinate_type aY, paths_size_type aLineCountHint = 0)
+        void move_to(coordinate_type aX, coordinate_type aY, sub_paths_size_type aLineCountHint = 0)
         {
             move_to(point_type(aX, aY), aLineCountHint);
         }
@@ -174,21 +175,21 @@ namespace neogfx
         {
             if (iPointFrom)
             {
-                iPaths.push_back(path_type());
+                iSubPaths.push_back(sub_path_type());
                 if (iLineCountHint != 0)
                 {
-                    iPaths.back().reserve(iLineCountHint + 1);
+                    iSubPaths.back().reserve(iLineCountHint + 1);
                     iLineCountHint = 0;
                 }
-                iPaths.back().push_back(*iPointFrom);
+                iSubPaths.back().push_back(*iPointFrom);
                 iPointFrom.reset();
             }
             else
             {
-                if (iPaths.empty())
+                if (iSubPaths.empty())
                     throw missing_move_to();
             }
-            iPaths.back().push_back(aPoint);
+            iSubPaths.back().push_back(aPoint);
             iBoundingRect.reset();
         }
         void line_to(coordinate_type aX, coordinate_type aY)
@@ -199,8 +200,8 @@ namespace neogfx
         void inflate(const delta_type& aDelta)
         {
             mesh_type boundingRect = bounding_rect(false);
-            for (auto& path : iPaths)
-                for (auto& point : path)
+            for (auto& segment : iSubPaths)
+                for (auto& point : segment)
                 {
                     if (point.x < boundingRect.x + static_cast<coordinate_type>(boundingRect.cx / 2))
                         point.x -= aDelta.dx;
@@ -229,11 +230,11 @@ namespace neogfx
         clip_rect_list clip_rects(const point& aOrigin) const;
         // attributes
     private:
-        shape_type_e iShape;
+        path_shape iShape;
         point_type iPosition;
         std::optional<point_type> iPointFrom;
-        paths_type iPaths;
-        paths_size_type iLineCountHint;
+        sub_paths_type iSubPaths;
+        sub_paths_size_type iLineCountHint;
         mutable std::optional<mesh_type> iBoundingRect;
     };
 }

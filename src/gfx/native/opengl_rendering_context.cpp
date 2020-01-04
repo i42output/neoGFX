@@ -109,30 +109,6 @@ namespace neogfx
             std::size_t iPass;
         };
 
-        inline GLenum path_shape_to_gl_mode(path::shape_type_e aShape)
-        {
-            switch (aShape)
-            {
-            case path::Quads:
-                return GL_QUADS;
-            case path::Lines:
-                return GL_LINES;
-            case path::LineLoop:
-                return GL_LINE_LOOP;
-            case path::LineStrip:
-                return GL_LINE_STRIP;
-            case path::ConvexPolygon:
-                return GL_TRIANGLE_FAN;
-            default:
-                return GL_POINTS;
-            }
-        }
-
-        inline GLenum path_shape_to_gl_mode(const path& aPath)
-        {
-            return path_shape_to_gl_mode(aPath.shape());
-        }
-
         inline vertices line_loop_to_lines(const vertices& aLineLoop)
         {
             vertices result;
@@ -179,16 +155,59 @@ namespace neogfx
             }
         }
 
-        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays_instance& aInstance, scalar aCounterUpdateOffset = 0.0)
+        inline GLenum path_shape_to_gl_mode(path_shape aShape)
+        {
+            switch (aShape)
+            {
+            case path_shape::Quads:
+                return GL_QUADS;
+            case path_shape::Lines:
+                return GL_LINES;
+            case path_shape::LineLoop:
+                return GL_LINE_LOOP;
+            case path_shape::LineStrip:
+                return GL_LINE_STRIP;
+            case path_shape::ConvexPolygon:
+                return GL_TRIANGLE_FAN;
+            default:
+                return GL_POINTS;
+            }
+        }
+
+        inline vertices path_vertices(const path& aPath, const path::sub_path_type& aSubPath, double aLineWidth, GLenum& aMode)
+        {
+            aMode = path_shape_to_gl_mode(aPath.shape());
+            neogfx::vertices vertices = aPath.to_vertices(aSubPath);
+            if (aMode == GL_LINE_LOOP)
+            {
+                aMode = GL_LINES;
+                vertices = line_loop_to_lines(vertices);
+            }
+            if (aMode == GL_LINES)
+            {
+                aMode = GL_QUADS;
+                lines_to_quads(neogfx::vertices{ std::move(vertices) }, aLineWidth, vertices);
+            }
+            if (aMode == GL_QUADS)
+            {
+                aMode = GL_TRIANGLES;
+                quads_to_triangles(neogfx::vertices{ std::move(vertices) }, vertices);
+            }
+            return vertices;
+        }
+
+        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays_instance& aInstance, scalar aDiscardFor = 0.0)
         {
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
             if (stippleShader.stipple_active())
             {
-                stippleShader.first_vertex(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz));
+                stippleShader.start(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz), 
+                    midpoint(std::next(aInstance.begin(), 2)->xyz, std::next(aInstance.begin(), 4)->xyz));
                 aInstance.draw(6u);
                 while (!aInstance.empty())
                 {
-                    stippleShader.next_vertex(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz), aCounterUpdateOffset);
+                    stippleShader.next(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz),
+                        midpoint(std::next(aInstance.begin(), 2)->xyz, std::next(aInstance.begin(), 4)->xyz), aDiscardFor);
                     aInstance.draw(6u);
                 }
             }
@@ -656,6 +675,8 @@ namespace neogfx
 
     void opengl_rendering_context::clip_to(const path& aPath, dimension aPathOutline)
     {
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
         if (iClipCounter++ == 0)
         {
             glCheck(glClear(GL_STENCIL_BUFFER_BIT));
@@ -668,13 +689,14 @@ namespace neogfx
         glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
         fill_rect(rendering_area(), colour::White);
         glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
-        for (std::size_t i = 0; i < aPath.paths().size(); ++i)
+        for (auto const& subPath : aPath.sub_paths())
         {
-            if (aPath.paths()[i].size() > 2)
+            if (subPath.size() > 2)
             {
-                auto vertices = aPath.to_vertices(aPath.paths()[i]);
+                GLenum mode;
+                auto vertices = path_vertices(aPath, subPath, aPathOutline, mode);
 
-                use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath), vertices.size() };
+                use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                 for (const auto& v : vertices)
                     vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{v, vec4f{{1.0, 1.0, 1.0, 1.0}}});
             }
@@ -684,13 +706,14 @@ namespace neogfx
             glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
             path innerPath = aPath;
             innerPath.deflate(delta{ aPathOutline });
-            for (std::size_t i = 0; i < innerPath.paths().size(); ++i)
+            for (auto const& innerSubPath : innerPath.sub_paths())
             {
-                if (innerPath.paths()[i].size() > 2)
+                if (innerSubPath.size() > 2)
                 {
-                    auto vertices = aPath.to_vertices(innerPath.paths()[i]);
+                    GLenum mode;
+                    auto vertices = path_vertices(aPath, innerSubPath, 0.0, mode);
 
-                    use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(innerPath), vertices.size() };
+                    use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                     for (const auto& v : vertices)
                         vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{v, vec4f{{1.0, 1.0, 1.0, 1.0}}});
                 }
@@ -905,9 +928,8 @@ namespace neogfx
         auto adjustedRect = aRect;
         if (snap_to_pixel())
         {
-            if (static_cast<int32_t>(aPen.width()) % 2 == 0)
-                adjustedRect.position() -= point{ 0.5 * aPen.width() / 2.0, 0.5 * aPen.width() / 2.0 };
-            adjustedRect.extents() -= size{ aPen.width() };
+            adjustedRect.position() -= size{ size_i32{ static_cast<int32_t>(aPen.width()) / 2 } } * 0.5;
+            adjustedRect.extents() -= size_i32{ (static_cast<int32_t>(aPen.width()) + 1) / 2 };
         }
 
         vec3_array<8> lines = rect_vertices(adjustedRect, mesh_type::Outline, 0.0);
@@ -940,9 +962,8 @@ namespace neogfx
         auto adjustedRect = aRect;
         if (snap_to_pixel())
         {
-            if (static_cast<int32_t>(aPen.width()) % 2 == 0)
-                adjustedRect.position() -= point{ 0.5 * aPen.width() / 2.0, 0.5 * aPen.width() / 2.0 };
-            adjustedRect.extents() -= size{ aPen.width() };
+            adjustedRect.position() -= size{ size_i32{ static_cast<int32_t>(aPen.width()) / 2 } } * 0.5;
+            adjustedRect.extents() -= size_i32{ (static_cast<int32_t>(aPen.width()) + 1) / 2 };
         }
 
         auto vertices = rounded_rect_vertices(adjustedRect, aRadius, mesh_type::Outline);
@@ -1036,17 +1057,18 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aPath.bounding_rect());
 
-        for (std::size_t i = 0; i < aPath.paths().size(); ++i)
+        for (auto const& subPath : aPath.sub_paths())
         {
-            if (aPath.paths()[i].size() > 2)
+            if (subPath.size() > 2)
             {
-                if (aPath.shape() == path::ConvexPolygon)
+                if (aPath.shape() == path_shape::ConvexPolygon)
                     clip_to(aPath, aPen.width());
 
-                auto vertices = aPath.to_vertices(aPath.paths()[i]);
+                GLenum mode;
+                auto vertices = path_vertices(aPath, subPath, aPen.width(), mode);
 
                 {
-                    use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
+                    use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                     for (auto const& v : vertices)
                         vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                             vec4f{{
@@ -1056,7 +1078,7 @@ namespace neogfx
                                 static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                             vec4f{} });
                 }
-                if (aPath.shape() == path::ConvexPolygon)
+                if (aPath.shape() == path_shape::ConvexPolygon)
                     reset_clip();
             }
         }
@@ -1129,6 +1151,7 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         scoped_anti_alias saa{ *this, smoothing_mode::None };
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
@@ -1157,6 +1180,8 @@ namespace neogfx
     void opengl_rendering_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (aRect.empty())
             return;
@@ -1236,14 +1261,16 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        for (std::size_t i = 0; i < aPath.paths().size(); ++i)
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        for (auto const& subPath : aPath.sub_paths())
         {
-            if (aPath.paths()[i].size() > 2)
+            if (subPath.size() > 2)
             {
                 clip_to(aPath, 0.0);
-                point min = aPath.paths()[i][0];
+                point min = subPath[0];
                 point max = min;
-                for (auto const& pt : aPath.paths()[i])
+                for (auto const& pt : subPath)
                 {
                     min = min.min(pt);
                     max = max.max(pt);
@@ -1253,10 +1280,11 @@ namespace neogfx
                     rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
                         rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
 
-                auto vertices = aPath.to_vertices(aPath.paths()[i]);
+                GLenum mode;
+                auto vertices = path_vertices(aPath, subPath, 0.0, mode);
 
                 {
-                    use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
+                    use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                     for (const auto& v : vertices)
                     {
                         vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
