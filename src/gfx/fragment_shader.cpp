@@ -550,7 +550,7 @@ namespace neogfx
                 "{\n"
                 "    if (uStippleEnabled)\n"
                 "    {\n"
-                "        float d = distance(uStippleVertex, Coord));\n"
+                "        float d = distance(uStippleVertex, Coord);\n"
                 "        if (d < uStippleDiscard)\n"
                 "            discard;\n"
                 "        else\n"

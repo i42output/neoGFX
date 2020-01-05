@@ -212,7 +212,7 @@ namespace neogfx
                 aInstance.draw(6u);
                 while (!aInstance.empty())
                 {
-                    auto const counterOffset = start.distance(end) - aDiscardFor;
+                    auto const counterOffset = start.distance(end) + aDiscardFor;
                     start = midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz);
                     end = midpoint(std::next(aInstance.begin(), 4)->xyz, std::next(aInstance.begin(), 2)->xyz);
                     stippleShader.next(aContext, start, counterOffset, aDiscardFor);
@@ -1024,6 +1024,8 @@ namespace neogfx
 
     void opengl_rendering_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
     {
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
@@ -1054,6 +1056,8 @@ namespace neogfx
 
     void opengl_rendering_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
     {
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
@@ -1120,6 +1124,8 @@ namespace neogfx
 
     void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
     {
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.colour()))
@@ -1243,6 +1249,8 @@ namespace neogfx
 
     void opengl_rendering_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
     {
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aFill))
@@ -1268,6 +1276,8 @@ namespace neogfx
 
     void opengl_rendering_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
     {
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aFill))
