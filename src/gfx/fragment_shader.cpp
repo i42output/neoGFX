@@ -601,8 +601,8 @@ namespace neogfx
     
     void standard_stipple_shader::next(const vec3& aFrom, const vec3& aTo, scalar aDiscardFor)
     {
-        auto const d = uStippleVertex.uniform().value().get<vec3f>().distance(aFrom.as<float>()) - (iTo.as<float>().distance(aFrom.as<float>()));
-        uStippleCounter = uStippleCounter.uniform().value().get<uint32_t>() + static_cast<uint32_t>(d);
+        auto const d = uStippleVertex.uniform().value().get<vec3f>().distance(aFrom.as<float>());// +(iTo.as<float>().distance(aFrom.as<float>()));
+        uStippleCounter = static_cast<uint32_t>(uStippleCounter.uniform().value().get<uint32_t>() + d);
         uStippleVertex = aFrom.as<float>();
         uStippleDiscard = static_cast<float>(aDiscardFor);
         iTo = aTo;

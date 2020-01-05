@@ -1146,7 +1146,8 @@ namespace neogfx
 
         inline mat33 rotation_matrix(const vec3& axis, scalar angle)
         {
-            if (std::abs(angle) <= std::numeric_limits<scalar>::min() || std::abs(angle - boost::math::constants::pi<scalar>()) <= std::numeric_limits<scalar>::epsilon())
+            scalar const epsilon = 0.00001;
+            if (std::abs(angle) <= epsilon || std::abs(angle - boost::math::constants::pi<scalar>()) <= epsilon)
                 return mat33::identity();
             scalar const s = std::sin(angle);
             scalar const c = std::cos(angle);
