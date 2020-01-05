@@ -579,9 +579,13 @@ namespace neogfx
     public:
         static constexpr bool gui = is_gui<CoordinateSystem>::value;
         static constexpr bool game = is_game<CoordinateSystem>::value;
+        static constexpr coordinate_type zero = constants::zero<coordinate_type>;
+        static constexpr coordinate_type one = constants::one<coordinate_type>;
+        static constexpr coordinate_type two = constants::two<coordinate_type>;
+        static constexpr coordinate_type default_epsilon = static_cast<coordinate_type>(0.00001);
         // construction
     public:
-        basic_rect() {}
+        basic_rect() : epsilon { default_epsilon } {}
         basic_rect(const point_type& coordinates, const size_type& dimensions) : point_type{ coordinates }, size_type{ dimensions } {}
         basic_rect(const point_type& leftCorner, const point_type& rightCorner) : point_type{ leftCorner }, size_type{ std::abs<CoordinateType>(rightCorner.x - leftCorner.x), std::abs<CoordinateType>(rightCorner.y - leftCorner.y) } {}
         explicit basic_rect(const point_type& coordinates) : point_type{ coordinates }, size_type{} {}
@@ -593,7 +597,7 @@ namespace neogfx
         // assignment
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
-        self_type& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other;  return *this; }
+        self_type& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other; epsilon = other.epsilon; return *this; }
         self_type& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
         self_type& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
         // operations
@@ -610,9 +614,9 @@ namespace neogfx
         const size_type& extents() const { return *this; }
         size_type& extents() { return *this; }
         coordinate_type left() const { return x; }
-        coordinate_type top() const { if constexpr (gui) return y; else return y + cy; }
-        coordinate_type right() const { return x + cx; }
-        coordinate_type bottom() const { if constexpr (gui) return y + cy; else return y; }
+        coordinate_type top() const { if constexpr (gui) return y; else return (y + cy) - epsilon; }
+        coordinate_type right() const { return (x + cx) - epsilon; }
+        coordinate_type bottom() const { if constexpr (gui) return (y + cy) - epsilon; else return y; }
         point_type top_left() const { return point_type(left(), top()); }
         point_type top_right() const { return point_type(right(), top()); }
         point_type bottom_left() const { return point_type(left(), bottom()); }
@@ -640,19 +644,19 @@ namespace neogfx
         point_type centre() const 
         { 
             if constexpr (gui)
-                return point_type{ left() + static_cast<CoordinateType>(width() / 2), top() + static_cast<CoordinateType>(height() / 2) };
+                return point_type{ left() + static_cast<coordinate_type>(width()) / two, top() + static_cast<coordinate_type>(height()) / two };
             else
-                return point_type{ left() + static_cast<CoordinateType>(width() / 2), bottom() + static_cast<CoordinateType>(height() / 2) };
+                return point_type{ left() + static_cast<coordinate_type>(width()) / two, bottom() + static_cast<coordinate_type>(height()) / two };
         }
         self_type& move(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
-        self_type& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * static_cast<CoordinateType>(2); cy += delta.dy * static_cast<CoordinateType>(2); return *this; }
+        self_type& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * two; cy += delta.dy * two; return *this; }
         self_type& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
-        self_type& inflate(CoordinateType dx, CoordinateType dy) { return inflate(delta_type(dx, dy)); }
-        self_type& inflate(CoordinateType left, CoordinateType top, CoordinateType right, CoordinateType bottom) { x -= left; y -= top; cx += (left + right); cy += (top + bottom); return *this; }
+        self_type& inflate(coordinate_type dx, coordinate_type dy) { return inflate(delta_type(dx, dy)); }
+        self_type& inflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { x -= left; y -= top; cx += (left + right); cy += (top + bottom); return *this; }
         self_type& deflate(const delta_type& delta) { return inflate(-delta); }
         self_type& deflate(const size_type& size) { return inflate(-size.cx, -size.cy); }
-        self_type& deflate(CoordinateType dx, CoordinateType dy) { return inflate(-dx, -dy); }
-        self_type& deflate(CoordinateType left, CoordinateType top, CoordinateType right, CoordinateType bottom) { return inflate(-left, -top, -right, -bottom); }
+        self_type& deflate(coordinate_type dx, coordinate_type dy) { return inflate(-dx, -dy); }
+        self_type& deflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { return inflate(-left, -top, -right, -bottom); }
         template <typename... T>
         friend self_type inflate_rect(const self_type& aRect, T&&... aAmount)
         {
@@ -695,11 +699,17 @@ namespace neogfx
         }
         self_type with_centred_origin() const
         {
-            return self_type{ point_type{ -extents() / 2.0 }, extents() };
+            return self_type{ point_type{ -extents() / two }, extents() };
         }
         self_type ceil() const { return self_type{ point_type::ceil(), size_type::ceil() }; }
         self_type floor() const { return self_type{ point_type::floor(), size_type::floor() }; }
         self_type round() const { return self_type{ point_type::round(), size_type::round() }; }
+        self_type with_epsilon(coordinate_type aEpsilon = default_epsilon) const
+        {
+            self_type result = *this;
+            result.epsilon = aEpsilon;
+            return result;
+        }
         aabb_2d to_aabb_2d() const
         { 
             if constexpr (gui)
@@ -707,11 +717,13 @@ namespace neogfx
             else
                 return aabb_2d{ bottom_left().to_vec2(), top_right().to_vec2() };
         }
+    public:
+        coordinate_type epsilon = zero;
     };
 
     typedef basic_rect<coordinate, logical_coordinate_system::AutomaticGui> gui_rect;
     typedef basic_rect<coordinate, logical_coordinate_system::AutomaticGame> game_rect;
-    typedef gui_rect rect;
+    typedef gui_rect rect; 
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline basic_rect<CoordinateType, CoordinateSystem> operator*(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)

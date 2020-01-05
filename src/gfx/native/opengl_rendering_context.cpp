@@ -126,8 +126,9 @@ namespace neogfx
         {
             auto const vecLine = aEnd - aStart;
             auto const r = rotation_matrix(vec3{ 1.0, 0.0, 0.0 }, vecLine);
-            auto const v1 = aStart + r * vec3{ 0.0, -aLineWidth / 2.0, 0.0 };
-            auto const v2 = aStart + r * vec3{ 0.0, aLineWidth / 2.0, 0.0 };
+            auto const halfWidth = aLineWidth / 2.0;
+            auto const v1 = aStart + r * vec3{ 0.0, -halfWidth, 0.0 };
+            auto const v2 = aStart + r * vec3{ 0.0, halfWidth, 0.0 };
             return quad{ v1, v2, v2 + vecLine, v1 + vecLine };
         }
 
@@ -218,6 +219,7 @@ namespace neogfx
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{aTarget}, 
         iWidget{ nullptr },
+        iMultisample{ true },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::None },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -240,6 +242,7 @@ namespace neogfx
         iTarget{ aTarget },
         iWidget{ &aWidget },
         iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },        
+        iMultisample{ true },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::None },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -263,6 +266,7 @@ namespace neogfx
         iWidget{ aOther.iWidget },
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
+        iMultisample{ true },
         iOpacity{ 1.0 },
         iBlendingMode{ aOther.iBlendingMode },
         iSmoothingMode{ aOther.iSmoothingMode },
@@ -744,6 +748,27 @@ namespace neogfx
         }
     }
 
+    bool opengl_rendering_context::multisample() const
+    {
+        return iMultisample;
+    }
+    
+    void opengl_rendering_context::set_multisample(bool aMultisample)
+    {
+        if (iMultisample != aMultisample)
+        {
+            iMultisample = aMultisample;
+            if (multisample())
+            {
+                glCheck(glEnable(GL_MULTISAMPLE));
+            }
+            else
+            {
+                glCheck(glDisable(GL_MULTISAMPLE));
+            }
+        }
+    }
+
     void opengl_rendering_context::set_opacity(double aOpacity)
     {
         iOpacity = aOpacity;
@@ -921,6 +946,7 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         scoped_anti_alias saa{ *this, smoothing_mode::None };
+        std::optional<disable_multisample> disableMultisample;
 
         if (std::holds_alternative<gradient>(aPen.colour()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
@@ -928,6 +954,7 @@ namespace neogfx
         auto adjustedRect = aRect;
         if (snap_to_pixel())
         {
+            disableMultisample.emplace(*this);
             adjustedRect.position() -= size{ size_i32{ static_cast<int32_t>(aPen.width()) / 2 } } * 0.5;
             adjustedRect.extents() -= size_i32{ (static_cast<int32_t>(aPen.width()) + 1) / 2 };
         }

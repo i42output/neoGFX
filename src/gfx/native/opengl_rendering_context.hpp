@@ -53,7 +53,29 @@ namespace neogfx
         class disable_anti_alias : public scoped_anti_alias
         {
         public:
-            disable_anti_alias(opengl_rendering_context& aParent) : scoped_anti_alias(aParent, neogfx::smoothing_mode::None)
+            disable_anti_alias(opengl_rendering_context& aParent) : scoped_anti_alias{ aParent, neogfx::smoothing_mode::None }
+            {
+            }
+        };
+        class scoped_multisample
+        {
+        public:
+            scoped_multisample(opengl_rendering_context& aParent, bool aMultisample) : iParent(aParent), iOldMultiSample(aParent.multisample())
+            {
+                iParent.set_multisample(aMultisample);
+            }
+            ~scoped_multisample()
+            {
+                iParent.set_multisample(iOldMultiSample);
+            }
+        private:
+            opengl_rendering_context& iParent;
+            bool iOldMultiSample;
+        };
+        class disable_multisample : public scoped_multisample
+        {
+        public:
+            disable_multisample(opengl_rendering_context& aParent) : scoped_multisample{ aParent, false }
             {
             }
         };
@@ -88,6 +110,8 @@ namespace neogfx
         void clip_to(const path& aPath, dimension aPathOutline);
         void reset_clip();
         void apply_clip();
+        bool multisample() const;
+        void set_multisample(bool aMultisample);
         void set_opacity(double aOpacity);
         neogfx::blending_mode blending_mode() const;
         void set_blending_mode(neogfx::blending_mode aBlendingMode);
@@ -139,6 +163,7 @@ namespace neogfx
         graphics_operation::queue iQueue;
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
+        bool iMultisample;
         double iOpacity;
         neogfx::blending_mode iBlendingMode;
         neogfx::smoothing_mode iSmoothingMode; 

@@ -43,11 +43,11 @@ namespace neogfx
         namespace constants
         {
             template <typename T>
-            const T zero = static_cast<T>(0.0);
+            constexpr T zero = static_cast<T>(0.0);
             template <typename T>
-            const T one = static_cast<T>(1.0);
+            constexpr T one = static_cast<T>(1.0);
             template <typename T>
-            const T two = static_cast<T>(2.0);
+            constexpr T two = static_cast<T>(2.0);
         }
 
         inline angle to_rad(angle aDegrees)
@@ -621,6 +621,17 @@ namespace neogfx
                         result[column][row] = -result[column][row];
                 return result;
             }
+            self_type round_to(value_type aEpsilon) const
+            {
+                self_type result;
+                for (uint32_t column = 0; column < Columns; ++column)
+                    for (uint32_t row = 0; row < Rows; ++row)
+                    {
+                         std::modf((*this)[column][row] / aEpsilon + 0.5, &result[column][row]);
+                         result[column][row] *= aEpsilon;
+                    }
+                return result;
+            }
             basic_matrix<T, Columns, Rows> transposed() const
             {
                 basic_matrix<T, Columns, Rows> result;
@@ -1144,9 +1155,8 @@ namespace neogfx
             return result;
         }
 
-        inline mat33 rotation_matrix(const vec3& axis, scalar angle)
+        inline mat33 rotation_matrix(const vec3& axis, scalar angle, scalar epsilon = 0.00001)
         {
-            scalar const epsilon = 0.00001;
             if (std::abs(angle) <= epsilon || std::abs(angle - boost::math::constants::pi<scalar>()) <= epsilon)
                 return mat33::identity();
             scalar const s = std::sin(angle);
@@ -1155,18 +1165,17 @@ namespace neogfx
             scalar const ax = a * axis.x;
             scalar const ay = a * axis.y;
             scalar const az = a * axis.z;
-            return mat33{ 
-                { ax * axis.x + c, ax * axis.y + axis.z * s, ax * axis.z - axis.y * s }, 
-                { ay * axis.x - axis.z * s, ay * axis.y + c, ay * axis.z + axis.x * s }, 
-                { az * axis.x + axis.y * s, az * axis.y - axis.x * s, az * axis.z + c } 
-            };
+            return mat33{
+                { ax * axis.x + c, ax * axis.y + axis.z * s, ax * axis.z - axis.y * s },
+                { ay * axis.x - axis.z * s, ay * axis.y + c, ay * axis.z + axis.x * s },
+                { az * axis.x + axis.y * s, az * axis.y - axis.x * s, az * axis.z + c } }.round_to(epsilon);
         }
 
-        inline mat33 rotation_matrix(const vec3& vectorA, const vec3& vectorB)
+        inline mat33 rotation_matrix(const vec3& vectorA, const vec3& vectorB, scalar epsilon = 0.00001)
         {
             auto const nva = vectorA.normalized();
             auto const nvb = vectorB.normalized();
-            return rotation_matrix(nva.cross(nvb).normalized(), std::acos(nva.dot(nvb)));
+            return rotation_matrix(nva.cross(nvb).normalized(), std::acos(nva.dot(nvb)), epsilon);
         }
 
         inline mat33 rotation_matrix(const vec3& angles)
