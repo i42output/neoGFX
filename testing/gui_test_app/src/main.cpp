@@ -835,6 +835,7 @@ int main(int argc, char* argv[])
         ui.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
             ng::service<ng::i_rendering_engine>().want_game_mode();
+            aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::colour::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::colour::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);

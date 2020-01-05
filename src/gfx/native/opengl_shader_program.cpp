@@ -125,9 +125,9 @@ namespace neogfx
         glCheck(glUseProgram(gl_handle()));
     }
 
-    void opengl_shader_program::update_uniforms(const i_rendering_context& aRenderingContext)
+    void opengl_shader_program::update_uniforms(const i_rendering_context& aContext)
     {
-        prepare_uniforms(aRenderingContext);
+        prepare_uniforms(aContext);
         bool const updateAllUniforms = dirty();
         for (auto& stage : stages())
             for (auto& shader : stage.second())

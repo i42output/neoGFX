@@ -170,14 +170,14 @@ namespace neogfx
     public:
         standard_stipple_shader(const std::string& aName = "standard_stipple_shader");
     public:
-        void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram) override;
+        void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) override;
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         bool stipple_active() const override;
         void clear_stipple() override;
         void set_stipple(uint32_t aFactor, uint16_t aPattern) override;
-        void start(const vec3& aFrom, const vec3& aTo) override;
-        void next(const vec3& aFrom, const vec3& aTo, scalar aDiscardFor = 0.0) override;
+        void start(const i_rendering_context& aContext, const vec3& aFrom) override;
+        void next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset = {}, scalar aDiscardFor = 0.0) override;
     private:
         cache_uniform(uStippleFactor)
         cache_uniform(uStipplePattern)
@@ -185,6 +185,5 @@ namespace neogfx
         cache_uniform(uStippleVertex)
         cache_uniform(uStippleDiscard)
         cache_uniform(uStippleEnabled)
-        vec3 iTo;
     };
 }

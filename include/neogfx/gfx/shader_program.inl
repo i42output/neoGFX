@@ -192,11 +192,11 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline void shader_program<Base>::prepare_uniforms(const i_rendering_context& aRenderingContext)
+    inline void shader_program<Base>::prepare_uniforms(const i_rendering_context& aContext)
     {
         for (auto& stage : stages())
             for (auto& shader : stage.second())
-                shader->prepare_uniforms(aRenderingContext, *this);
+                shader->prepare_uniforms(aContext, *this);
     }
 
     template <typename Base>

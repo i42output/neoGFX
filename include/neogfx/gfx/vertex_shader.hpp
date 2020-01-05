@@ -95,12 +95,12 @@ namespace neogfx
         const i_standard_vertex_matrices& standard_vertex_matrices() const override;
         i_standard_vertex_matrices& standard_vertex_matrices() override;
     public:
-        mat44 projection_matrix(const i_rendering_context& aRenderingContext) const override;
+        mat44 projection_matrix(const i_rendering_context& aContext) const override;
         void set_projection_matrix(const optional_mat44& aProjectionMatrix) override;
-        mat44 transformation_matrix(const i_rendering_context& aRenderingContext) const override;
+        mat44 transformation_matrix(const i_rendering_context& aContext) const override;
         void set_transformation_matrix(const optional_mat44& aTransformationMatrix) override;
     public:
-        void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program&) override;
+        void prepare_uniforms(const i_rendering_context& aContext, i_shader_program&) override;
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     private:
         optional_mat44 iProjectionMatrix;

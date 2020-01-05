@@ -614,9 +614,9 @@ namespace neogfx
         const size_type& extents() const { return *this; }
         size_type& extents() { return *this; }
         coordinate_type left() const { return x; }
-        coordinate_type top() const { if constexpr (gui) return y; else return (y + cy) - epsilon; }
-        coordinate_type right() const { return (x + cx) - epsilon; }
-        coordinate_type bottom() const { if constexpr (gui) return (y + cy) - epsilon; else return y; }
+        coordinate_type top() const { if constexpr (gui) return y; else return (y + cy) - epsilon.cy; }
+        coordinate_type right() const { return (x + cx) - epsilon.cx; }
+        coordinate_type bottom() const { if constexpr (gui) return (y + cy) - epsilon.cy; else return y; }
         point_type top_left() const { return point_type(left(), top()); }
         point_type top_right() const { return point_type(right(), top()); }
         point_type bottom_left() const { return point_type(left(), bottom()); }
@@ -704,7 +704,7 @@ namespace neogfx
         self_type ceil() const { return self_type{ point_type::ceil(), size_type::ceil() }; }
         self_type floor() const { return self_type{ point_type::floor(), size_type::floor() }; }
         self_type round() const { return self_type{ point_type::round(), size_type::round() }; }
-        self_type with_epsilon(coordinate_type aEpsilon = default_epsilon) const
+        self_type with_epsilon(const size_type& aEpsilon = default_epsilon) const
         {
             self_type result = *this;
             result.epsilon = aEpsilon;
@@ -718,7 +718,7 @@ namespace neogfx
                 return aabb_2d{ bottom_left().to_vec2(), top_right().to_vec2() };
         }
     public:
-        coordinate_type epsilon = zero;
+        size_type epsilon = size_type{ zero };
     };
 
     typedef basic_rect<coordinate, logical_coordinate_system::AutomaticGui> gui_rect;

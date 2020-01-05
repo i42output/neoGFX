@@ -345,13 +345,13 @@ namespace neogfx
             iVertices.reserve(16384);
         }
     public:
-        void instantiate(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram)
+        void instantiate(i_rendering_context& aContext, i_shader_program& aShaderProgram)
         {
-            do_instantiate(aRenderingContext, aShaderProgram, false);
+            do_instantiate(aContext, aShaderProgram, false);
         }
-        void instantiate_with_texture_coords(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram)
+        void instantiate_with_texture_coords(i_rendering_context& aContext, i_shader_program& aShaderProgram)
         {
-            do_instantiate(aRenderingContext, aShaderProgram, true);
+            do_instantiate(aContext, aShaderProgram, true);
         }
         void execute()
         {
@@ -365,7 +365,7 @@ namespace neogfx
             return iVertices.capacity();
         }
     private:
-        void do_instantiate(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram, bool aWithTextureCoords)
+        void do_instantiate(i_rendering_context& aContext, i_shader_program& aShaderProgram, bool aWithTextureCoords)
         {
             if (iInstance.get() == nullptr || iInstance->capacity() < iVertices.capacity() || iShaderProgram != &aShaderProgram || iInstance->has_texture_coords() != aWithTextureCoords)
             {
@@ -390,12 +390,12 @@ namespace neogfx
     class use_shader_program
     {
     public:
-        use_shader_program(i_rendering_context& aRenderingContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
-            iRenderingContext{ aRenderingContext },
+        use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
+            iRenderingContext{ aContext },
             iCurrentProgram{ aShaderProgram },
             iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
         {
-            iCurrentProgram.activate(aRenderingContext);
+            iCurrentProgram.activate(aContext);
         }
         ~use_shader_program()
         {

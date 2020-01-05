@@ -125,11 +125,14 @@ namespace neogfx
         inline quad line_to_quad(const vec3& aStart, const vec3& aEnd, double aLineWidth)
         {
             auto const vecLine = aEnd - aStart;
-            auto const r = rotation_matrix(vec3{ 1.0, 0.0, 0.0 }, vecLine);
+            auto const length = vecLine.magnitude();
             auto const halfWidth = aLineWidth / 2.0;
-            auto const v1 = aStart + r * vec3{ 0.0, -halfWidth, 0.0 };
-            auto const v2 = aStart + r * vec3{ 0.0, halfWidth, 0.0 };
-            return quad{ v1, v2, v2 + vecLine, v1 + vecLine };
+            auto const v1 = vec3{ -halfWidth, -halfWidth, 0.0 };
+            auto const v2 = vec3{ -halfWidth, halfWidth, 0.0 };
+            auto const v3 = vec3{ length + halfWidth, halfWidth, 0.0 };
+            auto const v4 = vec3{ length + halfWidth, -halfWidth, 0.0 };
+            auto const r = rotation_matrix(vec3{ 1.0, 0.0, 0.0 }, vecLine);
+            return quad{ aStart + r * v1, aStart + r * v2, aStart + r * v3, aStart + r * v4 };
         }
 
         template <typename VerticesIn, typename VerticesOut>
@@ -199,16 +202,20 @@ namespace neogfx
 
         void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays_instance& aInstance, scalar aDiscardFor = 0.0)
         {
+            // assumes vertices are quads (as two triangles) created with quads_to_triangles above.
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
             if (stippleShader.stipple_active())
             {
-                stippleShader.start(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz), 
-                    midpoint(std::next(aInstance.begin(), 2)->xyz, std::next(aInstance.begin(), 4)->xyz));
+                auto start = midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz);
+                auto end = midpoint(std::next(aInstance.begin(), 4)->xyz, std::next(aInstance.begin(), 2)->xyz);
+                stippleShader.start(aContext, start);
                 aInstance.draw(6u);
                 while (!aInstance.empty())
                 {
-                    stippleShader.next(midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz),
-                        midpoint(std::next(aInstance.begin(), 2)->xyz, std::next(aInstance.begin(), 4)->xyz), aDiscardFor);
+                    auto const counterOffset = start.distance(end) - aDiscardFor;
+                    start = midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz);
+                    end = midpoint(std::next(aInstance.begin(), 4)->xyz, std::next(aInstance.begin(), 2)->xyz);
+                    stippleShader.next(aContext, start, counterOffset, aDiscardFor);
                     aInstance.draw(6u);
                 }
             }
@@ -955,8 +962,8 @@ namespace neogfx
         if (snap_to_pixel())
         {
             disableMultisample.emplace(*this);
-            adjustedRect.position() -= size{ size_i32{ static_cast<int32_t>(aPen.width()) / 2 } } * 0.5;
-            adjustedRect.extents() -= size_i32{ (static_cast<int32_t>(aPen.width()) + 1) / 2 };
+            adjustedRect.position() -= size{ static_cast<int32_t>(aPen.width()) % 2 == 1 ? 0.0 : 0.5 };
+            adjustedRect = adjustedRect.with_epsilon(size{ 1.0, 1.0 });
         }
 
         vec3_array<8> lines = rect_vertices(adjustedRect, mesh_type::Outline, 0.0);
@@ -989,8 +996,8 @@ namespace neogfx
         auto adjustedRect = aRect;
         if (snap_to_pixel())
         {
-            adjustedRect.position() -= size{ size_i32{ static_cast<int32_t>(aPen.width()) / 2 } } * 0.5;
-            adjustedRect.extents() -= size_i32{ (static_cast<int32_t>(aPen.width()) + 1) / 2 };
+            adjustedRect.position() -= size{ static_cast<int32_t>(aPen.width()) % 2 == 1 ? 0.0 : 0.5 };
+            adjustedRect = adjustedRect.with_epsilon(size{ 1.0, 1.0 });
         }
 
         auto vertices = rounded_rect_vertices(adjustedRect, aRadius, mesh_type::Outline);

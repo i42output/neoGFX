@@ -212,8 +212,7 @@ namespace neogfx
                 "{\n"
                 "    if (uGradientEnabled)\n"
                 "    {\n"
-                "        vec2 viewPos = gl_FragCoord.xy;\n"
-                "        viewPos.y = uGradientViewportTop - viewPos.y;\n"
+                "        vec2 viewPos = vec2(gl_FragCoord.x, uGradientViewportTop - gl_FragCoord.y);\n"
                 "        int d = uGradientFilterSize / 2;\n"
                 "        if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)\n"
                 "        {\n"
@@ -534,7 +533,7 @@ namespace neogfx
         disable();
     }
 
-    void standard_stipple_shader::prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram)
+    void standard_stipple_shader::prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram)
     {
         if (stipple_active() && uStippleVertex.uniform().value().empty())
             throw no_stipple_vertex();
@@ -551,12 +550,12 @@ namespace neogfx
                 "{\n"
                 "    if (uStippleEnabled)\n"
                 "    {\n"
-                "        float d = distance(uStippleVertex, Coord);\n"
+                "        float d = distance(uStippleVertex, Coord));\n"
                 "        if (d < uStippleDiscard)\n"
                 "            discard;\n"
                 "        else\n"
                 "        {\n"
-                "            uint patternBit = ((uint(d) + uStippleCounter) / uStippleFactor) % 16;\n"
+                "            uint patternBit = ((uint(d + uStippleCounter)) / uStippleFactor) % 16;\n"
                 "            if ((uStipplePattern & (1 << patternBit)) == 0)\n"
                 "                discard;\n"
                 "        }\n"
@@ -585,26 +584,25 @@ namespace neogfx
         enable();
         uStippleFactor = aFactor;
         uStipplePattern = aPattern;
-        uStippleCounter = 0u;
+        uStippleCounter = 0.0f;
         uStippleVertex = vec3f{};
         uStippleDiscard = 0.0f;
         uStippleEnabled = true;
     }
 
-    void standard_stipple_shader::start(const vec3& aFrom, const vec3& aTo)
+    void standard_stipple_shader::start(const i_rendering_context& aContext, const vec3& aFrom)
     {
-        uStippleCounter = 0u;
-        uStippleVertex = aFrom.as<float>();
+        uStippleCounter = 0.0f;
+        uStippleVertex = (aFrom + vec3{ aContext.offset() }).as<float>();
         uStippleDiscard = 0.0f;
-        iTo = aTo;
     }
     
-    void standard_stipple_shader::next(const vec3& aFrom, const vec3& aTo, scalar aDiscardFor)
+    void standard_stipple_shader::next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset, scalar aDiscardFor)
     {
-        auto const d = uStippleVertex.uniform().value().get<vec3f>().distance(aFrom.as<float>()) + (iTo.as<float>().distance(aFrom.as<float>()));
-        uStippleCounter = static_cast<uint32_t>(uStippleCounter.uniform().value().get<uint32_t>() + d);
-        uStippleVertex = aFrom.as<float>();
+        float const counterOffset = (aCounterOffset == std::nullopt ? 
+            uStippleVertex.uniform().value().get<vec3f>().distance(aFrom.as<float>()) : static_cast<float>(*aCounterOffset));
+        uStippleCounter = uStippleCounter.uniform().value().get<float>() + counterOffset;
+        uStippleVertex = (aFrom + vec3{ aContext.offset() }).as<float>();
         uStippleDiscard = static_cast<float>(aDiscardFor);
-        iTo = aTo;
     }
 }

@@ -555,7 +555,7 @@ namespace neogfx
         template <typename T, typename Type, bool IsScalar>
         inline basic_vector<T, 3, Type, IsScalar> midpoint(const basic_vector<T, 3, Type, IsScalar>& left, const basic_vector<T, 3, Type, IsScalar>& right)
         {
-            return left + (right - left) / constants::two<T>;
+            return (left + right) / constants::two<T>;
         }
 
         /* todo: specializations that use SIMD intrinsics. */
@@ -1157,8 +1157,10 @@ namespace neogfx
 
         inline mat33 rotation_matrix(const vec3& axis, scalar angle, scalar epsilon = 0.00001)
         {
-            if (std::abs(angle) <= epsilon || std::abs(angle - boost::math::constants::pi<scalar>()) <= epsilon)
+            if (std::abs(angle) <= epsilon)
                 return mat33::identity();
+            else if (std::abs(angle - boost::math::constants::pi<scalar>()) <= epsilon)
+                return -mat33::identity();
             scalar const s = std::sin(angle);
             scalar const c = std::cos(angle);
             scalar const a = 1.0 - c;

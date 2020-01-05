@@ -46,11 +46,11 @@ namespace neogfx
         return *this;
     }
 
-    mat44 standard_vertex_shader::projection_matrix(const i_rendering_context& aRenderingContext) const
+    mat44 standard_vertex_shader::projection_matrix(const i_rendering_context& aContext) const
     {
         if (iProjectionMatrix != std::nullopt)
             return *iProjectionMatrix;
-        auto const& logicalCoordinates = aRenderingContext.logical_coordinates();
+        auto const& logicalCoordinates = aContext.logical_coordinates();
         double left = logicalCoordinates.bottomLeft.x;
         double right = logicalCoordinates.topRight.x;
         double bottom = logicalCoordinates.bottomLeft.y;
@@ -70,13 +70,13 @@ namespace neogfx
         iProjectionMatrix = aProjectionMatrix;
     }
 
-    mat44 standard_vertex_shader::transformation_matrix(const i_rendering_context& aRenderingContext) const
+    mat44 standard_vertex_shader::transformation_matrix(const i_rendering_context& aContext) const
     {
         auto transform = mat44::identity();
         if (iTransformationMatrix != std::nullopt)
             transform = *iTransformationMatrix;
-        transform[3][0] += aRenderingContext.offset().x;
-        transform[3][1] += aRenderingContext.offset().y;
+        transform[3][0] += aContext.offset().x;
+        transform[3][1] += aContext.offset().y;
         return transform;
     }
 
@@ -85,10 +85,10 @@ namespace neogfx
         iTransformationMatrix = aTransformationMatrix;
     }
 
-    void standard_vertex_shader::prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program&)
+    void standard_vertex_shader::prepare_uniforms(const i_rendering_context& aContext, i_shader_program&)
     {
-        uProjectionMatrix = projection_matrix(aRenderingContext).transposed().as<float>();
-        uTransformationMatrix = transformation_matrix(aRenderingContext).as<float>();
+        uProjectionMatrix = projection_matrix(aContext).transposed().as<float>();
+        uTransformationMatrix = transformation_matrix(aContext).as<float>();
     }
     
     void standard_vertex_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const

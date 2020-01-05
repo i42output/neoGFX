@@ -220,9 +220,10 @@ namespace neogfx
     void image_widget::set_image(const i_texture& aTexture)
     {
         size oldSize = minimum_size();
+        size oldTextureSize = image().extents();
         iTexture = aTexture;
         ImageChanged.trigger();
-        if (oldSize != minimum_size())
+        if (oldSize != minimum_size() || oldTextureSize != image().extents())
         {
             ImageGeometryChanged.trigger();
             if (has_managing_layout())

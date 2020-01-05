@@ -411,7 +411,7 @@ namespace neogfx
             return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::Out,  static_cast<shader_data_type>(neolib::index_of<T, shader_value_type>()) });
         }
     public:
-        virtual void prepare_uniforms(const i_rendering_context& aRenderingContext, i_shader_program& aProgram) = 0;
+        virtual void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) = 0;
         virtual void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const = 0;
         virtual void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const = 0;
     };
