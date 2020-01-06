@@ -212,7 +212,7 @@ namespace neogfx
                 aInstance.draw(6u);
                 while (!aInstance.empty())
                 {
-                    auto const counterOffset = start.distance(end) + aDiscardFor;
+                    auto const counterOffset = start.distance(end) - aDiscardFor;
                     start = midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz);
                     end = midpoint(std::next(aInstance.begin(), 4)->xyz, std::next(aInstance.begin(), 2)->xyz);
                     stippleShader.next(aContext, start, counterOffset, aDiscardFor);
