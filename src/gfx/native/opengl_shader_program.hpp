@@ -35,6 +35,7 @@ namespace neogfx
         void compile() override;
         void link() override;
         void use() override;
+        void update_uniform_locations(const i_rendering_context& aContext) override;
         void update_uniforms(const i_rendering_context& aContext) override;
         bool active() const override;
         void deactivate() override;

@@ -206,7 +206,7 @@ namespace neogfx
                     throw invalid_draw_count();
                 if (static_cast<std::size_t>(iStart) == vertices().size())
                     return;
-                iParent.rendering_engine().active_shader_program().update_uniforms(iParent);
+                iParent.rendering_engine().active_shader_program().activate(iParent);
                 if (!iWithTextures)
                     iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
                 else

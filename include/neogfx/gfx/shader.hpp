@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/map.hpp>
+#include <neolib/jar.hpp>
 #include <neolib/set.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -39,29 +39,27 @@ namespace neogfx
         typedef i_shader::value_type abstract_value_type;
         typedef shader_value_type value_type;
     protected:
-        typedef neolib::set<shader_uniform> uniform_list;
+        typedef neolib::polymorphic_jar<shader_uniform> uniform_list;
         typedef neolib::set<shader_variable> variable_list;
         class cached_uniform
         {
         public:
-            cached_uniform(shader<Base>& aParent, const char* const aUniformName) :
-                iParent{ aParent }, iUniformName { aUniformName }
+            cached_uniform(shader<Base>& aParent, const char* const aName) :
+                iParent{ aParent }, iName{ aName }
             {
             }
         public:
             const i_shader_uniform& uniform() const
             {
-                if (iUniform == std::nullopt)
+                if (iId == std::nullopt)
                 {
-                    auto existing = iParent.uniforms().find(shader_uniform{ string{iUniformName}, value_type{} });
-                    if (existing == iParent.uniforms().end())
-                    {
-                        existing = iParent.uniforms().insert(shader_uniform{ string{iUniformName}, value_type{} });
-                        iParent.set_dirty();
-                    }
-                    iUniform = existing;
+                    auto existing = iParent.find_uniform(iName);
+                    if (existing != no_uniform)
+                        iId = existing;
+                    if (iId == std::nullopt)
+                        iId = iParent.create_uniform(iName);
                 }
-                return **iUniform;
+                return iParent.uniforms()[*iId];
             }
             i_shader_uniform& uniform()
             {
@@ -75,8 +73,8 @@ namespace neogfx
             }
         private:
             shader<Base>& iParent;
-            const char* const iUniformName;
-            mutable std::optional<uniform_list::iterator> iUniform;
+            string iName;
+            mutable std::optional<shader_uniform_id> iId;
         };
     public:
         shader(shader_type aType, const std::string& aName, bool aEnabled = true) : 
@@ -141,15 +139,17 @@ namespace neogfx
         void set_dirty() override
         {
             iDirty = true;
+            for (auto& u : uniforms())
+                u.clear_location();
         }
         void set_clean() override
         {
             iDirty = false;
         }
     public:
-        const uniform_list& uniforms() const override
+        const i_shader::uniform_list& uniforms() const override
         {
-            return iUniforms;
+            return iUniforms.items();
         }
     protected:
         uniform_list& uniforms()
@@ -157,30 +157,40 @@ namespace neogfx
             return iUniforms;
         }
     public:
-        void clear_uniform(const i_string& aName) override
+        void clear_uniform(shader_uniform_id aUniform) override
         {
-            auto existing = iUniforms.find(shader_uniform{ aName, value_type{} });
-            if (existing != iUniforms.end())
-            {
-                iUniforms.erase(existing);
-                set_dirty();
-            }
+            iUniforms.remove(aUniform);
+            set_dirty();
+        }
+        shader_uniform_id create_uniform(const i_string& aName) override
+        {
+            auto id = uniforms().next_cookie();
+            uniforms().add(id, id, aName, value_type{});
+            set_dirty();
+            return id;
+        }
+        shader_uniform_id find_uniform(const i_string& aName) const override
+        {
+            for (auto const& u : uniforms())
+                if (u.name() == aName)
+                    return u.id();
+            return no_uniform;
         }
         using i_shader::set_uniform;
-        void set_uniform(const i_string& aName, const abstract_value_type& aValue) override
+        void set_uniform(shader_uniform_id aUniform, const abstract_value_type& aValue) override
         {
-            auto existing = iUniforms.find(shader_uniform{ aName, aValue });
-            if (existing == iUniforms.end())
-            {
-                iUniforms.insert(shader_uniform{ aName, aValue });
+            auto& u = uniforms()[aUniform];
+            if (u.value().empty() != aValue.empty() || (!u.value().empty() && u.different_type_to(aValue)))
                 set_dirty();
-            }
-            else
-            {
-                if (existing->different_type_to(aValue))
-                    set_dirty();
-                existing->set_value(aValue);
-            }
+            u.set_value(aValue);
+        }
+        void clear_uniform_location(shader_uniform_id aUniform) override
+        {
+            uniforms()[aUniform].clear_location();
+        }
+        void update_uniform_location(shader_uniform_id aUniform, shader_uniform_location aLocation) override
+        {
+            uniforms()[aUniform].set_location(aLocation);
         }
         const variable_list& in_variables() const override
         {

@@ -157,7 +157,10 @@ namespace neogfx
             template <typename SFINAE = self_type>
             std::enable_if_t<Size == 3, SFINAE> cross(const self_type& right) const
             {
-                return self_type{ y * right.z - z * right.y, z * right.x - x * right.z, x * right.y - y * right.x };
+                return self_type{ 
+                    base_type::y * right.base_type::z - base_type::z * right.base_type::y, 
+                    base_type::z * right.base_type::x - base_type::x * right.base_type::z, 
+                    base_type::x * right.base_type::y - base_type::y * right.base_type::x };
             }
         public:
             using base_type::v;
@@ -245,12 +248,18 @@ namespace neogfx
             {
                 value_type result = constants::zero<value_type>;
                 for (uint32_t index = 0; index < Size; ++index)
-                    result += (left[index] * right[index]);
+                    result += ((*this)[index] * right[index]);
                 return result;
             }
             std::enable_if_t<Size == 3, self_type> cross(const self_type& right) const
             {
-                return self_type{ y * right.z - z * right.y, z * right.x - x * right.z, x * right.y - y * right.x };
+                auto const& x = v[0];
+                auto const& y = v[1];
+                auto const& z = v[2];
+                auto const& xx = right.v[0];
+                auto const& yy = right.v[1];
+                auto const& zz = right.v[2];
+                return self_type{ y * zz - z * yy, z * xx - x * zz, x * yy - y * xx };
             }
         public:
             array_type v;

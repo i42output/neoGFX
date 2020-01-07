@@ -22,8 +22,9 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/plugin_variant.hpp>
 #include <neolib/vector.hpp>
+#include <neolib/jar.hpp>
 #include <neolib/reference_counted.hpp>
-#include <neolib/i_map.hpp>
+#include <neolib/i_vector.hpp>
 #include <neolib/i_set.hpp>
 #include <neolib/i_string.hpp>
 #include <neogfx/core/numerical.hpp>
@@ -124,6 +125,7 @@ const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerat
 
 namespace neogfx 
 {
+    struct unknown_uniform_location : std::logic_error { unknown_uniform_location() : std::logic_error{ "neogfx::unknown_uniform_location" } {} };
     struct shader_variable_not_linked : std::logic_error { shader_variable_not_linked() : std::logic_error{ "neogfx::shader_variable_not_linked" } {} };
     struct shader_variable_not_found : std::logic_error { shader_variable_not_found() : std::logic_error{ "neogfx::shader_variable_not_found" } {} };
     struct invalid_shader_variable_type : std::logic_error { invalid_shader_variable_type() : std::logic_error{ "neogfx::invalid_shader_variable_type" } {} };
@@ -148,11 +150,20 @@ namespace neogfx
     typedef neolib::plugin_variant<shader_data_type, bool, float, double, int32_t, uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
 
     typedef uint32_t shader_variable_location;
+    typedef int32_t shader_uniform_location;
+
+    typedef neolib::cookie shader_uniform_id;
+    constexpr shader_uniform_id no_uniform = shader_uniform_id{};
 
     class i_shader_uniform
     {
     public:
+        virtual shader_uniform_id id() const = 0;
         virtual const i_string& name() const = 0;
+        virtual bool has_location() const = 0;
+        virtual shader_uniform_location location() const = 0;
+        virtual void set_location(shader_uniform_location aLocation) = 0;
+        virtual void clear_location() = 0;
         virtual const abstract_t<shader_value_type>& value() const = 0;
         virtual void set_value(const abstract_t<shader_value_type>& aValue) = 0;
         virtual bool is_dirty() const = 0;
@@ -189,22 +200,79 @@ namespace neogfx
         typedef base_type abstract_type;
     public:
         template <typename T>
-        shader_uniform(const string& aName, const T& aValue) :
+        shader_uniform(shader_uniform_id aId, const string& aName, const T& aValue) :
+            iId { aId },
             iName{ aName }, 
             iValue{ aValue },
             iDirty{ true }
         {
         }
+        shader_uniform(const shader_uniform& aOther) :
+            iId{ aOther.iId },
+            iName{ aOther.iName },
+            iValue{ aOther.iValue },
+            iDirty{ true }
+        {
+        }
+        shader_uniform(shader_uniform&& aOther) noexcept :
+            iId{ std::move(aOther.iId) },
+            iName{ std::move(aOther.iName) },
+            iValue{ std::move(aOther.iValue) },
+            iDirty{ true }
+        {
+        }
         shader_uniform(const i_shader_uniform& aOther) :
+            iId{ aOther.id() },
             iName{ aOther.name() },
             iValue{ aOther.value() },
             iDirty{ true }
         {
         }
     public:
+        shader_uniform& operator=(const shader_uniform& aOther)
+        {
+            if (&aOther == this)
+                return *this;
+            this->~shader_uniform();
+            new (this) shader_uniform{ aOther };
+            return *this;
+        }
+        shader_uniform& operator=(shader_uniform&& aOther) noexcept
+        {
+            if (&aOther == this)
+                return *this;
+            iId = std::move(aOther.iId);
+            iName = std::move(aOther.iName);
+            iValue = std::move(aOther.iValue);
+            iDirty = true;
+            return *this;
+        }
+    public:
+        shader_uniform_id id() const override
+        {
+            return iId;
+        }
         const i_string& name() const override 
         { 
             return iName; 
+        }
+        bool has_location() const override
+        {
+            return iLocation != std::nullopt;
+        }
+        shader_uniform_location location() const override
+        {
+            if (has_location())
+                return *iLocation;
+            throw unknown_uniform_location();
+        }
+        void set_location(shader_uniform_location aLocation) override
+        {
+            iLocation = aLocation;
+        }
+        void clear_location() override
+        {
+            iLocation = std::nullopt;
         }
         const abstract_t<shader_value_type>& value() const override 
         { 
@@ -243,12 +311,9 @@ namespace neogfx
             }
         }
     public:
-        bool operator<(const shader_uniform& aRhs) const
-        {
-            return name() < aRhs.name();
-        }
-    public:
+        shader_uniform_id iId;
         string iName;
+        mutable std::optional<shader_uniform_location> iLocation;
         shader_value_type iValue;
         mutable bool iDirty;
     };
@@ -351,7 +416,7 @@ namespace neogfx
     public:
         typedef self_type asbtract_type;
         typedef abstract_t<shader_value_type> value_type;
-        typedef neolib::i_set<i_shader_uniform> uniform_list;
+        typedef neolib::i_vector<i_shader_uniform> uniform_list;
         typedef neolib::i_set<i_shader_variable> variable_list;
     public:
         virtual ~i_shader() {}
@@ -368,8 +433,28 @@ namespace neogfx
         virtual void set_clean() = 0;
     public:
         virtual const uniform_list& uniforms() const = 0;
-        virtual void clear_uniform(const i_string& aName) = 0;
-        virtual void set_uniform(const i_string& aName, const value_type& aValue) = 0;
+        virtual void clear_uniform(shader_uniform_id aUniform) = 0;
+        virtual shader_uniform_id create_uniform(const i_string& aName) = 0;
+        virtual shader_uniform_id find_uniform(const i_string& aName) const = 0;
+        virtual void set_uniform(shader_uniform_id aUniform, const value_type& aValue) = 0;
+        virtual void clear_uniform_location(shader_uniform_id aUniform) = 0;
+        virtual void update_uniform_location(shader_uniform_id aUniform, shader_uniform_location aLocation) = 0;
+        virtual const variable_list& in_variables() const = 0;
+        virtual const variable_list& out_variables() const = 0;
+        virtual void clear_variable(const i_string& aName) = 0;
+        virtual i_shader_variable& add_variable(const i_shader_variable& aVariable) = 0;
+    public:
+        virtual void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) = 0;
+        virtual void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const = 0;
+        virtual void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const = 0;
+    public:
+        void set_uniform(const i_string& aName, const value_type& aValue)
+        {
+            auto existing = find_uniform(aName);
+            if (existing == no_uniform)
+                existing = create_uniform(aName);
+            set_uniform(existing, aValue);
+        }
         template <typename T>
         void set_uniform(const i_string& aName, const T& aValue)
         {
@@ -396,10 +481,6 @@ namespace neogfx
         {
             set_uniform(aName, shader_double_array{ aArray, aArray + aArraySize });
         }
-        virtual const variable_list& in_variables() const = 0;
-        virtual const variable_list& out_variables() const = 0;
-        virtual void clear_variable(const i_string& aName) = 0;
-        virtual i_shader_variable& add_variable(const i_shader_variable& aVariable) = 0;
         template <typename T>
         i_shader_variable& add_in_variable(const i_string& aName, shader_variable_location aLocation)
         {
@@ -410,10 +491,6 @@ namespace neogfx
         {
             return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::Out,  static_cast<shader_data_type>(neolib::index_of<T, shader_value_type>()) });
         }
-    public:
-        virtual void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) = 0;
-        virtual void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const = 0;
-        virtual void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const = 0;
     };
 
     template <typename Shader, typename... Args>

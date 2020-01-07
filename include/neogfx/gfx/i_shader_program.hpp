@@ -34,6 +34,7 @@ namespace neogfx
     struct no_vertex_shader : std::logic_error { no_vertex_shader() : std::logic_error{ "neogfx::no_vertex_shader" } {} };
     struct no_fragment_shader : std::logic_error { no_fragment_shader() : std::logic_error{ "neogfx::no_fragment_shader" } {} };
     struct shader_last_in_stage : std::logic_error { shader_last_in_stage() : std::logic_error{ "neogfx::shader_last_in_stage" } {} };
+    struct shader_program_dirty : std::logic_error { shader_program_dirty() : std::logic_error("neogfx::shader_program_dirty") {} };
     struct failed_to_create_shader : std::runtime_error { failed_to_create_shader() : std::runtime_error("neogfx::failed_to_create_shader") {} };
     struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(const std::string& aReason) : std::runtime_error("neogfx::failed_to_create_shader_program: " + aReason) {} };
     struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::shader_program_error: " + aError) {} };
@@ -81,6 +82,7 @@ namespace neogfx
         virtual void compile() = 0;
         virtual void link() = 0;
         virtual void use() = 0;
+        virtual void update_uniform_locations(const i_rendering_context& aContext) = 0;
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;

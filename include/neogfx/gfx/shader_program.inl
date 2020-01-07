@@ -207,9 +207,15 @@ namespace neogfx
             prepare_uniforms(aContext);
             compile();
             link();
+            use();
+            update_uniform_locations(aContext);
+            update_uniforms(aContext);
+            set_clean();
         }
-        use();
-        update_uniforms(aContext);
-        set_clean();
+        else
+        {
+            use();
+            update_uniforms(aContext);
+        }
     }
 }

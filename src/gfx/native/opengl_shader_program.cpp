@@ -122,12 +122,29 @@ namespace neogfx
 
     void opengl_shader_program::use()
     {
-        glCheck(glUseProgram(gl_handle()));
+        if (!active())
+            glCheck(glUseProgram(gl_handle()));
+    }
+
+    void opengl_shader_program::update_uniform_locations(const i_rendering_context&)
+    {
+        for (auto& stage : stages())
+            for (auto& shader : stage.second())
+                for (auto& uniform : shader->uniforms())
+                {
+                    shader->update_uniform_location(uniform.id(), glGetUniformLocation(gl_handle(), uniform.name().c_str()));
+                    GLenum errorCode = glGetError();
+                    if (errorCode != GL_NO_ERROR)
+                        throw shader_program_error(glErrorString(errorCode));
+                }
     }
 
     void opengl_shader_program::update_uniforms(const i_rendering_context& aContext)
     {
+        bool wasDirty = dirty();
         prepare_uniforms(aContext);
+        if (!wasDirty && dirty())
+            throw shader_program_dirty();
         bool const updateAllUniforms = dirty();
         for (auto& stage : stages())
             for (auto& shader : stage.second())
@@ -139,10 +156,7 @@ namespace neogfx
                         if (uniform.value().empty())
                             continue;
                         uniform.clean();
-                        GLint location = glGetUniformLocation(gl_handle(), uniform.name().c_str());
-                        GLenum errorCode = glGetError();
-                        if (errorCode != GL_NO_ERROR)
-                            throw shader_program_error(glErrorString(errorCode));
+                        auto const location = uniform.location();
                         std::visit([this, location](auto&& v)
                         {
                             typedef std::decay_t<decltype(v)> data_type;
