@@ -48,10 +48,10 @@ namespace neogfx
         const i_string& name() const override;
         bool created() const override;
         void* handle() const override;
-        const i_stages_t& stages() const override;
-        i_stages_t& stages() override;
-        const i_shaders_t& stage(shader_type aStage) const override;
-        i_shaders_t& stage(shader_type aStage) override;
+        const stages_t& stages() const override;
+        stages_t& stages() override;
+        const shaders_t& stage(shader_type aStage) const override;
+        shaders_t& stage(shader_type aStage) override;
         const i_shader& shader(const neolib::i_string& aName) const override;
         i_shader& shader(const neolib::i_string& aName) override;
         const i_vertex_shader& vertex_shader() const override;

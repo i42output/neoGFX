@@ -70,27 +70,27 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline const i_shader_program::i_stages_t& shader_program<Base>::stages() const
+    inline const typename shader_program<Base>::stages_t& shader_program<Base>::stages() const
     {
         return iStages;
     }
 
     template <typename Base>
-    inline i_shader_program::i_stages_t& shader_program<Base>::stages()
+    inline typename shader_program<Base>::stages_t& shader_program<Base>::stages()
     {
         return iStages;
     }
 
     template <typename Base>
-    const i_shader_program::i_shaders_t& shader_program<Base>::stage(shader_type aStage) const
+    const typename shader_program<Base>::shaders_t& shader_program<Base>::stage(shader_type aStage) const
     {
-        return stages().at(static_cast<std::size_t>(aStage)).second();
+        return static_cast<const shaders_t&>(stages().at(static_cast<std::size_t>(aStage)).second());
     }
 
     template <typename Base>
-    i_shader_program::i_shaders_t& shader_program<Base>::stage(shader_type aStage)
+    typename shader_program<Base>::shaders_t& shader_program<Base>::stage(shader_type aStage)
     {
-        return stages().at(static_cast<std::size_t>(aStage)).second();
+        return static_cast<shaders_t&>(stages().at(static_cast<std::size_t>(aStage)).second());
     }
 
     template <typename Base>
@@ -152,7 +152,7 @@ namespace neogfx
     inline const i_shader& shader_program<Base>::first_in_stage(shader_type aStage) const
     {
         if (have_stage(aStage))
-            for (auto const& shader : stage(aStage))
+            for (auto const& shader : stage(aStage).container())
                 if (shader->enabled())
                     return *shader;
         throw shader_not_found();
@@ -200,8 +200,8 @@ namespace neogfx
     template <typename Base>
     inline bool shader_program<Base>::dirty() const
     {
-        for (auto const& stage : stages())
-            for (auto const& shader : stage.second())
+        for (auto const& stage : stages().container())
+            for (auto const& shader : stage.second().container())
                 if (shader->dirty())
                     return true;
         return false;
@@ -210,16 +210,16 @@ namespace neogfx
     template <typename Base>
     inline void shader_program<Base>::set_clean()
     {
-        for (auto& stage : stages())
-            for (auto& shader : stage.second())
+        for (auto& stage : stages().container())
+            for (auto& shader : stage.second().container())
                 shader->set_clean();
     }
 
     template <typename Base>
     inline void shader_program<Base>::prepare_uniforms(const i_rendering_context& aContext)
     {
-        for (auto& stage : stages())
-            for (auto& shader : stage.second())
+        for (auto& stage : stages().container())
+            for (auto& shader : stage.second().container())
                 shader->prepare_uniforms(aContext, *this);
     }
 
