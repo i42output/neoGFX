@@ -31,10 +31,16 @@ namespace neogfx
     class shader_program : public neolib::reference_counted<Base>
     {
     public:
-        typedef neolib::vector<neolib::ref_ptr<i_shader>> shaders_t;
-        typedef neolib::map<shader_type, shaders_t> stages_t;
+        using i_shader_program::i_shader_t;
+        using i_shader_program::i_shaders_t;
+        using i_shader_program::i_stage_t;
+        using i_shader_program::i_stages_t;
+        typedef neolib::ref_ptr<i_shader> shader_t;
+        typedef neolib::vector<shader_t> shaders_t;
+        typedef neolib::pair<shader_type, shaders_t> stage_t;
+        typedef neolib::vector<stage_t> stages_t;
     private:
-        typedef neolib::map<neolib::string, neolib::ref_ptr<i_shader>> shader_index;
+        typedef std::map<neolib::string, shader_t> shader_index;
     public:
         shader_program(const std::string aName);
         ~shader_program();
@@ -42,7 +48,10 @@ namespace neogfx
         const i_string& name() const override;
         bool created() const override;
         void* handle() const override;
-        const stages_t& stages() const override;
+        const i_stages_t& stages() const override;
+        i_stages_t& stages() override;
+        const i_shaders_t& stage(shader_type aStage) const override;
+        i_shaders_t& stage(shader_type aStage) override;
         const i_shader& shader(const neolib::i_string& aName) const override;
         i_shader& shader(const neolib::i_string& aName) override;
         const i_vertex_shader& vertex_shader() const override;

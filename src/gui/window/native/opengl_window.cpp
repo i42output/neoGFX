@@ -253,7 +253,7 @@ namespace neogfx
             return;
         }
 
-        //std::cerr << "to render: " << rectToRender << std::endl;
+        //std::cout << "to render: " << invalidated_area() << std::endl;
 
         ++iFrameCounter;
 

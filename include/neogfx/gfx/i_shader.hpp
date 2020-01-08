@@ -31,14 +31,15 @@
 
 namespace neogfx
 {
-    enum class shader_type
+    enum class shader_type : uint32_t
     {
         Compute,
         Vertex,
         TessellationControl,
         TessellationEvaluation,
         Geometry,
-        Fragment
+        Fragment,
+        COUNT
     };
 
     enum class shader_variable_qualifier : uint32_t

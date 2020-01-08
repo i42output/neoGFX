@@ -29,6 +29,12 @@ namespace neogfx
     inline shader_program<Base>::shader_program(const std::string aName) :
         iName{ aName }
     {
+        iStages.push_back(stage_t{ shader_type::Compute, shaders_t{} });
+        iStages.push_back(stage_t{ shader_type::Vertex, shaders_t{} });
+        iStages.push_back(stage_t{ shader_type::TessellationControl, shaders_t{} });
+        iStages.push_back(stage_t{ shader_type::TessellationEvaluation, shaders_t{} });
+        iStages.push_back(stage_t{ shader_type::Geometry, shaders_t{} });
+        iStages.push_back(stage_t{ shader_type::Fragment, shaders_t{} });
     }
 
     template <typename Base>
@@ -64,9 +70,27 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline const typename shader_program<Base>::stages_t& shader_program<Base>::stages() const
+    inline const i_shader_program::i_stages_t& shader_program<Base>::stages() const
     {
         return iStages;
+    }
+
+    template <typename Base>
+    inline i_shader_program::i_stages_t& shader_program<Base>::stages()
+    {
+        return iStages;
+    }
+
+    template <typename Base>
+    const i_shader_program::i_shaders_t& shader_program<Base>::stage(shader_type aStage) const
+    {
+        return stages().at(static_cast<std::size_t>(aStage)).second();
+    }
+
+    template <typename Base>
+    i_shader_program::i_shaders_t& shader_program<Base>::stage(shader_type aStage)
+    {
+        return stages().at(static_cast<std::size_t>(aStage)).second();
     }
 
     template <typename Base>
@@ -74,7 +98,7 @@ namespace neogfx
     {
         auto s = iShaderIndex.find(aName);
         if (s != iShaderIndex.end())
-            return *s->second();
+            return *s->second;
         throw shader_not_found();
     }
 
@@ -88,7 +112,7 @@ namespace neogfx
     inline const i_vertex_shader& shader_program<Base>::vertex_shader() const
     {
         if (have_stage(shader_type::Vertex))
-            return static_cast<const i_vertex_shader&>(*stages().at(shader_type::Vertex)[0]);
+            return static_cast<const i_vertex_shader&>(*stage(shader_type::Vertex)[0]);
         throw no_vertex_shader();
     }
 
@@ -102,7 +126,7 @@ namespace neogfx
     inline const i_fragment_shader& shader_program<Base>::fragment_shader() const
     {
         if (have_stage(shader_type::Fragment))
-            return static_cast<const i_fragment_shader&>(*stages().at(shader_type::Fragment)[0]);
+            return static_cast<const i_fragment_shader&>(*stage(shader_type::Fragment)[0]);
         throw no_fragment_shader();
     }
 
@@ -128,7 +152,7 @@ namespace neogfx
     inline const i_shader& shader_program<Base>::first_in_stage(shader_type aStage) const
     {
         if (have_stage(aStage))
-            for (auto const& shader : stages().at(aStage))
+            for (auto const& shader : stage(aStage))
                 if (shader->enabled())
                     return *shader;
         throw shader_not_found();
@@ -138,7 +162,7 @@ namespace neogfx
     inline const i_shader& shader_program<Base>::last_in_stage(shader_type aStage) const
     {
         if (have_stage(aStage))
-            for (auto shader = stages().at(aStage).rbegin(); shader != stages().at(aStage).rend(); ++shader)
+            for (auto shader = stage(aStage).rbegin(); shader != stage(aStage).rend(); ++shader)
                 if ((**shader).enabled())
                     return **shader;
         throw shader_not_found();
@@ -147,11 +171,11 @@ namespace neogfx
     template <typename Base>
     inline const i_shader& shader_program<Base>::next_in_stage(const i_shader& aPreviousShader) const
     {
-        auto stage = stages().find(aPreviousShader.type());
-        if (stage != stages().end())
+        if (have_stage(aPreviousShader.type()))
         {
-            auto shader = std::find_if(stage->second().begin(), stage->second().end(), [&aPreviousShader](auto& s) { return &*s == &aPreviousShader; });
-            while(shader != stage->second().end())
+            auto const& currentStage = stage(aPreviousShader.type());
+            auto shader = std::find_if(currentStage.begin(), currentStage.end(), [&aPreviousShader](auto& s) { return &*s == &aPreviousShader; });
+            while(shader != currentStage.end())
             {
                 std::advance(shader, 1);
                 if ((**shader).enabled())
@@ -166,8 +190,8 @@ namespace neogfx
     {
         if (iShaderIndex.find(aShader->name()) == iShaderIndex.end())
         {
-            iStages[aShader->type()].push_back(aShader);
-            iShaderIndex.insert(aShader->name(), aShader);
+            stage(aShader->type()).push_back(aShader);
+            iShaderIndex.emplace(string{ aShader->name() }, aShader);
             return *aShader;
         }
         throw shader_name_exists();

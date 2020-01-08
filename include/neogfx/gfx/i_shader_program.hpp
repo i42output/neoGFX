@@ -29,6 +29,7 @@
 
 namespace neogfx
 {
+    struct shader_stage_not_found : std::logic_error { shader_stage_not_found() : std::logic_error{ "neogfx::shader_stage_not_found" } {} };
     struct shader_not_found : std::logic_error { shader_not_found() : std::logic_error{ "neogfx::shader_not_found" } {} };
     struct shader_name_exists : std::logic_error { shader_name_exists() : std::logic_error{ "neogfx::shader_name_exists" } {} };
     struct no_vertex_shader : std::logic_error { no_vertex_shader() : std::logic_error{ "neogfx::no_vertex_shader" } {} };
@@ -52,8 +53,10 @@ namespace neogfx
     public:
         typedef self_type abstract_type;
     public:
-        typedef neolib::i_vector<neolib::i_ref_ptr<i_shader>> shaders_t;
-        typedef neolib::i_map<shader_type, shaders_t> stages_t;
+        typedef neolib::i_ref_ptr<i_shader> i_shader_t;
+        typedef neolib::i_vector<i_shader_t> i_shaders_t;
+        typedef neolib::i_pair<shader_type, i_shaders_t> i_stage_t;
+        typedef neolib::i_vector<i_stage_t> i_stages_t;
         // construction
     public:
         virtual ~i_shader_program() {}
@@ -63,7 +66,10 @@ namespace neogfx
         virtual const i_string& name() const = 0;
         virtual bool created() const = 0;
         virtual void* handle() const = 0;
-        virtual const stages_t& stages() const = 0;
+        virtual const i_stages_t& stages() const = 0;
+        virtual i_stages_t& stages() = 0;
+        virtual const i_shaders_t& stage(shader_type aStage) const = 0;
+        virtual i_shaders_t& stage(shader_type aStage) = 0;
         virtual const i_shader& shader(const neolib::i_string& aName) const = 0;
         virtual i_shader& shader(const neolib::i_string& aName) = 0;
         virtual const i_vertex_shader& vertex_shader() const = 0;
@@ -100,10 +106,12 @@ namespace neogfx
         }
         bool have_stage(shader_type aStage) const
         {
-            return stages().find(aStage) != stages().end() && !stages().at(aStage).empty();
+            return !stages().at(static_cast<std::size_t>(aStage)).second().empty();
         }
         bool stage_clean(shader_type aStage) const
         {
+            if (!have_stage(aStage))
+                return true;
             const i_shader* shader = &first_in_stage(aStage);
             for(;;)
             {
