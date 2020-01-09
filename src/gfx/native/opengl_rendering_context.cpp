@@ -770,6 +770,25 @@ namespace neogfx
         }
     }
 
+    void opengl_rendering_context::enable_sample_shading(double aSampleShadingRate)
+    {
+        if (iSampleShadingRate == std::nullopt || iSampleShadingRate != aSampleShadingRate)
+        {
+            iSampleShadingRate = aSampleShadingRate;
+            glCheck(glEnable(GL_SAMPLE_SHADING));
+            glCheck(glMinSampleShading(1.0));
+        }
+    }
+
+    void opengl_rendering_context::disable_sample_shading()
+    {
+        if (iSampleShadingRate != std::nullopt)
+        {
+            iSampleShadingRate = std::nullopt;
+            glCheck(glDisable(GL_SAMPLE_SHADING));
+        }
+    }
+    
     void opengl_rendering_context::set_opacity(double aOpacity)
     {
         iOpacity = aOpacity;
@@ -1672,10 +1691,7 @@ namespace neogfx
                 rendering_engine().default_shader_program().texture_shader().set_texture(texture);
                 rendering_engine().default_shader_program().texture_shader().set_effect(aMaterial.shaderEffect != std::nullopt ? *aMaterial.shaderEffect : shader_effect::None);
                 if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
-                {
-                    glCheck(glEnable(GL_SAMPLE_SHADING));
-                    glCheck(glMinSampleShading(1.0));
-                }
+                    enable_sample_shading(1.0);
             }
             else
                 rendering_engine().default_shader_program().texture_shader().clear_texture();
@@ -1714,7 +1730,7 @@ namespace neogfx
             glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
         }
 
-        glCheck(glDisable(GL_SAMPLE_SHADING));
+        disable_sample_shading();
 
         return drawn;
     }

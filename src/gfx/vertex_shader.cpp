@@ -48,14 +48,20 @@ namespace neogfx
 
     void standard_vertex_shader::set_projection_matrix(const optional_mat44& aProjectionMatrix)
     {
-        iProjectionMatrix = aProjectionMatrix;
-        uProjectionMatrix.uniform().mutable_value();
+        if (iProjectionMatrix != aProjectionMatrix)
+        {
+            iProjectionMatrix = aProjectionMatrix;
+            uProjectionMatrix.uniform().mutable_value();
+        }
     }
 
     void standard_vertex_shader::set_transformation_matrix(const optional_mat44& aTransformationMatrix)
     {
-        iTransformationMatrix = aTransformationMatrix;
-        uTransformationMatrix.uniform().mutable_value();
+        if (iTransformationMatrix != aTransformationMatrix)
+        {
+            iTransformationMatrix = aTransformationMatrix;
+            uTransformationMatrix.uniform().mutable_value();
+        }
     }
 
     void standard_vertex_shader::prepare_uniforms(const i_rendering_context& aContext, i_shader_program&)

@@ -112,6 +112,8 @@ namespace neogfx
         void apply_clip();
         bool multisample() const;
         void set_multisample(bool aMultisample);
+        void enable_sample_shading(double aSampleShadingRate);
+        void disable_sample_shading();
         void set_opacity(double aOpacity);
         neogfx::blending_mode blending_mode() const;
         void set_blending_mode(neogfx::blending_mode aBlendingMode);
@@ -164,6 +166,7 @@ namespace neogfx
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         bool iMultisample;
+        std::optional<double> iSampleShadingRate;
         double iOpacity;
         std::optional<neogfx::blending_mode> iBlendingMode;
         std::optional<neogfx::smoothing_mode> iSmoothingMode;

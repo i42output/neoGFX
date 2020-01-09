@@ -27,7 +27,7 @@ namespace neogfx
 {
     template <typename Base>
     inline shader_program<Base>::shader_program(const std::string aName) :
-        iName{ aName }, iNeedFullUniformUpdate{ false }
+        iName{ aName }, iNeedFullUniformUpdate{ false }, iActive{ false }
     {
         iStages.push_back(stage_t{ shader_type::Compute, shaders_t{} });
         iStages.push_back(stage_t{ shader_type::Vertex, shaders_t{} });
@@ -237,6 +237,12 @@ namespace neogfx
     }
     
     template <typename Base>
+    inline bool shader_program<Base>::active() const
+    {
+        return iActive;
+    }
+
+    template <typename Base>
     inline void shader_program<Base>::activate(const i_rendering_context& aContext)
     {
         prepare_uniforms(aContext);
@@ -257,5 +263,17 @@ namespace neogfx
         bool const needIt = iNeedFullUniformUpdate;
         iNeedFullUniformUpdate = false;
         return needIt;
+    }
+
+    template <typename Base>
+    void shader_program<Base>::set_active()
+    {
+        iActive = true;
+    }
+
+    template <typename Base>
+    void shader_program<Base>::set_inactive()
+    {
+        iActive = false;
     }
 }

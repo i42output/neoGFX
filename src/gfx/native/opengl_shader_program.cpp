@@ -123,7 +123,10 @@ namespace neogfx
     void opengl_shader_program::use()
     {
         if (!active())
+        {
             glCheck(glUseProgram(gl_handle()));
+            set_active();
+        }
     }
 
     void opengl_shader_program::update_uniform_locations()
@@ -209,19 +212,13 @@ namespace neogfx
                     }
     }
 
-    bool opengl_shader_program::active() const
-    {
-        if (!created())
-            return false;
-        GLint activeProgram = 0;
-        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &activeProgram));
-        return static_cast<GLuint>(activeProgram) == gl_handle();
-    }
-
     void opengl_shader_program::deactivate()
     {
         if (active())
+        {
             glCheck(glUseProgram(0));
+            set_inactive();
+        }
     }
 
     GLuint opengl_shader_program::gl_handle() const
