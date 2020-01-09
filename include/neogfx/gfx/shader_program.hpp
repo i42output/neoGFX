@@ -67,12 +67,17 @@ namespace neogfx
         bool dirty() const override;
         void set_clean() override;
         void prepare_uniforms(const i_rendering_context& aContext) override;
+        void make() override;
         void activate(const i_rendering_context& aContext) override;
+        void instantiate(const i_rendering_context& aContext) override;
+    protected:
+        bool need_full_uniform_update() const;
     private:
         string iName;
         mutable std::optional<void*> iHandle;
         stages_t iStages;
         shader_index iShaderIndex;
+        mutable bool iNeedFullUniformUpdate;
     };
 }
 

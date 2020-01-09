@@ -170,7 +170,6 @@ namespace neogfx
     public:
         standard_stipple_shader(const std::string& aName = "standard_stipple_shader");
     public:
-        void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) override;
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         bool stipple_active() const override;

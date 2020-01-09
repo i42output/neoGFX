@@ -126,7 +126,7 @@ namespace neogfx
             glCheck(glUseProgram(gl_handle()));
     }
 
-    void opengl_shader_program::update_uniform_locations(const i_rendering_context&)
+    void opengl_shader_program::update_uniform_locations()
     {
         for (auto& stage : stages())
             for (auto& shader : stage.second())
@@ -141,11 +141,8 @@ namespace neogfx
 
     void opengl_shader_program::update_uniforms(const i_rendering_context& aContext)
     {
-        bool wasDirty = dirty();
         prepare_uniforms(aContext);
-        if (!wasDirty && dirty())
-            throw shader_program_dirty();
-        bool const updateAllUniforms = dirty();
+        bool const updateAllUniforms = need_full_uniform_update();
         for (auto& stage : stages())
             for (auto& shader : stage.second())
                 if (shader->enabled())

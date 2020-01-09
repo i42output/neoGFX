@@ -166,6 +166,7 @@ namespace neogfx
         virtual void set_location(shader_uniform_location aLocation) = 0;
         virtual void clear_location() = 0;
         virtual const abstract_t<shader_value_type>& value() const = 0;
+        virtual abstract_t<shader_value_type>& mutable_value() = 0;
         virtual void set_value(const abstract_t<shader_value_type>& aValue) = 0;
         virtual bool is_dirty() const = 0;
         virtual void clean() const = 0;
@@ -279,7 +280,12 @@ namespace neogfx
         { 
             return iValue; 
         }
-        void set_value(const abstract_t<shader_value_type>& aValue) override 
+        abstract_t<shader_value_type>& mutable_value() override
+        {
+            iDirty = true;
+            return iValue;
+        }
+        void set_value(const abstract_t<shader_value_type>& aValue) override
         { 
             if (iValue != aValue)
             {

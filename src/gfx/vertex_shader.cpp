@@ -46,51 +46,57 @@ namespace neogfx
         return *this;
     }
 
-    mat44 standard_vertex_shader::projection_matrix(const i_rendering_context& aContext) const
-    {
-        if (iProjectionMatrix != std::nullopt)
-            return *iProjectionMatrix;
-        auto const& logicalCoordinates = aContext.logical_coordinates();
-        double left = logicalCoordinates.bottomLeft.x;
-        double right = logicalCoordinates.topRight.x;
-        double bottom = logicalCoordinates.bottomLeft.y;
-        double top = logicalCoordinates.topRight.y;
-        double zFar = 1.0;
-        double zNear = -1.0;
-        mat44 orthoMatrix = mat44{
-            { 2.0 / (right - left), 0.0, 0.0, -(right + left) / (right - left) },
-            { 0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom) },
-            { 0.0, 0.0, -2.0 / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
-            { 0.0, 0.0, 0.0, 1.0 } };
-        return orthoMatrix;
-    }
-
     void standard_vertex_shader::set_projection_matrix(const optional_mat44& aProjectionMatrix)
     {
         iProjectionMatrix = aProjectionMatrix;
-    }
-
-    mat44 standard_vertex_shader::transformation_matrix(const i_rendering_context& aContext) const
-    {
-        auto transform = mat44::identity();
-        if (iTransformationMatrix != std::nullopt)
-            transform = *iTransformationMatrix;
-        transform[3][0] += aContext.offset().x;
-        transform[3][1] += aContext.offset().y;
-        return transform;
+        uProjectionMatrix.uniform().mutable_value();
     }
 
     void standard_vertex_shader::set_transformation_matrix(const optional_mat44& aTransformationMatrix)
     {
         iTransformationMatrix = aTransformationMatrix;
+        uTransformationMatrix.uniform().mutable_value();
     }
 
     void standard_vertex_shader::prepare_uniforms(const i_rendering_context& aContext, i_shader_program&)
     {
-        uProjectionMatrix = projection_matrix(aContext).transposed().as<float>();
-        uTransformationMatrix = transformation_matrix(aContext).as<float>();
+        if (iProjectionMatrix == std::nullopt)
+        {
+            auto const& logicalCoordinates = aContext.logical_coordinates();
+            if (uProjectionMatrix.uniform().is_dirty() || iLogicalCoordinates == std::nullopt || *iLogicalCoordinates != logicalCoordinates)
+            {
+                iLogicalCoordinates = logicalCoordinates;
+                auto const bottomLeft = logicalCoordinates.bottomLeft.as<float>();
+                auto const topRight = logicalCoordinates.topRight.as<float>();
+                float const left = bottomLeft.x;
+                float const right = topRight.x;
+                float const bottom = bottomLeft.y;
+                float const top = topRight.y;
+                float const zFar = 1.0f;
+                float const zNear = -1.0f;
+                uProjectionMatrix = mat44f{
+                    { 2.0f / (right - left), 0.0f, 0.0f, -(right + left) / (right - left) },
+                    { 0.0f, 2.0f / (top - bottom), 0.0f, -(top + bottom) / (top - bottom) },
+                    { 0.0f, 0.0f, -2.0f / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
+                    { 0.0f, 0.0f, 0.0f, 1.0f } }.transposed();
+            }
+        }
+        else if (uProjectionMatrix.uniform().is_dirty())
+            uProjectionMatrix = iProjectionMatrix.value().as<float>().transposed();
+
+        auto const& offset = aContext.offset();
+        if (uTransformationMatrix.uniform().is_dirty() || iOffset == std::nullopt || *iOffset != offset)
+        {
+            iOffset = offset;
+            if (iTransformationMatrix == std::nullopt)
+                uTransformationMatrix = mat44f::identity();
+            else
+                uTransformationMatrix = iTransformationMatrix->as<float>();
+            uTransformationMatrix.uniform().mutable_value().get<mat44f>()[3][0] += static_cast<float>(offset.x);
+            uTransformationMatrix.uniform().mutable_value().get<mat44f>()[3][1] += static_cast<float>(offset.y);
+        }
     }
-    
+
     void standard_vertex_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         vertex_shader::generate_code(aProgram, aLanguage, aOutput);

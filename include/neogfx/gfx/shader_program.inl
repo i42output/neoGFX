@@ -27,7 +27,7 @@ namespace neogfx
 {
     template <typename Base>
     inline shader_program<Base>::shader_program(const std::string aName) :
-        iName{ aName }
+        iName{ aName }, iNeedFullUniformUpdate{ false }
     {
         iStages.push_back(stage_t{ shader_type::Compute, shaders_t{} });
         iStages.push_back(stage_t{ shader_type::Vertex, shaders_t{} });
@@ -203,7 +203,7 @@ namespace neogfx
         for (auto const& stage : stages().container())
             for (auto const& shader : stage.second().container())
                 if (shader->dirty())
-                    return true;
+                    return (iNeedFullUniformUpdate = true);
         return false;
     }
 
@@ -224,22 +224,38 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline void shader_program<Base>::activate(const i_rendering_context& aContext)
+    inline void shader_program<Base>::make()
     {
         if (dirty())
         {
-            prepare_uniforms(aContext);
             compile();
             link();
             use();
-            update_uniform_locations(aContext);
-            update_uniforms(aContext);
+            update_uniform_locations();
             set_clean();
         }
-        else
-        {
-            use();
-            update_uniforms(aContext);
-        }
+    }
+    
+    template <typename Base>
+    inline void shader_program<Base>::activate(const i_rendering_context& aContext)
+    {
+        prepare_uniforms(aContext);
+        make();
+        use();
+    }
+
+    template <typename Base>
+    inline void shader_program<Base>::instantiate(const i_rendering_context& aContext)
+    {
+        activate(aContext);
+        update_uniforms(aContext);
+    }
+
+    template <typename Base>
+    bool shader_program<Base>::need_full_uniform_update() const
+    {
+        bool const needIt = iNeedFullUniformUpdate;
+        iNeedFullUniformUpdate = false;
+        return needIt;
     }
 }

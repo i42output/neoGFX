@@ -533,12 +533,6 @@ namespace neogfx
         disable();
     }
 
-    void standard_stipple_shader::prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram)
-    {
-        if (stipple_active() && uStippleVertex.uniform().value().empty())
-            throw no_stipple_vertex();
-    }
-
     void standard_stipple_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_stipple_shader>::generate_code(aProgram, aLanguage, aOutput);

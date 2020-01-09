@@ -31,9 +31,7 @@ namespace neogfx
     class i_standard_vertex_matrices
     {
     public:
-        virtual mat44 projection_matrix(const i_rendering_context& aContext) const = 0;
         virtual void set_projection_matrix(const optional_mat44& aProjectionMatrix) = 0;
-        virtual mat44 transformation_matrix(const i_rendering_context& aContext) const = 0;
         virtual void set_transformation_matrix(const optional_mat44& aProjectionMatrix) = 0;
     };
 

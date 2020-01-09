@@ -379,6 +379,7 @@ namespace neogfx
                 auto& standardMatrices = aShaderProgram.vertex_shader().standard_vertex_matrices();
                 standardMatrices.set_transformation_matrix(iTransformation);
             }
+            aShaderProgram.instantiate(aContext);
         }
     private:
         i_shader_program* iShaderProgram;
