@@ -38,7 +38,6 @@ namespace neogfx
         iSurfaceWindow{ aWindow },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGui },
         iFrameCounter{ 0 },
-        iLastFrameTime{ 0 },
         iRendering{ false },
         iPaused{ 0 }
     {
@@ -183,10 +182,21 @@ namespace neogfx
 
     double opengl_window::fps() const
     {
-        if (iFpsData.size() <= 1)
+        if (iFpsData.size() < 2)
             return 0.0;
-        double durationSeconds = std::chrono::duration_cast<std::chrono::microseconds>(iFpsData.back() - iFpsData.front()).count() / 1000000.0;
-        return (iFpsData.size() - 1) / durationSeconds;
+        double const totalDuration_s = std::chrono::duration_cast<std::chrono::microseconds>(iFpsData.back().second - iFpsData.front().first).count() / 1000000.0;
+        double const averageDuration_s = totalDuration_s / iFpsData.size();
+        return 1.0 / averageDuration_s;
+    }
+
+    double opengl_window::potential_fps() const
+    {
+        if (iFpsData.size() < 1)
+            return 0.0;
+        double const totalDuration_s = std::accumulate(iFpsData.begin(), iFpsData.end(), 0.0, [](double sum, const frame_times& frameTimes) -> double
+            { return sum + std::chrono::duration_cast<std::chrono::microseconds>(frameTimes.second - frameTimes.first).count() / 1000000.0; });
+        double const averageDuration_s = totalDuration_s / iFpsData.size();
+        return 1.0 / averageDuration_s;
     }
 
     void opengl_window::invalidate(const rect& aInvalidatedRect)
@@ -233,11 +243,12 @@ namespace neogfx
         if (iRendering || rendering_engine().creating_window() || !can_render())
             return;
 
-        uint64_t now = neolib::thread::program_elapsed_ms();
+        auto const now = std::chrono::high_resolution_clock::now();
 
         if (!aOOBRequest)
         {
-            if (rendering_engine().frame_rate_limited() && now - iLastFrameTime < 1000 / (rendering_engine().frame_rate_limit() * (!rendering_engine().use_rendering_priority() ? 1.0 : rendering_priority())))
+            if (rendering_engine().frame_rate_limited() && iLastFrameTime != std::nullopt &&
+                std::chrono::duration_cast<std::chrono::milliseconds>(now - *iLastFrameTime).count() < 1000 / (rendering_engine().frame_rate_limit() * (!rendering_engine().use_rendering_priority() ? 1.0 : rendering_priority())))
                 return;
 
             if (!surface_window().native_window_ready_to_render())
@@ -319,7 +330,7 @@ namespace neogfx
 
         surface_window().rendering_finished().trigger();
 
-        iFpsData.push_back(std::chrono::high_resolution_clock::now());
+        iFpsData.push_back(frame_times{ *iLastFrameTime, std::chrono::high_resolution_clock::now() });
         if (iFpsData.size() > 100)
             iFpsData.pop_front();        
     }

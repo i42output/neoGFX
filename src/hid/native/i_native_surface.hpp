@@ -60,6 +60,7 @@ namespace neogfx
     public:
         virtual uint64_t frame_counter() const = 0;
         virtual double fps() const = 0;
+        virtual double potential_fps() const = 0;
     public:
         virtual void invalidate(const rect& aInvalidatedRect) = 0;
         virtual bool has_invalidated_area() const = 0;

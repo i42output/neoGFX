@@ -116,7 +116,7 @@ void create_game(ng::i_layout& aLayout)
             ng::vec2{ prng(64), prng(64) },
             ng::colour{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }.lighter(0x40)
         }.detach();
-
+        
     // Asteroids...
     auto make_asteroid_mesh = [&]()
     {

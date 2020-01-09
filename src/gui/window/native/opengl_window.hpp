@@ -60,6 +60,7 @@ namespace neogfx
     public:
         uint64_t frame_counter() const override;
         double fps() const override;
+        double potential_fps() const override;
     public:
         void invalidate(const rect& aInvalidatedRect) override;
         bool has_invalidated_area() const override;
@@ -89,8 +90,10 @@ namespace neogfx
         size iFrameBufferExtents;
         std::optional<rect> iInvalidatedArea;
         uint64_t iFrameCounter;
-        uint64_t iLastFrameTime;
-        std::deque<std::chrono::time_point<std::chrono::steady_clock>> iFpsData;
+        typedef std::chrono::time_point<std::chrono::high_resolution_clock> frame_time_point;
+        typedef std::pair<frame_time_point, frame_time_point> frame_times;
+        std::optional<frame_time_point> iLastFrameTime;
+        std::deque<frame_times> iFpsData;
         bool iRendering;
         uint32_t iPaused;
     };

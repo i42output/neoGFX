@@ -60,9 +60,8 @@ namespace neogfx
     private:
         window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style);
     public:
-        window_style style() const;
-        void set_style(window_style aStyle);
-        double fps() const;
+        window_style style() const override;
+        void set_style(window_style aStyle) override;
     public:
         const i_window_manager& window_manager() const override;
         i_window_manager& window_manager() override;
@@ -161,6 +160,8 @@ namespace neogfx
         void dismiss() override;
     public:
         double rendering_priority() const override;
+        double fps() const override;
+        double potential_fps() const override;
     public:
         point mouse_position() const override;
     public:

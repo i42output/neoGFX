@@ -309,14 +309,6 @@ namespace neogfx
         iStyle = aStyle;
     }
 
-    double window::fps() const
-    {
-        if (has_surface())
-            return native_window().fps();
-        else
-            return 0.0;
-    }
-
     const i_window_manager& window::window_manager() const
     {
         return iWindowManager;
@@ -982,6 +974,22 @@ namespace neogfx
         if (is_active())
             return 1.0;
         return 0.1;
+    }
+
+    double window::fps() const
+    {
+        if (has_surface())
+            return native_window().fps();
+        else
+            return 0.0;
+    }
+
+    double window::potential_fps() const
+    {
+        if (has_surface())
+            return native_window().potential_fps();
+        else
+            return 0.0;
     }
 
     point window::mouse_position() const

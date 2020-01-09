@@ -131,6 +131,8 @@ namespace neogfx
         virtual void dismiss() = 0;
     public:
         virtual double rendering_priority() const = 0;
+        virtual double fps() const = 0;
+        virtual double potential_fps() const = 0;
     public:
         virtual point mouse_position() const = 0;
     public:

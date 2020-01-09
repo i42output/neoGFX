@@ -211,7 +211,10 @@ int main(int argc, char* argv[])
         window.PaintOverlay([&showFps, &window, fpsFont](ng::i_graphics_context& aGc)
         {
             if (showFps)
-                aGc.draw_text(ng::point{ 100, 120 }, (boost::format(" %1$6.2f FPS ") % window.fps()).str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::colour::DarkBlue.darker(0x40), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
+            {
+                auto const numbers = (boost::format("%1$.2f/%2$.2f") % window.fps() % window.potential_fps()).str();
+                aGc.draw_text(ng::point{ 100, 120 }, (boost::format(" %1% FPS/PFPS ") % numbers).str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::colour::DarkBlue.darker(0x40), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
+            }
         });
 
         window.surface().rendering_finished([&fullRefresh, &window]()
