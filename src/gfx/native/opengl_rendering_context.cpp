@@ -1188,11 +1188,9 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
+        neolib::scoped_flag snap{ iSnapToPixel, false };
         scoped_anti_alias saa{ *this, smoothing_mode::None };
-        std::optional<disable_multisample> disableMultisample;
-
-        if (snap_to_pixel())
-            disableMultisample.emplace(*this);
+        disable_multisample disableMultisample{ *this };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
