@@ -165,8 +165,8 @@ namespace neogfx
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         bool iMultisample;
         double iOpacity;
-        neogfx::blending_mode iBlendingMode;
-        neogfx::smoothing_mode iSmoothingMode; 
+        std::optional<neogfx::blending_mode> iBlendingMode;
+        std::optional<neogfx::smoothing_mode> iSmoothingMode;
         bool iSubpixelRendering;
         std::vector<logical_operation> iLogicalOperationStack;
         std::list<use_shader_program> iShaderProgramStack;

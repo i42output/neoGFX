@@ -228,8 +228,6 @@ namespace neogfx
         iWidget{ nullptr },
         iMultisample{ true },
         iOpacity{ 1.0 },
-        iBlendingMode{ neogfx::blending_mode::None },
-        iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
         iSrt{ iTarget },
@@ -251,8 +249,6 @@ namespace neogfx
         iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },        
         iMultisample{ true },
         iOpacity{ 1.0 },
-        iBlendingMode{ neogfx::blending_mode::None },
-        iSmoothingMode{ neogfx::smoothing_mode::None },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iClipCounter{ 0 },
         iSrt{ iTarget },
@@ -275,16 +271,14 @@ namespace neogfx
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
         iMultisample{ true },
         iOpacity{ 1.0 },
-        iBlendingMode{ aOther.iBlendingMode },
-        iSmoothingMode{ aOther.iSmoothingMode },
         iSubpixelRendering{ aOther.iSubpixelRendering },
         iClipCounter{ 0 },
         iSrt{ iTarget },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
         iSnapToPixel{ false }
     {
-        set_blending_mode(iBlendingMode);
-        set_smoothing_mode(iSmoothingMode);
+        set_blending_mode(aOther.blending_mode());
+        set_smoothing_mode(aOther.smoothing_mode());
         iSink += render_target().target_deactivating([this]()
         {
             flush();
@@ -783,45 +777,51 @@ namespace neogfx
 
     neogfx::blending_mode opengl_rendering_context::blending_mode() const
     {
-        return iBlendingMode;
+        return *iBlendingMode;
     }
 
     void opengl_rendering_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
     {
-        iBlendingMode = aBlendingMode;
-        switch (iBlendingMode)
+        if (iBlendingMode == std::nullopt || *iBlendingMode != aBlendingMode)
         {
-        case neogfx::blending_mode::None:
-            glCheck(glDisable(GL_BLEND));
-            break;
-        case neogfx::blending_mode::Blit:
-            glCheck(glEnable(GL_BLEND));
-            glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
-            break;
-        case neogfx::blending_mode::Default:
-            glCheck(glEnable(GL_BLEND));
-            glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-            break;
+            iBlendingMode = aBlendingMode;
+            switch (*iBlendingMode)
+            {
+            case neogfx::blending_mode::None:
+                glCheck(glDisable(GL_BLEND));
+                break;
+            case neogfx::blending_mode::Blit:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+                break;
+            case neogfx::blending_mode::Default:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                break;
+            }
         }
     }
 
     smoothing_mode opengl_rendering_context::smoothing_mode() const
     {
-        return iSmoothingMode;
+        return *iSmoothingMode;
     }
 
     void opengl_rendering_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
     {
-        iSmoothingMode = aSmoothingMode;
-        if (iSmoothingMode == neogfx::smoothing_mode::AntiAlias)
+        if (iSmoothingMode == std::nullopt || *iSmoothingMode != aSmoothingMode)
         {
-            glCheck(glEnable(GL_LINE_SMOOTH));
-            glCheck(glEnable(GL_POLYGON_SMOOTH));
-        }
-        else
-        {
-            glCheck(glDisable(GL_LINE_SMOOTH));
-            glCheck(glDisable(GL_POLYGON_SMOOTH));
+            iSmoothingMode = aSmoothingMode;
+            if (*iSmoothingMode == neogfx::smoothing_mode::AntiAlias)
+            {
+                glCheck(glEnable(GL_LINE_SMOOTH));
+                glCheck(glEnable(GL_POLYGON_SMOOTH));
+            }
+            else
+            {
+                glCheck(glDisable(GL_LINE_SMOOTH));
+                glCheck(glDisable(GL_POLYGON_SMOOTH));
+            }
         }
     }
 
@@ -1180,8 +1180,6 @@ namespace neogfx
 
     void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
-
         graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill, aZpos } };
         fill_rect(graphics_operation::batch{ &op, &op + 1 });
     }
@@ -1191,7 +1189,10 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         scoped_anti_alias saa{ *this, smoothing_mode::None };
-        neolib::scoped_flag snap{ iSnapToPixel, false };
+        std::optional<disable_multisample> disableMultisample;
+
+        if (snap_to_pixel())
+            disableMultisample.emplace(*this);
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
