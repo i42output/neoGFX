@@ -34,6 +34,7 @@ namespace neogfx
             iOwner(aOwner),
             iAnimationTimer{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
             {
+                surface().closed([&aTimer]() { aTimer.cancel(); });
                 aTimer.again();
                 animate();
             }, 10, true },
