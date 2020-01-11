@@ -79,6 +79,43 @@ namespace neogfx
             {
             }
         };
+        struct mesh_drawable
+        {
+            game::mesh_filter const* filter;
+            game::mesh_renderer const* renderer;
+            mat44 transformation;
+            game::entity_id entity;
+            bool drawn;
+            mesh_drawable(
+                game::mesh_filter const& filter, 
+                game::mesh_renderer const& renderer,
+                mat44 const& transformation,
+                game::entity_id entity = game::null_entity
+                ) :
+                filter{ &filter },
+                renderer{ &renderer },
+                transformation{ transformation },
+                entity{ entity },
+                drawn{ false }
+            {}
+        };
+        struct patch_drawable
+        {
+            typedef uint32_t vertices_offset_t;
+            vertices xyz;
+            vertices_2d const* uv;
+            struct item
+            {
+                vertices_offset_t offset;
+                game::material const* material;
+                game::faces const* faces;
+                bool drawn;
+                item(vertices_offset_t offset, game::material const& material, game::faces const& faces) :
+                    offset{ offset }, material{ &material }, faces{ &faces }, drawn{ false }
+                {}
+            };
+            std::vector<item> items;
+        };
     public:
         opengl_rendering_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);
         opengl_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default);
@@ -148,9 +185,10 @@ namespace neogfx
         void fill_shape(const game::mesh& aMesh, const brush& aFill);
         void fill_shape(const graphics_operation::batch& aFillShapeOps);
         void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
-        bool draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
-        bool draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
-        bool draw_patch(const vertices& aVertices, const vertices_2d& aTextureVertices, const game::material& aMaterial, const game::faces& aFaces);
+        void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
+        void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
+        void draw_meshes(mesh_drawable* aFirst, mesh_drawable* aLast);
+        void draw_patch(patch_drawable& aPatch);
     public:
         neogfx::subpixel_format subpixel_format() const override;
     private:
