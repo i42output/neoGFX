@@ -44,7 +44,9 @@
     <CustomBuild Include="..\..\..\src\test.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\..\..\..\src\closed\toolbar.nrc" />
+    <CustomBuild Include="..\..\..\..\..\..\src\closed\toolbar.nrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">

@@ -1191,11 +1191,11 @@ namespace neogfx
                 std::cerr << "Rendering debug entity..." << std::endl;
             #endif
             drawables.emplace_back(
-            aEcs.component<game::mesh_filter>().entity_record(entity), 
-            aEcs.component<game::mesh_renderer>().entity_record(entity),
-            rigidBodies.has_entity_record(entity) ? 
-                to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity(),
-            entity);
+                aEcs.component<game::mesh_filter>().entity_record(entity), 
+                aEcs.component<game::mesh_renderer>().entity_record(entity),
+                rigidBodies.has_entity_record(entity) ? 
+                    to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity(),
+                entity);
         }
         draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), aTransformation);
         for (auto const& d : drawables)
@@ -1650,7 +1650,7 @@ namespace neogfx
                 mesh.filter->mesh->faces : mesh.filter->sharedMesh.ptr->faces;
             auto const& material = mesh.renderer->material;
 
-            patch_drawable::vertices_offset_t const offset = static_cast<patch_drawable::vertices_offset_t>(patch.xyz.size());
+            auto const offset = patch.xyz.size();
             patch.xyz.insert(patch.xyz.end(), xyz.begin(), xyz.end());
             patch.uv.insert(patch.uv.end(), uv.begin(), uv.end());
             patch.items.emplace_back(mesh, offset, material, faces);
@@ -1675,10 +1675,38 @@ namespace neogfx
             GLint previousTexture = 0;
 
             auto const& batchMaterial = *item->material;
+            vec2 textureStorageExtents;
+
+            auto calc_bounding_rect = [&aPatch](const patch_drawable::item& aItem) -> rect
+            {
+                return game::bounding_rect(aPatch.xyz, *aItem.faces, aItem.offset);
+            };
+
+            auto calc_sampling = [&aPatch, &calc_bounding_rect](const patch_drawable::item& aItem) -> texture_sampling
+            {
+                const game::material& material = *aItem.material;
+                if (material.texture == std::nullopt)
+                    return texture_sampling::Normal;
+                auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
+                auto sampling =
+                    (material.texture->sampling != std::nullopt ?
+                        *material.texture->sampling : texture.sampling());
+                if (sampling == texture_sampling::Scaled)
+                {
+                    auto const extents = size_u32{ texture.extents() };
+                    auto const outputRect = calc_bounding_rect(aItem);
+                    if (extents / 2u * 2u == extents && (outputRect.cx > extents.cx || outputRect.cy > extents.cy))
+                        sampling = texture_sampling::Nearest;
+                    else
+                        sampling = texture_sampling::Normal;
+                }
+                return sampling;
+            };
 
             std::size_t faceCount = item->faces->size();
+            auto sampling = calc_sampling(*item);
             auto next = std::next(item);
-            while (next != aPatch.items.end() && game::batchable(*item->material, *next->material))
+            while (next != aPatch.items.end() && game::batchable(*item->material, *next->material) && sampling == calc_sampling(*next))
             {
                 faceCount += next->faces->size();
                 ++next;
@@ -1689,24 +1717,22 @@ namespace neogfx
                 {
                     auto const& texture = *service<i_texture_manager>().find_texture(batchMaterial.texture->id.cookie());
 
+                    textureStorageExtents = texture.storage_extents().to_vec2();
+
                     glCheck(glActiveTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
 
                     glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
-                    glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(texture.native_texture()->handle()))));
-                    auto sampling = texture.sampling();
-                    if (sampling == texture_sampling::Scaled)
-                    {
-                        auto const extents = size_u32{ texture.extents() };
-                        auto const outputRect = game::bounding_rect(vertices);
-                        if (extents / 2u * 2u == extents && (outputRect.cx > extents.cx || outputRect.cy > extents.cy))
-                            sampling = texture_sampling::Nearest;
-                        else
-                            sampling = texture_sampling::Normal;
-                    }
+                    glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(texture.native_handle())));
                     if (sampling != texture_sampling::Multisample)
                     {
-                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
-                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
+                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
+                            GL_LINEAR : 
+                            GL_NEAREST));
+                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? 
+                            GL_LINEAR_MIPMAP_LINEAR : 
+                            sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
+                                GL_LINEAR : 
+                                GL_NEAREST));
                     }
 
                     rendering_engine().default_shader_program().texture_shader().set_texture(texture);
@@ -1722,7 +1748,6 @@ namespace neogfx
 
                 for (; item != next; ++item)
                 {
-                    vec2 textureStorageExtents;
                     vec2 uvFixupCoefficient;
                     vec2 uvFixupOffset;
 
@@ -1739,8 +1764,6 @@ namespace neogfx
                         else
                             uvFixupOffset = material.texture->subTexture->min;
                     }
-                    else
-                        rendering_engine().default_shader_program().texture_shader().clear_texture();
 
                     auto const offset = item->offset;
                     auto const& faces = *item->faces;
@@ -1753,8 +1776,8 @@ namespace neogfx
                     {
                         for (auto faceVertexIndex : face)
                         {
-                            faceVertexIndex += offset;
-                            auto const& v = vertices[faceVertexIndex];
+                            auto const vertexIndexOffset  = faceVertexIndex + offset;
+                            auto const& v = vertices[vertexIndexOffset];
                             auto const logicalCoordinates = logical_coordinates();
                             if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
                                 v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
@@ -1763,7 +1786,7 @@ namespace neogfx
                                 item->mesh->drawn = true;
                             vec2 uv = {};
                             if (material.texture != std::nullopt)
-                                uv = (textureVertices[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
+                                uv = (textureVertices[vertexIndexOffset].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
                             vertexArrays.instance().emplace_back(
                                 v,
                                 vec4f{ {

@@ -81,7 +81,7 @@ namespace neogfx::game
         return mesh{ aLhs * aRhs.vertices, aRhs.uv, aRhs.faces };
     }
 
-    inline rect bounding_rect(const neogfx::vertices& aVertices)
+    inline rect bounding_rect(const vertices& aVertices)
     {
         if (aVertices.empty())
             return rect{};
@@ -97,12 +97,34 @@ namespace neogfx::game
         return rect{ topLeft, bottomRight };
     }
 
+    inline rect bounding_rect(const vertices& aVertices, const faces& aFaces, vertices::size_type aOffset = 0)
+    {
+        if (aVertices.empty())
+            return rect{};
+        point topLeft{ 
+            aVertices[static_cast<vertices::size_type>(aFaces[0][0]) + aOffset].x, 
+            aVertices[static_cast<vertices::size_type>(aFaces[0][0]) + aOffset].y };
+        point bottomRight = topLeft;
+        for (auto const& f : aFaces)
+        {
+            for (faces::size_type fv = 0; fv < 3; ++fv)
+            {
+                auto const& v = aVertices[static_cast<vertices::size_type>(f[static_cast<uint32_t>(fv)]) + aOffset];
+                topLeft.x = std::min<coordinate>(topLeft.x, v.x);
+                topLeft.y = std::min<coordinate>(topLeft.y, v.y);
+                bottomRight.x = std::max<coordinate>(bottomRight.x, v.x);
+                bottomRight.y = std::max<coordinate>(bottomRight.y, v.y);
+            }
+        }
+        return rect{ topLeft, bottomRight };
+    }
+
     inline rect bounding_rect(const mesh& aMesh)
     {
         return bounding_rect(aMesh.vertices);
     }
 
-    inline game::faces default_faces(const neogfx::vertices& aVertices, uint32_t aOffset = 0u)
+    inline game::faces default_faces(const vertices& aVertices, uint32_t aOffset = 0u)
     {
         game::faces faces;
         for (uint32_t i = aOffset; i < static_cast<uint32_t>(aVertices.size()) + aOffset; i += 3u)

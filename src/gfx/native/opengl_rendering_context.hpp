@@ -101,16 +101,15 @@ namespace neogfx
         };
         struct patch_drawable
         {
-            typedef uint32_t vertices_offset_t;
             vertices xyz;
             vertices_2d uv;
             struct item
             {
                 mesh_drawable* mesh;
-                vertices_offset_t offset;
+                vertices::size_type offset;
                 game::material const* material;
                 game::faces const* faces;
-                item(mesh_drawable& mesh, vertices_offset_t offset, game::material const& material, game::faces const& faces) :
+                item(mesh_drawable& mesh, vertices::size_type offset, game::material const& material, game::faces const& faces) :
                     mesh{ &mesh }, offset{ offset }, material{ &material }, faces{ &faces }                {}
             };
             std::vector<item> items;

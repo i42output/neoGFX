@@ -36,7 +36,7 @@ namespace neogfx::game
     {
         neolib::cookie_ref_ptr id;
         texture_type type;
-        texture_sampling sampling;
+        std::optional<texture_sampling> sampling;
         scalar dpiScalingFactor;
         vec2 extents;
         optional_aabb_2d subTexture;
@@ -64,8 +64,9 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Id;
                 case 1:
-                case 2:
                     return component_data_field_type::Enum | component_data_field_type::Uint32;
+                case 2:
+                    return component_data_field_type::Enum | component_data_field_type::Uint32 | component_data_field_type::Optional;
                 case 3:
                     return component_data_field_type::Scalar;
                 case 4:
