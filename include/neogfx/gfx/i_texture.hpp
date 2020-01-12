@@ -95,6 +95,7 @@ namespace neogfx
     public:
         virtual int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const = 0;
     public:
+        virtual intptr_t native_handle() const = 0;
         virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
     };
 }

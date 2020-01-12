@@ -18,12 +18,19 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/texture_manager.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 #include "native/i_native_texture.hpp"
 
 namespace neogfx
 {
+    template <>
+    i_texture_manager& service<i_texture_manager>()
+    {
+        return service<i_rendering_engine>().texture_manager();
+    }
+
     neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry)
     {
         return aEntry.first->id();

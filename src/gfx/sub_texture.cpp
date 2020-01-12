@@ -149,6 +149,11 @@ namespace neogfx
         return native_texture()->bind(aTextureUnit);
     }
 
+    intptr_t sub_texture::native_handle() const
+    {
+        return native_texture()->native_handle();
+    }
+
     std::shared_ptr<i_native_texture> sub_texture::native_texture() const
     {
         return atlas_texture().native_texture();

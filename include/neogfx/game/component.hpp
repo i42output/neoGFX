@@ -33,6 +33,22 @@ namespace neogfx::game
     template <typename Data>
     struct shared;
 
+    template <typename T>
+    inline bool batchable(const std::optional<T>& lhs, const std::optional<T>& rhs)
+    {
+        return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
+    }
+
+    template <typename Data>
+    inline bool batchable(const shared<Data>& lhs, const shared<Data>& rhs)
+    {
+        if (!!lhs.ptr != !!rhs.ptr)
+            return false;
+        if (lhs.ptr == nullptr)
+            return true;
+        return batchable(*lhs.ptr, *rhs.ptr);
+    }
+
     namespace detail
     {
         template <typename Data>

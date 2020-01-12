@@ -24,12 +24,19 @@
 #include FT_FREETYPE_H
 #include FT_LCD_FILTER_H
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include "../../gfx/text/native/native_font_face.hpp"
 #include "../../gfx/text/native/native_font.hpp"
 
 namespace neogfx
 {
+    template <>
+    i_font_manager& service<i_font_manager>()
+    {
+        return service<i_rendering_engine>().font_manager();
+    }
+
     neolib::small_cookie item_cookie(const font_manager::id_cache_entry& aEntry)
     {
         return aEntry.first.id();

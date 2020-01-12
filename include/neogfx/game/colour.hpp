@@ -66,4 +66,9 @@ namespace neogfx::game
             }
         };
     };
+
+    inline bool operator==(const colour& lhs, const colour& rhs)
+    {
+        return lhs.rgba == rhs.rgba;
+    }
 }

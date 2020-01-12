@@ -30,6 +30,7 @@
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
+#include <neogfx/game/entity_info.hpp>
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
@@ -1185,14 +1186,18 @@ namespace neogfx
         {
             if (entity == game::null_entity)
                 continue; // todo: sort/remove and/or create skipping iterator
+            #ifndef NDEBUG
+            if (aEcs.component<game::entity_info>().entity_record(entity).debug)
+                std::cerr << "Rendering debug entity..." << std::endl;
+            #endif
             drawables.emplace_back(
-                aEcs.component<game::mesh_filter>().entity_record(entity), 
-                aEcs.component<game::mesh_renderer>().entity_record(entity),
-                rigidBodies.has_entity_record(entity) ? 
-                    aTransformation * to_transformation_matrix(rigidBodies.entity_record(entity)) : aTransformation,
-                entity);
+            aEcs.component<game::mesh_filter>().entity_record(entity), 
+            aEcs.component<game::mesh_renderer>().entity_record(entity),
+            rigidBodies.has_entity_record(entity) ? 
+                to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity(),
+            entity);
         }
-        draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size());
+        draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), aTransformation);
         for (auto const& d : drawables)
             if (!d.drawn && d.renderer->destroyOnFustrumCull)
                 aEcs.destroy_entity(d.entity);
@@ -1618,44 +1623,43 @@ namespace neogfx
         {
             aMeshFilter,
             aMeshRenderer,
-            aTransformation * (aMeshFilter.transformation != std::nullopt ?
-                *aMeshFilter.transformation : mat44::identity())
+            aMeshFilter.transformation != std::nullopt ?
+                *aMeshFilter.transformation : mat44::identity()
         };
-        draw_meshes(&drawable, &drawable + 1);
+        draw_meshes(&drawable, &drawable + 1, aTransformation);
     }
 
-    void opengl_rendering_context::draw_meshes(mesh_drawable* aFirst, mesh_drawable* aLast)
+    void opengl_rendering_context::draw_meshes(mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
+        thread_local patch_drawable patch = {};
+        patch.xyz.clear();
+        patch.uv.clear();
+        patch.items.clear();
+
         for (auto m = aFirst; m != aLast; ++m)
         {
-            thread_local patch_drawable patch = {};
-
-            // todo: batch by combining patches
-
             auto& mesh = *m;
-            patch.xyz = mesh.transformation * (mesh.filter->mesh != std::nullopt ?
-                *mesh.filter->mesh : *mesh.filter->sharedMesh.ptr).vertices; // todo: possible optimization (transform in-place)
+            auto const& untransformed = (mesh.filter->mesh != std::nullopt ?
+                *mesh.filter->mesh : *mesh.filter->sharedMesh.ptr).vertices;
+            auto const transformation = aTransformation * (mesh.filter->transformation != std::nullopt ? *mesh.filter->transformation : mat44::identity());
+            thread_local vec3_list xyz;
+            xyz = transformation * mesh.transformation * untransformed; // todo: possible optimization (transform in-place)
             auto const& uv = mesh.filter->mesh != std::nullopt ?
                 mesh.filter->mesh->uv : mesh.filter->sharedMesh.ptr->uv;
             auto const& faces = mesh.filter->mesh != std::nullopt ?
                 mesh.filter->mesh->faces : mesh.filter->sharedMesh.ptr->faces;
             auto const& material = mesh.renderer->material;
 
-            patch.uv = &uv;
-            patch.items.emplace_back(0, material, faces);
-            draw_patch(patch);
-            mesh.drawn = patch.items.back().drawn;
+            patch_drawable::vertices_offset_t const offset = static_cast<patch_drawable::vertices_offset_t>(patch.xyz.size());
+            patch.xyz.insert(patch.xyz.end(), xyz.begin(), xyz.end());
+            patch.uv.insert(patch.uv.end(), uv.begin(), uv.end());
+            patch.items.emplace_back(mesh, offset, material, faces);
 
             for (auto const& meshPatch : mesh.renderer->patches)
-            {
-                patch.items.back().material = &meshPatch.material;
-                patch.items.back().faces = &meshPatch.faces;
-                draw_patch(patch);
-                mesh.drawn = mesh.drawn || patch.items.back().drawn;
-            }
-
-            patch.items.clear();
+                patch.items.emplace_back(mesh, offset, meshPatch.material, meshPatch.faces);
         }
+
+        draw_patch(patch);
     }
 
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch)
@@ -1664,110 +1668,124 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto const& vertices = aPatch.xyz;
-        auto const& textureVertices = *aPatch.uv;
-        auto const offset = aPatch.items.back().offset;
-        auto const& material = *aPatch.items.back().material;
-        auto const& faces = *aPatch.items.back().faces;
+        auto const& textureVertices = aPatch.uv;
 
-        colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
-        if (material.colour != std::nullopt)
-            colourizationColour = material.colour->rgba;
-
-        bool drawn = false;
-
-        GLint previousTexture = 0;
-
+        for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
-            if (material.texture != std::nullopt)
+            GLint previousTexture = 0;
+
+            auto const& batchMaterial = *item->material;
+
+            std::size_t faceCount = item->faces->size();
+            auto next = std::next(item);
+            while (next != aPatch.items.end() && game::batchable(*item->material, *next->material))
             {
-                auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
-
-                glCheck(glActiveTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
-
-                glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
-                glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(texture.native_texture()->handle()))));
-                auto sampling = texture.sampling();
-                if (sampling == texture_sampling::Scaled)
-                {
-                    auto const extents = size_u32{ texture.extents() };
-                    auto const outputRect = game::bounding_rect(vertices);
-                    if (extents / 2u * 2u == extents && (outputRect.cx > extents.cx || outputRect.cy > extents.cy))
-                        sampling = texture_sampling::Nearest;
-                    else
-                        sampling = texture_sampling::Normal;
-                }
-                if (sampling != texture_sampling::Multisample)
-                {
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
-                }
+                faceCount += next->faces->size();
+                ++next;
             }
 
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, faces.size() * 3u };
-
-            vec2 textureStorageExtents;
-            vec2 uvFixupCoefficient;
-            vec2 uvFixupOffset;
-
-            if (material.texture != std::nullopt)
             {
-                auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
+                if (batchMaterial.texture != std::nullopt)
+                {
+                    auto const& texture = *service<i_texture_manager>().find_texture(batchMaterial.texture->id.cookie());
 
-                uvFixupCoefficient = material.texture->extents;
-                textureStorageExtents = texture.storage_extents().to_vec2();
-                if (texture.type() == texture_type::Texture)
-                    uvFixupOffset = vec2{ 1.0, 1.0 };
-                else if (material.texture->subTexture == std::nullopt)
-                    uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
+                    glCheck(glActiveTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
+
+                    glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
+                    glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(reinterpret_cast<std::intptr_t>(texture.native_texture()->handle()))));
+                    auto sampling = texture.sampling();
+                    if (sampling == texture_sampling::Scaled)
+                    {
+                        auto const extents = size_u32{ texture.extents() };
+                        auto const outputRect = game::bounding_rect(vertices);
+                        if (extents / 2u * 2u == extents && (outputRect.cx > extents.cx || outputRect.cy > extents.cy))
+                            sampling = texture_sampling::Nearest;
+                        else
+                            sampling = texture_sampling::Normal;
+                    }
+                    if (sampling != texture_sampling::Multisample)
+                    {
+                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
+                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
+                    }
+
+                    rendering_engine().default_shader_program().texture_shader().set_texture(texture);
+                    rendering_engine().default_shader_program().texture_shader().set_effect(batchMaterial.shaderEffect != std::nullopt ?
+                        *batchMaterial.shaderEffect : shader_effect::None);
+                    if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
+                        enable_sample_shading(1.0);
+                }
                 else
-                    uvFixupOffset = material.texture->subTexture->min;
-                rendering_engine().default_shader_program().texture_shader().set_texture(texture);
-                rendering_engine().default_shader_program().texture_shader().set_effect(material.shaderEffect != std::nullopt ? 
-                    *material.shaderEffect : shader_effect::None);
-                if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
-                    enable_sample_shading(1.0);
-            }
-            else
-                rendering_engine().default_shader_program().texture_shader().clear_texture();
+                    rendering_engine().default_shader_program().texture_shader().clear_texture();
 
-            for (auto const& face : faces)
-            {
-                for (auto faceVertexIndex : face)
+                use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, faceCount * 3 };
+
+                for (; item != next; ++item)
                 {
-                    faceVertexIndex += offset;
-                    auto const& v = vertices[faceVertexIndex];
-                    auto const logicalCoordinates = logical_coordinates();
-                    if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                        v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                        v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
-                        v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
-                        drawn = true;
-                    vec2 uv = {};
+                    vec2 textureStorageExtents;
+                    vec2 uvFixupCoefficient;
+                    vec2 uvFixupOffset;
+
+                    auto const& material = *item->material;
+
                     if (material.texture != std::nullopt)
-                        uv = (textureVertices[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
-                    vertexArrays.instance().emplace_back(
-                        v,
-                        vec4f{{
-                            colourizationColour.red<float>(),
-                            colourizationColour.green<float>(),
-                            colourizationColour.blue<float>(),
-                            colourizationColour.alpha<float>() * static_cast<float>(iOpacity)}},
-                        uv);
+                    {
+                        auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
+                        uvFixupCoefficient = material.texture->extents;
+                        if (material.texture->type == texture_type::Texture)
+                            uvFixupOffset = vec2{ 1.0, 1.0 };
+                        else if (material.texture->subTexture == std::nullopt)
+                            uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
+                        else
+                            uvFixupOffset = material.texture->subTexture->min;
+                    }
+                    else
+                        rendering_engine().default_shader_program().texture_shader().clear_texture();
+
+                    auto const offset = item->offset;
+                    auto const& faces = *item->faces;
+
+                    colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
+                    if (material.colour != std::nullopt)
+                        colourizationColour = material.colour->rgba;
+
+                    for (auto const& face : faces)
+                    {
+                        for (auto faceVertexIndex : face)
+                        {
+                            faceVertexIndex += offset;
+                            auto const& v = vertices[faceVertexIndex];
+                            auto const logicalCoordinates = logical_coordinates();
+                            if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+                                v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+                                v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
+                                v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
+                                item->mesh->drawn = true;
+                            vec2 uv = {};
+                            if (material.texture != std::nullopt)
+                                uv = (textureVertices[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
+                            vertexArrays.instance().emplace_back(
+                                v,
+                                vec4f{ {
+                                    colourizationColour.red<float>(),
+                                    colourizationColour.green<float>(),
+                                    colourizationColour.blue<float>(),
+                                    colourizationColour.alpha<float>() * static_cast<float>(iOpacity)} },
+                                uv);
+                        }
+                    }
                 }
+                vertexArrays.instance().draw();
             }
 
-            vertexArrays.instance().draw();
+            if (batchMaterial.texture != std::nullopt)
+            {
+                auto const& texture = *service<i_texture_manager>().find_texture(batchMaterial.texture->id.cookie());
+                glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
+            }
+
+            disable_sample_shading();
         }
-
-        if (material.texture != std::nullopt)
-        {
-            auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
-            glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
-        }
-
-        disable_sample_shading();
-
-        aPatch.items.back().drawn = drawn;
     }
 
     xyz opengl_rendering_context::to_shader_vertex(const point& aPoint, coordinate aZ) const

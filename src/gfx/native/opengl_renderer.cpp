@@ -44,21 +44,6 @@
 
 namespace neogfx
 {
-    template <>
-    i_font_manager& service<i_font_manager>()
-    {
-        return service<i_rendering_engine>().font_manager();
-    }
-
-    template <>
-    i_texture_manager& service<i_texture_manager>()
-    {
-        return service<i_rendering_engine>().texture_manager();
-    }
-}
-
-namespace neogfx
-{
     frame_counter::frame_counter(uint32_t aDuration) : iTimer{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();

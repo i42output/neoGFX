@@ -62,6 +62,7 @@ namespace neogfx
     public:
         int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
     public:
+        intptr_t native_handle() const override;
         std::shared_ptr<i_native_texture> native_texture() const override;
         // attributes
     private:

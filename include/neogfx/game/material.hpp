@@ -104,4 +104,12 @@ namespace neogfx::game
             }
         };
     };
+
+    inline bool batchable(const material& lhs, const material& rhs)
+    {
+        return batchable(lhs.gradient, rhs.gradient) &&
+            batchable(lhs.sharedTexture, rhs.sharedTexture) &&
+            batchable(lhs.texture, rhs.texture) &&
+            lhs.shaderEffect == rhs.shaderEffect;
+    }
 }

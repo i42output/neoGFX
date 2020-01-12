@@ -23,6 +23,7 @@
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/i_sub_texture.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/component.hpp>
@@ -105,4 +106,13 @@ namespace neogfx::game
             }
         };
     };
+
+    inline bool batchable(const texture& lhs, const texture& rhs)
+    {
+        if (lhs.sampling != rhs.sampling)
+            return false;
+        auto const& lhsTexture = *service<i_texture_manager>().find_texture(lhs.id.cookie());
+        auto const& rhsTexture = *service<i_texture_manager>().find_texture(rhs.id.cookie());
+        return lhsTexture.native_handle() == rhsTexture.native_handle();
+    }
 }

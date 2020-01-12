@@ -31,6 +31,9 @@ namespace neogfx::game
     {
         neolib::uuid archetypeId;
         int64_t creationTime;
+        #ifndef NDEBUG
+        bool debug = false;
+        #endif
 
         struct meta : i_component_data::meta
         {
@@ -46,7 +49,11 @@ namespace neogfx::game
             }
             static uint32_t field_count()
             { 
-                return 2; 
+                #ifdef NDEBUG
+                return 2;
+                #else
+                return 3;
+                #endif
             }
             static component_data_field_type field_type(uint32_t aFieldIndex)
             {
@@ -56,6 +63,10 @@ namespace neogfx::game
                     return component_data_field_type::Uuid;
                 case 1:
                     return component_data_field_type::Int64;
+                #ifndef NDEBUG
+                case 2:
+                    return component_data_field_type::Bool;
+                #endif
                 default:
                     throw invalid_field_index();
                 }
@@ -66,6 +77,9 @@ namespace neogfx::game
                 {
                     "Archetype Id",
                     "Creation Time",
+                    #ifndef NDEBUG
+                    "Debug",
+                    #endif
                 };
                 return sFieldNames[aFieldIndex];
             }

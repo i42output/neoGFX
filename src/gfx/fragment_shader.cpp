@@ -416,8 +416,12 @@ namespace neogfx
 
     void standard_texture_shader::clear_texture()
     {
+        enable();
         uTextureEnabled = false;
         uTextureEffect = shader_effect::None;
+        uTextureDataFormat = texture_data_format::RGBA;
+        uTextureMultisample = texture_sampling::Normal;
+        uTextureExtents = vec2f{};
     }
 
     void standard_texture_shader::set_texture(const i_texture& aTexture)

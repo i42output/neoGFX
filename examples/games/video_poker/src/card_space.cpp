@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <card_games/card_sprite.hpp>
 #include <video_poker/card_space.hpp>
 
+#include <neogfx/game/entity_info.hpp>
+
 namespace video_poker
 {
     card_widget::card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures) :

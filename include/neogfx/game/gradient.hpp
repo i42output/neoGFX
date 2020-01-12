@@ -91,4 +91,13 @@ namespace neogfx::game
             }
         };
     };
+
+    inline bool batchable(const gradient& lhs, const gradient& rhs)
+    {
+        // todo: hash gradient for faster equality operation?
+        return lhs.colourStops == rhs.colourStops &&
+            lhs.colourStopPositions == rhs.colourStopPositions &&
+            lhs.alphaStops == rhs.alphaStops &&
+            lhs.alphaStopPositions == rhs.alphaStopPositions;
+    }
 }

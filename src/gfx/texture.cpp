@@ -160,6 +160,11 @@ namespace neogfx
         return iNativeTexture->bind(aTextureUnit);
     }
 
+    intptr_t texture::native_handle() const
+    {
+        return native_texture()->native_handle();
+    }
+
     std::shared_ptr<i_native_texture> texture::native_texture() const
     {
         if (is_empty())

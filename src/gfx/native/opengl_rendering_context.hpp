@@ -103,16 +103,15 @@ namespace neogfx
         {
             typedef uint32_t vertices_offset_t;
             vertices xyz;
-            vertices_2d const* uv;
+            vertices_2d uv;
             struct item
             {
+                mesh_drawable* mesh;
                 vertices_offset_t offset;
                 game::material const* material;
                 game::faces const* faces;
-                bool drawn;
-                item(vertices_offset_t offset, game::material const& material, game::faces const& faces) :
-                    offset{ offset }, material{ &material }, faces{ &faces }, drawn{ false }
-                {}
+                item(mesh_drawable& mesh, vertices_offset_t offset, game::material const& material, game::faces const& faces) :
+                    mesh{ &mesh }, offset{ offset }, material{ &material }, faces{ &faces }                {}
             };
             std::vector<item> items;
         };
@@ -187,7 +186,7 @@ namespace neogfx
         void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
-        void draw_meshes(mesh_drawable* aFirst, mesh_drawable* aLast);
+        void draw_meshes(mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_patch(patch_drawable& aPatch);
     public:
         neogfx::subpixel_format subpixel_format() const override;

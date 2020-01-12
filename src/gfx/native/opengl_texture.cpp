@@ -495,6 +495,12 @@ namespace neogfx
     }
 
     template <typename T>
+    intptr_t opengl_texture<T>::native_handle() const
+    {
+        return reinterpret_cast<intptr_t>(handle());
+    }
+
+    template <typename T>
     std::shared_ptr<i_native_texture> opengl_texture<T>::native_texture() const
     {
         return std::dynamic_pointer_cast<i_native_texture>(iManager.find_texture(id()));
