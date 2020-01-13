@@ -1650,13 +1650,14 @@ namespace neogfx
                 mesh.filter->mesh->faces : mesh.filter->sharedMesh.ptr->faces;
             auto const& material = mesh.renderer->material;
 
-            auto const offset = patch.xyz.size();
+            auto const offsetVertices = patch.xyz.size();
+            auto const offsetTextureVertices = patch.uv.size();
             patch.xyz.insert(patch.xyz.end(), xyz.begin(), xyz.end());
             patch.uv.insert(patch.uv.end(), uv.begin(), uv.end());
-            patch.items.emplace_back(mesh, offset, material, faces);
+            patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, material, faces);
 
             for (auto const& meshPatch : mesh.renderer->patches)
-                patch.items.emplace_back(mesh, offset, meshPatch.material, meshPatch.faces);
+                patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, meshPatch.material, meshPatch.faces);
         }
 
         draw_patch(patch);
@@ -1679,7 +1680,7 @@ namespace neogfx
 
             auto calc_bounding_rect = [&aPatch](const patch_drawable::item& aItem) -> rect
             {
-                return game::bounding_rect(aPatch.xyz, *aItem.faces, aItem.offset);
+                return game::bounding_rect(aPatch.xyz, *aItem.faces, aItem.offsetVertices);
             };
 
             auto calc_sampling = [&aPatch, &calc_bounding_rect](const patch_drawable::item& aItem) -> texture_sampling
@@ -1765,7 +1766,8 @@ namespace neogfx
                             uvFixupOffset = material.texture->subTexture->min;
                     }
 
-                    auto const offset = item->offset;
+                    auto const offsetVertices = item->offsetVertices;
+                    auto const offsetTextureVertices = item->offsetTextureVertices;
                     auto const& faces = *item->faces;
 
                     colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
@@ -1776,7 +1778,8 @@ namespace neogfx
                     {
                         for (auto faceVertexIndex : face)
                         {
-                            auto const vertexIndexOffset  = faceVertexIndex + offset;
+                            auto const vertexIndexOffset  = faceVertexIndex + offsetVertices;
+                            auto const textureVertexIndexOffset = faceVertexIndex + offsetTextureVertices;
                             auto const& v = vertices[vertexIndexOffset];
                             auto const logicalCoordinates = logical_coordinates();
                             if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
@@ -1786,7 +1789,7 @@ namespace neogfx
                                 item->mesh->drawn = true;
                             vec2 uv = {};
                             if (material.texture != std::nullopt)
-                                uv = (textureVertices[vertexIndexOffset].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
+                                uv = (textureVertices[textureVertexIndexOffset].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
                             vertexArrays.instance().emplace_back(
                                 v,
                                 vec4f{ {

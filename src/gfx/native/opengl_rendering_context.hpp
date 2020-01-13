@@ -106,11 +106,12 @@ namespace neogfx
             struct item
             {
                 mesh_drawable* mesh;
-                vertices::size_type offset;
+                vertices::size_type offsetVertices;
+                vertices_2d::size_type offsetTextureVertices;
                 game::material const* material;
                 game::faces const* faces;
-                item(mesh_drawable& mesh, vertices::size_type offset, game::material const& material, game::faces const& faces) :
-                    mesh{ &mesh }, offset{ offset }, material{ &material }, faces{ &faces }                {}
+                item(mesh_drawable& mesh, vertices::size_type offsetVertices, vertices_2d::size_type offsetTextureVertices, game::material const& material, game::faces const& faces) :
+                    mesh{ &mesh }, offsetVertices{ offsetVertices }, offsetTextureVertices{ offsetTextureVertices }, material{ &material }, faces{ &faces }                {}
             };
             std::vector<item> items;
         };

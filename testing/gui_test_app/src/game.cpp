@@ -8,6 +8,7 @@
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/game/chrono.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/standard_archetypes.hpp>
 #include <neogfx/game/game_world.hpp>
@@ -186,6 +187,8 @@ void create_game(ng::i_layout& aLayout)
             ng::vec3{ 400.0, 18.0, 0.1 }, 1.0
         },
         ng::game::broadphase_collider{ 0x1ull });
+
+    //ecs.component<ng::game::entity_info>().entity_record(spaceship).debug = true;
 
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     // Some information text...
