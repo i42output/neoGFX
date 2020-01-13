@@ -1471,8 +1471,46 @@ namespace neogfx
         disable_anti_alias daa{ *this };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
+        thread_local std::vector<game::mesh_filter> meshFilters;
+        thread_local std::vector<game::mesh_renderer> meshRenderers;
+        meshFilters.clear();
+        meshRenderers.clear();
 
+        for (int32_t pass = 1; pass <= 3; ++pass)
+        {
+            for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+
+                font const& glyphFont = drawOp.glyph.font();
+                auto const& mesh = to_ecs_component(
+                    rect{
+                        point{ drawOp.point },
+                        size{ drawOp.glyph.advance().cx, glyphFont.height() } },
+                    mesh_type::Triangles,
+                    drawOp.point.z);
+
+                switch (pass)
+                {
+                case 1: // Paper (glyph background)
+                    if (drawOp.appearance.paper() == std::nullopt)
+                        continue;
+                    meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
+                    meshRenderers.push_back(
+                        game::mesh_renderer{
+                            game::material{
+                                std::holds_alternative<colour>(*drawOp.appearance.paper()) ?
+                                    to_ecs_component(std::get<colour>(*drawOp.appearance.paper())) : std::optional<game::colour>{},
+                                std::holds_alternative<gradient>(*drawOp.appearance.paper()) ?
+                                    to_ecs_component(std::get<gradient>(*drawOp.appearance.paper())) : std::optional<game::gradient>{} } });
+                    break;
+                }
+            }
+        }
+
+        //auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
+
+        /*
         if (firstOp.glyph.is_emoji())
         {
             if (firstOp.appearance.paper())
@@ -1490,7 +1528,8 @@ namespace neogfx
                 mat44::identity());
             return;
         }
-
+        */
+        /*
         const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
 
         bool renderEffects = !firstOp.appearance.only_calculate_effect() && firstOp.appearance.effect() && firstOp.appearance.effect()->type() == text_effect_type::Outline;
@@ -1609,7 +1648,14 @@ namespace neogfx
                 }
                 break;
             }
-        }
+        }*/
+
+        thread_local std::vector<mesh_drawable> drawables;
+        drawables.clear();
+        for (std::size_t i = 0; i < meshFilters.size(); ++i)
+            drawables.emplace_back(meshFilters[i], meshRenderers[i]);
+        if (!drawables.empty())
+            draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
     }
 
     void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)

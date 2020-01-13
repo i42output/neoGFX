@@ -107,20 +107,10 @@ namespace neogfx
             {
                 auto& left = static_variant_cast<const draw_glyph&>(aLeft);
                 auto& right = static_variant_cast<const draw_glyph&>(aRight);
-                if (left.glyph.is_emoji() || right.glyph.is_emoji())
-                     return false;
-                if (left.appearance.ink().index() != right.appearance.ink().index() || !std::holds_alternative<colour>(left.appearance.ink()))
-                    return false;
-                if (!!left.appearance.effect() != !!right.appearance.effect())
-                    return false;
-                if (!!left.appearance.effect() && (left.appearance.effect()->type() != right.appearance.effect()->type() || left.appearance.effect()->width() != right.appearance.effect()->width()))
-                    return false;
                 if (left.glyph.subpixel() != right.glyph.subpixel())
                     return false;
                 const i_glyph_texture& leftGlyphTexture = left.glyph.glyph_texture();
                 const i_glyph_texture& rightGlyphTexture = right.glyph.glyph_texture();
-                if (leftGlyphTexture.texture().native_texture()->handle() != rightGlyphTexture.texture().native_texture()->handle())
-                    return false;
                 if (leftGlyphTexture.subpixel() != rightGlyphTexture.subpixel())
                     return false;
                 return true;

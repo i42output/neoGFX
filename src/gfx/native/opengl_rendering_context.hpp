@@ -89,7 +89,7 @@ namespace neogfx
             mesh_drawable(
                 game::mesh_filter const& filter, 
                 game::mesh_renderer const& renderer,
-                mat44 const& transformation,
+                mat44 const& transformation = mat44::identity(),
                 game::entity_id entity = game::null_entity
                 ) :
                 filter{ &filter },
