@@ -212,11 +212,10 @@ namespace neogfx
                 "{\n"
                 "    if (uGradientEnabled)\n"
                 "    {\n"
-                "        vec2 viewPos = vec2(gl_FragCoord.x, uGradientViewportTop - gl_FragCoord.y);\n"
                 "        int d = uGradientFilterSize / 2;\n"
                 "        if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)\n"
                 "        {\n"
-                "            color = colour_at(viewPos);\n"  
+                "            color = colour_at(Coord.xy);\n"  
                 "        }\n"
                 "        else\n"
                 "        {\n"
@@ -225,7 +224,7 @@ namespace neogfx
                 "            {\n"
                 "                for (int fx = -d; fx <= d; ++fx)\n"
                 "                {\n"
-                "                    sum += (colour_at(viewPos + vec2(fx, fy)) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
+                "                    sum += (colour_at(Coord.xy + vec2(fx, fy)) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
                 "                }\n"
                 "            }\n"
                 "            color = sum;\n" 
@@ -248,7 +247,6 @@ namespace neogfx
     {
         enable();
         basic_rect<float> boundingBox{ aBoundingBox };
-        uGradientViewportTop = static_cast<float>(aContext.logical_coordinates().bottomLeft.y);
         uGradientTopLeft = vec2f{ boundingBox.top_left().x, boundingBox.top_left().y };
         uGradientBottomRight = vec2f{ boundingBox.bottom_right().x, boundingBox.bottom_right().y };
         uGradientDirection = aGradient.direction();

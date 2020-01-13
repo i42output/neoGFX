@@ -1641,9 +1641,13 @@ namespace neogfx
             auto& mesh = *m;
             auto const& untransformed = (mesh.filter->mesh != std::nullopt ?
                 *mesh.filter->mesh : *mesh.filter->sharedMesh.ptr).vertices;
-            auto const transformation = aTransformation * (mesh.filter->transformation != std::nullopt ? *mesh.filter->transformation : mat44::identity());
+            auto const transformation = aTransformation * (mesh.filter->transformation != std::nullopt ? *mesh.filter->transformation : mat44::identity()) * mesh.transformation;
             thread_local vec3_list xyz;
-            xyz = transformation * mesh.transformation * untransformed; // todo: possible optimization (transform in-place)
+            xyz.clear();
+            std::transform(untransformed.begin(), untransformed.end(), std::back_inserter(xyz), [&transformation](auto const& v)
+            {
+                return transformation * v;
+            });
             auto const& uv = mesh.filter->mesh != std::nullopt ?
                 mesh.filter->mesh->uv : mesh.filter->sharedMesh.ptr->uv;
             auto const& faces = mesh.filter->mesh != std::nullopt ?

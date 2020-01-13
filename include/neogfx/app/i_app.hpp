@@ -57,7 +57,7 @@ namespace neogfx
     public:
         virtual bool debug() const = 0;
         virtual neogfx::renderer renderer() const = 0;
-        virtual std::optional<std::pair<uint32_t, uint32_t>> full_screen() const = 0;
+        virtual std::optional<size_u32> full_screen() const = 0;
         virtual bool double_buffering() const = 0;
         virtual bool nest() const = 0;
     };

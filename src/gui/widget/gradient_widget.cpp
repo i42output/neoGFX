@@ -268,7 +268,15 @@ namespace neogfx
                     cd.set_custom_colours(*iCustomColours);
                 if (cd.exec() == dialog_result::Accepted)
                 {
-                    stop.second = cd.selected_colour();
+                    auto const colour = cd.selected_colour();
+                    stop.second = colour.with_alpha(0xFF);
+                    if (colour.alpha() != 0xFF)
+                    {
+                        auto as = iSelection.find_alpha_stop(stop.first);
+                        if (as == iSelection.alpha_end() || as->first != stop.first)
+                            as = iSelection.insert_alpha_stop(stop.first);
+                        as->second = colour.alpha();
+                    }
                     update();
                     GradientChanged.trigger();
                 }
@@ -319,7 +327,15 @@ namespace neogfx
                             cd.set_custom_colours(*iCustomColours);
                         if (cd.exec() == dialog_result::Accepted)
                         {
-                            stop.second = cd.selected_colour();
+                            auto const colour = cd.selected_colour();
+                            stop.second = colour.with_alpha(0xFF);
+                            if (colour.alpha() != 0xFF)
+                            {
+                                auto as = iSelection.find_alpha_stop(stop.first);
+                                if (as == iSelection.alpha_end() || as->first != stop.first)
+                                    as = iSelection.insert_alpha_stop(stop.first);
+                                as->second = colour.alpha();
+                            }
                             update();
                             GradientChanged.trigger();
                         }

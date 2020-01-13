@@ -110,7 +110,6 @@ namespace neogfx
         gradient_data_cache_queue_t iGradientDataCacheQueue;
         std::optional<neogfx::gradient_shader_data> iUncachedGradient;
     private:
-        cache_uniform(uGradientViewportTop)
         cache_uniform(uGradientTopLeft)
         cache_uniform(uGradientBottomRight)
         cache_uniform(uGradientDirection)

@@ -22,7 +22,13 @@ int main(int argc, char* argv[])
 
         ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
 
-        ng::window window{ ng::size{1280_spx, 720_spx} };
+        std::optional<ng::window> windowObject;
+        if (!app.program_options().full_screen())
+            windowObject.emplace(ng::size{ 1280_spx, 720_spx });
+        else
+            windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
+
+        auto& window = *windowObject;
 
         ng::game::canvas canvas{ window.client_layout() };
         canvas.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);

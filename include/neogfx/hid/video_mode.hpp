@@ -26,7 +26,7 @@ namespace neogfx
     class video_mode
     {
     public:
-        typedef basic_size<uint32_t> resolution_t;
+        typedef size_u32 resolution_t;
     public:
         video_mode(const resolution_t& aResolution, uint32_t aBitsPerPixel = 32) :
             iResolution{ aResolution }, iBitsPerPixel{ aBitsPerPixel }

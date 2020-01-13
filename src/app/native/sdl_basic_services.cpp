@@ -155,10 +155,10 @@ namespace neogfx
         auto fullscreenResolution = service<i_app>().program_options().full_screen();
         if (fullscreenResolution != std::nullopt)
         {
-            if (fullscreenResolution->first == 0)
+            if (fullscreenResolution->cx == 0)
                 return window_placement{ video_mode{ rect().extents() } };
             else
-                return window_placement{ video_mode{ fullscreenResolution->first, fullscreenResolution->second } };
+                return window_placement{ video_mode{ fullscreenResolution->cx, fullscreenResolution->cy } };
         }
         return desktop_rect().deflate(desktop_rect().extents() * 0.167);
     }

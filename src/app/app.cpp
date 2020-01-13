@@ -76,27 +76,27 @@ namespace neogfx
             return neogfx::renderer::OpenGL;
     }
 
-    std::optional<std::pair<uint32_t, uint32_t>> program_options::full_screen() const
+    std::optional<size_u32> program_options::full_screen() const
     {
         if (options().count("fullscreen") == 1)
         {
             auto screenResolution = iOptions["fullscreen"].as<std::string>();
             if (screenResolution.empty())
-                return std::make_pair(0, 0);
+                return size_u32{};
             else
             {
                 neolib::vecarray<std::string, 2> bits;
                 neolib::tokens(screenResolution, ","s, bits, 2, false, false);
                 if (bits.size() == 2)
                 {
-                    auto result = std::make_pair(boost::lexical_cast<uint32_t>(bits[0]), boost::lexical_cast<uint32_t>(bits[1]));
-                    if (result.first != 0 && result.second != 0)
+                    auto result = size_u32{ boost::lexical_cast<uint32_t>(bits[0]), boost::lexical_cast<uint32_t>(bits[1]) };
+                    if (result.cx != 0 && result.cx != 0)
                         return result;
                 }
             }
             throw invalid_options("invalid fullscreen resolution");
         }
-        return std::optional<std::pair<uint32_t, uint32_t>>{};
+        return std::optional<size_u32>{};
     }
 
     bool program_options::double_buffering() const

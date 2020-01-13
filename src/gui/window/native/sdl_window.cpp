@@ -163,7 +163,7 @@ namespace neogfx
             0,
             aVideoMode.resolution().cx,
             aVideoMode.resolution().cy,
-            SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
+            SDL_WINDOW_FULLSCREEN | SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
         if (iHandle == nullptr)
             throw failed_to_create_window(SDL_GetError());
         init();
@@ -173,8 +173,6 @@ namespace neogfx
 
         if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
             show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-        SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
 
         iReady = true;
     }
@@ -270,7 +268,7 @@ namespace neogfx
             0,
             aVideoMode.resolution().cx,
             aVideoMode.resolution().cy,
-            SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
+            SDL_WINDOW_FULLSCREEN | SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
         if (iHandle == nullptr)
             throw failed_to_create_window(SDL_GetError());
         init();
@@ -280,8 +278,6 @@ namespace neogfx
 
         if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
             show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-        SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
 
         iReady = true;
     }
