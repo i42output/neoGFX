@@ -1668,6 +1668,8 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
+        auto const logicalCoordinates = logical_coordinates();
+
         auto const& vertices = aPatch.xyz;
         auto const& textureVertices = aPatch.uv;
 
@@ -1781,7 +1783,6 @@ namespace neogfx
                             auto const vertexIndexOffset  = faceVertexIndex + offsetVertices;
                             auto const textureVertexIndexOffset = faceVertexIndex + offsetTextureVertices;
                             auto const& v = vertices[vertexIndexOffset];
-                            auto const logicalCoordinates = logical_coordinates();
                             if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
                                 v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
                                 v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
