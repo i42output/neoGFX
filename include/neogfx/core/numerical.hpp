@@ -386,8 +386,14 @@ namespace neogfx
         template <std::size_t VertexCount>
         using vec3_array = neolib::vecarray<vec3, VertexCount, VertexCount, neolib::check<neolib::vecarray_overflow>, std::allocator<vec3>>;
 
+        template <std::size_t VertexCount>
+        using vec2_array = neolib::vecarray<vec2, VertexCount, VertexCount, neolib::check<neolib::vecarray_overflow>, std::allocator<vec2>>;
+
         typedef std::array<vec3, 3> triangle;
         typedef std::array<vec3, 4> quad;
+
+        typedef std::array<vec2, 3> triangle_2d;
+        typedef std::array<vec2, 4> quad_2d;
 
         template <typename T, uint32_t D, typename Type, bool IsScalar>
         inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)

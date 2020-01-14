@@ -1427,7 +1427,8 @@ namespace neogfx
 
     namespace
     {
-        void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const neogfx::logical_coordinates& aLogicalCoordinates, vertices_2d& aResult)
+        template <typename Result>
+        void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const neogfx::logical_coordinates& aLogicalCoordinates, Result& aResult)
         {
             rect normalizedRect = aTextureRect / aTextureStorageSize;
             aResult.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
@@ -1476,179 +1477,73 @@ namespace neogfx
         meshFilters.clear();
         meshRenderers.clear();
 
+        std::size_t normalGlyphCount = 0;
+
         for (int32_t pass = 1; pass <= 3; ++pass)
-        {
-            for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
-            {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
-
-                font const& glyphFont = drawOp.glyph.font();
-                auto const& mesh = to_ecs_component(
-                    rect{
-                        point{ drawOp.point },
-                        size{ drawOp.glyph.advance().cx, glyphFont.height() } },
-                    mesh_type::Triangles,
-                    drawOp.point.z);
-
-                switch (pass)
-                {
-                case 1: // Paper (glyph background)
-                    if (drawOp.appearance.paper() == std::nullopt)
-                        continue;
-                    meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
-                    meshRenderers.push_back(
-                        game::mesh_renderer{
-                            game::material{
-                                std::holds_alternative<colour>(*drawOp.appearance.paper()) ?
-                                    to_ecs_component(std::get<colour>(*drawOp.appearance.paper())) : std::optional<game::colour>{},
-                                std::holds_alternative<gradient>(*drawOp.appearance.paper()) ?
-                                    to_ecs_component(std::get<gradient>(*drawOp.appearance.paper())) : std::optional<game::gradient>{} } });
-                    break;
-                }
-            }
-        }
-
-        //auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
-
-        /*
-        if (firstOp.glyph.is_emoji())
-        {
-            if (firstOp.appearance.paper())
-                fill_rect(rect{ point{ firstOp.point }, firstOp.glyph.extents() }, to_brush(*firstOp.appearance.paper()), firstOp.point.z);
-            auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
-            auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
-            draw_mesh(
-                to_ecs_component(rect{ firstOp.point, firstOp.glyph.extents() }),
-                game::material{ 
-                    {}, 
-                    {}, 
-                    {}, 
-                    to_ecs_component(emojiTexture)
-                }, 
-                mat44::identity());
-            return;
-        }
-        */
-        /*
-        const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
-
-        bool renderEffects = !firstOp.appearance.only_calculate_effect() && firstOp.appearance.effect() && firstOp.appearance.effect()->type() == text_effect_type::Outline;
-
-        for (uint32_t pass = 1; pass <= 3; ++pass)
         {
             switch (pass)
             {
-            case 1:
+            case 1: // Paper (glyph background) and emoji
+                for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
                 {
-                    thread_local std::vector<graphics_operation::operation> rects;
-                    rects.clear();
-                    rects.reserve(std::distance(aDrawGlyphOps.first, aDrawGlyphOps.second));
-                    for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+                    auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+
+                    if (!drawOp.glyph.is_whitespace() && !drawOp.glyph.is_emoji())
+                        ++normalGlyphCount;
+
+                    if (drawOp.appearance.paper() != std::nullopt)
                     {
-                        auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+                        font const& glyphFont = drawOp.glyph.font();
 
-                        if (!drawOp.appearance.paper())
-                            continue;
-
-                        const font& glyphFont = drawOp.glyph.font();
-                        graphics_operation::fill_rect nextOp{ rect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } }, to_brush(*drawOp.appearance.paper()), drawOp.point.z };
-                        if (!rects.empty() && !batchable(rects.back(), nextOp))
-                        {
-                            fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
-                            rects.clear();
-                        }
-                        rects.push_back(nextOp);
-                    }
-                    if (!rects.empty())
-                        fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
-                }
-                break;
-            case 2:
-            case 3:
-                {
-                    if (!renderEffects && pass == 2)
-                        continue;
-
-                    auto const glyphCount = std::count_if(aDrawGlyphOps.first, aDrawGlyphOps.second, [](const graphics_operation::operation& op) { return !static_variant_cast<const graphics_operation::draw_glyph&>(op).glyph.is_whitespace(); });
-                    auto const need = (pass == 3 ? 6u * glyphCount : 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect()->width() * 2 + 1) * (firstOp.appearance.effect()->width() * 2 + 1))) * glyphCount);
-
-                    bool const useTextureBarrier = firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
-                    use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, static_cast<std::size_t>(need), useTextureBarrier };
-
-                    auto const scanlineOffsets = (pass == 2 ? static_cast<uint32_t>(firstOp.appearance.effect()->width()) * 2u + 1u : 1u);
-                    auto const offsets = scanlineOffsets * scanlineOffsets;
-                    point const offsetOrigin{ pass == 2 ? -firstOp.appearance.effect()->width() : 0.0, pass == 2 ? -firstOp.appearance.effect()->width() : 0.0 };
-                    for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, static_cast<std::size_t>(glyphCount / 2u), static_cast<std::size_t>(offsets) }; op != aDrawGlyphOps.second; ++op)
-                    {
-                        auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
-
-                        if (drawOp.glyph.is_whitespace())
-                            continue;
-
-                        const font& glyphFont = drawOp.glyph.font();
-                        const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
-
-                        vec3 glyphOrigin(
-                            drawOp.point.x + glyphTexture.placement().x,
-                            logical_coordinates().is_game_orientation() ?
-                                drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-                                drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
+                        auto const& mesh = to_ecs_component(
+                            rect{
+                                point{ drawOp.point },
+                                size{ drawOp.glyph.advance().cx, glyphFont.height() } },
+                            mesh_type::Triangles,
                             drawOp.point.z);
 
-                        iTempTextureCoords.clear();
-                        texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() }, logical_coordinates(), iTempTextureCoords);
-
-                        rect outputRect{ point{ glyphOrigin } + offsetOrigin + point{ static_cast<coordinate>((op.pass() - 1u) % scanlineOffsets), static_cast<coordinate>((op.pass() - 1u) / scanlineOffsets) }, glyphTexture.texture().extents() };
-                        auto const outputVertices = rect_vertices(outputRect, mesh_type::Triangles, glyphOrigin.z);
-
-                        vec4f passColour;
-
-                        if (pass == 2)
-                        {
-                            passColour = std::holds_alternative<colour>(drawOp.appearance.effect()->colour()) ?
-                                vec4f{{
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).red<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).green<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).blue<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.effect()->colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                                vec4f{};
-                        }
-                        else
-                        {
-                            passColour = std::holds_alternative<colour>(drawOp.appearance.ink()) ?
-                                vec4f{{
-                                    static_variant_cast<const colour&>(drawOp.appearance.ink()).red<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.ink()).green<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.ink()).blue<float>(),
-                                    static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                                vec4f{};
-                        }
-
-                        vertexArrays.instance().push_back({ outputVertices[0], passColour, iTempTextureCoords[0] });
-                        vertexArrays.instance().push_back({ outputVertices[2], passColour, iTempTextureCoords[3] });
-                        vertexArrays.instance().push_back({ outputVertices[1], passColour, iTempTextureCoords[1] });
-                        vertexArrays.instance().push_back({ outputVertices[3], passColour, iTempTextureCoords[1] });
-                        vertexArrays.instance().push_back({ outputVertices[4], passColour, iTempTextureCoords[2] });
-                        vertexArrays.instance().push_back({ outputVertices[5], passColour, iTempTextureCoords[3] });
-
-                        if (pass == 3 && std::holds_alternative<gradient>(firstOp.appearance.ink()))
-                            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.appearance.ink()),
-                                outputRect);
+                        meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
+                        meshRenderers.push_back(
+                            game::mesh_renderer{
+                                game::material{
+                                    std::holds_alternative<colour>(*drawOp.appearance.paper()) ?
+                                        to_ecs_component(std::get<colour>(*drawOp.appearance.paper())) : std::optional<game::colour>{},
+                                    std::holds_alternative<gradient>(*drawOp.appearance.paper()) ?
+                                        to_ecs_component(std::get<gradient>(*drawOp.appearance.paper())) : std::optional<game::gradient>{} } });
                     }
 
-                    if (vertexArrays.instance().empty())
-                        continue;
+                    if (drawOp.glyph.is_emoji())
+                    {
+                        font const& glyphFont = drawOp.glyph.font();
 
-                    auto& shader = rendering_engine().default_shader_program();
-                    rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
-                    shader.glyph_shader().set_first_glyph(*this, firstOp.glyph);
+                        auto const& mesh = to_ecs_component(
+                            rect{
+                                point{ drawOp.point },
+                                size{ drawOp.glyph.advance().cx, glyphFont.height() } },
+                                mesh_type::Triangles,
+                                drawOp.point.z);
 
-                    vertexArrays.instance().draw(need, glyphCount / 2u);
-                    vertexArrays.instance().execute();
+                        auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
+                        auto const& emojiTexture = emojiAtlas.emoji_texture(drawOp.glyph.value()).as_sub_texture();
+                        meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
+                        meshRenderers.push_back(
+                            game::mesh_renderer{
+                                game::material{
+                                    {},
+                                    {},
+                                    {},
+                                    to_ecs_component(emojiTexture)
+                                } });
+                    }
+                }
+                break;
+            case 2: // Special effects
+            case 3: // Final glyph render
+                {
                 }
                 break;
             }
-        }*/
+        }
 
         thread_local std::vector<mesh_drawable> drawables;
         drawables.clear();

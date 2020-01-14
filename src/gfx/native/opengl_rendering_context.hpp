@@ -216,7 +216,7 @@ namespace neogfx
         GLint iPreviousTexture;
         font iLastDrawGlyphFallbackFont;
         std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
-        vertices_2d iTempTextureCoords;
+        vec2_array<4> iTempTextureCoords;
         sink iSink;
         scoped_render_target iSrt;
         use_shader_program iUseDefaultShaderProgram;
