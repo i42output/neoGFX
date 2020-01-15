@@ -1620,7 +1620,7 @@ namespace neogfx
             std::optional<GLint> previousTexture;
 
             auto const& batchRenderer = *item->mesh->renderer;
-            auto const& batchMaterial = item->mesh->renderer->material;
+            auto const& batchMaterial = *item->material;
             vec2 textureStorageExtents;
 
             auto calc_bounding_rect = [&aPatch](const patch_drawable::item& aItem) -> rect
