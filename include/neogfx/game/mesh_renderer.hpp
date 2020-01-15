@@ -34,6 +34,7 @@ namespace neogfx::game
         material material;
         patches_t patches;
         bool destroyOnFustrumCull;
+        bool barrier;
 
         struct meta : i_component_data::meta
         {
@@ -49,7 +50,7 @@ namespace neogfx::game
             }
             static uint32_t field_count()
             {
-                return 2;
+                return 4;
             }
             static component_data_field_type field_type(uint32_t aFieldIndex)
             {
@@ -60,6 +61,7 @@ namespace neogfx::game
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Array;
                 case 2:
+                case 3:
                     return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
@@ -83,7 +85,8 @@ namespace neogfx::game
                 {
                     "Material",
                     "Patches",
-                    "Destroy On Fustrum Cull"
+                    "Destroy On Fustrum Cull",
+                    "Barrier"
                 };
                 return sFieldNames[aFieldIndex];
             }
@@ -103,4 +106,9 @@ namespace neogfx::game
             }
         };
     };
+
+    inline bool batchable(const mesh_renderer& lhs, const mesh_renderer& rhs)
+    {
+        return batchable(lhs.material, rhs.material) && !lhs.barrier && !rhs.barrier;
+    }
 }

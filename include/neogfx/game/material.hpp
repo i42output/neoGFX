@@ -87,9 +87,6 @@ namespace neogfx::game
                 case 2:
                 case 3:
                     return texture::meta::id();
-                case 4:
-                case 5:
-                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -103,7 +100,7 @@ namespace neogfx::game
                     "Shared Texture",
                     "Texture",
                     "Shader Effect",
-                    "Subpixel Rendering"
+                    "Subpixel"
                 };
                 return sFieldNames[aFieldIndex];
             }

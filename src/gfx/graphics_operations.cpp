@@ -107,6 +107,13 @@ namespace neogfx
             {
                 auto& left = static_variant_cast<const draw_glyph&>(aLeft);
                 auto& right = static_variant_cast<const draw_glyph&>(aRight);
+                // ensure emoji cannot allow subpixel and non-subpixel glyphs in same batch
+                if (left.glyph.is_emoji() != right.glyph.is_emoji())
+                    return false;
+                // are both emoji?
+                if (left.glyph.is_emoji())
+                    return true;
+                // neither are emoji...
                 if (left.glyph.subpixel() != right.glyph.subpixel())
                     return false;
                 const i_glyph_texture& leftGlyphTexture = left.glyph.glyph_texture();

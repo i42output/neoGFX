@@ -344,9 +344,7 @@ namespace neogfx
 
         bool batchable(const operation& aLeft, const operation& aRight);
 
-        typedef std::vector<operation> operations;
-        typedef std::vector<operations::size_type> batches;
-        typedef std::pair<const operation*, const operation*> batch;
-        typedef std::pair<operations, batches> queue;
+        typedef std::vector<operation> queue;
+        typedef std::pair<operation const*, operation const*> batch;
     }
 }

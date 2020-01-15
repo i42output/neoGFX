@@ -378,32 +378,40 @@ namespace neogfx
         iSnapToPixel = true;
     }
 
+    const graphics_operation::queue& opengl_rendering_context::queue() const
+    {
+        thread_local graphics_operation::queue tQueue;
+        return tQueue;
+    }
+
+    graphics_operation::queue& opengl_rendering_context::queue()
+    {
+        return const_cast<graphics_operation::queue&>(to_const(*this).queue());
+    }
+
     void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
     {
         scoped_render_target srt{ render_target() };
 
-        if (iQueue.second.empty())
-            iQueue.second.push_back(0);
-        bool sameBatch = (iQueue.first.empty() || graphics_operation::batchable(iQueue.first.back(), aOperation)) && iQueue.first.size() - iQueue.second.back() < max_operations(aOperation);
-        if (!sameBatch)
-            iQueue.second.push_back(iQueue.first.size());
-        iQueue.first.push_back(aOperation);
+        queue().push_back(aOperation);
     }
 
     void opengl_rendering_context::flush()
     {
-        if (iQueue.first.empty())
+        if (queue().empty())
             return;
 
         apply_clip();
         apply_scissor();
         set_blending_mode(blending_mode());
 
-        iQueue.second.push_back(iQueue.first.size());
-        auto endIndex = std::prev(iQueue.second.end());
-        for (auto startIndex = iQueue.second.begin(); startIndex != endIndex; ++startIndex)
+        for (auto batchStart = queue().begin(); batchStart != queue().end();)
         {
-            graphics_operation::batch opBatch{ &*iQueue.first.begin() + *startIndex, &*iQueue.first.begin() + *std::next(startIndex) };
+            auto batchEnd = std::next(batchStart);
+            while (batchEnd != queue().end() && graphics_operation::batchable(*batchStart, *batchEnd))
+                ++batchEnd;
+            graphics_operation::batch const opBatch{ &*batchStart, &*batchStart + (batchEnd - batchStart) };
+            batchStart = batchEnd;
             switch (opBatch.first->index())
             {
             case graphics_operation::operation_type::SetLogicalCoordinateSystem:
@@ -603,11 +611,7 @@ namespace neogfx
                 break;
             }
         }
-        iQueue.first.clear();
-        iQueue.second.clear();
-
-        use_vertex_arrays uva{ *this, GL_TRIANGLES };
-        uva.instance().execute();
+        queue().clear();
     }
 
     void opengl_rendering_context::scissor_on(const rect& aRect)
@@ -1520,20 +1524,13 @@ namespace neogfx
                             rect{
                                 point{ drawOp.point },
                                 size{ drawOp.glyph.advance().cx, glyphFont.height() } },
-                                mesh_type::Triangles,
-                                drawOp.point.z);
+                            mesh_type::Triangles,
+                            drawOp.point.z);
 
                         auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
                         auto const& emojiTexture = emojiAtlas.emoji_texture(drawOp.glyph.value()).as_sub_texture();
                         meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
-                        meshRenderers.push_back(
-                            game::mesh_renderer{
-                                game::material{
-                                    {},
-                                    {},
-                                    {},
-                                    to_ecs_component(emojiTexture)
-                                } });
+                        meshRenderers.push_back(game::mesh_renderer{ game::material{ {}, {}, {}, to_ecs_component(emojiTexture) } });
                     }
                 }
                 break;
@@ -1593,13 +1590,12 @@ namespace neogfx
                 mesh.filter->mesh->uv : mesh.filter->sharedMesh.ptr->uv;
             auto const& faces = mesh.filter->mesh != std::nullopt ?
                 mesh.filter->mesh->faces : mesh.filter->sharedMesh.ptr->faces;
-            auto const& material = mesh.renderer->material;
 
             auto const offsetVertices = patch.xyz.size();
             auto const offsetTextureVertices = patch.uv.size();
             patch.xyz.insert(patch.xyz.end(), xyz.begin(), xyz.end());
             patch.uv.insert(patch.uv.end(), uv.begin(), uv.end());
-            patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, material, faces);
+            patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, faces);
 
             for (auto const& meshPatch : mesh.renderer->patches)
                 patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, meshPatch.material, meshPatch.faces);
@@ -1622,6 +1618,7 @@ namespace neogfx
         {
             GLint previousTexture = 0;
 
+            auto const& batchRenderer = *item->mesh->renderer;
             auto const& batchMaterial = *item->material;
             vec2 textureStorageExtents;
 
@@ -1654,7 +1651,7 @@ namespace neogfx
             std::size_t faceCount = item->faces->size();
             auto sampling = calc_sampling(*item);
             auto next = std::next(item);
-            while (next != aPatch.items.end() && game::batchable(*item->material, *next->material) && sampling == calc_sampling(*next))
+            while (next != aPatch.items.end() && game::batchable(*item->mesh->renderer, *next->mesh->renderer) && sampling == calc_sampling(*next))
             {
                 faceCount += next->faces->size();
                 ++next;
@@ -1692,7 +1689,7 @@ namespace neogfx
                 else
                     rendering_engine().default_shader_program().texture_shader().clear_texture();
 
-                use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, faceCount * 3 };
+                use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, faceCount * 3, batchRenderer.barrier };
 
                 for (; item != next; ++item)
                 {

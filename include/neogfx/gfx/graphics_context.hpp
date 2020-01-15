@@ -48,6 +48,8 @@ namespace neogfx
         const i_render_target& render_target() const override;
         const i_render_target& render_target() override;
         rect rendering_area(bool aConsiderScissor = true) const override;
+        const graphics_operation::queue& queue() const override;
+        graphics_operation::queue& queue() override;
         void enqueue(const graphics_operation::operation& aOperation) override;
         void flush() override;
     public:
