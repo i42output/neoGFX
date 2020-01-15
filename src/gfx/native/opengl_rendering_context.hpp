@@ -105,6 +105,7 @@ namespace neogfx
             vertices_2d uv;
             struct item
             {
+                struct no_texture : std::logic_error { no_texture() : std::logic_error{ "neogfx::opengl_rendering_context::patch_drawable::item::no_texture" } {} };
                 mesh_drawable* mesh;
                 vertices::size_type offsetVertices;
                 vertices_2d::size_type offsetTextureVertices;
@@ -114,6 +115,32 @@ namespace neogfx
                     mesh{ &mesh }, offsetVertices{ offsetVertices }, offsetTextureVertices{ offsetTextureVertices }, material{ &mesh.renderer->material }, faces{ &faces }                {}
                 item(mesh_drawable& mesh, vertices::size_type offsetVertices, vertices_2d::size_type offsetTextureVertices, game::material const& material, game::faces const& faces) :
                     mesh{ &mesh }, offsetVertices{ offsetVertices }, offsetTextureVertices{ offsetTextureVertices }, material{ &material }, faces{ &faces }                {}
+                bool has_texture() const
+                {
+                    if (material->texture != std::nullopt)
+                        return true;
+                    else if (material->sharedTexture != std::nullopt)
+                        return true;
+                    else if (mesh->renderer->material.texture != std::nullopt)
+                        return true;
+                    else if (mesh->renderer->material.sharedTexture != std::nullopt)
+                        return true;
+                    else
+                        return false;
+                }
+                game::texture const& texture() const
+                {
+                    if (material->texture != std::nullopt)
+                        return *material->texture;
+                    else if (material->sharedTexture != std::nullopt)
+                        return *material->sharedTexture->ptr;
+                    else if (mesh->renderer->material.texture != std::nullopt)
+                        return *mesh->renderer->material.texture;
+                    else if (mesh->renderer->material.sharedTexture != std::nullopt)
+                        return *mesh->renderer->material.sharedTexture->ptr;
+                    else
+                        throw no_texture();
+                }
             };
             std::vector<item> items;
         };

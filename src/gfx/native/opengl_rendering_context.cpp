@@ -1590,12 +1590,13 @@ namespace neogfx
                 mesh.filter->mesh->uv : mesh.filter->sharedMesh.ptr->uv;
             auto const& faces = mesh.filter->mesh != std::nullopt ?
                 mesh.filter->mesh->faces : mesh.filter->sharedMesh.ptr->faces;
+            auto const& material = mesh.renderer->material;
 
             auto const offsetVertices = patch.xyz.size();
             auto const offsetTextureVertices = patch.uv.size();
             patch.xyz.insert(patch.xyz.end(), xyz.begin(), xyz.end());
             patch.uv.insert(patch.uv.end(), uv.begin(), uv.end());
-            patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, faces);
+            patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, material, faces);
 
             for (auto const& meshPatch : mesh.renderer->patches)
                 patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, meshPatch.material, meshPatch.faces);
@@ -1616,10 +1617,10 @@ namespace neogfx
 
         for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
-            GLint previousTexture = 0;
+            std::optional<GLint> previousTexture;
 
             auto const& batchRenderer = *item->mesh->renderer;
-            auto const& batchMaterial = *item->material;
+            auto const& batchMaterial = item->mesh->renderer->material;
             vec2 textureStorageExtents;
 
             auto calc_bounding_rect = [&aPatch](const patch_drawable::item& aItem) -> rect
@@ -1629,13 +1630,12 @@ namespace neogfx
 
             auto calc_sampling = [&aPatch, &calc_bounding_rect](const patch_drawable::item& aItem) -> texture_sampling
             {
-                const game::material& material = *aItem.material;
-                if (material.texture == std::nullopt)
+                if (!aItem.has_texture())
                     return texture_sampling::Normal;
-                auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
+                auto const& texture = *service<i_texture_manager>().find_texture(aItem.texture().id.cookie());
                 auto sampling =
-                    (material.texture->sampling != std::nullopt ?
-                        *material.texture->sampling : texture.sampling());
+                    (aItem.texture().sampling != std::nullopt ?
+                        *aItem.texture().sampling : texture.sampling());
                 if (sampling == texture_sampling::Scaled)
                 {
                     auto const extents = size_u32{ texture.extents() };
@@ -1651,23 +1651,24 @@ namespace neogfx
             std::size_t faceCount = item->faces->size();
             auto sampling = calc_sampling(*item);
             auto next = std::next(item);
-            while (next != aPatch.items.end() && game::batchable(*item->mesh->renderer, *next->mesh->renderer) && sampling == calc_sampling(*next))
+            while (next != aPatch.items.end() && game::batchable(*item->material, *next->material) && sampling == calc_sampling(*next))
             {
                 faceCount += next->faces->size();
                 ++next;
             }
 
             {
-                if (batchMaterial.texture != std::nullopt)
+                if (item->has_texture())
                 {
-                    auto const& texture = *service<i_texture_manager>().find_texture(batchMaterial.texture->id.cookie());
+                    auto const& texture = *service<i_texture_manager>().find_texture(item->texture().id.cookie());
 
                     textureStorageExtents = texture.storage_extents().to_vec2();
 
-                    glCheck(glActiveTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
+                    glCheck(glActiveTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
 
-                    glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
-                    glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(texture.native_handle())));
+                    previousTexture.emplace(0);
+                    glCheck(glGetIntegerv(sampling != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &*previousTexture));
+                    glCheck(glBindTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(texture.native_handle())));
                     if (sampling != texture_sampling::Multisample)
                     {
                         glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
@@ -1698,16 +1699,17 @@ namespace neogfx
 
                     auto const& material = *item->material;
 
-                    if (material.texture != std::nullopt)
+                    if (item->has_texture())
                     {
-                        auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
-                        uvFixupCoefficient = material.texture->extents;
-                        if (material.texture->type == texture_type::Texture)
+                        auto const& materialTexture = item->texture();
+                        auto const& texture = *service<i_texture_manager>().find_texture(materialTexture.id.cookie());
+                        uvFixupCoefficient = materialTexture.extents;
+                        if (materialTexture.type == texture_type::Texture)
                             uvFixupOffset = vec2{ 1.0, 1.0 };
-                        else if (material.texture->subTexture == std::nullopt)
+                        else if (materialTexture.subTexture == std::nullopt)
                             uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
                         else
-                            uvFixupOffset = material.texture->subTexture->min;
+                            uvFixupOffset = materialTexture.subTexture->min;
                     }
 
                     auto const offsetVertices = item->offsetVertices;
@@ -1731,7 +1733,7 @@ namespace neogfx
                                 v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
                                 item->mesh->drawn = true;
                             vec2 uv = {};
-                            if (material.texture != std::nullopt)
+                            if (item->has_texture())
                                 uv = (textureVertices[textureVertexIndexOffset].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
                             vertexArrays.instance().emplace_back(
                                 v,
@@ -1747,11 +1749,8 @@ namespace neogfx
                 vertexArrays.instance().draw();
             }
 
-            if (batchMaterial.texture != std::nullopt)
-            {
-                auto const& texture = *service<i_texture_manager>().find_texture(batchMaterial.texture->id.cookie());
-                glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
-            }
+            if (previousTexture != std::nullopt)
+                glCheck(glBindTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(*previousTexture)));
 
             disable_sample_shading();
         }
