@@ -126,21 +126,21 @@ namespace neogames
             aabb.deflate(neogfx::size{ 0.025, 0.05 });
 
             // Card value textures...
-            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard));
+            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, 0.0, aCardTextures.value_texture(aCard));
             meshRenderer.patches.back().material.colour = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
 
             const neogfx::mat33 uvRotate180{ { -1.0, 0.0, 0.0 }, { 0.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
 
-            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard), uvRotate180);
+            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, 0.0, aCardTextures.value_texture(aCard), uvRotate180);
             meshRenderer.patches.back().material.colour = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
 
             // Card suit textures under card value textures...
-            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard));
-            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } +neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard), uvRotate180);
+            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, 0.0, aCardTextures.suit_texture(aCard));
+            neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } +neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, 0.0, aCardTextures.suit_texture(aCard), uvRotate180);
 
             auto faceTextureRects = face_texture_rects(aabb, static_cast<basic_card<GameTraits>::value>(aCard));
             for (const auto& r : faceTextureRects)
-                neogfx::add_patch(mesh, meshRenderer, r.first, aCardTextures.face_texture(aCard), r.second ? uvRotate180 : neogfx::mat33::identity());
+                neogfx::add_patch(mesh, meshRenderer, r.first, 0.0, aCardTextures.face_texture(aCard), r.second ? uvRotate180 : neogfx::mat33::identity());
 
             return aEcs.create_entity(cardArchetype, neogfx::game::mesh_filter{ {}, mesh, {} }, meshRenderer);
         }
