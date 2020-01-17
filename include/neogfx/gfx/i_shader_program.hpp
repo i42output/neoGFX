@@ -90,6 +90,7 @@ namespace neogfx
         virtual void link() = 0;
         virtual void use() = 0;
         virtual void update_uniform_locations() = 0;
+        virtual bool uniforms_changed() const = 0;
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;

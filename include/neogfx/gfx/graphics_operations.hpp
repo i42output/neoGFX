@@ -53,21 +53,6 @@ namespace neogfx
         {
         };
 
-        struct clip_to_rect
-        {
-            rect rect;
-        };
-
-        struct clip_to_path
-        {
-            path path;
-            dimension pathOutline;
-        };
-
-        struct reset_clip
-        {
-        };
-
         struct snap_to_pixel_on
         {
         };
@@ -259,9 +244,6 @@ namespace neogfx
             set_logical_coordinates,
             scissor_on,
             scissor_off,
-            clip_to_rect,
-            clip_to_path,
-            reset_clip,
             snap_to_pixel_on,
             snap_to_pixel_off,
             set_opacity,
@@ -303,9 +285,6 @@ namespace neogfx
             SetLogicalCoordinates,
             ScissorOn,
             ScissorOff,
-            ClipToRect,
-            ClipToPath,
-            ResetClip,
             SnapToPixelOn,
             SnapToPixelOff,
             SetOpacity,

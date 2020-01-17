@@ -83,9 +83,6 @@ namespace neogfx
         void flush() const override;
         void scissor_on(const rect& aRect) const override;
         void scissor_off() const override;
-        void clip_to(const rect& aRect) const override;
-        void clip_to(const path& aPath, dimension aPathOutline = 0) const override;
-        void reset_clip() const override;
         bool snap_to_pixel() const override;
         void set_snap_to_pixel(bool aSnap) const override;
         double opacity() const override;

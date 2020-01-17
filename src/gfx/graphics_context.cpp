@@ -748,24 +748,6 @@ namespace neogfx
         native_context().enqueue(graphics_operation::scissor_off{});
     }
 
-    void graphics_context::clip_to(const rect& aRect) const
-    {
-        native_context().enqueue(graphics_operation::clip_to_rect{ to_device_units(aRect) + iOrigin });
-    }
-
-    void graphics_context::clip_to(const path& aPath, dimension aPathOutline) const
-    {
-        path path = to_device_units(aPath);
-        path.set_shape(path_shape::ConvexPolygon);
-        path.set_position(path.position() + iOrigin);
-        native_context().enqueue(graphics_operation::clip_to_path{ path, aPathOutline });
-    }
-
-    void graphics_context::reset_clip() const
-    {
-        native_context().enqueue(graphics_operation::reset_clip{});
-    }
-
     bool graphics_context::snap_to_pixel() const
     {
         return iSnapToPixel;

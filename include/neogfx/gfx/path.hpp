@@ -112,7 +112,7 @@ namespace neogfx
         void set_position(point_type aPosition) 
         { 
             iPosition = aPosition; 
-            iBoundingRect.reset();
+            iBoundingRect = std::nullopt;
         }
         const sub_paths_type& sub_paths() const 
         { 
@@ -130,7 +130,9 @@ namespace neogfx
             {
                 if (iShape == path_shape::ConvexPolygon)
                 {
-                    result.push_back(xyz{ bounding_rect(false).centre().x + position().x, bounding_rect(false).centre().y + position().y });
+                    auto const& boundingRect = bounding_rect(false);
+                    auto const& centre = boundingRect.centre();
+                    result.push_back(xyz{ centre.x + position().x, centre.y + position().y });
                 }
                 for (auto vi = aPath.begin(); vi != aPath.end(); ++vi)
                 {
@@ -182,7 +184,7 @@ namespace neogfx
                     iLineCountHint = 0;
                 }
                 iSubPaths.back().push_back(*iPointFrom);
-                iPointFrom.reset();
+                iPointFrom = std::nullopt;
             }
             else
             {
@@ -190,7 +192,7 @@ namespace neogfx
                     throw missing_move_to();
             }
             iSubPaths.back().push_back(aPoint);
-            iBoundingRect.reset();
+            iBoundingRect = std::nullopt;
         }
         void line_to(coordinate_type aX, coordinate_type aY)
         {
@@ -199,20 +201,21 @@ namespace neogfx
         void add_rect(const mesh_type& aRectangle);
         void inflate(const delta_type& aDelta)
         {
-            mesh_type boundingRect = bounding_rect(false);
+            auto const boundingRect = bounding_rect(false);
+            auto const centre = boundingRect.centre();
             for (auto& segment : iSubPaths)
                 for (auto& point : segment)
                 {
-                    if (point.x < boundingRect.x + static_cast<coordinate_type>(boundingRect.cx / 2))
+                    if (point.x < centre.x)
                         point.x -= aDelta.dx;
                     else
                         point.x += aDelta.dx;
-                    if (point.y < boundingRect.y + static_cast<coordinate_type>(boundingRect.cy / 2))
+                    if (point.y < centre.y)
                         point.y -= aDelta.dy;
                     else
                         point.y += aDelta.dy;
                 }
-            iBoundingRect.reset();
+            iBoundingRect = std::nullopt;
         }
         void inflate(coordinate_delta_type aDeltaX, coordinate_delta_type aDeltaY)
         {
@@ -226,7 +229,7 @@ namespace neogfx
         {
             inflate(delta_type(-aDeltaX, -aDeltaY));
         }
-        const mesh_type& bounding_rect(bool aOffsetPosition = true, size_type aPixelWidthAdjustment = size_type{}) const;
+        mesh_type bounding_rect(bool aOffsetPosition = true, size_type aPixelWidthAdjustment = size_type{}) const;
         clip_rect_list clip_rects(const point& aOrigin) const;
         // attributes
     private:
@@ -235,7 +238,7 @@ namespace neogfx
         std::optional<point_type> iPointFrom;
         sub_paths_type iSubPaths;
         sub_paths_size_type iLineCountHint;
-        mutable std::optional<mesh_type> iBoundingRect;
+        mutable std::optional<std::tuple<bool, size_type, mesh_type>> iBoundingRect;
     };
 }
 

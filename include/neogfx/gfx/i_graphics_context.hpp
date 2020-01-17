@@ -108,9 +108,6 @@ namespace neogfx
         virtual void flush() const = 0;
         virtual void scissor_on(const rect& aRect) const = 0;
         virtual void scissor_off() const = 0;
-        virtual void clip_to(const rect& aRect) const = 0;
-        virtual void clip_to(const path& aPath, dimension aPathOutline = 0) const = 0;
-        virtual void reset_clip() const = 0;
         virtual bool snap_to_pixel() const = 0;
         virtual void set_snap_to_pixel(bool aSnap) const = 0;
         virtual double opacity() const = 0;

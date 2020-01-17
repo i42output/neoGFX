@@ -438,6 +438,7 @@ namespace neogfx
         virtual bool dirty() const = 0;
         virtual void set_dirty() = 0;
         virtual void set_clean() = 0;
+        virtual bool uniforms_changed() const = 0;
     public:
         virtual const uniform_list& uniforms() const = 0;
         virtual void clear_uniform(shader_uniform_id aUniform) = 0;

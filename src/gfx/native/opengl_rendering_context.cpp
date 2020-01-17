@@ -201,7 +201,7 @@ namespace neogfx
             return vertices;
         }
 
-        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays_instance& aInstance, scalar aDiscardFor = 0.0)
+        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays& aInstance, scalar aDiscardFor = 0.0)
         {
             // assumes vertices are quads (as two triangles) created with quads_to_triangles above.
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
@@ -230,7 +230,6 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
-        iClipCounter{ 0 },
         iSrt{ iTarget },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
         iSnapToPixel{ false }
@@ -251,7 +250,6 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
-        iClipCounter{ 0 },
         iSrt{ iTarget },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
         iSnapToPixel{ false }
@@ -273,7 +271,6 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ aOther.iSubpixelRendering },
-        iClipCounter{ 0 },
         iSrt{ iTarget },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
         iSnapToPixel{ false }
@@ -401,8 +398,6 @@ namespace neogfx
         if (queue().empty())
             return;
 
-        apply_clip();
-        apply_scissor();
         set_blending_mode(blending_mode());
 
         for (auto batchStart = queue().begin(); batchStart != queue().end();)
@@ -431,21 +426,6 @@ namespace neogfx
                 {
                     (void)op;
                     scissor_off();
-                }
-                break;
-            case graphics_operation::operation_type::ClipToRect:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    clip_to(static_variant_cast<const graphics_operation::clip_to_rect&>(*op).rect);
-                break;
-            case graphics_operation::operation_type::ClipToPath:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    clip_to(static_variant_cast<const graphics_operation::clip_to_path&>(*op).path, static_variant_cast<const graphics_operation::clip_to_path&>(*op).pathOutline);
-                break;
-            case graphics_operation::operation_type::ResetClip:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    (void)op;
-                    reset_clip();
                 }
                 break;
             case graphics_operation::operation_type::SnapToPixelOn:
@@ -660,100 +640,6 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::clip_to(const rect& aRect)
-    {
-        if (iClipCounter++ == 0)
-        {
-            glCheck(glClear(GL_STENCIL_BUFFER_BIT));
-        }
-        apply_clip();
-        glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-        glCheck(glDepthMask(GL_FALSE));
-        glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
-        glCheck(glStencilMask(static_cast<GLuint>(-1)));
-        glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
-        fill_rect(rendering_area(), colour::White);
-        glCheck(glStencilFunc(GL_NEVER, 1, static_cast<GLuint>(-1)));
-        fill_rect(aRect, colour::White);
-        glCheck(glStencilFunc(GL_NEVER, 1, static_cast<GLuint>(-1)));
-        glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        glCheck(glDepthMask(GL_TRUE));
-        glCheck(glStencilMask(0x00));
-        // draw only where stencil's value is 1
-        glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
-    }
-
-    void opengl_rendering_context::clip_to(const path& aPath, dimension aPathOutline)
-    {
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
-        if (iClipCounter++ == 0)
-        {
-            glCheck(glClear(GL_STENCIL_BUFFER_BIT));
-        }
-        apply_clip();
-        glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-        glCheck(glDepthMask(GL_FALSE));
-        glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
-        glCheck(glStencilMask(static_cast<GLuint>(-1)));
-        glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
-        fill_rect(rendering_area(), colour::White);
-        glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
-        for (auto const& subPath : aPath.sub_paths())
-        {
-            if (subPath.size() > 2)
-            {
-                GLenum mode;
-                auto vertices = path_vertices(aPath, subPath, aPathOutline, mode);
-
-                use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
-                for (const auto& v : vertices)
-                    vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{v, vec4f{{1.0, 1.0, 1.0, 1.0}}});
-            }
-        }
-        if (aPathOutline != 0)
-        {
-            glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
-            path innerPath = aPath;
-            innerPath.deflate(delta{ aPathOutline });
-            for (auto const& innerSubPath : innerPath.sub_paths())
-            {
-                if (innerSubPath.size() > 2)
-                {
-                    GLenum mode;
-                    auto vertices = path_vertices(aPath, innerSubPath, 0.0, mode);
-
-                    use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
-                    for (const auto& v : vertices)
-                        vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{v, vec4f{{1.0, 1.0, 1.0, 1.0}}});
-                }
-            }
-        }
-        glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        glCheck(glDepthMask(GL_TRUE));
-        glCheck(glStencilMask(0x00));
-        // draw only where stencil's value is 1
-        glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
-    }
-
-    void opengl_rendering_context::reset_clip()
-    {
-        --iClipCounter;
-        apply_clip();
-    }
-
-    void opengl_rendering_context::apply_clip()
-    {
-        if (iClipCounter > 0)
-        {
-            glCheck(glEnable(GL_STENCIL_TEST));
-        }
-        else
-        {
-            glCheck(glDisable(GL_STENCIL_TEST));
-        }
-    }
-
     bool opengl_rendering_context::multisample() const
     {
         return iMultisample;
@@ -961,7 +847,7 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
@@ -969,7 +855,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
-        emit_any_stipple(*this, vertexArrays.instance());
+        emit_any_stipple(*this, vertexArrays);
     }
 
     void opengl_rendering_context::draw_rect(const rect& aRect, const pen& aPen)
@@ -999,7 +885,7 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
@@ -1007,7 +893,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
-        emit_any_stipple(*this, vertexArrays.instance(), aPen.width());
+        emit_any_stipple(*this, vertexArrays, aPen.width());
     }
 
     void opengl_rendering_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
@@ -1035,7 +921,7 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
@@ -1043,7 +929,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
-        emit_any_stipple(*this, vertexArrays.instance());
+        emit_any_stipple(*this, vertexArrays);
     }
 
     void opengl_rendering_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
@@ -1067,7 +953,7 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
@@ -1075,7 +961,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
-        emit_any_stipple(*this, vertexArrays.instance());
+        emit_any_stipple(*this, vertexArrays);
     }
 
     void opengl_rendering_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
@@ -1099,7 +985,7 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
@@ -1107,7 +993,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
-        emit_any_stipple(*this, vertexArrays.instance());
+        emit_any_stipple(*this, vertexArrays);
     }
 
     void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen)
@@ -1123,16 +1009,13 @@ namespace neogfx
         {
             if (subPath.size() > 2)
             {
-                if (aPath.shape() == path_shape::ConvexPolygon)
-                    clip_to(aPath, aPen.width());
-
                 GLenum mode;
                 auto vertices = path_vertices(aPath, subPath, aPen.width(), mode);
 
                 {
                     use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                     for (auto const& v : vertices)
-                        vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+                        vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                             vec4f{{
                                 static_variant_cast<colour>(aPen.colour()).red<float>(),
                                 static_variant_cast<colour>(aPen.colour()).green<float>(),
@@ -1140,8 +1023,6 @@ namespace neogfx
                                 static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                             vec4f{} });
                 }
-                if (aPath.shape() == path_shape::ConvexPolygon)
-                    reset_clip();
             }
         }
     }
@@ -1166,7 +1047,7 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
                 vec4f{{
                     static_variant_cast<colour>(aPen.colour()).red<float>(),
                     static_variant_cast<colour>(aPen.colour()).green<float>(),
@@ -1226,6 +1107,7 @@ namespace neogfx
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
+        
         {
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
 
@@ -1234,7 +1116,7 @@ namespace neogfx
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
                 auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles, drawOp.zpos);
                 for (const auto& v : rectVertices)
-                    vertexArrays.instance().push_back({ v,
+                    vertexArrays.push_back({ v,
                         std::holds_alternative<colour>(drawOp.fill) ?
                             vec4f{{
                                 static_variant_cast<const colour&>(drawOp.fill).red<float>(),
@@ -1265,7 +1147,7 @@ namespace neogfx
 
             for (const auto& v : vertices)
             {
-                vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
+                vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
                     vec4f{{
                         static_variant_cast<const colour&>(aFill).red<float>(),
                         static_variant_cast<const colour&>(aFill).green<float>(),
@@ -1292,7 +1174,7 @@ namespace neogfx
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
             for (const auto& v : vertices)
             {
-                vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
+                vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
                     vec4f{{
                         static_variant_cast<const colour&>(aFill).red<float>(),
                         static_variant_cast<const colour&>(aFill).green<float>(),
@@ -1319,7 +1201,7 @@ namespace neogfx
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
             for (const auto& v : vertices)
             {
-                vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
+                vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
                     vec4f{{
                         static_variant_cast<const colour&>(aFill).red<float>(),
                         static_variant_cast<const colour&>(aFill).green<float>(),
@@ -1340,18 +1222,9 @@ namespace neogfx
         {
             if (subPath.size() > 2)
             {
-                clip_to(aPath, 0.0);
-                point min = subPath[0];
-                point max = min;
-                for (auto const& pt : subPath)
-                {
-                    min = min.min(pt);
-                    max = max.max(pt);
-                }
-
                 if (std::holds_alternative<gradient>(aFill))
-                    rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
-                        rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
+                     rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
+                        aPath.bounding_rect());
 
                 GLenum mode;
                 auto vertices = path_vertices(aPath, subPath, 0.0, mode);
@@ -1360,7 +1233,7 @@ namespace neogfx
                     use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                     for (const auto& v : vertices)
                     {
-                        vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
+                        vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
                             vec4f{{
                                 static_variant_cast<const colour&>(aFill).red<float>(),
                                 static_variant_cast<const colour&>(aFill).green<float>(),
@@ -1369,8 +1242,6 @@ namespace neogfx
                             vec4f{}});
                     }
                 }
-
-                reset_clip();
             }
         }
     }
@@ -1396,7 +1267,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill),
                 rect{
                     point{ min.x, min.y },
-                    size{ max.x - min.y, max.y - min.y } });
+                    size{ max.x - min.x, max.y - min.y } });
         }
 
         {
@@ -1406,14 +1277,14 @@ namespace neogfx
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(*op);
                 auto const& vertices = drawOp.mesh.vertices;
                 auto const& uv = drawOp.mesh.uv;
-                if (!vertexArrays.instance().room_for(drawOp.mesh.faces.size() * 3u))
-                    vertexArrays.instance().execute();
+                if (!vertexArrays.room_for(drawOp.mesh.faces.size() * 3u))
+                    vertexArrays.execute();
                 for (auto const& f : drawOp.mesh.faces)
                 {
                     for (auto vi : f)
                     {
                         auto const& v = vertices[vi];
-                        vertexArrays.instance().push_back({
+                        vertexArrays.push_back({
                             v,
                             std::holds_alternative<colour>(drawOp.fill) ?
                                 vec4f{{
@@ -1455,19 +1326,6 @@ namespace neogfx
             return service<i_surface_manager>().display(iWidget->surface()).subpixel_format();
         // todo: might not be monitor 0!
         return service<i_basic_services>().display(0).subpixel_format();
-    }
-
-    std::size_t opengl_rendering_context::max_operations(const graphics_operation::operation& aOperation)
-    {
-        auto need = 1u;
-        if (std::holds_alternative<graphics_operation::draw_glyph>(aOperation))
-        {
-            need = 6u;
-            auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
-            if (drawGlyphOp.appearance.effect() && drawGlyphOp.appearance.effect()->type() == text_effect_type::Outline)
-                need += 6u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect()->width() * 2 + 1) * (drawGlyphOp.appearance.effect()->width() * 2 + 1)));
-        }
-        return rendering_engine().vertex_arrays().capacity() / need;
     }
 
     void opengl_rendering_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
@@ -1535,8 +1393,9 @@ namespace neogfx
                 }
                 break;
             case 2: // Special effects
-            case 3: // Final glyph render
+            case 3: // Glyph render (final pass)
                 {
+
                 }
                 break;
             }
@@ -1735,7 +1594,7 @@ namespace neogfx
                             vec2 uv = {};
                             if (item->has_texture())
                                 uv = (textureVertices[textureVertexIndexOffset].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
-                            vertexArrays.instance().emplace_back(
+                            vertexArrays.emplace_back(
                                 v,
                                 vec4f{ {
                                     colourizationColour.red<float>(),
@@ -1746,7 +1605,7 @@ namespace neogfx
                         }
                     }
                 }
-                vertexArrays.instance().draw();
+                vertexArrays.draw();
             }
 
             if (previousTexture != std::nullopt)
@@ -1754,10 +1613,5 @@ namespace neogfx
 
             disable_sample_shading();
         }
-    }
-
-    xyz opengl_rendering_context::to_shader_vertex(const point& aPoint, coordinate aZ) const
-    {
-        return xyz{{ aPoint.x, aPoint.y, aZ }};
     }
 }

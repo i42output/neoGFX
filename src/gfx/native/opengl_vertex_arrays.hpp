@@ -25,78 +25,82 @@ namespace neogfx
     {
         struct with_textures_t {} with_textures;
 
-        class use_vertex_arrays_instance
+        class use_vertex_arrays
         {
         public:
-            struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::use_vertex_arrays_instance::not_enough_room") {} };
-            struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays_instance::invalid_draw_count") {} };
-            struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays_instance::cannot_use_barrier") {} };
+            struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::use_vertex_arrays::not_enough_room") {} };
+            struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays::invalid_draw_count") {} };
+            struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays::cannot_use_barrier") {} };
         public:
             typedef opengl_standard_vertex_arrays::vertex_array::value_type value_type;
             typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
             typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
         public:
-            use_vertex_arrays_instance(opengl_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
                 iParent{ aParent }, 
                 iUse{ aParent.rendering_engine().vertex_arrays() }, 
                 iMode{ aMode }, 
                 iWithTextures{ false }, 
-                iStart{ static_cast<GLint>(vertices().size()) }, 
+                iStart{ static_cast<GLint>(iUse.vertices().size()) }, 
                 iUseBarrier{ aUseBarrier }
             {
-                if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
+                if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
                 if (!room_for(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays_instance(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
                 iParent{ aParent }, 
                 iUse{ aParent.rendering_engine().vertex_arrays() }, 
                 iMode{ aMode }, 
                 iWithTextures{ false }, 
-                iStart{ static_cast<GLint>(vertices().size()) }, 
+                iStart{ static_cast<GLint>(iUse.vertices().size()) },
                 iUseBarrier{ aUseBarrier }
             {
-                if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
+                if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
                 if (!room_for(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays_instance(opengl_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
                 iParent{ aParent }, 
                 iUse{ aParent.rendering_engine().vertex_arrays() }, 
                 iMode{ aMode }, 
                 iWithTextures{ true }, 
-                iStart{ static_cast<GLint>(vertices().size()) }, 
+                iStart{ static_cast<GLint>(iUse.vertices().size()) },
                 iUseBarrier{ aUseBarrier }
             {
-                if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
+                if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
                 if (!room_for(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays_instance(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
                 iParent{ aParent }, 
                 iUse{ aParent.rendering_engine().vertex_arrays() }, 
                 iMode{ aMode }, 
                 iWithTextures{ true }, 
-                iStart{ static_cast<GLint>(vertices().size()) }, 
+                iStart{ static_cast<GLint>(iUse.vertices().size()) },
                 iUseBarrier{ aUseBarrier }
             {
-                if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
+                if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
                 if (!room_for(aNeed))
                     throw not_enough_room();
             }
-            ~use_vertex_arrays_instance()
+            ~use_vertex_arrays()
             {
                 draw();
             }
         public:
+            opengl_rendering_context& parent()
+            {
+                return iParent;
+            }
             std::size_t primitive_vertex_count() const
             {
                 switch (mode())
@@ -278,49 +282,6 @@ namespace neogfx
             bool iWithTextures;
             GLint iStart;
             bool iUseBarrier;
-        };
-
-        class use_vertex_arrays
-        {
-        public:
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false)
-            {
-                instantiate(aParent, aMode, aNeed, aUseBarrier);
-            }
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false)
-            {
-                instantiate(aParent, aMode, aTransformation, aNeed, aUseBarrier);
-            }
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false)
-            {
-                instantiate(aParent, aMode, with_textures, aNeed, aUseBarrier);
-            }
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false)
-            {
-                instantiate(aParent, aMode, aTransformation, with_textures, aNeed, aUseBarrier);
-            }
-            ~use_vertex_arrays()
-            {
-            }
-        public:
-            use_vertex_arrays_instance& instance()
-            {
-                return *iInstance;
-            }
-            template <typename... Args>
-            void instantiate(Args&&... args)
-            {
-                thread_local std::weak_ptr<use_vertex_arrays_instance> tInstance;
-                if (tInstance.expired())
-                {
-                    iInstance = std::make_shared<use_vertex_arrays_instance>(std::forward<Args>(args)...);
-                    tInstance = iInstance;
-                }
-                else
-                    iInstance = tInstance.lock();
-            }
-        private:
-            std::shared_ptr<use_vertex_arrays_instance> iInstance;
         };
     }
 }

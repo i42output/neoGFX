@@ -31,10 +31,10 @@ namespace neogfx
     }
 
     template <typename PointType>
-    inline const typename basic_path<PointType>::mesh_type& basic_path<PointType>::bounding_rect(bool aOffsetPosition, size_type aPixelWidthAdjustment) const
+    inline typename basic_path<PointType>::mesh_type basic_path<PointType>::bounding_rect(bool aOffsetPosition, size_type aPixelWidthAdjustment) const
     {
-        if (iBoundingRect)
-            return *iBoundingRect;
+        if (iBoundingRect && std::get<0>(*iBoundingRect) == aOffsetPosition && std::get<1>(*iBoundingRect) == aPixelWidthAdjustment)
+            return std::get<2>(*iBoundingRect);
         coordinate_type minX = std::numeric_limits<coordinate_type>::max();
         coordinate_type minY = std::numeric_limits<coordinate_type>::max();
         coordinate_type maxX = std::numeric_limits<coordinate_type>::min();
@@ -47,8 +47,11 @@ namespace neogfx
                 maxX = std::max(maxX, point.x);
                 maxY = std::max(maxY, point.y);
             }
-        iBoundingRect = mesh_type(point_type(minX, minY) + (aOffsetPosition ? iPosition : point(0.0, 0.0)), size_type(maxX - minX + aPixelWidthAdjustment.cx, maxY - minY + aPixelWidthAdjustment.cy));
-        return *iBoundingRect;
+        iBoundingRect = std::make_tuple(
+            aOffsetPosition,
+            aPixelWidthAdjustment,
+            mesh_type{ point_type{ minX, minY } +(aOffsetPosition ? iPosition : point{}), size_type{ maxX - minX + aPixelWidthAdjustment.cx, maxY - minY + aPixelWidthAdjustment.cy } });
+        return std::get<2>(*iBoundingRect);
     }
 
     namespace

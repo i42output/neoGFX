@@ -144,6 +144,7 @@ namespace neogfx
         point origin() const override;
         void move(const point& aPosition) override;
         void moved() override;
+        void parent_moved() override;
         void resize(const size& aSize) override;
         void resized() override;
         const i_widget& get_widget_at(const point& aPosition) const override;
@@ -268,6 +269,7 @@ namespace neogfx
         class layout_timer;
         std::unique_ptr<layout_timer> iLayoutTimer;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
+        mutable std::optional<point> iOrigin;
         // properties / anchors
     public:
         define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem, logical_coordinate_system)

@@ -146,6 +146,13 @@ namespace neogfx
         {
             iDirty = false;
         }
+        bool uniforms_changed() const override
+        {
+            for (auto& u : uniforms())
+                if (u.is_dirty())
+                    return true;
+            return false;
+        }
     public:
         const i_shader::uniform_list& uniforms() const override
         {

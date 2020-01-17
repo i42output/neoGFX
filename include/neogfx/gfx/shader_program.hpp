@@ -68,6 +68,7 @@ namespace neogfx
         void set_clean() override;
         void prepare_uniforms(const i_rendering_context& aContext) override;
         void make() override;
+        bool uniforms_changed() const override;
         bool active() const override;
         void activate(const i_rendering_context& aContext) override;
         void instantiate(const i_rendering_context& aContext) override;

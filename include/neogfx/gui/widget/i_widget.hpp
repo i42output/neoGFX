@@ -130,6 +130,7 @@ namespace neogfx
         virtual point origin() const = 0;
         virtual void move(const point& aPosition) = 0;
         virtual void moved() = 0;
+        virtual void parent_moved() = 0;
         virtual size extents() const = 0;
         virtual void resize(const size& aSize) = 0;
         virtual void resized() = 0;

@@ -36,9 +36,6 @@ namespace neogfx
             case SetLogicalCoordinates: return "SetLogicalCoordinates";
             case ScissorOn: return "ScissorOn";
             case ScissorOff: return "ScissorOff";
-            case ClipToRect: return "ClipToRect";
-            case ClipToPath: return "ClipToPath";
-            case ResetClip: return "ResetClip";
             case SnapToPixelOn: return "SnapToPixelOn";
             case SnapToPixelOff: return "SnapToPixelOff";
             case SetOpacity: return "SetOpacity";
@@ -52,6 +49,7 @@ namespace neogfx
             case SubpixelRenderingOff: return "SubpixelRenderingOff";
             case Clear: return "Clear";
             case ClearDepthBuffer: return "ClearDepthBuffer";
+            case ClearStencilBuffer: return "ClearStencilBuffer";
             case SetPixel: return "SetPixel";
             case DrawPixel: return "DrawPixel";
             case DrawLine: return "DrawLine";
@@ -101,6 +99,12 @@ namespace neogfx
             {
                 auto& left = static_variant_cast<const fill_shape&>(aLeft);
                 auto& right = static_variant_cast<const fill_shape&>(aRight);
+                return left.fill.index() == right.fill.index() && std::holds_alternative<colour>(left.fill);
+            }
+            case operation_type::FillPath:
+            {
+                auto& left = static_variant_cast<const fill_path&>(aLeft);
+                auto& right = static_variant_cast<const fill_path&>(aRight);
                 return left.fill.index() == right.fill.index() && std::holds_alternative<colour>(left.fill);
             }
             case operation_type::DrawGlyph:

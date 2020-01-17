@@ -1077,6 +1077,13 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_delta<T>& aDelta)
+    {
+        aStream << "{dx: " << aDelta.dx << ", dy: " << aDelta.dy << "}";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_rect<T>& aRect)
     {
         aStream << "[" << aRect.top_left() << " -> " << aRect.bottom_right() << ", " << aRect.extents() << "]";

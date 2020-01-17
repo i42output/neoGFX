@@ -53,6 +53,7 @@ namespace neogfx
         iParentLayout{ nullptr },
         iLayoutInProgress{ 0 }
     {
+        Position.Changed([this](const point&) { moved(); });
     }
     
     widget::widget(i_widget& aParent) :
@@ -64,6 +65,7 @@ namespace neogfx
         iParentLayout{ nullptr },
         iLayoutInProgress{ 0 }
     {
+        Position.Changed([this](const point&) { moved(); });
         aParent.add(*this);
     }
 
@@ -76,6 +78,7 @@ namespace neogfx
         iParentLayout{ nullptr },
         iLayoutInProgress{ 0 }
     {
+        Position.Changed([this](const point&) { moved(); });
         aLayout.add(*this);
     }
 
@@ -423,9 +426,9 @@ namespace neogfx
             {
                 if (oldLayout == nullptr)
                 {
-                    for (auto& c : iChildren)
-                        if (c->has_parent_layout() && &c->parent_layout() == oldLayout.get())
-                            iLayout->add(c);
+                    for (auto& child : iChildren)
+                        if (child->has_parent_layout() && &child->parent_layout() == oldLayout.get())
+                            iLayout->add(child);
                 }
                 else
                     oldLayout->move_all_to(*iLayout);
@@ -710,31 +713,42 @@ namespace neogfx
 
     point widget::origin() const
     {
-        if ((!is_root() || root().is_nested()))
+        if (iOrigin == std::nullopt)
         {
-            if (has_parent())
-                return position() + parent().origin();
+            if ((!is_root() || root().is_nested()))
+            {
+                if (has_parent())
+                    iOrigin = position() + parent().origin();
+                else
+                    iOrigin = position();
+            }
             else
-                return position();
+                iOrigin = point{};
         }
-        else
-            return point{};
+        return *iOrigin;
     }
 
     void widget::move(const point& aPosition)
     {
         if (Position != units_converter(*this).to_device_units(aPosition))
-        {
-            update(true);
             Position.assign(units_converter(*this).to_device_units(aPosition), false);
-            update(true);
-            moved();
-        }
     }
 
     void widget::moved()
     {
+        update(true);
+        iOrigin = std::nullopt;
+        update(true);
+        for (auto child : iChildren)
+            child->parent_moved();
         PositionChanged.trigger();
+    }
+
+    void widget::parent_moved()
+    {
+        iOrigin = std::nullopt;
+        for (auto child : iChildren)
+            child->parent_moved();
     }
     
     size widget::extents() const
@@ -781,9 +795,9 @@ namespace neogfx
     {
         if (client_rect().contains(aPosition))
         {
-            for (const auto& c : children())
-                if (c->visible() && to_client_coordinates(c->non_client_rect()).contains(aPosition))
-                    return c->get_widget_at(aPosition - c->position());
+            for (const auto& child : children())
+                if (child->visible() && to_client_coordinates(child->non_client_rect()).contains(aPosition))
+                    return child->get_widget_at(aPosition - child->position());
         }
         return *this;
     }
@@ -1038,10 +1052,10 @@ namespace neogfx
 
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
-                const auto& c = *i;
-                rect intersection = clipRect.intersection(to_client_coordinates(c->non_client_rect()));
+                const auto& child = *i;
+                rect intersection = clipRect.intersection(to_client_coordinates(child->non_client_rect()));
                 if (!intersection.empty())
-                    c->render(aGraphicsContext);
+                    child->render(aGraphicsContext);
             }
 
             ChildrenPainted.trigger(aGraphicsContext);

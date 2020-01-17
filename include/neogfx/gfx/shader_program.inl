@@ -235,6 +235,16 @@ namespace neogfx
             set_clean();
         }
     }
+
+    template <typename Base>
+    bool shader_program<Base>::uniforms_changed() const
+    {
+        for (auto& stage : stages().container())
+            for (auto& shader : stage.second().container())
+                if (shader->uniforms_changed())
+                    return true;
+        return false;
+    }
     
     template <typename Base>
     inline bool shader_program<Base>::active() const

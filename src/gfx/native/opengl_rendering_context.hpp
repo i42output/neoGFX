@@ -173,10 +173,6 @@ namespace neogfx
         void scissor_on(const rect& aRect);
         void scissor_off();
         const optional_rect& scissor_rect() const;
-        void clip_to(const rect& aRect);
-        void clip_to(const path& aPath, dimension aPathOutline);
-        void reset_clip();
-        void apply_clip();
         bool multisample() const;
         void set_multisample(bool aMultisample);
         void enable_sample_shading(double aSampleShadingRate);
@@ -222,10 +218,8 @@ namespace neogfx
     public:
         neogfx::subpixel_format subpixel_format() const override;
     private:
-        std::size_t max_operations(const graphics_operation::operation& aOperation);
         void apply_scissor();
         void apply_logical_operation();
-        xyz to_shader_vertex(const point& aPoint, coordinate aZ = 0.0) const;
     private:
         i_rendering_engine& iRenderingEngine;
         const i_render_target& iTarget;
@@ -240,7 +234,6 @@ namespace neogfx
         bool iSubpixelRendering;
         std::vector<logical_operation> iLogicalOperationStack;
         std::list<use_shader_program> iShaderProgramStack;
-        uint32_t iClipCounter;
         std::vector<rect> iScissorRects;
         mutable optional_rect iScissorRect;
         GLint iPreviousTexture;
