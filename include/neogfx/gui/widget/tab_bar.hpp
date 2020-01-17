@@ -79,6 +79,9 @@ namespace neogfx
         i_widget& as_widget() override;
     public:
         bool visible() const override;
+    protected:
+        bool can_defer_layout() const override;
+        bool is_managing_layout() const override;
     private:
         void update_placement();
     private:
