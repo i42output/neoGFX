@@ -100,8 +100,10 @@ namespace neogfx
     public:
         void clear_gradient() override;
         void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) override;
+        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox) override;
     private:
         neogfx::gradient_shader_data& gradient_shader_data(const gradient& aGradient);
+        neogfx::gradient_shader_data& gradient_shader_data(const game::gradient& aGradient);
     private:
         std::vector<float> iGradientStopPositions;
         std::vector<std::array<float, 4>> iGradientStopColours;
@@ -157,7 +159,6 @@ namespace neogfx
     private:
         cache_uniform(uGlyphRenderTargetExtents)
         cache_uniform(uGlyphGuiCoordinates)
-        cache_uniform(uGlyphTexture)
         cache_uniform(uGlyphRenderOutput)
         cache_uniform(uGlyphSubpixel)
         cache_uniform(uGlyphSubpixelFormat)

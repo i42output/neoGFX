@@ -464,7 +464,6 @@ int main(int argc, char* argv[])
             else
                 ng::service<ng::i_rendering_engine>().subpixel_rendering_off();
         });
-        ui.checkSubpixel.check();
         ui.editNormal.checked([&]()
         {
             auto s = ui.textEdit.default_style();

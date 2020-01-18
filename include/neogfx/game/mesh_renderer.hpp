@@ -32,7 +32,7 @@ namespace neogfx::game
     struct mesh_renderer
     {
         material material;
-        patches_t patches;
+        patches patches;
         bool destroyOnFustrumCull;
         bool barrier;
 

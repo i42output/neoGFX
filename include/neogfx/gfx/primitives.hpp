@@ -68,7 +68,8 @@ namespace neogfx
         ColorizeMaximum     = ColourizeMaximum,
         ColourizeSpot       = 3,
         ColorizeSpot        = ColourizeSpot,
-        Monochrome          = 4
+        Monochrome          = 4,
+        Ignore              = 5
     };
 
     enum class blurring_algorithm

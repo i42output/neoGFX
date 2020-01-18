@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/hid/i_display.hpp>
+#include <neogfx/game/gradient.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
@@ -48,6 +49,7 @@ namespace neogfx
     public:
         virtual void clear_gradient() = 0;
         virtual void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) = 0; // todo: use abstract gradient and rect types when available
+        virtual void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox) = 0;
     };
 
     class i_texture_shader : public i_fragment_shader

@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
     ng::app app(argc, argv, "neoGFX Design Studio");
     try
     {
-        ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
         ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
         
         app.current_style().palette().set_colour(ng::colour{ 64, 64, 64 });

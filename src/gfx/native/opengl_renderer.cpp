@@ -77,7 +77,7 @@ namespace neogfx
         iRenderer{ aRenderer },
         iLimitFrameRate{ true },
         iFrameRateLimit{ 60u },
-        iSubpixelRendering{ true },
+        iSubpixelRendering{ false },
         iLastGameRenderTime{ 0ull }
     {
 #ifdef _WIN32

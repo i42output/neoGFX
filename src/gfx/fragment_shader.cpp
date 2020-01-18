@@ -270,6 +270,12 @@ namespace neogfx
         uGradientEnabled = true;
     }
 
+    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox)
+    {
+        // todo
+        throw std::logic_error("standard_gradient_shader::set_gradient not yet implemented");
+    }
+
     gradient_shader_data& standard_gradient_shader::gradient_shader_data(const gradient& aGradient)
     {
         auto instantiate_gradient = [this, &aGradient](neogfx::gradient_shader_data& aData)
@@ -331,6 +337,12 @@ namespace neogfx
             instantiate_gradient(*iUncachedGradient);
             return *iUncachedGradient;
         }
+    }
+
+    gradient_shader_data& standard_gradient_shader::gradient_shader_data(const game::gradient& aGradient)
+    {
+        // todo
+        throw std::logic_error("standard_gradient_shader::gradient_shader_data not yet implemented");
     }
 
     standard_texture_shader::standard_texture_shader(const std::string& aName) :
@@ -402,6 +414,8 @@ namespace neogfx
                 "                color = vec4(gray, gray, gray, texel.a) * color;\n"
                 "            }\n"
                 "            break;\n"
+                "        case 5:\n" // effect: Ignore
+                "            break;\n"
                 "        }\n"
                 "    }\n"
                 "}\n"_s
@@ -434,6 +448,8 @@ namespace neogfx
     void standard_texture_shader::set_effect(shader_effect aEffect)
     {
         uTextureEffect = aEffect;
+        if (aEffect == shader_effect::Ignore)
+            uTextureEnabled = false;
     }
 
     standard_glyph_shader::standard_glyph_shader(const std::string& aName) :
@@ -470,7 +486,7 @@ namespace neogfx
                 "        float a = 0.0;\n"
                 "        if (uGlyphSubpixel)\n"
                 "        {\n"
-                "            vec4 aaaAlpha = texture(uGlyphTexture, TexCoord);\n"
+                "            vec4 aaaAlpha = texture(tex, TexCoord);\n"
                 "            if (aaaAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
                 "                return;\n"
                 "            else if (aaaAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
@@ -494,7 +510,7 @@ namespace neogfx
                 "        }\n"
                 "        else\n"
                 "        {\n"
-                "            a = texture(uGlyphTexture, TexCoord).r;\n"
+                "            a = texture(tex, TexCoord).r;\n"
                 "            if (a == 0)\n"
                 "                discard;\n"
                 "            color = vec4(color.xyz, color.a * a);\n"
@@ -516,13 +532,11 @@ namespace neogfx
     void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph)
     {
         enable();
-        aGlyph.glyph_texture().texture().bind(6);
         bool subpixelRender = aGlyph.subpixel() && aGlyph.glyph_texture().subpixel();
         if (subpixelRender)
             aContext.render_target().target_texture().bind(7);
         uGlyphRenderTargetExtents = aContext.render_target().extents().to_vec2().as<int32_t>();
         uGlyphGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
-        uGlyphTexture = sampler2D{ 6 };
         uGlyphRenderOutput = sampler2DMS{ 7 };
         uGlyphSubpixel = aGlyph.glyph_texture().subpixel();
         uGlyphSubpixelFormat = subpixelRender ? aContext.subpixel_format() : subpixel_format::None;

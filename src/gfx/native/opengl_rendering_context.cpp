@@ -1330,14 +1330,23 @@ namespace neogfx
 
     void opengl_rendering_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
         disable_anti_alias daa{ *this };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         thread_local std::vector<game::mesh_filter> meshFilters;
         thread_local std::vector<game::mesh_renderer> meshRenderers;
-        meshFilters.clear();
-        meshRenderers.clear();
+        thread_local std::vector<mesh_drawable> drawables;
+
+        auto draw = [&]()
+        {
+            for (std::size_t i = 0; i < meshFilters.size(); ++i)
+                drawables.emplace_back(meshFilters[i], meshRenderers[i]);
+            if (!drawables.empty())
+                draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
+            meshFilters.clear();
+            meshRenderers.clear();
+            drawables.clear();
+        };
 
         std::size_t normalGlyphCount = 0;
 
@@ -1364,7 +1373,7 @@ namespace neogfx
                             mesh_type::Triangles,
                             drawOp.point.z);
 
-                        meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
+                        meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         meshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
@@ -1395,18 +1404,137 @@ namespace neogfx
             case 2: // Special effects
             case 3: // Glyph render (final pass)
                 {
+                    draw();
+                    bool firstGlyph = true;
+                    for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+                    {
+                        auto const& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
+                        if (drawOp.glyph.is_whitespace() || drawOp.glyph.is_emoji())
+                            continue;
+
+                        auto const& glyphTexture = drawOp.glyph.glyph_texture();
+
+                        bool const renderEffects = !drawOp.appearance.only_calculate_effect() && drawOp.appearance.effect() && drawOp.appearance.effect()->type() == text_effect_type::Outline;
+                        if (!renderEffects && pass == 2)
+                            continue;
+
+                        if (firstGlyph)
+                        {
+                            firstGlyph = false;
+                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, drawOp.glyph);
+                        }
+
+                        bool const subpixelRender = drawOp.glyph.subpixel() && glyphTexture.subpixel();
+
+                        auto const& glyphFont = drawOp.glyph.font();
+
+                        vec3 glyphOrigin{
+                            drawOp.point.x + glyphTexture.placement().x,
+                            logical_coordinates().is_game_orientation() ?
+                                drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
+                                drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
+                            drawOp.point.z };
+
+                        if (pass == 2)
+                        {
+                            auto const scanlineOffsets = (pass == 2 ? static_cast<uint32_t>(drawOp.appearance.effect()->width()) * 2u + 1u : 1u);
+                            auto const offsets = scanlineOffsets * scanlineOffsets;
+                            point const offsetOrigin{ pass == 2 ? -drawOp.appearance.effect()->width() : 0.0, pass == 2 ? -drawOp.appearance.effect()->width() : 0.0 };
+                            for (uint32_t offset = 0; offset < offsets; ++offset)
+                            {
+                                rect const outputRect = {
+                                        point{ glyphOrigin } + offsetOrigin + point{ static_cast<coordinate>(offset % scanlineOffsets), static_cast<coordinate>(offset / scanlineOffsets) },
+                                        glyphTexture.texture().extents() };
+                                bool haveGradient = drawOp.appearance.effect() && std::holds_alternative<gradient>(drawOp.appearance.effect()->colour());
+                                if (haveGradient)
+                                {
+                                    draw();
+                                    rendering_engine().default_shader_program().gradient_shader().set_gradient(
+                                        *this, static_variant_cast<gradient>(drawOp.appearance.effect()->colour()), outputRect);
+                                }
+                                auto mesh = to_ecs_component(
+                                    outputRect,
+                                    mesh_type::Triangles,
+                                    drawOp.point.z);
+                                meshFilters.push_back(game::mesh_filter{ {}, mesh });
+                                if (std::holds_alternative<colour>(drawOp.appearance.effect()->colour()))
+                                    meshRenderers.push_back(
+                                        game::mesh_renderer{
+                                            game::material{ 
+                                                to_ecs_component(static_variant_cast<const colour&>(drawOp.appearance.effect()->colour())),
+                                                {},
+                                                {},
+                                                to_ecs_component(glyphTexture.texture()),
+                                                shader_effect::Ignore
+                                            },
+                                            {}, false, subpixelRender });
+                                else
+                                    meshRenderers.push_back(
+                                        game::mesh_renderer{
+                                            game::material{ 
+                                                {}, 
+                                                {},
+                                                {},
+                                                to_ecs_component(glyphTexture.texture()),
+                                                shader_effect::Ignore
+                                            },
+                                            {}, false, subpixelRender });
+                                if (haveGradient)
+                                {
+                                    draw();
+                                    rendering_engine().default_shader_program().gradient_shader().clear_gradient();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            rect const outputRect = { point{ glyphOrigin }, glyphTexture.texture().extents() };
+                            bool haveGradient = drawOp.appearance.effect() && std::holds_alternative<gradient>(drawOp.appearance.ink());
+                            if (haveGradient)
+                            {
+                                draw();
+                                rendering_engine().default_shader_program().gradient_shader().set_gradient(
+                                    *this, static_variant_cast<gradient>(drawOp.appearance.ink()), outputRect);
+                            }
+                            auto mesh = to_ecs_component(
+                                outputRect,
+                                mesh_type::Triangles,
+                                drawOp.point.z);
+                            meshFilters.push_back(game::mesh_filter{ {}, mesh });
+                            if (std::holds_alternative<colour>(drawOp.appearance.ink()))
+                                meshRenderers.push_back(
+                                    game::mesh_renderer{
+                                        game::material{ 
+                                            to_ecs_component(static_variant_cast<const colour&>(drawOp.appearance.ink())),
+                                            {},
+                                            {},
+                                            to_ecs_component(glyphTexture.texture()),
+                                            shader_effect::Ignore
+                                        },
+                                        {}, false, subpixelRender });
+                            else
+                                meshRenderers.push_back(
+                                    game::mesh_renderer{
+                                        game::material{ 
+                                            {}, 
+                                            {},
+                                            {},
+                                            to_ecs_component(glyphTexture.texture()),
+                                            shader_effect::Ignore
+                                        },
+                                        {}, false, subpixelRender });
+                            if (haveGradient)
+                            {
+                                draw();
+                                rendering_engine().default_shader_program().gradient_shader().clear_gradient();
+                            }
+                        }
+                    }
                 }
-                break;
             }
         }
-
-        thread_local std::vector<mesh_drawable> drawables;
-        drawables.clear();
-        for (std::size_t i = 0; i < meshFilters.size(); ++i)
-            drawables.emplace_back(meshFilters[i], meshRenderers[i]);
-        if (!drawables.empty())
-            draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
+        draw();
     }
 
     void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)

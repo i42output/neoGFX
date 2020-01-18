@@ -72,6 +72,26 @@ namespace neogfx
             }
         }
 
+        template <typename T>
+        inline bool batchable(const std::optional<T>& lhs, const std::optional<T>& rhs)
+        {
+            return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
+        }
+
+        bool batchable(const text_colour& lhs, const text_colour& rhs)
+        {
+            if (lhs.index() != rhs.index())
+                return false;
+            if (std::holds_alternative<colour>(lhs))
+                return true;
+            return lhs == rhs;
+        }
+
+        bool batchable(const text_effect& lhs, const text_effect& rhs)
+        {
+            return batchable(lhs.colour(), rhs.colour());
+        }
+
         bool batchable(const operation& aLeft, const operation& aRight)
         {
             if (aLeft.index() != aRight.index())
@@ -123,6 +143,12 @@ namespace neogfx
                 const i_glyph_texture& leftGlyphTexture = left.glyph.glyph_texture();
                 const i_glyph_texture& rightGlyphTexture = right.glyph.glyph_texture();
                 if (leftGlyphTexture.subpixel() != rightGlyphTexture.subpixel())
+                    return false;
+                if (!batchable(left.appearance.ink(), right.appearance.ink()))
+                    return false;
+                if (!batchable(left.appearance.paper(), right.appearance.paper()))
+                    return false;
+                if (!batchable(left.appearance.effect(), right.appearance.effect()))
                     return false;
                 return true;
             }

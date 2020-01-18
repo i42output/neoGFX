@@ -138,7 +138,7 @@ namespace neogfx::game
                     aEcs.component<mesh_renderer>().entity_record(aEntity) :
                     aEcs.component<mesh_renderer>().populate(aEntity, mesh_renderer{});
                 mf.mesh = mesh{};
-                mr.patches = patches_t{};
+                mr.patches = patches{};
                 auto glyphText = aGraphicsContext.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font.ptr->id.cookie()), aData.extents.x, aData.alignment);
                 for (auto const& line : glyphText.lines)
                 {
