@@ -1300,24 +1300,6 @@ namespace neogfx
         }
     }
 
-    namespace
-    {
-        template <typename Result>
-        void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const neogfx::logical_coordinates& aLogicalCoordinates, Result& aResult)
-        {
-            rect normalizedRect = aTextureRect / aTextureStorageSize;
-            aResult.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
-            aResult.emplace_back(normalizedRect.top_right().x, normalizedRect.top_right().y);
-            aResult.emplace_back(normalizedRect.bottom_right().x, normalizedRect.bottom_right().y);
-            aResult.emplace_back(normalizedRect.bottom_left().x, normalizedRect.bottom_left().y);
-            if (aLogicalCoordinates.is_gui_orientation())
-            {
-                std::swap(aResult[0][1], aResult[2][1]);
-                std::swap(aResult[1][1], aResult[3][1]);
-            }
-        }
-    }
-
     subpixel_format opengl_rendering_context::subpixel_format() const
     {
         if (render_target().target_type() == render_target_type::Texture)
@@ -1387,12 +1369,19 @@ namespace neogfx
                     {
                         font const& glyphFont = drawOp.glyph.font();
 
-                        auto const& mesh = to_ecs_component(
-                            rect{
-                                point{ drawOp.point },
-                                size{ drawOp.glyph.advance().cx, glyphFont.height() } },
-                            mesh_type::Triangles,
-                            drawOp.point.z);
+                        auto const& mesh = logical_coordinates().is_gui_orientation() ? 
+                            to_ecs_component(
+                                rect{
+                                    point{ drawOp.point },
+                                    size{ drawOp.glyph.advance().cx, glyphFont.height() } },
+                                mesh_type::Triangles,
+                                drawOp.point.z) :
+                            to_ecs_component(
+                                game_rect{
+                                    point{ drawOp.point },
+                                    size{ drawOp.glyph.advance().cx, glyphFont.height() } },
+                                mesh_type::Triangles,
+                                drawOp.point.z);
 
                         auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
                         auto const& emojiTexture = emojiAtlas.emoji_texture(drawOp.glyph.value()).as_sub_texture();
@@ -1405,7 +1394,7 @@ namespace neogfx
             case 3: // Glyph render (final pass)
                 {
                     draw();
-                    bool firstGlyph = true;
+                    bool updateGlyphShader = true;
                     for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
                     {
                         auto const& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
@@ -1419,9 +1408,9 @@ namespace neogfx
                         if (!renderEffects && pass == 2)
                             continue;
 
-                        if (firstGlyph)
+                        if (updateGlyphShader)
                         {
-                            firstGlyph = false;
+                            updateGlyphShader = false;
                             rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, drawOp.glyph);
                         }
 
@@ -1449,14 +1438,20 @@ namespace neogfx
                                 bool haveGradient = drawOp.appearance.effect() && std::holds_alternative<gradient>(drawOp.appearance.effect()->colour());
                                 if (haveGradient)
                                 {
+                                    updateGlyphShader = true;
                                     draw();
                                     rendering_engine().default_shader_program().gradient_shader().set_gradient(
                                         *this, static_variant_cast<gradient>(drawOp.appearance.effect()->colour()), outputRect);
                                 }
-                                auto mesh = to_ecs_component(
-                                    outputRect,
-                                    mesh_type::Triangles,
-                                    drawOp.point.z);
+                                auto mesh = logical_coordinates().is_gui_orientation() ? 
+                                    to_ecs_component(
+                                        outputRect,
+                                        mesh_type::Triangles,
+                                        drawOp.point.z) : 
+                                    to_ecs_component(
+                                        game_rect{ outputRect },
+                                        mesh_type::Triangles,
+                                        drawOp.point.z);
                                 meshFilters.push_back(game::mesh_filter{ {}, mesh });
                                 if (std::holds_alternative<colour>(drawOp.appearance.effect()->colour()))
                                     meshRenderers.push_back(
@@ -1482,6 +1477,7 @@ namespace neogfx
                                             {}, false, subpixelRender });
                                 if (haveGradient)
                                 {
+                                    updateGlyphShader = true;
                                     draw();
                                     rendering_engine().default_shader_program().gradient_shader().clear_gradient();
                                 }
@@ -1490,17 +1486,23 @@ namespace neogfx
                         else
                         {
                             rect const outputRect = { point{ glyphOrigin }, glyphTexture.texture().extents() };
-                            bool haveGradient = drawOp.appearance.effect() && std::holds_alternative<gradient>(drawOp.appearance.ink());
+                            bool haveGradient = std::holds_alternative<gradient>(drawOp.appearance.ink());
                             if (haveGradient)
                             {
+                                updateGlyphShader = true;
                                 draw();
                                 rendering_engine().default_shader_program().gradient_shader().set_gradient(
                                     *this, static_variant_cast<gradient>(drawOp.appearance.ink()), outputRect);
                             }
-                            auto mesh = to_ecs_component(
-                                outputRect,
-                                mesh_type::Triangles,
-                                drawOp.point.z);
+                            auto mesh = logical_coordinates().is_gui_orientation() ? 
+                                to_ecs_component(
+                                    outputRect,
+                                    mesh_type::Triangles,
+                                    drawOp.point.z) : 
+                                to_ecs_component(
+                                    game_rect{ outputRect },
+                                    mesh_type::Triangles,
+                                    drawOp.point.z);
                             meshFilters.push_back(game::mesh_filter{ {}, mesh });
                             if (std::holds_alternative<colour>(drawOp.appearance.ink()))
                                 meshRenderers.push_back(
@@ -1526,6 +1528,7 @@ namespace neogfx
                                         {}, false, subpixelRender });
                             if (haveGradient)
                             {
+                                updateGlyphShader = true;
                                 draw();
                                 rendering_engine().default_shader_program().gradient_shader().clear_gradient();
                             }
