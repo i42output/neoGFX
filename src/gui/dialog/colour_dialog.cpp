@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
+    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0_spx);
 
     colour_dialog::colour_box::colour_box(colour_dialog& aOwner, const optional_colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
         framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColour(aColour), iCustomColour(aCustomColour)
@@ -49,19 +49,10 @@ namespace neogfx
     void colour_dialog::colour_box::paint(i_graphics_context& aGraphicsContext) const
     {
         framed_widget::paint(aGraphicsContext);
+        draw_alpha_background(aGraphicsContext, client_rect(false));
         const optional_colour& fillColour = (iCustomColour == std::nullopt ? iColour : **iCustomColour);
         if (fillColour != std::nullopt)
-        {
-            if (fillColour->alpha() != 0xFF)
-                draw_alpha_background(aGraphicsContext, client_rect(false), 2.0_spx);
             aGraphicsContext.fill_rect(client_rect(false), *fillColour);
-        }
-        else
-        {
-            aGraphicsContext.fill_rect(client_rect(false), colour::White);
-            aGraphicsContext.draw_line(client_rect(false).top_left(), client_rect(false).bottom_right(), pen{ colour::Black, 2.0_spx });
-            aGraphicsContext.draw_line(client_rect(false).top_right(), client_rect(false).bottom_left(), pen{ colour::Black, 2.0_spx });
-        }
         if (iCustomColour != std::nullopt && iOwner.current_custom_colour() == *iCustomColour)
         {
             auto radius = client_rect(false).width() * 0.5 * 0.666;
