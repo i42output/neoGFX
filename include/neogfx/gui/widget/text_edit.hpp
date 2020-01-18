@@ -108,8 +108,8 @@ namespace neogfx
             void set_max_width(const optional_dimension& aMaxWidth) { iMaxWidth = aMaxWidth; }
             const neogfx::margins& margins() const { return iMargins; }
             void set_margins(const neogfx::margins& aMargins) { iMargins = aMargins; }
-            const text_edit::style& style() const { return iStyle; }
-            void set_style(const text_edit::style& aStyle) { iStyle = aStyle; }
+            const std::optional<text_edit::style>& style() const { return iStyle; }
+            void set_style(const std::optional<text_edit::style>& aStyle) { iStyle = aStyle; }
 
         public:
             bool operator==(const column_info& aRhs) const
@@ -126,7 +126,7 @@ namespace neogfx
             optional_dimension iMinWidth;
             optional_dimension iMaxWidth;
             neogfx::margins iMargins;
-            text_edit::style iStyle;
+            std::optional<text_edit::style> iStyle;
         };
     private:
         class multiple_text_changes;
@@ -440,7 +440,8 @@ namespace neogfx
     public:
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-    public:
+        neogfx::margins margins() const override;
+   public:
         void paint(i_graphics_context& aGraphicsContext) const override;
     public:
         const neogfx::font& font() const override;
@@ -519,6 +520,8 @@ namespace neogfx
         void remove_columns();
         const column_info& column(std::size_t aColumnIndex) const;
         void set_column(std::size_t aColumnIndex, const column_info& aColumn);
+        const style& column_style(std::size_t aColumnIndex) const;
+        const style& column_style(const column_info& aColumn) const;
     public:
         const neogfx::size_hint& size_hint() const;
         void set_size_hint(const neogfx::size_hint& aSizeHint);

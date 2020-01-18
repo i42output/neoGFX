@@ -277,12 +277,22 @@ namespace neogfx
         return size{ scrollable_widget::maximum_size(aAvailableSpace).cx, minimum_size(aAvailableSpace).cy };
     }
 
+    neogfx::margins text_edit::margins() const
+    {
+        auto result = scrollable_widget::margins();
+        if (default_style().text_effect())
+            result += default_style().text_effect()->width();
+        return result;
+    }
+
     void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
     void text_edit::paint(i_graphics_context& aGraphicsContext) const
     {
         scrollable_widget::paint(aGraphicsContext);
         rect clipRect = default_clip_rect().intersection(client_rect(false));
+        if (default_style().text_effect())
+            clipRect.inflate(size{ default_style().text_effect()->width() });
         if (iOutOfMemory)
         {
             draw_alpha_background(aGraphicsContext, clipRect);
@@ -294,8 +304,11 @@ namespace neogfx
         coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < columns(); ++columnIndex)
         {
-            scoped_scissor scissor2{ aGraphicsContext, clipRect.intersection(column_rect(columnIndex, true)) };
             auto const& column = static_cast<const glyph_column&>(text_edit::column(columnIndex));
+            auto columnClipRect = clipRect.intersection(column_rect(columnIndex, true));
+            if (column_style(columnIndex).text_effect())
+                columnClipRect.inflate(size{ column_style(columnIndex).text_effect()->width() });
+            scoped_scissor scissor2{ aGraphicsContext, columnClipRect };
             auto const& columnRectSansMargins = column_rect(columnIndex);
             auto const& lines = column.lines();
             auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, vertical_scrollbar().position(), {} },
@@ -1350,6 +1363,18 @@ namespace neogfx
         }
     }
 
+    const text_edit::style& text_edit::column_style(std::size_t aColumnIndex) const
+    {
+        return column_style(column(aColumnIndex));
+    }
+
+    const text_edit::style& text_edit::column_style(const column_info& aColumn) const
+    {
+        if (aColumn.style())
+            return *aColumn.style();
+        return default_style();
+    }
+
     const neogfx::size_hint& text_edit::size_hint() const
     {       
         return iSizeHint;
@@ -1549,7 +1574,7 @@ namespace neogfx
             std::size_t indexColumn = std::lower_bound(columnDelimiters.begin(), columnDelimiters.end(), aSourceIndex) - columnDelimiters.begin();
             if (indexColumn > columns() - 1)
                 indexColumn = columns() - 1;
-            auto const& columnStyle = text_edit::column(indexColumn).style();
+            auto const& columnStyle = column_style(indexColumn);
             auto const& style =
                 std::holds_alternative<style_list::const_iterator>(tagStyle) ? *static_variant_cast<style_list::const_iterator>(tagStyle) :
                 columnStyle.font() != std::nullopt ? columnStyle : iDefaultStyle;
@@ -1839,7 +1864,7 @@ namespace neogfx
     text_edit::style text_edit::glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const
     {
         style result = iDefaultStyle;
-        result.merge(aColumn.style());
+        result.merge(column_style(aColumn));
         result.set_background_colour();
         auto const& tagStyle = iText.tag(iText.begin() + from_glyph(aGlyph).first).style();
         if (std::holds_alternative<style_list::const_iterator>(tagStyle))
