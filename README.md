@@ -35,6 +35,8 @@ v1.20   | Summer 2021   | macOS support
 
 # Implementation Progress
 
+![](http://neogfx.org/temp/glyphgradients1.png?id=2)
+![](http://neogfx.org/temp/glyphgradients2.png?id=1)
 ![](http://neogfx.org/temp/github1.png?id=1)
 ![](http://neogfx.org/temp/github2.png?id=1)
 ![](http://neogfx.org/temp/github3.png?id=1)
