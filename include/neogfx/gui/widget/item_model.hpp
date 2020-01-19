@@ -164,7 +164,7 @@ namespace neogfx
         struct column_info
         {
             std::string name;
-            mutable optional_item_cell_data_info defaultDataInfo;
+            mutable optional_item_cell_info defaultDataInfo;
         };
         typedef typename container_traits::template rebind<item_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
     public:
@@ -203,56 +203,62 @@ namespace neogfx
         }
         bool column_selectable(item_model_index::column_type aColumnIndex) const override
         {
-            return !default_cell_data_info(aColumnIndex).unselectable;
+            return (default_cell_info(aColumnIndex).flags & item_cell_flags::Selectable) == item_cell_flags::Selectable;
         }
         void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) override
         {
-            default_cell_data_info(aColumnIndex).unselectable = !aSelectable;
+            if (aSelectable)
+                default_cell_info(aColumnIndex).flags &= ~item_cell_flags::Selectable;
+            else
+                default_cell_info(aColumnIndex).flags |= item_cell_flags::Selectable;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
         bool column_read_only(item_model_index::column_type aColumnIndex) const override
         {
-            return default_cell_data_info(aColumnIndex).readOnly;
+            return (default_cell_info(aColumnIndex).flags & item_cell_flags::Editable) != item_cell_flags::Editable;
         }
         void set_column_read_only(item_model_index::column_type aColumnIndex, bool aReadOnly) override
         {
-            default_cell_data_info(aColumnIndex).readOnly = aReadOnly;
+            if (aReadOnly)
+                default_cell_info(aColumnIndex).flags &= ~item_cell_flags::Editable;
+            else
+                default_cell_info(aColumnIndex).flags |= item_cell_flags::Editable;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
-        item_cell_data_type column_data_type(item_model_index::column_type aColumnIndex) const override
+        item_data_type column_data_type(item_model_index::column_type aColumnIndex) const override
         {
-            return default_cell_data_info(aColumnIndex).type;
+            return default_cell_info(aColumnIndex).dataType;
         }
-        void set_column_data_type(item_model_index::column_type aColumnIndex, item_cell_data_type aType) override
+        void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) override
         {
-            default_cell_data_info(aColumnIndex).type = aType;
+            default_cell_info(aColumnIndex).dataType = aType;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
         const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const override
         {
-            return default_cell_data_info(aColumnIndex).min;
+            return default_cell_info(aColumnIndex).dataMin;
         }
         void set_column_min_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
         {
-            default_cell_data_info(aColumnIndex).min = aValue;
+            default_cell_info(aColumnIndex).dataMin = aValue;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
         const item_cell_data& column_max_value(item_model_index::column_type aColumnIndex) const override
         {
-            return default_cell_data_info(aColumnIndex).max;
+            return default_cell_info(aColumnIndex).dataMax;
         }
         void set_column_max_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
         {
-            default_cell_data_info(aColumnIndex).max = aValue;
+            default_cell_info(aColumnIndex).dataMax = aValue;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
         const item_cell_data& column_step_value(item_model_index::column_type aColumnIndex) const override
         {
-            return default_cell_data_info(aColumnIndex).step;
+            return default_cell_info(aColumnIndex).dataStep;
         }
         void set_column_step_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
         {
-            default_cell_data_info(aColumnIndex).step = aValue;
+            default_cell_info(aColumnIndex).dataStep = aValue;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
     public:
@@ -329,9 +335,9 @@ namespace neogfx
         {
             return iItems[aIndex.row()].second[aIndex.column()];
         }
-        const item_cell_data_info& cell_data_info(const item_model_index& aIndex) const override
+        const item_cell_info& cell_info(const item_model_index& aIndex) const override
         {
-            return default_cell_data_info(aIndex.column());
+            return default_cell_info(aIndex.column());
         }
     public:
         bool empty() const override
@@ -406,9 +412,9 @@ namespace neogfx
                 iColumns.resize(aColumnIndex + 1);
                 changed = true;
             }
-            if (default_cell_data_info(aColumnIndex).type == item_cell_data_type::Unknown)
+            if (default_cell_info(aColumnIndex).dataType == item_data_type::Unknown)
             {
-                default_cell_data_info(aColumnIndex).type = static_cast<item_cell_data_type>(aCellData.index());
+                default_cell_info(aColumnIndex).dataType = static_cast<item_data_type>(aCellData.index());
                 changed = true;
             }
             if (ri->second[aColumnIndex] != aCellData)
@@ -432,8 +438,8 @@ namespace neogfx
             if (iItems[aIndex.row()].second[aIndex.column()] == aCellData)
                 return;
             iItems[aIndex.row()].second[aIndex.column()] = aCellData;
-            if (default_cell_data_info(aIndex.column()).type == item_cell_data_type::Unknown)
-                default_cell_data_info(aIndex.column()).type = static_cast<item_cell_data_type>(aCellData.index());
+            if (default_cell_info(aIndex.column()).dataType == item_data_type::Unknown)
+                default_cell_info(aIndex.column()).dataType = static_cast<item_data_type>(aCellData.index());
             ItemChanged.trigger(aIndex);
         }
     public:
@@ -446,7 +452,7 @@ namespace neogfx
             return iItems[aIndex.row()].first;
         }
     private:
-        const item_cell_data_info& default_cell_data_info(item_model_index::column_type aColumnIndex) const
+        const item_cell_info& default_cell_info(item_model_index::column_type aColumnIndex) const
         {
             if (iColumns.size() < aColumnIndex + 1)
                 throw bad_column_index();
@@ -454,16 +460,16 @@ namespace neogfx
                 return *iColumns[aColumnIndex].defaultDataInfo;
             else
             {
-                static const item_cell_data_info sZero;
+                static const item_cell_info sZero;
                 return sZero;
             }
         }
-        item_cell_data_info& default_cell_data_info(item_model_index::column_type aColumnIndex)
+        item_cell_info& default_cell_info(item_model_index::column_type aColumnIndex)
         {
             if (iColumns.size() < aColumnIndex + 1)
                 iColumns.resize(aColumnIndex + 1);
             if (iColumns[aColumnIndex].defaultDataInfo == std::nullopt)
-                iColumns[aColumnIndex].defaultDataInfo = item_cell_data_info{};
+                iColumns[aColumnIndex].defaultDataInfo = item_cell_info{};
             return *iColumns[aColumnIndex].defaultDataInfo;
         }
     private:

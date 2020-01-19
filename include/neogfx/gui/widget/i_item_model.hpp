@@ -36,7 +36,7 @@ namespace neogfx
     struct item_model_index : item_index<item_model_index> { using item_index::item_index; };
     typedef std::optional<item_model_index> optional_item_model_index;
 
-    enum item_cell_data_type
+    enum class item_data_type : uint32_t
     {
         Unknown,
         Bool,
@@ -61,6 +61,116 @@ namespace neogfx
         ChoiceCustomType
     };
 
+    enum class item_cell_data_category : uint32_t
+    {
+        Invalid,
+        Value,
+        Pointer,
+        CustomType,
+        ChooseValue,
+        ChoosePointer,
+        ChooseCustomType
+    };
+
+    enum class item_cell_flags : uint32_t
+    {
+        Enabled                 = 0x00000001,
+        Selectable              = 0x00000002,
+        Editable                = 0x00000004,
+        Checkable               = 0x00000010,
+        CheckableBiState        = Checkable,
+        CheckableTriState       = 0x00000020,
+        Draggable               = 0x00001000,
+        Droppable               = 0x00002000,
+        Checked                 = 0x00010000,
+        CheckedIndeterminate    = 0x00020000,
+
+        Default                 = Enabled | Selectable | Editable
+    };
+
+    inline item_cell_flags operator|(item_cell_flags lhs, item_cell_flags rhs)
+    {
+        return static_cast<item_cell_flags>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+    }
+
+    inline item_cell_flags operator&(item_cell_flags lhs, item_cell_flags rhs)
+    {
+        return static_cast<item_cell_flags>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+    }
+
+    inline item_cell_flags& operator|=(item_cell_flags& lhs, item_cell_flags rhs)
+    {
+        lhs = lhs | rhs;
+        return lhs;
+    }
+
+    inline item_cell_flags& operator&=(item_cell_flags& lhs, item_cell_flags rhs)
+    {
+        lhs = lhs & rhs;
+        return lhs;
+    }
+
+    inline item_cell_flags operator~(item_cell_flags flags)
+    {
+        return static_cast<item_cell_flags>(~static_cast<uint32_t>(flags));
+    }
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::item_data_type> neolib::enum_enumerators_v<neogfx::item_data_type>
+{
+    declare_enum_string(neogfx::item_data_type, Unknown)
+    declare_enum_string(neogfx::item_data_type, Bool)
+    declare_enum_string(neogfx::item_data_type, Int32)
+    declare_enum_string(neogfx::item_data_type, UInt32)
+    declare_enum_string(neogfx::item_data_type, Int64)
+    declare_enum_string(neogfx::item_data_type, UInt64)
+    declare_enum_string(neogfx::item_data_type, Float)
+    declare_enum_string(neogfx::item_data_type, Double)
+    declare_enum_string(neogfx::item_data_type, String)
+    declare_enum_string(neogfx::item_data_type, Pointer)
+    declare_enum_string(neogfx::item_data_type, CustomType)
+    declare_enum_string(neogfx::item_data_type, ChoiceBool)
+    declare_enum_string(neogfx::item_data_type, ChoiceInt32)
+    declare_enum_string(neogfx::item_data_type, ChoiceUInt32)
+    declare_enum_string(neogfx::item_data_type, ChoiceInt64)
+    declare_enum_string(neogfx::item_data_type, ChoiceUInt16)
+    declare_enum_string(neogfx::item_data_type, ChoiceFloat)
+    declare_enum_string(neogfx::item_data_type, ChoiceDouble)
+    declare_enum_string(neogfx::item_data_type, ChoiceString)
+    declare_enum_string(neogfx::item_data_type, ChoicePointer)
+    declare_enum_string(neogfx::item_data_type, ChoiceCustomType)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::item_cell_data_category> neolib::enum_enumerators_v<neogfx::item_cell_data_category>
+{
+    declare_enum_string(neogfx::item_cell_data_category, Invalid)
+    declare_enum_string(neogfx::item_cell_data_category, Value)
+    declare_enum_string(neogfx::item_cell_data_category, Pointer)
+    declare_enum_string(neogfx::item_cell_data_category, CustomType)
+    declare_enum_string(neogfx::item_cell_data_category, ChooseValue)
+    declare_enum_string(neogfx::item_cell_data_category, ChoosePointer)
+    declare_enum_string(neogfx::item_cell_data_category, ChooseCustomType)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::item_cell_flags> neolib::enum_enumerators_v<neogfx::item_cell_flags>
+{
+    declare_enum_string(neogfx::item_cell_flags, Enabled)
+    declare_enum_string(neogfx::item_cell_flags, Selectable)
+    declare_enum_string(neogfx::item_cell_flags, Editable)
+    declare_enum_string(neogfx::item_cell_flags, Checkable)
+    declare_enum_string(neogfx::item_cell_flags, CheckableBiState)
+    declare_enum_string(neogfx::item_cell_flags, CheckableTriState)
+    declare_enum_string(neogfx::item_cell_flags, Draggable)
+    declare_enum_string(neogfx::item_cell_flags, Droppable)
+    declare_enum_string(neogfx::item_cell_flags, Checked)
+    declare_enum_string(neogfx::item_cell_flags, CheckedIndeterminate)
+};                                               
+
+namespace neogfx
+{
     template <typename T>
     struct item_cell_choice_type
     {
@@ -91,16 +201,6 @@ namespace neogfx
         item_cell_choice_type<void*>::type::const_iterator,
         item_cell_choice_type<custom_type>::type::const_iterator> item_cell_data_variant;
 
-    enum class item_cell_data_category
-    {
-        Invalid,
-        Value,
-        Pointer,
-        CustomType,
-        ChooseValue,
-        ChoosePointer,
-        ChooseCustomType
-    };
     template <typename T> struct classify_item_call_data { static constexpr item_cell_data_category category = item_cell_data_category::Invalid; };
     template <> struct classify_item_call_data<bool> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<int32_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
@@ -183,17 +283,16 @@ namespace neogfx
         }
     };
 
-    struct item_cell_data_info
+    struct item_cell_info
     {
-        bool unselectable;
-        bool readOnly;
-        item_cell_data_type type;
-        item_cell_data min;
-        item_cell_data max;
-        item_cell_data step;
+        item_cell_flags flags = item_cell_flags::Default;
+        item_data_type dataType;
+        item_cell_data dataMin;
+        item_cell_data dataMax;
+        item_cell_data dataStep;
     };
 
-    typedef std::optional<item_cell_data_info> optional_item_cell_data_info;
+    typedef std::optional<item_cell_info> optional_item_cell_info;
 
     class i_item_model : public i_object
     {
@@ -219,8 +318,8 @@ namespace neogfx
         virtual void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) = 0;
         virtual bool column_read_only(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_read_only(item_model_index::column_type aColumnIndex, bool aReadOnly) = 0;
-        virtual item_cell_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_cell_data_type aType) = 0;
+        virtual item_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) = 0;
         virtual const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_min_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
         virtual const item_cell_data& column_max_value(item_model_index::column_type aColumnIndex) const = 0;
@@ -258,7 +357,7 @@ namespace neogfx
         virtual void insert_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
         virtual void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
     public:
-        virtual const item_cell_data_info& cell_data_info(const item_model_index& aIndex) const = 0;
+        virtual const item_cell_info& cell_info(const item_model_index& aIndex) const = 0;
         virtual const item_cell_data& cell_data(const item_model_index& aIndex) const = 0;
     };
 }

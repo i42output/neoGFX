@@ -74,6 +74,7 @@ namespace neogfx
             mutable std::optional<std::string> headingText;
             mutable font headingFont;
             mutable optional_size headingExtents;
+            optional_size imageSize;
         };
         typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
     public:
@@ -166,11 +167,11 @@ namespace neogfx
         {
             return static_cast<uint32_t>(iRows[aIndex.row()].second.size());
         }
-        dimension column_width(item_presentation_model_index::value_type aColumnIndex, const i_graphics_context& aGraphicsContext, bool aIncludeMargins = true) const override
+        dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGraphicsContext, bool aIncludeMargins = true) const override
         {
             if (iColumns.size() < aColumnIndex + 1u)
                 return 0.0;
-            auto& columnWidth = iColumns[aColumnIndex].width;
+            auto& columnWidth = column(aColumnIndex).width;
             if (columnWidth != std::nullopt)
                 return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
             columnWidth = 0.0;
@@ -186,49 +187,47 @@ namespace neogfx
         }
         const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
         {
-            if (iColumns.size() < aColumnIndex + 1u)
-                throw bad_column_index();
-            if (iColumns[aColumnIndex].headingText != std::nullopt)
-                return *iColumns[aColumnIndex].headingText;
+            if (column(aColumnIndex).headingText != std::nullopt)
+                return *column(aColumnIndex).headingText;
             else
-                return item_model().column_name(iColumns[aColumnIndex].modelColumn);
+                return item_model().column_name(column(aColumnIndex).modelColumn);
         }
         size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGraphicsContext) const override
         {
-            if (iColumns.size() < aColumnIndex + 1u)
-                throw bad_column_index();
-            if (iColumns[aColumnIndex].headingFont != font{})
+            if (column(aColumnIndex).headingFont != font{})
             {
-                iColumns[aColumnIndex].headingFont = font{};
-                iColumns[aColumnIndex].headingExtents = std::nullopt;
+                column(aColumnIndex).headingFont = font{};
+                column(aColumnIndex).headingExtents = std::nullopt;
             }
-            if (iColumns[aColumnIndex].headingExtents != std::nullopt)
-                return units_converter(aGraphicsContext).from_device_units(*iColumns[aColumnIndex].headingExtents);
-            size columnHeadingExtents = aGraphicsContext.multiline_text_extent(column_heading_text(aColumnIndex), iColumns[aColumnIndex].headingFont);
-            iColumns[aColumnIndex].headingExtents = units_converter(aGraphicsContext).to_device_units(columnHeadingExtents);
-            iColumns[aColumnIndex].headingExtents->cx = std::ceil(iColumns[aColumnIndex].headingExtents->cx);
-            iColumns[aColumnIndex].headingExtents->cy = std::ceil(iColumns[aColumnIndex].headingExtents->cy);
-            return units_converter(aGraphicsContext).from_device_units(*iColumns[aColumnIndex].headingExtents);
+            if (column(aColumnIndex).headingExtents != std::nullopt)
+                return units_converter(aGraphicsContext).from_device_units(*column(aColumnIndex).headingExtents);
+            size columnHeadingExtents = aGraphicsContext.multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
+            column(aColumnIndex).headingExtents = units_converter(aGraphicsContext).to_device_units(columnHeadingExtents);
+            column(aColumnIndex).headingExtents->cx = std::ceil(column(aColumnIndex).headingExtents->cx);
+            column(aColumnIndex).headingExtents->cy = std::ceil(column(aColumnIndex).headingExtents->cy);
+            return units_converter(aGraphicsContext).from_device_units(*column(aColumnIndex).headingExtents);
         }
         void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, const std::string& aHeadingText) override
         {
-            if (iColumns.size() < aColumnIndex + 1u)
-                throw bad_column_index();
-            iColumns[aColumnIndex].headingText = aHeadingText;
-            iColumns[aColumnIndex].headingExtents = std::nullopt;
+            column(aColumnIndex).headingText = aHeadingText;
+            column(aColumnIndex).headingExtents = std::nullopt;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
-        item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const override
+        item_cell_editable column_editable(item_presentation_model_index::column_type aColumnIndex) const override
         {
-            if (iColumns.size() < aColumnIndex + 1u)
-                throw bad_column_index();
-            return iColumns[aColumnIndex].editable;
+            return column(aColumnIndex).editable;
         }
-        void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_cell_editable aEditable) override
+        void set_column_editable(item_presentation_model_index::column_type aColumnIndex, item_cell_editable aEditable) override
         {
-            if (iColumns.size() < aColumnIndex + 1u)
-                throw bad_column_index();
-            iColumns[aColumnIndex].editable = aEditable;
+            column(aColumnIndex).editable = aEditable;
+        }
+        optional_size column_image_size(item_presentation_model_index::column_type aColumnIndex) const override
+        {
+            return column(aColumnIndex).imageSize;
+        }
+        void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, const optional_size& aImageSize) override
+        {
+            column(aColumnIndex).imageSize = aImageSize;
         }
         const font& default_font() const override
         {
@@ -384,17 +383,17 @@ namespace neogfx
     public:
         item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const override
         {
-            if (!item_model().cell_data_info(to_item_model_index(aIndex)).readOnly)
+            if ((item_model().cell_info(to_item_model_index(aIndex)).flags & item_cell_flags::Editable) == item_cell_flags::Editable)
                 return column_editable(aIndex.column());
             else
                 return item_cell_editable::No;
         }
         std::string cell_to_string(const item_presentation_model_index& aIndex) const override
         {
-            auto modelIndex = to_item_model_index(aIndex);
+            auto const modelIndex = to_item_model_index(aIndex);
             return std::visit([&, this](auto&& arg) -> std::string
             {
-                typedef typename std::remove_cv<typename std::remove_reference<decltype(arg)>::type>::type type;
+                typedef std::decay_t<decltype(arg)> type;
                 if constexpr(!std::is_same_v<type, neolib::none_t> && classify_item_call_data<type>::category == item_cell_data_category::Value)
                     return (cell_format(aIndex) % std::get<type>(item_model().cell_data(modelIndex))).str();
                 else
@@ -409,12 +408,12 @@ namespace neogfx
         item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString, bool& aError) const override
         {
             aError = false;
-            auto const& cellDataInfo = item_model().cell_data_info(to_item_model_index(aIndex));
+            auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
             std::istringstream input{ aString };
             std::string guff;
-            switch (cellDataInfo.type)
+            switch (cellInfo.dataType)
             {
-            case item_cell_data_type::Bool:
+            case item_data_type::Bool:
                 {
                     bool value;
                     if (!(input >> value) || (input >> guff))
@@ -424,7 +423,7 @@ namespace neogfx
                     }
                     return value;
                 }
-            case item_cell_data_type::Int32:
+            case item_data_type::Int32:
                 {
                     int32_t value;
                     if (!(input >> value) || (input >> guff))
@@ -432,13 +431,13 @@ namespace neogfx
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
-                    if (cellDataInfo.min != neolib::none)
-                        value = std::max(value, static_variant_cast<int32_t>(cellDataInfo.min));
-                    if (cellDataInfo.max != neolib::none)
-                        value = std::min(value, static_variant_cast<int32_t>(cellDataInfo.max));
+                    if (cellInfo.dataMin != neolib::none)
+                        value = std::max(value, static_variant_cast<int32_t>(cellInfo.dataMin));
+                    if (cellInfo.dataMax != neolib::none)
+                        value = std::min(value, static_variant_cast<int32_t>(cellInfo.dataMax));
                     return value;
                 }
-            case item_cell_data_type::UInt32:
+            case item_data_type::UInt32:
                 {
                     uint32_t value;
                     if (!(input >> value) || (input >> guff))
@@ -446,13 +445,13 @@ namespace neogfx
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
-                    if (cellDataInfo.min != neolib::none)
-                        value = std::max(value, static_variant_cast<uint32_t>(cellDataInfo.min));
-                    if (cellDataInfo.max != neolib::none)
-                        value = std::min(value, static_variant_cast<uint32_t>(cellDataInfo.max));
+                    if (cellInfo.dataMin != neolib::none)
+                        value = std::max(value, static_variant_cast<uint32_t>(cellInfo.dataMin));
+                    if (cellInfo.dataMax != neolib::none)
+                        value = std::min(value, static_variant_cast<uint32_t>(cellInfo.dataMax));
                     return value;
                 }
-            case item_cell_data_type::Int64:
+            case item_data_type::Int64:
                 {
                     int64_t value;
                     if (!(input >> value) || (input >> guff))
@@ -460,13 +459,13 @@ namespace neogfx
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
-                    if (cellDataInfo.min != neolib::none)
-                        value = std::max(value, static_variant_cast<int64_t>(cellDataInfo.min));
-                    if (cellDataInfo.max != neolib::none)
-                        value = std::min(value, static_variant_cast<int64_t>(cellDataInfo.max));
+                    if (cellInfo.dataMin != neolib::none)
+                        value = std::max(value, static_variant_cast<int64_t>(cellInfo.dataMin));
+                    if (cellInfo.dataMax != neolib::none)
+                        value = std::min(value, static_variant_cast<int64_t>(cellInfo.dataMax));
                     return value;
                 }
-            case item_cell_data_type::UInt64:
+            case item_data_type::UInt64:
                 {
                     uint64_t value;
                     if (!(input >> value) || (input >> guff))
@@ -474,13 +473,13 @@ namespace neogfx
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
-                    if (cellDataInfo.min != neolib::none)
-                        value = std::max(value, static_variant_cast<uint64_t>(cellDataInfo.min));
-                    if (cellDataInfo.max != neolib::none)
-                        value = std::min(value, static_variant_cast<uint64_t>(cellDataInfo.max));
+                    if (cellInfo.dataMin != neolib::none)
+                        value = std::max(value, static_variant_cast<uint64_t>(cellInfo.dataMin));
+                    if (cellInfo.dataMax != neolib::none)
+                        value = std::min(value, static_variant_cast<uint64_t>(cellInfo.dataMax));
                     return value;
                 }
-            case item_cell_data_type::Float:
+            case item_data_type::Float:
                 {
                     float value;
                     if (!(input >> value) || (input >> guff))
@@ -488,13 +487,13 @@ namespace neogfx
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
-                    if (cellDataInfo.min != neolib::none)
-                        value = std::max(value, static_variant_cast<float>(cellDataInfo.min));
-                    if (cellDataInfo.max != neolib::none)
-                        value = std::min(value, static_variant_cast<float>(cellDataInfo.max));
+                    if (cellInfo.dataMin != neolib::none)
+                        value = std::max(value, static_variant_cast<float>(cellInfo.dataMin));
+                    if (cellInfo.dataMax != neolib::none)
+                        value = std::min(value, static_variant_cast<float>(cellInfo.dataMax));
                     return value;
                 }
-            case item_cell_data_type::Double:
+            case item_data_type::Double:
                 {
                     double value;
                     if (!(input >> value) || (input >> guff))
@@ -502,13 +501,13 @@ namespace neogfx
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
-                    if (cellDataInfo.min != neolib::none)
-                        value = std::max(value, static_variant_cast<double>(cellDataInfo.min));
-                    if (cellDataInfo.max != neolib::none)
-                        value = std::min(value, static_variant_cast<double>(cellDataInfo.max));
+                    if (cellInfo.dataMin != neolib::none)
+                        value = std::max(value, static_variant_cast<double>(cellInfo.dataMin));
+                    if (cellInfo.dataMax != neolib::none)
+                        value = std::min(value, static_variant_cast<double>(cellInfo.dataMax));
                     return value;
                 }
-            case item_cell_data_type::String:
+            case item_data_type::String:
             default:
                 return aString;
             }
@@ -525,6 +524,14 @@ namespace neogfx
         optional_font cell_font(const item_presentation_model_index&) const override
         {
             return optional_font{};
+        }
+        optional_size cell_image_size(const item_presentation_model_index& aIndex) const override
+        {
+            if (column(aIndex.column()).imageSize)
+                return column(aIndex.column()).imageSize;
+            else if (cell_image(aIndex))
+                return cell_image(aIndex)->extents();
+            return optional_size{};
         }
         optional_texture cell_image(const item_presentation_model_index&) const override
         {
@@ -546,10 +553,10 @@ namespace neogfx
             if (cellMeta.extents != std::nullopt)
                 return units_converter(aGraphicsContext).from_device_units(*cellMeta.extents);
             size cellExtents = cell_glyph_text(aIndex, aGraphicsContext).extents();
-            auto const& cellDataInfo = item_model().cell_data_info(to_item_model_index(aIndex));
-            if (!cellDataInfo.readOnly && cellDataInfo.step != neolib::none)
+            auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
+            if ((cellInfo.flags & item_cell_flags::Editable) == item_cell_flags::Editable && cellInfo.dataStep != neolib::none)
             {
-                cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellDataInfo.max.to_string(), cellFont).cx);
+                cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
                 cellExtents.cx += spx(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
             }
             auto const& maybeCellImage = cell_image(aIndex);
@@ -855,6 +862,17 @@ namespace neogfx
             iPositions.resize(iRows.size());
             for (std::size_t i = aFromRow; i < iPositions.size(); ++i)
                 iPositions[i] = std::nullopt;
+        }
+    private:
+        const column_info& column(item_presentation_model_index::column_type aColumnIndex) const
+        {
+            if (iColumns.size() < aColumnIndex + 1u)
+                throw bad_column_index();
+            return iColumns[aColumnIndex];
+        }
+        column_info& column(item_presentation_model_index::column_type aColumnIndex)
+        {
+            return const_cast<column_info&>(to_const(*this).column(aColumnIndex));
         }
     private:
         i_item_model* iItemModel;

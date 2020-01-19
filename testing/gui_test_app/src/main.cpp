@@ -52,22 +52,22 @@ public:
         }
         return ng::basic_item_model<void*, 9u>::cell_data(aIndex);
     }
-    const ng::item_cell_data_info& cell_data_info(const ng::item_model_index& aIndex) const override
+    const ng::item_cell_info& cell_info(const ng::item_model_index& aIndex) const override
     {
         if (aIndex.column() == 4)
         {
             if (aIndex.row() == 4)
             {
-                static const ng::item_cell_data_info sReadOnly = { false, true };
+                static const ng::item_cell_info sReadOnly = { ng::item_cell_flags::Default & ~ng::item_cell_flags::Editable };
                 return sReadOnly;
             }
             if (aIndex.row() == 5)
             {
-                static const ng::item_cell_data_info sUnselectable = { true, false };
+                static const ng::item_cell_info sUnselectable = { ng::item_cell_flags::Default & ~ng::item_cell_flags::Selectable };
                 return sUnselectable;
             }
         }
-        return ng::basic_item_model<void*, 9u>::cell_data_info(aIndex);
+        return ng::basic_item_model<void*, 9u>::cell_info(aIndex);
     }
 };
 
@@ -663,8 +663,8 @@ int main(int argc, char* argv[])
         ng::service<ng::i_window_manager>().save_mouse_cursor();
         ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait);
 
-        ng::table_view tableView1(ui.layoutItemViews);
-        ng::table_view tableView2(ui.layoutItemViews);
+        ng::table_view& tableView1 = ui.tableView1;
+        ng::table_view& tableView2 = ui.tableView2;
         tableView1.set_minimum_size(ng::size(128, 128));
         tableView2.set_minimum_size(ng::size(128, 128));
         ui.button10.clicked([&tableView1, &tableView2]()

@@ -643,6 +643,16 @@
                                 id: tableView2
                                 minimum_size: [ 128 128 ]
                             }
+                            horizontal_layout: {
+                                tree_view: {
+                                    id: treeView1
+                                    minimum_size: [ 128 128 ]
+                                }
+                                tree_view: {
+                                    id: treeView2
+                                    minimum_size: [ 128 128 ]
+                                }
+                            }
                             push_button: {
                                 id: button10
                                 text: "Toggle List\nHeader View"

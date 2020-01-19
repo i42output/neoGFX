@@ -262,12 +262,12 @@ namespace neogfx
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
                     auto const& glyphText = presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext);
                     point textPos{ cellRect.top_left().x + presentation_model().cell_margins(*this).left, (cellRect.height() - glyphText.extents().cy) / 2.0 + cellRect.top_left().y };
+                    auto const& cellImageSize = presentation_model().cell_image_size(item_presentation_model_index{ row, col });
                     auto const& cellImage = presentation_model().cell_image(item_presentation_model_index{ row, col });
                     if (cellImage != std::nullopt)
-                    {
                         aGraphicsContext.draw_texture(cellRect.top_left() + (cellRect.cy - cellImage->extents().cy) / 2.0, *cellImage);
-                        textPos.x += (cellImage->extents().cx + presentation_model().cell_spacing(aGraphicsContext).cx);
-                    }
+                    if (cellImageSize)
+                        textPos.x += (cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
                     optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
                     if (textColour == std::nullopt)
                         textColour = has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().text_colour();
@@ -727,48 +727,48 @@ namespace neogfx
         neolib::scoped_flag sf{ iBeginningEdit };
         auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
         end_edit(true);
-        auto const& cellDataInfo = model().cell_data_info(modelIndex);
-        if (cellDataInfo.step == neolib::none)
+        auto const& cellInfo = model().cell_info(modelIndex);
+        if (cellInfo.dataStep == neolib::none)
             iEditor = std::make_shared<item_editor<line_edit>>(*this);
         else
         {
-            switch (model().cell_data_info(presentation_model().to_item_model_index(aItemIndex)).type)
+            switch (model().cell_info(presentation_model().to_item_model_index(aItemIndex)).dataType)
             {
-            case item_cell_data_type::Int32:
+            case item_data_type::Int32:
                 iEditor = std::make_shared<item_editor<basic_spin_box<int32_t>>>(*this);
-                static_cast<basic_spin_box<int32_t>&>(editor()).set_step(static_variant_cast<int32_t>(cellDataInfo.step));
-                static_cast<basic_spin_box<int32_t>&>(editor()).set_minimum(static_variant_cast<int32_t>(cellDataInfo.min));
-                static_cast<basic_spin_box<int32_t>&>(editor()).set_maximum(static_variant_cast<int32_t>(cellDataInfo.max));
+                static_cast<basic_spin_box<int32_t>&>(editor()).set_step(static_variant_cast<int32_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<int32_t>&>(editor()).set_minimum(static_variant_cast<int32_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<int32_t>&>(editor()).set_maximum(static_variant_cast<int32_t>(cellInfo.dataMax));
                 break;
-            case item_cell_data_type::UInt32:
+            case item_data_type::UInt32:
                 iEditor = std::make_shared<item_editor<basic_spin_box<uint32_t>>>(*this);
-                static_cast<basic_spin_box<uint32_t>&>(editor()).set_step(static_variant_cast<uint32_t>(cellDataInfo.step));
-                static_cast<basic_spin_box<uint32_t>&>(editor()).set_minimum(static_variant_cast<uint32_t>(cellDataInfo.min));
-                static_cast<basic_spin_box<uint32_t>&>(editor()).set_maximum(static_variant_cast<uint32_t>(cellDataInfo.max));
+                static_cast<basic_spin_box<uint32_t>&>(editor()).set_step(static_variant_cast<uint32_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<uint32_t>&>(editor()).set_minimum(static_variant_cast<uint32_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<uint32_t>&>(editor()).set_maximum(static_variant_cast<uint32_t>(cellInfo.dataMax));
                 break;
-            case item_cell_data_type::Int64:
+            case item_data_type::Int64:
                 iEditor = std::make_shared<item_editor<basic_spin_box<int64_t>>>(*this);
-                static_cast<basic_spin_box<int64_t>&>(editor()).set_step(static_variant_cast<int64_t>(cellDataInfo.step));
-                static_cast<basic_spin_box<int64_t>&>(editor()).set_minimum(static_variant_cast<int64_t>(cellDataInfo.min));
-                static_cast<basic_spin_box<int64_t>&>(editor()).set_maximum(static_variant_cast<int64_t>(cellDataInfo.max));
+                static_cast<basic_spin_box<int64_t>&>(editor()).set_step(static_variant_cast<int64_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<int64_t>&>(editor()).set_minimum(static_variant_cast<int64_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<int64_t>&>(editor()).set_maximum(static_variant_cast<int64_t>(cellInfo.dataMax));
                 break;
-            case item_cell_data_type::UInt64:
+            case item_data_type::UInt64:
                 iEditor = std::make_shared<item_editor<basic_spin_box<uint64_t>>>(*this);
-                static_cast<basic_spin_box<uint64_t>&>(editor()).set_step(static_variant_cast<uint64_t>(cellDataInfo.step));
-                static_cast<basic_spin_box<uint64_t>&>(editor()).set_minimum(static_variant_cast<uint64_t>(cellDataInfo.min));
-                static_cast<basic_spin_box<uint64_t>&>(editor()).set_maximum(static_variant_cast<uint64_t>(cellDataInfo.max));
+                static_cast<basic_spin_box<uint64_t>&>(editor()).set_step(static_variant_cast<uint64_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<uint64_t>&>(editor()).set_minimum(static_variant_cast<uint64_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<uint64_t>&>(editor()).set_maximum(static_variant_cast<uint64_t>(cellInfo.dataMax));
                 break;
-            case item_cell_data_type::Float:
+            case item_data_type::Float:
                 iEditor = std::make_shared<item_editor<basic_spin_box<float>>>(*this);
-                static_cast<basic_spin_box<float>&>(editor()).set_step(static_variant_cast<float>(cellDataInfo.step));
-                static_cast<basic_spin_box<float>&>(editor()).set_minimum(static_variant_cast<float>(cellDataInfo.min));
-                static_cast<basic_spin_box<float>&>(editor()).set_maximum(static_variant_cast<float>(cellDataInfo.max));
+                static_cast<basic_spin_box<float>&>(editor()).set_step(static_variant_cast<float>(cellInfo.dataStep));
+                static_cast<basic_spin_box<float>&>(editor()).set_minimum(static_variant_cast<float>(cellInfo.dataMin));
+                static_cast<basic_spin_box<float>&>(editor()).set_maximum(static_variant_cast<float>(cellInfo.dataMax));
                 break;
-            case item_cell_data_type::Double:
+            case item_data_type::Double:
                 iEditor = std::make_shared<item_editor<basic_spin_box<double>>>(*this);
-                static_cast<basic_spin_box<double>&>(editor()).set_step(static_variant_cast<double>(cellDataInfo.step));
-                static_cast<basic_spin_box<double>&>(editor()).set_minimum(static_variant_cast<double>(cellDataInfo.min));
-                static_cast<basic_spin_box<double>&>(editor()).set_maximum(static_variant_cast<double>(cellDataInfo.max));
+                static_cast<basic_spin_box<double>&>(editor()).set_step(static_variant_cast<double>(cellInfo.dataStep));
+                static_cast<basic_spin_box<double>&>(editor()).set_minimum(static_variant_cast<double>(cellInfo.dataMin));
+                static_cast<basic_spin_box<double>&>(editor()).set_maximum(static_variant_cast<double>(cellInfo.dataMax));
                 break;
             default:
                 throw unknown_editor_type();

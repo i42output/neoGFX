@@ -297,7 +297,7 @@ namespace neogfx
         }    
         bool is_selectable(const item_presentation_model_index& aIndex) const override
         {
-            return !(has_presentation_model() && presentation_model().item_model().cell_data_info(presentation_model().to_item_model_index(aIndex)).unselectable);
+            return (presentation_model().item_model().cell_info(presentation_model().to_item_model_index(aIndex)).flags & item_cell_flags::Selectable) == item_cell_flags::Selectable;
         }
         void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
         {

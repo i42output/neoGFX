@@ -498,6 +498,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\tree_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp" />
@@ -691,6 +692,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\toolbar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tree_view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp" />

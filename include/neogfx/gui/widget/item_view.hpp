@@ -20,12 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "scrollable_widget.hpp"
-#include "header_view.hpp"
-#include "item_editor.hpp"
-#include "i_item_model.hpp"
-#include "i_item_presentation_model.hpp"
-#include "i_item_selection_model.hpp"
+#include <neogfx/gui/widget/scrollable_widget.hpp>
+#include <neogfx/gui/widget/header_view.hpp>
+#include <neogfx/gui/widget/item_editor.hpp>
+#include <neogfx/gui/widget/i_item_model.hpp>
+#include <neogfx/gui/widget/i_item_presentation_model.hpp>
+#include <neogfx/gui/widget/i_item_selection_model.hpp>
 
 namespace neogfx
 {

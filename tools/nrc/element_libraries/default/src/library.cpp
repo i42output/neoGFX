@@ -43,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "text_field.hpp"
 #include "drop_list.hpp"
 #include "table_view.hpp"
+#include "tree_view.hpp"
 #include "slider.hpp"
 #include "spin_box.hpp"
 #include "group_box.hpp"
@@ -81,6 +82,7 @@ namespace neogfx::nrc
             { "text_field", ui_element_type::LayoutItem },
             { "drop_list", ui_element_type::LayoutItem },
             { "table_view", ui_element_type::LayoutItem },
+            { "tree_view", ui_element_type::LayoutItem },
             { "group_box", ui_element_type::LayoutItem },
             { "slider", ui_element_type::LayoutItem },
             { "double_slider", ui_element_type::LayoutItem },
@@ -156,6 +158,7 @@ namespace neogfx::nrc
             { "text_field", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_field{ aParser, aParent }; } },
             { "drop_list", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new drop_list{ aParser, aParent }; } },
             { "table_view", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new table_view{ aParser, aParent }; } },
+            { "tree_view", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new tree_view{ aParser, aParent }; } },
             { "group_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new group_box{ aParser, aParent }; } },
             { "slider", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new slider{ aParser, aParent }; } },
             { "double_slider", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new double_slider{ aParser, aParent }; } },
