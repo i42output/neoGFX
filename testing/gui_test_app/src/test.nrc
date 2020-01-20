@@ -661,9 +661,25 @@
                                 id: layoutTableViewTweaks
                                 alignment: Top
                                 spacer: {}
-                                vertical_layout: {
-                                    id: layoutTableViewSelection
-                                    weight: 0
+                                group_box: {
+                                    id: groupTableViewTweaks
+                                    text: "Tweaks"
+                                    check_box: {
+                                        id: checkTableViewImages
+                                        text: "Images"
+                                    }
+                                    check_box: {
+                                        id: checkTableViewCheckable
+                                        text: "Checkable"
+                                    }
+                                    check_box: {
+                                        id: checkTableViewTriStateCheckable
+                                        text: "TriState Checkable"
+                                    }
+                                }
+                                group_box: {
+                                    id: groupTableViewSelection
+                                    text: "Selection"
                                     radio_button: {
                                         id: radioNoTableViewSelection
                                         text: "No selection"
@@ -683,7 +699,7 @@
                                 }
                                 group_box: {
                                     id: groupColumn5
-                                    text: "Column 5"
+                                    text: "Column Five"
                                     check_box: {
                                         id: checkColumn5ReadOnly
                                         text: "Read only"
@@ -692,7 +708,6 @@
                                         id: checkColumn5Unselectable
                                         text: "Unselectable"
                                     }
-                                    vertical_spacer: {}
                                 }
                                 spacer: {}
                             }

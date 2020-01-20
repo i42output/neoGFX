@@ -75,7 +75,15 @@ class my_item_presentation_model : public ng::basic_item_presentation_model<my_i
 {
     typedef ng::basic_item_presentation_model<my_item_model> base_type;
 public:
-    my_item_presentation_model(my_item_model& aModel, ng::item_cell_colour_type aColourType) : base_type{ aModel }, iColourType{ aColourType }
+    my_item_presentation_model(my_item_model& aModel, ng::item_cell_colour_type aColourType) : 
+        base_type{ aModel }, 
+        iColourType{ aColourType }, 
+        iCellImages{ {
+            ng::image{ ":/test/resources/icon.png" }, 
+            ng::image{ ":/closed/resources/caw_toolbar.naa#contacts.png" },
+            ng::image{ ":/closed/resources/caw_toolbar.naa#favourite.png" },
+            ng::image{ ":/closed/resources/caw_toolbar.naa#folder.png" }
+        } }
     {
     }
 public:
@@ -87,8 +95,16 @@ public:
         else
             return iColourType == ng::item_cell_colour_type::Foreground ? ng::optional_colour{} : ng::colour::Black;
     }
+    ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
+    {
+        if (column_image_size(aIndex.column()))
+            return iCellImages[(std::hash<uint32_t>{}(to_item_model_index(aIndex).row()) + std::hash<uint32_t>{}(to_item_model_index(aIndex).column())) % 5];
+        else
+            return ng::optional_texture{};
+    }
 private:
     ng::item_cell_colour_type iColourType;
+    std::array<ng::optional_texture, 4> iCellImages;
 };
 
 class easing_item_presentation_model : public ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>>
@@ -760,6 +776,23 @@ int main(int argc, char* argv[])
         {
             if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
                 tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
+        });
+
+        ui.checkTableViewImages.checked([&]
+        {
+            for (uint32_t c = 0u; c <= 6u; c += 2u)
+            {
+                ipm1.set_column_image_size(c, ng::size{ 16_spx });
+                ipm2.set_column_image_size(c, ng::size{ 16_spx });
+            }
+        });
+        ui.checkTableViewImages.unchecked([&]
+        {
+            for (uint32_t c = 0u; c <= 6u; c += 2u)
+            {
+                ipm1.set_column_image_size(c, ng::optional_size{});
+                ipm2.set_column_image_size(c, ng::optional_size{});
+            }
         });
 
         ng::service<ng::i_window_manager>().restore_mouse_cursor(window);

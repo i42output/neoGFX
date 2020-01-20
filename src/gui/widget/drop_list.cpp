@@ -299,9 +299,9 @@ namespace neogfx
                 item_presentation_model_index{ 0, 0 });
             view().make_visible(index);
             currentItemPos += view().cell_rect(index).top_left();
-            auto const& maybeCellImage = view().presentation_model().cell_image(index);
-            if (maybeCellImage != std::nullopt)
-                currentItemPos.x += (maybeCellImage->extents().cx + view().presentation_model().cell_spacing(*this).cx);
+            auto const& maybeCellImageSize = view().presentation_model().cell_image_size(index);
+            if (maybeCellImageSize != std::nullopt)
+                currentItemPos.x += (maybeCellImageSize->cx + view().presentation_model().cell_spacing(*this).cx);
         }
         point inputWidgetPos{ iDropList.non_client_rect().top_left() + iDropList.root().window_position() };
         point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };

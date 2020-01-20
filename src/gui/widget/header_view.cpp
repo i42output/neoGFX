@@ -209,6 +209,8 @@ namespace neogfx
     void header_view::column_info_changed(item_presentation_model_index::column_type)
     {
         update_buttons();
+        iUpdater.reset();
+        iUpdater.reset(new updater(*this));
     }
 
     void header_view::item_model_changed(const i_item_model&)

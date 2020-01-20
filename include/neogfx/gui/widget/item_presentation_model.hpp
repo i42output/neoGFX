@@ -227,7 +227,12 @@ namespace neogfx
         }
         void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, const optional_size& aImageSize) override
         {
-            column(aColumnIndex).imageSize = aImageSize;
+            if (column(aColumnIndex).imageSize != aImageSize)
+            {
+                column(aColumnIndex).imageSize = aImageSize;
+                reset_meta();
+                ColumnInfoChanged.trigger(aColumnIndex);
+            }
         }
         const font& default_font() const override
         {
@@ -296,9 +301,9 @@ namespace neogfx
                     auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
                     height = std::max(height, units_converter(aUnitsContext).from_device_units(size(0.0, std::ceil(effectiveFont.height()))).cy *
                         (1 + std::count(cellString.begin(), cellString.end(), '\n')));
-                    auto const& cellImage = cell_image(aIndex);
-                    if (cellImage != std::nullopt)
-                        height = std::max(height, units_converter(aUnitsContext).from_device_units(cellImage->extents()).cy);
+                    auto const& maybeCellImageSize = cell_image_size(aIndex);
+                    if (maybeCellImageSize != std::nullopt)
+                        height = std::max(height, units_converter(aUnitsContext).from_device_units(*maybeCellImageSize).cy);
                 }
             }
             return height + cell_margins(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
@@ -559,11 +564,11 @@ namespace neogfx
                 cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
                 cellExtents.cx += spx(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
             }
-            auto const& maybeCellImage = cell_image(aIndex);
-            if (maybeCellImage != std::nullopt)
+            auto const& maybeCellImageSize = cell_image_size(aIndex);
+            if (maybeCellImageSize != std::nullopt)
             {
-                cellExtents.cx += (maybeCellImage->extents().cx + units_converter(aGraphicsContext).to_device_units(cell_spacing(aGraphicsContext)).cx);
-                cellExtents.cy = std::max(cellExtents.cy, maybeCellImage->extents().cy);
+                cellExtents.cx += (maybeCellImageSize->cx + units_converter(aGraphicsContext).to_device_units(cell_spacing(aGraphicsContext)).cx);
+                cellExtents.cy = std::max(cellExtents.cy, maybeCellImageSize->cy);
             }
             if (cellExtents.cy == 0.0)
                 cellExtents.cy = cellFont.height();

@@ -265,8 +265,8 @@ namespace neogfx
                     auto const& cellImageSize = presentation_model().cell_image_size(item_presentation_model_index{ row, col });
                     auto const& cellImage = presentation_model().cell_image(item_presentation_model_index{ row, col });
                     if (cellImage != std::nullopt)
-                        aGraphicsContext.draw_texture(cellRect.top_left() + (cellRect.cy - cellImage->extents().cy) / 2.0, *cellImage);
-                    if (cellImageSize)
+                        aGraphicsContext.draw_texture(rect{ cellRect.top_left() + point{ 0.0, (cellRect.cy - cellImageSize->cy) / 2.0 }, *cellImageSize }, *cellImage);
+                    if (cellImageSize != std::nullopt)
                         textPos.x += (cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
                     optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
                     if (textColour == std::nullopt)
