@@ -75,9 +75,8 @@ class my_item_presentation_model : public ng::basic_item_presentation_model<my_i
 {
     typedef ng::basic_item_presentation_model<my_item_model> base_type;
 public:
-    my_item_presentation_model(my_item_model& aModel, ng::item_cell_colour_type aColourType) : 
+    my_item_presentation_model(my_item_model& aModel) : 
         base_type{ aModel }, 
-        iColourType{ aColourType }, 
         iCellImages{ {
             ng::image{ ":/test/resources/icon.png" }, 
             ng::image{ ":/closed/resources/caw_toolbar.naa#contacts.png" },
@@ -87,13 +86,18 @@ public:
     {
     }
 public:
+    void set_colour_type(const std::optional<ng::item_cell_colour_type>& aColourType)
+    {
+        iColourType = aColourType;
+    }
     ng::optional_colour cell_colour(const ng::item_presentation_model_index& aIndex, ng::item_cell_colour_type aColourType) const override
     {
         neolib::basic_random<double> prng{ (to_item_model_index(aIndex).row() << 16) + to_item_model_index(aIndex).column() }; // use seed to make random colour based on row/index
         if (aColourType == iColourType)
-            return ng::hsv_colour{prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
-        else
-            return iColourType == ng::item_cell_colour_type::Foreground ? ng::optional_colour{} : ng::colour::Black;
+            return ng::hsv_colour{ prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
+        else if (aColourType == ng::item_cell_colour_type::Foreground && iColourType)
+            return ng::colour::Black;
+        return {};
     }
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
     {
@@ -103,7 +107,7 @@ public:
             return ng::optional_texture{};
     }
 private:
-    ng::item_cell_colour_type iColourType;
+    std::optional<ng::item_cell_colour_type> iColourType;
     std::array<ng::optional_texture, 4> iCellImages;
 };
 
@@ -757,7 +761,7 @@ int main(int argc, char* argv[])
         itemModel.set_column_max_value(1, 9999u);
         itemModel.set_column_step_value(1, 1u);
         tableView1.set_model(itemModel);
-        my_item_presentation_model ipm1{ itemModel, ng::item_cell_colour_type::Foreground };
+        my_item_presentation_model ipm1{ itemModel };
         tableView1.set_presentation_model(ipm1);
         ipm1.set_column_editable(4, ng::item_cell_editable::WhenFocused);
         ipm1.set_column_editable(5, ng::item_cell_editable::WhenFocused);
@@ -765,7 +769,7 @@ int main(int argc, char* argv[])
         ipm1.set_column_editable(7, ng::item_cell_editable::WhenFocused);
         ipm1.set_column_editable(8, ng::item_cell_editable::WhenFocused);
         tableView2.set_model(itemModel);
-        my_item_presentation_model ipm2{ itemModel, ng::item_cell_colour_type::Background };
+        my_item_presentation_model ipm2{ itemModel };
         ipm2.set_column_editable(0, ng::item_cell_editable::WhenFocused);
         ipm2.set_column_editable(1, ng::item_cell_editable::WhenFocused);
         ipm2.set_column_editable(2, ng::item_cell_editable::WhenFocused);
@@ -778,22 +782,16 @@ int main(int argc, char* argv[])
                 tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
         });
 
-        ui.checkTableViewImages.checked([&]
-        {
-            for (uint32_t c = 0u; c <= 6u; c += 2u)
-            {
-                ipm1.set_column_image_size(c, ng::size{ 16_spx });
-                ipm2.set_column_image_size(c, ng::size{ 16_spx });
-            }
-        });
-        ui.checkTableViewImages.unchecked([&]
-        {
-            for (uint32_t c = 0u; c <= 6u; c += 2u)
-            {
-                ipm1.set_column_image_size(c, ng::optional_size{});
-                ipm2.set_column_image_size(c, ng::optional_size{});
-            }
-        });
+        ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_spx }); });
+        ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); });
+        ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_colour_type({}); ui.tableView1.update(); });
+        ui.radioUpperTableViewColouredText.checked([&] { ipm1.set_colour_type(ng::item_cell_colour_type::Foreground); ui.tableView1.update(); });
+        ui.radioUpperTableViewColouredCells.checked([&] { ipm1.set_colour_type(ng::item_cell_colour_type::Background); ui.tableView1.update(); });
+        ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_spx }); });
+        ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); });
+        ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_colour_type({}); ui.tableView2.update(); });
+        ui.radioLowerTableViewColouredText.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Foreground); ui.tableView2.update(); });
+        ui.radioLowerTableViewColouredCells.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Background); ui.tableView2.update(); });
 
         ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
 

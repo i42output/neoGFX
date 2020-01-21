@@ -662,19 +662,69 @@
                                 alignment: Top
                                 spacer: {}
                                 group_box: {
-                                    id: groupTableViewTweaks
-                                    text: "Tweaks"
-                                    check_box: {
-                                        id: checkTableViewImages
-                                        text: "Images"
+                                    text: "Upper Table View"
+                                    horizontal_layout: {
+                                        vertical_layout: {
+                                            check_box: {
+                                                id: checkUpperTableViewImages
+                                                text: "Images"
+                                            }
+                                            check_box: {
+                                                id: checkUpperTableViewCheckable
+                                                text: "Checkable"
+                                            }
+                                            check_box: {
+                                                id: checkUpperTableViewTriStateCheckable
+                                                text: "TriState Checkable"
+                                            }
+                                        }
+                                        vertical_layout: {
+                                            radio_button: {
+                                                id: radioUpperTableViewMonochrome
+                                                text: "Monochrome text"
+                                            }
+                                            radio_button: {
+                                                id: radioUpperTableViewColouredText
+                                                text: "Coloured text"
+                                            }
+                                            radio_button: {
+                                                id: radioUpperTableViewColouredCells
+                                                text: "Coloured cells"
+                                            }
+                                        }
                                     }
-                                    check_box: {
-                                        id: checkTableViewCheckable
-                                        text: "Checkable"
-                                    }
-                                    check_box: {
-                                        id: checkTableViewTriStateCheckable
-                                        text: "TriState Checkable"
+                                }
+                                group_box: {
+                                    text: "Lower Table View"
+                                    horizontal_layout: {
+                                        vertical_layout: {
+                                            check_box: {
+                                                id: checkLowerTableViewImages
+                                                text: "Images"
+                                            }
+                                            check_box: {
+                                                id: checkLowerTableViewCheckable
+                                                text: "Checkable"
+                                            }
+                                            check_box: {
+                                                id: checkLowerTableViewTriStateCheckable
+                                                text: "TriState Checkable"
+                                            }
+                                        }
+                                        vertical_layout: {
+                                            radio_button: {
+                                                id: radioLowerTableViewMonochrome
+                                                text: "Monochrome text"
+                                            }
+                                            radio_button: {
+                                                id: radioLowerTableViewColouredText
+                                                text: "Coloured text"
+                                            }
+                                            radio_button: {
+                                                id: radioLowerTableViewColouredCells
+                                                text: "Coloured cells"
+                                            }
+                                        }
                                     }
                                 }
                                 group_box: {
