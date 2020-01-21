@@ -247,12 +247,13 @@ namespace neogfx
             finished = true;
             for (uint32_t col = 0; col < presentation_model().columns(); ++col)
             {
-                rect cellRect = cell_rect(item_presentation_model_index{ row, col });
+                auto const itemIndex = item_presentation_model_index{ row, col };
+                rect cellRect = cell_rect(itemIndex, aGraphicsContext);
                 if (cellRect.y > clipRect.bottom())
                     continue;
                 finished = false;
-                optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Background);
-                rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
+                optional_colour backgroundColour = presentation_model().cell_colour(itemIndex, item_cell_colour_type::Background);
+                rect cellBackgroundRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Background);
                 if (backgroundColour != std::nullopt)
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
@@ -260,20 +261,17 @@ namespace neogfx
                 }
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
-                    auto const& glyphText = presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext);
-                    point textPos{ cellRect.top_left().x + presentation_model().cell_margins(*this).left, (cellRect.height() - glyphText.extents().cy) / 2.0 + cellRect.top_left().y };
-                    auto const& cellImageSize = presentation_model().cell_image_size(item_presentation_model_index{ row, col });
-                    auto const& cellImage = presentation_model().cell_image(item_presentation_model_index{ row, col });
+                    auto const& cellImage = presentation_model().cell_image(itemIndex);
                     if (cellImage != std::nullopt)
-                        aGraphicsContext.draw_texture(rect{ cellRect.top_left() + point{ 0.0, (cellRect.cy - cellImageSize->cy) / 2.0 }, *cellImageSize }, *cellImage);
-                    if (cellImageSize != std::nullopt)
-                        textPos.x += (cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
-                    optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
+                        aGraphicsContext.draw_texture(cell_rect(itemIndex, aGraphicsContext, cell_part::Image), *cellImage);
+                    auto cellTextRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Text);
+                    auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGraphicsContext);
+                    optional_colour textColour = presentation_model().cell_colour(itemIndex, item_cell_colour_type::Foreground);
                     if (textColour == std::nullopt)
                         textColour = has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().text_colour();
-                    aGraphicsContext.draw_glyph_text(textPos, glyphText, *textColour);
+                    aGraphicsContext.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColour);
                 }
-                if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
+                if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == itemIndex && has_focus())
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
                     aGraphicsContext.draw_focus_rect(cellBackgroundRect);
@@ -650,7 +648,7 @@ namespace neogfx
         if (aCurrentIndex != std::nullopt)
         {
             make_visible(*aCurrentIndex);
-            update(cell_rect(*aCurrentIndex, true));
+            update(cell_rect(*aCurrentIndex, cell_part::Background));
             if (!selection_model().sorting() && !selection_model().filtering())
             {
                 if (aPreviousIndex != std::nullopt)
@@ -663,7 +661,7 @@ namespace neogfx
             }
         }
         if (aPreviousIndex != std::nullopt)
-            update(cell_rect(*aPreviousIndex, true));
+            update(cell_rect(*aPreviousIndex, cell_part::Background));
     }
 
     void item_view::selection_changed(const item_selection&, const item_selection&)
@@ -692,13 +690,13 @@ namespace neogfx
 
     bool item_view::is_visible(const item_presentation_model_index& aItemIndex) const
     {
-        return item_display_rect().contains(cell_rect(aItemIndex, true));
+        return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
     }
 
     void item_view::make_visible(const item_presentation_model_index& aItemIndex)
     {
         graphics_context gc{ *this, graphics_context::type::Unattached };
-        rect cellRect = cell_rect(aItemIndex, true);
+        rect cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
         if (cellRect.intersection(item_display_rect()).height() < cellRect.height())
         {
             if (cellRect.top() < item_display_rect().top())
@@ -781,8 +779,10 @@ namespace neogfx
         if (presentation_model().cell_colour(newIndex, item_cell_colour_type::Background) != optional_colour{})
             editor().set_background_colour(presentation_model().cell_colour(newIndex, item_cell_colour_type::Background));
         editor().set_margins(presentation_model().cell_margins(*this));
-        editor().move(cell_rect(newIndex).position());
-        editor().resize(cell_rect(newIndex).extents());
+        auto editorRect = cell_rect(newIndex, cell_part::Text);
+        editorRect.inflate(presentation_model().cell_margins(*this));
+        editor().move(editorRect.position());
+        editor().resize(editorRect.extents());
         if (editor_has_text_edit())
         {
             auto& textEdit = editor_text_edit();
@@ -902,8 +902,10 @@ namespace neogfx
         }
         if (editing() != std::nullopt)
         {
-            editor().move(cell_rect(*editing()).position());
-            editor().resize(cell_rect(*editing()).extents());
+            auto editorRect = cell_rect(*editing(), cell_part::Text);
+            editorRect.inflate(presentation_model().cell_margins(*this));
+            editor().move(editorRect.position());
+            editor().resize(editorRect.extents());
         }
     }
 
@@ -915,39 +917,88 @@ namespace neogfx
         return result;
     }
 
-    rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground) const
+    rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart) const
     {
-        const size cellSpacing = presentation_model().cell_spacing(*this);
-        coordinate y = presentation_model().item_position(aItemIndex, *this);
-        dimension h = presentation_model().item_height(aItemIndex, *this);
-        coordinate x = 0.0;
-        for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+        switch(aPart)
         {
-            if (col != 0)
-                x += cellSpacing.cx;
-            else
-                x += cellSpacing.cx / 2.0;
-            if (col == aItemIndex.column())
+        case cell_part::Background:
+        case cell_part::Foreground:
             {
-                x -= horizontal_scrollbar().position();
-                y -= vertical_scrollbar().position();
-                rect result{ point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
-                if (aBackground)
+                size const cellSpacing = presentation_model().cell_spacing(*this);
+                coordinate y = presentation_model().item_position(aItemIndex, *this);
+                dimension const h = presentation_model().item_height(aItemIndex, *this);
+                coordinate x = 0.0;
+                for (uint32_t col = 0; col < presentation_model().columns(); ++col)
                 {
-                    if (col == presentation_model().columns() - 1)
-                    {
-                        result.x -= cellSpacing.cx / 2.0;
-                        result.cx += cellSpacing.cx / 2.0;
-                        result.cx += (item_display_rect().right() - result.right());
-                    }
+                    if (col != 0)
+                        x += cellSpacing.cx;
                     else
-                        result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
+                        x += cellSpacing.cx / 2.0;
+                    if (col == aItemIndex.column())
+                    {
+                        x -= horizontal_scrollbar().position();
+                        y -= vertical_scrollbar().position();
+                        rect result{ point{x, y} +item_display_rect().top_left(), size{ column_width(col), h } };
+                        switch (aPart)
+                        {
+                        case cell_part::Background:
+                            if (col == presentation_model().columns() - 1)
+                            {
+                                result.indent(point{ -cellSpacing.cx / 2.0, 0.0 });
+                                result.cx += (item_display_rect().right() - result.right());
+                            }
+                            else
+                                result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
+                            break;
+                        case cell_part::Foreground:
+                            result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
+                            break;
+                        }
+                        return result;
+                    }
+                    x += column_width(col);
                 }
-                else
-                    result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
-                return result;
+                throw i_item_presentation_model::bad_column_index();
             }
-            x += column_width(col);
+        default:
+            {
+                graphics_context gc{ *this, graphics_context::type::Unattached };
+                return cell_rect(aItemIndex, gc, aPart);
+            }
+        }
+    }
+        
+    rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGraphicsContext, cell_part aPart) const
+    {
+        switch (aPart)
+        {
+        case cell_part::Background:
+        case cell_part::Foreground:
+            return cell_rect(aItemIndex, aPart);
+        case cell_part::Image:
+            {
+                auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
+                if (!cellImageSize)
+                    throw invalid_cell_part();
+                auto cellRect = cell_rect(aItemIndex);
+                cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellImageSize->cy) / 2.0) });
+                cellRect.extents() = *cellImageSize;
+                return cellRect;
+            }
+            break;
+        case cell_part::Text:
+            {
+                auto cellRect = cell_rect(aItemIndex);
+                cellRect.deflate(presentation_model().cell_margins(*this));
+                auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
+                if (cellImageSize)
+                    cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx, 0.0 });
+                auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGraphicsContext);
+                auto const textHeight = std::max(glyphText.extents().cy,
+                    (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());
+                cellRect.indent(point{ 0.0, (cellRect.height() - textHeight) / 2.0 });
+                return cellRect;
+            }
         }
         return rect{};
     }
@@ -956,14 +1007,14 @@ namespace neogfx
     {
         if (model().rows() == 0)
             return optional_item_presentation_model_index{};
-        const size cellSpacing = presentation_model().cell_spacing(*this);
-        point adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right() - size{ 1.0, 1.0 } );
-        item_presentation_model_index rowIndex = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
+        size const cellSpacing = presentation_model().cell_spacing(*this);
+        point const adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right() - size{ 1.0, 1.0 } );
+        item_presentation_model_index const rowIndex = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
         item_presentation_model_index index = rowIndex;
         for (uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
         {
             index.set_column(col);
-            if (cell_rect(index, true).contains_x(adjustedPos))
+            if (cell_rect(index, cell_part::Background).contains_x(adjustedPos))
             {
                 if (aPosition.y < item_display_rect().top() && index.row() > 0)
                     index.set_row(index.row() - 1);

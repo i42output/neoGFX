@@ -1039,7 +1039,7 @@ namespace neogfx
         for (std::size_t ci = 0; ci < aColumnIndex; ++ci)
             result.x += static_cast<const glyph_column&>(column(ci)).width();
         if (!aIncludeMargins)
-            result = result - column(aColumnIndex).margins();
+            result.deflate(column(aColumnIndex).margins());
         return result;
     }
 

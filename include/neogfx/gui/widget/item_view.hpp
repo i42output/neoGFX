@@ -29,6 +29,15 @@
 
 namespace neogfx
 {
+    enum class cell_part : uint32_t
+    {
+        Background,
+        Foreground,
+        Text,
+        Image,
+        Checkbox
+    };
+
     class item_view : public scrollable_widget, protected header_view::i_owner
     {
     public:
@@ -37,6 +46,7 @@ namespace neogfx
         struct no_selection_model : std::logic_error { no_selection_model() : std::logic_error("neogfx::item_view::no_selection_model") {} };
         struct no_editor : std::logic_error { no_editor() : std::logic_error("neogfx::item_view::no_editor") {} };
         struct unknown_editor_type : std::logic_error { unknown_editor_type() : std::logic_error("neogfx::item_view::unknown_editor_type") {} };
+        struct invalid_cell_part : std::logic_error { invalid_cell_part() : std::logic_error("neogfx::item_view::invalid_cell_part") {} };
     public:
         item_view(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
         item_view(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
@@ -133,7 +143,8 @@ namespace neogfx
         virtual void selection_changed(const item_selection& aCurrentSelection, const item_selection& aPreviousSelection);
     public:
         rect row_rect(const item_presentation_model_index& aItemIndex) const;
-        rect cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground = false) const;
+        rect cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart = cell_part::Foreground) const;
+        rect cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGraphicsContext, cell_part aPart = cell_part::Foreground) const;
         optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
     private:
         void init();
