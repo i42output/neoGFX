@@ -561,14 +561,9 @@ namespace neogfx
                 "    if (uStippleEnabled)\n"
                 "    {\n"
                 "        float d = distance(uStippleVertex, Coord);\n"
-                "        if (d < uStippleDiscard)\n"
+                "        uint patternBit = ((uint(d + uStippleCounter)) / uStippleFactor) % 16;\n"
+                "        if ((uStipplePattern & (1 << patternBit)) == 0)\n"
                 "            discard;\n"
-                "        else\n"
-                "        {\n"
-                "            uint patternBit = ((uint(d + uStippleCounter)) / uStippleFactor) % 16;\n"
-                "            if ((uStipplePattern & (1 << patternBit)) == 0)\n"
-                "                discard;\n"
-                "        }\n"
                 "    }\n"
                 "}\n"_s
             };
@@ -596,23 +591,19 @@ namespace neogfx
         uStipplePattern = aPattern;
         uStippleCounter = 0.0f;
         uStippleVertex = vec3f{};
-        uStippleDiscard = 0.0f;
         uStippleEnabled = true;
     }
 
     void standard_stipple_shader::start(const i_rendering_context& aContext, const vec3& aFrom)
     {
         uStippleCounter = 0.0f;
-        uStippleVertex = (aFrom + vec3{ aContext.offset() }).as<float>();
-        uStippleDiscard = 0.0f;
+        uStippleVertex = aFrom.as<float>();
     }
     
-    void standard_stipple_shader::next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset, scalar aDiscardFor)
+    void standard_stipple_shader::next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset)
     {
-        float const counterOffset = (aCounterOffset == std::nullopt ? 
-            uStippleVertex.uniform().value().get<vec3f>().distance(aFrom.as<float>()) : static_cast<float>(*aCounterOffset));
-        uStippleCounter = uStippleCounter.uniform().value().get<float>() + counterOffset;
-        uStippleVertex = (aFrom + vec3{ aContext.offset() }).as<float>();
-        uStippleDiscard = static_cast<float>(aDiscardFor);
+        if (aCounterOffset)
+            uStippleCounter = uStippleCounter.uniform().value().get<float>() + static_cast<float>(*aCounterOffset);
+        uStippleVertex = aFrom.as<float>();
     }
 }

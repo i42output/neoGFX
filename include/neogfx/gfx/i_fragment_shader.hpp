@@ -83,6 +83,6 @@ namespace neogfx
         virtual void clear_stipple() = 0;
         virtual void set_stipple(uint32_t aFactor, uint16_t aPattern) = 0;
         virtual void start(const i_rendering_context& aContext, const vec3& aFrom) = 0;
-        virtual void next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset = {}, scalar aDiscardFor = 0.0) = 0;
+        virtual void next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset = {}) = 0;
     };
 }

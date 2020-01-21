@@ -176,13 +176,12 @@ namespace neogfx
         void clear_stipple() override;
         void set_stipple(uint32_t aFactor, uint16_t aPattern) override;
         void start(const i_rendering_context& aContext, const vec3& aFrom) override;
-        void next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset = {}, scalar aDiscardFor = 0.0) override;
+        void next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset = {}) override;
     private:
         cache_uniform(uStippleFactor)
         cache_uniform(uStipplePattern)
         cache_uniform(uStippleCounter)
         cache_uniform(uStippleVertex)
-        cache_uniform(uStippleDiscard)
         cache_uniform(uStippleEnabled)
     };
 }

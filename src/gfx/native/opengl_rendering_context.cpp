@@ -201,7 +201,7 @@ namespace neogfx
             return vertices;
         }
 
-        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays& aInstance, scalar aDiscardFor = 0.0)
+        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays& aInstance)
         {
             // assumes vertices are quads (as two triangles) created with quads_to_triangles above.
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
@@ -213,10 +213,10 @@ namespace neogfx
                 aInstance.draw(6u);
                 while (!aInstance.empty())
                 {
-                    auto const counterOffset = start.distance(end) - aDiscardFor;
+                    auto counterOffset = start.distance(end);
                     start = midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz);
                     end = midpoint(std::next(aInstance.begin(), 4)->xyz, std::next(aInstance.begin(), 2)->xyz);
-                    stippleShader.next(aContext, start, counterOffset, aDiscardFor);
+                    stippleShader.next(aContext, start, counterOffset);
                     aInstance.draw(6u);
                 }
             }
@@ -877,6 +877,10 @@ namespace neogfx
         }
 
         vec3_array<8> lines = rect_vertices(adjustedRect, mesh_type::Outline, 0.0);
+        lines[1].x -= (aPen.width() + rect::default_epsilon);
+        lines[3].y -= (aPen.width() + rect::default_epsilon);
+        lines[5].x += (aPen.width() + rect::default_epsilon);
+        lines[7].y += (aPen.width() + rect::default_epsilon);
         vec3_array<4 * 4> quads;
         lines_to_quads(lines, aPen.width(), quads);
         vec3_array<4 * 6> triangles;
@@ -893,7 +897,7 @@ namespace neogfx
                     static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
-        emit_any_stipple(*this, vertexArrays, aPen.width());
+        emit_any_stipple(*this, vertexArrays);
     }
 
     void opengl_rendering_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)

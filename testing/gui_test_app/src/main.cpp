@@ -198,6 +198,19 @@ void signal_handler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
+inline ng::quad line_to_quad(const ng::vec3& aStart, const ng::vec3& aEnd, double aLineWidth)
+{
+    auto const vecLine = aEnd - aStart;
+    auto const length = vecLine.magnitude();
+    auto const halfWidth = aLineWidth / 2.0;
+    auto const v1 = ng::vec3{ -halfWidth, -halfWidth, 0.0 };
+    auto const v2 = ng::vec3{ -halfWidth, halfWidth, 0.0 };
+    auto const v3 = ng::vec3{ length + halfWidth, halfWidth, 0.0 };
+    auto const v4 = ng::vec3{ length + halfWidth, -halfWidth, 0.0 };
+    auto const r = ng::rotation_matrix(ng::vec3{ 1.0, 0.0, 0.0 }, vecLine);
+    return ng::quad{ aStart + r * v1, aStart + r * v2, aStart + r * v3, aStart + r * v4 };
+}
+
 int main(int argc, char* argv[])
 {
     auto previous_handler = std::signal(SIGABRT, signal_handler);
