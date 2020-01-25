@@ -200,6 +200,16 @@ namespace neogfx
         update();
     }
 
+    const optional_easing& item_view::default_transition() const
+    {
+        return iDefaultTransition;
+    }
+
+    void item_view::set_default_transition(const optional_easing& aTransition)
+    {
+        iDefaultTransition = aTransition;
+    }
+
     std::pair<item_presentation_model_index::value_type, coordinate> item_view::first_visible_item(i_graphics_context& aGraphicsContext) const
     {
         return presentation_model().item_at(vertical_scrollbar().position(), aGraphicsContext);
@@ -693,25 +703,26 @@ namespace neogfx
         return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
     }
 
-    void item_view::make_visible(const item_presentation_model_index& aItemIndex, easing aTransition)
+    void item_view::make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition)
     {
+        auto const& transition = (aTransition == std::nullopt ? default_transition() : aTransition);
         graphics_context gc{ *this, graphics_context::type::Unattached };
-        auto const cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
-        auto const displayRect = item_display_rect();
-        auto const intersectRect = cellRect.intersection(displayRect);
+        auto const& cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
+        auto const& displayRect = item_display_rect();
+        auto const& intersectRect = cellRect.intersection(displayRect);
         if (intersectRect.height() < cellRect.height())
         {
             if (cellRect.top() < displayRect.top())
-                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top()), aTransition);
+                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top()), transition);
             else if (cellRect.bottom() > displayRect.bottom())
-                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom()), aTransition);
+                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom()), transition);
         }
         if (intersectRect.width() < cellRect.width())
         {
             if (cellRect.left() < displayRect.left())
-                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left()), aTransition);
+                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left()), transition);
             else if (cellRect.right() > displayRect.right())
-                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right()), aTransition);
+                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right()), transition);
         }
     }
 

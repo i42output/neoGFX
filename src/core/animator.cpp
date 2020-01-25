@@ -124,17 +124,17 @@ namespace neogfx
         iPaused = false;
     }
 
-    void transition::reset(bool aEnable)
+    void transition::reset(bool aEnable, bool aDisableWhenFinished)
     {
         iStartTime = std::nullopt;
         if (aEnable)
-            enable();
+            enable(aDisableWhenFinished);
     }
 
-    void transition::reset(easing aNewEasingFunction, bool aEnable)
+    void transition::reset(easing aNewEasingFunction, bool aEnable, bool aDisableWhenFinished)
     {
         iEasingFunction = aNewEasingFunction;
-        reset(aEnable);
+        reset(aEnable, aDisableWhenFinished);
         if (easing_function() == easing::One || easing_function() == easing::Zero)
             apply();
     }
@@ -236,7 +236,7 @@ namespace neogfx
             aEvent.accept();
             if (&aEvent == &property().property_changed_from_to().raw_event())
                  iTo = property().get_as_variant();
-            reset();
+            reset(true, disable_when_finished());
          }
     }
 

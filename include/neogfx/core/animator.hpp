@@ -49,8 +49,8 @@ namespace neogfx
         void pause() override;
         void resume() override;
     public:
-        void reset(bool aEnable = true) override;
-        void reset(easing aNewEasingFunction, bool aEnable = true) override;
+        void reset(bool aEnable = true, bool aDisableWhenFinished = false) override;
+        void reset(easing aNewEasingFunction, bool aEnable = true, bool aDisableWhenFinished = false) override;
     private:
         i_animator& iAnimator;
         transition_id iId;

@@ -48,7 +48,7 @@ namespace neogfx
         void hide() override;
         bool visible() const override;
         value_type position() const override;
-        bool set_position(value_type aPosition, easing aTransition = easing::One) override;
+        bool set_position(value_type aPosition, const optional_easing& aTransition = {}) override;
         value_type minimum() const override;
         void set_minimum(value_type aMinimum) override;
         value_type maximum() const override;

@@ -91,7 +91,7 @@ namespace neogfx
         return result;
     }
 
-    bool scrollbar::set_position(value_type aPosition, easing aTransition)
+    bool scrollbar::set_position(value_type aPosition, const optional_easing& aTransition)
     {
         aPosition = std::max(std::min(aPosition, maximum() - page()), minimum());
         if (iIntegerPositions)
@@ -100,12 +100,12 @@ namespace neogfx
         if (Position != aPosition)
         {
             changed = true;
-            if (aTransition == easing::One || std::abs(aPosition - Position.value()) < page())
+            if (aTransition == std::nullopt || *aTransition == easing::One || std::abs(aPosition - Position.value()) < page())
             {
                 if (have_transition())
                 {
                     if (transition().active())
-                        transition().reset(aTransition == easing::One);
+                        transition().reset(easing::One);
                     else if (!transition().paused())
                         transition().disable();
                 }
@@ -113,9 +113,9 @@ namespace neogfx
             else
             {
                 if (!iTransition)
-                    iTransition = service<i_animator>().add_transition(Position, aTransition, 0.5);
+                    iTransition = service<i_animator>().add_transition(Position, *aTransition, 0.5);
                 else
-                    transition().reset(aTransition);
+                    transition().reset(*aTransition);
             }
             Position = aPosition;
         }

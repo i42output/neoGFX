@@ -399,10 +399,11 @@ int main(int argc, char* argv[])
             button.clicked([&, randomColour]() { ui.textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
             transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
         }
-        ui.layout3.LayoutCompleted([&ui, &transitions, &transitionPrng]()
+        ng::event<> startAnimation;
+        startAnimation([&ui, &transitions, &transitionPrng]()
         {
             for (auto t : transitions)
-                ng::service<ng::i_animator>().transition(t).reset();
+                ng::service<ng::i_animator>().transition(t).reset(true, true);
             for (auto i = 0u; i < ui.layout3.count(); ++i)
             {
                 auto& button = ui.layout3.get_widget_at(i);
@@ -410,6 +411,11 @@ int main(int argc, char* argv[])
                 button.set_position(ng::point{ finalPosition.x, finalPosition.y - transitionPrng.get(600.0, 800.0) }.ceil());
                 button.set_position(finalPosition);
             }
+        });
+        ui.mainWindow.Window([&startAnimation](const ng::window_event& aEvent)
+        { 
+            if (aEvent.type() == ng::window_event_type::Resized)
+                startAnimation.async_trigger(); 
         });
         auto showHideTabs = [&ui]()
         {

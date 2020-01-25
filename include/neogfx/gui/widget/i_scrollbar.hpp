@@ -82,7 +82,7 @@ namespace neogfx
         virtual void hide() = 0;
         virtual bool visible() const = 0;
         virtual value_type position() const = 0;
-        virtual bool set_position(value_type aPosition, easing aTransition = easing::One) = 0;
+        virtual bool set_position(value_type aPosition, const optional_easing& aTransition = {}) = 0;
         virtual value_type minimum() const = 0;
         virtual void set_minimum(value_type aMinimum) = 0;
         virtual value_type maximum() const = 0;
