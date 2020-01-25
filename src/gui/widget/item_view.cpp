@@ -693,23 +693,25 @@ namespace neogfx
         return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
     }
 
-    void item_view::make_visible(const item_presentation_model_index& aItemIndex)
+    void item_view::make_visible(const item_presentation_model_index& aItemIndex, easing aTransition)
     {
         graphics_context gc{ *this, graphics_context::type::Unattached };
-        rect cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
-        if (cellRect.intersection(item_display_rect()).height() < cellRect.height())
+        auto const cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
+        auto const displayRect = item_display_rect();
+        auto const intersectRect = cellRect.intersection(displayRect);
+        if (intersectRect.height() < cellRect.height())
         {
-            if (cellRect.top() < item_display_rect().top())
-                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - item_display_rect().top()));
-            else if (cellRect.bottom() > item_display_rect().bottom())
-                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - item_display_rect().bottom()));
+            if (cellRect.top() < displayRect.top())
+                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top()), aTransition);
+            else if (cellRect.bottom() > displayRect.bottom())
+                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom()), aTransition);
         }
-        if (cellRect.intersection(item_display_rect()).width() < cellRect.width())
+        if (intersectRect.width() < cellRect.width())
         {
-            if (cellRect.left() < item_display_rect().left())
-                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - item_display_rect().left()));
-            else if (cellRect.right() > item_display_rect().right())
-                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - item_display_rect().right()));
+            if (cellRect.left() < displayRect.left())
+                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left()), aTransition);
+            else if (cellRect.right() > displayRect.right())
+                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right()), aTransition);
         }
     }
 
@@ -938,7 +940,7 @@ namespace neogfx
                     {
                         x -= horizontal_scrollbar().position();
                         y -= vertical_scrollbar().position();
-                        rect result{ point{x, y} +item_display_rect().top_left(), size{ column_width(col), h } };
+                        rect result{ point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
                         switch (aPart)
                         {
                         case cell_part::Background:

@@ -33,7 +33,7 @@ namespace neogfx
     class i_transition
     {
     public:
-        virtual ~i_transition() {}
+        virtual ~i_transition() = default;
     public:
         virtual transition_id id() const = 0;
         virtual i_animator& animator() const = 0;
@@ -47,7 +47,8 @@ namespace neogfx
         virtual double mix_value() const = 0;
         virtual bool finished() const = 0;
     public:
-        virtual void reset() = 0;
+        virtual void reset(bool aEnable = true) = 0;
+        virtual void reset(easing aNewEasingFunction, bool aEnable = true) = 0;
         virtual void apply() = 0;
     };
 
@@ -94,7 +95,9 @@ namespace neogfx
 
     inline double mix(double aMixValue, double aLhs, double aRhs)
     {
-        return (aRhs - aLhs) * aMixValue + aLhs;
+        auto const result = aLhs * (1.0 - aMixValue) + aRhs * aMixValue;
+        std::cout << "mix(" << aMixValue << ", " << aLhs << ", " << aRhs << ") = " << result << ". " << std::flush;
+        return result;
     }
 
     inline point mix(double aMixValue, const point& aLhs, const point& aRhs)

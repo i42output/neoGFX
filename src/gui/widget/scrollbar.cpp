@@ -29,7 +29,6 @@ namespace neogfx
         iStyle(aStyle),
         iIntegerPositions(aIntegerPositions),
         iVisible(false),
-        iPosition(0.0),
         iMinimum(0.0),
         iMaximum(0.0),
         iStep(1.0),
@@ -38,6 +37,17 @@ namespace neogfx
         iHoverElement(ElementNone),
         iPaused(false)
     {
+        Position.changed_from_to([this](const value_type& aFrom, const value_type& aTo)
+        {
+            update_reason_e updateReason = (aFrom < aTo ? ScrolledDown : ScrolledUp);
+            iContainer.scrollbar_updated(*this, updateReason);
+        });
+    }
+
+    scrollbar::~scrollbar()
+    {
+        if (iTransition)
+            service<i_animator>().remove_transition(*iTransition);
     }
 
     scrollbar_type scrollbar::type() const
@@ -75,21 +85,34 @@ namespace neogfx
 
     scrollbar::value_type scrollbar::position() const
     {
-        return iPosition;
+        auto result = Position.value();
+        if (iIntegerPositions)
+            result = std::ceil(result);
+        return result;
     }
 
-    bool scrollbar::set_position(value_type aPosition)
+    bool scrollbar::set_position(value_type aPosition, easing aTransition)
     {
         aPosition = std::max(std::min(aPosition, maximum() - page()), minimum());
         if (iIntegerPositions)
             aPosition = std::ceil(aPosition);
         bool changed = false;
-        if (iPosition != aPosition)
+        if (Position != aPosition)
         {
             changed = true;
-            update_reason_e updateReason = (iPosition < aPosition ? ScrolledDown : ScrolledUp);
-            iPosition = aPosition;
-            iContainer.scrollbar_updated(*this, updateReason);
+            if (aTransition == easing::One || std::abs(aPosition - Position.value()) < page())
+            {
+                if (iTransition)
+                    service<i_animator>().transition(*iTransition).disable();
+            }
+            else
+            {
+                if (!iTransition)
+                    iTransition = service<i_animator>().add_transition(Position, aTransition, 0.5);
+                else
+                    service<i_animator>().transition(*iTransition).reset(aTransition);
+            }
+            Position = aPosition;
         }
         return changed;
     }

@@ -22,15 +22,23 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/optional.hpp>
 #include <neolib/timer.hpp>
+#include <neogfx/core/object.hpp>
+#include <neogfx/core/property.hpp>
+#include <neogfx/core/i_animator.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/i_scrollbar.hpp>
 
 namespace neogfx
 {
-    class scrollbar : public i_scrollbar
+    class scrollbar : public object<>, public i_scrollbar
     {
     public:
+        typedef i_scrollbar abstract_type;
+    private:
+        typedef abstract_type property_context_type;
+    public:
         scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
+        ~scrollbar();
     public:
         scrollbar_type type() const override;
         scrollbar_style style() const override;
@@ -38,7 +46,7 @@ namespace neogfx
         void hide() override;
         bool visible() const override;
         value_type position() const override;
-        bool set_position(value_type aPosition) override;
+        bool set_position(value_type aPosition, easing aTransition = easing::One) override;
         value_type minimum() const override;
         void set_minimum(value_type aMinimum) override;
         value_type maximum() const override;
@@ -72,7 +80,6 @@ namespace neogfx
         scrollbar_style iStyle;
         bool iIntegerPositions;
         bool iVisible;
-        value_type iPosition;
         value_type iMinimum;
         value_type iMaximum;
         value_type iStep;
@@ -84,5 +91,9 @@ namespace neogfx
         point iThumbClickedPosition;
         value_type iThumbClickedValue;
         optional_point iScrollTrackPosition;
+        std::optional<transition_id> iTransition;
+        // properties / anchors
+    public:
+        define_property(property_category::interaction, value_type, Position, position)
     };
 }

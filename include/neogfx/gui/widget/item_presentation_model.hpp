@@ -78,14 +78,14 @@ namespace neogfx
         };
         typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
     public:
-        basic_item_presentation_model() : iItemModel{ nullptr }, iInitializing{ false }, iFiltering{ false }
+        basic_item_presentation_model() : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
         {
             init();
         }
-        basic_item_presentation_model(i_item_model& aItemModel) : iItemModel{ nullptr }, iInitializing{ false }, iFiltering{ false }
+        basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = true) : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
         {
             init();
-            set_item_model(aItemModel);
+            set_item_model(aItemModel, aSortable);
         }
         ~basic_item_presentation_model()
         {
@@ -107,8 +107,9 @@ namespace neogfx
                 throw no_item_model();
             return static_cast<item_model_type&>(*iItemModel);
         }
-        void set_item_model(i_item_model& aItemModel) override
+        void set_item_model(i_item_model& aItemModel, bool aSortable = true) override
         {
+            iSortable = aSortable;
             if (iItemModel != &aItemModel)
             {
                 neolib::scoped_flag sf{ iInitializing };
@@ -578,6 +579,10 @@ namespace neogfx
             return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);
         }
     public:
+        bool sortable() const override
+        {
+            return iSortable;
+        }
         optional_sort sorting_by() const override
         {
             if (!iSortOrder.empty())
@@ -608,7 +613,8 @@ namespace neogfx
         void reset_sort() override
         {
             iSortOrder.clear();
-            execute_sort();
+            if (sortable())
+                execute_sort();
         }
     public:
         optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type_e aFilterSearchType = Prefix, case_sensitivity_e aCaseSensitivity = CaseInsensitive) const override
@@ -680,34 +686,36 @@ namespace neogfx
         }
         void execute_sort()
         {
+            if (iRows.size() <= 1)
+                return;
+            if (iSortOrder.empty())
+            {
+                sort_by(0, SortAscending);
+                return;
+            }
             ItemsSorting.trigger();
             std::sort(iRows.begin(), iRows.end(), [&](const typename container_type::value_type& aLhs, const typename container_type::value_type& aRhs) -> bool
             {
-                if (!iSortOrder.empty())
+                for (std::size_t i = 0; i < iSortOrder.size(); ++i)
                 {
-                    for (std::size_t i = 0; i < iSortOrder.size(); ++i)
+                    auto col = iSortOrder[i].first;
+                    const auto& v1 = item_model().cell_data(item_model_index{ aLhs.first, iColumns[col].modelColumn });
+                    const auto& v2 = item_model().cell_data(item_model_index{ aRhs.first, iColumns[col].modelColumn });
+                    if (std::holds_alternative<std::string>(v1) && std::holds_alternative<std::string>(v2))
                     {
-                        auto col = iSortOrder[i].first;
-                        const auto& v1 = item_model().cell_data(item_model_index{ aLhs.first, iColumns[col].modelColumn });
-                        const auto& v2 = item_model().cell_data(item_model_index{ aRhs.first, iColumns[col].modelColumn });
-                        if (std::holds_alternative<std::string>(v1) && std::holds_alternative<std::string>(v2))
-                        {
-                            std::string s1 = boost::to_upper_copy<std::string>(std::get<std::string>(v1));
-                            std::string s2 = boost::to_upper_copy<std::string>(std::get<std::string>(v2));
-                            if (s1 < s2)
-                                return iSortOrder[i].second == SortAscending;
-                            else if (s2 < s1)
-                                return iSortOrder[i].second == SortDescending;
-                        }
-                        if (v1 < v2)
+                        std::string s1 = boost::to_upper_copy<std::string>(std::get<std::string>(v1));
+                        std::string s2 = boost::to_upper_copy<std::string>(std::get<std::string>(v2));
+                        if (s1 < s2)
                             return iSortOrder[i].second == SortAscending;
-                        else if (v2 < v1)
+                        else if (s2 < s1)
                             return iSortOrder[i].second == SortDescending;
                     }
-                    return false;
+                    if (v1 < v2)
+                        return iSortOrder[i].second == SortAscending;
+                    else if (v2 < v1)
+                        return iSortOrder[i].second == SortDescending;
                 }
-                else
-                    return aLhs.first < aRhs.first;
+                return false;
             });
             reset_maps();
             reset_position_meta(0);
@@ -881,6 +889,7 @@ namespace neogfx
         }
     private:
         i_item_model* iItemModel;
+        bool iSortable;
         sink iItemModelSink;
         optional_size iCellSpacing;
         optional_margins iCellMargins;

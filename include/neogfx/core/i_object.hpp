@@ -38,7 +38,7 @@ namespace neogfx
     public:
         virtual ~i_object() {}
     public:
-        virtual object_type type() const = 0;
+        virtual neogfx::object_type object_type() const = 0;
     public:
         virtual neolib::i_lifetime& as_lifetime() = 0;
     public:

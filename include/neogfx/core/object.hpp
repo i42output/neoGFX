@@ -29,7 +29,7 @@
 
 namespace neogfx
 {
-    template <typename Base>
+    template <typename Base = i_object>
     class object : public Base, public i_properties, protected virtual neolib::lifetime
     {
     public:
@@ -42,9 +42,9 @@ namespace neogfx
         }
         // type
     public:
-        object_type type() const override
+        neogfx::object_type object_type() const override
         {
-            return object_type{};
+            return neogfx::object_type{};
         }
         // i_lifetime
     public:

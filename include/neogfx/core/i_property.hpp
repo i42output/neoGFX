@@ -130,8 +130,8 @@ namespace neogfx
     {
         // events
     public:
-        declare_event(changed, const property_variant&)
-        declare_event(changed_from_to, const property_variant&, const property_variant&)
+        declare_event(property_changed, const property_variant&)
+        declare_event(property_changed_from_to, const property_variant&, const property_variant&)
         // exceptions
     public:
         struct no_calculator : std::logic_error { no_calculator() : std::logic_error("neogfx::i_property::no_calculator") {} };

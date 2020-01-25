@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/easing.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/widget/header_view.hpp>
 #include <neogfx/gui/widget/item_editor.hpp>
@@ -74,7 +75,7 @@ namespace neogfx
         void disable_hot_tracking();
     public:
         bool is_visible(const item_presentation_model_index& aItemIndex) const;
-        void make_visible(const item_presentation_model_index& aItemIndex);
+        void make_visible(const item_presentation_model_index& aItemIndex, easing aTransition = easing::OutQuart);
         const optional_item_presentation_model_index& editing() const;
         void edit(const item_presentation_model_index& aItemIndex);
         void begin_edit();

@@ -99,23 +99,30 @@ namespace neogfx
         return animator().animation_time() - start_time() > duration();
     }
 
-    void transition::reset()
+    void transition::reset(bool aEnable)
     {
         iStartTime = std::nullopt;
+        if (aEnable)
+            enable();
+    }
+
+    void transition::reset(easing aNewEasingFunction, bool aEnable)
+    {
+        iEasingFunction = aNewEasingFunction;
+        reset(aEnable);
     }
 
     property_transition::property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled) :
         transition{ aAnimator, aEasingFunction, aDuration, aEnabled }, iProperty{ aProperty }, iPropertyDestroyed{ aProperty.as_lifetime() }, iFrom{ aProperty.get_as_variant() }, iTo{ aProperty.get_as_variant() }, iUpdatingProperty{ false }
     {
-        iSink += aProperty.changed_from_to([this](const property_variant& aFrom, const property_variant& aTo)
-        {
-            if (!iUpdatingProperty)
-            {
-                iFrom = aFrom;
-                iTo = aTo;
-                reset();
-            }
-        });
+        neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed().raw_event());
+        neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed_from_to().raw_event());
+    }
+
+    property_transition::~property_transition()
+    {
+        neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed_from_to().raw_event());
+        neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed().raw_event());
     }
 
     i_property& property_transition::property() const
@@ -142,7 +149,8 @@ namespace neogfx
                 std::visit([this, &aFrom](auto&& aTo)
                 {
                     neolib::scoped_flag sf{ iUpdatingProperty };
-                    property().set_from_variant(mix(mix_value(), aFrom, aTo));
+                    auto const value = mix(mix_value(), aFrom, aTo);
+                    property().set_from_variant(value);
                 }, to().for_visitor());
             }, from().for_visitor());
         }
@@ -158,6 +166,25 @@ namespace neogfx
     bool property_transition::property_destroyed() const
     {
         return iPropertyDestroyed;
+    }
+
+    void property_transition::pre_filter_event(const neolib::i_event& aEvent) 
+    {
+        if (enabled() && !iUpdatingProperty && &aEvent == &property().property_changed_from_to().raw_event())
+            iFrom = property().get_as_variant();
+    }
+
+    void property_transition::filter_event(const neolib::i_event& aEvent)
+    {
+        if (enabled() && !iUpdatingProperty)
+        {
+            aEvent.accept();
+            if (&aEvent == &property().property_changed_from_to().raw_event())
+            {
+                iTo = property().get_as_variant();
+                reset();
+            }
+        }
     }
 
     animator::animator() :

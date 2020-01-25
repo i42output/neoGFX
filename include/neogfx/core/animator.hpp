@@ -43,7 +43,8 @@ namespace neogfx
         double mix_value() const override;
         bool finished() const override;
     public:
-        void reset() override;
+        void reset(bool aEnable = true) override;
+        void reset(easing aNewEasingFunction, bool aEnable = true) override;
     private:
         i_animator& iAnimator;
         transition_id iId;
@@ -54,10 +55,11 @@ namespace neogfx
         mutable std::optional<double> iStartTime;
     };
 
-    class property_transition : public transition
+    class property_transition : public transition, private neolib::i_event_filter
     {
     public:
         property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true);
+        ~property_transition();
     public:
         void apply() override;
         bool finished() const override;
@@ -68,9 +70,11 @@ namespace neogfx
     public:
         bool property_destroyed() const;
     private:
+        void pre_filter_event(const neolib::i_event& aEvent) override;
+        void filter_event(const neolib::i_event& aEvent) override;
+    private:
         i_property& iProperty;
         neolib::destroyed_flag iPropertyDestroyed;
-        sink iSink;
         property_variant iFrom;
         property_variant iTo;
         bool iUpdatingProperty;

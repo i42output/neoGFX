@@ -333,7 +333,10 @@ namespace neogfx
     public:
         const item_cell_data& cell_data(const item_model_index& aIndex) const override
         {
-            return iItems[aIndex.row()].second[aIndex.column()];
+            if (aIndex.column() < iItems[aIndex.row()].second.size())
+                return iItems[aIndex.row()].second[aIndex.column()];
+            static const item_cell_data sEmpty;
+            return sEmpty;
         }
         const item_cell_info& cell_info(const item_model_index& aIndex) const override
         {

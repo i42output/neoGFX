@@ -40,10 +40,10 @@ namespace neogfx
         typedef T value_type;
         typedef Context context_type;
     public:
-        define_declared_event(VariantChanged, changed, const property_variant&)
-        define_declared_event(VariantChangedFromTo, changed_from_to, const property_variant&, const property_variant&)
-        define_event_2(Changed, changed, const value_type&)
-        define_event_2(ChangedFromTo, changed_from_to, const value_type&, const value_type&)
+        define_declared_event(PropertyChanged, property_changed, const property_variant&)
+        define_declared_event(PropertyChangedFromTo, property_changed_from_to, const property_variant&, const property_variant&)
+        define_event(Changed, changed, const value_type&)
+        define_event(ChangedFromTo, changed_from_to, const value_type&, const value_type&)
     public:
         struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
     public:
@@ -260,23 +260,37 @@ namespace neogfx
         {
             if (iValue != aValue)
             {
-                auto previousValue = iValue;
-                iValue = std::forward<T2>(aValue);
                 neolib::destroyed_flag destroyed{ *this };
+                PropertyChanged.pre_trigger();
+                if (destroyed)
+                    return *this;
+                PropertyChangedFromTo.pre_trigger();
+                if (destroyed)
+                    return *this;
+                Changed.pre_trigger();
+                if (destroyed)
+                    return *this;
+                ChangedFromTo.pre_trigger();
+                if (destroyed)
+                    return *this;
+                auto const previousValue = iValue;
+                iValue = std::forward<T2>(aValue);
                 if (aOwnerNotify)
                     iOwner.property_changed(*this);
                 if (destroyed)
                     return *this;
-                VariantChanged.trigger(get_as_variant());
+                bool const discardChanged = !PropertyChanged.trigger(get_as_variant());
                 if (destroyed)
                     return *this;
-                VariantChangedFromTo.trigger(property_variant{ previousValue }, get_as_variant());
+                bool const discardChangedFromTo = !PropertyChangedFromTo.trigger(property_variant{ previousValue }, get_as_variant());
                 if (destroyed)
                     return *this;
-                Changed.trigger(value());
+                if (!discardChanged && !Changed.trigger(iValue))
+                    return *this;
                 if (destroyed)
                     return *this;
-                ChangedFromTo.trigger(previousValue, value());
+                if (!discardChangedFromTo && !ChangedFromTo.trigger(previousValue, iValue))
+                    return *this;
                 if (destroyed)
                     return *this;
                 if (has_delegate())
@@ -299,6 +313,7 @@ namespace neogfx
         struct font {};
         struct colour {};
         struct other_appearance {};
+        struct interaction {};
         struct other {};
     };
 

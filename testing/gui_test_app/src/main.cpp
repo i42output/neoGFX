@@ -806,6 +806,24 @@ int main(int argc, char* argv[])
         ui.radioLowerTableViewColouredText.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Foreground); ui.tableView2.update(); });
         ui.radioLowerTableViewColouredCells.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Background); ui.tableView2.update(); });
 
+        tableView1.selection_model().current_index_changed([&](const ng::optional_item_presentation_model_index& aCurrentIndex, const ng::optional_item_presentation_model_index&)
+        {
+            if (aCurrentIndex)
+            {
+                auto const modelIndex = tableView1.presentation_model().to_item_model_index(*aCurrentIndex);
+                tableView2.selection_model().set_current_index(tableView2.presentation_model().from_item_model_index(modelIndex));
+            }
+        });
+
+        tableView2.selection_model().current_index_changed([&](const ng::optional_item_presentation_model_index& aCurrentIndex, const ng::optional_item_presentation_model_index&)
+        {
+            if (aCurrentIndex)
+            {
+                auto const modelIndex = tableView2.presentation_model().to_item_model_index(*aCurrentIndex);
+                tableView1.selection_model().set_current_index(tableView1.presentation_model().from_item_model_index(modelIndex));
+            }
+        });
+
         ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
 
         #ifdef NDEBUG
