@@ -37,7 +37,7 @@ namespace neogfx
     private:
         typedef abstract_type property_context_type;
     public:
-        struct no_transition_in_progress : std::logic_error { no_transition_in_progress() : std::logic_error{ "neogfx::scrollbar::no_transition_in_progress" } {} };
+        struct no_transition : std::logic_error { no_transition() : std::logic_error{ "neogfx::scrollbar::no_transition" } {} };
     public:
         scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
         ~scrollbar();
@@ -81,8 +81,7 @@ namespace neogfx
     public:
         static dimension width(scrollbar_style aStyle);
     private:
-        bool transition_active() const;
-        bool transition_paused() const;
+        bool have_transition() const;
         i_transition& transition() const;
     private:
         i_scrollbar_container& iContainer;

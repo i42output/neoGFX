@@ -44,6 +44,7 @@ namespace neogfx
         double mix_value() const override;
         bool animation_finished() const override;
     public:
+        bool active() const override;
         bool paused() const override;
         void pause() override;
         void resume() override;

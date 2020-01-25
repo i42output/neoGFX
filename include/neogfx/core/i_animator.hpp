@@ -51,6 +51,7 @@ namespace neogfx
         virtual bool animation_finished() const = 0;
         virtual bool finished() const = 0;
     public:
+        virtual bool active() const = 0;
         virtual bool paused() const = 0;
         virtual void pause() = 0;
         virtual void resume() = 0;

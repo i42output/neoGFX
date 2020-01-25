@@ -104,9 +104,14 @@ namespace neogfx
         return animator().animation_time() - start_time() > duration();
     }
 
+    bool transition::active() const
+    {
+        return enabled() && !finished() && !paused();
+    }
+
     bool transition::paused() const
     {
-        return iPaused;
+        return enabled() && !finished() && iPaused;
     }
 
     void transition::pause()
@@ -130,6 +135,8 @@ namespace neogfx
     {
         iEasingFunction = aNewEasingFunction;
         reset(aEnable);
+        if (easing_function() == easing::One || easing_function() == easing::Zero)
+            apply();
     }
 
     property_transition::property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled) :
@@ -188,7 +195,7 @@ namespace neogfx
         else
         {
             neolib::scoped_flag sf{ iUpdatingProperty };
-            property().set_from_variant(iTo);
+            property().set_from_variant(easing_function() != easing::Zero ? iTo : iFrom);
             clear();
             if (disable_when_finished())
                 disable();
