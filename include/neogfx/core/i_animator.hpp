@@ -33,11 +33,14 @@ namespace neogfx
     class i_transition
     {
     public:
+        struct cannot_apply : std::logic_error { cannot_apply() : std::logic_error{ "neogfx::i_transition::cannot_apply" } {} };
+    public:
         virtual ~i_transition() = default;
     public:
         virtual transition_id id() const = 0;
         virtual i_animator& animator() const = 0;
         virtual bool enabled() const = 0;
+        virtual bool disabled() const = 0;
         virtual bool disable_when_finished() const = 0;
         virtual void enable(bool aDisableWhenFinished = false) = 0;
         virtual void disable() = 0;
@@ -45,8 +48,14 @@ namespace neogfx
         virtual double duration() const = 0;
         virtual double start_time() const = 0;
         virtual double mix_value() const = 0;
+        virtual bool animation_finished() const = 0;
         virtual bool finished() const = 0;
     public:
+        virtual bool paused() const = 0;
+        virtual void pause() = 0;
+        virtual void resume() = 0;
+    public:
+        virtual void clear() = 0;
         virtual void reset(bool aEnable = true) = 0;
         virtual void reset(easing aNewEasingFunction, bool aEnable = true) = 0;
         virtual void apply() = 0;

@@ -73,6 +73,8 @@ namespace neogfx
     public:
         struct element_already_clicked : std::logic_error { element_already_clicked() : std::logic_error("neogfx::i_scrollbar::element_already_clicked") {} };
         struct element_not_clicked : std::logic_error{ element_not_clicked() : std::logic_error("neogfx::i_scrollbar::element_not_clicked") {} };
+        struct already_locked : std::logic_error { already_locked() : std::logic_error("neogfx::i_scrollbar::already_locked") {} };
+        struct not_locked : std::logic_error { not_locked() : std::logic_error("neogfx::i_scrollbar::not_locked") {} };
     public:
         virtual scrollbar_type type() const = 0;
         virtual scrollbar_style style() const = 0;
@@ -89,6 +91,10 @@ namespace neogfx
         virtual void set_step(value_type aStep) = 0;
         virtual value_type page() const = 0;
         virtual void set_page(value_type aPage) = 0;
+    public:
+        virtual bool locked() const = 0;
+        virtual void lock(value_type aPosition) = 0;
+        virtual void unlock() = 0;
     public:
         virtual dimension width() const = 0;
         virtual void render(i_graphics_context& aGraphicsContext) const = 0;

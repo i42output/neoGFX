@@ -102,8 +102,8 @@ namespace neogfx
             changed = true;
             if (aTransition == easing::One || std::abs(aPosition - Position.value()) < page())
             {
-                if (iTransition)
-                    service<i_animator>().transition(*iTransition).disable();
+                if (transition_active())
+                    transition().reset(aTransition);
             }
             else
             {
@@ -171,6 +171,31 @@ namespace neogfx
             iPage = aPage;
             iContainer.scrollbar_updated(*this, AttributeChanged);
         }
+    }
+
+    bool scrollbar::locked() const
+    {
+        return iLockedPosition != std::nullopt;
+    }
+
+    void scrollbar::lock(value_type aPosition)
+    {
+        if (iLockedPosition != std::nullopt)
+            throw already_locked();
+        iLockedPosition = position();
+        if (transition_active())
+            transition().pause();
+        set_position(aPosition);
+    }
+
+    void scrollbar::unlock()
+    {
+        if (iLockedPosition == std::nullopt)
+            throw not_locked();
+        set_position(*iLockedPosition);
+        iLockedPosition = std::nullopt;
+        if (transition_paused())
+            transition().resume();
     }
 
     dimension scrollbar::width() const
@@ -654,5 +679,32 @@ namespace neogfx
         if (to_px<uint32_t>(w) % 2u == 0u)
             w = from_px<dimension>(to_px<uint32_t>(w) + 1u);
         return w;
+    }
+
+    bool scrollbar::transition_active() const
+    {
+        if (iTransition != std::nullopt)
+        {
+            auto const& transition = service<i_animator>().transition(*iTransition);
+            return transition.enabled() && !transition.finished() && !transition.paused();
+        }
+        return false;
+    }
+
+    bool scrollbar::transition_paused() const
+    {
+        if (iTransition != std::nullopt)
+        {
+            auto const& transition = service<i_animator>().transition(*iTransition);
+            return transition.enabled() && !transition.finished() && transition.paused();
+        }
+        return false;
+    }
+
+    i_transition& scrollbar::transition() const
+    {
+        if (transition_active() || transition_paused())
+            return service<i_animator>().transition(*iTransition);
+        throw no_transition_in_progress();
     }
 }

@@ -37,6 +37,8 @@ namespace neogfx
     private:
         typedef abstract_type property_context_type;
     public:
+        struct no_transition_in_progress : std::logic_error { no_transition_in_progress() : std::logic_error{ "neogfx::scrollbar::no_transition_in_progress" } {} };
+    public:
         scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
         ~scrollbar();
     public:
@@ -55,6 +57,10 @@ namespace neogfx
         void set_step(value_type aStep) override;
         value_type page() const override;
         void set_page(value_type aPage) override;
+    public:
+        bool locked() const override;
+        void lock(value_type aPosition) override;
+        void unlock() override;
     public:
         dimension width() const override;
         void render(i_graphics_context& aGraphicsContext) const override;
@@ -75,6 +81,10 @@ namespace neogfx
     public:
         static dimension width(scrollbar_style aStyle);
     private:
+        bool transition_active() const;
+        bool transition_paused() const;
+        i_transition& transition() const;
+    private:
         i_scrollbar_container& iContainer;
         scrollbar_type iType;
         scrollbar_style iStyle;
@@ -84,6 +94,7 @@ namespace neogfx
         value_type iMaximum;
         value_type iStep;
         value_type iPage;
+        std::optional<value_type> iLockedPosition;
         element_e iClickedElement;
         element_e iHoverElement;
         std::optional<std::shared_ptr<neolib::callback_timer>> iTimer;

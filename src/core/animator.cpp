@@ -37,7 +37,7 @@ namespace neogfx
     }
 
     transition::transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled) :
-        iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }
+        iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }, iPaused{ false }
     {
     }
 
@@ -54,6 +54,11 @@ namespace neogfx
     bool transition::enabled() const
     {
         return iEnabled;
+    }
+
+    bool transition::disabled() const
+    {
+        return !iEnabled;
     }
 
     bool transition::disable_when_finished() const
@@ -94,9 +99,24 @@ namespace neogfx
         return ease(easing_function(), std::min(1.0, std::max(0.0, (animator().animation_time() - start_time()) / duration())));
     }
 
-    bool transition::finished() const
+    bool transition::animation_finished() const
     {
         return animator().animation_time() - start_time() > duration();
+    }
+
+    bool transition::paused() const
+    {
+        return iPaused;
+    }
+
+    void transition::pause()
+    {
+        iPaused = true;
+    }
+
+    void transition::resume()
+    {
+        iPaused = false;
     }
 
     void transition::reset(bool aEnable)
@@ -113,7 +133,13 @@ namespace neogfx
     }
 
     property_transition::property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled) :
-        transition{ aAnimator, aEasingFunction, aDuration, aEnabled }, iProperty{ aProperty }, iPropertyDestroyed{ aProperty.as_lifetime() }, iFrom{ aProperty.get_as_variant() }, iTo{ aProperty.get_as_variant() }, iUpdatingProperty{ false }
+        transition{ aAnimator, aEasingFunction, aDuration, aEnabled }, 
+        iProperty{ aProperty }, 
+        iPropertyDestroyed{ aProperty.as_lifetime() }, 
+        iFrom{ aProperty.get_as_variant() }, 
+        iTo{ aProperty.get_as_variant() }, 
+        iUpdatingProperty{ false },
+        iEventQueueDestroyed{ neolib::async_event_queue::instance() }
     {
         neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed().raw_event());
         neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed_from_to().raw_event());
@@ -121,8 +147,11 @@ namespace neogfx
 
     property_transition::~property_transition()
     {
-        neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed_from_to().raw_event());
-        neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed().raw_event());
+        if (!iEventQueueDestroyed)
+        {
+            neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed_from_to().raw_event());
+            neolib::async_event_queue::instance().filter_registry().install_event_filter(*this, property().property_changed().raw_event());
+        }
     }
 
     i_property& property_transition::property() const
@@ -142,38 +171,39 @@ namespace neogfx
 
     void property_transition::apply()
     {
-        if (enabled())
+        if (finished() || disabled() || paused())
+            throw cannot_apply();
+        if (!animation_finished())
         {
-            if (!finished())
+            std::visit([this](auto&& aFrom)
             {
-                std::visit([this](auto&& aFrom)
-                {
-                    std::visit([this, &aFrom](auto&& aTo)
-                    {
-                        neolib::scoped_flag sf{ iUpdatingProperty };
-                        auto const value = mix(mix_value(), aFrom, aTo);
-                        property().set_from_variant(value);
-                    }, to().for_visitor());
-                }, from().for_visitor());
-            }
-            else
-            {
-                if (iTo != neolib::none)
+                std::visit([this, &aFrom](auto&& aTo)
                 {
                     neolib::scoped_flag sf{ iUpdatingProperty };
-                    property().set_from_variant(iTo);
-                    iFrom = neolib::none;
-                    iTo = neolib::none;
-                    if (disable_when_finished())
-                        disable();
-                }
-            }
+                    auto const value = mix(mix_value(), aFrom, aTo);
+                    property().set_from_variant(value);
+                }, to().for_visitor());
+            }, from().for_visitor());
+        }
+        else
+        {
+            neolib::scoped_flag sf{ iUpdatingProperty };
+            property().set_from_variant(iTo);
+            clear();
+            if (disable_when_finished())
+                disable();
         }
     }
 
     bool property_transition::finished() const
     {
-        return property_destroyed() || iTo == neolib::none || transition::finished();
+        return property_destroyed() || iTo == neolib::none;
+    }
+
+    void property_transition::clear()
+    {
+        iFrom = neolib::none;
+        iTo = neolib::none;
     }
 
     bool property_transition::property_destroyed() const
@@ -183,21 +213,24 @@ namespace neogfx
 
     void property_transition::pre_filter_event(const neolib::i_event& aEvent) 
     {
-        if (enabled() && !iUpdatingProperty && &aEvent == &property().property_changed_from_to().raw_event())
-            iFrom = property().get_as_variant();
+        if (enabled() && !paused() && !iUpdatingProperty && &aEvent == &property().property_changed_from_to().raw_event())
+        {
+            if (iFrom == neolib::none || iTo == neolib::none)
+                iFrom = property().get_as_variant();
+            else
+                iFrom = iTo;
+        }
     }
 
     void property_transition::filter_event(const neolib::i_event& aEvent)
     {
-        if (enabled() && !iUpdatingProperty)
+        if (enabled() && !paused() && !iUpdatingProperty)
         {
             aEvent.accept();
             if (&aEvent == &property().property_changed_from_to().raw_event())
-            {
-                iTo = property().get_as_variant();
-                reset();
-            }
-        }
+                 iTo = property().get_as_variant();
+            reset();
+         }
     }
 
     animator::animator() :
@@ -235,7 +268,7 @@ namespace neogfx
     {
         iAnimationTime = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - iZeroHour).count();
         for (auto& t : iTransitions)
-            if (!t->finished())
+            if (t->enabled() && !t->paused() && !t->finished())
                 t->apply();
     }
 

@@ -34,6 +34,7 @@ namespace neogfx
         transition_id id() const override;
         i_animator& animator() const override;
         bool enabled() const override;
+        bool disabled() const override;
         bool disable_when_finished() const override;
         void enable(bool aDisableWhenFinished = false) override;
         void disable() override;
@@ -41,7 +42,11 @@ namespace neogfx
         double duration() const override;
         double start_time() const override;
         double mix_value() const override;
-        bool finished() const override;
+        bool animation_finished() const override;
+    public:
+        bool paused() const override;
+        void pause() override;
+        void resume() override;
     public:
         void reset(bool aEnable = true) override;
         void reset(easing aNewEasingFunction, bool aEnable = true) override;
@@ -53,6 +58,7 @@ namespace neogfx
         easing iEasingFunction;
         double iDuration;
         mutable std::optional<double> iStartTime;
+        bool iPaused;
     };
 
     class property_transition : public transition, private neolib::i_event_filter
@@ -63,6 +69,8 @@ namespace neogfx
     public:
         void apply() override;
         bool finished() const override;
+    public:
+        void clear() override;
     public:
         i_property& property() const;
         const property_variant& from() const;
@@ -78,6 +86,7 @@ namespace neogfx
         property_variant iFrom;
         property_variant iTo;
         bool iUpdatingProperty;
+        neolib::destroyed_flag iEventQueueDestroyed;
     };
 
     class animator : public i_animator

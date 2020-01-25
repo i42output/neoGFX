@@ -409,11 +409,10 @@ namespace neogfx
 
     void scrollable_widget::update_scrollbar_visibility()
     {
-        point savedScrollbarPositions{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-            vertical_scrollbar().set_position(0.0);
+            vertical_scrollbar().lock(0.0);
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-            horizontal_scrollbar().set_position(0.0);
+            horizontal_scrollbar().lock(0.0);
         {
             neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
             update_scrollbar_visibility(UsvStageInit);
@@ -427,9 +426,9 @@ namespace neogfx
             update_scrollbar_visibility(UsvStageDone);
         }
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-            vertical_scrollbar().set_position(savedScrollbarPositions.y);
+            vertical_scrollbar().unlock();
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-            horizontal_scrollbar().set_position(savedScrollbarPositions.x);
+            horizontal_scrollbar().unlock();
     }
 
     void scrollable_widget::update_scrollbar_visibility(usv_stage_e aStage)

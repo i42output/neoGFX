@@ -402,7 +402,7 @@ int main(int argc, char* argv[])
         ui.layout3.LayoutCompleted([&ui, &transitions, &transitionPrng]()
         {
             for (auto t : transitions)
-                ng::service<ng::i_animator>().transition(t).enable(true);
+                ng::service<ng::i_animator>().transition(t).reset();
             for (auto i = 0u; i < ui.layout3.count(); ++i)
             {
                 auto& button = ui.layout3.get_widget_at(i);
