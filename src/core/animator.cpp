@@ -142,25 +142,38 @@ namespace neogfx
 
     void property_transition::apply()
     {
-        if (!finished() && enabled())
+        if (enabled())
         {
-            std::visit([this](auto&& aFrom)
+            if (!finished())
             {
-                std::visit([this, &aFrom](auto&& aTo)
+                std::visit([this](auto&& aFrom)
+                {
+                    std::visit([this, &aFrom](auto&& aTo)
+                    {
+                        neolib::scoped_flag sf{ iUpdatingProperty };
+                        auto const value = mix(mix_value(), aFrom, aTo);
+                        property().set_from_variant(value);
+                    }, to().for_visitor());
+                }, from().for_visitor());
+            }
+            else
+            {
+                if (iTo != neolib::none)
                 {
                     neolib::scoped_flag sf{ iUpdatingProperty };
-                    auto const value = mix(mix_value(), aFrom, aTo);
-                    property().set_from_variant(value);
-                }, to().for_visitor());
-            }, from().for_visitor());
+                    property().set_from_variant(iTo);
+                    iFrom = neolib::none;
+                    iTo = neolib::none;
+                    if (disable_when_finished())
+                        disable();
+                }
+            }
         }
-        if (finished() && disable_when_finished())
-            disable();
     }
 
     bool property_transition::finished() const
     {
-        return property_destroyed() || (transition::finished() && property().get_as_variant() == to());
+        return property_destroyed() || iTo == neolib::none || transition::finished();
     }
 
     bool property_transition::property_destroyed() const

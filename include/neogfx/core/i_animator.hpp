@@ -95,9 +95,7 @@ namespace neogfx
 
     inline double mix(double aMixValue, double aLhs, double aRhs)
     {
-        auto const result = aLhs * (1.0 - aMixValue) + aRhs * aMixValue;
-        std::cout << "mix(" << aMixValue << ", " << aLhs << ", " << aRhs << ") = " << result << ". " << std::flush;
-        return result;
+        return aLhs * (1.0 - aMixValue) + aRhs * aMixValue;
     }
 
     inline point mix(double aMixValue, const point& aLhs, const point& aRhs)
