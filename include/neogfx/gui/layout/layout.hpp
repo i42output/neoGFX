@@ -152,8 +152,6 @@ namespace neogfx
         const i_device_metrics& device_metrics() const override;
     public:
         void layout_as(const point& aPosition, const size& aSize);
-        uint32_t layout_id() const override;
-        void next_layout_id() override;
     public:
         bool visible() const override;
     protected:
@@ -195,7 +193,6 @@ namespace neogfx
         optional_size iMaximumSize;
         item_list iItems;
         bool iLayoutStarted;
-        uint32_t iLayoutId;
         bool iInvalidated;
     };
 }

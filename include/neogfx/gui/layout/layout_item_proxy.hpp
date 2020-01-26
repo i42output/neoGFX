@@ -98,10 +98,12 @@ namespace neogfx
     public:
         bool operator==(const layout_item_proxy& aOther) const;
     private:
+        bool subject_is_proxy() const;
+    private:
         std::shared_ptr<i_layout_item> iSubject;
-        mutable std::pair<uint32_t, uint32_t> iLayoutId;
-        mutable size iMinimumSize;
-        mutable size iMaximumSize;
+        bool iSubjectIsProxy;
+        mutable std::pair<uint32_t, size> iMinimumSize;
+        mutable std::pair<uint32_t, size> iMaximumSize;
         mutable std::optional<const i_anchor_t<decltype(layout_item<i_layout>::MinimumSize)>*> iMinimumSizeAnchor;
     };
 }

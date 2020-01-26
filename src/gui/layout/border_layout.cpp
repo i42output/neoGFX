@@ -172,7 +172,7 @@ namespace neogfx
 
     void border_layout::layout_items(const point& aPosition, const size& aSize)
     {
-        next_layout_id();
+        scoped_layout_items layoutItems;
         validate();
         iRows.layout_items(aPosition, aSize);
     }

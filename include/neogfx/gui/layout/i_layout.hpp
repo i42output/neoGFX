@@ -86,9 +86,6 @@ namespace neogfx
         virtual bool invalidated() const = 0;
         virtual void invalidate() = 0;
         virtual void validate() = 0;
-    public:
-        virtual uint32_t layout_id() const = 0;
-        virtual void next_layout_id() = 0;
         // helpers
     public:
         template <typename ItemType>
@@ -151,6 +148,57 @@ namespace neogfx
         WidgetT& get_widget_at(item_index aIndex)
         {
             return static_cast<WidgetT&>(get_widget_at(aIndex));
+        }
+    };
+
+    class global_layout_state
+    {
+    public:
+        global_layout_state() :
+            iLayoutId{ 0u }
+        {
+        }
+    public:
+        static global_layout_state& instance()
+        {
+            static global_layout_state sState;
+            return sState;
+        }
+    public:
+        uint32_t id() const
+        {
+            return iLayoutId;
+        }
+        void increment_id()
+        {
+            if (++iLayoutId == static_cast<uint32_t>(-1))
+                iLayoutId = 0u;
+        }
+        bool& in_progress()
+        {
+            return iLayoutInProgress;
+        }
+    private:
+        uint32_t iLayoutId;
+        bool iLayoutInProgress;
+    };
+
+    inline uint32_t global_layout_id()
+    {
+        return global_layout_state::instance().id();
+    }
+
+    class scoped_layout_items : private neolib::scoped_flag
+    {
+    public:
+        scoped_layout_items() : 
+            neolib::scoped_flag{ global_layout_state::instance().in_progress() }
+        {
+            if (!iSaved)
+                global_layout_state::instance().increment_id();
+        }
+        ~scoped_layout_items()
+        {
         }
     };
 }

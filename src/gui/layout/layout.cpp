@@ -47,7 +47,6 @@ namespace neogfx
         iMinimumSize{},
         iMaximumSize{},
         iLayoutStarted{ false },
-        iLayoutId{ 0 },
         iInvalidated{ false }
     {
         enable();
@@ -62,7 +61,6 @@ namespace neogfx
         iMinimumSize{},
         iMaximumSize{},
         iLayoutStarted{ false },
-        iLayoutId{ 0 },
         iInvalidated{ false }
     {
         aOwner.set_layout(*this);
@@ -79,7 +77,6 @@ namespace neogfx
         iMinimumSize{},
         iMaximumSize{},
         iLayoutStarted{ false },
-        iLayoutId{ 0 },
         iInvalidated{ false }
     {
         aParent.add(*this);
@@ -455,22 +452,6 @@ namespace neogfx
     void layout::layout_as(const point& aPosition, const size& aSize)
     {
         layout_items(aPosition, aSize);
-    }
-
-    uint32_t layout::layout_id() const
-    {
-        return iLayoutId;
-    }
-
-    void layout::next_layout_id()
-    {
-        if (++iLayoutId == static_cast<uint32_t>(-1))
-            iLayoutId = 0;
-        for (auto& item : *this)
-            if (item.is_layout())
-                item.as_layout().next_layout_id();
-            else if (item.is_widget() && item.as_widget().has_layout())
-                item.as_widget().layout().next_layout_id();
     }
 
     bool layout::visible() const

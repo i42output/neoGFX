@@ -215,12 +215,6 @@ namespace neogfx
             row->invalidate();
     }
 
-    void grid_layout::next_layout_id()
-    {
-        layout::next_layout_id();
-        iRowLayout.next_layout_id();
-    }
-
     size grid_layout::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (items_visible() == 0)
@@ -333,7 +327,7 @@ namespace neogfx
             std::cerr << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
         if (has_layout_owner())
             layout_owner().layout_items_started();
-        next_layout_id();
+        scoped_layout_items layoutItems;
         validate();
         set_position(aPosition);
         set_extents(aSize);

@@ -72,8 +72,6 @@ namespace neogfx
     public:
         void invalidate() override;
     public:
-        void next_layout_id() override;
-    public:
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     public:

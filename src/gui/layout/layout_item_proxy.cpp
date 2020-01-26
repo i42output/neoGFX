@@ -31,12 +31,12 @@ namespace neogfx
     }
 
     layout_item_proxy::layout_item_proxy(std::shared_ptr<i_layout_item> aItem) :
-        iSubject{ aItem }, iLayoutId{ -1, -1 }
+        iSubject{ aItem }, iSubjectIsProxy{ aItem->is_proxy() }, iMinimumSize{ -1, {} }, iMaximumSize{ -1, {} }
     {
     }
 
     layout_item_proxy::layout_item_proxy(const layout_item_proxy& aOther) :
-        iSubject{ aOther.iSubject }, iLayoutId{ -1, -1 }
+        iSubject{ aOther.iSubject }, iSubjectIsProxy{ aOther.iSubject->is_proxy() }, iMinimumSize{ -1, {} }, iMaximumSize{ -1, {} }
     {
     }
 
@@ -132,7 +132,7 @@ namespace neogfx
 
     void layout_item_proxy::set_parent_layout(i_layout* aParentLayout)
     {
-        if (!subject().is_proxy())
+        if (!subject_is_proxy())
             subject().set_parent_layout(aParentLayout);
     }
 
@@ -155,7 +155,7 @@ namespace neogfx
 
     void layout_item_proxy::set_layout_owner(i_widget* aOwner)
     {
-        if (!subject().is_proxy())
+        if (!subject_is_proxy())
             subject().set_layout_owner(aOwner);
     }
 
@@ -275,8 +275,9 @@ namespace neogfx
     {
         if (!visible())
             return size{};
-        if (iLayoutId.first == parent_layout().layout_id() && iLayoutId.first != -1)
-            return iMinimumSize;
+        auto& minSize = iMinimumSize.second;
+        if (iMinimumSize.first == global_layout_id())
+            return minSize;
         else
         {
             if (iMinimumSizeAnchor == std::nullopt)
@@ -288,29 +289,29 @@ namespace neogfx
                     iMinimumSizeAnchor = nullptr;
             }
             if (*iMinimumSizeAnchor == nullptr)
-                iMinimumSize = subject().minimum_size(aAvailableSpace);
+                minSize = subject().minimum_size(aAvailableSpace);
             else
-                iMinimumSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
+                minSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
             if (size_policy().maintain_aspect_ratio())
             {
                 const auto& aspectRatio = size_policy().aspect_ratio();
                 if (aspectRatio.cx < aspectRatio.cy)
                 {
-                    if (iMinimumSize.cx < iMinimumSize.cy)
-                        iMinimumSize = size{ iMinimumSize.cx, iMinimumSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+                    if (minSize.cx < minSize.cy)
+                        minSize = size{ minSize.cx, minSize.cx * (aspectRatio.cy / aspectRatio.cx) };
                     else
-                        iMinimumSize = size{ iMinimumSize.cy * (aspectRatio.cx / aspectRatio.cy), iMinimumSize.cy };
+                        minSize = size{ minSize.cy * (aspectRatio.cx / aspectRatio.cy), minSize.cy };
                 }
                 else
                 {
-                    if (iMinimumSize.cx < iMinimumSize.cy)
-                        iMinimumSize = size{ iMinimumSize.cy * (aspectRatio.cx / aspectRatio.cy), iMinimumSize.cy };
+                    if (minSize.cx < minSize.cy)
+                        minSize = size{ minSize.cy * (aspectRatio.cx / aspectRatio.cy), minSize.cy };
                     else
-                        iMinimumSize = size{ iMinimumSize.cx, iMinimumSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+                        minSize = size{ minSize.cx, minSize.cx * (aspectRatio.cy / aspectRatio.cx) };
                 }
             }
-            iLayoutId.first = parent_layout().layout_id();
-            return iMinimumSize;
+            iMinimumSize.first = global_layout_id();
+            return minSize;
         }
     }
 
@@ -318,7 +319,7 @@ namespace neogfx
     {
         subject().set_minimum_size(aMinimumSize, aUpdateLayout);
         if (aMinimumSize != std::nullopt)
-            iMinimumSize = *aMinimumSize;
+            iMinimumSize.second = *aMinimumSize;
     }
 
     bool layout_item_proxy::has_maximum_size() const
@@ -330,13 +331,13 @@ namespace neogfx
     {
         if (!visible())
             return size::max_size();
-        if (iLayoutId.second == parent_layout().layout_id() && iLayoutId.second != -1)
-            return iMaximumSize;
+        if (iMaximumSize.first == global_layout_id())
+            return iMaximumSize.second;
         else
         {
-            iMaximumSize = subject().maximum_size(aAvailableSpace);
-            iLayoutId.second = parent_layout().layout_id();
-            return iMaximumSize;
+            iMaximumSize.second = subject().maximum_size(aAvailableSpace);
+            iMaximumSize.first = global_layout_id();
+            return iMaximumSize.second;
         }
     }
 
@@ -344,7 +345,7 @@ namespace neogfx
     {
         subject().set_maximum_size(aMaximumSize, aUpdateLayout);
         if (aMaximumSize != std::nullopt)
-            iMaximumSize = *aMaximumSize;
+            iMaximumSize.second = *aMaximumSize;
     }
 
     bool layout_item_proxy::has_margins() const
@@ -370,5 +371,10 @@ namespace neogfx
     bool layout_item_proxy::operator==(const layout_item_proxy& aOther) const
     {
         return iSubject == aOther.iSubject;
+    }
+
+    bool layout_item_proxy::subject_is_proxy() const
+    {
+        return iSubjectIsProxy;
     }
 }
