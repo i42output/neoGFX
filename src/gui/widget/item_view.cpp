@@ -90,7 +90,7 @@ namespace neogfx
             iModelSink += model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
             iModelSink += model().destroying([this]() { iModel = nullptr; });
             if (has_presentation_model())
-                presentation_model().set_item_model(*aModel);
+                presentation_model().set_item_model(*aModel, false);
         }
         model_changed();
         update_scrollbar_visibility();
@@ -142,7 +142,7 @@ namespace neogfx
             iPresentationModelSink += presentation_model().items_filtered([this]() { items_filtered(); });
         }
         if (has_presentation_model() && has_model())
-            presentation_model().set_item_model(model());
+            presentation_model().set_item_model(model(), false);
         if (has_presentation_model() && has_selection_model())
             selection_model().set_presentation_model(*aPresentationModel);
         presentation_model_changed();

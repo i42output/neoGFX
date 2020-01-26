@@ -608,7 +608,7 @@ namespace neogfx
                     break;
                 }
             }
-            execute_sort();
+            execute_sort(true);
         }
         void reset_sort() override
         {
@@ -684,8 +684,10 @@ namespace neogfx
             });
             reset_sort();
         }
-        void execute_sort()
+        void execute_sort(bool aForce = false)
         {
+            if (!sortable() && !aForce)
+                return;
             if (iRows.size() <= 1)
                 return;
             if (iSortOrder.empty())
