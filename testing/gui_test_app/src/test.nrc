@@ -677,6 +677,15 @@
                                                 id: checkUpperTableViewTriStateCheckable
                                                 text: "TriState Checkable"
                                             }
+                                            horizontal_layout: {
+                                                label: {
+                                                    text: "Easing:"
+                                                }
+                                                drop_list: {
+                                                    id: dropListEasingUpperTableView
+                                                    size_policy: Minimum
+                                                }
+                                            }
                                         }
                                         vertical_layout: {
                                             radio_button: {
@@ -691,6 +700,7 @@
                                                 id: radioUpperTableViewColouredCells
                                                 text: "Coloured cells"
                                             }
+                                            vertical_spacer: {}
                                         }
                                     }
                                 }
@@ -710,6 +720,15 @@
                                                 id: checkLowerTableViewTriStateCheckable
                                                 text: "TriState Checkable"
                                             }
+                                            horizontal_layout: {
+                                                label: {
+                                                    text: "Easing:"
+                                                }
+                                                drop_list: {
+                                                    id: dropListEasingLowerTableView
+                                                    size_policy: Minimum
+                                                }
+                                            }
                                         }
                                         vertical_layout: {
                                             radio_button: {
@@ -724,6 +743,7 @@
                                                 id: radioLowerTableViewColouredCells
                                                 text: "Coloured cells"
                                             }
+                                            vertical_spacer: {}
                                         }
                                     }
                                 }

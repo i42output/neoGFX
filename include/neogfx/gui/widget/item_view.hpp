@@ -70,14 +70,15 @@ namespace neogfx
         void set_selection_model(i_item_selection_model& aSelectionModel);
         void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
         const optional_easing& default_transition() const;
-        void set_default_transition(const optional_easing& aTransition);
+        double default_transition_duration() const;
+        void set_default_transition(const optional_easing& aTransition, double aTransitionDuration = 0.5);
     public:
         bool hot_tracking() const;
         void enable_hot_tracking();
         void disable_hot_tracking();
     public:
         bool is_visible(const item_presentation_model_index& aItemIndex) const;
-        void make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition = {});
+        void make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition = {}, const std::optional<double>& aTransitionDuration = {});
         const optional_item_presentation_model_index& editing() const;
         void edit(const item_presentation_model_index& aItemIndex);
         void begin_edit();
@@ -169,5 +170,6 @@ namespace neogfx
         optional_item_model_index iSavedModelIndex;
         basic_size<i_scrollbar::value_type> iOldPositionForScrollbarVisibility;
         optional_easing iDefaultTransition;
+        double iDefaultTransitionDuration;
     };
 }

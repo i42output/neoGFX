@@ -91,7 +91,7 @@ namespace neogfx
         return result;
     }
 
-    bool scrollbar::set_position(value_type aPosition, const optional_easing& aTransition)
+    bool scrollbar::set_position(value_type aPosition, const optional_easing& aTransition, double aTransitionDuration)
     {
         aPosition = std::max(std::min(aPosition, maximum() - page()), minimum());
         if (iIntegerPositions)
@@ -113,7 +113,7 @@ namespace neogfx
             else
             {
                 if (!iTransition)
-                    iTransition = service<i_animator>().add_transition(Position, *aTransition, 0.5);
+                    iTransition = service<i_animator>().add_transition(Position, *aTransition, aTransitionDuration);
                 else
                     transition().reset(*aTransition);
             }

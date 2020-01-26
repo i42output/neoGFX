@@ -115,7 +115,7 @@ class easing_item_presentation_model : public ng::basic_item_presentation_model<
 {
     typedef ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>> base_type;
 public:
-    easing_item_presentation_model(ng::basic_item_model<ng::easing>& aModel) : base_type{ aModel }
+    easing_item_presentation_model(ng::basic_item_model<ng::easing>& aModel, bool aLarge = true) : base_type{ aModel, false }, iLarge{ aLarge }
     {
         iSink += ng::service<ng::i_app>().current_style_changed([this](ng::style_aspect)
         {
@@ -130,15 +130,16 @@ public:
         auto iterTexture = iTextures.find(easingFunction);
         if (iterTexture == iTextures.end())
         {
-            ng::texture newTexture{ ng::size{48.0, 48.0}, 1.0, ng::texture_sampling::Multisample };
+            ng::dimension const d = iLarge ? 48.0 : 24.0;
+            ng::texture newTexture{ ng::size{d, d}, 1.0, ng::texture_sampling::Multisample };
             ng::graphics_context gc{ newTexture };
             auto const textColour = ng::service<ng::i_app>().current_style().palette().text_colour();
-            gc.draw_rect(ng::rect{ ng::point{}, ng::size{48.0, 48.0} }, ng::pen{ textColour, 1.0 });
+            gc.draw_rect(ng::rect{ ng::point{}, ng::size{d, d} }, ng::pen{ textColour, 1.0 });
             ng::optional_point lastPos;
             ng::pen pen{ textColour, 2.0 };
-            for (double x = 0.0; x <= 40.0; x += 2.0)
+            for (double x = 0.0; x <= d - 8.0; x += 2.0)
             {
-                ng::point pos{ x + 4.0, ng::ease(easingFunction, x / 40.0) * 40.0 + 4.0 };
+                ng::point pos{ x + 4.0, ng::ease(easingFunction, x / (d - 8.0)) * (d - 8.0) + 4.0 };
                 if (lastPos != std::nullopt)
                 {
                     gc.draw_line(*lastPos, pos, pen);
@@ -150,6 +151,7 @@ public:
         return iterTexture->second;
     }
 private:
+    bool iLarge;
     mutable std::map<ng::easing, ng::texture> iTextures;
     ng::sink iSink;
 };
@@ -811,6 +813,34 @@ int main(int argc, char* argv[])
         ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_colour_type({}); ui.tableView2.update(); });
         ui.radioLowerTableViewColouredText.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Foreground); ui.tableView2.update(); });
         ui.radioLowerTableViewColouredCells.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Background); ui.tableView2.update(); });
+
+        ng::basic_item_model<ng::easing> easingItemModelUpperTableView;
+        ui.dropListEasingUpperTableView.SelectionChanged([&](const ng::optional_item_model_index& aIndex) 
+        { 
+            tableView1.set_default_transition(easingItemModelUpperTableView.item(*aIndex), 0.75); 
+        });
+        for (auto i = 0; i < ng::standard_easings().size(); ++i)
+            easingItemModelUpperTableView.insert_item(easingItemModelUpperTableView.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
+        easing_item_presentation_model easingPresentationModelUpperTableView{ easingItemModelUpperTableView, false };
+        ui.dropListEasingUpperTableView.set_size_policy(ng::size_constraint::Minimum);
+        ui.dropListEasingUpperTableView.set_model(easingItemModelUpperTableView);
+        ui.dropListEasingUpperTableView.set_presentation_model(easingPresentationModelUpperTableView);
+        ui.dropListEasingUpperTableView.selection_model().set_current_index(ng::item_presentation_model_index{ ng::standard_easing_index(ng::easing::One) });
+        ui.dropListEasingUpperTableView.accept_selection();
+
+        ng::basic_item_model<ng::easing> easingItemModelLowerTableView;
+        ui.dropListEasingLowerTableView.SelectionChanged([&](const ng::optional_item_model_index& aIndex)
+        {
+            tableView2.set_default_transition(easingItemModelLowerTableView.item(*aIndex), 0.75);
+        });
+        for (auto i = 0; i < ng::standard_easings().size(); ++i)
+            easingItemModelLowerTableView.insert_item(easingItemModelLowerTableView.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
+        easing_item_presentation_model easingPresentationModelLowerTableView{ easingItemModelLowerTableView, false };
+        ui.dropListEasingLowerTableView.set_size_policy(ng::size_constraint::Minimum);
+        ui.dropListEasingLowerTableView.set_model(easingItemModelLowerTableView);
+        ui.dropListEasingLowerTableView.set_presentation_model(easingPresentationModelLowerTableView);
+        ui.dropListEasingLowerTableView.selection_model().set_current_index(ng::item_presentation_model_index{ ng::standard_easing_index(ng::easing::One) });
+        ui.dropListEasingLowerTableView.accept_selection();
 
         tableView1.selection_model().current_index_changed([&](const ng::optional_item_presentation_model_index& aCurrentIndex, const ng::optional_item_presentation_model_index&)
         {

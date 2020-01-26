@@ -478,9 +478,11 @@ namespace neogfx
 
     typedef std::optional<easing> optional_easing;
 
-    inline constexpr const std::array<easing, 43> standard_easings()
+    typedef std::array<easing, 43> standard_easings_t;
+
+    inline const standard_easings_t& standard_easings()
     {
-        constexpr std::array<easing, 43> STANDARD_EASINGS =
+        static constexpr standard_easings_t STANDARD_EASINGS =
         { {
             easing::Linear,
             easing::InQuad,
@@ -527,6 +529,15 @@ namespace neogfx
             easing::One
         } };
         return STANDARD_EASINGS;
+    }
+
+    inline uint32_t standard_easing_index(easing aEasing)
+    {
+        // todo: optimize this; perhaps use polymorphic enum.
+        auto standardEasing = std::find(standard_easings().begin(), standard_easings().end(), aEasing);
+        if (standardEasing != standard_easings().end())
+            return static_cast<uint32_t>(std::distance(standard_easings().begin(), standardEasing));
+        return standard_easing_index(easing::Zero);
     }
 
     template <typename T>
