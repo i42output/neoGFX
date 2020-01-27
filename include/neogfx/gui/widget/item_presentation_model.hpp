@@ -82,7 +82,7 @@ namespace neogfx
         {
             init();
         }
-        basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = true) : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
+        basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = false) : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
         {
             init();
             set_item_model(aItemModel, aSortable);
@@ -107,7 +107,7 @@ namespace neogfx
                 throw no_item_model();
             return static_cast<item_model_type&>(*iItemModel);
         }
-        void set_item_model(i_item_model& aItemModel, bool aSortable = true) override
+        void set_item_model(i_item_model& aItemModel, bool aSortable = false) override
         {
             iSortable = aSortable;
             if (iItemModel != &aItemModel)
@@ -523,9 +523,9 @@ namespace neogfx
             static const boost::basic_format<char> sDefaultFormat("%1%");
             return sDefaultFormat;
         }
-        optional_colour cell_colour(const item_presentation_model_index&, item_cell_colour_type) const override
+        optional_color cell_color(const item_presentation_model_index&, item_cell_color_type) const override
         {
-            return optional_colour{};
+            return optional_color{};
         }
         optional_font cell_font(const item_presentation_model_index&) const override
         {

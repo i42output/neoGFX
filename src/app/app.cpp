@@ -246,7 +246,7 @@ namespace neogfx
         style whiteStyle("Default");
         register_style(whiteStyle);
         style slateStyle("Slate");
-        slateStyle.palette().set_colour(colour(0x35, 0x35, 0x35));
+        slateStyle.palette().set_color(color(0x35, 0x35, 0x35));
         register_style(slateStyle);
 
         add_action(actionFileNew);

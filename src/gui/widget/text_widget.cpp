@@ -109,7 +109,7 @@ namespace neogfx
         }
         auto appearance = text_appearance();
         if (effectively_disabled())
-            appearance = appearance.with_alpha(static_cast<colour::component>(appearance.ink().alpha() * 0.25));
+            appearance = appearance.with_alpha(static_cast<color::component>(appearance.ink().alpha() * 0.25));
         if (appearance.effect() != std::nullopt)
             textPosition += size{ appearance.effect()->width() };
         if (multi_line())
@@ -203,24 +203,24 @@ namespace neogfx
         }
     }
 
-    bool text_widget::has_text_colour() const
+    bool text_widget::has_text_color() const
     {
-        return has_text_appearance() && text_appearance().ink() != neolib::none && std::holds_alternative<colour>(text_appearance().ink());
+        return has_text_appearance() && text_appearance().ink() != neolib::none && std::holds_alternative<color>(text_appearance().ink());
     }
 
-    colour text_widget::text_colour() const
+    color text_widget::text_color() const
     {
-        if (has_text_colour())
-            return static_variant_cast<colour>(iTextAppearance->ink());
-        return service<i_app>().current_style().palette().text_colour_for_widget(*this);
+        if (has_text_color())
+            return static_variant_cast<color>(iTextAppearance->ink());
+        return service<i_app>().current_style().palette().text_color_for_widget(*this);
     }
 
-    void text_widget::set_text_colour(const optional_colour& aTextColour)
+    void text_widget::set_text_color(const optional_color& aTextColor)
     {
         if (has_text_appearance())
-            set_text_appearance(neogfx::text_appearance{ aTextColour != std::nullopt ? *aTextColour : neogfx::text_colour{}, iTextAppearance->paper(), iTextAppearance->effect() });
+            set_text_appearance(neogfx::text_appearance{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{}, iTextAppearance->paper(), iTextAppearance->effect() });
         else
-            set_text_appearance(neogfx::text_appearance{ aTextColour != std::nullopt ? *aTextColour : neogfx::text_colour{} });
+            set_text_appearance(neogfx::text_appearance{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{} });
     }
 
     bool text_widget::has_text_appearance() const
@@ -232,7 +232,7 @@ namespace neogfx
     {
         if (has_text_appearance())
             return *iTextAppearance;
-        return neogfx::text_appearance{ text_colour() };
+        return neogfx::text_appearance{ text_color() };
     }
 
     void text_widget::set_text_appearance(const optional_text_appearance& aTextAppearance)

@@ -159,7 +159,7 @@ namespace neogfx::game
                                         pos.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
                                     0.0);
                                 add_patch(*mf.mesh, mr, rect{ glyphOrigin, glyphTexture.texture().extents() }, 0.0, glyphTexture.texture());
-                                mr.patches.back().material = material{ aMaterial.colour, aMaterial.gradient, aMaterial.sharedTexture, mr.patches.back().material.texture, aMaterial.shaderEffect };
+                                mr.patches.back().material = material{ aMaterial.color, aMaterial.gradient, aMaterial.sharedTexture, mr.patches.back().material.texture, aMaterial.shaderEffect };
                             }
                             pos.x += glyph.advance().cx;
                         }

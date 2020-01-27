@@ -48,31 +48,31 @@ namespace neogfx
         scoped_units su{ *this, units::Pixels };
         rect boxRect = client_rect();
         auto enabledAlphaCoefficient = effectively_enabled() ? 1.0 : 0.25;
-        colour hoverColour = service<i_app>().current_style().palette().hover_colour().same_lightness_as(
-            background_colour().dark() ?
-                background_colour().lighter(0x20) :
-                background_colour().darker(0x20));
+        color hoverColor = service<i_app>().current_style().palette().hover_color().same_lightness_as(
+            background_color().dark() ?
+                background_color().lighter(0x20) :
+                background_color().darker(0x20));
         if (parent().capturing())
-            background_colour().dark() ? hoverColour.lighten(0x20) : hoverColour.darken(0x20);
-        colour fillColour = parent().enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColour : background_colour();
-        aGraphicsContext.fill_rect(boxRect, fillColour.with_combined_alpha(enabledAlphaCoefficient));
-        colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
-        if (borderColour1.similar_intensity(container_background_colour(), 0.03125))
-            borderColour1.dark() ? borderColour1.lighten(0x40) : borderColour1.darken(0x40);
-        aGraphicsContext.draw_rect(boxRect, pen{ borderColour1.with_combined_alpha(enabledAlphaCoefficient), 1.0 });
+            background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
+        color fillColor = parent().enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColor : background_color();
+        aGraphicsContext.fill_rect(boxRect, fillColor.with_combined_alpha(enabledAlphaCoefficient));
+        color borderColor1 = container_background_color().mid(container_background_color().mid(background_color()));
+        if (borderColor1.similar_intensity(container_background_color(), 0.03125))
+            borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
+        aGraphicsContext.draw_rect(boxRect, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), 1.0 });
         boxRect.deflate(1.0, 1.0);
-        aGraphicsContext.draw_rect(boxRect, pen{ borderColour1.mid(background_colour()).with_combined_alpha(enabledAlphaCoefficient), 1.0 });
+        aGraphicsContext.draw_rect(boxRect, pen{ borderColor1.mid(background_color()).with_combined_alpha(enabledAlphaCoefficient), 1.0 });
         boxRect.deflate(2.0, 2.0);
         if (static_cast<const check_box&>(parent()).is_checked())
         {
             scoped_snap_to_pixel snap{ aGraphicsContext, false };
             /* todo: draw tick image eye candy */
-            aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
-            aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
+            aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient), 2.0));
+            aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient), 2.0));
         }
         else if (static_cast<const check_box&>(parent()).is_indeterminate())
         {
-            aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient));
+            aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
         }
     }
 

@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_colour& aColour)
+    std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_color& aColor)
     {
         switch (aDataFormat)
         {
@@ -34,9 +34,9 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                return add_texture(std::make_shared<opengl_texture<std::array<uint8_t,4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+                return add_texture(std::make_shared<opengl_texture<std::array<uint8_t,4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColor));
             case texture_data_type::Float:
-                return add_texture(std::make_shared<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+                return add_texture(std::make_shared<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColor));
             }
             break;
         case texture_data_format::Red:
@@ -44,9 +44,9 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                return add_texture(std::make_shared<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+                return add_texture(std::make_shared<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColor));
             case texture_data_type::Float:
-                return add_texture(std::make_shared<opengl_texture<float>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColour));
+                return add_texture(std::make_shared<opengl_texture<float>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColor));
             }
             break;
         }

@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    enum class colour_format
+    enum class color_format
     {
         RGBA8
     };
@@ -39,7 +39,7 @@ namespace neogfx
         virtual ~i_image() {}
     public:
         virtual dimension dpi_scale_factor() const = 0;
-        virtual neogfx::colour_format colour_format() const = 0;
+        virtual neogfx::color_format color_format() const = 0;
         virtual texture_sampling sampling() const = 0;
         virtual texture_data_format data_format() const = 0;
         virtual const neogfx::size& extents() const = 0;
@@ -47,7 +47,7 @@ namespace neogfx
         virtual const void* cpixels() const = 0;
         virtual const void* pixels() const = 0;
         virtual void* pixels() = 0;
-        virtual colour get_pixel(const point& aPoint) const = 0;
-        virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
+        virtual color get_pixel(const point& aPoint) const = 0;
+        virtual void set_pixel(const point& aPoint, const color& aColor) = 0;
     };
 }

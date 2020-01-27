@@ -47,7 +47,7 @@ namespace neogfx
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     public:
-        colour background_colour() const override;
+        color background_color() const override;
     private:
         drop_list& iDropList;
         bool iChangingText;
@@ -64,7 +64,7 @@ namespace neogfx
         const drop_list_view& view() const;
         drop_list_view& view();
     protected:
-        colour frame_colour() const override;
+        color frame_color() const override;
     protected:
         double rendering_priority() const override;
     public:
@@ -154,8 +154,8 @@ namespace neogfx
             public:
                 view_container(i_layout& aLayout);
             public:
-                colour background_colour() const override;
-                colour frame_colour() const override;
+                color background_color() const override;
+                color frame_color() const override;
             };
         public:
             struct no_view : std::logic_error { no_view() : std::logic_error("neogfx::drop_list::list_proxy::no_view") {} };
@@ -241,7 +241,7 @@ namespace neogfx
         std::shared_ptr<i_item_presentation_model> iPresentationModel;
         std::shared_ptr<i_item_selection_model> iSelectionModel;
         sink iSink;
-        mutable std::optional<std::pair<colour, texture>> iDownArrowTexture;
+        mutable std::optional<std::pair<color, texture>> iDownArrowTexture;
         image_widget iDownArrow;
         list_proxy iListProxy;
         optional_item_model_index iSavedSelection;

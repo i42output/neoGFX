@@ -47,7 +47,7 @@ namespace neogfx
     public:
         virtual void paint(i_graphics_context& aGraphicsContext) const;
     public:
-        virtual colour foreground_colour() const;
+        virtual color foreground_color() const;
     public:
         virtual neogfx::focus_policy focus_policy() const;
     public:

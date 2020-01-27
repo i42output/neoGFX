@@ -21,7 +21,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include <neogfx/game/renderable_entity_archetype.hpp>
@@ -108,7 +108,7 @@ namespace neogfx::game
             }
         public:
             rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents);
-            rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::colour& aColour);
+            rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::color& aColor);
             rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
             rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
             rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);

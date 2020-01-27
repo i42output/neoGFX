@@ -23,7 +23,7 @@
 #include <boost/format.hpp>
 
 #include <neogfx/core/i_object.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
@@ -49,12 +49,12 @@ namespace neogfx
         OnInputEvent
     };
 
-    enum class item_cell_colour_type
+    enum class item_cell_color_type
     {
         Foreground = 0x01,
         Background = 0x02,
     };
-    typedef item_cell_colour_type item_cell_color_type;
+    typedef item_cell_color_type item_cell_color_type;
 
     inline item_cell_selection_flags operator|(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
     {
@@ -123,7 +123,7 @@ namespace neogfx
         virtual bool initializing() const = 0;
         virtual bool has_item_model() const = 0;
         virtual i_item_model& item_model() const = 0;
-        virtual void set_item_model(i_item_model& aItemModel, bool aSortable = true) = 0;
+        virtual void set_item_model(i_item_model& aItemModel, bool aSortable = false) = 0;
         virtual item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const = 0;
         virtual bool have_item_model_index(const item_model_index& aIndex) const = 0;
         virtual item_presentation_model_index from_item_model_index(const item_model_index& aIndex) const = 0;
@@ -159,7 +159,7 @@ namespace neogfx
         virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const = 0;
         virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString, bool& aError) const = 0;
         virtual boost::basic_format<char> cell_format(const item_presentation_model_index& aIndex) const = 0;
-        virtual optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const = 0;
+        virtual optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const = 0;
         virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_size cell_image_size(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_texture cell_image(const item_presentation_model_index& aIndex) const = 0;

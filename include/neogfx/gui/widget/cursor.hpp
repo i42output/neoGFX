@@ -23,7 +23,7 @@
 #include <neolib/variant.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 
 namespace neogfx
 {
@@ -80,8 +80,8 @@ namespace neogfx
         void set_position(position_type aPosition, bool aMoveAnchor = true);
         position_type anchor() const;
         void set_anchor(position_type aAnchor);
-        const colour_or_gradient& colour() const;
-        void set_colour(const colour_or_gradient& aColour);
+        const color_or_gradient& color() const;
+        void set_color(const color_or_gradient& aColor);
         cursor_style style() const;
         void set_style(cursor_style aStyle);
         dimension width() const;
@@ -92,7 +92,7 @@ namespace neogfx
         i_document* iDocument;
         position_type iPosition;
         position_type iAnchor;
-        colour_or_gradient iColour;
+        color_or_gradient iColor;
         cursor_style iStyle;
         dimension iWidth;
         std::chrono::milliseconds iFlashInterval;

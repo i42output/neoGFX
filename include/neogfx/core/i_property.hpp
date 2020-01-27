@@ -29,7 +29,7 @@
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
 

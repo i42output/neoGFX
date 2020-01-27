@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
@@ -33,35 +33,35 @@ namespace neogfx
     public:
         virtual ~i_palette() {}
     public:
-        virtual bool has_colour() const = 0;
-        virtual neogfx::colour colour() const = 0;
-        virtual void set_colour(const optional_colour& aDefaultColour) = 0;
-        virtual bool has_background_colour() const = 0;
-        virtual neogfx::colour background_colour() const = 0;
-        virtual void set_background_colour(const optional_colour& aBackgroundColour) = 0;
-        virtual bool has_foreground_colour() const = 0;
-        virtual neogfx::colour foreground_colour() const = 0;
-        virtual void set_foreground_colour(const optional_colour& aForegroundColour) = 0;
-        virtual bool has_text_colour() const = 0;
-        virtual neogfx::colour text_colour() const = 0;
-        virtual void set_text_colour(const optional_colour& aTextColour) = 0;
-        virtual bool has_selection_colour() const = 0;
-        virtual neogfx::colour selection_colour() const = 0;
-        virtual void set_selection_colour(const optional_colour& aSelectionColour) = 0;
-        virtual bool has_hover_colour() const = 0;
-        virtual neogfx::colour hover_colour() const = 0;
-        virtual void set_hover_colour(const optional_colour& aHoverColour) = 0;
-        virtual bool has_widget_detail_primary_colour() const = 0;
-        virtual neogfx::colour widget_detail_primary_colour() const = 0;
-        virtual void set_widget_detail_primary_colour(const optional_colour& aWidgetDetailPrimaryColour) = 0;
-        virtual bool has_widget_detail_secondary_colour() const = 0;
-        virtual neogfx::colour widget_detail_secondary_colour() const = 0;
-        virtual void set_widget_detail_secondary_colour(const optional_colour& aWidgetDetailSecondaryColour) = 0;
+        virtual bool has_color() const = 0;
+        virtual neogfx::color color() const = 0;
+        virtual void set_color(const optional_color& aDefaultColor) = 0;
+        virtual bool has_background_color() const = 0;
+        virtual neogfx::color background_color() const = 0;
+        virtual void set_background_color(const optional_color& aBackgroundColor) = 0;
+        virtual bool has_foreground_color() const = 0;
+        virtual neogfx::color foreground_color() const = 0;
+        virtual void set_foreground_color(const optional_color& aForegroundColor) = 0;
+        virtual bool has_text_color() const = 0;
+        virtual neogfx::color text_color() const = 0;
+        virtual void set_text_color(const optional_color& aTextColor) = 0;
+        virtual bool has_selection_color() const = 0;
+        virtual neogfx::color selection_color() const = 0;
+        virtual void set_selection_color(const optional_color& aSelectionColor) = 0;
+        virtual bool has_hover_color() const = 0;
+        virtual neogfx::color hover_color() const = 0;
+        virtual void set_hover_color(const optional_color& aHoverColor) = 0;
+        virtual bool has_widget_detail_primary_color() const = 0;
+        virtual neogfx::color widget_detail_primary_color() const = 0;
+        virtual void set_widget_detail_primary_color(const optional_color& aWidgetDetailPrimaryColor) = 0;
+        virtual bool has_widget_detail_secondary_color() const = 0;
+        virtual neogfx::color widget_detail_secondary_color() const = 0;
+        virtual void set_widget_detail_secondary_color(const optional_color& aWidgetDetailSecondaryColor) = 0;
         // helpers
     public:
-        neogfx::colour text_colour_for_widget(const i_widget& aWidget) const
+        neogfx::color text_color_for_widget(const i_widget& aWidget) const
         {
-            optional_colour textColour;
+            optional_color textColor;
             const i_widget* w = nullptr;
             do
             {
@@ -69,21 +69,21 @@ namespace neogfx
                     w = &aWidget;
                 else
                     w = &w->parent();
-                if (w->has_background_colour())
+                if (w->has_background_color())
                 {
-                    textColour = w->background_colour().brightness() >= 0.509 ? colour::Black : colour::White;
+                    textColor = w->background_color().brightness() >= 0.509 ? color::Black : color::White;
                     break;
                 }
-                else if (w->has_foreground_colour())
+                else if (w->has_foreground_color())
                 {
-                    textColour = w->foreground_colour().brightness() >= 0.509 ? colour::Black : colour::White;
+                    textColor = w->foreground_color().brightness() >= 0.509 ? color::Black : color::White;
                     break;
                 }
             } while (w->has_parent());
-            auto defaultTextColour = text_colour();
-            if (textColour == std::nullopt || textColour->similar_intensity(defaultTextColour))
-                textColour = defaultTextColour;
-            return *textColour;
+            auto defaultTextColor = text_color();
+            if (textColor == std::nullopt || textColor->similar_intensity(defaultTextColor))
+                textColor = defaultTextColor;
+            return *textColor;
         }
     };
 }

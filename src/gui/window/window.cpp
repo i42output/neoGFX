@@ -513,17 +513,17 @@ namespace neogfx
         Closed.trigger();
     }
 
-    colour window::frame_colour() const
+    color window::frame_color() const
     {
-        if (effectively_enabled() && !scrollable_widget::has_frame_colour() && is_active())
+        if (effectively_enabled() && !scrollable_widget::has_frame_color() && is_active())
         {
             if (!is_nested())
-                return service<i_app>().current_style().palette().selection_colour();
+                return service<i_app>().current_style().palette().selection_color();
             else
-                return service<i_app>().current_style().palette().widget_detail_secondary_colour();
+                return service<i_app>().current_style().palette().widget_detail_secondary_color();
         }
         else
-            return scrollable_widget::frame_colour().with_alpha(is_active() ? 0xFF : 0x40);
+            return scrollable_widget::frame_color().with_alpha(is_active() ? 0xFF : 0x40);
     }
 
     bool window::is_root() const
@@ -624,7 +624,7 @@ namespace neogfx
             {
                 rect shadowRect = to_client_coordinates(non_client_rect());
                 shadowRect.position() += point{ 4.0_spx, 4.0_spx };
-                aGraphicsContext.fill_rounded_rect(shadowRect, 4.0_spx, colour::Yellow);
+                aGraphicsContext.fill_rounded_rect(shadowRect, 4.0_spx, color::Yellow);
             }
         }
         scrollable_widget::render(aGraphicsContext);
@@ -641,12 +641,12 @@ namespace neogfx
         scrollable_widget::paint(aGraphicsContext);
     }
 
-    colour window::background_colour() const
+    color window::background_color() const
     {
-        if (has_background_colour())
-            return scrollable_widget::background_colour();
+        if (has_background_color())
+            return scrollable_widget::background_color();
         else
-            return container_background_colour();
+            return container_background_color();
     }
 
     bool window::is_dismissing_children() const
@@ -951,7 +951,7 @@ namespace neogfx
 
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
-            if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
+            if ((aAspect & style_aspect::Color) == style_aspect::Color)
                 surface().native_surface().invalidate(rect{ surface().surface_size() });
         });
 

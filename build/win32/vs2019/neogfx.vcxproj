@@ -286,15 +286,12 @@
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\color.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\css.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\device_metrics.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\geometrical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_color.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\hsl_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_color.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\hsv_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\html.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_event.hpp" />
@@ -317,7 +314,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\broadphase_collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\clock.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\colour.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\component.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\ecs.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\collider.hpp" />
@@ -396,7 +393,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\color_dialog.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\colour_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\font_dialog.hpp" />
@@ -589,7 +585,7 @@
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\core\animator.cpp" />
-    <ClCompile Include="..\..\..\src\core\colour.cpp" />
+    <ClCompile Include="..\..\..\src\core\color.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
     <ClCompile Include="..\..\..\src\core\units.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
@@ -638,7 +634,7 @@
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font_face.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\glyph_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\vertex_shader.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\colour_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\color_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp" />

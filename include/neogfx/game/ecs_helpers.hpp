@@ -20,12 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/shapes.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
-#include <neogfx/game/colour.hpp>
+#include <neogfx/game/color.hpp>
 #include <neogfx/game/gradient.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/rigid_body.hpp>
@@ -79,22 +79,22 @@ namespace neogfx
         return game::mesh{};
     }
 
-    inline game::colour to_ecs_component(const colour& aColour)
+    inline game::color to_ecs_component(const color& aColor)
     {
-        return game::colour{ aColour.to_vec4() };
+        return game::color{ aColor.to_vec4() };
     }
 
     inline game::gradient to_ecs_component(const gradient& aGradient)
     {
         game::gradient result;
-        result.colourStops.reserve(aGradient.colour_stop_count());
-        result.colourStopPositions.reserve(aGradient.colour_stop_count());
+        result.colorStops.reserve(aGradient.color_stop_count());
+        result.colorStopPositions.reserve(aGradient.color_stop_count());
         result.alphaStops.reserve(aGradient.alpha_stop_count());
         result.alphaStopPositions.reserve(aGradient.alpha_stop_count());
-        for (auto cs = aGradient.colour_begin(); cs != aGradient.colour_end(); ++cs)
+        for (auto cs = aGradient.color_begin(); cs != aGradient.color_end(); ++cs)
         {
-            result.colourStops.push_back(to_ecs_component(cs->second));
-            result.colourStopPositions.push_back(cs->first);
+            result.colorStops.push_back(to_ecs_component(cs->second));
+            result.colorStopPositions.push_back(cs->first);
         }
         for (auto as = aGradient.alpha_begin(); as != aGradient.alpha_end(); ++as)
         {
@@ -104,24 +104,24 @@ namespace neogfx
         return result;
     }
 
-    inline game::material to_ecs_component(const text_colour& aTextColour)
+    inline game::material to_ecs_component(const text_color& aTextColor)
     {
-        if (std::holds_alternative<colour>(aTextColour))
-            return game::material{ to_ecs_component(std::get<colour>(aTextColour)) };
-        else if (std::holds_alternative<gradient>(aTextColour))
-            return game::material{ {}, to_ecs_component(std::get<gradient>(aTextColour)) };
+        if (std::holds_alternative<color>(aTextColor))
+            return game::material{ to_ecs_component(std::get<color>(aTextColor)) };
+        else if (std::holds_alternative<gradient>(aTextColor))
+            return game::material{ {}, to_ecs_component(std::get<gradient>(aTextColor)) };
         else
-            return game::material{ game::colour{} };
+            return game::material{ game::color{} };
     }
 
     inline game::material to_ecs_component(const brush& aBrush)
     {
-        if (std::holds_alternative<colour>(aBrush))
-            return game::material{ to_ecs_component(std::get<colour>(aBrush)) };
+        if (std::holds_alternative<color>(aBrush))
+            return game::material{ to_ecs_component(std::get<color>(aBrush)) };
         else if (std::holds_alternative<gradient>(aBrush))
             return game::material{ {}, to_ecs_component(std::get<gradient>(aBrush)) };
         else
-            return game::material{ game::colour{} };
+            return game::material{ game::color{} };
     }
 
     inline game::texture to_ecs_component(const i_texture& aTexture)

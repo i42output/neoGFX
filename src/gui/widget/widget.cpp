@@ -109,7 +109,7 @@ namespace neogfx
             { std::type_index{ typeid(property_category::hard_geometry) }, invalidate_layout },
             { std::type_index{ typeid(property_category::soft_geometry) }, invalidate_window_canvas },
             { std::type_index{ typeid(property_category::font) }, invalidate_layout },
-            { std::type_index{ typeid(property_category::colour) }, invalidate_canvas },
+            { std::type_index{ typeid(property_category::color) }, invalidate_canvas },
             { std::type_index{ typeid(property_category::other_appearance) }, invalidate_canvas },
             { std::type_index{ typeid(property_category::other) }, ignore }
         };
@@ -1076,8 +1076,8 @@ namespace neogfx
 
     void widget::paint_non_client(i_graphics_context& aGraphicsContext) const
     {
-        if (has_background_colour() || !transparent_background())
-            aGraphicsContext.fill_rect(update_rect(), background_colour());
+        if (has_background_color() || !transparent_background())
+            aGraphicsContext.fill_rect(update_rect(), background_color());
     }
 
     void widget::paint_non_client_after(i_graphics_context&) const
@@ -1114,53 +1114,53 @@ namespace neogfx
         set_opacity(1.0 - aTransparency);
     }
 
-    bool widget::has_foreground_colour() const
+    bool widget::has_foreground_color() const
     {
-        return ForegroundColour != std::nullopt;
+        return ForegroundColor != std::nullopt;
     }
 
-    colour widget::foreground_colour() const
+    color widget::foreground_color() const
     {
-        if (has_foreground_colour())
-            return *ForegroundColour;
+        if (has_foreground_color())
+            return *ForegroundColor;
         else
-            return service<i_app>().current_style().palette().foreground_colour();
+            return service<i_app>().current_style().palette().foreground_color();
     }
 
-    void widget::set_foreground_colour(const optional_colour& aForegroundColour)
+    void widget::set_foreground_color(const optional_color& aForegroundColor)
     {
-        ForegroundColour = aForegroundColour;
+        ForegroundColor = aForegroundColor;
         update();
     }
 
-    bool widget::has_background_colour() const
+    bool widget::has_background_color() const
     {
-        return BackgroundColour != std::nullopt;
+        return BackgroundColor != std::nullopt;
     }
 
-    colour widget::background_colour() const
+    color widget::background_color() const
     {
-        if (has_background_colour())
-            return *BackgroundColour;
+        if (has_background_color())
+            return *BackgroundColor;
         else
-            return service<i_app>().current_style().palette().background_colour();
+            return service<i_app>().current_style().palette().background_color();
     }
 
-    void widget::set_background_colour(const optional_colour& aBackgroundColour)
+    void widget::set_background_color(const optional_color& aBackgroundColor)
     {
-        BackgroundColour = aBackgroundColour;
+        BackgroundColor = aBackgroundColor;
         update();
     }
 
-    colour widget::container_background_colour() const
+    color widget::container_background_color() const
     {
         const i_widget* w = this;
         while (w->transparent_background() && w->has_parent())
             w = &w->parent();
-        if (!w->transparent_background() && w->has_background_colour())
-            return w->background_colour();
+        if (!w->transparent_background() && w->has_background_color())
+            return w->background_color();
         else
-            return service<i_app>().current_style().palette().colour();
+            return service<i_app>().current_style().palette().color();
     }
 
     bool widget::has_font() const

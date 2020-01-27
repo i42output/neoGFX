@@ -199,7 +199,7 @@ namespace neogfx
             placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
             break;
         }
-        aGraphicsContext.draw_texture(placementRect, iTexture, effectively_disabled() ? colour(0xFF, 0xFF, 0xFF, 0x80) : optional_colour(), effectively_disabled() ? shader_effect::Monochrome : shader_effect::None);
+        aGraphicsContext.draw_texture(placementRect, iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : optional_color(), effectively_disabled() ? shader_effect::Monochrome : shader_effect::None);
     }
 
     const texture& image_widget::image() const

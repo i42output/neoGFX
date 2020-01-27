@@ -146,30 +146,30 @@ namespace neogfx
         widget::paint(aGraphicsContext);
         rect lr{ item_layout().position(), item_layout().extents() };
         lr.inflate(size{ 5.0 });
-        aGraphicsContext.fill_rounded_rect(lr, 4.0, border_colour());
+        aGraphicsContext.fill_rounded_rect(lr, 4.0, border_color());
         lr.deflate(size{ 1.0 });
-        aGraphicsContext.fill_rounded_rect(lr, 4.0, fill_colour());
+        aGraphicsContext.fill_rounded_rect(lr, 4.0, fill_color());
     }
 
-    colour group_box::border_colour() const
+    color group_box::border_color() const
     {
-        if (container_background_colour().light())
-            return background_colour().darker(24);
+        if (container_background_color().light())
+            return background_color().darker(24);
         else
-            return background_colour().lighter(24);
+            return background_color().lighter(24);
     }
 
-    colour group_box::fill_colour() const
+    color group_box::fill_color() const
     {
-        return container_background_colour().light() ? border_colour().lighter(24) : border_colour().darker(24);
+        return container_background_color().light() ? border_color().lighter(24) : border_color().darker(24);
     }
 
-    colour group_box::background_colour() const
+    color group_box::background_color() const
     {
-        if (container_background_colour().light())
-            return parent().background_colour().darker(24);
+        if (container_background_color().light())
+            return parent().background_color().darker(24);
         else
-            return parent().background_colour().lighter(24);
+            return parent().background_color().lighter(24);
     }
 
     class group_box_item_layout : public vertical_layout

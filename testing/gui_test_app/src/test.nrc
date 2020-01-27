@@ -146,8 +146,8 @@
                         action: actionMute
                         action: actionMute
                         action: {
-                            id: actionColourDialog
-                            text: "Colour Dialog..."
+                            id: actionColorDialog
+                            text: "Color Dialog..."
                         }
                     }
                     menu: {
@@ -213,12 +213,12 @@
                                         maximum_size: [ 160spx max ]
                                     }
                                     size_policy: Expanding
-                                    foreground_colour: LightGoldenrodYellow
+                                    foreground_color: LightGoldenrodYellow
                                 }
                                 push_button: {
                                     id: button1
                                     text: "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement."
-                                    foreground_colour: LightGoldenrod
+                                    foreground_color: LightGoldenrod
                                 }
                                 push_button: {
                                     id: buttonGenerateUuid
@@ -230,12 +230,12 @@
                                 push_button: {
                                     id: button2
                                     text: "ويقفز الثعلب البني السريع فوق الكلب الكسول"
-                                    foreground_colour: Goldenrod
+                                    foreground_color: Goldenrod
                                 }
                                 push_button: {
                                     id: button3
                                     text: "שועל חום קפיצות מעל הכלב העצלן"
-                                    foreground_colour: DarkGoldenrod
+                                    foreground_color: DarkGoldenrod
                                 }
                                 push_button: {
                                     id: buttonJapan
@@ -244,7 +244,7 @@
                                 push_button: {
                                     id: buttonChina
                                     text: "请停止食用犬"
-                                    foreground_colour: CadetBlue
+                                    foreground_color: CadetBlue
                                 }
                             }
                             push_button: {
@@ -373,7 +373,7 @@
                                 }
                                 push_button: {
                                     id: button6
-                                    text: "RGB <-> HSV\ncolour space\nconversion test"
+                                    text: "RGB <-> HSV\ncolor space\nconversion test"
                                 }
                                 spacer: {
                                     weight: 0.5
@@ -383,19 +383,19 @@
                                     push_button: {
                                         id: buttonArcadeMode
                                         text: "Toggle arcade mode."
-                                        foreground_colour: ForestGreen
+                                        foreground_color: ForestGreen
                                         size_policy: Expanding
                                     }
                                     push_button: {
                                         id: button7
                                         text: "Toggle &mute."
-                                        foreground_colour: LightCoral
+                                        foreground_color: LightCoral
                                         size_policy: Expanding
                                     }
                                     push_button: {
                                         id: button8
                                         text: "Enable/disable\ncontacts action."
-                                        foreground_colour: [ 255 235 160 ]
+                                        foreground_color: [ 255 235 160 ]
                                         size_policy: Expanding
                                     }
                                 }
@@ -442,9 +442,9 @@
                                         }
                                     }
                                     horizontal_layout: {
-                                        id: layoutColourPickers
+                                        id: layoutColorPickers
                                         push_button: {
-                                            id: themeColour
+                                            id: themeColor
                                             text: "theme"
                                             image: ":/closed/resources/caw_toolbar.naa#colour.png"
                                         }
@@ -454,7 +454,7 @@
                                             image: ":/closed/resources/caw_toolbar.naa#font.png"
                                         }
                                         push_button: {
-                                            id: editColour
+                                            id: editColor
                                             text: "edit"
                                             image: ":/closed/resources/caw_toolbar.naa#colour.png"
                                         }
@@ -500,8 +500,8 @@
                                         enabled: false
                                     }
                                     radio_button: {
-                                        id: radioThemeColour
-                                        text: "Slider changes\ntheme colour"
+                                        id: radioThemeColor
+                                        text: "Slider changes\ntheme color"
                                     }
                                     vertical_spacer: {}
                                 }
@@ -510,7 +510,7 @@
                                     push_button: {
                                         id: button9
                                         text: "Default/Slate\nStyle"
-                                        foreground_colour: Aquamarine
+                                        foreground_color: Aquamarine
                                     }
                                     grid_layout: {
                                         id: keypad
@@ -693,12 +693,12 @@
                                                 text: "Monochrome text"
                                             }
                                             radio_button: {
-                                                id: radioUpperTableViewColouredText
-                                                text: "Coloured text"
+                                                id: radioUpperTableViewColoredText
+                                                text: "Colored text"
                                             }
                                             radio_button: {
-                                                id: radioUpperTableViewColouredCells
-                                                text: "Coloured cells"
+                                                id: radioUpperTableViewColoredCells
+                                                text: "Colored cells"
                                             }
                                             vertical_spacer: {}
                                         }
@@ -736,12 +736,12 @@
                                                 text: "Monochrome text"
                                             }
                                             radio_button: {
-                                                id: radioLowerTableViewColouredText
-                                                text: "Coloured text"
+                                                id: radioLowerTableViewColoredText
+                                                text: "Colored text"
                                             }
                                             radio_button: {
-                                                id: radioLowerTableViewColouredCells
-                                                text: "Coloured cells"
+                                                id: radioLowerTableViewColoredCells
+                                                text: "Colored cells"
                                             }
                                             vertical_spacer: {}
                                         }
@@ -798,28 +798,28 @@
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
                                     aspect_ratio: Ignore
-                                    background_colour: Red
+                                    background_color: Red
                                     size_policy: Expanding
                                     minimum_size: 0
                                 }
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
                                     aspect_ratio: Keep
-                                    background_colour: Green
+                                    background_color: Green
                                     size_policy: Expanding
                                     minimum_size: 0
                                 }
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
                                     aspect_ratio: KeepExpanding
-                                    background_colour: Blue
+                                    background_color: Blue
                                     size_policy: Expanding
                                     minimum_size: 0
                                 }
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
                                     aspect_ratio: Stretch
-                                    background_colour: Magenta
+                                    background_color: Magenta
                                     size_policy: Expanding
                                     minimum_size: 0
                                 }
@@ -866,8 +866,8 @@
                             id: layoutEditor
                             text_edit: {
                                 id: textEditEditor
-                                text_colour: [ Horizontal Green White Red Yellow ]
-                                background_colour: [ Vertical DarkBlue Black ]
+                                text_color: [ Horizontal Green White Red Yellow ]
+                                background_color: [ Vertical DarkBlue Black ]
                             }
                             push_button: {
                                 id: buttonStyle1

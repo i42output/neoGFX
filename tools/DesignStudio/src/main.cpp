@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     {
         ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
         
-        app.current_style().palette().set_colour(ng::colour{ 64, 64, 64 });
+        app.current_style().palette().set_color(ng::color{ 64, 64, 64 });
         app.current_style().set_spacing(ng::size{ 4.0 });
 
         ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect().extents() * ng::size{ 0.5, 0.5 } };
@@ -90,11 +90,11 @@ int main(int argc, char* argv[])
             aGc.draw_texture(
                 ng::point{ (cr.extents() - backgroundTexture1.extents()) / 2.0 },
                 backgroundTexture1,
-                ng::colour::White.with_alpha(32));
+                ng::color::White.with_alpha(32));
             aGc.draw_texture(
                 ng::rect{ ng::point{ cr.bottom_right() - backgroundTexture2.extents() / 2.0 }, backgroundTexture2.extents() / 2.0 },
                 backgroundTexture2,
-                ng::colour::White.with_alpha(32));
+                ng::color::White.with_alpha(32));
         });
 
 //        ng::css css{"test.css"};

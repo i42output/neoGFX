@@ -24,9 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/variant.hpp>
 #include <neolib/vecarray.hpp>
 #include "geometrical.hpp"
-#include "hsl_colour.hpp"
-#include "hsv_colour.hpp"
-#include "colour.hpp"
+#include "hsl_color.hpp"
+#include "hsv_color.hpp"
+#include "color.hpp"
 
 namespace neogfx
 {

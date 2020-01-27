@@ -63,9 +63,9 @@ namespace neogfx
     public:
         virtual void paint(i_graphics_context& aGraphicsContext) const;
     public:
-        virtual colour border_colour() const;
-        virtual colour fill_colour() const;
-        virtual colour background_colour() const;
+        virtual color border_color() const;
+        virtual color fill_color() const;
+        virtual color background_color() const;
     private:
         void init();
     private:

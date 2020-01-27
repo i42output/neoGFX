@@ -81,7 +81,7 @@ namespace neogfx
         //todo: use a mini atlas for the this
         uint32_t stopCount;
         shader_array<float> stops = { size_u32{gradient::MaxStops, 1} };
-        shader_array<std::array<float, 4>> stopColours = { size_u32{gradient::MaxStops, 1} };
+        shader_array<std::array<float, 4>> stopColors = { size_u32{gradient::MaxStops, 1} };
         shader_array<float> filter = { size_u32{GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE} };
     };
 
@@ -106,7 +106,7 @@ namespace neogfx
         neogfx::gradient_shader_data& gradient_shader_data(const game::gradient& aGradient);
     private:
         std::vector<float> iGradientStopPositions;
-        std::vector<std::array<float, 4>> iGradientStopColours;
+        std::vector<std::array<float, 4>> iGradientStopColors;
         gradient_data_cache_t iGradientDataCache;
         gradient_data_cache_map_t iGradientDataCacheMap;
         gradient_data_cache_queue_t iGradientDataCacheQueue;
@@ -124,7 +124,7 @@ namespace neogfx
         cache_uniform(uGradientFilterSize)
         cache_uniform(uGradientStopCount)
         cache_uniform(uGradientStopPositions)
-        cache_uniform(uGradientStopColours)
+        cache_uniform(uGradientStopColors)
         cache_uniform(uGradientFilter)
         cache_uniform(uGradientEnabled)
     };

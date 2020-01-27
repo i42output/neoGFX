@@ -476,7 +476,7 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::Clear:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    clear(static_variant_cast<const graphics_operation::clear&>(*op).colour);
+                    clear(static_variant_cast<const graphics_operation::clear&>(*op).color);
                 break;
             case graphics_operation::operation_type::ClearDepthBuffer:
                 clear_depth_buffer();
@@ -486,11 +486,11 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::SetPixel:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    set_pixel(static_variant_cast<const graphics_operation::set_pixel&>(*op).point, static_variant_cast<const graphics_operation::set_pixel&>(*op).colour);
+                    set_pixel(static_variant_cast<const graphics_operation::set_pixel&>(*op).point, static_variant_cast<const graphics_operation::set_pixel&>(*op).color);
                 break;
             case graphics_operation::operation_type::DrawPixel:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    draw_pixel(static_variant_cast<const graphics_operation::draw_pixel&>(*op).point, static_variant_cast<const graphics_operation::draw_pixel&>(*op).colour);
+                    draw_pixel(static_variant_cast<const graphics_operation::draw_pixel&>(*op).point, static_variant_cast<const graphics_operation::draw_pixel&>(*op).color);
                 break;
             case graphics_operation::operation_type::DrawLine:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -791,9 +791,9 @@ namespace neogfx
         iSubpixelRendering = false;
     }
 
-    void opengl_rendering_context::clear(const colour& aColour)
+    void opengl_rendering_context::clear(const color& aColor)
     {
-        glCheck(glClearColor(aColour.red<GLclampf>(), aColour.green<GLclampf>(), aColour.blue<GLclampf>(), aColour.alpha<GLclampf>()));
+        glCheck(glClearColor(aColor.red<GLclampf>(), aColor.green<GLclampf>(), aColor.blue<GLclampf>(), aColor.alpha<GLclampf>()));
         glCheck(glClear(GL_COLOR_BUFFER_BIT));
     }
 
@@ -810,25 +810,25 @@ namespace neogfx
         glCheck(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
-    void opengl_rendering_context::set_pixel(const point& aPoint, const colour& aColour)
+    void opengl_rendering_context::set_pixel(const point& aPoint, const color& aColor)
     {
         /* todo: faster alternative to this... */
         disable_anti_alias daa{ *this };
-        draw_pixel(aPoint, aColour.with_alpha(0xFF));
+        draw_pixel(aPoint, aColor.with_alpha(0xFF));
     }
 
-    void opengl_rendering_context::draw_pixel(const point& aPoint, const colour& aColour)
+    void opengl_rendering_context::draw_pixel(const point& aPoint, const color& aColor)
     {
         /* todo: faster alternative to this... */
-        fill_rect(rect{ aPoint, size{1.0, 1.0} }, aColour);
+        fill_rect(rect{ aPoint, size{1.0, 1.0} }, aColor);
     }
 
     void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), rect{ aFrom, aTo });
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), rect{ aFrom, aTo });
 
         auto v1 = aFrom.to_vec3();
         auto v2 = aTo.to_vec3();
@@ -847,12 +847,12 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
-                    static_variant_cast<colour>(aPen.colour()).red<float>(),
-                    static_variant_cast<colour>(aPen.colour()).green<float>(),
-                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                    static_variant_cast<color>(aPen.color()).red<float>(),
+                    static_variant_cast<color>(aPen.color()).green<float>(),
+                    static_variant_cast<color>(aPen.color()).blue<float>(),
+                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
         emit_any_stipple(*this, vertexArrays);
@@ -865,8 +865,8 @@ namespace neogfx
         scoped_anti_alias saa{ *this, smoothing_mode::None };
         std::optional<disable_multisample> disableMultisample;
 
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), aRect);
 
         auto adjustedRect = aRect;
         if (snap_to_pixel())
@@ -889,12 +889,12 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
-                    static_variant_cast<colour>(aPen.colour()).red<float>(),
-                    static_variant_cast<colour>(aPen.colour()).green<float>(),
-                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                    static_variant_cast<color>(aPen.color()).red<float>(),
+                    static_variant_cast<color>(aPen.color()).green<float>(),
+                    static_variant_cast<color>(aPen.color()).blue<float>(),
+                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
         emit_any_stipple(*this, vertexArrays);
@@ -904,8 +904,8 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aRect);
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), aRect);
 
         auto adjustedRect = aRect;
         if (snap_to_pixel())
@@ -925,12 +925,12 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
-                    static_variant_cast<colour>(aPen.colour()).red<float>(),
-                    static_variant_cast<colour>(aPen.colour()).green<float>(),
-                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                    static_variant_cast<color>(aPen.color()).red<float>(),
+                    static_variant_cast<color>(aPen.color()).green<float>(),
+                    static_variant_cast<color>(aPen.color()).blue<float>(),
+                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
         emit_any_stipple(*this, vertexArrays);
@@ -942,8 +942,8 @@ namespace neogfx
 
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), 
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), 
                 rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
         auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, mesh_type::Outline);
@@ -957,12 +957,12 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
-                    static_variant_cast<colour>(aPen.colour()).red<float>(),
-                    static_variant_cast<colour>(aPen.colour()).green<float>(),
-                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                    static_variant_cast<color>(aPen.color()).red<float>(),
+                    static_variant_cast<color>(aPen.color()).green<float>(),
+                    static_variant_cast<color>(aPen.color()).blue<float>(),
+                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
         emit_any_stipple(*this, vertexArrays);
@@ -974,8 +974,8 @@ namespace neogfx
 
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()),
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()),
                 rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
         auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline);
@@ -989,12 +989,12 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
-                    static_variant_cast<colour>(aPen.colour()).red<float>(),
-                    static_variant_cast<colour>(aPen.colour()).green<float>(),
-                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                    static_variant_cast<color>(aPen.color()).red<float>(),
+                    static_variant_cast<color>(aPen.color()).green<float>(),
+                    static_variant_cast<color>(aPen.color()).blue<float>(),
+                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
 
         emit_any_stipple(*this, vertexArrays);
@@ -1006,8 +1006,8 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), aPath.bounding_rect());
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), aPath.bounding_rect());
 
         for (auto const& subPath : aPath.sub_paths())
         {
@@ -1019,12 +1019,12 @@ namespace neogfx
                 {
                     use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                     for (auto const& v : vertices)
-                        vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+                        vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                             vec4f{{
-                                static_variant_cast<colour>(aPen.colour()).red<float>(),
-                                static_variant_cast<colour>(aPen.colour()).green<float>(),
-                                static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                                static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                                static_variant_cast<color>(aPen.color()).red<float>(),
+                                static_variant_cast<color>(aPen.color()).green<float>(),
+                                static_variant_cast<color>(aPen.color()).blue<float>(),
+                                static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                             vec4f{} });
                 }
             }
@@ -1037,8 +1037,8 @@ namespace neogfx
 
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        if (std::holds_alternative<gradient>(aPen.colour()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.colour()), bounding_rect(aMesh));
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), bounding_rect(aMesh));
 
         auto const& vertices = aMesh.vertices;
 
@@ -1051,12 +1051,12 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
-                    static_variant_cast<colour>(aPen.colour()).red<float>(),
-                    static_variant_cast<colour>(aPen.colour()).green<float>(),
-                    static_variant_cast<colour>(aPen.colour()).blue<float>(),
-                    static_variant_cast<colour>(aPen.colour()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                    static_variant_cast<color>(aPen.color()).red<float>(),
+                    static_variant_cast<color>(aPen.color()).green<float>(),
+                    static_variant_cast<color>(aPen.color()).blue<float>(),
+                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                 vec4f{} });
     }
 
@@ -1121,12 +1121,12 @@ namespace neogfx
                 auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles, drawOp.zpos);
                 for (const auto& v : rectVertices)
                     vertexArrays.push_back({ v,
-                        std::holds_alternative<colour>(drawOp.fill) ?
+                        std::holds_alternative<color>(drawOp.fill) ?
                             vec4f{{
-                                static_variant_cast<const colour&>(drawOp.fill).red<float>(),
-                                static_variant_cast<const colour&>(drawOp.fill).green<float>(),
-                                static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
-                                static_variant_cast<const colour&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                                static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                                static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                                static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                                static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
                             vec4f{} });
             }
         }
@@ -1151,12 +1151,12 @@ namespace neogfx
 
             for (const auto& v : vertices)
             {
-                vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+                vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                     vec4f{{
-                        static_variant_cast<const colour&>(aFill).red<float>(),
-                        static_variant_cast<const colour&>(aFill).green<float>(),
-                        static_variant_cast<const colour&>(aFill).blue<float>(),
-                        static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        static_variant_cast<const color&>(aFill).red<float>(),
+                        static_variant_cast<const color&>(aFill).green<float>(),
+                        static_variant_cast<const color&>(aFill).blue<float>(),
+                        static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}}); 
             }
         }
@@ -1178,12 +1178,12 @@ namespace neogfx
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
             for (const auto& v : vertices)
             {
-                vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+                vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                     vec4f{{
-                        static_variant_cast<const colour&>(aFill).red<float>(),
-                        static_variant_cast<const colour&>(aFill).green<float>(),
-                        static_variant_cast<const colour&>(aFill).blue<float>(),
-                        static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        static_variant_cast<const color&>(aFill).red<float>(),
+                        static_variant_cast<const color&>(aFill).green<float>(),
+                        static_variant_cast<const color&>(aFill).blue<float>(),
+                        static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
             }
         }
@@ -1205,12 +1205,12 @@ namespace neogfx
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
             for (const auto& v : vertices)
             {
-                vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+                vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                     vec4f{{
-                        static_variant_cast<const colour&>(aFill).red<float>(),
-                        static_variant_cast<const colour&>(aFill).green<float>(),
-                        static_variant_cast<const colour&>(aFill).blue<float>(),
-                        static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        static_variant_cast<const color&>(aFill).red<float>(),
+                        static_variant_cast<const color&>(aFill).green<float>(),
+                        static_variant_cast<const color&>(aFill).blue<float>(),
+                        static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                     vec4f{}});
             }
         }
@@ -1237,12 +1237,12 @@ namespace neogfx
                     use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
                     for (const auto& v : vertices)
                     {
-                        vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+                        vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                             vec4f{{
-                                static_variant_cast<const colour&>(aFill).red<float>(),
-                                static_variant_cast<const colour&>(aFill).green<float>(),
-                                static_variant_cast<const colour&>(aFill).blue<float>(),
-                                static_variant_cast<const colour&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                                static_variant_cast<const color&>(aFill).red<float>(),
+                                static_variant_cast<const color&>(aFill).green<float>(),
+                                static_variant_cast<const color&>(aFill).blue<float>(),
+                                static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
                             vec4f{}});
                     }
                 }
@@ -1290,12 +1290,12 @@ namespace neogfx
                         auto const& v = vertices[vi];
                         vertexArrays.push_back({
                             v,
-                            std::holds_alternative<colour>(drawOp.fill) ?
+                            std::holds_alternative<color>(drawOp.fill) ?
                                 vec4f{{
-                                    static_variant_cast<const colour&>(drawOp.fill).red<float>(),
-                                    static_variant_cast<const colour&>(drawOp.fill).green<float>(),
-                                    static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
-                                    static_variant_cast<const colour&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                                    static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                                    static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                                    static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                                    static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
                                 vec4f{},
                             uv[vi]});
                     }
@@ -1363,8 +1363,8 @@ namespace neogfx
                         meshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
-                                    std::holds_alternative<colour>(*drawOp.appearance.paper()) ?
-                                        to_ecs_component(std::get<colour>(*drawOp.appearance.paper())) : std::optional<game::colour>{},
+                                    std::holds_alternative<color>(*drawOp.appearance.paper()) ?
+                                        to_ecs_component(std::get<color>(*drawOp.appearance.paper())) : std::optional<game::color>{},
                                     std::holds_alternative<gradient>(*drawOp.appearance.paper()) ?
                                         to_ecs_component(std::get<gradient>(*drawOp.appearance.paper())) : std::optional<game::gradient>{} } });
                     }
@@ -1439,13 +1439,13 @@ namespace neogfx
                                 rect const outputRect = {
                                         point{ glyphOrigin } + offsetOrigin + point{ static_cast<coordinate>(offset % scanlineOffsets), static_cast<coordinate>(offset / scanlineOffsets) },
                                         glyphTexture.texture().extents() };
-                                bool haveGradient = drawOp.appearance.effect() && std::holds_alternative<gradient>(drawOp.appearance.effect()->colour());
+                                bool haveGradient = drawOp.appearance.effect() && std::holds_alternative<gradient>(drawOp.appearance.effect()->color());
                                 if (haveGradient)
                                 {
                                     updateGlyphShader = true;
                                     draw();
                                     rendering_engine().default_shader_program().gradient_shader().set_gradient(
-                                        *this, static_variant_cast<gradient>(drawOp.appearance.effect()->colour()), outputRect);
+                                        *this, static_variant_cast<gradient>(drawOp.appearance.effect()->color()), outputRect);
                                 }
                                 auto mesh = logical_coordinates().is_gui_orientation() ? 
                                     to_ecs_component(
@@ -1457,11 +1457,11 @@ namespace neogfx
                                         mesh_type::Triangles,
                                         drawOp.point.z);
                                 meshFilters.push_back(game::mesh_filter{ {}, mesh });
-                                if (std::holds_alternative<colour>(drawOp.appearance.effect()->colour()))
+                                if (std::holds_alternative<color>(drawOp.appearance.effect()->color()))
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
                                             game::material{ 
-                                                to_ecs_component(static_variant_cast<const colour&>(drawOp.appearance.effect()->colour())),
+                                                to_ecs_component(static_variant_cast<const color&>(drawOp.appearance.effect()->color())),
                                                 {},
                                                 {},
                                                 to_ecs_component(glyphTexture.texture()),
@@ -1508,11 +1508,11 @@ namespace neogfx
                                     mesh_type::Triangles,
                                     drawOp.point.z);
                             meshFilters.push_back(game::mesh_filter{ {}, mesh });
-                            if (std::holds_alternative<colour>(drawOp.appearance.ink()))
+                            if (std::holds_alternative<color>(drawOp.appearance.ink()))
                                 meshRenderers.push_back(
                                     game::mesh_renderer{
                                         game::material{ 
-                                            to_ecs_component(static_variant_cast<const colour&>(drawOp.appearance.ink())),
+                                            to_ecs_component(static_variant_cast<const color&>(drawOp.appearance.ink())),
                                             {},
                                             {},
                                             to_ecs_component(glyphTexture.texture()),
@@ -1710,9 +1710,9 @@ namespace neogfx
                     auto const offsetTextureVertices = item->offsetTextureVertices;
                     auto const& faces = *item->faces;
 
-                    colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
-                    if (material.colour != std::nullopt)
-                        colourizationColour = material.colour->rgba;
+                    color colorizationColor{ 0xFF, 0xFF, 0xFF, 0xFF };
+                    if (material.color != std::nullopt)
+                        colorizationColor = material.color->rgba;
 
                     for (auto const& face : faces)
                     {
@@ -1732,10 +1732,10 @@ namespace neogfx
                             vertexArrays.emplace_back(
                                 v,
                                 vec4f{ {
-                                    colourizationColour.red<float>(),
-                                    colourizationColour.green<float>(),
-                                    colourizationColour.blue<float>(),
-                                    colourizationColour.alpha<float>() * static_cast<float>(iOpacity)} },
+                                    colorizationColor.red<float>(),
+                                    colorizationColor.green<float>(),
+                                    colorizationColor.blue<float>(),
+                                    colorizationColor.alpha<float>() * static_cast<float>(iOpacity)} },
                                 uv);
                         }
                     }

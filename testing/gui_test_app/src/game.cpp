@@ -28,7 +28,7 @@ using namespace neolib::stdint_suffix;
 {
     spritePlane.enable_z_sorting(true);
 
-    auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } } });
+    auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } } });
     score->second.set_value("000000");
     score->second.set_position(ng::vec3{ 0.0, 0.0, 1.0 });
     auto positionScore = [&spritePlane, score]()
@@ -38,7 +38,7 @@ using namespace neolib::stdint_suffix;
     spritePlane.size_changed(positionScore);
     positionScore();
     spritePlane.add_shape(score->second);
-    auto shipInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{}, "", ng::font("SnareDrum One NBP", "Regular", 24.0), ng::colour::White);
+    auto shipInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{}, "", ng::font("SnareDrum One NBP", "Regular", 24.0), ng::color::White);
     shipInfo->set_border(1.0);
     shipInfo->set_margins(ng::margins(2.0));
     shipInfo->set_tag_of(spaceshipSprite, ng::vec3{ 18.0, 18.0, 1.0 });
@@ -51,16 +51,16 @@ using namespace neolib::stdint_suffix;
     {
         create_target(spritePlane);
     }
-    auto debugInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane.font().with_size(spritePlane.font().size() * 0.5), ng::text_appearance{ ng::colour::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
+    auto debugInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane.font().with_size(spritePlane.font().size() * 0.5), ng::text_appearance{ ng::color::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } });
     spritePlane.add_shape(debugInfo);
     spritePlane.sprites_painted([&spritePlane](ng::i_graphics_context& aGraphicsContext)
     {
-        aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane.font().with_style(ng::font_info::Underline), ng::colour::White);
+        aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane.font().with_style(ng::font_info::Underline), ng::color::White);
         if (ng::service<ng::i_app>().keyboard().is_key_pressed(ng::ScanCode_C))
             spritePlane.collision_tree_2d().visit_aabbs([&aGraphicsContext](const neogfx::aabb_2d& aAabb)
             {
                 ng::rect aabb{ ng::point{ aAabb.min }, ng::point{ aAabb.max } };
-                aGraphicsContext.draw_rect(aabb, ng::pen{ ng::colour::Blue });
+                aGraphicsContext.draw_rect(aabb, ng::pen{ ng::color::Blue });
             });
     });
 
@@ -102,7 +102,7 @@ void create_game(ng::i_layout& aLayout)
     // Canvas to render game world on...
     auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>());
     canvas.set_font(ng::font{ canvas.font(), ng::font_style::Bold, 16 });
-    canvas.set_background_colour(ng::colour::Black);
+    canvas.set_background_color(ng::color::Black);
 
     // Get ECS associated with canvas...
     auto& ecs = canvas.ecs();
@@ -115,7 +115,7 @@ void create_game(ng::i_layout& aLayout)
             ecs,
             ng::vec3{ prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
             ng::vec2{ prng(64), prng(64) },
-            ng::colour{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }.lighter(0x40)
+            ng::color{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }.lighter(0x40)
         }.detach();
         
     // Asteroids...
@@ -135,7 +135,7 @@ void create_game(ng::i_layout& aLayout)
     for (int i = 0; i < 75; ++i)
         auto asteroid = ecs.create_entity(
             archetypes::asteroid, 
-            ng::game::material{ ng::to_ecs_component(ng::colour::from_hsl(prng(360), 1.0, 0.75)) },
+            ng::game::material{ ng::to_ecs_component(ng::color::from_hsl(prng(360), 1.0, 0.75)) },
             make_asteroid_mesh(),
             ng::game::rigid_body
             { 
@@ -174,9 +174,9 @@ void create_game(ng::i_layout& aLayout)
             {
                 spaceshipImage,
                 {
-                    { "paper", ng::colour{} },
-                    { "ink1", ng::colour::LightGoldenrod },
-                    { "ink2", ng::colour::DeepSkyBlue }
+                    { "paper", ng::color{} },
+                    { "ink1", ng::color::LightGoldenrod },
+                    { "ink2", ng::color::DeepSkyBlue }
                 },
                 1.0,
                 ng::texture_sampling::Nearest
@@ -198,7 +198,7 @@ void create_game(ng::i_layout& aLayout)
         auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
         text.fill('0');
         text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
-        gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black, 2.0 } });
+        gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
     });
 
     // Instantiate physics...
@@ -250,7 +250,7 @@ void create_game(ng::i_layout& aLayout)
                         auto missile = ecs.create_entity(
                             archetypes::missile,
                             ng::to_ecs_component(ng::rect{ ng::size{ 3.0, 3.0} }.with_centred_origin()),
-                            ng::game::material{ ng::to_ecs_component(ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 }), {}, {}, {} },
+                            ng::game::material{ ng::to_ecs_component(ng::color{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 }), {}, {}, {} },
                             ng::game::rigid_body
                             {
                                 spaceshipPhysics.position + ~(tm * ng::vec4{ 0.0, 18.0, 0.0, 1.0 }).xyz,

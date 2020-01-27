@@ -61,10 +61,10 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect rectBarBox = bar_box();
-        colour ink = background_colour().light(0x80) ? background_colour().darker(0x80) : background_colour().lighter(0x80);
+        color ink = background_color().light(0x80) ? background_color().darker(0x80) : background_color().lighter(0x80);
         aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink);
         rectBarBox.inflate(size{ 1.0, 1.0 });
-        aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink.mid(background_colour()));
+        aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink.mid(background_color()));
         rectBarBox.deflate(size{ 1.0, 1.0 });
         point selection = normalized_value_to_position(normalized_value());
         rect selectionRect = rectBarBox;
@@ -76,20 +76,20 @@ namespace neogfx
             selectionRect.y = selection.y;
         }
         if (normalized_value() > 0.0)
-            aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, service<i_app>().current_style().palette().selection_colour());
+            aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, service<i_app>().current_style().palette().selection_color());
         rect rectIndicator = indicator_box();
-        colour indicatorColour = foreground_colour();
+        color indicatorColor = foreground_color();
         if (iDragOffset != std::nullopt)
         {
-            if (indicatorColour.light(0x40))
-                indicatorColour.darken(0x40);
+            if (indicatorColor.light(0x40))
+                indicatorColor.darken(0x40);
             else
-                indicatorColour.lighten(0x40);
+                indicatorColor.lighten(0x40);
         }
-        colour indicatorBorderColour = indicatorColour.darker(0x40);
-        indicatorColour.lighten(0x40);
-        aGraphicsContext.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0, indicatorBorderColour);
-        aGraphicsContext.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0 - 1.0, indicatorColour);
+        color indicatorBorderColor = indicatorColor.darker(0x40);
+        indicatorColor.lighten(0x40);
+        aGraphicsContext.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0, indicatorBorderColor);
+        aGraphicsContext.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
     }
 
     void slider_impl::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)

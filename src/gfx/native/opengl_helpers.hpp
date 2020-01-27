@@ -239,7 +239,7 @@ namespace neogfx
         }
     };
 
-    inline vec4f colour_to_vec4f(const std::array<uint8_t, 4>& aSource)
+    inline vec4f color_to_vec4f(const std::array<uint8_t, 4>& aSource)
     {
         return vec4f{{ aSource[0] / 255.0f, aSource[1] / 255.0f, aSource[2] / 255.0f, aSource[3] / 255.0f }};
     }

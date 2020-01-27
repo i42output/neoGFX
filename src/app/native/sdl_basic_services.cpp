@@ -198,14 +198,14 @@ namespace neogfx
         return 0;
     }
 
-    colour display::read_pixel(const point& aPosition) const
+    color display::read_pixel(const point& aPosition) const
     {
 #ifdef WIN32
         auto clr = GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));
-        return colour{ GetRValue(clr), GetGValue(clr), GetBValue(clr) };
+        return color{ GetRValue(clr), GetGValue(clr), GetBValue(clr) };
 #else
         // todo
-        return colour::Black;
+        return color::Black;
 #endif
     }
 

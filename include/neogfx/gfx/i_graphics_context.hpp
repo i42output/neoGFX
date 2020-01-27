@@ -82,7 +82,7 @@ namespace neogfx
         virtual ~i_graphics_context() {}
         // operations
     public:
-        virtual ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_colour& aClearColour = colour{ vec4{0.0, 0.0, 0.0, 0.0} }) const = 0;
+        virtual ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const = 0;
     public:
         virtual delta to_device_units(const delta& aValue) const = 0;
         virtual size to_device_units(const size& aValue) const = 0;
@@ -123,13 +123,13 @@ namespace neogfx
         virtual bool is_subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_off() const = 0;
-        virtual void clear(const colour& aColour, const std::optional<scalar>& aZpos = std::optional<scalar>{}) const = 0;
+        virtual void clear(const color& aColor, const std::optional<scalar>& aZpos = std::optional<scalar>{}) const = 0;
         virtual void clear_depth_buffer() const = 0;
         virtual void clear_stencil_buffer() const = 0;
         virtual void blit(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect) const = 0;
         virtual void blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, uint32_t aParameter1 = 5, double aParameter2 = 1.0) const = 0;
-        virtual void set_pixel(const point& aPoint, const colour& aColour) const = 0;
-        virtual void draw_pixel(const point& aPoint, const colour& aColour) const = 0;
+        virtual void set_pixel(const point& aPoint, const color& aColor) const = 0;
+        virtual void draw_pixel(const point& aPoint, const color& aColor) const = 0;
         virtual void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const = 0;
         virtual void draw_rect(const rect& aRect, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const = 0;
@@ -195,12 +195,12 @@ namespace neogfx
         virtual bool password() const = 0;
         virtual const std::string& password_mask() const = 0;
         virtual void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F") = 0;
-        virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const = 0;
+        virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
+        virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
+        virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
+        virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
+        virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
+        virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}) const = 0;
     };
 
@@ -216,14 +216,14 @@ namespace neogfx
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow_pass_1(const i_graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_colour& aGlowColour, dimension aGlowSize)
+    inline void draw_glyph_text_glow_pass_1(const i_graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
     {
         scoped_render_target srt{ aPingPongBuffers.first->render_target() };
         point const effectOffset{ aGlowSize, aGlowSize };
         vec3 pos{ effectOffset.x, effectOffset.y, 0.0 };
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aPingPongBuffers.first->draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aGlowColour);
+            aPingPongBuffers.first->draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aGlowColor);
             pos.x += iterGlyph->advance().cx;
         }
     }
@@ -249,12 +249,12 @@ namespace neogfx
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow(const i_graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_colour& aGlowColour, dimension aGlowSize)
+    inline void draw_glyph_text_glow(const i_graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
     {
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
         auto pingPongBuffers = aGraphicsContext.ping_pong_buffers(effectExtents);
-        draw_glyph_text_glow_pass_1(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowColour, aGlowSize);
+        draw_glyph_text_glow_pass_1(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowColor, aGlowSize);
         draw_glyph_text_glow_pass_2(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
         draw_glyph_text_glow_pass_3(aGraphicsContext, pingPongBuffers, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
     }
@@ -263,7 +263,7 @@ namespace neogfx
     inline void draw_glyph_text(const i_graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
         if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Glow)
-            draw_glyph_text_glow(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->colour(), aAppearance.effect()->width());
+            draw_glyph_text_glow(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
         draw_glyph_text_normal(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance);
     }
 

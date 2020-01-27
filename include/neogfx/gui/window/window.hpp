@@ -100,7 +100,7 @@ namespace neogfx
         bool is_closed() const override;
         void close() override;
     public:
-        colour frame_colour() const override;
+        color frame_color() const override;
     public:
         bool is_root() const override;
         const i_window& root() const override;
@@ -126,7 +126,7 @@ namespace neogfx
         void render(i_graphics_context& aGraphicsContext) const override;
         void paint(i_graphics_context& aGraphicsContext) const override;
     public:
-        colour background_colour() const override;
+        color background_color() const override;
     public:
         using widget::show;
         bool show(bool aVisible) override;

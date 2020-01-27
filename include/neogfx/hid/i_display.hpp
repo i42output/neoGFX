@@ -23,7 +23,7 @@
 #include <neolib/i_enum.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/core/units.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
 
 namespace neogfx
@@ -65,7 +65,7 @@ namespace neogfx
         virtual neogfx::rect rect() const = 0;
         virtual neogfx::rect desktop_rect() const = 0;
         virtual window_placement default_window_placement() const = 0;
-        virtual colour read_pixel(const point& aPosition) const = 0;
+        virtual color read_pixel(const point& aPosition) const = 0;
     public:
         virtual neogfx::subpixel_format subpixel_format() const = 0;
     };

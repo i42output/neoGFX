@@ -180,7 +180,7 @@ namespace neogfx::nrc
         using i_ui_element::get_scalars;
         using i_ui_element::emplace_2;
         using i_ui_element::emplace_4;
-        using i_ui_element::get_colour;
+        using i_ui_element::get_color;
     protected:
         const data_names_t& data_names() const
         {
@@ -245,10 +245,10 @@ namespace neogfx::nrc
                 else
                     iTextFieldPlacement = get_enum<text_field_placement>(aData);
             }
-            else if (aName == "foreground_colour")
-                iForegroundColour = get_colour(aData);
-            else if (aName == "background_colour")
-                iBackgroundColour = get_colour(aData);
+            else if (aName == "foreground_color")
+                iForegroundColor = get_color(aData);
+            else if (aName == "background_color")
+                iBackgroundColor = get_color(aData);
             else if (aName == "opacity")
                 iOpacity = aData.get<double>();
             else if (aName == "transparency")
@@ -279,10 +279,10 @@ namespace neogfx::nrc
                 emplace_2<double>("weight", iWeight);
             else if (aName == "focus_policy")
                 iFocusPolicy.first = get_enum<focus_policy>(aArrayData, iFocusPolicy.second, "Default");
-            else if (aName == "foreground_colour")
-                iForegroundColour = get_colour(aArrayData);
-            else if (aName == "background_colour")
-                iBackgroundColour = get_colour(aArrayData);
+            else if (aName == "foreground_color")
+                iForegroundColor = get_color(aArrayData);
+            else if (aName == "background_color")
+                iBackgroundColor = get_color(aArrayData);
         }
         void emit_preamble() const override
         {
@@ -354,10 +354,10 @@ namespace neogfx::nrc
                 emit("   %1%.label().set_text(\"%2%\"_t);\n", id(), *iLabelText);
             if (iOpacity)
                 emit("   %1%.set_opacity(%2%);\n", id(), *iOpacity);
-            if (iForegroundColour)
-                emit("   %1%.set_foreground_colour(colour{ %2% });\n", id(), *iForegroundColour);
-            if (iBackgroundColour)
-                emit("   %1%.set_background_colour(colour{ %2% });\n", id(), *iBackgroundColour);
+            if (iForegroundColor)
+                emit("   %1%.set_foreground_color(color{ %2% });\n", id(), *iForegroundColor);
+            if (iBackgroundColor)
+                emit("   %1%.set_background_color(color{ %2% });\n", id(), *iBackgroundColor);
             for (auto const& child : children())
                 child->emit_body();
         }
@@ -439,8 +439,8 @@ namespace neogfx::nrc
                 add_data_names({ "image", "aspect_ratio", "placement" });
             if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
                 add_data_names({ "uri" });
-            if ((type() & ui_element_type::HasColour) == ui_element_type::HasColour)
-                add_data_names({ "foreground_colour", "background_colour", "opacity", "transparency" });
+            if ((type() & ui_element_type::HasColor) == ui_element_type::HasColor)
+                add_data_names({ "foreground_color", "background_color", "opacity", "transparency" });
         }
     private:
         const i_ui_element_parser& iParser;
@@ -473,7 +473,7 @@ namespace neogfx::nrc
         std::optional<aspect_ratio> iAspectRatio;
         std::optional<cardinal> iImagePlacement;
         std::optional<double> iOpacity;
-        std::optional<colour> iForegroundColour;
-        std::optional<colour> iBackgroundColour;
+        std::optional<color> iForegroundColor;
+        std::optional<color> iBackgroundColor;
     };
 }

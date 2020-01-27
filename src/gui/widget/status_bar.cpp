@@ -51,7 +51,7 @@ namespace neogfx
         rect line = client_rect(false);
         line.deflate(size{ 0.0_spx, 2.0_spx });
         line.cx = 1.0;
-        colour ink = (has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().foreground_colour());
+        color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().foreground_color());
         aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0x80));
         ++line.x;
         aGraphicsContext.fill_rect(line, ink.lighter(0x40).with_alpha(0x80));
@@ -264,7 +264,7 @@ namespace neogfx
         iPermanentWidgetLayout.set_margins(neogfx::margins{});
         auto update_size_grip = [this](style_aspect)
         {
-            auto ink1 = (has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().foreground_colour());
+            auto ink1 = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().foreground_color());
             ink1 = ink1.light() ? ink1.darker(0x40) : ink1.lighter(0x40);
             auto ink2 = ink1.darker(0x30);
             if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
@@ -325,14 +325,14 @@ namespace neogfx
                     "00000000000000000000000000"
                 };
                 iSizeGripTexture.emplace(ink1, !high_dpi() ?
-                    neogfx::image{ "neogfx::status_bar::iSizeGripTexture::" + ink1.to_string(), sSizeGripTextureImagePattern, { { "paper", colour{} }, { "ink1", ink1 }, { "ink2", ink2 } } } :
-                    neogfx::image{ "neogfx::status_bar::iSizeGripHighDpiTexture::" + ink1.to_string(), sSizeGripHighDpiTextureImagePattern, { { "paper", colour{} },{ "ink1", ink1 },{ "ink2", ink2 } }, 2.0 });
+                    neogfx::image{ "neogfx::status_bar::iSizeGripTexture::" + ink1.to_string(), sSizeGripTextureImagePattern, { { "paper", color{} }, { "ink1", ink1 }, { "ink2", ink2 } } } :
+                    neogfx::image{ "neogfx::status_bar::iSizeGripHighDpiTexture::" + ink1.to_string(), sSizeGripHighDpiTextureImagePattern, { { "paper", color{} },{ "ink1", ink1 },{ "ink2", ink2 } }, 2.0 });
             }
             iSizeGrip.set_image(iSizeGripTexture->second);
         };
         iSink += service<i_surface_manager>().dpi_changed([update_size_grip](i_surface&) { update_size_grip(style_aspect::Geometry); });
         iSink += service<i_app>().current_style_changed(update_size_grip);
-        update_size_grip(style_aspect::Colour);
+        update_size_grip(style_aspect::Color);
         iSink += service<i_app>().help().help_activated([this](const i_help_source&) { update_widgets();    });
         iSink += service<i_app>().help().help_deactivated([this](const i_help_source&) { update_widgets(); });
         update_widgets();

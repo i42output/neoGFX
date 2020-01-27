@@ -39,14 +39,14 @@ namespace neogfx
         define_declared_event(TargetDeactivating, target_deactivating)
         define_declared_event(TargetDeactivated, target_deactivated)
     public:
-        struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
+        struct unsupported_color_format : std::runtime_error { unsupported_color_format() : std::runtime_error("neogfx::opengl_texture::unsupported_color_format") {} };
         struct multisample_texture_initialization_unsupported : std::logic_error { multisample_texture_initialization_unsupported() : std::logic_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
         struct unsupported_sampling_type_for_function : std::logic_error { unsupported_sampling_type_for_function() : std::logic_error("neogfx::opengl_texture::unsupported_sampling_type_for_function") {} };
     public:
         typedef T value_type;
         static constexpr texture_data_type kDataType = crack_shader_array_data_type<value_type>::DATA_TYPE;
     public:
-        opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, const optional_colour& aColour = optional_colour());
+        opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, const optional_color& aColor = optional_color());
         opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA);
         ~opengl_texture();
     public:
@@ -64,8 +64,8 @@ namespace neogfx
         size storage_extents() const override;
         void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) override;
         void set_pixels(const i_image& aImage) override;
-        void set_pixel(const point& aPosition, const colour& aColour) override;
-        colour get_pixel(const point& aPosition) const override;
+        void set_pixel(const point& aPosition, const color& aColor) override;
+        color get_pixel(const point& aPosition) const override;
     public:
         void* handle() const override;
         bool is_resident() const override;
@@ -98,7 +98,7 @@ namespace neogfx
         void activate_target() const override;
         void deactivate_target() const override;
     public:
-        colour read_pixel(const point& aPosition) const override;
+        color read_pixel(const point& aPosition) const override;
     private:
         i_texture_manager& iManager;
         texture_id iId;

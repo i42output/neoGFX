@@ -74,9 +74,9 @@ namespace neogfx
         void set_flags(text_widget_flags aFlags);
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
-        bool has_text_colour() const;
-        colour text_colour() const;
-        void set_text_colour(const optional_colour& aTextColour);
+        bool has_text_color() const;
+        color text_color() const;
+        void set_text_color(const optional_color& aTextColor);
         bool has_text_appearance() const;
         neogfx::text_appearance text_appearance() const;
         void set_text_appearance(const optional_text_appearance& aTextAppearance);

@@ -61,7 +61,7 @@ namespace neogames
                 Heart   = 3,
                 Spade   = 4
             };
-            enum class colour
+            enum class color
             {
                 Red,
                 Black
@@ -105,9 +105,9 @@ namespace neogames
             { 
                 return iSuit; 
             }
-            operator colour() const 
+            operator color() const 
             { 
-                return iSuit == suit::Club || iSuit == suit::Spade ? colour::Black : colour::Red;
+                return iSuit == suit::Club || iSuit == suit::Spade ? color::Black : color::Red;
             }
             bool is_face_card() const
             {

@@ -105,7 +105,7 @@ namespace neogfx
 
         struct clear
         {
-            colour colour;
+            color color;
         };
 
         struct clear_depth_buffer
@@ -119,13 +119,13 @@ namespace neogfx
         struct set_pixel
         {
             point point;
-            colour colour;
+            color color;
         };
 
         struct draw_pixel
         {
             point point;
-            colour colour;
+            color color;
         };
 
         struct draw_line

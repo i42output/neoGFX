@@ -23,19 +23,19 @@
 namespace neogfx
 {
     palette::palette() : 
-        iWidgetDetailSecondaryColour{ colour::Goldenrod }
+        iWidgetDetailSecondaryColor{ color::Goldenrod }
     {
     }
 
     palette::palette(const i_palette& aOther) :
-        iColour{ aOther.has_colour() ? aOther.colour() : optional_colour{} },
-        iBackgroundColour{ aOther.has_background_colour() ? aOther.background_colour() : optional_colour{} },
-        iForegroundColour{ aOther.has_foreground_colour() ? aOther.foreground_colour() : optional_colour{} },
-        iTextColour{ aOther.has_text_colour() ? aOther.text_colour() : optional_colour{} },
-        iSelectionColour{ aOther.has_selection_colour() ? aOther.selection_colour() : optional_colour{} },
-        iHoverColour{ aOther.has_hover_colour() ? aOther.hover_colour() : optional_colour{} },
-        iWidgetDetailPrimaryColour{ aOther.has_widget_detail_primary_colour() ? aOther.widget_detail_primary_colour() : optional_colour{} },
-        iWidgetDetailSecondaryColour{ aOther.has_widget_detail_secondary_colour() ? aOther.widget_detail_secondary_colour() : optional_colour{} }
+        iColor{ aOther.has_color() ? aOther.color() : optional_color{} },
+        iBackgroundColor{ aOther.has_background_color() ? aOther.background_color() : optional_color{} },
+        iForegroundColor{ aOther.has_foreground_color() ? aOther.foreground_color() : optional_color{} },
+        iTextColor{ aOther.has_text_color() ? aOther.text_color() : optional_color{} },
+        iSelectionColor{ aOther.has_selection_color() ? aOther.selection_color() : optional_color{} },
+        iHoverColor{ aOther.has_hover_color() ? aOther.hover_color() : optional_color{} },
+        iWidgetDetailPrimaryColor{ aOther.has_widget_detail_primary_color() ? aOther.widget_detail_primary_color() : optional_color{} },
+        iWidgetDetailSecondaryColor{ aOther.has_widget_detail_secondary_color() ? aOther.widget_detail_secondary_color() : optional_color{} }
     {
     }
 
@@ -48,14 +48,14 @@ namespace neogfx
     {
         if (*this != aOther)
         {
-            iColour = aOther.has_colour() ? aOther.colour() : optional_colour{};
-            iBackgroundColour = aOther.has_background_colour() ? aOther.background_colour() : optional_colour{};
-            iForegroundColour = aOther.has_foreground_colour() ? aOther.foreground_colour() : optional_colour{};
-            iTextColour = aOther.has_text_colour() ? aOther.text_colour() : optional_colour{};
-            iSelectionColour = aOther.has_selection_colour() ? aOther.selection_colour() : optional_colour{};
-            iHoverColour = aOther.has_hover_colour() ? aOther.hover_colour() : optional_colour{};
-            iWidgetDetailPrimaryColour = aOther.has_widget_detail_primary_colour() ? aOther.widget_detail_primary_colour() : optional_colour{};
-            iWidgetDetailSecondaryColour = aOther.has_widget_detail_secondary_colour() ? aOther.widget_detail_secondary_colour() : optional_colour{};
+            iColor = aOther.has_color() ? aOther.color() : optional_color{};
+            iBackgroundColor = aOther.has_background_color() ? aOther.background_color() : optional_color{};
+            iForegroundColor = aOther.has_foreground_color() ? aOther.foreground_color() : optional_color{};
+            iTextColor = aOther.has_text_color() ? aOther.text_color() : optional_color{};
+            iSelectionColor = aOther.has_selection_color() ? aOther.selection_color() : optional_color{};
+            iHoverColor = aOther.has_hover_color() ? aOther.hover_color() : optional_color{};
+            iWidgetDetailPrimaryColor = aOther.has_widget_detail_primary_color() ? aOther.widget_detail_primary_color() : optional_color{};
+            iWidgetDetailSecondaryColor = aOther.has_widget_detail_secondary_color() ? aOther.widget_detail_secondary_color() : optional_color{};
             Changed.trigger();
         }
         return *this;
@@ -63,22 +63,22 @@ namespace neogfx
 
     bool palette::operator==(const i_palette& aOther) const
     {
-        return has_colour() == aOther.has_colour() &&
-            colour() == aOther.colour() &&
-            has_background_colour() == aOther.has_background_colour() &&
-            background_colour() == aOther.background_colour() &&
-            has_foreground_colour() == aOther.has_foreground_colour() &&
-            foreground_colour() == aOther.foreground_colour() &&
-            has_text_colour() == aOther.has_text_colour() &&
-            text_colour() == aOther.text_colour() &&
-            has_selection_colour() == aOther.has_selection_colour() &&
-            selection_colour() == aOther.selection_colour() &&
-            has_hover_colour() == aOther.has_hover_colour() &&
-            hover_colour() == aOther.hover_colour() &&
-            has_widget_detail_primary_colour() == aOther.has_widget_detail_primary_colour() &&
-            widget_detail_primary_colour() == aOther.widget_detail_primary_colour() &&
-            has_widget_detail_secondary_colour() == aOther.has_widget_detail_secondary_colour() &&
-            widget_detail_secondary_colour() == aOther.widget_detail_secondary_colour();
+        return has_color() == aOther.has_color() &&
+            color() == aOther.color() &&
+            has_background_color() == aOther.has_background_color() &&
+            background_color() == aOther.background_color() &&
+            has_foreground_color() == aOther.has_foreground_color() &&
+            foreground_color() == aOther.foreground_color() &&
+            has_text_color() == aOther.has_text_color() &&
+            text_color() == aOther.text_color() &&
+            has_selection_color() == aOther.has_selection_color() &&
+            selection_color() == aOther.selection_color() &&
+            has_hover_color() == aOther.has_hover_color() &&
+            hover_color() == aOther.hover_color() &&
+            has_widget_detail_primary_color() == aOther.has_widget_detail_primary_color() &&
+            widget_detail_primary_color() == aOther.widget_detail_primary_color() &&
+            has_widget_detail_secondary_color() == aOther.has_widget_detail_secondary_color() &&
+            widget_detail_secondary_color() == aOther.widget_detail_secondary_color();
     }
 
     bool palette::operator!=(const i_palette& aOther) const
@@ -86,182 +86,182 @@ namespace neogfx
         return !(*this == aOther);
     }
 
-    bool palette::has_colour() const
+    bool palette::has_color() const
     {
-        return iColour != std::nullopt;
+        return iColor != std::nullopt;
     }
 
-    colour palette::colour() const
+    color palette::color() const
     {
-        if (has_colour())
-            return iColour->with_alpha(0xFF);
-        return neogfx::colour{ 0xEF, 0xEB, 0xE7 };
+        if (has_color())
+            return iColor->with_alpha(0xFF);
+        return neogfx::color{ 0xEF, 0xEB, 0xE7 };
     }
 
-    void palette::set_colour(const optional_colour& aColour)
+    void palette::set_color(const optional_color& aColor)
     {
-        if (iColour != aColour)
+        if (iColor != aColor)
         {
-            iColour = aColour;
+            iColor = aColor;
             Changed.trigger();
         }
     }
 
-    bool palette::has_background_colour() const
+    bool palette::has_background_color() const
     {
-        return iBackgroundColour != std::nullopt;
+        return iBackgroundColor != std::nullopt;
     }
 
-    colour palette::background_colour() const
+    color palette::background_color() const
     {
-        if (has_background_colour())
-            return *iBackgroundColour;
+        if (has_background_color())
+            return *iBackgroundColor;
         else
-            return colour().light() ? colour().lighter(0x20) : colour().darker(0x20);
+            return color().light() ? color().lighter(0x20) : color().darker(0x20);
     }
 
-    void palette::set_background_colour(const optional_colour& aBackgroundColour)
+    void palette::set_background_color(const optional_color& aBackgroundColor)
     {
-        if (iBackgroundColour != aBackgroundColour)
+        if (iBackgroundColor != aBackgroundColor)
         {
-            iBackgroundColour = aBackgroundColour;
+            iBackgroundColor = aBackgroundColor;
             Changed.trigger();
         }
     }
 
-    bool palette::has_foreground_colour() const
+    bool palette::has_foreground_color() const
     {
-        return iForegroundColour != std::nullopt;
+        return iForegroundColor != std::nullopt;
     }
 
-    colour palette::foreground_colour() const
+    color palette::foreground_color() const
     {
-        if (has_foreground_colour())
-            return *iForegroundColour;
+        if (has_foreground_color())
+            return *iForegroundColor;
         else
-            return colour().light() ? colour().darker(0x20) : colour().lighter(0x20);
+            return color().light() ? color().darker(0x20) : color().lighter(0x20);
     }
 
-    void palette::set_foreground_colour(const optional_colour& aForegroundColour)
+    void palette::set_foreground_color(const optional_color& aForegroundColor)
     {
-        if (iForegroundColour != aForegroundColour)
+        if (iForegroundColor != aForegroundColor)
         {
-            iForegroundColour = aForegroundColour;
+            iForegroundColor = aForegroundColor;
             Changed.trigger();
         }
     }
 
-    bool palette::has_text_colour() const
+    bool palette::has_text_color() const
     {
-        return iTextColour != std::nullopt;
+        return iTextColor != std::nullopt;
     }
 
-    colour palette::text_colour() const
+    color palette::text_color() const
     {
-        if (has_text_colour())
-            return *iTextColour;
+        if (has_text_color())
+            return *iTextColor;
         else
         {
-            if (colour().to_hsl().lightness() < 0.6)
-                return colour::White;
+            if (color().to_hsl().lightness() < 0.6)
+                return color::White;
             else
-                return colour::Black;
+                return color::Black;
         }
     }
 
-    void palette::set_text_colour(const optional_colour& aTextColour)
+    void palette::set_text_color(const optional_color& aTextColor)
     {
-        if (iTextColour != aTextColour)
+        if (iTextColor != aTextColor)
         {
-            iTextColour = aTextColour;
+            iTextColor = aTextColor;
             Changed.trigger();
         }
     }
 
-    bool palette::has_selection_colour() const
+    bool palette::has_selection_color() const
     {
-        return iTextColour != std::nullopt;
+        return iTextColor != std::nullopt;
     }
 
-    colour palette::selection_colour() const
+    color palette::selection_color() const
     {
-        if (has_selection_colour())
-            return *iTextColour;
+        if (has_selection_color())
+            return *iTextColor;
         else
-            return neogfx::colour{ 0x2A, 0x82, 0xDA };
+            return neogfx::color{ 0x2A, 0x82, 0xDA };
     }
 
-    void palette::set_selection_colour(const optional_colour& aSelectionColour)
+    void palette::set_selection_color(const optional_color& aSelectionColor)
     {
-        if (iSelectionColour != aSelectionColour)
+        if (iSelectionColor != aSelectionColor)
         {
-            iSelectionColour = aSelectionColour;
+            iSelectionColor = aSelectionColor;
             Changed.trigger();
         }
     }
 
-    bool palette::has_hover_colour() const
+    bool palette::has_hover_color() const
     {
-        return iHoverColour != std::nullopt;
+        return iHoverColor != std::nullopt;
     }
 
-    colour palette::hover_colour() const
+    color palette::hover_color() const
     {
-        if (has_hover_colour())
-            return *iHoverColour;
+        if (has_hover_color())
+            return *iHoverColor;
         else
-            return selection_colour().lighter(0x40);
+            return selection_color().lighter(0x40);
     }
 
-    void palette::set_hover_colour(const optional_colour& aHoverColour)
+    void palette::set_hover_color(const optional_color& aHoverColor)
     {
-        if (iHoverColour != aHoverColour)
+        if (iHoverColor != aHoverColor)
         {
-            iHoverColour = aHoverColour;
+            iHoverColor = aHoverColor;
             Changed.trigger();
         }
     }
 
-    bool palette::has_widget_detail_primary_colour() const
+    bool palette::has_widget_detail_primary_color() const
     {
-        return iWidgetDetailPrimaryColour != std::nullopt;
+        return iWidgetDetailPrimaryColor != std::nullopt;
     }
 
-    colour palette::widget_detail_primary_colour() const
+    color palette::widget_detail_primary_color() const
     {
-        if (has_widget_detail_primary_colour())
-            return *iWidgetDetailPrimaryColour;
+        if (has_widget_detail_primary_color())
+            return *iWidgetDetailPrimaryColor;
         else
-            return colour().same_lightness_as(colour().light() ? neogfx::colour{ 32, 32, 32 } : neogfx::colour{ 224, 224, 224 });
+            return color().same_lightness_as(color().light() ? neogfx::color{ 32, 32, 32 } : neogfx::color{ 224, 224, 224 });
     }
 
-    void palette::set_widget_detail_primary_colour(const optional_colour& aWidgetDetailPrimaryColour)
+    void palette::set_widget_detail_primary_color(const optional_color& aWidgetDetailPrimaryColor)
     {
-        if (iWidgetDetailPrimaryColour != aWidgetDetailPrimaryColour)
+        if (iWidgetDetailPrimaryColor != aWidgetDetailPrimaryColor)
         {
-            iWidgetDetailPrimaryColour = aWidgetDetailPrimaryColour;
+            iWidgetDetailPrimaryColor = aWidgetDetailPrimaryColor;
             Changed.trigger();
         }
     }
 
-    bool palette::has_widget_detail_secondary_colour() const
+    bool palette::has_widget_detail_secondary_color() const
     {
-        return iWidgetDetailSecondaryColour != std::nullopt;
+        return iWidgetDetailSecondaryColor != std::nullopt;
     }
 
-    colour palette::widget_detail_secondary_colour() const
+    color palette::widget_detail_secondary_color() const
     {
-        if (has_widget_detail_secondary_colour())
-            return *iWidgetDetailSecondaryColour;
+        if (has_widget_detail_secondary_color())
+            return *iWidgetDetailSecondaryColor;
         else
-            return colour().same_lightness_as(colour().light() ? neogfx::colour{ 64, 64, 64 } : neogfx::colour{ 192, 192, 192 });
+            return color().same_lightness_as(color().light() ? neogfx::color{ 64, 64, 64 } : neogfx::color{ 192, 192, 192 });
     }
 
-    void palette::set_widget_detail_secondary_colour(const optional_colour& aWidgetDetailSecondaryColour)
+    void palette::set_widget_detail_secondary_color(const optional_color& aWidgetDetailSecondaryColor)
     {
-        if (iWidgetDetailSecondaryColour != aWidgetDetailSecondaryColour)
+        if (iWidgetDetailSecondaryColor != aWidgetDetailSecondaryColor)
         {
-            iWidgetDetailSecondaryColour = aWidgetDetailSecondaryColour;
+            iWidgetDetailSecondaryColor = aWidgetDetailSecondaryColor;
             Changed.trigger();
         }
     }

@@ -87,7 +87,7 @@ namespace neogfx
     }
 
     template <typename T>
-    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, const optional_colour& aColour) :
+    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, const optional_color& aColor) :
         iManager{ aManager },
         iId{ aId },
         iDpiScaleFactor{ aDpiScaleFactor },
@@ -132,27 +132,27 @@ namespace neogfx
             if (sampling() != texture_sampling::Multisample)
             {
                 std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
-                if (aColour != std::nullopt)
+                if (aColor != std::nullopt)
                 {
                     if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                             for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
                                 data[y * iStorageSize.cx + x + 0] = 
                                     value_type{
-                                        aColour->red(),
-                                        aColour->green(),
-                                        aColour->blue(),
-                                        aColour->alpha()
+                                        aColor->red(),
+                                        aColor->green(),
+                                        aColor->blue(),
+                                        aColor->alpha()
                                     };
                     else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                             for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
                                 data[y * iStorageSize.cx + x + 0] = 
                                     value_type{
-                                        aColour->red<float>(),
-                                        aColour->green<float>(),
-                                        aColour->blue<float>(),
-                                        aColour->alpha<float>()
+                                        aColor->red<float>(),
+                                        aColor->green<float>(),
+                                        aColor->blue<float>(),
+                                        aColor->alpha<float>()
                                     };
                 }
                 glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), data.empty() ? nullptr : &data[0]));
@@ -163,7 +163,7 @@ namespace neogfx
             }
             else
             {
-                if (aColour != std::nullopt)
+                if (aColor != std::nullopt)
                     throw multisample_texture_initialization_unsupported();
                 glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
             }
@@ -220,9 +220,9 @@ namespace neogfx
                 throw multisample_texture_initialization_unsupported();
                 break;
             }
-            switch (aImage.colour_format())
+            switch (aImage.color_format())
             {
-            case colour_format::RGBA8:
+            case color_format::RGBA8:
                 {
                     std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
                     if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
@@ -249,7 +249,7 @@ namespace neogfx
                 }
                 break;
             default:
-                throw unsupported_colour_format();
+                throw unsupported_color_format();
                 break;
             }
             glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
@@ -406,14 +406,14 @@ namespace neogfx
     }
 
     template <typename T>
-    void opengl_texture<T>::set_pixel(const point& aPosition, const colour& aColour)
+    void opengl_texture<T>::set_pixel(const point& aPosition, const color& aColor)
     {
-        std::array<uint8_t, 4> pixel{ aColour.red(), aColour.green(), aColour.blue(), aColour.alpha() };
+        std::array<uint8_t, 4> pixel{ aColor.red(), aColor.green(), aColor.blue(), aColor.alpha() };
         set_pixels(rect{ aPosition, size{1.0, 1.0} }, &pixel);
     }
 
     template <typename T>
-    colour opengl_texture<T>::get_pixel(const point& aPosition) const
+    color opengl_texture<T>::get_pixel(const point& aPosition) const
     {
         switch (sampling())
         {
@@ -656,7 +656,7 @@ namespace neogfx
     }
 
     template <typename T>
-    colour opengl_texture<T>::read_pixel(const point& aPosition) const
+    color opengl_texture<T>::read_pixel(const point& aPosition) const
     {
         if (sampling() != neogfx::texture_sampling::Multisample)
         {
@@ -664,7 +664,7 @@ namespace neogfx
             std::array<uint8_t, 4> pixel;
             basic_point<GLint> pos{ aPosition };
             glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &pixel));
-            return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
+            return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
         }
         else
             throw std::logic_error("neogfx::opengl_texture::read_pixel: not yet implemented for multisample render targets");

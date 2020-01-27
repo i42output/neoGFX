@@ -79,16 +79,16 @@ namespace neogfx
         if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())))
         {
             bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
-            colour fillColour = background_colour().dark() ? colour::Black : colour::White;
+            color fillColor = background_color().dark() ? color::Black : color::White;
             if (openSubMenu && menu().type() == menu_type::MenuBar)
             {
-                if (fillColour.similar_intensity(service<i_app>().current_style().palette().colour(), 0.05))
-                    fillColour = service<i_app>().current_style().palette().selection_colour();
+                if (fillColor.similar_intensity(service<i_app>().current_style().palette().color(), 0.05))
+                    fillColor = service<i_app>().current_style().palette().selection_color();
             }
-            else if (fillColour.similar_intensity(background_colour(), 0.05))
-                fillColour = fillColour.dark() ? fillColour.lighter(0x20) : fillColour.darker(0x20);
-            fillColour.set_alpha(0xC0);
-            aGraphicsContext.fill_rect(client_rect(), fillColour);
+            else if (fillColor.similar_intensity(background_color(), 0.05))
+                fillColor = fillColor.dark() ? fillColor.lighter(0x20) : fillColor.darker(0x20);
+            fillColor.set_alpha(0xC0);
+            aGraphicsContext.fill_rect(client_rect(), fillColor);
         }
     }
 
@@ -100,8 +100,8 @@ namespace neogfx
             if (menu_item().type() == menu_item_type::SubMenu && menu().type() == menu_type::Popup)
             {
                 bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
-                colour ink = openSubMenu ? service<i_app>().current_style().palette().selection_colour()
-                    : background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
+                color ink = openSubMenu ? service<i_app>().current_style().palette().selection_color()
+                    : background_color().light() ? background_color().darker(0x80) : background_color().lighter(0x80);
                 if (iSubMenuArrow == std::nullopt || iSubMenuArrow->first != ink)
                 {
                     const char* sArrowImagePattern
@@ -146,8 +146,8 @@ namespace neogfx
                         "000000000000"
                     };
                     iSubMenuArrow.emplace(ink, !high_dpi() ? 
-                        image{ "neogfx::menu_item_widget::sArrowImagePattern::" + ink.to_string(), sArrowImagePattern, { { "paper", colour{} },{ "ink", ink } } } : 
-                        image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
+                        image{ "neogfx::menu_item_widget::sArrowImagePattern::" + ink.to_string(), sArrowImagePattern, { { "paper", color{} },{ "ink", ink } } } : 
+                        image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });
                 }
                 rect rect = client_rect(false);
                 aGraphicsContext.draw_texture(
@@ -163,21 +163,21 @@ namespace neogfx
             line.cy = 1.0_spx;
             line.x += dpi_scale(iGap);
             line.cx -= dpi_scale(iGap * 2.0);
-            colour ink = colour::Black;
-            if (ink.similar_intensity(background_colour(), 0.05))
+            color ink = color::Black;
+            if (ink.similar_intensity(background_color(), 0.05))
                 ink = ink.dark() ? ink.lighter(0x20) : ink.darker(0x20);
             ink.set_alpha(0x40);
             aGraphicsContext.fill_rect(line, ink);
         }
     }
 
-    colour menu_item_widget::background_colour() const
+    color menu_item_widget::background_color() const
     {
-        return widget::has_background_colour() ?
-            widget::background_colour() :
-            parent().has_background_colour() ?
-                parent().background_colour() :
-                service<i_app>().current_style().palette().colour();
+        return widget::has_background_color() ?
+            widget::background_color() :
+            parent().has_background_color() ?
+                parent().background_color() :
+                service<i_app>().current_style().palette().color();
     }
 
     bool menu_item_widget::can_capture() const
@@ -333,10 +333,10 @@ namespace neogfx
                         "00000000000001100000000000000000"
                         "00000000000001100000000000000000"
                     };
-                    colour ink = service<i_app>().current_style().palette().text_colour();
+                    color ink = service<i_app>().current_style().palette().text_color();
                     iIcon.set_image(!high_dpi() ?
-                        image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", colour{} },{ "ink", ink } } } :
-                        image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
+                        image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", color{} },{ "ink", ink } } } :
+                        image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });
                 }
                 if (!iIcon.image().is_empty())
                     iIcon.set_fixed_size(dpi_scale(iIconSize));

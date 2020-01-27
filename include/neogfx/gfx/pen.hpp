@@ -29,19 +29,19 @@ namespace neogfx
         // construction
     public:
         pen() : iWidth{ 0.0 } {}
-        pen(const colour& aColour, bool aAntiAliased = true) : iColour{ aColour }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
-        pen(const colour& aColour, dimension aWidth, bool aAntiAliased = true) : iColour{ aColour }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
-        pen(const gradient& aColour, bool aAntiAliased = true) : iColour{ aColour }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
-        pen(const gradient& aColour, dimension aWidth, bool aAntiAliased = true) : iColour{ aColour }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
-        pen(const colour_or_gradient& aColour, bool aAntiAliased = true) : iColour{ aColour }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
-        pen(const colour_or_gradient& aColour, dimension aWidth, bool aAntiAliased = true) : iColour{ aColour }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
+        pen(const color& aColor, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
+        pen(const color& aColor, dimension aWidth, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
+        pen(const gradient& aColor, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
+        pen(const gradient& aColor, dimension aWidth, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
+        pen(const color_or_gradient& aColor, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
+        pen(const color_or_gradient& aColor, dimension aWidth, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
         // operations
     public:
-        const colour_or_gradient& colour() const { return iColour; }
+        const color_or_gradient& color() const { return iColor; }
         dimension width() const { return iWidth; }
         bool anti_aliased() const { return iAntiAliased; }
     private:
-        colour_or_gradient iColour;
+        color_or_gradient iColor;
         dimension iWidth;
         bool iAntiAliased;
     };

@@ -224,14 +224,14 @@ namespace neogfx::nrc
                 throw element_ill_formed(id().to_std_string());
             }
         }
-        colour get_colour(const data_t& aData) const
+        color get_color(const data_t& aData) const
         {
-            colour result;
+            color result;
             std::visit([&result](auto&& v)
             {
                 typedef std::decay_t<decltype(v)> vt;
                 if constexpr (std::is_same_v<vt, int64_t>)
-                    result = colour{ static_cast<uint32_t>(v) };
+                    result = color{ static_cast<uint32_t>(v) };
                 else if constexpr (std::is_same_v<vt, neolib::i_string>)
                     result = v.to_std_string();
                 else
@@ -239,34 +239,34 @@ namespace neogfx::nrc
             }, aData);
             return result;
         }
-        colour get_colour(const array_data_t& aArrayData) const
+        color get_color(const array_data_t& aArrayData) const
         {
             if (aArrayData.size() == 3)
-                return colour{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]) };
+                return color{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]) };
             else if (aArrayData.size() == 4)
-                return colour{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]), neolib::get_as<uint8_t>(aArrayData[3]) };
+                return color{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]), neolib::get_as<uint8_t>(aArrayData[3]) };
             else
                 throw element_ill_formed(id().to_std_string());
         }
-        colour_or_gradient get_colour_or_gradient(const array_data_t& aArrayData) const
+        color_or_gradient get_color_or_gradient(const array_data_t& aArrayData) const
         {
             if (aArrayData[0].which() == neolib::simple_variant_type::String)
             {
                 auto gradientDirection = neolib::try_string_to_enum<gradient_direction>(aArrayData[0].get<neolib::i_string>().to_std_string());
                 if (gradientDirection != std::nullopt)
                 {
-                    gradient::colour_stop_list stops;
+                    gradient::color_stop_list stops;
                     // todo: full gradient specification support
                     auto interval = 1.0 / (aArrayData.size() - 2);
                     for (std::size_t i = 1; i < aArrayData.size(); ++i)
-                        stops.push_back(gradient::colour_stop{ (i - 1) * interval, get_colour(aArrayData[i]) });
+                        stops.push_back(gradient::color_stop{ (i - 1) * interval, get_color(aArrayData[i]) });
                     return gradient{ stops, *gradientDirection };
                 }
                 else
-                    return get_colour(aArrayData);
+                    return get_color(aArrayData);
             }
             else
-                return get_colour(aArrayData);
+                return get_color(aArrayData);
         }
     protected:
         template <typename Enum>
@@ -340,7 +340,7 @@ namespace neogfx::nrc
             else
                 return "size_constraint::" + hp + ", size_constraint::" + vp;
         }
-        static std::string convert_emit_argument(const colour& aArgument)
+        static std::string convert_emit_argument(const color& aArgument)
         {
             std::ostringstream result;
             result << "0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << aArgument.value() << "u";
@@ -350,12 +350,12 @@ namespace neogfx::nrc
         {
             std::ostringstream result;
             // todo: full gradient specification support
-            result << "gradient::colour_stop_list{ ";
-            for (auto s = aArgument.colour_begin(); s != aArgument.colour_end(); ++s)
+            result << "gradient::color_stop_list{ ";
+            for (auto s = aArgument.color_begin(); s != aArgument.color_end(); ++s)
             {
-                if (s != aArgument.colour_begin())
+                if (s != aArgument.color_begin())
                     result << ", ";
-                result << "gradient::colour_stop{ " << s->first << ", colour{ " << convert_emit_argument(s->second) << " } }";
+                result << "gradient::color_stop{ " << s->first << ", color{ " << convert_emit_argument(s->second) << " } }";
             }
             result << " }, " << enum_to_string<gradient_direction>("gradient_direction", aArgument.direction());
             return result.str();

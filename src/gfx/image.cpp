@@ -29,42 +29,42 @@ namespace neogfx
 {
     image::image(dimension aDpiScaleFactor, texture_sampling aSampling) :
         iDpiScaleFactor{ aDpiScaleFactor }, 
-        iColourFormat{ neogfx::colour_format::RGBA8 },
+        iColorFormat{ neogfx::color_format::RGBA8 },
         iSampling{ aSampling }
     {
     }
 
-    image::image(const neogfx::size& aSize, const colour& aColour, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    image::image(const neogfx::size& aSize, const color& aColor, dimension aDpiScaleFactor, texture_sampling aSampling) :
         iDpiScaleFactor{ aDpiScaleFactor }, 
-        iColourFormat{ neogfx::colour_format::RGBA8 }, 
+        iColorFormat{ neogfx::color_format::RGBA8 }, 
         iSampling{ aSampling }
     {
         resize(aSize);
         for (coordinate y = 0.0; y < aSize.cx; ++y)
             for (coordinate x = 0.0; x < aSize.cx; ++x)
-                set_pixel(point{ x, y }, aColour);
+                set_pixel(point{ x, y }, aColor);
     }
 
     image::image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
         iResource{ resource_manager::instance().load_resource(aUri) },
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
-        iColourFormat{ neogfx::colour_format::RGBA8 },
+        iColorFormat{ neogfx::color_format::RGBA8 },
         iSampling{ aSampling }
     {
         if (available())
             load();
     }
 
-    image::image(const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, dimension aDpiScaleFactor, texture_sampling aSampling) :
-        image{ std::string{}, aImagePattern, aColourMap, aDpiScaleFactor, aSampling }
+    image::image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling) :
+        image{ std::string{}, aImagePattern, aColorMap, aDpiScaleFactor, aSampling }
     {
     }
 
-    image::image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    image::image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling) :
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
-        iColourFormat{ neogfx::colour_format::RGBA8 },
+        iColorFormat{ neogfx::color_format::RGBA8 },
         iSampling{ aSampling }
     {
         try
@@ -80,12 +80,12 @@ namespace neogfx
 
             basic_size<std::size_t> imageSize{ boost::lexical_cast<std::size_t>(bits2.at(0)), boost::lexical_cast<std::size_t>(bits2.at(1)) };
 
-            std::unordered_map<char, std::string> colourKeyMap;
+            std::unordered_map<char, std::string> colorKeyMap;
             for (std::size_t i = 0; i < bits3.size() - 1; ++i)
             {
-                neolib::vecarray<std::string, 2> colourKeyMapEntry;
-                neolib::tokens(bits3[i], std::string{ "," }, colourKeyMapEntry);
-                colourKeyMap.insert(std::make_pair(colourKeyMapEntry.at(0).at(0), colourKeyMapEntry.at(1)));
+                neolib::vecarray<std::string, 2> colorKeyMapEntry;
+                neolib::tokens(bits3[i], std::string{ "," }, colorKeyMapEntry);
+                colorKeyMap.insert(std::make_pair(colorKeyMapEntry.at(0).at(0), colorKeyMapEntry.at(1)));
             }
             
             resize(imageSize);
@@ -96,13 +96,13 @@ namespace neogfx
                     char pixelKey = *nextPixel++;
                     if (pixelKey == '\0')
                         throw error_parsing_image_pattern();
-                    auto colourKey = colourKeyMap.find(pixelKey);
-                    if (colourKey == colourKeyMap.end())
+                    auto colorKey = colorKeyMap.find(pixelKey);
+                    if (colorKey == colorKeyMap.end())
                         throw error_parsing_image_pattern();
-                    auto colourMapKey = aColourMap.find(colourKey->second);
-                    if (colourMapKey == aColourMap.end())
+                    auto colorMapKey = aColorMap.find(colorKey->second);
+                    if (colorMapKey == aColorMap.end())
                         throw error_parsing_image_pattern();
-                    set_pixel(basic_point<std::size_t>{ x, y }, colourMapKey->second);
+                    set_pixel(basic_point<std::size_t>{ x, y }, colorMapKey->second);
                 }
 
         }
@@ -189,9 +189,9 @@ namespace neogfx
         return iDpiScaleFactor;
     }
 
-    colour_format image::colour_format() const
+    color_format image::color_format() const
     {
-        return iColourFormat;
+        return iColorFormat;
     }
 
     texture_sampling image::sampling() const
@@ -231,31 +231,31 @@ namespace neogfx
         return data();
     }
 
-    colour image::get_pixel(const point& aPoint) const
+    color image::get_pixel(const point& aPoint) const
     {
-        switch (iColourFormat)
+        switch (iColorFormat)
         {
-        case neogfx::colour_format::RGBA8:
+        case neogfx::color_format::RGBA8:
             {
                 const uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
-                return colour{pixel[0], pixel[1], pixel[2], pixel[3]};
+                return color{pixel[0], pixel[1], pixel[2], pixel[3]};
             }
         default:
-            return colour{};
+            return color{};
         }
     }
 
-    void image::set_pixel(const point& aPoint, const colour& aColour)
+    void image::set_pixel(const point& aPoint, const color& aColor)
     {
-        switch (iColourFormat)
+        switch (iColorFormat)
         {
-        case neogfx::colour_format::RGBA8:
+        case neogfx::color_format::RGBA8:
             {
                 uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
-                pixel[0] = aColour.red();
-                pixel[1] = aColour.green();
-                pixel[2] = aColour.blue();
-                pixel[3] = aColour.alpha();
+                pixel[0] = aColor.red();
+                pixel[1] = aColor.green();
+                pixel[2] = aColor.blue();
+                pixel[3] = aColor.alpha();
             }
         default:
             /* do nothing */

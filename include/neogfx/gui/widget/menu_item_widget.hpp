@@ -50,7 +50,7 @@ namespace neogfx
         void paint_non_client(i_graphics_context& aGraphicsContext) const override;
         void paint(i_graphics_context& aGraphicsContext) const override;
     public:
-        colour background_colour() const override;
+        color background_color() const override;
     public:
         bool can_capture() const override;
     public:
@@ -84,6 +84,6 @@ namespace neogfx
         horizontal_spacer iSpacer;
         text_widget iShortcutText;
         std::optional<std::unique_ptr<neolib::callback_timer>> iSubMenuOpener;
-        mutable std::optional<std::pair<colour, texture>> iSubMenuArrow;
+        mutable std::optional<std::pair<color, texture>> iSubMenuArrow;
     };
 }

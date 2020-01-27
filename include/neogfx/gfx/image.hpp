@@ -44,10 +44,10 @@ namespace neogfx
         struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
     public:
         image(dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
-        image(const neogfx::size& aSize, const colour& aColour = colour::Black, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(const neogfx::size& aSize, const color& aColor = color::Black, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
         image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
-        image(const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
-        image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
         ~image();
     public:
         bool available() const override;
@@ -63,7 +63,7 @@ namespace neogfx
         hash_digest_type hash() const override;
     public:
         dimension dpi_scale_factor() const override;
-        neogfx::colour_format colour_format() const override;
+        neogfx::color_format color_format() const override;
         texture_sampling sampling() const override;
         texture_data_format data_format() const override;
         const neogfx::size& extents() const override;
@@ -71,8 +71,8 @@ namespace neogfx
         const void* cpixels() const override;
         const void* pixels() const override;
         void* pixels() override;
-        colour get_pixel(const point& aPoint) const override;
-        void set_pixel(const point& aPoint, const colour& aColour) override;
+        color get_pixel(const point& aPoint) const override;
+        void set_pixel(const point& aPoint, const color& aColor) override;
     private:
         bool has_resource() const;
         const i_resource& resource() const;
@@ -84,7 +84,7 @@ namespace neogfx
         std::string iUri;
         std::optional<std::string> iError;
         dimension iDpiScaleFactor;
-        neogfx::colour_format iColourFormat;
+        neogfx::color_format iColorFormat;
         data_type iData;
         texture_sampling iSampling;
         neogfx::size iSize;

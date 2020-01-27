@@ -120,19 +120,19 @@ namespace neogames
             auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, neogfx::mesh_type::Triangles, 20);
 
             neogfx::game::mesh mesh{ cardBackgroundVertices, neogfx::vertices_2d{cardBackgroundVertices.size(), neogfx::vec2{} }, neogfx::game::default_faces(cardBackgroundVertices) };
-            neogfx::game::mesh_renderer meshRenderer{ neogfx::game::material{ neogfx::to_ecs_component( neogfx::colour::White) } };
+            neogfx::game::mesh_renderer meshRenderer{ neogfx::game::material{ neogfx::to_ecs_component( neogfx::color::White) } };
 
             auto aabb = neogfx::game::bounding_rect(mesh);
             aabb.deflate(neogfx::size{ 0.025, 0.05 });
 
             // Card value textures...
             neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, 0.0, aCardTextures.value_texture(aCard));
-            meshRenderer.patches.back().material.colour = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
+            meshRenderer.patches.back().material.color = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? neogfx::color::Black : neogfx::color{ 213, 0, 0 });
 
             const neogfx::mat33 uvRotate180{ { -1.0, 0.0, 0.0 }, { 0.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
 
             neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, 0.0, aCardTextures.value_texture(aCard), uvRotate180);
-            meshRenderer.patches.back().material.colour = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
+            meshRenderer.patches.back().material.color = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? neogfx::color::Black : neogfx::color{ 213, 0, 0 });
 
             // Card suit textures under card value textures...
             neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, 0.0, aCardTextures.suit_texture(aCard));

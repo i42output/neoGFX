@@ -1,4 +1,4 @@
-// colour.hpp
+// color.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -26,7 +26,7 @@
 
 namespace neogfx::game
 {
-    struct colour
+    struct color
     {
         vec4 rgba;
 
@@ -39,7 +39,7 @@ namespace neogfx::game
             }
             static const i_string& name()
             {
-                static const string sName = "Colour";
+                static const string sName = "Color";
                 return sName;
             }
             static uint32_t field_count()
@@ -67,7 +67,7 @@ namespace neogfx::game
         };
     };
 
-    inline bool operator==(const colour& lhs, const colour& rhs)
+    inline bool operator==(const color& lhs, const color& rhs)
     {
         return lhs.rgba == rhs.rgba;
     }

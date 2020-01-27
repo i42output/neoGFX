@@ -78,18 +78,18 @@ namespace neogfx
             return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
         }
 
-        bool batchable(const text_colour& lhs, const text_colour& rhs)
+        bool batchable(const text_color& lhs, const text_color& rhs)
         {
             if (lhs.index() != rhs.index())
                 return false;
-            if (std::holds_alternative<colour>(lhs))
+            if (std::holds_alternative<color>(lhs))
                 return true;
             return lhs == rhs;
         }
 
         bool batchable(const text_effect& lhs, const text_effect& rhs)
         {
-            return batchable(lhs.colour(), rhs.colour());
+            return batchable(lhs.color(), rhs.color());
         }
 
         bool batchable(const operation& aLeft, const operation& aRight)
@@ -113,19 +113,19 @@ namespace neogfx
             {
                 auto& left = static_variant_cast<const fill_rect&>(aLeft);
                 auto& right = static_variant_cast<const fill_rect&>(aRight);
-                return left.fill.index() == right.fill.index() && std::holds_alternative<colour>(left.fill);
+                return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
             }
             case operation_type::FillShape:
             {
                 auto& left = static_variant_cast<const fill_shape&>(aLeft);
                 auto& right = static_variant_cast<const fill_shape&>(aRight);
-                return left.fill.index() == right.fill.index() && std::holds_alternative<colour>(left.fill);
+                return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
             }
             case operation_type::FillPath:
             {
                 auto& left = static_variant_cast<const fill_path&>(aLeft);
                 auto& right = static_variant_cast<const fill_path&>(aRight);
-                return left.fill.index() == right.fill.index() && std::holds_alternative<colour>(left.fill);
+                return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
             }
             case operation_type::DrawGlyph:
             {

@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/component.hpp>
-#include <neogfx/game/colour.hpp>
+#include <neogfx/game/color.hpp>
 #include <neogfx/game/gradient.hpp>
 #include <neogfx/game/texture.hpp>
 
@@ -34,7 +34,7 @@ namespace neogfx::game
 {
     struct material
     {
-        std::optional<colour> colour;
+        std::optional<color> color;
         std::optional<gradient> gradient;
         std::optional<shared<texture>> sharedTexture;
         std::optional<texture> texture;
@@ -81,7 +81,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return colour::meta::id();
+                    return color::meta::id();
                 case 1:
                     return gradient::meta::id();
                 case 2:
@@ -95,7 +95,7 @@ namespace neogfx::game
             {
                 static const string sFieldNames[] =
                 {
-                    "Colour",
+                    "Color",
                     "Gradient",
                     "Shared Texture",
                     "Texture",

@@ -28,11 +28,11 @@ namespace neogfx
     {
     }
 
-    colour text_field::input_box_container::frame_colour() const
+    color text_field::input_box_container::frame_color() const
     {
-        if (service<i_app>().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
-            return framed_widget::frame_colour();
-        return service<i_app>().current_style().palette().colour().mid(background_colour());
+        if (service<i_app>().current_style().palette().color().similar_intensity(background_color(), 0.03125))
+            return framed_widget::frame_color();
+        return service<i_app>().current_style().palette().color().mid(background_color());
     }
 
     text_field::text_field(const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
@@ -210,7 +210,7 @@ namespace neogfx
         auto hint_updater = [this]()
         { 
             hint().set_font(input_box().default_style().font());
-            hint().set_text_colour(input_box().default_text_colour().with_alpha(0x80));
+            hint().set_text_color(input_box().default_text_color().with_alpha(0x80));
             hint().show(input_box().text().empty());
         };
         iSink += service<i_app>().current_style_changed([hint_updater](style_aspect)

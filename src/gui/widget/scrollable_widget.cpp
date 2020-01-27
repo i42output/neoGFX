@@ -134,12 +134,12 @@ namespace neogfx
         {
             point oldOrigin = aGraphicsContext.origin();
             aGraphicsContext.set_origin(point(0.0, 0.0));
-            auto scrollbarColour = background_colour();
+            auto scrollbarColor = background_color();
             aGraphicsContext.fill_rect(
                 rect{
                     point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(iVerticalScrollbar).bottom() },
                     size{ scrollbar_geometry(iVerticalScrollbar).width(), scrollbar_geometry(horizontal_scrollbar()).height() } },
-                scrollbarColour.light() ? scrollbarColour.darker(0x40) : scrollbarColour.lighter(0x40));
+                scrollbarColor.light() ? scrollbarColor.darker(0x40) : scrollbarColor.lighter(0x40));
             aGraphicsContext.set_origin(oldOrigin);
         }
     }
@@ -397,9 +397,9 @@ namespace neogfx
         update(true);
     }
 
-    colour scrollable_widget::scrollbar_colour(const i_scrollbar&) const
+    color scrollable_widget::scrollbar_color(const i_scrollbar&) const
     {
-        return background_colour();
+        return background_color();
     }
 
     const i_widget& scrollable_widget::as_widget() const

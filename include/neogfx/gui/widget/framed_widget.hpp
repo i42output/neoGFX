@@ -60,16 +60,16 @@ namespace neogfx
     public:
         void set_frame_style(frame_style aStyle);
     public:
-        virtual bool has_frame_colour() const;
-        virtual colour frame_colour() const;
-        virtual void set_frame_colour(const optional_colour& aFrameColour = optional_colour{});
-        virtual colour inner_frame_colour() const;
+        virtual bool has_frame_color() const;
+        virtual color frame_color() const;
+        virtual void set_frame_color(const optional_color& aFrameColor = optional_color{});
+        virtual color inner_frame_color() const;
     public:
         dimension line_width() const;
         dimension effective_frame_width() const;
     private:
         frame_style iStyle;
         dimension iLineWidth;
-        optional_colour iFrameColour;
+        optional_color iFrameColor;
     };
 }

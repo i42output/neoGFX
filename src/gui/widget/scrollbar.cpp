@@ -216,13 +216,13 @@ namespace neogfx
         rect g = iContainer.scrollbar_geometry(*this);
         point oldOrigin = aGraphicsContext.origin();
         aGraphicsContext.set_origin(point(0.0, 0.0));
-        colour baseColour = iContainer.scrollbar_colour(*this);
-        colour backgroundColour = baseColour.light() ? baseColour.darker(0x40) : baseColour.lighter(0x40);
+        color baseColor = iContainer.scrollbar_color(*this);
+        color backgroundColor = baseColor.light() ? baseColor.darker(0x40) : baseColor.lighter(0x40);
         if (iContainer.as_widget().transparent_background())
-            backgroundColour = iContainer.as_widget().container_background_colour();
-        colour foregroundColour = baseColour.light() ? baseColour.darker(0x80) : baseColour.lighter(0x80);
+            backgroundColor = iContainer.as_widget().container_background_color();
+        color foregroundColor = baseColor.light() ? baseColor.darker(0x80) : baseColor.lighter(0x80);
         if (style() == scrollbar_style::Normal)
-            aGraphicsContext.fill_rect(iContainer.scrollbar_geometry(*this), backgroundColour);
+            aGraphicsContext.fill_rect(iContainer.scrollbar_geometry(*this), backgroundColor);
         else if (style() == scrollbar_style::Menu)
         {
             auto g1 = g;
@@ -239,8 +239,8 @@ namespace neogfx
                 g2.x = g2.x + g2.cx - width();
                 g2.cx = g1.cx;
             }
-            aGraphicsContext.fill_rect(g1, backgroundColour);
-            aGraphicsContext.fill_rect(g2, backgroundColour);
+            aGraphicsContext.fill_rect(g1, backgroundColor);
+            aGraphicsContext.fill_rect(g2, backgroundColor);
         }
         else if (style() == scrollbar_style::Scroller)
         {
@@ -260,8 +260,8 @@ namespace neogfx
                 g2.x = g2.x + g2.cx - width();
                 g2.cx = g1.cx;
             }
-            aGraphicsContext.fill_rect(g1, backgroundColour);
-            aGraphicsContext.fill_rect(g2, backgroundColour);
+            aGraphicsContext.fill_rect(g1, backgroundColor);
+            aGraphicsContext.fill_rect(g2, backgroundColor);
             if (position() != minimum())
             {
                 auto fadeRect = g;
@@ -271,7 +271,7 @@ namespace neogfx
                     fadeRect.cx = width();
                 aGraphicsContext.fill_rect(fadeRect, gradient
                 {
-                    gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
+                    gradient::color_stop_list{ { 0.0, backgroundColor }, { 1.0, backgroundColor } },
                     gradient::alpha_stop_list{ { 0.0, 0xFF_u8 }, { 1.0, 0x00_u8 } },
                     type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
                 });
@@ -291,7 +291,7 @@ namespace neogfx
                 }
                 aGraphicsContext.fill_rect(fadeRect, gradient
                 {
-                    gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
+                    gradient::color_stop_list{ { 0.0, backgroundColor }, { 1.0, backgroundColor } },
                     gradient::alpha_stop_list{ { 0.0, 0x00_u8 },{ 1.0, 0xFF_u8 } },
                     type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
                 });
@@ -307,12 +307,12 @@ namespace neogfx
             coordinate w = 1.0;
             for (coordinate y = 0.0; y < rectUpButton.height(); ++y)
             {
-                aGraphicsContext.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), baseColour.light() ?
-                    foregroundColour.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
-                    foregroundColour.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
-                aGraphicsContext.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)), baseColour.light() ?
-                    foregroundColour.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
-                    foregroundColour.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
+                aGraphicsContext.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), baseColor.light() ?
+                    foregroundColor.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
+                    foregroundColor.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
+                aGraphicsContext.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)), baseColor.light() ?
+                    foregroundColor.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
+                    foregroundColor.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
                 x -= 1.0;
                 w += 2.0;
             }
@@ -323,20 +323,20 @@ namespace neogfx
             coordinate h = 1.0;
             for (coordinate x = 0.0; x < rectUpButton.width(); ++x)
             {
-                aGraphicsContext.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)), baseColour.light() ?
-                    foregroundColour.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
-                    foregroundColour.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
-                aGraphicsContext.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)), baseColour.light() ?
-                    foregroundColour.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
-                    foregroundColour.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
+                aGraphicsContext.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)), baseColor.light() ?
+                    foregroundColor.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
+                    foregroundColor.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
+                aGraphicsContext.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)), baseColor.light() ?
+                    foregroundColor.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
+                    foregroundColor.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
                 y -= 1.0;
                 h += 2.0;
             }
         }
         if (style() == scrollbar_style::Normal)
-            aGraphicsContext.fill_rect(element_geometry(ElementThumb).deflate(iType == scrollbar_type::Vertical ? margin : 0.0, iType == scrollbar_type::Vertical ? 0.0 : margin), baseColour.light() ?
-                foregroundColour.darker(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00) :
-                foregroundColour.lighter(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00));
+            aGraphicsContext.fill_rect(element_geometry(ElementThumb).deflate(iType == scrollbar_type::Vertical ? margin : 0.0, iType == scrollbar_type::Vertical ? 0.0 : margin), baseColor.light() ?
+                foregroundColor.darker(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00) :
+                foregroundColor.lighter(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00));
         aGraphicsContext.set_origin(oldOrigin);
     }
 

@@ -39,7 +39,7 @@ namespace neogfx::game
                     { &font },
                     { to_ecs_component(aAppearance.ink()) },
                     aAppearance.effect() ? aAppearance.effect()->type() : text_effect_type::None,
-                    { aAppearance.effect() ? to_ecs_component(aAppearance.effect()->colour()) : game::material{} },
+                    { aAppearance.effect() ? to_ecs_component(aAppearance.effect()->color()) : game::material{} },
                     aAppearance.effect() ? aAppearance.effect()->width() : 0.0
                 });
             game::text_mesh::meta::update(textMesh, aEcs, aGraphicsContext, id());

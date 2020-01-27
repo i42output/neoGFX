@@ -59,23 +59,23 @@ namespace neogfx
     protected:
         virtual rect path_bounding_rect() const;
         virtual neogfx::path path() const;
-        virtual bool spot_colour() const;
-        virtual colour border_mid_colour() const;
+        virtual bool spot_color() const;
+        virtual color border_mid_color() const;
         virtual bool perform_hover_animation() const;
-        virtual bool has_hover_colour() const;
-        virtual colour hover_colour() const;
-        virtual void set_hover_colour(const optional_colour& aHoverColour = optional_colour());
+        virtual bool has_hover_color() const;
+        virtual color hover_color() const;
+        virtual void set_hover_color(const optional_color& aHoverColor = optional_color());
         virtual void animate();
         virtual bool finished_animation() const;
-        virtual colour animation_colour() const;
-        virtual colour animation_colour(uint32_t aAnimationFrame) const;
+        virtual color animation_color() const;
+        virtual color animation_color(uint32_t aAnimationFrame) const;
     private:
         void init();
     private:
         neolib::callback_timer iAnimator;
         uint32_t iAnimationFrame;
         push_button_style iStyle;
-        optional_colour iHoverColour;
+        optional_color iHoverColor;
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
     };
 }

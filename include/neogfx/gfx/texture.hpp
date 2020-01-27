@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <vector>
 #include <optional>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
 
@@ -36,7 +36,7 @@ namespace neogfx
         // construction
     public:
         texture();
-        texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_colour& aColour = optional_colour());
+        texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_color& aColor = optional_color());
         texture(const i_texture& aTexture);
         texture(const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
         texture(const i_sub_texture& aSubTexture);
@@ -57,8 +57,8 @@ namespace neogfx
         size storage_extents() const override;
         void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) override;
         void set_pixels(const i_image& aImage) override;
-        void set_pixel(const point& aPosition, const colour& aColour) override;
-        colour get_pixel(const point& aPosition) const override;
+        void set_pixel(const point& aPosition, const color& aColor) override;
+        color get_pixel(const point& aPosition) const override;
     public:
         int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
     public:

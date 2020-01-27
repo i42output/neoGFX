@@ -56,7 +56,7 @@ namespace neogfx
         void activate_target() const override;
         void deactivate_target() const override;
     public:
-        colour read_pixel(const point& aPosition) const override;
+        color read_pixel(const point& aPosition) const override;
     public:
         uint64_t frame_counter() const override;
         double fps() const override;

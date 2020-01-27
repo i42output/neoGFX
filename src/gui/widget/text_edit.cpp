@@ -38,14 +38,14 @@ namespace neogfx
         
     text_edit::style::style(
         const optional_font& aFont,
-        const colour_or_gradient& aTextColour,
-        const colour_or_gradient& aBackgroundColour,
+        const color_or_gradient& aTextColor,
+        const color_or_gradient& aBackgroundColor,
         const optional_text_effect& aTextEffect) :
         iParent{ nullptr },
         iUseCount{ 0 },
         iFont{ aFont },
-        iTextColour{ aTextColour },
-        iBackgroundColour{ aBackgroundColour },
+        iTextColor{ aTextColor },
+        iBackgroundColor{ aBackgroundColor },
         iTextEffect{ aTextEffect }
     {
     }
@@ -56,8 +56,8 @@ namespace neogfx
         iParent{ &aParent },
         iUseCount{ 0 },
         iFont{ aOther.iFont },
-        iTextColour{ aOther.iTextColour },
-        iBackgroundColour{ aOther.iBackgroundColour },
+        iTextColor{ aOther.iTextColor },
+        iBackgroundColor{ aOther.iBackgroundColor },
         iTextEffect{ aOther.iTextEffect }
     {
     }
@@ -78,19 +78,19 @@ namespace neogfx
         return iFont;
     }
 
-    const colour_or_gradient& text_edit::style::glyph_colour() const
+    const color_or_gradient& text_edit::style::glyph_color() const
     {
-        return iGlyphColour;
+        return iGlyphColor;
     }
 
-    const colour_or_gradient& text_edit::style::text_colour() const
+    const color_or_gradient& text_edit::style::text_color() const
     {
-        return iTextColour;
+        return iTextColor;
     }
 
-    const colour_or_gradient& text_edit::style::background_colour() const
+    const color_or_gradient& text_edit::style::background_color() const
     {
-        return iBackgroundColour;
+        return iBackgroundColor;
     }
 
     const optional_text_effect& text_edit::style::text_effect() const
@@ -103,19 +103,19 @@ namespace neogfx
         iFont = aFont;
     }
 
-    void text_edit::style::set_glyph_colour(const colour_or_gradient& aColour)
+    void text_edit::style::set_glyph_color(const color_or_gradient& aColor)
     {
-        iGlyphColour = aColour;
+        iGlyphColor = aColor;
     }
 
-    void text_edit::style::set_text_colour(const colour_or_gradient& aColour)
+    void text_edit::style::set_text_color(const color_or_gradient& aColor)
     {
-        iTextColour = aColour;
+        iTextColor = aColor;
     }
 
-    void text_edit::style::set_background_colour(const colour_or_gradient& aColour)
+    void text_edit::style::set_background_color(const color_or_gradient& aColor)
     {
-        iBackgroundColour = aColour;
+        iBackgroundColor = aColor;
     }
 
     void text_edit::style::set_text_effect(const optional_text_effect& aEffect)
@@ -127,10 +127,10 @@ namespace neogfx
     {
         if (aOverridingStyle.font() != std::nullopt)
             iFont = aOverridingStyle.font();
-        if (aOverridingStyle.text_colour() != neolib::none)
-            iTextColour = aOverridingStyle.text_colour();
-        if (aOverridingStyle.background_colour() != neolib::none)
-            iBackgroundColour = aOverridingStyle.background_colour();
+        if (aOverridingStyle.text_color() != neolib::none)
+            iTextColor = aOverridingStyle.text_color();
+        if (aOverridingStyle.background_color() != neolib::none)
+            iBackgroundColor = aOverridingStyle.background_color();
         if (aOverridingStyle.text_effect() != std::nullopt)
             iTextEffect = aOverridingStyle.text_effect();
         return *this;
@@ -138,7 +138,7 @@ namespace neogfx
 
     bool text_edit::style::operator==(const style& aRhs) const
     {
-        return std::tie(iFont, iTextColour, iBackgroundColour, iTextEffect) == std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextEffect);
+        return std::tie(iFont, iTextColor, iBackgroundColor, iTextEffect) == std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iBackgroundColor, aRhs.iTextEffect);
     }
 
     bool text_edit::style::operator!=(const style& aRhs) const
@@ -148,7 +148,7 @@ namespace neogfx
 
     bool text_edit::style::operator<(const style& aRhs) const
     {
-        return std::tie(iFont, iTextColour, iBackgroundColour, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextEffect);
+        return std::tie(iFont, iTextColor, iBackgroundColor, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iBackgroundColor, aRhs.iTextEffect);
     }
 
     class text_edit::multiple_text_changes
@@ -299,8 +299,8 @@ namespace neogfx
             return;
         }
         scoped_scissor scissor{ aGraphicsContext, clipRect };
-        if (iDefaultStyle.background_colour() != neolib::none)
-            aGraphicsContext.fill_rect(client_rect(true), to_brush(iDefaultStyle.background_colour()));
+        if (iDefaultStyle.background_color() != neolib::none)
+            aGraphicsContext.fill_rect(client_rect(true), to_brush(iDefaultStyle.background_color()));
         coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < columns(); ++columnIndex)
         {
@@ -632,11 +632,11 @@ namespace neogfx
         }
     }
 
-    colour text_edit::frame_colour() const
+    color text_edit::frame_color() const
     {
-        if (service<i_app>().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
-            return scrollable_widget::frame_colour();
-        return service<i_app>().current_style().palette().colour().mid(background_colour());
+        if (service<i_app>().current_style().palette().color().similar_intensity(background_color(), 0.03125))
+            return scrollable_widget::frame_color();
+        return service<i_app>().current_style().palette().color().mid(background_color());
     }
 
     bool text_edit::can_undo() const
@@ -998,14 +998,14 @@ namespace neogfx
         update();
     }
 
-    colour text_edit::default_text_colour() const
+    color text_edit::default_text_color() const
     {
-        if (std::holds_alternative<colour>(default_style().text_colour()))
-            return static_variant_cast<const colour&>(default_style().text_colour());
-        else if (std::holds_alternative<gradient>(default_style().text_colour()))
-            return static_variant_cast<const gradient&>(default_style().text_colour()).at(0.0);
+        if (std::holds_alternative<color>(default_style().text_color()))
+            return static_variant_cast<const color&>(default_style().text_color());
+        else if (std::holds_alternative<gradient>(default_style().text_color()))
+            return static_variant_cast<const gradient&>(default_style().text_color()).at(0.0);
         else
-            return service<i_app>().current_style().palette().text_colour_for_widget(*this);
+            return service<i_app>().current_style().palette().text_color_for_widget(*this);
     }
 
     neogfx::cursor& text_edit::cursor() const
@@ -1865,7 +1865,7 @@ namespace neogfx
     {
         style result = iDefaultStyle;
         result.merge(column_style(aColumn));
-        result.set_background_colour();
+        result.set_background_color();
         auto const& tagStyle = iText.tag(iText.begin() + from_glyph(aGlyph).first).style();
         if (std::holds_alternative<style_list::const_iterator>(tagStyle))
             result.merge(*static_variant_cast<style_list::const_iterator>(tagStyle));
@@ -1896,18 +1896,18 @@ namespace neogfx
                 auto const& glyphFont = glyph.font(iGlyphs);
                 auto nextTextAppearance = selected ?
                     text_appearance{ 
-                        service<i_app>().current_style().palette().selection_colour().light() ? colour::Black : colour::White,
-                        has_focus() ? service<i_app>().current_style().palette().selection_colour() : service<i_app>().current_style().palette().selection_colour().with_alpha(64) } :
+                        service<i_app>().current_style().palette().selection_color().light() ? color::Black : color::White,
+                        has_focus() ? service<i_app>().current_style().palette().selection_color() : service<i_app>().current_style().palette().selection_color().with_alpha(64) } :
                     text_appearance{
-                        style.glyph_colour() == neolib::none ?
-                            std::holds_alternative<colour>(style.text_colour()) ?
-                                static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
-                                    static_variant_cast<const gradient&>(style.text_colour()).at(((glyphPos.x - column_rect(column_index(aColumn)).x) / column_rect(column_index(aColumn)).width())) :
-                                    default_text_colour() :
-                            style.glyph_colour(),
-                        style.background_colour() != neolib::none ? 
-                            optional_text_colour{ neogfx::text_colour{ style.background_colour() } } : 
-                            optional_text_colour{},
+                        style.glyph_color() == neolib::none ?
+                            std::holds_alternative<color>(style.text_color()) ?
+                                static_variant_cast<const color&>(style.text_color()) : std::holds_alternative<gradient>(style.text_color()) ?
+                                    static_variant_cast<const gradient&>(style.text_color()).at(((glyphPos.x - column_rect(column_index(aColumn)).x) / column_rect(column_index(aColumn)).width())) :
+                                    default_text_color() :
+                            style.glyph_color(),
+                        style.background_color() != neolib::none ? 
+                            optional_text_color{ neogfx::text_color{ style.background_color() } } : 
+                            optional_text_color{},
                         style.text_effect() };
                 if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)
                 {
@@ -1933,23 +1933,23 @@ namespace neogfx
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-        colour::component cursorAlpha = static_cast<colour::component>(partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime) * 0xFF);
-        auto cursorColour = cursor().colour();
-        if (cursorColour == neolib::none && cursor().style() == cursor_style::Standard)
-            cursorColour = service<i_app>().current_style().palette().text_colour_for_widget(*this);
-        if (cursorColour == neolib::none)
+        color::component cursorAlpha = static_cast<color::component>(partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime) * 0xFF);
+        auto cursorColor = cursor().color();
+        if (cursorColor == neolib::none && cursor().style() == cursor_style::Standard)
+            cursorColor = service<i_app>().current_style().palette().text_color_for_widget(*this);
+        if (cursorColor == neolib::none)
         {
             aGraphicsContext.push_logical_operation(logical_operation::Xor);
-            aGraphicsContext.fill_rect(cursor_rect(), colour::White * (cursorAlpha / 255.0));
+            aGraphicsContext.fill_rect(cursor_rect(), color::White * (cursorAlpha / 255.0));
             aGraphicsContext.pop_logical_operation();
         }
-        else if (std::holds_alternative<colour>(cursorColour))
+        else if (std::holds_alternative<color>(cursorColor))
         {
-            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const colour&>(cursorColour).with_combined_alpha(cursorAlpha));
+            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const color&>(cursorColor).with_combined_alpha(cursorAlpha));
         }
-        else if (std::holds_alternative<gradient>(cursorColour))
+        else if (std::holds_alternative<gradient>(cursorColor))
         {
-            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColour).with_combined_alpha(cursorAlpha));
+            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColor).with_combined_alpha(cursorAlpha));
         }
     }
 

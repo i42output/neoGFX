@@ -20,9 +20,45 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/hsv_colour.hpp>
 
 namespace neogfx
 {
-    typedef hsv_colour hsv_color;
+    class color;
+
+    class hsv_color
+    {
+    public:
+        hsv_color();
+        hsv_color(double aHue, double aSaturation, double aValue, double aAlpha = 1.0);
+        hsv_color(const color& aColor);
+    public:
+        double hue() const;
+        double saturation() const;
+        double value() const;
+        double brightness() const;
+        double alpha() const;
+        void set_hue(double aHue);
+        void set_saturation(double aSaturation);
+        void set_value(double aValue);
+        void set_brightness(double aBrightness);
+        void set_alpha(double aAlpha);
+        bool hue_undefined() const;
+    public:
+        hsv_color with_brightness(double aNewLightness) const;
+        hsv_color brighter(double aDelta) const;
+        hsv_color brighter(double aCoeffecient, double aDelta) const;
+        color to_rgb() const;
+        static hsv_color from_rgb(const color& aColor);
+    public:
+        static double undefined_hue();
+    public:
+        bool operator==(const hsv_color& aOther) const;
+        bool operator!=(const hsv_color& aOther) const;
+        bool operator<(const hsv_color& aOther) const;
+    private:
+        double iHue;
+        double iSaturation;
+        double iValue;
+        double iAlpha;
+    };
 }

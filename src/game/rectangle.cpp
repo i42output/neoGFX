@@ -31,10 +31,10 @@ namespace neogfx::game
             game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
         }
 
-        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::colour& aColour) :
+        rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::color& aColor) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ colour{ aColour.to_vec4() }, {}, {} } }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ color{ aColor.to_vec4() }, {}, {} } }, aEcs, id());
         }
 
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :

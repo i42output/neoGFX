@@ -50,13 +50,13 @@ namespace video_poker
     class outcome : public neogfx::game::shape::text
     {
     public:
-        outcome(neogfx::game::canvas& aCanvas, const std::string& aOutcome, const neogfx::colour& aColour) :
+        outcome(neogfx::game::canvas& aCanvas, const std::string& aOutcome, const neogfx::color& aColor) :
             neogfx::game::shape::text{
                 aCanvas.ecs(),
                 neogfx::graphics_context{ aCanvas },
                 aOutcome,
                 neogfx::font{ "Exo 2", "Black", 48.0 },
-                neogfx::text_appearance{aColour, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::colour::Black } },
+                neogfx::text_appearance{aColor, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black } },
                 neogfx::alignment::Centre}
         {
             aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).destroyOnFustrumCull = true;
@@ -100,14 +100,14 @@ namespace video_poker
         set_ignore_mouse_events(true);
         iMainLayout.set_spacing(neogfx::size{ 16.0 });
         iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
-        auto shiny_text = [](const neogfx::colour& aColour)
+        auto shiny_text = [](const neogfx::color& aColor)
         {
             return neogfx::text_appearance{
-                neogfx::gradient{ { neogfx::colour::Black, aColour, neogfx::colour::Black } },
-                neogfx::text_effect{neogfx::text_effect_type::Outline, neogfx::colour::White } };
+                neogfx::gradient{ { neogfx::color::Black, aColor, neogfx::color::Black } },
+                neogfx::text_effect{neogfx::text_effect_type::Outline, neogfx::color::White } };
         };
         iLabelTitle.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
-        iLabelTitle.text_widget().set_text_appearance(shiny_text(neogfx::colour::Green));
+        iLabelTitle.text_widget().set_text_appearance(shiny_text(neogfx::color::Green));
         iSpacer1.set_weight(neogfx::size{ 0.1 });
         iSpacer2.set_weight(neogfx::size{ 0.25 });
         iSpacer3.set_weight(neogfx::size{ 0.25 });
@@ -116,9 +116,9 @@ namespace video_poker
         {
             aButton.set_size_policy(neogfx::size_constraint::Minimum, neogfx::size{ 1.0 });
             aButton.set_weight(neogfx::size{});
-            aButton.set_foreground_colour(neogfx::colour::White);
+            aButton.set_foreground_color(neogfx::color::White);
             aButton.text_widget().set_size_hint(neogfx::size_hint{ "MAX\nBET" });
-            aButton.text_widget().set_text_colour(neogfx::colour::Black);
+            aButton.text_widget().set_text_color(neogfx::color::Black);
             aButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 24.0 });
         };
         set_bet_button_apperance(iBetMinus);
@@ -126,13 +126,13 @@ namespace video_poker
         set_bet_button_apperance(iBetMax);
         set_bet_button_apperance(iDeal);
         iLabelCredits.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCredits.text_widget().set_text_appearance(shiny_text(neogfx::colour::Yellow));
+        iLabelCredits.text_widget().set_text_appearance(shiny_text(neogfx::color::Yellow));
         iLabelCreditsValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCreditsValue.text_widget().set_text_appearance(shiny_text(neogfx::colour::White));
+        iLabelCreditsValue.text_widget().set_text_appearance(shiny_text(neogfx::color::White));
         iLabelStake.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStake.text_widget().set_text_appearance(shiny_text(neogfx::colour::Yellow));
+        iLabelStake.text_widget().set_text_appearance(shiny_text(neogfx::color::Yellow));
         iLabelStakeValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStakeValue.text_widget().set_text_appearance(shiny_text(neogfx::colour::White));
+        iLabelStakeValue.text_widget().set_text_appearance(shiny_text(neogfx::color::White));
 
         iBetMinus.clicked([this]() { bet(-1); });
         iBetPlus.clicked([this]() { bet(+1); });
@@ -242,7 +242,7 @@ namespace video_poker
         iOutcome = std::make_unique<outcome>(
             iCanvas, 
             to_string(video_poker::to_poker_hand(*iHand)) + neogfx::to_string(u8"\nWIN £") + boost::lexical_cast<std::string>(aWinnings) + "!",
-            neogfx::colour::Goldenrod.with_lightness(0.8));
+            neogfx::color::Goldenrod.with_lightness(0.8));
         iCredits += aWinnings;
     }
 
@@ -251,7 +251,7 @@ namespace video_poker
         iOutcome = std::make_unique<outcome>(
             iCanvas,
             "No Win",
-            neogfx::colour::Blue.with_lightness(0.8));
+            neogfx::color::Blue.with_lightness(0.8));
     }
 
     void table::change_state(table_state aNewState)

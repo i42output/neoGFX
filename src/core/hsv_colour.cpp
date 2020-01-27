@@ -1,4 +1,4 @@
-// colour.cpp
+// color.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -19,104 +19,104 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/string_utils.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 
 namespace neogfx
 {
-    hsv_colour::hsv_colour() :
+    hsv_color::hsv_color() :
         iHue{0.0}, iSaturation{0.0}, iValue{0.0}, iAlpha{1.0}
     {
     }
 
-    hsv_colour::hsv_colour(double aHue, double aSaturation, double aValue, double aAlpha) :
+    hsv_color::hsv_color(double aHue, double aSaturation, double aValue, double aAlpha) :
         iHue{aHue}, iSaturation{ aSaturation }, iValue{ aValue }, iAlpha{ aAlpha }
     {
         if (iHue != undefined_hue())
             iHue = std::fmod(iHue, 360.0);
     }
 
-    hsv_colour::hsv_colour(const colour& aColour)
+    hsv_color::hsv_color(const color& aColor)
     {
-        *this = from_rgb(aColour);
+        *this = from_rgb(aColor);
     }
 
-    double hsv_colour::hue() const
+    double hsv_color::hue() const
     {
         if (iHue != undefined_hue())
             return iHue;
         return 0.0;
     }
 
-    double hsv_colour::saturation() const
+    double hsv_color::saturation() const
     {
         return iSaturation;
     }
 
-    double hsv_colour::value() const
+    double hsv_color::value() const
     {
         return iValue;
     }
 
-    double hsv_colour::brightness() const
+    double hsv_color::brightness() const
     {
         return value();
     }
 
-    double hsv_colour::alpha() const
+    double hsv_color::alpha() const
     {
         return iAlpha;
     }
 
-    void hsv_colour::set_hue(double aHue)
+    void hsv_color::set_hue(double aHue)
     {
         iHue = std::fmod(aHue, 360.0);
     }
 
-    void hsv_colour::set_saturation(double aSaturation)
+    void hsv_color::set_saturation(double aSaturation)
     {
         iSaturation = aSaturation;
     }
 
-    void hsv_colour::set_value(double aValue)
+    void hsv_color::set_value(double aValue)
     {
         iValue = aValue;
     }
 
-    void hsv_colour::set_brightness(double aBrightness)
+    void hsv_color::set_brightness(double aBrightness)
     {
         set_value(aBrightness);
     }
 
-    void hsv_colour::set_alpha(double aAlpha)
+    void hsv_color::set_alpha(double aAlpha)
     {
         iAlpha = aAlpha;
     }
 
-    bool hsv_colour::hue_undefined() const
+    bool hsv_color::hue_undefined() const
     {
         return iHue == undefined_hue();
     }
 
-    hsv_colour hsv_colour::with_brightness(double aNewBrightness) const
+    hsv_color hsv_color::with_brightness(double aNewBrightness) const
     {
         return brighter(0.0, aNewBrightness);
     }
 
-    hsv_colour hsv_colour::brighter(double aDelta) const
+    hsv_color hsv_color::brighter(double aDelta) const
     {
         return brighter(1.0, aDelta);
     }
 
-    hsv_colour hsv_colour::brighter(double coeffecient, double delta) const
+    hsv_color hsv_color::brighter(double coeffecient, double delta) const
     {
-        hsv_colour result = *this;
+        hsv_color result = *this;
         result.iValue *= coeffecient;
         result.iValue += delta;
         result.iValue = std::min(std::max(result.iValue, 0.0), 1.0);
         return result;
     }
 
-    colour hsv_colour::to_rgb() const
+    color hsv_color::to_rgb() const
     {
         double c = value() * saturation();
         double h2 = hue() / 60.0;
@@ -137,18 +137,18 @@ namespace neogfx
         else
             r = g = b = 0.0;
         double m = std::abs(value() - c);
-        colour result(
-            static_cast<colour::component>(std::floor((r + m) * 255.0)),
-            static_cast<colour::component>(std::floor((g + m) * 255.0)),
-            static_cast<colour::component>(std::floor((b + m) * 255.0)),
-            static_cast<colour::component>(std::floor(alpha() * 255.0)));
+        color result(
+            static_cast<color::component>(std::floor((r + m) * 255.0)),
+            static_cast<color::component>(std::floor((g + m) * 255.0)),
+            static_cast<color::component>(std::floor((b + m) * 255.0)),
+            static_cast<color::component>(std::floor(alpha() * 255.0)));
         return result;
     }
 
-    hsv_colour hsv_colour::from_rgb(const colour& aColour)
+    hsv_color hsv_color::from_rgb(const color& aColor)
     {
         double hue, saturation, value;
-        double r = aColour.red() / 255.0, g = aColour.green() / 255.0, b = aColour.blue() / 255.0;
+        double r = aColor.red() / 255.0, g = aColor.green() / 255.0, b = aColor.blue() / 255.0;
         double M = std::max(std::max(r, g), b);
         double m = std::min(std::min(r, g), b);
         double c = M - m;
@@ -178,16 +178,16 @@ namespace neogfx
         else
             saturation = c / value;
         saturation = std::max(std::min(saturation, 1.0), 0.0);
-        return hsv_colour(hue, saturation, value, aColour.alpha() / 255.0);
+        return hsv_color(hue, saturation, value, aColor.alpha() / 255.0);
     }
 
-    double hsv_colour::undefined_hue()
+    double hsv_color::undefined_hue()
     {
         return -std::numeric_limits<double>::max();
     }
 
 
-    bool hsv_colour::operator==(const hsv_colour& aOther) const
+    bool hsv_color::operator==(const hsv_color& aOther) const
     {
         return hue() == aOther.hue() &&
             saturation() == aOther.saturation() &&
@@ -196,12 +196,12 @@ namespace neogfx
             hue_undefined() == aOther.hue_undefined();
     }
 
-    bool hsv_colour::operator!=(const hsv_colour& aOther) const
+    bool hsv_color::operator!=(const hsv_color& aOther) const
     {
         return !(*this == aOther);
     }
 
-    bool hsv_colour::operator<(const hsv_colour& aOther) const
+    bool hsv_color::operator<(const hsv_color& aOther) const
     {
         return std::make_tuple(hue(), saturation(), value(), alpha()) < std::make_tuple(aOther.hue(), aOther.saturation(), aOther.value(), aOther.alpha());
     }

@@ -10,7 +10,7 @@
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
-#include <neogfx/gui/dialog/colour_dialog.hpp>
+#include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
 
@@ -86,17 +86,17 @@ public:
     {
     }
 public:
-    void set_colour_type(const std::optional<ng::item_cell_colour_type>& aColourType)
+    void set_color_type(const std::optional<ng::item_cell_color_type>& aColorType)
     {
-        iColourType = aColourType;
+        iColorType = aColorType;
     }
-    ng::optional_colour cell_colour(const ng::item_presentation_model_index& aIndex, ng::item_cell_colour_type aColourType) const override
+    ng::optional_color cell_color(const ng::item_presentation_model_index& aIndex, ng::item_cell_color_type aColorType) const override
     {
-        neolib::basic_random<double> prng{ (to_item_model_index(aIndex).row() << 16) + to_item_model_index(aIndex).column() }; // use seed to make random colour based on row/index
-        if (aColourType == iColourType)
-            return ng::hsv_colour{ prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
-        else if (aColourType == ng::item_cell_colour_type::Foreground && iColourType)
-            return ng::colour::Black;
+        neolib::basic_random<double> prng{ (to_item_model_index(aIndex).row() << 16) + to_item_model_index(aIndex).column() }; // use seed to make random color based on row/index
+        if (aColorType == iColorType)
+            return ng::hsv_color{ prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
+        else if (aColorType == ng::item_cell_color_type::Foreground && iColorType)
+            return ng::color::Black;
         return {};
     }
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
@@ -107,7 +107,7 @@ public:
             return ng::optional_texture{};
     }
 private:
-    std::optional<ng::item_cell_colour_type> iColourType;
+    std::optional<ng::item_cell_color_type> iColorType;
     std::array<ng::optional_texture, 4> iCellImages;
 };
 
@@ -133,10 +133,10 @@ public:
             ng::dimension const d = iLarge ? 48.0 : 24.0;
             ng::texture newTexture{ ng::size{d, d}, 1.0, ng::texture_sampling::Multisample };
             ng::graphics_context gc{ newTexture };
-            auto const textColour = ng::service<ng::i_app>().current_style().palette().text_colour();
-            gc.draw_rect(ng::rect{ ng::point{}, ng::size{d, d} }, ng::pen{ textColour, 1.0 });
+            auto const textColor = ng::service<ng::i_app>().current_style().palette().text_color();
+            gc.draw_rect(ng::rect{ ng::point{}, ng::size{d, d} }, ng::pen{ textColor, 1.0 });
             ng::optional_point lastPos;
-            ng::pen pen{ textColour, 2.0 };
+            ng::pen pen{ textColor, 2.0 };
             for (double x = 0.0; x <= d - 8.0; x += 2.0)
             {
                 ng::point pos{ x + 4.0, ng::ease(easingFunction, x / (d - 8.0)) * (d - 8.0) + 4.0 };
@@ -165,22 +165,22 @@ public:
         clicked([this, aNumber]()
         {
             ng::service<ng::i_app>().change_style("Keypad").
-                palette().set_colour(aNumber != 9 ? ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::colour::LightGoldenrod);
+                palette().set_color(aNumber != 9 ? ng::color{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::color::LightGoldenrod);
             if (aNumber == 9)
-                iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} });
+                iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::color::DarkGoldenrod, ng::color::LightGoldenrodYellow, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} });
             else if (aNumber == 8)
-                iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::White });
+                iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::color::White });
             else if (aNumber == 0)
-                iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::colour::White });
+                iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::color::White });
             else
                 iTextEdit.set_default_style(
                     ng::text_edit::style{
                         ng::optional_font{},
                         ng::gradient{
-                            ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0x40),
-                            ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0xC0),
+                            ng::color{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0x40),
+                            ng::color{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0xC0),
                             ng::gradient_direction::Horizontal},
-                        ng::colour_or_gradient{} });
+                        ng::color_or_gradient{} });
         });
     }
 private:
@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
         app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.change_style("Keypad");
-        app.current_style().palette().set_colour(ng::colour::Black);
+        app.current_style().palette().set_color(ng::color::Black);
         app.change_style("Slate");
 
         ng::window& window = ui.mainWindow;
@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
             if (showFps)
             {
                 auto const numbers = (boost::format("%1$.2f/%2$.2f") % window.fps() % window.potential_fps()).str();
-                aGc.draw_text(ng::point{ 100, 120 }, (boost::format(" %1% FPS/PFPS ") % numbers).str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::colour::DarkBlue.darker(0x40), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
+                aGc.draw_text(ng::point{ 100, 120 }, (boost::format(" %1% FPS/PFPS ") % numbers).str(), fpsFont, ng::text_appearance{ ng::color::White, ng::color::DarkBlue.darker(0x40), ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } });
             }
         });
 
@@ -260,12 +260,12 @@ int main(int argc, char* argv[])
         
         app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
         {
-            ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(ng::colour::LightGoldenrod);
+            ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color::LightGoldenrod);
         });
 
         ui.actionContacts.triggered([]()
         {
-            ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(ng::colour::White);
+            ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color::White);
         });
         
         neolib::callback_timer ct{ app, [&app, &ui](neolib::callback_timer& aTimer)
@@ -307,9 +307,9 @@ int main(int argc, char* argv[])
             }
         }
 
-        ui.actionColourDialog.triggered([&window]()
+        ui.actionColorDialog.triggered([&window]()
         {
-            ng::colour_dialog cd(window);
+            ng::color_dialog cd(window);
             cd.exec();
         });
 
@@ -325,9 +325,9 @@ int main(int argc, char* argv[])
         {
             auto s = ui.textEdit.default_style();
             auto s2 = ui.textEditEditor.default_style();
-            s.set_glyph_colour(ui.gradientWidget.gradient());
-            s2.set_glyph_colour(ui.gradientWidget.gradient());
-            s2.set_background_colour(ng::colour_or_gradient{});
+            s.set_glyph_color(ui.gradientWidget.gradient());
+            s2.set_glyph_color(ui.gradientWidget.gradient());
+            s2.set_background_color(ng::color_or_gradient{});
             ui.textEdit.set_default_style(s);
             ui.textEditEditor.set_default_style(s2);
         });
@@ -385,8 +385,8 @@ int main(int argc, char* argv[])
             ui.button1.set_text(ui.textField1.input_box().text());
         });
         ui.spinBox1.ValueChanged([&ui]() { ui.slider1.set_value(ui.spinBox1.value()); });
-        bool colourCycle = false;
-        ui.button6.clicked([&colourCycle]() { colourCycle = !colourCycle; });
+        bool colorCycle = false;
+        ui.button6.clicked([&colorCycle]() { colorCycle = !colorCycle; });
         ui.buttonArcadeMode.clicked([&ui]() { ui.actionArcadeMode.toggle(); });
         ui.button7.clicked([&ui]() { ui.actionMute.toggle(); });
         ui.button8.clicked([&ui]() { if (ui.actionContacts.is_enabled()) ui.actionContacts.disable(); else ui.actionContacts.enable(); });
@@ -396,9 +396,9 @@ int main(int argc, char* argv[])
         for (uint32_t i = 0; i < 10; ++i)
         {
             auto& button = ui.layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
-            ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
-            button.set_foreground_colour(randomColour);
-            button.clicked([&, randomColour]() { ui.textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
+            ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
+            button.set_foreground_color(randomColor);
+            button.clicked([&, randomColor]() { ui.textEdit.BackgroundColor = randomColor.same_lightness_as(app.current_style().palette().background_color()); });
             transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
         }
         ng::event<> startAnimation;
@@ -479,7 +479,7 @@ int main(int argc, char* argv[])
             ui.gradientWidget.GradientChanged([&]()
             {
                 auto cs = ui.textEdit.column(2);
-                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } });
+                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::color_or_gradient{}, ng::color_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White } });
                 ui.textEdit.set_column(2, cs);
             }, ui.textEdit);
         });
@@ -515,18 +515,18 @@ int main(int argc, char* argv[])
         {
             ui.effectWidthSlider.set_value(1);
             auto s = ui.textEdit.default_style();
-            s.set_text_colour(app.current_style().palette().text_colour().light() ? ng::colour::Black : ng::colour::White);
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_colour() });
+            s.set_text_color(app.current_style().palette().text_color().light() ? ng::color::Black : ng::color::White);
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_color() });
             ui.textEdit.set_default_style(s);
             auto s2 = ui.textEditEditor.default_style();
-            s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White });
+            s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::color::White });
             ui.textEditEditor.set_default_style(s2);
         });
         ui.editGlow.checked([&]()
         {
             ui.effectWidthSlider.set_value(5);
             auto s = ui.textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::colour::Orange.with_lightness(0.9) });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange.with_lightness(0.9) });
             ui.textEdit.set_default_style(s);
         });
         ui.effectWidthSlider.ValueChanged([&]()
@@ -535,7 +535,7 @@ int main(int argc, char* argv[])
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ ui.editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->colour(), ui.effectWidthSlider.value(), textEffect->aux1() });
+            s.set_text_effect(ng::text_effect{ ui.editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->color(), ui.effectWidthSlider.value(), textEffect->aux1() });
             ui.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << ui.effectWidthSlider.value() << std::endl << ui.effectAux1Slider.value() << std::endl;
@@ -551,7 +551,7 @@ int main(int argc, char* argv[])
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->colour(), textEffect->width(), ui.effectAux1Slider.value() });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->color(), textEffect->width(), ui.effectAux1Slider.value() });
             ui.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << ui.effectWidthSlider.value() << std::endl << ui.effectAux1Slider.value() << std::endl;
@@ -560,54 +560,54 @@ int main(int argc, char* argv[])
         ui.editShadow.checked([&]()
         {
             auto s = ui.textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, ng::colour::Black });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, ng::color::Black });
             ui.textEdit.set_default_style(s);
         });
         ui.radioSliderFont.checked([&ui, &app]()
         {
             app.current_style().set_font_info(app.current_style().font_info().with_size(ui.slider1.normalized_value() * 18.0 + 4));
         });
-        auto update_theme_colour = [&ui]()
+        auto update_theme_color = [&ui]()
         {
-            auto themeColour = ng::service<ng::i_app>().current_style().palette().colour().to_hsv();
-            themeColour.set_hue(ui.slider1.normalized_value() * 360.0);
-            ng::service<ng::i_app>().current_style().palette().set_colour(themeColour.to_rgb());
+            auto themeColor = ng::service<ng::i_app>().current_style().palette().color().to_hsv();
+            themeColor.set_hue(ui.slider1.normalized_value() * 360.0);
+            ng::service<ng::i_app>().current_style().palette().set_color(themeColor.to_rgb());
         };
-        ui.slider1.ValueChanged([update_theme_colour, &ui, &app]()
+        ui.slider1.ValueChanged([update_theme_color, &ui, &app]()
         {
             ui.spinBox1.set_value(ui.slider1.value());
             if (ui.radioSliderFont.is_checked())
                 app.current_style().set_font_info(app.current_style().font_info().with_size(ui.slider1.normalized_value() * 18.0 + 4));
-            else if (ui.radioThemeColour.is_checked())
-                update_theme_colour();
+            else if (ui.radioThemeColor.is_checked())
+                update_theme_color();
         });
         ui.slider1.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
-        ui.radioThemeColour.checked([update_theme_colour, &ui, &app]()
+        ui.radioThemeColor.checked([update_theme_color, &ui, &app]()
         {
-            ui.slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().colour().to_hsv().hue() / 360.0);
-            update_theme_colour();
+            ui.slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().color().to_hsv().hue() / 360.0);
+            update_theme_color();
         });
 
-        ui.themeColour.clicked([&window]()
+        ui.themeColor.clicked([&window]()
         {
-            static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
-            if (sCustomColours == std::nullopt)
+            static std::optional<ng::color_dialog::custom_color_list> sCustomColors;
+            if (sCustomColors == std::nullopt)
             {
-                sCustomColours = ng::colour_dialog::custom_colour_list{};
-                std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);
+                sCustomColors = ng::color_dialog::custom_color_list{};
+                std::fill(sCustomColors->begin(), sCustomColors->end(), ng::color::White);
             }
-            auto oldColour = ng::service<ng::i_app>().change_style("Keypad").palette().colour();
-            ng::colour_dialog colourPicker(window, ng::service<ng::i_app>().change_style("Keypad").palette().colour());
-            colourPicker.set_custom_colours(*sCustomColours);
-            colourPicker.SelectionChanged([&]()
+            auto oldColor = ng::service<ng::i_app>().change_style("Keypad").palette().color();
+            ng::color_dialog colorPicker(window, ng::service<ng::i_app>().change_style("Keypad").palette().color());
+            colorPicker.set_custom_colors(*sCustomColors);
+            colorPicker.SelectionChanged([&]()
             {
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
+                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(colorPicker.selected_color());
             });
-            if (colourPicker.exec() == ng::dialog_result::Accepted)
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
+            if (colorPicker.exec() == ng::dialog_result::Accepted)
+                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(colorPicker.selected_color());
             else
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(oldColour);
-            *sCustomColours = colourPicker.custom_colours();
+                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(oldColor);
+            *sCustomColors = colorPicker.custom_colors();
         });
 
         ui.themeFont.clicked([&window]()
@@ -617,21 +617,21 @@ int main(int argc, char* argv[])
                 ng::service<ng::i_app>().current_style().set_font_info(fontPicker.selected_font());
         });
 
-        ui.editColour.clicked([&]()
+        ui.editColor.clicked([&]()
         {
-            static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
-            static ng::colour sInk = ng::service<ng::i_app>().current_style().palette().text_colour();
-            ng::colour_dialog colourPicker(window, sInk);
-            if (sCustomColours != std::nullopt)
-                colourPicker.set_custom_colours(*sCustomColours);
-            if (colourPicker.exec() == ng::dialog_result::Accepted)
+            static std::optional<ng::color_dialog::custom_color_list> sCustomColors;
+            static ng::color sInk = ng::service<ng::i_app>().current_style().palette().text_color();
+            ng::color_dialog colorPicker(window, sInk);
+            if (sCustomColors != std::nullopt)
+                colorPicker.set_custom_colors(*sCustomColors);
+            if (colorPicker.exec() == ng::dialog_result::Accepted)
             {
-                sInk = colourPicker.selected_colour();
-                ui.textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} }, true);
-                ui.textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} }, true);
-                ui.textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient_direction::Horizontal }, ng::colour_or_gradient{} }, true);
+                sInk = colorPicker.selected_color();
+                ui.textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::color::White, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} }, true);
+                ui.textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::color::White, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} }, true);
+                ui.textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::color::White, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} }, true);
             }
-            sCustomColours = colourPicker.custom_colours();
+            sCustomColors = colorPicker.custom_colors();
         });
 
         ng::vertical_spacer spacer1{ ui.layout4 };
@@ -653,14 +653,14 @@ int main(int argc, char* argv[])
             if (ui.button6.is_singular())
                 return;
             aTimer.again();
-            if (colourCycle)
+            if (colorCycle)
             {
                 const double PI = 2.0 * std::acos(0.0);
                 double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
                 neolib::random prng{ app.program_elapsed_ms() / 5000 };
-                ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
-                randomColour = randomColour.to_hsv().with_brightness(brightness).to_rgb();
-                ui.button6.set_foreground_colour(randomColour);
+                ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
+                randomColor = randomColor.to_hsv().with_brightness(brightness).to_rgb();
+                ui.button6.set_foreground_color(randomColor);
             }
         }, 16);
 
@@ -805,14 +805,14 @@ int main(int argc, char* argv[])
 
         ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_spx }); });
         ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); });
-        ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_colour_type({}); ui.tableView1.update(); });
-        ui.radioUpperTableViewColouredText.checked([&] { ipm1.set_colour_type(ng::item_cell_colour_type::Foreground); ui.tableView1.update(); });
-        ui.radioUpperTableViewColouredCells.checked([&] { ipm1.set_colour_type(ng::item_cell_colour_type::Background); ui.tableView1.update(); });
+        ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_type({}); ui.tableView1.update(); });
+        ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView1.update(); });
+        ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Background); ui.tableView1.update(); });
         ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_spx }); });
         ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); });
-        ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_colour_type({}); ui.tableView2.update(); });
-        ui.radioLowerTableViewColouredText.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Foreground); ui.tableView2.update(); });
-        ui.radioLowerTableViewColouredCells.checked([&] { ipm2.set_colour_type(ng::item_cell_colour_type::Background); ui.tableView2.update(); });
+        ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_type({}); ui.tableView2.update(); });
+        ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView2.update(); });
+        ui.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Background); ui.tableView2.update(); });
 
         ng::basic_item_model<ng::easing> easingItemModelUpperTableView;
         ui.dropListEasingUpperTableView.SelectionChanged([&](const ng::optional_item_model_index& aIndex) 
@@ -874,17 +874,17 @@ int main(int argc, char* argv[])
         {
             auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal>(i));
             hashWidget->set_size_policy(ng::size_constraint::Expanding);
-            hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
+            hashWidget->set_background_color(i % 2 == 0 ? ng::color::Black : ng::color::White);
             ui.gridLayoutImages.add_item_at_position(i / 3, i % 3, hashWidget);
         }
         ng::image smallHash(":/test/resources/channel.png");
 
         create_game(ui.layoutGame);
 
-        neolib::basic_random<uint8_t> rngColour;
-        auto random_colour = [&]()
+        neolib::basic_random<uint8_t> rngColor;
+        auto random_color = [&]()
         {
-            return ng::colour{ rngColour(255), rngColour(255), rngColour(255) };
+            return ng::color{ rngColor(255), rngColor(255), rngColor(255) };
         };
 
         ng::basic_item_model<ng::easing> easingItemModel;
@@ -905,61 +905,61 @@ int main(int argc, char* argv[])
             ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
             ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample }
         };
-        std::array<ng::colour, 4> texColour =
+        std::array<ng::color, 4> texColor =
         {
-            ng::colour::Red,
-            ng::colour::Green,
-            ng::colour::Blue,
-            ng::colour::White
+            ng::color::Red,
+            ng::color::Green,
+            ng::color::Blue,
+            ng::color::White
         };
         ng::font renderToTextureFont{ "Exo 2", ng::font_style::Bold, 11.0 };
-        auto test_pattern = [renderToTextureFont](ng::i_graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::colour& aColour, const std::string& aText)
+        auto test_pattern = [renderToTextureFont](ng::i_graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::color& aColor, const std::string& aText)
         {
-            aGc.draw_circle(aOrigin + ng::point{ 32.0, 32.0 }, 32.0, ng::pen{ aColour, aDpiScale * 2.0 });
-            aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ aColour, 1.0 });
-            aGc.draw_line(aOrigin + ng::point{ 0.0, 0.0 }, aOrigin + ng::point{ 64.0, 64.0 }, ng::pen{ aColour, aDpiScale * 4.0 });
-            aGc.draw_line(aOrigin + ng::point{ 64.0, 0.0 }, aOrigin + ng::point{ 0.0, 64.0 }, ng::pen{ aColour, aDpiScale * 4.0 });
-            aGc.draw_multiline_text(aOrigin + ng::point{ 4.0, 4.0 }, aText, renderToTextureFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black, 2.0 } });
-            aGc.draw_pixel(aOrigin + ng::point{ 2.0, 2.0 }, ng::colour{ 0xFF, 0x01, 0x01, 0xFF });
-            aGc.draw_pixel(aOrigin + ng::point{ 3.0, 2.0 }, ng::colour{ 0x02, 0xFF, 0x02, 0xFF });
-            aGc.draw_pixel(aOrigin + ng::point{ 4.0, 2.0 }, ng::colour{ 0x03, 0x03, 0xFF, 0xFF });
+            aGc.draw_circle(aOrigin + ng::point{ 32.0, 32.0 }, 32.0, ng::pen{ aColor, aDpiScale * 2.0 });
+            aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ aColor, 1.0 });
+            aGc.draw_line(aOrigin + ng::point{ 0.0, 0.0 }, aOrigin + ng::point{ 64.0, 64.0 }, ng::pen{ aColor, aDpiScale * 4.0 });
+            aGc.draw_line(aOrigin + ng::point{ 64.0, 0.0 }, aOrigin + ng::point{ 0.0, 64.0 }, ng::pen{ aColor, aDpiScale * 4.0 });
+            aGc.draw_multiline_text(aOrigin + ng::point{ 4.0, 4.0 }, aText, renderToTextureFont, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+            aGc.draw_pixel(aOrigin + ng::point{ 2.0, 2.0 }, ng::color{ 0xFF, 0x01, 0x01, 0xFF });
+            aGc.draw_pixel(aOrigin + ng::point{ 3.0, 2.0 }, ng::color{ 0x02, 0xFF, 0x02, 0xFF });
+            aGc.draw_pixel(aOrigin + ng::point{ 4.0, 2.0 }, ng::color{ 0x03, 0x03, 0xFF, 0xFF });
         };
 
         // render to texture demo
         for (std::size_t i = 0; i < 4; ++i)
         {
             ng::graphics_context texGc{ tex[i] };
-            test_pattern(texGc, ng::point{}, 1.0, texColour[i], "Render\nTo\nTexture");
+            test_pattern(texGc, ng::point{}, 1.0, texColor[i], "Render\nTo\nTexture");
         }
 
         ui.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
             ng::service<ng::i_rendering_engine>().want_game_mode();
-            aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::colour::White);
-            aGc.draw_pixel(ng::point{ 7, 7 }, ng::colour::Blue);
+            aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
+            aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
-            aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
+            aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::color::Goldenrod);
             aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
-            aGc.draw_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ng::pen{ ng::colour::Blue4, 2.0 });
-            aGc.draw_rounded_rect(ng::rect{ ng::point{ 150, 150 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
+            aGc.draw_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ng::pen{ ng::color::Blue4, 2.0 });
+            aGc.draw_rounded_rect(ng::rect{ ng::point{ 150, 150 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::color::Red4, 2.0 });
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ui.gradientWidget.gradient().with_direction(ng::gradient_direction::Radial));
-            aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
+            aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::color::Black, 1.0 });
             for (int x = 0; x < 3; ++x)
             {
-                aGc.fill_rect(ng::rect{ ng::point{ 600.0 + x * 17, 600.0 }, ng::size{ 16, 16 } }, ng::colour::Green);
-                aGc.draw_rect(ng::rect{ ng::point{ 600.0 + x * 17, 600.0 }, ng::size{ 16, 16 } }, ng::pen{ ng::colour::White, 1.0 });
+                aGc.fill_rect(ng::rect{ ng::point{ 600.0 + x * 17, 600.0 }, ng::size{ 16, 16 } }, ng::color::Green);
+                aGc.draw_rect(ng::rect{ ng::point{ 600.0 + x * 17, 600.0 }, ng::size{ 16, 16 } }, ng::pen{ ng::color::White, 1.0 });
             }
-            aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
-            aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
-            aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });
+            aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::color::Chocolate);
+            aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::color::White, 3.0 });
+            aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::color::Yellow, 3.0 });
 
             for (int x = 0; x < 10; ++x)
                 for (int y = 0; y < 10; ++y)
                     if ((x + y % 2) % 2 == 0)
-                        aGc.draw_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::colour::Black);
+                        aGc.draw_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::color::Black);
                     else
-                        aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::colour::Goldenrod);
+                        aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::color::Goldenrod);
 
             // easing function demo
             ng::scalar t = static_cast<ng::scalar>(app.program_elapsed_us());
@@ -974,10 +974,10 @@ int main(int argc, char* argv[])
             aGc.draw_texture(texLocation + ng::point{ 65.0, 65.0 }, tex[3]);
 
             texLocation.x += 140.0;
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, 1.0_spx, texColour[0], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, 1.0_spx, texColour[1], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, 1.0_spx, texColour[2], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_spx, texColour[3], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, 1.0_spx, texColor[0], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, 1.0_spx, texColor[1], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, 1.0_spx, texColor[2], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_spx, texColor[3], "Render\nTo\nScreen");
         });
 
         neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
@@ -989,14 +989,14 @@ int main(int argc, char* argv[])
 
         ui.buttonStyle1.clicked([&ui]()
         {
-            ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient_direction::Horizontal), ng::colour_or_gradient() });
+            ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::optional_font(), ng::gradient(ng::color::Red, ng::color::White, ng::gradient_direction::Horizontal), ng::color_or_gradient() });
         });
         ui.buttonStyle2.clicked([&ui]()
         {
-            ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White });
+            ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::color::White });
         });
 
-        ui.pageCircles.painting([&ui, &random_colour](ng::i_graphics_context& aGc)
+        ui.pageCircles.painting([&ui, &random_color](ng::i_graphics_context& aGc)
         {
             neolib::basic_random<ng::coordinate> prng;
             for (int i = 0; i < 100; ++i)
@@ -1006,18 +1006,18 @@ int main(int argc, char* argv[])
                 case 0:
                     aGc.draw_circle(
                         ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().extents().cy - 1) }, prng(255),
-                        ng::pen{ random_colour(), prng(1, 3) });
+                        ng::pen{ random_color(), prng(1, 3) });
                     break;
                 case 1:
                     aGc.draw_circle(
                         ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().cy - 1) }, prng(255),
-                        ng::pen{ random_colour(), prng(1, 3) },
-                        random_colour().with_alpha(random_colour().red()));
+                        ng::pen{ random_color(), prng(1, 3) },
+                        random_color().with_alpha(random_color().red()));
                     break;
                 case 2:
                     aGc.fill_circle(
                         ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().cy - 1) }, prng(255),
-                        random_colour().with_alpha(random_colour().red()));
+                        random_color().with_alpha(random_color().red()));
                     break;
                 }
             }

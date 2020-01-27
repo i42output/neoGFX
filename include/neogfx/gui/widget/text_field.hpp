@@ -49,7 +49,7 @@ namespace neogfx
         public:
             input_box_container(i_layout& aParentLayout, frame_style aFrameStyle);
         public:
-            colour frame_colour() const override;
+            color frame_color() const override;
         };
     public:
         text_field(const std::string& aLabel = std::string{}, const std::string& aHint = std::string{}, text_field_placement aPlacement = text_field_placement::LabelAbove, frame_style aFrameStyle = frame_style::SolidFrame);

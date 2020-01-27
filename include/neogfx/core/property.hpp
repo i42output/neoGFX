@@ -311,7 +311,7 @@ namespace neogfx
         struct soft_geometry {};
         struct hard_geometry {};
         struct font {};
-        struct colour {};
+        struct color {};
         struct other_appearance {};
         struct interaction {};
         struct other {};

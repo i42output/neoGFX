@@ -249,19 +249,19 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
 
-    colour popup_menu::background_colour() const
+    color popup_menu::background_color() const
     {
-        return window::has_background_colour() ?
-            window::background_colour() :
-            service<i_app>().current_style().palette().colour();
+        return window::has_background_color() ?
+            window::background_color() :
+            service<i_app>().current_style().palette().color();
     }
 
-    colour popup_menu::frame_colour() const
+    color popup_menu::frame_color() const
     {
-        if (window::has_frame_colour())
-            return window::frame_colour();
-        colour result = background_colour().darker(0x30);
-        if (result.similar_intensity(background_colour(), 0.05))
+        if (window::has_frame_color())
+            return window::frame_color();
+        color result = background_color().darker(0x30);
+        if (result.similar_intensity(background_color(), 0.05))
             result = result.dark() ? result.lighter(0x20) : result.darker(0x20);
         return result;
     }

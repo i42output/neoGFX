@@ -35,7 +35,7 @@ namespace neogfx
         {
             static const string code =
             {
-                "vec4 gradient_colour(in float n)\n"
+                "vec4 gradient_color(in float n)\n"
                 "{\n"
                 "    int l = 0;\n"
                 "    int r = uGradientStopCount - 1;\n"
@@ -65,9 +65,9 @@ namespace neogfx
                 "        --found;\n"
                 "    float firstPos = texelFetch(uGradientStopPositions, ivec2(found, 0)).r;\n"
                 "    float secondPos = texelFetch(uGradientStopPositions, ivec2(found + 1, 0)).r;\n"
-                "    vec4 firstColour = texelFetch(uGradientStopColours, ivec2(found, 0));\n"
-                "    vec4 secondColour = texelFetch(uGradientStopColours, ivec2(found + 1, 0));\n"
-                "    return mix(firstColour, secondColour, (n - firstPos) / (secondPos - firstPos));\n"
+                "    vec4 firstColor = texelFetch(uGradientStopColors, ivec2(found, 0));\n"
+                "    vec4 secondColor = texelFetch(uGradientStopColors, ivec2(found + 1, 0));\n"
+                "    return mix(firstColor, secondColor, (n - firstPos) / (secondPos - firstPos));\n"
                 "}\n"
                 "\n"
                 "float ellipse_radius(vec2 ab, vec2 centre, vec2 pt)\n"
@@ -85,7 +85,7 @@ namespace neogfx
                 "    return sqrt(x * x + y * y);\n"
                 "}\n"
                 "\n"
-                "vec4 colour_at(vec2 viewPos)\n"
+                "vec4 color_at(vec2 viewPos)\n"
                 "{\n"
                 "    vec2 s = uGradientBottomRight - uGradientTopLeft;\n"
                 "    vec2 pos = viewPos - uGradientTopLeft;\n"
@@ -205,7 +205,7 @@ namespace neogfx
                 "        else\n"
                 "            uGradientPos = 1.0;\n"
                 "    }\n"
-                "    return gradient_colour(uGradientPos);\n"
+                "    return gradient_color(uGradientPos);\n"
                 "}\n"
                 "\n"
                 "void standard_gradient_shader(inout vec4 color)\n"
@@ -215,7 +215,7 @@ namespace neogfx
                 "        int d = uGradientFilterSize / 2;\n"
                 "        if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)\n"
                 "        {\n"
-                "            color = colour_at(Coord.xy);\n"  
+                "            color = color_at(Coord.xy);\n"  
                 "        }\n"
                 "        else\n"
                 "        {\n"
@@ -224,7 +224,7 @@ namespace neogfx
                 "            {\n"
                 "                for (int fx = -d; fx <= d; ++fx)\n"
                 "                {\n"
-                "                    sum += (colour_at(Coord.xy + vec2(fx, fy)) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
+                "                    sum += (color_at(Coord.xy + vec2(fx, fy)) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
                 "                }\n"
                 "            }\n"
                 "            color = sum;\n" 
@@ -262,10 +262,10 @@ namespace neogfx
         uGradientFilterSize = static_cast<int>(gradientArrays.filter.data().extents().cx);
         uGradientStopCount = static_cast<int>(gradientArrays.stopCount);
         gradientArrays.stops.data().bind(3);
-        gradientArrays.stopColours.data().bind(4);
+        gradientArrays.stopColors.data().bind(4);
         gradientArrays.filter.data().bind(5);
         uGradientStopPositions = sampler2DRect{ 3 };
-        uGradientStopColours = sampler2DRect{ 4 };
+        uGradientStopColors = sampler2DRect{ 4 };
         uGradientFilter = sampler2DRect{ 5 };
         uGradientEnabled = true;
     }
@@ -282,17 +282,17 @@ namespace neogfx
         {
             auto combinedStops = aGradient.combined_stops();
             iGradientStopPositions.reserve(combinedStops.size());
-            iGradientStopColours.reserve(combinedStops.size());
+            iGradientStopColors.reserve(combinedStops.size());
             iGradientStopPositions.clear();
-            iGradientStopColours.clear();
+            iGradientStopColors.clear();
             for (const auto& stop : combinedStops)
             {
                 iGradientStopPositions.push_back(static_cast<float>(stop.first));
-                iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
+                iGradientStopColors.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
             }
             aData.stopCount = static_cast<uint32_t>(combinedStops.size());
             aData.stops.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopPositions.size()), 1u } }, & iGradientStopPositions[0]);
-            aData.stopColours.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopColours.size()), 1u } }, & iGradientStopColours[0]);
+            aData.stopColors.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopColors.size()), 1u } }, & iGradientStopColors[0]);
             auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
             aData.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, & filter[0][0]);
         };
@@ -393,19 +393,19 @@ namespace neogfx
                 "        case 0:\n" // effect: None
                 "            color = texel.rgba * color;\n"
                 "            break;\n"
-                "        case 1:\n" // effect: Colourize, ColourizeAverage
+                "        case 1:\n" // effect: Colorize, ColorizeAverage
                 "            {\n"
                 "                float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
                 "                color = vec4(avg, avg, avg, texel.a) * color;\n"
                 "            }\n"
                 "            break;\n"
-                "        case 2:\n" // effect: ColourizeMaximum
+                "        case 2:\n" // effect: ColorizeMaximum
                 "            {\n"
                 "                float maxChannel = max(texel.r, max(texel.g, texel.b));\n"
                 "                color = vec4(maxChannel, maxChannel, maxChannel, texel.a) * color;\n"
                 "            }\n"
                 "            break;\n"
-                "        case 3:\n" // effect: ColourizeSpot
+                "        case 3:\n" // effect: ColorizeSpot
                 "            color = vec4(1.0, 1.0, 1.0, texel.a) * color;\n"
                 "            break;\n"
                 "        case 4:\n" // effect: Monochrome

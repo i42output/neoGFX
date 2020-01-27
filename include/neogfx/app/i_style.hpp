@@ -32,9 +32,8 @@ namespace neogfx
         None        = 0x0000,
         Geometry    = 0x0001,
         Font        = 0x0002,
-        Colour        = 0x0004,
-        Color = Colour,
-        Style        = Geometry | Font | Colour
+        Color       = 0x0004,
+        Style       = Geometry | Font | Color
     };
 
     inline constexpr style_aspect operator|(style_aspect aLhs, style_aspect aRhs)

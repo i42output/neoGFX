@@ -28,8 +28,8 @@ namespace neogfx
     {
     }
 
-    texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_colour& aColour) :
-        iNativeTexture{ service<i_texture_manager>().create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColour) }
+    texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_color& aColor) :
+        iNativeTexture{ service<i_texture_manager>().create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColor) }
     {
     }
 
@@ -139,14 +139,14 @@ namespace neogfx
         set_pixels(rect{ point{}, aImage.extents() }, aImage.cpixels());
     }
 
-    void texture::set_pixel(const point& aPosition, const colour& aColour)
+    void texture::set_pixel(const point& aPosition, const color& aColor)
     {
         if (is_empty())
             throw texture_empty();
-        return iNativeTexture->set_pixel(aPosition, aColour);
+        return iNativeTexture->set_pixel(aPosition, aColor);
     }
 
-    colour texture::get_pixel(const point& aPosition) const
+    color texture::get_pixel(const point& aPosition) const
     {
         if (is_empty())
             throw texture_empty();

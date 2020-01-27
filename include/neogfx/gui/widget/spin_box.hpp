@@ -68,7 +68,7 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override;
     protected:
-        colour frame_colour() const override;
+        color frame_color() const override;
     protected:
         void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
     protected:
@@ -88,8 +88,8 @@ namespace neogfx
         push_button iStepUpButton;
         push_button iStepDownButton;
         std::optional<neolib::callback_timer> iStepper;
-        mutable std::optional<std::pair<colour, texture>> iUpArrow;
-        mutable std::optional<std::pair<colour, texture>> iDownArrow;
+        mutable std::optional<std::pair<color, texture>> iUpArrow;
+        mutable std::optional<std::pair<color, texture>> iDownArrow;
         value_type iMinimum;
         value_type iMaximum;
         value_type iStep;

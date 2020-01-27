@@ -119,9 +119,9 @@ namespace neogfx
     void sub_texture::set_pixels(const i_image& aImage)
     {
         size_u32 imageExtents = aImage.extents();
-        switch (aImage.colour_format())
+        switch (aImage.color_format())
         {
-        case colour_format::RGBA8:
+        case color_format::RGBA8:
             {
                 const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
                 std::vector<uint8_t> data(imageExtents.cx * 4 * imageExtents.cy);
@@ -134,12 +134,12 @@ namespace neogfx
         }
     }
 
-    void sub_texture::set_pixel(const point& aPosition, const colour& aColour)
+    void sub_texture::set_pixel(const point& aPosition, const color& aColor)
     {
-        native_texture()->set_pixel(aPosition + atlas_location().position(), aColour);
+        native_texture()->set_pixel(aPosition + atlas_location().position(), aColor);
     }
 
-    colour sub_texture::get_pixel(const point& aPosition) const
+    color sub_texture::get_pixel(const point& aPosition) const
     {
         return native_texture()->get_pixel(aPosition + atlas_location().position());
     }

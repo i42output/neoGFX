@@ -23,7 +23,7 @@
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/units.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 
 namespace neogfx

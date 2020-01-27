@@ -115,18 +115,18 @@ namespace neogfx
             rect line = client_rect();
             line.deflate(0, std::floor(client_rect().height() / 6.0));
             line.cx = 1.0;
-            colour ink = (has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().foreground_colour());
+            color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().foreground_color());
             aGraphicsContext.fill_rect(line, ink.darker(0x40));
             ++line.x;
             aGraphicsContext.fill_rect(line, ink.lighter(0x40));
         }
     }
 
-    colour toolbar_button::foreground_colour() const
+    color toolbar_button::foreground_color() const
     {
-        if (push_button::has_foreground_colour())
-            return push_button::foreground_colour();
-        return colour{};
+        if (push_button::has_foreground_color())
+            return push_button::foreground_color();
+        return color{};
     }
 
     focus_policy toolbar_button::focus_policy() const

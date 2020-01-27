@@ -122,7 +122,7 @@ namespace neogfx
         horizontal_layout iNormalWidgetLayout;
         horizontal_layout iPermanentWidgetLayout;
         keyboard_lock_status iKeyboardLockStatus;
-        mutable std::optional<std::pair<colour, texture>> iSizeGripTexture;
+        mutable std::optional<std::pair<color, texture>> iSizeGripTexture;
         size_grip iSizeGrip;
     };
 }

@@ -40,7 +40,7 @@ namespace neogfx
             push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, 20 }
         {
             set_margins(neogfx::margins{ 2.0 });
-            iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
+            iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Color) == style_aspect::Color) update_textures(); });
             iSink += aParent.selected([this]() { update_state(); });
             iSink += aParent.deselected([this]() { update_state(); });
             update_textures();
@@ -59,7 +59,7 @@ namespace neogfx
             {
                 double radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
                 aGraphicsContext.fill_circle(
-                    to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().centre())), radius, service<i_app>().current_style().palette().text_colour());
+                    to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().centre())), radius, service<i_app>().current_style().palette().text_color());
             }
             if (has_focus())
             {
@@ -71,8 +71,8 @@ namespace neogfx
     private:
         void update_textures()
         {
-            auto ink = service<i_app>().current_style().palette().text_colour();
-            auto paper = background_colour();
+            auto ink = service<i_app>().current_style().palette().text_color();
+            auto paper = background_color();
             const char* sTexture
             {
                 "[8,8]"
@@ -120,10 +120,10 @@ namespace neogfx
                     !high_dpi() ?
                         neogfx::image{
                             "neogfx::tab_button::close_button::iTextures[TextureOff]::" + ink.to_string(),
-                            sTexture, { { "paper", colour{} },{ "ink1", ink.with_alpha(0x60) }, { "ink2", ink.with_alpha(0x30) } } } :
+                            sTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0x60) }, { "ink2", ink.with_alpha(0x30) } } } :
                         neogfx::image{
                             "neogfx::tab_button::close_button::iHighDpiTextures[TextureOff]::" + ink.to_string(),
-                            sHighDpiTexture, { { "paper", colour{} },{ "ink1", ink.with_alpha(0x60) },{ "ink2", ink.with_alpha(0x30) } }, 2.0 });
+                            sHighDpiTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0x60) },{ "ink2", ink.with_alpha(0x30) } }, 2.0 });
             }
             if (iTextures[TextureOn] == std::nullopt || iTextures[TextureOn]->first != ink)
             {
@@ -132,10 +132,10 @@ namespace neogfx
                     !high_dpi() ?
                         neogfx::image{
                             "neogfx::tab_button::close_button::iTextures[TextureOn]::" + ink.to_string(),
-                            sTexture, { { "paper", colour{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } } } :
+                            sTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } } } :
                         neogfx::image{
                             "neogfx::tab_button::close_button::iHighDpiTextures[TextureOn]::" + ink.to_string(),
-                            sHighDpiTexture, { { "paper", colour{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } }, 2.0 });
+                            sHighDpiTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } }, 2.0 });
             }
             if (iTextures[TextureOnOver] == std::nullopt || iTextures[TextureOnOver]->first != ink)
             {
@@ -144,10 +144,10 @@ namespace neogfx
                     !high_dpi() ?
                         neogfx::image{
                             "neogfx::tab_button::close_button::iTextures[TextureOnOver]::" + paper.to_string(),
-                            sTexture, { { "paper", colour{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } } } :
+                            sTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } } } :
                         neogfx::image{
                             "neogfx::tab_button::close_button::iHighDpiTextures[TextureOnOver]::" + paper.to_string(),
-                            sHighDpiTexture, { { "paper", colour{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } }, 2.0 });
+                            sHighDpiTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } }, 2.0 });
             }
             iTextureState = Unknown;
             update_appearance();
@@ -178,7 +178,7 @@ namespace neogfx
     private:
         i_tab & iParent;
         sink iSink;
-        mutable std::optional<std::pair<colour, texture>> iTextures[3];
+        mutable std::optional<std::pair<color, texture>> iTextures[3];
         texture_index_e iTextureState;
         neolib::callback_timer iUpdater;
     };
@@ -310,17 +310,17 @@ namespace neogfx
         return to_units(*this, su.saved_units(), result);
     }
 
-    bool tab_button::spot_colour() const
+    bool tab_button::spot_color() const
     {
         return is_selected();
     }
 
-    colour tab_button::border_mid_colour() const
+    color tab_button::border_mid_color() const
     {
         if (is_deselected() || !container().has_tab_page(container().index_of(*this)))
-            return push_button::border_mid_colour();
+            return push_button::border_mid_color();
         auto& tabPage = container().tab_page(container().index_of(*this)).as_widget();
-        return tabPage.background_colour();
+        return tabPage.background_color();
     }
 
     bool tab_button::perform_hover_animation() const
@@ -353,12 +353,12 @@ namespace neogfx
         select();
     }
 
-    colour tab_button::foreground_colour() const
+    color tab_button::foreground_color() const
     {
-        if (has_foreground_colour() || is_deselected() || !container().has_tab_page(container().index_of(*this)))
-            return push_button::foreground_colour();
+        if (has_foreground_color() || is_deselected() || !container().has_tab_page(container().index_of(*this)))
+            return push_button::foreground_color();
         auto& tabPage = container().tab_page(container().index_of(*this)).as_widget();
-        return tabPage.background_colour();
+        return tabPage.background_color();
     }
 
     bool tab_button::update(const rect& aUpdateRect)

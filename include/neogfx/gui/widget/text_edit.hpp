@@ -55,8 +55,8 @@ namespace neogfx
             style();
             style(
                 const optional_font& aFont,
-                const colour_or_gradient& aTextColour = colour_or_gradient{},
-                const colour_or_gradient& aBackgroundColour = colour_or_gradient{},
+                const color_or_gradient& aTextColor = color_or_gradient{},
+                const color_or_gradient& aBackgroundColor = color_or_gradient{},
                 const optional_text_effect& aTextEffect = optional_text_effect{});
             style(
                 text_edit& aParent,
@@ -66,14 +66,14 @@ namespace neogfx
             void release() const;
         public:
             const optional_font& font() const;
-            const colour_or_gradient& glyph_colour() const;
-            const colour_or_gradient& text_colour() const;
-            const colour_or_gradient& background_colour() const;
+            const color_or_gradient& glyph_color() const;
+            const color_or_gradient& text_color() const;
+            const color_or_gradient& background_color() const;
             const optional_text_effect& text_effect() const;
             void set_font(const optional_font& aFont = optional_font{});
-            void set_glyph_colour(const colour_or_gradient& aColour = colour_or_gradient{});
-            void set_text_colour(const colour_or_gradient& aColour = colour_or_gradient{});
-            void set_background_colour(const colour_or_gradient& aColour = colour_or_gradient{});
+            void set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
+            void set_text_color(const color_or_gradient& aColor = color_or_gradient{});
+            void set_background_color(const color_or_gradient& aColor = color_or_gradient{});
             void set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
         public:
             style& merge(const style& aOverridingStyle);
@@ -85,9 +85,9 @@ namespace neogfx
             text_edit* iParent;
             mutable uint32_t iUseCount;
             optional_font iFont;
-            colour_or_gradient iGlyphColour;
-            colour_or_gradient iTextColour;
-            colour_or_gradient iBackgroundColour;
+            color_or_gradient iGlyphColor;
+            color_or_gradient iTextColor;
+            color_or_gradient iBackgroundColor;
             optional_text_effect iTextEffect;
         };
         typedef std::set<style> style_list;
@@ -465,7 +465,7 @@ namespace neogfx
         using scrollable_widget::update_scrollbar_visibility;
         void update_scrollbar_visibility(usv_stage_e aStage) override;
     public:
-        colour frame_colour() const override;
+        color frame_color() const override;
         // i_clipboard
     public:
         bool can_undo() const override;
@@ -506,7 +506,7 @@ namespace neogfx
         void set_alignment(neogfx::alignment aAlignment);
         const style& default_style() const;
         void set_default_style(const style& aDefaultStyle, bool aPersist = false);
-        colour default_text_colour() const;
+        color default_text_color() const;
     public:
         void clear();
         const std::string& text() const;

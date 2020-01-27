@@ -92,15 +92,15 @@ namespace neogfx
             break;
         case frame_style::SolidFrame:
         case frame_style::WindowFrame:
-            aGraphicsContext.draw_rect(rect{ point{ 0.0, 0.0 }, non_client_rect().extents() }, pen{ frame_colour(), effective_frame_width() });
+            aGraphicsContext.draw_rect(rect{ point{ 0.0, 0.0 }, non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
             break;
         case frame_style::ContainerFrame:
             {
                 rect rectBorder{ point{ 0.0, 0.0 }, non_client_rect().extents() };
                 rectBorder.deflate(line_width(), line_width());
-                aGraphicsContext.draw_rect(rectBorder, pen(inner_frame_colour(), line_width()));
+                aGraphicsContext.draw_rect(rectBorder, pen(inner_frame_color(), line_width()));
                 rectBorder.inflate(line_width(), line_width());
-                aGraphicsContext.draw_rect(rectBorder, pen(frame_colour(), line_width()));
+                aGraphicsContext.draw_rect(rectBorder, pen(frame_color(), line_width()));
             }
             break;
         case frame_style::DoubleFrame:
@@ -131,33 +131,33 @@ namespace neogfx
         }
     }
 
-    bool framed_widget::has_frame_colour() const
+    bool framed_widget::has_frame_color() const
     {
-        return iFrameColour != std::nullopt;
+        return iFrameColor != std::nullopt;
     }
 
-    colour framed_widget::frame_colour() const
+    color framed_widget::frame_color() const
     {
-        if (has_frame_colour())
-            return *iFrameColour;
+        if (has_frame_color())
+            return *iFrameColor;
         else if (iStyle != frame_style::ContainerFrame)
-            return (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
+            return (background_color().dark() ? background_color().lighter(0x60) : background_color().darker(0x60));
         else
-            return (has_foreground_colour() ? foreground_colour() : container_background_colour()).darker(0x40);
+            return (has_foreground_color() ? foreground_color() : container_background_color()).darker(0x40);
     }
 
-    void framed_widget::set_frame_colour(const optional_colour& aFrameColour)
+    void framed_widget::set_frame_color(const optional_color& aFrameColor)
     {
-        iFrameColour = aFrameColour;
+        iFrameColor = aFrameColor;
         update();
     }
 
-    colour framed_widget::inner_frame_colour() const
+    color framed_widget::inner_frame_color() const
     {
         if (iStyle != frame_style::ContainerFrame)
-            return frame_colour();
+            return frame_color();
         else
-            return (has_foreground_colour() ? foreground_colour() : container_background_colour()).lighter(0x40);
+            return (has_foreground_color() ? foreground_color() : container_background_color()).lighter(0x40);
     }
 
     dimension framed_widget::line_width() const

@@ -124,7 +124,7 @@ namespace neogfx
 //        throw not_active();
     }
 
-    colour opengl_window::read_pixel(const point& aPosition) const
+    color opengl_window::read_pixel(const point& aPosition) const
     {
         if (target_texture().sampling() != neogfx::texture_sampling::Multisample)
         {
@@ -132,7 +132,7 @@ namespace neogfx
             std::array<uint8_t, 4> pixel;
             basic_point<GLint> pos{ aPosition };
             glCheck(glReadPixels(pos.x, pos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel));
-            return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
+            return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
         }
         else
             throw std::logic_error("opengl_window::read_pixel: not yet implemented for multisample render targets");

@@ -22,9 +22,9 @@
 #include <neolib/variant.hpp>
 #include "widget.hpp"
 #include <neogfx/app/i_resource.hpp>
-#include <neogfx/core/colour.hpp>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
-#include <neogfx/gui/dialog/colour_dialog.hpp>
+#include <neogfx/gui/dialog/color_dialog.hpp>
 
 namespace neogfx
 {
@@ -35,8 +35,8 @@ namespace neogfx
     public:
         define_event(GradientChanged, gradient_changed)
     private:
-        typedef neolib::variant<neogfx::gradient::colour_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
-        typedef neolib::variant<neogfx::gradient::colour_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
+        typedef neolib::variant<neogfx::gradient::color_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
+        typedef neolib::variant<neogfx::gradient::color_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
     public:
         gradient_widget(const neogfx::gradient& aGradient = neogfx::gradient{});
         gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient = neogfx::gradient{});
@@ -45,8 +45,8 @@ namespace neogfx
     public:
         const neogfx::gradient& gradient() const;
         void set_gradient(const neogfx::gradient& aGradient);
-        const std::optional<colour_dialog::custom_colour_list>& custom_colours() const;
-        std::optional<colour_dialog::custom_colour_list>& custom_colours();
+        const std::optional<color_dialog::custom_color_list>& custom_colors() const;
+        std::optional<color_dialog::custom_color_list>& custom_colors();
     public:
         virtual neogfx::size_policy size_policy() const;
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -62,9 +62,9 @@ namespace neogfx
         rect contents_rect() const;
         stop_const_iterator stop_at(const point& aPosition) const;
         stop_iterator stop_at(const point& aPosition);
-        rect colour_stop_rect(const neogfx::gradient::colour_stop& aColourStop) const;
+        rect color_stop_rect(const neogfx::gradient::color_stop& aColorStop) const;
         rect alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const;
-        void draw_colour_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
+        void draw_color_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::color_stop& aColorStop) const;
         void draw_alpha_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
     private:
         dimension stop_width() const;
@@ -78,11 +78,11 @@ namespace neogfx
         bool iInGradientDialog;
         neogfx::gradient iSelection;
         std::optional<point> iClicked;
-        std::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;
+        std::optional<gradient::color_stop_list::iterator> iCurrentColorStop;
         std::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
         bool iTracking;
         std::unique_ptr<context_menu> iMenu;
         mutable std::map<i_resource::hash_digest_type, texture> iStopTextures;
-        std::optional<colour_dialog::custom_colour_list> iCustomColours;
+        std::optional<color_dialog::custom_color_list> iCustomColors;
     };
 }

@@ -189,11 +189,11 @@ namespace neogfx
         bool is_subpixel_rendering_on() const;
         void subpixel_rendering_on();
         void subpixel_rendering_off();
-        void clear(const colour& aColour);
+        void clear(const color& aColor);
         void clear_depth_buffer();
         void clear_stencil_buffer();
-        void set_pixel(const point& aPoint, const colour& aColour);
-        void draw_pixel(const point& aPoint, const colour& aColour);
+        void set_pixel(const point& aPoint, const color& aColor);
+        void draw_pixel(const point& aPoint, const color& aColor);
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
         void draw_rect(const rect& aRect, const pen& aPen);
         void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen);

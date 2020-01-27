@@ -206,14 +206,14 @@ namespace neogfx
         native_context().flush();
     }
 
-    graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_colour& aClearColour) const
+    graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor) const
     {
         auto buffer1 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer1(aExtents, aSampling));
         {
             scoped_scissor ss{ *buffer1, rect{ point{}, aExtents} };
-            if (aClearColour != std::nullopt)
+            if (aClearColor != std::nullopt)
             {
-                buffer1->clear(*aClearColour);
+                buffer1->clear(*aClearColor);
                 buffer1->clear_depth_buffer();
                 buffer1->clear_stencil_buffer();
             }
@@ -222,9 +222,9 @@ namespace neogfx
         auto buffer2 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer2(aExtents, aSampling));
         {
             scoped_scissor ss{ *buffer2, rect{ point{}, aExtents} };
-            if (aClearColour != std::nullopt)
+            if (aClearColor != std::nullopt)
             {
-                buffer2->clear(*aClearColour);
+                buffer2->clear(*aClearColor);
                 buffer2->clear_depth_buffer();
                 buffer2->clear_stencil_buffer();
             }
@@ -379,14 +379,14 @@ namespace neogfx
         return from_device_units(iOrigin);
     }
 
-    void graphics_context::set_pixel(const point& aPoint, const colour& aColour) const
+    void graphics_context::set_pixel(const point& aPoint, const color& aColor) const
     {
-        native_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint) + iOrigin, aColour });
+        native_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint) + iOrigin, aColor });
     }
 
-    void graphics_context::draw_pixel(const point& aPoint, const colour& aColour) const
+    void graphics_context::draw_pixel(const point& aPoint, const color& aColor) const
     {
-        native_context().enqueue(graphics_operation::draw_pixel{ to_device_units(aPoint) + iOrigin, aColour });
+        native_context().enqueue(graphics_operation::draw_pixel{ to_device_units(aPoint) + iOrigin, aColor });
     }
 
     void graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen) const
@@ -464,7 +464,7 @@ namespace neogfx
     {
         push_logical_operation(neogfx::logical_operation::Xor);
         line_stipple_on(dpi_scale(1u), 0x5555);
-        draw_rect(deflate_rect(aRect, delta{ dpi_scale(1.0) - 1.0 }), pen(colour::White, dpi_scale(1.0)));
+        draw_rect(deflate_rect(aRect, delta{ dpi_scale(1.0) - 1.0 }), pen(color::White, dpi_scale(1.0)));
         line_stipple_off();
         pop_logical_operation();
     }
@@ -850,12 +850,12 @@ namespace neogfx
         }
     }
 
-    void graphics_context::clear(const colour& aColour, const std::optional<scalar>& aZpos) const
+    void graphics_context::clear(const color& aColor, const std::optional<scalar>& aZpos) const
     {
         if (aZpos == std::nullopt)
-            native_context().enqueue(graphics_operation::clear{ aColour });
+            native_context().enqueue(graphics_operation::clear{ aColor });
         else
-            fill_rect(rect{ render_target().target_type() == render_target_type::Surface ? point{} : point{-1.0, -1.0}, iRenderTarget.target_texture().storage_extents() }, aColour, *aZpos);
+            fill_rect(rect{ render_target().target_type() == render_target_type::Surface ? point{} : point{-1.0, -1.0}, iRenderTarget.target_texture().storage_extents() }, aColor, *aZpos);
     }
 
     void graphics_context::clear_depth_buffer() const
@@ -1126,39 +1126,39 @@ namespace neogfx
             iPassword = std::nullopt;
     }
 
-    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_color& aColor, shader_effect aShaderEffect) const
     {
-        draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, aColour, aShaderEffect);
+        draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, aColor, aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
-    {
-        if (logical_coordinates().is_gui_orientation())
-            draw_texture(to_ecs_component(aRect), aTexture, aColour, aShaderEffect);
-        else
-            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aColour, aShaderEffect);
-    }
-
-    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
-    {
-        draw_texture(rect{ aPoint, aTextureRect.extents() }, aTexture, aTextureRect, aColour, aShaderEffect);
-    }
-
-    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_color& aColor, shader_effect aShaderEffect) const
     {
         if (logical_coordinates().is_gui_orientation())
-            draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, aColour, aShaderEffect);
+            draw_texture(to_ecs_component(aRect), aTexture, aColor, aShaderEffect);
         else
-            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aTextureRect, aColour, aShaderEffect);
+            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aColor, aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect) const
+    {
+        draw_texture(rect{ aPoint, aTextureRect.extents() }, aTexture, aTextureRect, aColor, aShaderEffect);
+    }
+
+    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect) const
+    {
+        if (logical_coordinates().is_gui_orientation())
+            draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, aColor, aShaderEffect);
+        else
+            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aTextureRect, aColor, aShaderEffect);
+    }
+
+    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_color& aColor, shader_effect aShaderEffect) const
     {
         draw_mesh(
             aMesh, 
             game::material
             { 
-                aColour != std::nullopt ? game::colour{ aColour->to_vec4() } : std::optional<game::colour>{},
+                aColor != std::nullopt ? game::color{ aColor->to_vec4() } : std::optional<game::color>{},
                 {}, 
                 {},
                 to_ecs_component(aTexture),
@@ -1167,12 +1167,12 @@ namespace neogfx
             optional_mat44{});
     }
 
-    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect) const
     {
         auto adjustedMesh = aMesh;
         for (auto& uv : adjustedMesh.uv)
             uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2());
-         draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
+         draw_texture(adjustedMesh, aTexture, aColor, aShaderEffect);
     }
 
     void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation) const

@@ -23,14 +23,14 @@
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
 #include <neogfx/game/i_component_data.hpp>
-#include <neogfx/game/colour.hpp>
+#include <neogfx/game/color.hpp>
 
 namespace neogfx::game
 {
     struct gradient
     {
-        std::vector<colour> colourStops;
-        std::vector<scalar> colourStopPositions;
+        std::vector<color> colorStops;
+        std::vector<scalar> colorStopPositions;
         std::vector<scalar> alphaStops;
         std::vector<scalar> alphaStopPositions;
 
@@ -69,7 +69,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return colour::meta::id();
+                    return color::meta::id();
                 case 1:
                 case 2:
                 case 3:
@@ -82,8 +82,8 @@ namespace neogfx::game
             {
                 static const string sFieldNames[] =
                 {
-                    "Colour Stops",
-                    "Colour Stop Positions",
+                    "Color Stops",
+                    "Color Stop Positions",
                     "Alpha Stops",
                     "Alpha Stop Positions"
                 };
@@ -95,8 +95,8 @@ namespace neogfx::game
     inline bool batchable(const gradient& lhs, const gradient& rhs)
     {
         // todo: hash gradient for faster equality operation?
-        return lhs.colourStops == rhs.colourStops &&
-            lhs.colourStopPositions == rhs.colourStopPositions &&
+        return lhs.colorStops == rhs.colorStops &&
+            lhs.colorStopPositions == rhs.colorStopPositions &&
             lhs.alphaStops == rhs.alphaStops &&
             lhs.alphaStopPositions == rhs.alphaStopPositions;
     }

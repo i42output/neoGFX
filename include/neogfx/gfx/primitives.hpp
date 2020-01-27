@@ -59,17 +59,13 @@ namespace neogfx
 
     enum class shader_effect
     {
-        None                = 0,
-        Colourize           = 1,
-        ColourizeAverage    = Colourize,
-        Colorize            = Colourize,
-        ColorizeAverage     = ColourizeAverage,
-        ColourizeMaximum    = 2,
-        ColorizeMaximum     = ColourizeMaximum,
-        ColourizeSpot       = 3,
-        ColorizeSpot        = ColourizeSpot,
-        Monochrome          = 4,
-        Ignore              = 5
+        None               = 0,
+        Colorize           = 1,
+        ColorizeAverage    = Colorize,
+        ColorizeMaximum    = 2,
+        ColorizeSpot       = 3,
+        Monochrome         = 4,
+        Ignore             = 5
     };
 
     enum class blurring_algorithm
@@ -78,74 +74,74 @@ namespace neogfx
         Gaussian
     };
 
-    typedef neolib::variant<colour, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
+    typedef neolib::variant<color, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
 
-    inline brush to_brush(const colour_or_gradient& aEffectColour)
+    inline brush to_brush(const color_or_gradient& aEffectColor)
     {
-        if (std::holds_alternative<colour>(aEffectColour))
-            return std::get<colour>(aEffectColour);
-        else if (std::holds_alternative<gradient>(aEffectColour))
-            return std::get<gradient>(aEffectColour);
+        if (std::holds_alternative<color>(aEffectColor))
+            return std::get<color>(aEffectColor);
+        else if (std::holds_alternative<gradient>(aEffectColor))
+            return std::get<gradient>(aEffectColor);
         else
-            return colour{};
+            return color{};
     }
 
-    class text_colour : public colour_or_gradient
+    class text_color : public color_or_gradient
     {
     public:
-        text_colour() : colour_or_gradient{}
+        text_color() : color_or_gradient{}
         {
         }
-        text_colour(const text_colour& aOther) : colour_or_gradient{ aOther }
+        text_color(const text_color& aOther) : color_or_gradient{ aOther }
         {
         }
-        text_colour(text_colour&& aOther) : colour_or_gradient{ std::move(aOther) }
+        text_color(text_color&& aOther) : color_or_gradient{ std::move(aOther) }
         {
         }
         template <typename T>
-        text_colour(T&& aOther) : colour_or_gradient{ std::forward<T>(aOther) }
+        text_color(T&& aOther) : color_or_gradient{ std::forward<T>(aOther) }
         {
         }
     public:
-        text_colour& operator=(const text_colour& aOther)
+        text_color& operator=(const text_color& aOther)
         {
             if (&aOther == this)
                 return *this;
-            colour_or_gradient::operator=(aOther);
+            color_or_gradient::operator=(aOther);
             return *this;
         }
-        text_colour& operator=(text_colour&& aOther)
+        text_color& operator=(text_color&& aOther)
         {
             if (&aOther == this)
                 return *this;
-            colour_or_gradient::operator=(std::move(aOther));
+            color_or_gradient::operator=(std::move(aOther));
             return *this;
         }
         template <typename T>
-        text_colour& operator=(T&& aOther)
+        text_color& operator=(T&& aOther)
         {
-            colour_or_gradient::operator=(std::forward<T>(aOther));
+            color_or_gradient::operator=(std::forward<T>(aOther));
             return *this;
         }
     public:
-        colour::component alpha() const
+        color::component alpha() const
         {
-            if (std::holds_alternative<colour>(*this))
-                return std::get<colour>(*this).alpha();
+            if (std::holds_alternative<color>(*this))
+                return std::get<color>(*this).alpha();
             else
                 return 255;
         }
-        text_colour with_alpha(colour::component aAlpha) const
+        text_color with_alpha(color::component aAlpha) const
         {
-            if (std::holds_alternative<colour>(*this))
-                return std::get<colour>(*this).with_alpha(aAlpha);
+            if (std::holds_alternative<color>(*this))
+                return std::get<color>(*this).with_alpha(aAlpha);
             if (std::holds_alternative<gradient>(*this))
                 return std::get<gradient>(*this).with_combined_alpha(aAlpha);
             else
-                return text_colour{};
+                return text_color{};
         }
     };
-    typedef std::optional<text_colour> optional_text_colour;
+    typedef std::optional<text_color> optional_text_color;
 
     enum class text_effect_type : uint32_t
     {
@@ -161,8 +157,8 @@ namespace neogfx
         typedef double auxiliary_parameter;
         typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
     public:
-        text_effect(text_effect_type aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) :
-            iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
+        text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) :
+            iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }
         {
         }
     public:
@@ -171,7 +167,7 @@ namespace neogfx
             if (&aOther == this)
                 return *this;
             iType = aOther.iType;
-            iColour = aOther.iColour;
+            iColor = aOther.iColor;
             iWidth = aOther.iWidth;
             iAux1 = aOther.iAux1;
             return *this;
@@ -179,24 +175,24 @@ namespace neogfx
     public:
         bool operator==(const text_effect& aOther) const
         {
-            return iType == aOther.iType && iColour == aOther.iColour && iWidth == aOther.iWidth && iAux1 == aOther.iAux1;
+            return iType == aOther.iType && iColor == aOther.iColor && iWidth == aOther.iWidth && iAux1 == aOther.iAux1;
         }
         bool operator!=(const text_effect& aOther) const
         {
-            return iType != aOther.iType || iColour != aOther.iColour || iWidth != aOther.iWidth || iAux1 != aOther.iAux1;
+            return iType != aOther.iType || iColor != aOther.iColor || iWidth != aOther.iWidth || iAux1 != aOther.iAux1;
         }
         bool operator<(const text_effect& aRhs) const
         {
-            return std::tie(iType, iColour, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth, aRhs.iAux1);
+            return std::tie(iType, iColor, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColor, aRhs.iWidth, aRhs.iAux1);
         }
     public:
         text_effect_type type() const
         {
             return iType;
         }
-        const text_colour& colour() const
+        const text_color& color() const
         {
-            return iColour;
+            return iColor;
         }
         dimension width() const
         {
@@ -230,17 +226,17 @@ namespace neogfx
                 return 1.0;
             }
         }
-        text_effect with_alpha(colour::component aAlpha) const
+        text_effect with_alpha(color::component aAlpha) const
         {
-            return text_effect{ iType, iColour.with_alpha(aAlpha), iWidth, iAux1 };
+            return text_effect{ iType, iColor.with_alpha(aAlpha), iWidth, iAux1 };
         }
         text_effect with_alpha(double aAlpha) const
         {
-            return with_alpha(static_cast<colour::component>(aAlpha * 255));
+            return with_alpha(static_cast<color::component>(aAlpha * 255));
         }
     private:
         text_effect_type iType;
-        text_colour iColour;
+        text_color iColor;
         optional_dimension iWidth;
         optional_auxiliary_parameter iAux1;
     };
@@ -305,11 +301,11 @@ namespace neogfx
             return !(*this == aRhs);
         }
     public:
-        const text_colour& ink() const
+        const text_color& ink() const
         {
             return iInk;
         }
-        const optional_text_colour& paper() const
+        const optional_text_color& paper() const
         {
             return iPaper;
         }
@@ -322,13 +318,13 @@ namespace neogfx
             return iOnlyCalculateEffect;
         }
     public:
-        text_appearance with_alpha(colour::component aAlpha) const
+        text_appearance with_alpha(color::component aAlpha) const
         {
-            return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
+            return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_color{ iPaper->with_alpha(aAlpha) } : optional_text_color{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
         }
         text_appearance with_alpha(double aAlpha) const
         {
-            return with_alpha(static_cast<colour::component>(aAlpha * 255));
+            return with_alpha(static_cast<color::component>(aAlpha * 255));
         }
         text_appearance with_only_effect_calculation() const
         {
@@ -337,8 +333,8 @@ namespace neogfx
             return copy;
         }
     private:
-        text_colour iInk;
-        optional_text_colour iPaper;
+        text_color iInk;
+        optional_text_color iPaper;
         optional_text_effect iEffect;
         bool iOnlyCalculateEffect;
     };

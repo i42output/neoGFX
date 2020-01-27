@@ -42,17 +42,17 @@ namespace neogfx
             return item_cell_editable::No;
         }
     public:    
-        optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const override
+        optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const override
         {
-            if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+            if (aColorType == item_cell_color_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
             {
-                auto backgroundColour = iDropList.view().background_colour().dark() ? colour::Black : colour::White;
-                if (backgroundColour == iDropList.view().background_colour())
-                    backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
-                return backgroundColour;
+                auto backgroundColor = iDropList.view().background_color().dark() ? color::Black : color::White;
+                if (backgroundColor == iDropList.view().background_color())
+                    backgroundColor = backgroundColor.dark() ? backgroundColor.lighter(0x20) : backgroundColor.darker(0x20);
+                return backgroundColor;
             }
             else
-                return item_presentation_model::cell_colour(aIndex, aColourType);
+                return item_presentation_model::cell_color(aIndex, aColorType);
         }
     private:
         drop_list& iDropList;
@@ -157,11 +157,11 @@ namespace neogfx
         return handled;
     }
 
-    colour drop_list_view::background_colour() const
+    color drop_list_view::background_color() const
     {
-        if (list_view::has_background_colour())
-            return list_view::background_colour();
-        return service<i_app>().current_style().palette().colour();
+        if (list_view::has_background_color())
+            return list_view::background_color();
+        return service<i_app>().current_style().palette().color();
     }
 
     drop_list_popup::drop_list_popup(drop_list& aDropList) :
@@ -194,15 +194,15 @@ namespace neogfx
         return iView;
     }
 
-    colour drop_list_popup::frame_colour() const
+    color drop_list_popup::frame_color() const
     {
-        if (window::has_frame_colour())
-            return window::frame_colour();
-        auto viewBackgroundColour = iView.background_colour();
-        auto backgroundColour = viewBackgroundColour.dark() ? viewBackgroundColour.darker(0x20) : viewBackgroundColour.lighter(0x20);
-        if (backgroundColour == viewBackgroundColour)
-            backgroundColour = viewBackgroundColour.dark() ? viewBackgroundColour.lighter(0x20) : viewBackgroundColour.darker(0x20);
-        return backgroundColour;
+        if (window::has_frame_color())
+            return window::frame_color();
+        auto viewBackgroundColor = iView.background_color();
+        auto backgroundColor = viewBackgroundColor.dark() ? viewBackgroundColor.darker(0x20) : viewBackgroundColor.lighter(0x20);
+        if (backgroundColor == viewBackgroundColor)
+            backgroundColor = viewBackgroundColor.dark() ? viewBackgroundColor.lighter(0x20) : viewBackgroundColor.darker(0x20);
+        return backgroundColor;
     }
 
     double drop_list_popup::rendering_priority() const
@@ -330,24 +330,24 @@ namespace neogfx
     {
     }
 
-    colour drop_list::list_proxy::view_container::background_colour() const
+    color drop_list::list_proxy::view_container::background_color() const
     {
-        if (framed_widget::has_background_colour())
-            return framed_widget::background_colour();
-        else if (container_background_colour().light())
-            return parent().background_colour().darker(24);
+        if (framed_widget::has_background_color())
+            return framed_widget::background_color();
+        else if (container_background_color().light())
+            return parent().background_color().darker(24);
         else
-            return parent().background_colour().lighter(24);
+            return parent().background_color().lighter(24);
     }
 
-    colour drop_list::list_proxy::view_container::frame_colour() const
+    color drop_list::list_proxy::view_container::frame_color() const
     {
-        if (framed_widget::has_frame_colour())
-            return framed_widget::frame_colour();
-        else if (container_background_colour().light())
-            return background_colour().darker(24);
+        if (framed_widget::has_frame_color())
+            return framed_widget::frame_color();
+        else if (container_background_color().light())
+            return background_color().darker(24);
         else
-            return background_colour().lighter(24);
+            return background_color().lighter(24);
     }
 
     drop_list::list_proxy::list_proxy(drop_list& aDropList) :
@@ -563,9 +563,9 @@ namespace neogfx
                 iEditor.set_text(aText);
             }
         protected:
-            colour frame_colour() const override
+            color frame_color() const override
             {
-                return iEditor.frame_colour();
+                return iEditor.frame_color();
             }
         private:
             horizontal_layout iLayout;
@@ -1062,7 +1062,7 @@ namespace neogfx
 
     void drop_list::update_arrow()
     {
-        auto ink = service<i_app>().current_style().palette().text_colour();
+        auto ink = service<i_app>().current_style().palette().text_color();
         if (iDownArrowTexture == std::nullopt || iDownArrowTexture->first != ink)
         {
             const char* sDownArrowImagePattern
@@ -1093,8 +1093,8 @@ namespace neogfx
             };
             iDownArrowTexture.emplace(
                 ink, !high_dpi() ?
-                    neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { "paper", colour{} }, { "ink", ink } } } :
-                    neogfx::image{ "neogfx::drop_list::iDownArrowHighDpiTexture::" + ink.to_string(), sDownArrowHighDpiImagePattern, { { "paper", colour{} }, { "ink", ink } }, 2.0 });
+                    neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { "paper", color{} }, { "ink", ink } } } :
+                    neogfx::image{ "neogfx::drop_list::iDownArrowHighDpiTexture::" + ink.to_string(), sDownArrowHighDpiImagePattern, { { "paper", color{} }, { "ink", ink } }, 2.0 });
         }
         iDownArrow.set_image(iDownArrowTexture->second);
     }

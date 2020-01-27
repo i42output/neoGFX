@@ -84,7 +84,7 @@ namespace neogfx
         non_client_item<push_button, widget_part::NonClientMaximizeButton> iRestoreButton;
         non_client_item<push_button, widget_part::NonClientCloseButton> iCloseButton;
         sink iSink;
-        mutable std::optional<std::pair<colour, texture>> iTextures[4];
+        mutable std::optional<std::pair<color, texture>> iTextures[4];
     };
 
     template <>

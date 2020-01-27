@@ -31,7 +31,7 @@ namespace neogfx
         iSpacing(2.0, 2.0),
         iFontInfo(service<i_font_manager>().default_system_font_info())
     {
-        iPalette.Changed([this]() { handle_change(style_aspect::Colour); });
+        iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
     style::style(const std::string& aName, const i_style& aOther) :
@@ -41,7 +41,7 @@ namespace neogfx
         iPalette(aOther.palette()),
         iFontInfo(aOther.font_info())
     {
-        iPalette.Changed([this]() { handle_change(style_aspect::Colour); });
+        iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
     style::style(const i_style& aOther) :
@@ -51,7 +51,7 @@ namespace neogfx
         iPalette(aOther.palette()),
         iFontInfo(aOther.font_info())
     {
-        iPalette.Changed([this]() { handle_change(style_aspect::Colour); });
+        iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
     style::style(const style& aOther) :
@@ -139,7 +139,7 @@ namespace neogfx
         if (iPalette != aPalette)
         {
             iPalette = aPalette;
-            handle_change(style_aspect::Colour);
+            handle_change(style_aspect::Color);
         }
     }
 

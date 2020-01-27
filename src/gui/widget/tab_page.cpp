@@ -85,9 +85,9 @@ namespace neogfx
                 {
                     auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(non_client_rect()));
                     hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
-                    aGraphicsContext.fill_rect(hole, inner_frame_colour());
+                    aGraphicsContext.fill_rect(hole, inner_frame_color());
                     hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
-                    aGraphicsContext.fill_rect(hole, background_colour());
+                    aGraphicsContext.fill_rect(hole, background_color());
                 }
                 break;
             case tab_container_style::TabAlignmentLeft:
@@ -95,9 +95,9 @@ namespace neogfx
                 {
                     auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ effective_frame_width(), -effective_frame_width() / 2.0 }).intersection(non_client_rect()));
                     hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ 0.0, effective_frame_width() / 2.0 })));
-                    aGraphicsContext.fill_rect(hole, inner_frame_colour());
+                    aGraphicsContext.fill_rect(hole, inner_frame_color());
                     hole.deflate(size{ 0.0, effective_frame_width() / 2.0 });
-                    aGraphicsContext.fill_rect(hole, background_colour());
+                    aGraphicsContext.fill_rect(hole, background_color());
                 }
                 break;
             }
@@ -105,12 +105,12 @@ namespace neogfx
         scrollable_widget::paint_non_client_after(aGraphicsContext);
     }
 
-    colour tab_page::background_colour() const
+    color tab_page::background_color() const
     {
-        if (has_background_colour())
-            return scrollable_widget::background_colour();
+        if (has_background_color())
+            return scrollable_widget::background_color();
         else
-            return container_background_colour();
+            return container_background_color();
     }
 
     const i_tab& tab_page::tab() const

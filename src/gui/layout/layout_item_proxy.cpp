@@ -31,12 +31,12 @@ namespace neogfx
     }
 
     layout_item_proxy::layout_item_proxy(std::shared_ptr<i_layout_item> aItem) :
-        iSubject{ aItem }, iSubjectIsProxy{ aItem->is_proxy() }, iMinimumSize{ -1, {} }, iMaximumSize{ -1, {} }
+        iSubject{ aItem }, iSubjectIsProxy{ aItem->is_proxy() }, iMinimumSize{ static_cast<uint32_t>(-1), {} }, iMaximumSize{ static_cast<uint32_t>(-1), {} }
     {
     }
 
     layout_item_proxy::layout_item_proxy(const layout_item_proxy& aOther) :
-        iSubject{ aOther.iSubject }, iSubjectIsProxy{ aOther.iSubject->is_proxy() }, iMinimumSize{ -1, {} }, iMaximumSize{ -1, {} }
+        iSubject{ aOther.iSubject }, iSubjectIsProxy{ aOther.iSubject->is_proxy() }, iMinimumSize{ static_cast<uint32_t>(-1), {} }, iMaximumSize{ static_cast<uint32_t>(-1), {} }
     {
     }
 

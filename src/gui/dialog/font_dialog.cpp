@@ -49,17 +49,17 @@ namespace neogfx
                 return item_cell_editable::No;
             }
         public:
-            optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const override
+            optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const override
             {
-                if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+                if (aColorType == item_cell_color_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
                 {
-                    auto backgroundColour = service<i_app>().current_style().palette().colour().dark() ? colour::Black : colour::White;
-                    if (backgroundColour == service<i_app>().current_style().palette().colour())
-                        backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
-                    return backgroundColour;
+                    auto backgroundColor = service<i_app>().current_style().palette().color().dark() ? color::Black : color::White;
+                    if (backgroundColor == service<i_app>().current_style().palette().color())
+                        backgroundColor = backgroundColor.dark() ? backgroundColor.lighter(0x20) : backgroundColor.darker(0x20);
+                    return backgroundColor;
                 }
                 else
-                    return item_presentation_model::cell_colour(aIndex, aColourType);
+                    return item_presentation_model::cell_color(aIndex, aColorType);
             }
         private:
             mutable std::vector<optional_font> iFonts;
@@ -69,7 +69,7 @@ namespace neogfx
         {
         public:
             style_picker_presentation_model(i_item_selection_model& aOurSelectionModel, i_item_selection_model& aFamilyPickerSelectionModel) :
-                iOurSelectionModel{ aOurSelectionModel }, iFamilyPickerSelectionModel {    aFamilyPickerSelectionModel    }
+                iOurSelectionModel{ aOurSelectionModel }, iFamilyPickerSelectionModel { aFamilyPickerSelectionModel }
             {
                 iSink += iFamilyPickerSelectionModel.current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /*aPreviousIndex*/)
                 {
@@ -108,17 +108,17 @@ namespace neogfx
                 return item_cell_editable::No;
             }
         public:
-            optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const override
+            optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const override
             {
-                if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+                if (aColorType == item_cell_color_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
                 {
-                    auto backgroundColour = service<i_app>().current_style().palette().colour().dark() ? colour::Black : colour::White;
-                    if (backgroundColour == service<i_app>().current_style().palette().colour())
-                        backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
-                    return backgroundColour;
+                    auto backgroundColor = service<i_app>().current_style().palette().color().dark() ? color::Black : color::White;
+                    if (backgroundColor == service<i_app>().current_style().palette().color())
+                        backgroundColor = backgroundColor.dark() ? backgroundColor.lighter(0x20) : backgroundColor.darker(0x20);
+                    return backgroundColor;
                 }
                 else
-                    return item_presentation_model::cell_colour(aIndex, aColourType);
+                    return item_presentation_model::cell_color(aIndex, aColorType);
             }
         private:
             i_item_selection_model& iOurSelectionModel;
