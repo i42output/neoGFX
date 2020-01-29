@@ -48,7 +48,7 @@ namespace neogfx
     {
         if (iButtonImageExtents != std::nullopt)
             return *iButtonImageExtents;
-        return size{ 32.0_spx, 32.0_spx };
+        return size{ 32.0_dip, 32.0_dip };
     }
 
     void toolbar::set_button_image_extents(const optional_size& aExtents)

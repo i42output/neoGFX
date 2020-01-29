@@ -54,7 +54,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        return iOrientation == slider_orientation::Horizontal ? size{ 96_spx, 22_spx } : size{ 22_spx, 96_spx };
+        return iOrientation == slider_orientation::Horizontal ? size{ 96_dip, 22_dip } : size{ 22_dip, 96_dip };
     }
 
     void slider_impl::paint(i_graphics_context& aGraphicsContext) const

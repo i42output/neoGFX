@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 
         std::optional<ng::window> windowObject;
         if (!app.program_options().full_screen())
-            windowObject.emplace(ng::size{ 1280_spx, 720_spx });
+            windowObject.emplace(ng::size{ 1280_dip, 720_dip });
         else
             windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
 

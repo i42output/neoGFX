@@ -201,7 +201,7 @@ namespace neogfx
             return vertices;
         }
 
-        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays& aInstance)
+        void emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays& aInstance, bool aLoop = false)
         {
             // assumes vertices are quads (as two triangles) created with quads_to_triangles above.
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
@@ -211,12 +211,15 @@ namespace neogfx
                 auto end = midpoint(std::next(aInstance.begin(), 4)->xyz, std::next(aInstance.begin(), 2)->xyz);
                 stippleShader.start(aContext, start);
                 aInstance.draw(6u);
+                auto positionOffset = 0.0;
                 while (!aInstance.empty())
                 {
-                    auto counterOffset = start.distance(end);
+                    positionOffset += start.distance(end);
                     start = midpoint(aInstance.begin()->xyz, std::next(aInstance.begin())->xyz);
+                    if (aLoop)
+                        positionOffset += start.distance(end);
                     end = midpoint(std::next(aInstance.begin(), 4)->xyz, std::next(aInstance.begin(), 2)->xyz);
-                    stippleShader.next(aContext, start, counterOffset);
+                    stippleShader.next(aContext, start, positionOffset);
                     aInstance.draw(6u);
                 }
             }
@@ -459,7 +462,10 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::LineStippleOn:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    line_stipple_on(static_variant_cast<const graphics_operation::line_stipple_on&>(*op).factor, static_variant_cast<const graphics_operation::line_stipple_on&>(*op).pattern);
+                {
+                    auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(*op);
+                    line_stipple_on(lso.factor, lso.pattern, lso.position);
+                }
                 break;
             case graphics_operation::operation_type::LineStippleOff:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -766,9 +772,9 @@ namespace neogfx
         }    
     }
 
-    void opengl_rendering_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
+    void opengl_rendering_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern, scalar aPosition)
     {
-        rendering_engine().default_shader_program().stipple_shader().set_stipple(aFactor, aPattern);
+        rendering_engine().default_shader_program().stipple_shader().set_stipple(aFactor, aPattern, aPosition);
     }
 
     void opengl_rendering_context::line_stipple_off()
@@ -917,9 +923,11 @@ namespace neogfx
         auto vertices = rounded_rect_vertices(adjustedRect, aRadius, mesh_type::Outline);
 
         auto lines = line_loop_to_lines(vertices);
-        vec3_list quads;
+        thread_local vec3_list quads;
+        quads.clear();
         lines_to_quads(lines, aPen.width(), quads);
-        vec3_list triangles;
+        thread_local vec3_list triangles;
+        triangles.clear();
         quads_to_triangles(quads, triangles);
 
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
@@ -938,9 +946,9 @@ namespace neogfx
 
     void opengl_rendering_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
     {
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), 
@@ -949,9 +957,11 @@ namespace neogfx
         auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, mesh_type::Outline);
 
         auto lines = line_loop_to_lines(vertices);
-        vec3_list quads;
+        thread_local vec3_list quads;
+        quads.clear();
         lines_to_quads(lines, aPen.width(), quads);
-        vec3_list triangles;
+        thread_local vec3_list triangles;
+        triangles.clear();
         quads_to_triangles(quads, triangles);
 
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
@@ -970,9 +980,9 @@ namespace neogfx
 
     void opengl_rendering_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
     {
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()),
@@ -981,9 +991,11 @@ namespace neogfx
         auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline);
 
         auto lines = line_loop_to_lines(vertices);
-        vec3_list quads;
+        thread_local vec3_list quads;
+        quads.clear();
         lines_to_quads(lines, aPen.width(), quads);
-        vec3_list triangles;
+        thread_local vec3_list triangles;
+        triangles.clear();
         quads_to_triangles(quads, triangles);
 
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
@@ -1043,9 +1055,11 @@ namespace neogfx
         auto const& vertices = aMesh.vertices;
 
         auto lines = line_loop_to_lines(vertices);
-        vec3_list quads;
+        thread_local vec3_list quads;
+        quads.clear();
         lines_to_quads(lines, aPen.width(), quads);
-        vec3_list triangles;
+        thread_local vec3_list triangles;
+        triangles.clear();
         quads_to_triangles(quads, triangles);
 
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };

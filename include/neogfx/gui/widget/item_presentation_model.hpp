@@ -563,7 +563,7 @@ namespace neogfx
             if ((cellInfo.flags & item_cell_flags::Editable) == item_cell_flags::Editable && cellInfo.dataStep != neolib::none)
             {
                 cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
-                cellExtents.cx += spx(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
+                cellExtents.cx += dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
             }
             auto const& maybeCellImageSize = cell_image_size(aIndex);
             if (maybeCellImageSize != std::nullopt)

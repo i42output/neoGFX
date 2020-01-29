@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
         });
 
         ng::toolbar toolbar{ mainWindow.toolbar_layout() };
-        toolbar.set_button_image_extents(ng::size{ 16.0_spx, 16.0_spx });
+        toolbar.set_button_image_extents(ng::size{ 16.0_dip, 16.0_dip });
         toolbar.add_action(app.action_file_new());
         toolbar.add_action(app.action_file_open());
         toolbar.add_action(app.action_file_save());

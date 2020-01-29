@@ -942,7 +942,7 @@ namespace neogfx
         const auto& adjustedMargins =
             (has_margins() ?
                 *Margins :
-                service<i_app>().current_style().margins() * 1.0_spx);
+                service<i_app>().current_style().margins() * 1.0_dip);
         return units_converter(*this).from_device_units(adjustedMargins);
     }
 

@@ -89,6 +89,7 @@ namespace neogfx
         {
             uint32_t factor;
             uint16_t pattern;
+            scalar position;
         };
 
         struct line_stipple_off

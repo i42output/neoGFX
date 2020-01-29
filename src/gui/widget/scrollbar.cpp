@@ -298,7 +298,7 @@ namespace neogfx
             }
         }
 
-        const dimension margin = 3.0_spx;
+        const dimension margin = 3.0_dip;
         rect rectUpButton = element_geometry(ElementUpButton).deflate(margin, margin);
         rect rectDownButton = element_geometry(ElementDownButton).deflate(margin, margin);
         if (type() == scrollbar_type::Vertical)
@@ -346,7 +346,7 @@ namespace neogfx
             return rect{};
         scoped_units su(units::Pixels);
         rect g = iContainer.scrollbar_geometry(*this);
-        const dimension margin = 3.0_spx;
+        const dimension margin = 3.0_dip;
         switch (aElement)
         {
         case ElementUpButton:
@@ -678,7 +678,7 @@ namespace neogfx
         dimension w = rasterize(4.0_mm);
         if (aStyle == scrollbar_style::Menu || aStyle == scrollbar_style::Scroller)
         {
-            dimension const margin = 3.0_spx;
+            dimension const margin = 3.0_dip;
             w -= margin * 2.0;
         }
         if (to_px<uint32_t>(w) % 2u == 0u)

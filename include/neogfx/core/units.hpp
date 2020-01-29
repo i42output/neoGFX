@@ -249,7 +249,7 @@ namespace neogfx
                 oss << "px";
                 break;
             case length_units::ScaledPixels:
-                oss << "spx";
+                oss << "dip";
                 break;
             case length_units::Points:
                 oss << "pt";
@@ -280,7 +280,7 @@ namespace neogfx
             static const std::unordered_map<std::string, length_units::units> sUnitTypes
             {
                 { "px", length_units::Pixels },
-                { "spx", length_units::ScaledPixels },
+                { "dip", length_units::ScaledPixels },
                 { "pt", length_units::Points },
                 { "pc", length_units::Picas },
                 { "em", length_units::Ems },
@@ -461,7 +461,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline T from_spx(T aValue)
+    inline T from_dip(T aValue)
     {
         return from_units(length_units::ScaledPixels, aValue);
     }
@@ -515,7 +515,7 @@ namespace neogfx
     }
 
     template <typename ResultT, typename T>
-    inline ResultT from_spx(T aValue)
+    inline ResultT from_dip(T aValue)
     {
         return static_cast<ResultT>(from_units(length_units::ScaledPixels, aValue));
     }
@@ -569,7 +569,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline T to_spx(T aValue)
+    inline T to_dip(T aValue)
     {
         return to_units(length_units::ScaledPixels, aValue);
     }
@@ -623,7 +623,7 @@ namespace neogfx
     }
 
     template <typename ResultT, typename T>
-    inline ResultT to_spx(T aValue)
+    inline ResultT to_dip(T aValue)
     {
         return static_cast<ResultT>(to_units(length_units::ScaledPixels, aValue));
     }
@@ -677,7 +677,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline basic_length<T> spx(T aValue)
+    inline basic_length<T> dip(T aValue)
     {
         return basic_length<T>{ aValue, length_units::ScaledPixels };
     }
@@ -761,9 +761,9 @@ namespace neogfx
             return px(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_spx(long double aValue)
+        inline basic_length<default_geometry_value_type> operator ""_dip(long double aValue)
         {
-            return spx(static_cast<default_geometry_value_type>(aValue));
+            return dip(static_cast<default_geometry_value_type>(aValue));
         }
 
         inline basic_length<default_geometry_value_type> operator ""_pt(long double aValue)
@@ -806,9 +806,9 @@ namespace neogfx
             return px(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_spx(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator ""_dip(unsigned long long int aValue)
         {
-            return spx(static_cast<default_geometry_value_type>(aValue));
+            return dip(static_cast<default_geometry_value_type>(aValue));
         }
 
         inline basic_length<default_geometry_value_type> operator ""_pt(unsigned long long int aValue)

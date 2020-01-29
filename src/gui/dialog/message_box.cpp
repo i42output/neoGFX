@@ -281,7 +281,7 @@ namespace neogfx
         text().set_font(neogfx::font{ normalFont.with_style(font_style::Bold) });
 
         icon().set_aspect_ratio(aspect_ratio::KeepExpanding);
-        icon().set_fixed_size(size{ 32.0_spx, 32.0_spx });
+        icon().set_fixed_size(size{ 32.0_dip, 32.0_dip });
     
         centre_on_parent();
 

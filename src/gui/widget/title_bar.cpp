@@ -151,7 +151,7 @@ namespace neogfx
         iLayout.set_margins(neogfx::margins{ 4.0, 4.0, 4.0, 4.0 });
         iLayout.set_spacing(size{ 8.0 });
         icon().set_ignore_mouse_events(false);
-        size iconSize{ 24.0_spx };
+        size iconSize{ 24.0_dip };
         if (icon().image().is_empty())
             icon().set_fixed_size(iconSize);
         else
@@ -162,7 +162,7 @@ namespace neogfx
         iCloseButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
         {
-            size iconSize{ 24.0_spx };
+            size iconSize{ 24.0_dip };
             if (icon().image().is_empty())
                 icon().set_fixed_size(iconSize);
             else

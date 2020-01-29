@@ -174,13 +174,15 @@ namespace neogfx
     public:
         bool stipple_active() const override;
         void clear_stipple() override;
-        void set_stipple(uint32_t aFactor, uint16_t aPattern) override;
+        void set_stipple(uint32_t aFactor, uint16_t aPattern, scalar aPosition = 0.0) override;
         void start(const i_rendering_context& aContext, const vec3& aFrom) override;
-        void next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset = {}) override;
+        void next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset) override;
+    private:
+        scalar iPosition;
     private:
         cache_uniform(uStippleFactor)
         cache_uniform(uStipplePattern)
-        cache_uniform(uStippleCounter)
+        cache_uniform(uStipplePosition)
         cache_uniform(uStippleVertex)
         cache_uniform(uStippleEnabled)
     };

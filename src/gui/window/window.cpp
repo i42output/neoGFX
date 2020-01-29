@@ -623,8 +623,8 @@ namespace neogfx
             else
             {
                 rect shadowRect = to_client_coordinates(non_client_rect());
-                shadowRect.position() += point{ 4.0_spx, 4.0_spx };
-                aGraphicsContext.fill_rounded_rect(shadowRect, 4.0_spx, color::Yellow);
+                shadowRect.position() += point{ 4.0_dip, 4.0_dip };
+                aGraphicsContext.fill_rounded_rect(shadowRect, 4.0_dip, color::Yellow);
             }
         }
         scrollable_widget::render(aGraphicsContext);

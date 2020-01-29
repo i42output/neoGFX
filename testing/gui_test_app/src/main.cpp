@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
             if (ui.buttonChina.has_maximum_size())
                 ui.buttonChina.set_maximum_size(ng::optional_size{});
             else 
-                ui.buttonChina.set_maximum_size(ng::size{ 128_spx, 64_spx });
+                ui.buttonChina.set_maximum_size(ng::size{ 128_dip, 64_dip });
         });
         ui.dropList.model().insert_item(ui.dropList.model().end(), "Red");
         ui.dropList.model().insert_item(ui.dropList.model().end(), "Green");
@@ -803,12 +803,12 @@ int main(int argc, char* argv[])
                 tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
         });
 
-        ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_spx }); });
+        ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); });
         ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); });
         ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_type({}); ui.tableView1.update(); });
         ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView1.update(); });
         ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Background); ui.tableView1.update(); });
-        ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_spx }); });
+        ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); });
         ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); });
         ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_type({}); ui.tableView2.update(); });
         ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView2.update(); });
@@ -974,10 +974,10 @@ int main(int argc, char* argv[])
             aGc.draw_texture(texLocation + ng::point{ 65.0, 65.0 }, tex[3]);
 
             texLocation.x += 140.0;
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, 1.0_spx, texColor[0], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, 1.0_spx, texColor[1], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, 1.0_spx, texColor[2], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_spx, texColor[3], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, 1.0_dip, texColor[0], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, 1.0_dip, texColor[1], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, 1.0_dip, texColor[2], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_dip, texColor[3], "Render\nTo\nScreen");
         });
 
         neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)

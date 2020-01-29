@@ -544,7 +544,7 @@ namespace neogfx
     }
 
     standard_stipple_shader::standard_stipple_shader(const std::string& aName) :
-        standard_fragment_shader<i_stipple_shader>{ aName }
+        standard_fragment_shader<i_stipple_shader>{ aName }, iPosition{ 0.0 }
     {
         disable();
     }
@@ -561,7 +561,7 @@ namespace neogfx
                 "    if (uStippleEnabled)\n"
                 "    {\n"
                 "        float d = distance(uStippleVertex, Coord);\n"
-                "        uint patternBit = ((uint(d + uStippleCounter)) / uStippleFactor) % 16;\n"
+                "        uint patternBit = uint((d + uStipplePosition) / uStippleFactor) % 16;\n"
                 "        if ((uStipplePattern & (1 << patternBit)) == 0)\n"
                 "            discard;\n"
                 "    }\n"
@@ -581,29 +581,29 @@ namespace neogfx
 
     void standard_stipple_shader::clear_stipple()
     {
+        iPosition = 0.0;
         uStippleEnabled = false;
     }
 
-    void standard_stipple_shader::set_stipple(uint32_t aFactor, uint16_t aPattern)
+    void standard_stipple_shader::set_stipple(uint32_t aFactor, uint16_t aPattern, scalar aPosition)
     {
         enable();
+        iPosition = aPosition;
         uStippleFactor = aFactor;
         uStipplePattern = aPattern;
-        uStippleCounter = 0.0f;
+        uStipplePosition = 0.0f;
         uStippleVertex = vec3f{};
         uStippleEnabled = true;
     }
 
     void standard_stipple_shader::start(const i_rendering_context& aContext, const vec3& aFrom)
     {
-        uStippleCounter = 0.0f;
-        uStippleVertex = aFrom.as<float>();
+        next(aContext, aFrom, 0.0);
     }
     
-    void standard_stipple_shader::next(const i_rendering_context& aContext, const vec3& aFrom, const std::optional<scalar>& aCounterOffset)
+    void standard_stipple_shader::next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset)
     {
-        if (aCounterOffset)
-            uStippleCounter = uStippleCounter.uniform().value().get<float>() + static_cast<float>(*aCounterOffset);
+        uStipplePosition = static_cast<float>(iPosition + aPositionOffset);
         uStippleVertex = aFrom.as<float>();
     }
 }

@@ -63,7 +63,7 @@
             }
             window: {
                 id: mainWindow
-                default_size: [ 960spx 832spx ]
+                default_size: [ 960dip 832dip ]
                 status_bar: {
                     id: statusBar
                 }
@@ -209,8 +209,8 @@
                                     text: "This is the neoGFX test application."
                                     .image: {
                                         uri: ":/test/resources/neoGFX.png"
-                                        minimum_size: [ 32spx 32spx ]
-                                        maximum_size: [ 160spx max ]
+                                        minimum_size: [ 32dip 32dip ]
+                                        maximum_size: [ 160dip max ]
                                     }
                                     size_policy: Expanding
                                     foreground_color: LightGoldenrodYellow
@@ -543,7 +543,7 @@
                                     text: "Information"
                                     .image: {
                                         uri: ":/neogfx/resources/icons.naa#information.png"
-                                        size: 24spx
+                                        size: 24dip
                                     }
                                 }
                                 radio_button: {
@@ -551,7 +551,7 @@
                                     text: "Question"
                                     .image: {
                                         uri: ":/neogfx/resources/icons.naa#question.png"
-                                        size: 24spx
+                                        size: 24dip
                                     }
                                 }
                                 radio_button: {
@@ -559,7 +559,7 @@
                                     text: "Warning"
                                     .image: {
                                         uri: ":/neogfx/resources/icons.naa#warning.png"
-                                        size: 24spx
+                                        size: 24dip
                                     }
                                 }
                                 radio_button: {
@@ -567,7 +567,7 @@
                                     text: "Stop"
                                     .image: {
                                         uri: ":/neogfx/resources/icons.naa#stop.png"
-                                        size: 24spx
+                                        size: 24dip
                                     }
                                 }
                                 radio_button: {
@@ -575,7 +575,7 @@
                                     text: "Error"
                                     .image: {
                                         uri: ":/neogfx/resources/icons.naa#error.png"
-                                        size: 24spx
+                                        size: 24dip
                                     }
                                 }
                                 radio_button: {
@@ -583,7 +583,7 @@
                                     text: "Critical"
                                     .image: {
                                         uri: ":/neogfx/resources/icons.naa#critical.png"
-                                        size: 24spx
+                                        size: 24dip
                                     }
                                 }
                             }
@@ -607,7 +607,7 @@
                                 text_edit: {
                                     id: textEditMessageBoxText
                                     text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
-                                    minimum_size: [ 256spx 128spx ]
+                                    minimum_size: [ 256dip 128dip ]
                                     size_policy: Minimum
                                 }
                                 label: {
@@ -616,7 +616,7 @@
                                 text_edit: {
                                     id: textEditMessageBoxDetailedText
                                     text: "This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank."
-                                    minimum_size: [ 256spx 128spx ]
+                                    minimum_size: [ 256dip 128dip ]
                                     size_policy: Minimum
                                 }
                             }

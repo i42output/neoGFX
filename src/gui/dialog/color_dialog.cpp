@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0_spx);
+    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0_dip);
 
     color_dialog::color_box::color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor) :
         framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColor(aColor), iCustomColor(aCustomColor)
@@ -57,7 +57,7 @@ namespace neogfx
         {
             auto radius = client_rect(false).width() * 0.5 * 0.666;
             aGraphicsContext.fill_circle(client_rect(false).centre(), radius, color::White);
-            aGraphicsContext.fill_circle(client_rect(false).centre(), radius - 1.0_spx, color::Black);
+            aGraphicsContext.fill_circle(client_rect(false).centre(), radius - 1.0_dip, color::Black);
         }
     }
 
@@ -239,7 +239,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return framed_widget::minimum_size(aAvailableSpace);
-        return framed_widget::minimum_size(aAvailableSpace) + size{ 32_spx, 256_spx };
+        return framed_widget::minimum_size(aAvailableSpace) + size{ 32_dip, 256_dip };
     }
 
     size color_dialog::x_picker::maximum_size(const optional_size& aAvailableSpace) const
@@ -463,7 +463,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return framed_widget::minimum_size(aAvailableSpace);
-        return framed_widget::minimum_size(aAvailableSpace) + size{ 256_spx, 256_spx };
+        return framed_widget::minimum_size(aAvailableSpace) + size{ 256_dip, 256_dip };
     }
 
     size color_dialog::yz_picker::maximum_size(const optional_size& aAvailableSpace) const
@@ -494,8 +494,8 @@ namespace neogfx
             }
             iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
         }
-        aGraphicsContext.draw_texture(rect{ cr.top_left(), size{ 256.0_spx, 256.0_spx } }, iTexture);
-        point cursor = spx(current_cursor_position());
+        aGraphicsContext.draw_texture(rect{ cr.top_left(), size{ 256.0_dip, 256.0_dip } }, iTexture);
+        point cursor = dip(current_cursor_position());
         aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iOwner.selected_color());
         aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iOwner.selected_color().light(0x80) ? color::Black : color::White });
     }
@@ -673,7 +673,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return framed_widget::minimum_size(aAvailableSpace);
-        return framed_widget::minimum_size(aAvailableSpace) + size{ 60_spx, 80_spx };
+        return framed_widget::minimum_size(aAvailableSpace) + size{ 60_dip, 80_dip };
     }
 
     size color_dialog::color_selection::maximum_size(const optional_size& aAvailableSpace) const

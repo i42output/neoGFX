@@ -52,7 +52,7 @@ namespace neogfx
         color borderColor1 = container_background_color().mid(container_background_color().mid(background_color()));
         if (borderColor1.similar_intensity(container_background_color(), 0.03125))
             borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
-        size const scaledPixel{ 1.0_spx, 1.0_spx };
+        size const scaledPixel{ 1.0_dip, 1.0_dip };
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);
         aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);

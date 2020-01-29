@@ -49,7 +49,7 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect line = client_rect(false);
-        line.deflate(size{ 0.0_spx, 2.0_spx });
+        line.deflate(size{ 0.0_dip, 2.0_dip });
         line.cx = 1.0;
         color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().foreground_color());
         aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0x80));
