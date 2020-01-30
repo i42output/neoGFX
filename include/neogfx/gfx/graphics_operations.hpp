@@ -87,7 +87,7 @@ namespace neogfx
 
         struct line_stipple_on
         {
-            uint32_t factor;
+            scalar factor;
             uint16_t pattern;
             scalar position;
         };

@@ -438,16 +438,13 @@ namespace neogfx
                 set_snap_to_pixel(false);
                 break;
             case graphics_operation::operation_type::SetOpacity:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    set_opacity(static_variant_cast<const graphics_operation::set_opacity&>(*op).opacity);
+                set_opacity(static_variant_cast<const graphics_operation::set_opacity&>(*(std::prev(opBatch.second))).opacity);
                 break;
             case graphics_operation::operation_type::SetBlendingMode:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    set_blending_mode(static_variant_cast<const graphics_operation::set_blending_mode&>(*op).blendingMode);
+                set_blending_mode(static_variant_cast<const graphics_operation::set_blending_mode&>(*(std::prev(opBatch.second))).blendingMode);
                 break;
             case graphics_operation::operation_type::SetSmoothingMode:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    set_smoothing_mode(static_variant_cast<const graphics_operation::set_smoothing_mode&>(*op).smoothingMode);
+                set_smoothing_mode(static_variant_cast<const graphics_operation::set_smoothing_mode&>(*(std::prev(opBatch.second))).smoothingMode);
                 break;
             case graphics_operation::operation_type::PushLogicalOperation:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -461,18 +458,13 @@ namespace neogfx
                 }
                 break;
             case graphics_operation::operation_type::LineStippleOn:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(*op);
+                    auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(*(std::prev(opBatch.second)));
                     line_stipple_on(lso.factor, lso.pattern, lso.position);
                 }
                 break;
             case graphics_operation::operation_type::LineStippleOff:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    (void)op;
-                    line_stipple_off();
-                }
+                line_stipple_off();
                 break;
             case graphics_operation::operation_type::SubpixelRenderingOn:
                 subpixel_rendering_on();
@@ -481,8 +473,7 @@ namespace neogfx
                 subpixel_rendering_off();
                 break;
             case graphics_operation::operation_type::Clear:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    clear(static_variant_cast<const graphics_operation::clear&>(*op).color);
+                clear(static_variant_cast<const graphics_operation::clear&>(*(std::prev(opBatch.second))).color);
                 break;
             case graphics_operation::operation_type::ClearDepthBuffer:
                 clear_depth_buffer();
@@ -772,7 +763,7 @@ namespace neogfx
         }    
     }
 
-    void opengl_rendering_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern, scalar aPosition)
+    void opengl_rendering_context::line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition)
     {
         rendering_engine().default_shader_program().stipple_shader().set_stipple(aFactor, aPattern, aPosition);
     }

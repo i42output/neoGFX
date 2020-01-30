@@ -585,11 +585,11 @@ namespace neogfx
         uStippleEnabled = false;
     }
 
-    void standard_stipple_shader::set_stipple(uint32_t aFactor, uint16_t aPattern, scalar aPosition)
+    void standard_stipple_shader::set_stipple(scalar aFactor, uint16_t aPattern, scalar aPosition)
     {
         enable();
         iPosition = aPosition;
-        uStippleFactor = aFactor;
+        uStippleFactor = static_cast<float>(aFactor);
         uStipplePattern = aPattern;
         uStipplePosition = 0.0f;
         uStippleVertex = vec3f{};

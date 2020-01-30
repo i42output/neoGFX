@@ -817,7 +817,7 @@ namespace neogfx
         native_context().enqueue(graphics_operation::pop_logical_operation{});
     }
 
-    void graphics_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern, scalar aPosition) const
+    void graphics_context::line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition) const
     {
         native_context().enqueue(graphics_operation::line_stipple_on{ aFactor, aPattern, aPosition });
     }

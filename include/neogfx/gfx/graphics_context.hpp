@@ -93,7 +93,7 @@ namespace neogfx
         void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const override;
         void push_logical_operation(logical_operation aLogicalOperation) const override;
         void pop_logical_operation() const override;
-        void line_stipple_on(uint32_t aFactor, uint16_t aPattern, scalar aPosition = 0.0) const override;
+        void line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition = 0.0) const override;
         void line_stipple_off() const override;
         bool is_subpixel_rendering_on() const override;
         void subpixel_rendering_on() const override;

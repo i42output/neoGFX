@@ -184,7 +184,7 @@ namespace neogfx
         void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode);
         void push_logical_operation(logical_operation aLogicalOperation);
         void pop_logical_operation();
-        void line_stipple_on(uint32_t aFactor, uint16_t aPattern, scalar aPosition);
+        void line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition);
         void line_stipple_off();
         bool is_subpixel_rendering_on() const;
         void subpixel_rendering_on();
