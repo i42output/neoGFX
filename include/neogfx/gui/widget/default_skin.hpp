@@ -34,6 +34,7 @@ namespace neogfx
         void activate() override;
         void deactivate() override;
     public:
+        void draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, scrollbar_type aType, scrollbar_style aStyle) const override;
         void draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const override;
     };
 }

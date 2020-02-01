@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
+#include <neogfx/gui/widget/i_scrollbar.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
 
 namespace neogfx
@@ -40,6 +41,7 @@ namespace neogfx
         virtual void activate() = 0;
         virtual void deactivate() = 0;
     public:
+        virtual void draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, scrollbar_type aType, scrollbar_style aStyle) const = 0;
         virtual void draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
     };
 }

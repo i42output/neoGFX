@@ -81,9 +81,15 @@ namespace neogfx
         return size_constraint::Minimum;
     }
 
-    rect check_box::draw_rect() const
+    rect check_box::element_rect(skin_element aElement) const
     {
-        return iBox.client_rect() + iBox.position();
+        switch (aElement)
+        {
+        case skin_element::CheckBox:
+            return iBox.client_rect() + iBox.position();
+        default:
+            return button::element_rect(aElement);
+        }
     }
 
     void check_box::paint(i_graphics_context& aGraphicsContext) const

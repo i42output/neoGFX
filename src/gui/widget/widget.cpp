@@ -519,12 +519,7 @@ namespace neogfx
         return *this;
     }
 
-    rect widget::click_rect() const
-    {
-        return client_rect();
-    }
-
-    rect widget::draw_rect() const
+    rect widget::element_rect(skin_element) const
     {
         return client_rect();
     }

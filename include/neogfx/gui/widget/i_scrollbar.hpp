@@ -47,16 +47,16 @@ namespace neogfx
         typedef double value_type;
         enum element_e
         {
-            ElementNone                = 0x00,
-            ElementUpButton            = 0x01,
-            ElementLeftButton        = ElementUpButton,
-            ElementDownButton        = 0x02,
-            ElementRightButton        = ElementDownButton,
-            ElementPageUpArea        = 0x03,
-            ElementPageLeftArea        = ElementPageUpArea,
-            ElementPageDownArea        = 0x04,
-            ElementPageRightArea    = ElementPageDownArea,
-            ElementThumb            = 0x05
+            ElementNone          = 0x00,
+            ElementUpButton      = 0x01,
+            ElementLeftButton    = ElementUpButton,
+            ElementDownButton    = 0x02,
+            ElementRightButton   = ElementDownButton,
+            ElementPageUpArea    = 0x03,
+            ElementPageLeftArea  = ElementPageUpArea,
+            ElementPageDownArea  = 0x04,
+            ElementPageRightArea = ElementPageDownArea,
+            ElementThumb         = 0x05
         };
         enum update_reason_e
         {

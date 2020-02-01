@@ -21,11 +21,42 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/i_object.hpp>
 
 namespace neogfx
 {
     class i_widget;
+
+    enum class skin_element : uint32_t
+    {
+        ClickableArea,
+        ScrollbarUpArrow,
+        ScrollbarLeftArrow,
+        ScrollbarDownArrow,
+        ScrollbarRightArrow,
+        ScrollbarPageUpArea,
+        ScrollbarPageLeftArea,
+        ScrollbarPageDownArea,
+        ScrollbarPageRightArea,
+        ScrollbarThumb,
+        ButtonFace,
+        CheckBox,
+        RadioButton,
+        SliderTrack,
+        SliderThumb,
+        SpinnerUpArrow,
+        SpinnerDownArrow,
+        TabClose,
+        Custom1,
+        Custom2,
+        Custom3,
+        Custom4,
+        Custom5,
+        Custom6,
+        Custom7,
+        Custom8,
+        Custom9,
+        Custom10
+    };
 
     class i_skinnable_item
     {
@@ -34,7 +65,6 @@ namespace neogfx
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
     public:
-        virtual rect click_rect() const = 0;
-        virtual rect draw_rect() const = 0;
+        virtual rect element_rect(skin_element aElement) const = 0;
     };
 }

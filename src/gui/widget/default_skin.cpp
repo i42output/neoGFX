@@ -50,11 +50,16 @@ namespace neogfx
     {
     }
 
+    void default_skin::draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, scrollbar_type aType, scrollbar_style aStyle) const
+    {
+        // todo
+    }
+
     void default_skin::draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const
     {
         auto const& widget = aItem.as_widget();
         scoped_units su{ widget, units::Pixels };
-        rect boxRect = aItem.draw_rect();
+        rect boxRect = aItem.element_rect(skin_element::CheckBox);
         auto enabledAlphaCoefficient = widget.effectively_enabled() ? 1.0 : 0.25;
         color hoverColor = service<i_app>().current_style().palette().hover_color().same_lightness_as(
             widget.background_color().dark() ?
@@ -62,7 +67,7 @@ namespace neogfx
                 widget.background_color().darker(0x20));
         if (widget.capturing())
             widget.background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color fillColor = widget.enabled() && aItem.click_rect().contains(widget.root().mouse_position() - widget.origin()) ?
+        color fillColor = widget.enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ?
             hoverColor : widget.background_color();
         aGraphicsContext.fill_rect(boxRect, fillColor.with_combined_alpha(enabledAlphaCoefficient));
         color borderColor1 = widget.container_background_color().mid(widget.container_background_color().mid(widget.background_color()));

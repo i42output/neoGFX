@@ -134,8 +134,7 @@ namespace neogfx
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     public:
-        rect click_rect() const override;
-        rect draw_rect() const override;
+        rect element_rect(skin_element aElement) const override;
         // i_widget
     public:
         bool has_logical_coordinate_system() const override;

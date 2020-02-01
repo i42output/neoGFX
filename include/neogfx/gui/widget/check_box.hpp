@@ -43,7 +43,7 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     public:
-        rect draw_rect() const override;
+        rect element_rect(skin_element aElement) const override;
     protected:
         void paint(i_graphics_context& aGraphicsContext) const override;
     protected:
