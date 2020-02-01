@@ -519,6 +519,16 @@ namespace neogfx
         return *this;
     }
 
+    rect widget::click_rect() const
+    {
+        return client_rect();
+    }
+
+    rect widget::draw_rect() const
+    {
+        return client_rect();
+    }
+
     bool widget::has_parent_layout() const
     {
         return iParentLayout != nullptr;

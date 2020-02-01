@@ -134,14 +134,16 @@ namespace neogfx
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     public:
-        rect non_client_rect() const override;
-        rect client_rect(bool aIncludeMargins = true) const override;
+        rect click_rect() const override;
+        rect draw_rect() const override;
         // i_widget
     public:
         bool has_logical_coordinate_system() const override;
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
         void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;
         point origin() const override;
+        rect non_client_rect() const override;
+        rect client_rect(bool aIncludeMargins = true) const override;
         void move(const point& aPosition) override;
         void moved() override;
         void parent_moved() override;

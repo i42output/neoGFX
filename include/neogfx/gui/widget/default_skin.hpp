@@ -1,7 +1,7 @@
-// i_skin.hpp
+// default_skin.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,26 +20,20 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/i_graphics_context.hpp>
-#include <neogfx/gui/widget/i_skinnable_item.hpp>
-#include <neogfx/gui/widget/i_button.hpp>
+#include <neogfx/gui/widget/i_skin.hpp>
 
 namespace neogfx
 {
-    class i_skin
+    class default_skin : public i_skin
     {
     public:
-        struct no_fallback : std::logic_error { no_fallback() : std::logic_error{ "neogfx::i_skin::no_fallback" } {} };
+        const std::string& name() const override;
+        bool has_fallback() const override;
+        i_skin& fallback() override;
     public:
-        virtual ~i_skin() = default;
+        void activate() override;
+        void deactivate() override;
     public:
-        virtual const std::string& name() const = 0;
-        virtual bool has_fallback() const = 0;
-        virtual i_skin& fallback() = 0;
-    public:
-        virtual void activate() = 0;
-        virtual void deactivate() = 0;
-    public:
-        virtual void draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
+        void draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const override;
     };
 }

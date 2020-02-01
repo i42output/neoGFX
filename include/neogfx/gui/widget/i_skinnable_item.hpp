@@ -34,7 +34,7 @@ namespace neogfx
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
     public:
-        virtual rect non_client_rect() const = 0;
-        virtual rect client_rect(bool aIncludeMargins = true) const = 0;
+        virtual rect click_rect() const = 0;
+        virtual rect draw_rect() const = 0;
     };
 }

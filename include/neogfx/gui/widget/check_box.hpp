@@ -35,8 +35,6 @@ namespace neogfx
         public:
             size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
             size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        public:
-            void paint(i_graphics_context& aGraphicsContext) const override;
         };
     public:
         check_box(const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
@@ -44,6 +42,8 @@ namespace neogfx
         check_box(i_layout& aLayout, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
     public:
         neogfx::size_policy size_policy() const override;
+    public:
+        rect draw_rect() const override;
     protected:
         void paint(i_graphics_context& aGraphicsContext) const override;
     protected:

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
 
 namespace neogfx
@@ -43,39 +44,6 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
         
-    void check_box::box::paint(i_graphics_context& aGraphicsContext) const
-    {
-        scoped_units su{ *this, units::Pixels };
-        rect boxRect = client_rect();
-        auto enabledAlphaCoefficient = effectively_enabled() ? 1.0 : 0.25;
-        color hoverColor = service<i_app>().current_style().palette().hover_color().same_lightness_as(
-            background_color().dark() ?
-                background_color().lighter(0x20) :
-                background_color().darker(0x20));
-        if (parent().capturing())
-            background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color fillColor = parent().enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColor : background_color();
-        aGraphicsContext.fill_rect(boxRect, fillColor.with_combined_alpha(enabledAlphaCoefficient));
-        color borderColor1 = container_background_color().mid(container_background_color().mid(background_color()));
-        if (borderColor1.similar_intensity(container_background_color(), 0.03125))
-            borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
-        aGraphicsContext.draw_rect(boxRect, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), 1.0 });
-        boxRect.deflate(1.0, 1.0);
-        aGraphicsContext.draw_rect(boxRect, pen{ borderColor1.mid(background_color()).with_combined_alpha(enabledAlphaCoefficient), 1.0 });
-        boxRect.deflate(2.0, 2.0);
-        if (static_cast<const check_box&>(parent()).is_checked())
-        {
-            scoped_snap_to_pixel snap{ aGraphicsContext, false };
-            /* todo: draw tick image eye candy */
-            aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient), 2.0));
-            aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient), 2.0));
-        }
-        else if (static_cast<const check_box&>(parent()).is_indeterminate())
-        {
-            aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
-        }
-    }
-
     check_box::check_box(const std::string& aText, button_checkable aCheckable) :
         button(aText), iBox(*this)
     {
@@ -113,13 +81,19 @@ namespace neogfx
         return size_constraint::Minimum;
     }
 
+    rect check_box::draw_rect() const
+    {
+        return iBox.client_rect() + iBox.position();
+    }
+
     void check_box::paint(i_graphics_context& aGraphicsContext) const
     {
         if (has_focus())
         {
-            rect focusRect = label().client_rect() + label().position();
+            rect const focusRect = label().client_rect() + label().position();
             aGraphicsContext.draw_focus_rect(focusRect);
         }
+        service<i_skin_manager>().active_skin().draw_check_box(aGraphicsContext, *this, checked_state());
     }
 
     void check_box::mouse_entered(const point& aPosition)

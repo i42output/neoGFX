@@ -936,6 +936,9 @@
     <ClInclude Include="..\..\..\include\neogfx\game\color.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1364,6 +1367,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\dialog\color_dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\default_skin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\skin_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

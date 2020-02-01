@@ -113,7 +113,7 @@ namespace neogfx
     private:
         sink iSink;
         button_checkable iCheckable;
-        std::optional<bool> iCheckedState;
+        button_checked_state iCheckedState;
         horizontal_layout iLayout;
         neogfx::label iLabel;
     };

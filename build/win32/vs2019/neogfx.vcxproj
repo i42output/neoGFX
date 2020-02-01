@@ -430,6 +430,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_editor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp" />
@@ -655,6 +656,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\default_skin.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp" />
@@ -674,6 +676,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\skin_manager.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\slider.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\splitter.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\status_bar.cpp" />

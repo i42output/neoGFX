@@ -1,7 +1,7 @@
 // i_skin_manager.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/i_event.hpp>
 #include <neogfx/gui/widget/i_skin.hpp>
-#include <neogfx/gui/widget/i_skinnable_item.hpp>
 
 namespace neogfx
 {
@@ -31,8 +30,11 @@ namespace neogfx
     public:
         declare_event(skin_registered, i_skin&)
         declare_event(skin_unregistered, i_skin&)
-        declare_event(item_registered, i_skinnable_item&)
-        declare_event(item_unregistered, i_skinnable_item&)
+    public:
+        struct skin_not_found : std::logic_error { skin_not_found() : std::logic_error{ "neogfx::i_skin_manager::skin_not_found" } {} };
+        struct no_skin_active : std::logic_error { no_skin_active() : std::logic_error{ "neogfx::i_skin_manager::no_skin_active" } {} };
+    public:
+        virtual ~i_skin_manager() = default;
     public:
         virtual uint32_t skin_count() const = 0;
         virtual const i_skin& skin(uint32_t aIndex) const = 0;
@@ -40,12 +42,9 @@ namespace neogfx
         virtual void register_skin(i_skin& aSkin) = 0;
         virtual void unregister_skin(i_skin& aSkin) = 0;
     public:
+        virtual bool skin_active() const = 0;
         virtual const i_skin& active_skin() const = 0;
         virtual i_skin& active_skin() = 0;
         virtual void activate_skin(i_skin& aSkin) = 0;
-    public:
-        virtual bool is_item_registered(const i_skinnable_item& aItem) const = 0;
-        virtual void register_item(i_skinnable_item& aItem) = 0;
-        virtual void unregister_item(i_skinnable_item& aItem) = 0;
     };
 }

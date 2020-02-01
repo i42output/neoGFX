@@ -43,6 +43,8 @@ const neolib::enum_enumerators_t<neogfx::button_checkable> neolib::enum_enumerat
 
 namespace neogfx
 {
+    typedef std::optional<bool> button_checked_state;
+
     class i_button : public virtual i_skinnable_item
     {
     public:
