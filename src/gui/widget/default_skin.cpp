@@ -87,4 +87,33 @@ namespace neogfx
         else if (aCheckedState == std::nullopt)
             aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
     }
+
+    void default_skin::draw_radio_button(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const
+    {
+        auto const& widget = aItem.as_widget();
+        scoped_units su{ widget, units::Pixels };
+        rect discRect = aItem.element_rect(skin_element::RadioButton);
+        auto enabledAlphaCoefficient = widget.effectively_enabled() ? 1.0 : 0.25;
+        color borderColor1 = widget.container_background_color().mid(widget.container_background_color().mid(widget.background_color()));
+        if (borderColor1.similar_intensity(widget.container_background_color(), 0.03125))
+            borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
+        size const scaledPixel{ 1.0_dip, 1.0_dip };
+        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
+        aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
+        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
+        aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.mid(widget.background_color()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
+        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
+        color hoverColor = service<i_app>().current_style().palette().hover_color().same_lightness_as(
+            widget.background_color().dark() ?
+                widget.background_color().lighter(0x20) :
+                widget.background_color().darker(0x20));
+        if (widget.capturing())
+            widget.background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
+        color backgroundFillColor = widget.effectively_enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ? 
+            hoverColor : widget.background_color();
+        aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColor.with_combined_alpha(enabledAlphaCoefficient));
+        discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
+        if (aCheckedState != std::nullopt && *aCheckedState == true)
+            aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
+    }
 }

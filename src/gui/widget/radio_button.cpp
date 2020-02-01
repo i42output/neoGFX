@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
-#include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 
 namespace neogfx
@@ -44,33 +44,6 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
         
-    void radio_button::disc::paint(i_graphics_context& aGraphicsContext) const
-    {
-        scoped_units su{ *this, units::Pixels };
-        rect discRect = client_rect();
-        auto enabledAlphaCoefficient = effectively_enabled() ? 1.0 : 0.25;
-        color borderColor1 = container_background_color().mid(container_background_color().mid(background_color()));
-        if (borderColor1.similar_intensity(container_background_color(), 0.03125))
-            borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
-        size const scaledPixel{ 1.0_dip, 1.0_dip };
-        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
-        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.mid(background_color()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
-        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        color hoverColor = service<i_app>().current_style().palette().hover_color().same_lightness_as(
-            background_color().dark() ?
-            background_color().lighter(0x20) :
-            background_color().darker(0x20));
-        if (parent().capturing())
-            background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color backgroundFillColor = effectively_enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColor : background_color();
-        aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColor.with_combined_alpha(enabledAlphaCoefficient));
-        discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
-        if (static_cast<const radio_button&>(parent()).is_on())
-            aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
-    }
-
     radio_button::radio_button(const std::string& aText) :
         button(aText), iDisc(*this)
     {
@@ -129,6 +102,17 @@ namespace neogfx
         return size_constraint::Minimum;
     }
 
+    rect radio_button::element_rect(skin_element aElement) const
+    {
+        switch (aElement)
+        {
+        case skin_element::RadioButton:
+            return iDisc.client_rect() + iDisc.position();
+        default:
+            return button::element_rect(aElement);
+        }
+    }
+
     void radio_button::paint(i_graphics_context& aGraphicsContext) const
     {
         if (has_focus())
@@ -136,6 +120,7 @@ namespace neogfx
             rect focusRect = label().client_rect() + label().position();
             aGraphicsContext.draw_focus_rect(focusRect);
         }
+        service<i_skin_manager>().active_skin().draw_radio_button(aGraphicsContext, *this, checked_state());
     }
 
     void radio_button::mouse_entered(const point& aPosition)

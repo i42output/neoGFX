@@ -37,8 +37,6 @@ namespace neogfx
         public:
             size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
             size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        public:
-            void paint(i_graphics_context& aGraphicsContext) const override;
         };
     public:
         radio_button(const std::string& aText = std::string());
@@ -50,6 +48,8 @@ namespace neogfx
         void set_on();
     public:
         neogfx::size_policy size_policy() const override;
+    public:
+        rect element_rect(skin_element aElement) const override;
     protected:
         void paint(i_graphics_context& aGraphicsContext) const override;
     protected:
