@@ -50,6 +50,19 @@ namespace neogfx
     {
     }
 
+    size default_skin::preferred_size(skin_element aElement, const optional_size& aDesiredSize) const
+    {
+        switch (aElement)
+        {
+        case skin_element::CheckBox:
+            return (aDesiredSize == std::nullopt ? size{ 3.5_mm, 3.5_mm } : size{ 3.5_mm, 3.5_mm }.max(*aDesiredSize)).ceil();
+        case skin_element::RadioButton:
+            return (aDesiredSize == std::nullopt ? size{ 3.5_mm, 3.5_mm } : size{ 3.5_mm, 3.5_mm }.max(*aDesiredSize)).ceil();
+        default:
+            return {};
+        }
+    }
+
     void default_skin::draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const
     {
         auto const& widget = aItem.as_widget();

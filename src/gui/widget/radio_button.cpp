@@ -35,8 +35,8 @@ namespace neogfx
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        dimension const length = std::ceil(units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text_widget().font().height() * (2.0 / 3.0)));
-        return rasterize(size{ std::max<dimension>(length, 3.5_mm) });
+        dimension const length = units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text_widget().font().height()* (2.0 / 3.0));
+        return rasterize(service<i_skin_manager>().active_skin().preferred_size(skin_element::RadioButton, size{ length }));
     }
 
     size radio_button::disc::maximum_size(const optional_size& aAvailableSpace) const
@@ -95,7 +95,7 @@ namespace neogfx
         check();
     }
 
-    neogfx::size_policy radio_button::size_policy() const
+    size_policy radio_button::size_policy() const
     {
         if (widget::has_size_policy())
             return widget::size_policy();

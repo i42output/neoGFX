@@ -34,6 +34,8 @@ namespace neogfx
         void activate() override;
         void deactivate() override;
     public:
+        size preferred_size(skin_element aElement, const optional_size& aDesiredSize = {}) const override;
+    public:
         void draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const override;
         void draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const override;
         void draw_radio_button(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const override;
