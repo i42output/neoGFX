@@ -26,11 +26,12 @@
 #include <neogfx/core/property.hpp>
 #include <neogfx/core/i_animator.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/i_scrollbar.hpp>
 
 namespace neogfx
 {
-    class scrollbar : public object<>, public i_scrollbar
+    class scrollbar : public object<>, public i_scrollbar, public i_skinnable_item
     {
     public:
         typedef i_scrollbar abstract_type;
@@ -41,6 +42,8 @@ namespace neogfx
     public:
         scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
         ~scrollbar();
+    public:
+        i_scrollbar_container& container() const override;
     public:
         scrollbar_type type() const override;
         scrollbar_style style() const override;
@@ -65,14 +68,15 @@ namespace neogfx
         dimension width() const override;
         void render(i_graphics_context& aGraphicsContext) const override;
     public:
-        rect element_geometry(element_e aElement) const override;
-        element_e element_at(const point& aPosition) const override;
+        rect element_geometry(scrollbar_element aElement) const override;
+        scrollbar_element element_at(const point& aPosition) const override;
     public:
         void update(const update_params_t& aUpdateParams = update_params_t()) override;
-        element_e clicked_element() const override;
-        void click_element(element_e aElement) override;
+        scrollbar_element clicked_element() const override;
+        void click_element(scrollbar_element aElement) override;
         void unclick_element() override;
-        void hover_element(element_e aElement) override;
+        scrollbar_element hovering_element() const override;
+        void hover_element(scrollbar_element aElement) override;
         void unhover_element() override;
         void pause() override;
         void resume() override;
@@ -80,6 +84,12 @@ namespace neogfx
         void untrack() override;
     public:
         static dimension width(scrollbar_style aStyle);
+    public:
+        bool is_widget() const override;
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
+    public:
+        rect element_rect(skin_element aElement) const override;
     private:
         bool have_transition() const;
         i_transition& transition() const;
@@ -94,8 +104,8 @@ namespace neogfx
         value_type iStep;
         value_type iPage;
         std::optional<value_type> iLockedPosition;
-        element_e iClickedElement;
-        element_e iHoverElement;
+        scrollbar_element iClickedElement;
+        scrollbar_element iHoverElement;
         std::optional<std::shared_ptr<neolib::callback_timer>> iTimer;
         bool iPaused;
         point iThumbClickedPosition;

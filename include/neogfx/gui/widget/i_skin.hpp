@@ -41,7 +41,7 @@ namespace neogfx
         virtual void activate() = 0;
         virtual void deactivate() = 0;
     public:
-        virtual void draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, scrollbar_type aType, scrollbar_style aStyle) const = 0;
+        virtual void draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const = 0;
         virtual void draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
         virtual void draw_radio_button(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
     };

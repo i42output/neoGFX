@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/scrollbar.hpp>
 
 namespace neogfx
@@ -33,8 +34,8 @@ namespace neogfx
         iMaximum(0.0),
         iStep(1.0),
         iPage(0.0),
-        iClickedElement(ElementNone),
-        iHoverElement(ElementNone),
+        iClickedElement(scrollbar_element::None),
+        iHoverElement(scrollbar_element::None),
         iPaused(false)
     {
         Position.changed_from_to([this](const value_type& aFrom, const value_type& aTo)
@@ -48,6 +49,11 @@ namespace neogfx
     {
         if (iTransition)
             service<i_animator>().remove_transition(*iTransition);
+    }
+
+    i_scrollbar_container& scrollbar::container() const
+    {
+        return iContainer;
     }
 
     scrollbar_type scrollbar::type() const
@@ -212,135 +218,10 @@ namespace neogfx
     {
         if (style() == scrollbar_style::Invisible)
             return;
-        scoped_units su(aGraphicsContext, units::Pixels);
-        rect g = iContainer.scrollbar_geometry(*this);
-        point oldOrigin = aGraphicsContext.origin();
-        aGraphicsContext.set_origin(point(0.0, 0.0));
-        color baseColor = iContainer.scrollbar_color(*this);
-        color backgroundColor = baseColor.light() ? baseColor.darker(0x40) : baseColor.lighter(0x40);
-        if (iContainer.as_widget().transparent_background())
-            backgroundColor = iContainer.as_widget().container_background_color();
-        color foregroundColor = baseColor.light() ? baseColor.darker(0x80) : baseColor.lighter(0x80);
-        if (style() == scrollbar_style::Normal)
-            aGraphicsContext.fill_rect(iContainer.scrollbar_geometry(*this), backgroundColor);
-        else if (style() == scrollbar_style::Menu)
-        {
-            auto g1 = g;
-            auto g2 = g;
-            if (type() == scrollbar_type::Vertical)
-            {
-                g1.cy = width();
-                g2.y = g2.y + g2.cy - width();
-                g2.cy = g1.cy;
-            }
-            else
-            {
-                g1.cx = width();
-                g2.x = g2.x + g2.cx - width();
-                g2.cx = g1.cx;
-            }
-            aGraphicsContext.fill_rect(g1, backgroundColor);
-            aGraphicsContext.fill_rect(g2, backgroundColor);
-        }
-        else if (style() == scrollbar_style::Scroller)
-        {
-            auto g1 = g;
-            auto g2 = g;
-            if (type() == scrollbar_type::Vertical)
-            {
-                g1.y = g1.y + g1.cy - width() * 2.0;
-                g1.cy = width();
-                g2.y = g2.y + g2.cy - width();
-                g2.cy = g1.cy;
-            }
-            else
-            {
-                g1.x = g1.x + g1.cx - width() * 2.0;
-                g1.cx = width();
-                g2.x = g2.x + g2.cx - width();
-                g2.cx = g1.cx;
-            }
-            aGraphicsContext.fill_rect(g1, backgroundColor);
-            aGraphicsContext.fill_rect(g2, backgroundColor);
-            if (position() != minimum())
-            {
-                auto fadeRect = g;
-                if (type() == scrollbar_type::Vertical)
-                    fadeRect.cy = width();
-                else
-                    fadeRect.cx = width();
-                aGraphicsContext.fill_rect(fadeRect, gradient
-                {
-                    gradient::color_stop_list{ { 0.0, backgroundColor }, { 1.0, backgroundColor } },
-                    gradient::alpha_stop_list{ { 0.0, 0xFF_u8 }, { 1.0, 0x00_u8 } },
-                    type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
-                });
-            }
-            if (position() != maximum() - page())
-            {
-                auto fadeRect = g;
-                if (type() == scrollbar_type::Vertical)
-                {
-                    fadeRect.y = fadeRect.y + fadeRect.cy - width() * 3.0;
-                    fadeRect.cy = width();
-                }
-                else
-                {
-                    fadeRect.x = fadeRect.x + fadeRect.cx - width() * 3.0;
-                    fadeRect.cx = width();
-                }
-                aGraphicsContext.fill_rect(fadeRect, gradient
-                {
-                    gradient::color_stop_list{ { 0.0, backgroundColor }, { 1.0, backgroundColor } },
-                    gradient::alpha_stop_list{ { 0.0, 0x00_u8 },{ 1.0, 0xFF_u8 } },
-                    type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
-                });
-            }
-        }
-
-        const dimension margin = 3.0_dip;
-        rect rectUpButton = element_geometry(ElementUpButton).deflate(margin, margin);
-        rect rectDownButton = element_geometry(ElementDownButton).deflate(margin, margin);
-        if (type() == scrollbar_type::Vertical)
-        {
-            coordinate x = std::floor(rectUpButton.centre().x);
-            coordinate w = 1.0;
-            for (coordinate y = 0.0; y < rectUpButton.height(); ++y)
-            {
-                aGraphicsContext.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), baseColor.light() ?
-                    foregroundColor.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
-                    foregroundColor.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
-                aGraphicsContext.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)), baseColor.light() ?
-                    foregroundColor.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
-                    foregroundColor.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
-                x -= 1.0;
-                w += 2.0;
-            }
-        }
-        else
-        {
-            coordinate y = std::floor(rectUpButton.centre().y);
-            coordinate h = 1.0;
-            for (coordinate x = 0.0; x < rectUpButton.width(); ++x)
-            {
-                aGraphicsContext.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)), baseColor.light() ?
-                    foregroundColor.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
-                    foregroundColor.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
-                aGraphicsContext.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)), baseColor.light() ?
-                    foregroundColor.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
-                    foregroundColor.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
-                y -= 1.0;
-                h += 2.0;
-            }
-        }
-        if (style() == scrollbar_style::Normal)
-            aGraphicsContext.fill_rect(element_geometry(ElementThumb).deflate(iType == scrollbar_type::Vertical ? margin : 0.0, iType == scrollbar_type::Vertical ? 0.0 : margin), baseColor.light() ?
-                foregroundColor.darker(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00) :
-                foregroundColor.lighter(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00));
-        aGraphicsContext.set_origin(oldOrigin);
+        service<i_skin_manager>().active_skin().draw_scrollbar(aGraphicsContext, *this, *this);
     }
 
-    rect scrollbar::element_geometry(element_e aElement) const
+    rect scrollbar::element_geometry(scrollbar_element aElement) const
     {
         if (style() == scrollbar_style::Invisible)
             return rect{};
@@ -349,7 +230,9 @@ namespace neogfx
         const dimension margin = 3.0_dip;
         switch (aElement)
         {
-        case ElementUpButton:
+        case scrollbar_element::Scrollbar:
+            return g;
+        case scrollbar_element::UpButton:
             if (iType == scrollbar_type::Vertical)
             {
                 if (iStyle == scrollbar_style::Normal)
@@ -375,7 +258,7 @@ namespace neogfx
                 }
             }
             break;
-        case ElementDownButton:
+        case scrollbar_element::DownButton:
             if (iType == scrollbar_type::Vertical)
             {
                 if (iStyle == scrollbar_style::Normal)
@@ -403,35 +286,35 @@ namespace neogfx
                 }
             }
             break;
-        case ElementPageUpArea:
+        case scrollbar_element::PageUpArea:
             if (iType == scrollbar_type::Vertical)
             {
-                g.y = element_geometry(ElementUpButton).bottom() + 1.0;
-                g.cy = element_geometry(ElementThumb).top() - 1.0 - g.y;
+                g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
+                g.cy = element_geometry(scrollbar_element::Thumb).top() - 1.0 - g.y;
             }
             else
             {
-                g.x = element_geometry(ElementLeftButton).right() + 1.0;
-                g.cx = element_geometry(ElementThumb).left() - 1.0 - g.x;
+                g.x = element_geometry(scrollbar_element::LeftButton).right() + 1.0;
+                g.cx = element_geometry(scrollbar_element::Thumb).left() - 1.0 - g.x;
             }
             break;
-        case ElementPageDownArea:
+        case scrollbar_element::PageDownArea:
             if (iType == scrollbar_type::Vertical)
             {
-                g.y = element_geometry(ElementThumb).bottom() + 1.0;
-                g.cy = element_geometry(ElementDownButton).top() - 1.0 - g.y;
+                g.y = element_geometry(scrollbar_element::Thumb).bottom() + 1.0;
+                g.cy = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
             }
             else
             {
-                g.x = element_geometry(ElementThumb).right() + 1.0;
-                g.cx = element_geometry(ElementRightButton).left() - 1.0 - g.x;
+                g.x = element_geometry(scrollbar_element::Thumb).right() + 1.0;
+                g.cx = element_geometry(scrollbar_element::RightButton).left() - 1.0 - g.x;
             }
             break;
-        case ElementThumb:
+        case scrollbar_element::Thumb:
             if (iType == scrollbar_type::Vertical)
             {
-                g.y = element_geometry(ElementUpButton).bottom() + 1.0;
-                dimension available = element_geometry(ElementDownButton).top() - 1.0 - g.y;
+                g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
+                dimension available = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
                 if ((maximum() - minimum()) != 0.0)
                 {
                     g.cy = available * static_cast<dimension>(page() / (maximum() - minimum()));
@@ -453,8 +336,8 @@ namespace neogfx
             }
             else
             {
-                g.x = element_geometry(ElementLeftButton).right() + 1.0;
-                dimension available = element_geometry(ElementRightButton).left() - 1.0 - g.x;
+                g.x = element_geometry(scrollbar_element::LeftButton).right() + 1.0;
+                dimension available = element_geometry(scrollbar_element::RightButton).left() - 1.0 - g.x;
                 if ((maximum() - minimum()) != 0.0)
                 {
                     g.cx = available * static_cast<dimension>(page() / (maximum() - minimum()));
@@ -479,77 +362,77 @@ namespace neogfx
         return to_units(su.saved_units(), g);
     }
 
-    scrollbar::element_e scrollbar::element_at(const point& aPosition) const
+    scrollbar_element scrollbar::element_at(const point& aPosition) const
     {
         if (style() == scrollbar_style::Invisible)
-            return ElementNone;
-        else if (element_geometry(ElementUpButton).contains(aPosition))
-            return ElementUpButton;
-        else if (element_geometry(ElementDownButton).contains(aPosition))
-            return ElementDownButton;
+            return scrollbar_element::None;
+        else if (element_geometry(scrollbar_element::UpButton).contains(aPosition))
+            return scrollbar_element::UpButton;
+        else if (element_geometry(scrollbar_element::DownButton).contains(aPosition))
+            return scrollbar_element::DownButton;
         else if (style() == scrollbar_style::Normal)
         {
-            if (element_geometry(ElementPageUpArea).contains(aPosition))
-                return ElementPageUpArea;
-            else if (element_geometry(ElementPageDownArea).contains(aPosition))
-                return ElementPageDownArea;
-            else if (element_geometry(ElementThumb).contains(aPosition))
-                return ElementThumb;
+            if (element_geometry(scrollbar_element::PageUpArea).contains(aPosition))
+                return scrollbar_element::PageUpArea;
+            else if (element_geometry(scrollbar_element::PageDownArea).contains(aPosition))
+                return scrollbar_element::PageDownArea;
+            else if (element_geometry(scrollbar_element::Thumb).contains(aPosition))
+                return scrollbar_element::Thumb;
             else
-                return ElementNone;
+                return scrollbar_element::None;
         }
         else
-            return ElementNone;
+            return scrollbar_element::None;
     }
 
     void scrollbar::update(const update_params_t& aUpdateParams)
     {
         if (!visible())
             return;
-        if (clicked_element() != i_scrollbar::ElementNone && clicked_element() != element_at(iContainer.as_widget().root().mouse_position()))
+        if (clicked_element() != scrollbar_element::None && clicked_element() != element_at(iContainer.as_widget().root().mouse_position()))
             pause();
         else
             resume();
-        if (clicked_element() == i_scrollbar::ElementThumb)
+        if (clicked_element() == scrollbar_element::Thumb)
         {
             point delta = (std::holds_alternative<point>(aUpdateParams) ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().root().mouse_position()) - iThumbClickedPosition;
             scoped_units su(units::Pixels);
             rect g = iContainer.scrollbar_geometry(*this);
             if (iType == scrollbar_type::Vertical)
             {
-                g.y = element_geometry(ElementUpButton).bottom() + 1.0;
-                g.cy = element_geometry(ElementDownButton).top() - 1.0 - g.y;
-                g.cy -= (element_geometry(ElementThumb).cy - std::ceil(g.cy * static_cast<dimension>(page() / (maximum() - minimum()))));
+                g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
+                g.cy = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
+                g.cy -= (element_geometry(scrollbar_element::Thumb).cy - std::ceil(g.cy * static_cast<dimension>(page() / (maximum() - minimum()))));
                 set_position(static_cast<value_type>(delta.y / g.height()) * (maximum() - minimum()) + iThumbClickedValue);
             }
             else
             {
-                g.x = element_geometry(ElementLeftButton).right() + 1.0;
-                g.cx = element_geometry(ElementRightButton).left() - 1.0 - g.x;
-                g.cx -= (element_geometry(ElementThumb).cx - std::ceil(g.cx * static_cast<dimension>(page() / (maximum() - minimum()))));
+                g.x = element_geometry(scrollbar_element::LeftButton).right() + 1.0;
+                g.cx = element_geometry(scrollbar_element::RightButton).left() - 1.0 - g.x;
+                g.cx -= (element_geometry(scrollbar_element::Thumb).cx - std::ceil(g.cx * static_cast<dimension>(page() / (maximum() - minimum()))));
                 set_position(static_cast<value_type>(delta.x / g.width()) * (maximum() - minimum()) + iThumbClickedValue);
             }
             iContainer.scrollbar_updated(*this, Updated);
         }
-        if (clicked_element() == i_scrollbar::ElementNone && iContainer.as_widget().entered())
+        if (clicked_element() == scrollbar_element::None && iContainer.as_widget().entered())
             hover_element(element_at(iContainer.as_widget().root().mouse_position()));
         else
             unhover_element();
     }
 
-    scrollbar::element_e scrollbar::clicked_element() const
+    scrollbar_element scrollbar::clicked_element() const
     {
         return iClickedElement;
     }
 
-    void scrollbar::click_element(element_e aElement)
+    void scrollbar::click_element(scrollbar_element aElement)
     {
-        if (iClickedElement != ElementNone)
+        if (iClickedElement != scrollbar_element::None)
             throw element_already_clicked();
         iClickedElement = aElement;
         switch (aElement)
         {
-        case ElementUpButton:
+        case scrollbar_element::UpButton:
             set_position(position() - step());
             iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
             {
@@ -559,7 +442,7 @@ namespace neogfx
                     set_position(position() - step());
             }, 500);
             break;
-        case ElementDownButton:
+        case scrollbar_element::DownButton:
             set_position(position() + step());
             iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
             {
@@ -569,7 +452,7 @@ namespace neogfx
                     set_position(position() + step());
             }, 500);
             break;
-        case ElementPageUpArea:
+        case scrollbar_element::PageUpArea:
             set_position(position() - page());
             iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
             {
@@ -579,7 +462,7 @@ namespace neogfx
                     set_position(position() - page());
             }, 500);
             break;
-        case ElementPageDownArea:
+        case scrollbar_element::PageDownArea:
             set_position(position() + page());
             iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
             {
@@ -589,7 +472,7 @@ namespace neogfx
                     set_position(position() + page());
             }, 500);
             break;
-        case ElementThumb:
+        case scrollbar_element::Thumb:
             iThumbClickedPosition = iContainer.as_widget().root().mouse_position();
             iThumbClickedValue = position();
             break;
@@ -600,14 +483,19 @@ namespace neogfx
 
     void scrollbar::unclick_element()
     {
-        if (iClickedElement == ElementNone)
+        if (iClickedElement == scrollbar_element::None)
             throw element_not_clicked();
-        iClickedElement = ElementNone;
+        iClickedElement = scrollbar_element::None;
         iTimer.reset();
         iPaused = false;
     }
 
-    void scrollbar::hover_element(element_e aElement)
+    scrollbar_element scrollbar::hovering_element() const
+    {
+        return iHoverElement;
+    }
+
+    void scrollbar::hover_element(scrollbar_element aElement)
     {
         if (iHoverElement != aElement)
         {
@@ -618,9 +506,9 @@ namespace neogfx
 
     void scrollbar::unhover_element()
     {
-        if (iHoverElement != ElementNone)
+        if (iHoverElement != scrollbar_element::None)
         {
-            iHoverElement = ElementNone;
+            iHoverElement = scrollbar_element::None;
             iContainer.scrollbar_updated(*this, Updated);
         }
     }
@@ -648,14 +536,14 @@ namespace neogfx
                 rect g = iContainer.scrollbar_geometry(*this);
                 if (iType == scrollbar_type::Vertical)
                 {
-                    g.y = element_geometry(ElementUpButton).bottom() + 1.0;
-                    g.cy = element_geometry(ElementDownButton).top() - 1.0 - g.y;
+                    g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
+                    g.cy = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
                     set_position(position() + static_cast<value_type>(delta.y * 0.25f / g.height()) * (maximum() - minimum()));
                 }
                 else
                 {
-                    g.x = element_geometry(ElementUpButton).right() + 1.0;
-                    g.cx = element_geometry(ElementDownButton).left() - 1.0 - g.x;
+                    g.x = element_geometry(scrollbar_element::UpButton).right() + 1.0;
+                    g.cx = element_geometry(scrollbar_element::DownButton).left() - 1.0 - g.x;
                     set_position(position() + static_cast<value_type>(delta.x * 0.25f / g.width()) * (maximum() - minimum()));
                 }
             }, 50);
@@ -684,6 +572,52 @@ namespace neogfx
         if (to_px<uint32_t>(w) % 2u == 0u)
             w = from_px<dimension>(to_px<uint32_t>(w) + 1u);
         return w;
+    }
+
+    bool scrollbar::is_widget() const
+    {
+        return true;
+    }
+
+    const i_widget& scrollbar::as_widget() const
+    {
+        return iContainer.as_widget();
+    }
+
+    i_widget& scrollbar::as_widget()
+    {
+        return iContainer.as_widget();
+    }
+
+    rect scrollbar::element_rect(skin_element aElement) const
+    {
+        switch (aElement)
+        {
+        case skin_element::ClickableArea:
+            return element_geometry(scrollbar_element::Scrollbar);
+        case skin_element::Scrollbar:
+            return element_geometry(scrollbar_element::Scrollbar);
+        case skin_element::ScrollbarUpArrow:
+            return element_geometry(scrollbar_element::UpButton);
+        case skin_element::ScrollbarLeftArrow:
+            return element_geometry(scrollbar_element::LeftButton);
+        case skin_element::ScrollbarDownArrow:
+            return element_geometry(scrollbar_element::DownButton);
+        case skin_element::ScrollbarRightArrow:
+            return element_geometry(scrollbar_element::RightButton);
+        case skin_element::ScrollbarPageUpArea:
+            return element_geometry(scrollbar_element::PageUpArea);
+        case skin_element::ScrollbarPageLeftArea:
+            return element_geometry(scrollbar_element::PageLeftArea);
+        case skin_element::ScrollbarPageDownArea:
+            return element_geometry(scrollbar_element::PageDownArea);
+        case skin_element::ScrollbarPageRightArea:
+            return element_geometry(scrollbar_element::PageRightArea);
+        case skin_element::ScrollbarThumb:
+            return element_geometry(scrollbar_element::Thumb);
+        default:
+            return as_widget().element_rect(aElement);
+        }
     }
 
     bool scrollbar::have_transition() const

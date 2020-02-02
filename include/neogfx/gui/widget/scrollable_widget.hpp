@@ -93,6 +93,7 @@ namespace neogfx
         void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) override;
         color scrollbar_color(const i_scrollbar& aScrollbar) const override;
         const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
     protected:
         virtual void update_scrollbar_visibility();
         virtual void update_scrollbar_visibility(usv_stage_e aStage);

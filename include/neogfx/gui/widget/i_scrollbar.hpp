@@ -41,23 +41,27 @@ namespace neogfx
         Invisible
     };
 
+    enum class scrollbar_element : uint32_t
+    {
+        None             = 0x00,
+        Scrollbar        = 0x01,
+        UpButton         = 0x02,
+        LeftButton       = UpButton,
+        DownButton       = 0x03,
+        RightButton      = DownButton,
+        PageUpArea       = 0x04,
+        PageLeftArea     = PageUpArea,
+        PageDownArea     = 0x05,
+        PageRightArea    = PageDownArea,
+        Thumb            = 0x06
+    };
+
+    class i_scrollbar_container;
+
     class i_scrollbar
     {
     public:
         typedef double value_type;
-        enum element_e
-        {
-            ElementNone          = 0x00,
-            ElementUpButton      = 0x01,
-            ElementLeftButton    = ElementUpButton,
-            ElementDownButton    = 0x02,
-            ElementRightButton   = ElementDownButton,
-            ElementPageUpArea    = 0x03,
-            ElementPageLeftArea  = ElementPageUpArea,
-            ElementPageDownArea  = 0x04,
-            ElementPageRightArea = ElementPageDownArea,
-            ElementThumb         = 0x05
-        };
         enum update_reason_e
         {
             Updated                = 0x00,
@@ -75,6 +79,8 @@ namespace neogfx
         struct element_not_clicked : std::logic_error{ element_not_clicked() : std::logic_error("neogfx::i_scrollbar::element_not_clicked") {} };
         struct already_locked : std::logic_error { already_locked() : std::logic_error("neogfx::i_scrollbar::already_locked") {} };
         struct not_locked : std::logic_error { not_locked() : std::logic_error("neogfx::i_scrollbar::not_locked") {} };
+    public:
+        virtual i_scrollbar_container& container() const = 0;
     public:
         virtual scrollbar_type type() const = 0;
         virtual scrollbar_style style() const = 0;
@@ -99,22 +105,21 @@ namespace neogfx
         virtual dimension width() const = 0;
         virtual void render(i_graphics_context& aGraphicsContext) const = 0;
     public:
-        virtual rect element_geometry(element_e aElement) const = 0;
-        virtual element_e element_at(const point& aPosition) const = 0;
+        virtual rect element_geometry(scrollbar_element aElement) const = 0;
+        virtual scrollbar_element element_at(const point& aPosition) const = 0;
     public:
         virtual void update(const update_params_t& aUpdateParams = update_params_t()) = 0;
-        virtual element_e clicked_element() const = 0;
-        virtual void click_element(element_e aElement) = 0;
+        virtual scrollbar_element clicked_element() const = 0;
+        virtual void click_element(scrollbar_element aElement) = 0;
         virtual void unclick_element() = 0;
-        virtual void hover_element(element_e aElement) = 0;
+        virtual scrollbar_element hovering_element() const = 0;
+        virtual void hover_element(scrollbar_element aElement) = 0;
         virtual void unhover_element() = 0;
         virtual void pause() = 0;
         virtual void resume() = 0;
         virtual void track() = 0;
         virtual void untrack() = 0;
     };
-
-    class i_surface;
 
     class i_scrollbar_container
     {
@@ -123,5 +128,6 @@ namespace neogfx
         virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) = 0;
         virtual color scrollbar_color(const i_scrollbar& aScrollbar) const = 0;
         virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
     };
 }

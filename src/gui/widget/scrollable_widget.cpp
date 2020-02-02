@@ -115,9 +115,9 @@ namespace neogfx
 
     widget_part scrollable_widget::hit_test(const point& aPosition) const
     {
-        if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + origin()) != scrollbar::ElementNone)
+        if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
             return widget_part::NonClientVerticalScrollbar;
-        else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + origin()) != scrollbar::ElementNone)
+        else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
             return widget_part::NonClientHorizontalScrollbar;
         else
             return widget::hit_test(aPosition);
@@ -187,14 +187,14 @@ namespace neogfx
             framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
-                if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)
+                if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
                 {
-                    if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + origin()) != i_scrollbar::ElementNone)
+                    if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
                     {
                         update(true);
                         vertical_scrollbar().click_element(vertical_scrollbar().element_at(aPosition + origin()));
                     }
-                    else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + origin()) != i_scrollbar::ElementNone)
+                    else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
                     {
                         update(true);
                         horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(aPosition + origin()));
@@ -209,14 +209,14 @@ namespace neogfx
         framed_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
-            if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)
+            if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
             {
-                if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + origin()) != i_scrollbar::ElementNone)
+                if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
                 {
                     update(true);
                     vertical_scrollbar().click_element(vertical_scrollbar().element_at(aPosition + origin()));
                 }
-                else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + origin()) != i_scrollbar::ElementNone)
+                else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
                 {
                     update(true);
                     horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(aPosition + origin()));
@@ -230,12 +230,12 @@ namespace neogfx
         framed_widget::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Left)
         {
-            if (vertical_scrollbar().clicked_element() != i_scrollbar::ElementNone)
+            if (vertical_scrollbar().clicked_element() != scrollbar_element::None)
             {
                 update(true);
                 vertical_scrollbar().unclick_element();
             }
-            else if (horizontal_scrollbar().clicked_element() != i_scrollbar::ElementNone)
+            else if (horizontal_scrollbar().clicked_element() != scrollbar_element::None)
             {
                 update(true);
                 horizontal_scrollbar().unclick_element();
@@ -403,6 +403,11 @@ namespace neogfx
     }
 
     const i_widget& scrollable_widget::as_widget() const
+    {
+        return *this;
+    }
+
+    i_widget& scrollable_widget::as_widget()
     {
         return *this;
     }

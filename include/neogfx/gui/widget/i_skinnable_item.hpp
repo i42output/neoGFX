@@ -29,6 +29,7 @@ namespace neogfx
     enum class skin_element : uint32_t
     {
         ClickableArea,
+        Scrollbar,
         ScrollbarUpArrow,
         ScrollbarLeftArrow,
         ScrollbarDownArrow,
