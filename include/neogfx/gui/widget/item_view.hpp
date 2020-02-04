@@ -36,7 +36,7 @@ namespace neogfx
         Foreground,
         Text,
         Image,
-        Checkbox
+        CheckBox
     };
 
     class item_view : public scrollable_widget, protected header_view::i_owner

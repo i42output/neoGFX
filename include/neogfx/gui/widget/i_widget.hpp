@@ -179,7 +179,8 @@ namespace neogfx
         virtual bool entered() const = 0;
         virtual bool can_capture() const = 0;
         virtual bool capturing() const = 0;
-        virtual void set_capture(capture_reason aReason = capture_reason::Other) = 0;
+        virtual const optional_point& capture_position() const = 0;
+        virtual void set_capture(capture_reason aReason = capture_reason::Other, const optional_point& aPosition = {}) = 0;
         virtual void release_capture(capture_reason aReason = capture_reason::Other) = 0;
         virtual void non_client_set_capture() = 0;
         virtual void non_client_release_capture() = 0;

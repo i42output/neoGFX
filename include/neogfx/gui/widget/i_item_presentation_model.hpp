@@ -162,6 +162,7 @@ namespace neogfx
         virtual optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const = 0;
         virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_size cell_image_size(const item_presentation_model_index& aIndex) const = 0;
+        virtual optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
         virtual optional_texture cell_image(const item_presentation_model_index& aIndex) const = 0;
         virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
         virtual size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;

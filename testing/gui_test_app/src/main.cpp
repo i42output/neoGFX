@@ -771,10 +771,14 @@ int main(int argc, char* argv[])
             itemModel.set_column_name(5, heading);
         };
 
+        ui.checkTableViewsCheckable.checked([&]() { itemModel.set_column_checkable(0, true); itemModel.set_column_checkable(1, true); });
+        ui.checkTableViewsCheckable.unchecked([&]() { itemModel.set_column_checkable(0, false); itemModel.set_column_checkable(1, false); });
+        ui.checkTableViewsCheckableTriState.checked([&]() { itemModel.set_column_tri_state_checkable(0, true); itemModel.set_column_tri_state_checkable(1, true); });
+        ui.checkTableViewsCheckableTriState.unchecked([&]() { itemModel.set_column_tri_state_checkable(0, false); itemModel.set_column_tri_state_checkable(1, false); });
         ui.checkColumn5ReadOnly.checked([&]() { itemModel.set_column_read_only(5, true); update_column5_heading(); });
-        ui.checkColumn5ReadOnly.Unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
+        ui.checkColumn5ReadOnly.unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
         ui.checkColumn5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
-        ui.checkColumn5Unselectable.Unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
+        ui.checkColumn5Unselectable.unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
 
         itemModel.set_column_min_value(0, 0u);
         itemModel.set_column_max_value(0, 9999u);

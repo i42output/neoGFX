@@ -34,6 +34,7 @@
 #include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 
 namespace neogfx
 {
@@ -539,6 +540,18 @@ namespace neogfx
                 return cell_image(aIndex)->extents();
             return optional_size{};
         }
+        optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        {
+            auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
+            if ((cellInfo.flags & item_cell_flags::Checkable) == item_cell_flags::Checkable)
+            {
+                auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : * cell_font(aIndex));
+                dimension const length = units_converter(aGraphicsContext).from_device_units(cellFont.height() * (2.0 / 3.0));
+                auto const checkBoxSize = service<i_skin_manager>().active_skin().preferred_size(skin_element::CheckBox, size{ length });
+                return checkBoxSize;
+            }
+            return {};
+        }
         optional_texture cell_image(const item_presentation_model_index&) const override
         {
             return optional_texture{};
@@ -564,6 +577,12 @@ namespace neogfx
             {
                 cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
+            }
+            auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aGraphicsContext);
+            if (maybeCheckBoxSize != std::nullopt)
+            {
+                cellExtents.cx += (maybeCheckBoxSize->cx + units_converter(aGraphicsContext).to_device_units(cell_spacing(aGraphicsContext)).cx);
+                cellExtents.cy = std::max(cellExtents.cy, maybeCheckBoxSize->cy);
             }
             auto const& maybeCellImageSize = cell_image_size(aIndex);
             if (maybeCellImageSize != std::nullopt)

@@ -21,6 +21,7 @@
 #include <neolib/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/item_view.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
@@ -277,6 +278,44 @@ namespace neogfx
                 }
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
+                    auto const& cellInfo = model().cell_info(presentation_model().to_item_model_index(itemIndex));
+                    if ((cellInfo.flags & item_cell_flags::Checkable) == item_cell_flags::Checkable)
+                    {
+                        button_checked_state checkedState = false;
+                        if ((cellInfo.flags & item_cell_flags::Checked) == item_cell_flags::Checkable)
+                            checkedState = true;
+                        if ((cellInfo.flags & item_cell_flags::CheckedIndeterminate) == item_cell_flags::CheckedIndeterminate)
+                            checkedState = std::nullopt;
+                        thread_local struct : i_skinnable_item
+                        {
+                            const item_view* widget;
+                            rect checkBoxRect;
+
+                            bool is_widget() const override
+                            {
+                                return true;
+                            }
+                            const i_widget& as_widget() const override
+                            {
+                                return *widget;
+                            }
+
+                            rect element_rect(skin_element aElement) const override
+                            {
+                                switch (aElement)
+                                {
+                                case skin_element::ClickableArea:
+                                case skin_element::CheckBox:
+                                    return checkBoxRect;
+                                default:
+                                    return widget->element_rect(aElement);
+                                }
+                            }
+                        } skinnableItem = {};
+                        skinnableItem.widget = this;
+                        skinnableItem.checkBoxRect = cell_rect(itemIndex, aGraphicsContext, cell_part::CheckBox);
+                        service<i_skin_manager>().active_skin().draw_check_box(aGraphicsContext, skinnableItem, checkedState);
+                    }
                     auto const& cellImage = presentation_model().cell_image(itemIndex);
                     if (cellImage != std::nullopt)
                         aGraphicsContext.draw_texture(cell_rect(itemIndex, aGraphicsContext, cell_part::Image), *cellImage);
@@ -995,6 +1034,17 @@ namespace neogfx
         case cell_part::Background:
         case cell_part::Foreground:
             return cell_rect(aItemIndex, aPart);
+        case cell_part::CheckBox:
+            {
+                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
+                if (!cellCheckBoxSize)
+                    throw invalid_cell_part();
+                auto cellRect = cell_rect(aItemIndex);
+                cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
+                cellRect.extents() = *cellCheckBoxSize;
+                return cellRect;
+            }
+            break;
         case cell_part::Image:
             {
                 auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
@@ -1003,6 +1053,9 @@ namespace neogfx
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellImageSize->cy) / 2.0) });
                 cellRect.extents() = *cellImageSize;
+                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
+                if (cellCheckBoxSize)
+                    cellRect.x += (cellCheckBoxSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
                 return cellRect;
             }
             break;
@@ -1010,9 +1063,12 @@ namespace neogfx
             {
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.deflate(presentation_model().cell_margins(*this));
+                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
+                if (cellCheckBoxSize)
+                    cellRect.x += (cellCheckBoxSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
                 auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
                 if (cellImageSize)
-                    cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx, 0.0 });
+                    cellRect.x += (cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
                 auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGraphicsContext);
                 auto const textHeight = std::max(glyphText.extents().cy,
                     (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());

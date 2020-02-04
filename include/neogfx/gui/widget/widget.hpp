@@ -212,7 +212,8 @@ namespace neogfx
         bool entered() const override;
         bool can_capture() const override;
         bool capturing() const override;
-        void set_capture(capture_reason aReason = capture_reason::Other) override;
+        const optional_point& capture_position() const override;
+        void set_capture(capture_reason aReason = capture_reason::Other, const optional_point& aPosition = {}) override;
         void release_capture(capture_reason aReason = capture_reason::Other) override;
         void non_client_set_capture() override;
         void non_client_release_capture() override;
@@ -270,7 +271,8 @@ namespace neogfx
         class layout_timer;
         std::unique_ptr<layout_timer> iLayoutTimer;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
-        mutable std::optional<point> iOrigin;
+        mutable optional_point iOrigin;
+        optional_point iCapturePosition;
         // properties / anchors
     public:
         define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem, logical_coordinate_system)

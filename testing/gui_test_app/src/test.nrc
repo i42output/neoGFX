@@ -662,20 +662,35 @@
                                 alignment: Top
                                 spacer: {}
                                 group_box: {
+                                    text: "Table View Model"
+                                    check_box: {
+                                        id: checkTableViewsCheckable
+                                        text: "Checkable"
+                                    }
+                                    check_box: {
+                                        id: checkTableViewsCheckableTriState
+                                        text: "TriState Checkable"
+                                    }
+                                    group_box: {
+                                        id: groupColumn5
+                                        text: "Column Five"
+                                        check_box: {
+                                            id: checkColumn5ReadOnly
+                                            text: "Read only"
+                                        }
+                                        check_box: {
+                                            id: checkColumn5Unselectable
+                                            text: "Unselectable"
+                                        }
+                                    }                                
+                                }
+                                group_box: {
                                     text: "Upper Table View"
                                     horizontal_layout: {
                                         vertical_layout: {
                                             check_box: {
                                                 id: checkUpperTableViewImages
                                                 text: "Images"
-                                            }
-                                            check_box: {
-                                                id: checkUpperTableViewCheckable
-                                                text: "Checkable"
-                                            }
-                                            check_box: {
-                                                id: checkUpperTableViewTriStateCheckable
-                                                text: "TriState Checkable"
                                             }
                                             horizontal_layout: {
                                                 label: {
@@ -711,14 +726,6 @@
                                             check_box: {
                                                 id: checkLowerTableViewImages
                                                 text: "Images"
-                                            }
-                                            check_box: {
-                                                id: checkLowerTableViewCheckable
-                                                text: "Checkable"
-                                            }
-                                            check_box: {
-                                                id: checkLowerTableViewTriStateCheckable
-                                                text: "TriState Checkable"
                                             }
                                             horizontal_layout: {
                                                 label: {
@@ -765,18 +772,6 @@
                                     radio_button: {
                                         id: radioExtendedTableViewSelection
                                         text: "Extended selection"
-                                    }
-                                }
-                                group_box: {
-                                    id: groupColumn5
-                                    text: "Column Five"
-                                    check_box: {
-                                        id: checkColumn5ReadOnly
-                                        text: "Read only"
-                                    }
-                                    check_box: {
-                                        id: checkColumn5Unselectable
-                                        text: "Unselectable"
                                     }
                                 }
                                 spacer: {}

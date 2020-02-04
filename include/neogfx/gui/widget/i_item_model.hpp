@@ -79,7 +79,7 @@ namespace neogfx
         Editable                = 0x00000004,
         Checkable               = 0x00000010,
         CheckableBiState        = Checkable,
-        CheckableTriState       = 0x00000020,
+        CheckableTriState       = 0x00000020 | Checkable,
         Draggable               = 0x00001000,
         Droppable               = 0x00002000,
         Checked                 = 0x00010000,
@@ -318,6 +318,10 @@ namespace neogfx
         virtual void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) = 0;
         virtual bool column_read_only(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_read_only(item_model_index::column_type aColumnIndex, bool aReadOnly) = 0;
+        virtual bool column_checkable(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_checkable(item_model_index::column_type aColumnIndex, bool aCheckable) = 0;
+        virtual bool column_tri_state_checkable(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_tri_state_checkable(item_model_index::column_type aColumnIndex, bool aCheckableTriState) = 0;
         virtual item_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) = 0;
         virtual const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const = 0;

@@ -208,9 +208,9 @@ namespace neogfx
         void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) override
         {
             if (aSelectable)
-                default_cell_info(aColumnIndex).flags &= ~item_cell_flags::Selectable;
-            else
                 default_cell_info(aColumnIndex).flags |= item_cell_flags::Selectable;
+            else
+                default_cell_info(aColumnIndex).flags &= ~item_cell_flags::Selectable;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
         bool column_read_only(item_model_index::column_type aColumnIndex) const override
@@ -223,6 +223,30 @@ namespace neogfx
                 default_cell_info(aColumnIndex).flags &= ~item_cell_flags::Editable;
             else
                 default_cell_info(aColumnIndex).flags |= item_cell_flags::Editable;
+            ColumnInfoChanged.trigger(aColumnIndex);
+        }
+        bool column_checkable(item_model_index::column_type aColumnIndex) const override
+        {
+            return (default_cell_info(aColumnIndex).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable;
+        }
+        void set_column_checkable(item_model_index::column_type aColumnIndex, bool aCheckable) override
+        {
+            if (aCheckable)
+                default_cell_info(aColumnIndex).flags |= item_cell_flags::Checkable;
+            else
+                default_cell_info(aColumnIndex).flags &= ~item_cell_flags::Checkable;
+            ColumnInfoChanged.trigger(aColumnIndex);
+        }
+        bool column_tri_state_checkable(item_model_index::column_type aColumnIndex) const override
+        {
+            return (default_cell_info(aColumnIndex).flags & item_cell_flags::CheckableTriState) == item_cell_flags::CheckableTriState;
+        }
+        void set_column_tri_state_checkable(item_model_index::column_type aColumnIndex, bool aCheckableTriState) override
+        {
+            if (aCheckableTriState)
+                default_cell_info(aColumnIndex).flags |= item_cell_flags::CheckableTriState;
+            else
+                default_cell_info(aColumnIndex).flags &= ~item_cell_flags::CheckableTriState;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
         item_data_type column_data_type(item_model_index::column_type aColumnIndex) const override

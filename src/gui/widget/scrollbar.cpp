@@ -584,11 +584,6 @@ namespace neogfx
         return iContainer.as_widget();
     }
 
-    i_widget& scrollbar::as_widget()
-    {
-        return iContainer.as_widget();
-    }
-
     rect scrollbar::element_rect(skin_element aElement) const
     {
         switch (aElement)

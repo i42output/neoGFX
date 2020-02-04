@@ -1297,7 +1297,12 @@ namespace neogfx
         return surface().as_surface_window().has_capturing_widget() && &surface().as_surface_window().capturing_widget() == this;
     }
 
-    void widget::set_capture(capture_reason aReason)
+    const optional_point& widget::capture_position() const
+    {
+        return iCapturePosition;
+    }
+
+    void widget::set_capture(capture_reason aReason, const optional_point& aPosition)
     {
         if (can_capture())
         {
@@ -1313,6 +1318,7 @@ namespace neogfx
                 surface().as_surface_window().set_capture(*this);
                 break;
             }
+            iCapturePosition = aPosition;
         }
         else
             throw widget_cannot_capture();
@@ -1332,7 +1338,7 @@ namespace neogfx
             surface().as_surface_window().release_capture(*this);
             break;
         }
-        
+        iCapturePosition = std::nullopt;
     }
 
     void widget::non_client_set_capture()
@@ -1432,7 +1438,7 @@ namespace neogfx
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_pressed(aButton, aPosition + position(), aKeyModifiers);
         else if (capture_ok(hit_test(aPosition)) && can_capture())
-            set_capture(capture_reason::MouseEvent);
+            set_capture(capture_reason::MouseEvent, aPosition);
     }
 
     void widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -1440,7 +1446,7 @@ namespace neogfx
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_double_clicked(aButton, aPosition + position(), aKeyModifiers);
         else if (capture_ok(hit_test(aPosition)) && can_capture())
-            set_capture(capture_reason::MouseEvent);
+            set_capture(capture_reason::MouseEvent, aPosition);
     }
 
     void widget::mouse_button_released(mouse_button aButton, const point& aPosition)

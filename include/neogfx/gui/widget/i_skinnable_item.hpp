@@ -64,7 +64,6 @@ namespace neogfx
     public:
         virtual bool is_widget() const = 0;
         virtual const i_widget& as_widget() const = 0;
-        virtual i_widget& as_widget() = 0;
     public:
         virtual rect element_rect(skin_element aElement) const = 0;
     };

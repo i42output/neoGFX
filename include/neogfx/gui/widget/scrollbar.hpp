@@ -87,7 +87,6 @@ namespace neogfx
     public:
         bool is_widget() const override;
         const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
     public:
         rect element_rect(skin_element aElement) const override;
     private:
