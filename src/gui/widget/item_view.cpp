@@ -1065,10 +1065,10 @@ namespace neogfx
                 cellRect.deflate(presentation_model().cell_margins(*this));
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
                 if (cellCheckBoxSize)
-                    cellRect.x += (cellCheckBoxSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
+                    cellRect.indent(point{ cellCheckBoxSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx, 0.0 });
                 auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
                 if (cellImageSize)
-                    cellRect.x += (cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
+                    cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx, 0.0 });
                 auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGraphicsContext);
                 auto const textHeight = std::max(glyphText.extents().cy,
                     (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());

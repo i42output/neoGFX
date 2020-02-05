@@ -785,9 +785,13 @@ namespace neogfx
     private:
         void item_model_column_info_changed(item_model_index::column_type aColumnIndex)
         {
-            reset_column_meta();
             if (have_item_model_index(item_model_index{ 0, aColumnIndex }))
-                ColumnInfoChanged.trigger(from_item_model_index(item_model_index{ 0, aColumnIndex }).column());
+            {
+                auto const index = from_item_model_index(item_model_index{ 0, aColumnIndex });
+                reset_cell_meta(index.column());
+                reset_column_meta(index.column());
+                ColumnInfoChanged.trigger(index.column());
+            }
         }
         void item_added(const item_model_index& aItemIndex)
         {
@@ -871,21 +875,25 @@ namespace neogfx
             reset_column_meta();
             reset_position_meta(0);
         }
-        void reset_cell_meta() const
+        void reset_cell_meta(const std::optional<item_presentation_model_index::column_type>& aColumn = {}) const
         {
-            for (uint32_t row = 0; row < iRows.size(); ++row)
+            for (item_presentation_model_index::column_type row = 0; row < iRows.size(); ++row)
             {
-                for (uint32_t col = 0; col < iColumns.size(); ++col)
+                for (item_presentation_model_index::column_type col = 0; col < iColumns.size(); ++col)
                 {
+                    if (aColumn != std::nullopt && col != *aColumn)
+                        continue;
                     cell_meta(item_presentation_model_index(row, col)).text = std::nullopt;
                     cell_meta(item_presentation_model_index(row, col)).extents = std::nullopt;
                 }
             }
         }
-        void reset_column_meta() const
+        void reset_column_meta(const std::optional<item_presentation_model_index::column_type>& aColumn = {}) const
         {
-            for (uint32_t col = 0; col < iColumns.size(); ++col)
+            for (item_presentation_model_index::column_type col = 0; col < iColumns.size(); ++col)
             {
+                if (aColumn != std::nullopt && col != *aColumn)
+                    continue;
                 iColumns[col].width = std::nullopt;
                 iColumns[col].headingExtents = std::nullopt;
             }

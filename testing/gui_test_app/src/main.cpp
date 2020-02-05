@@ -81,7 +81,8 @@ public:
             ng::image{ ":/test/resources/icon.png" }, 
             ng::image{ ":/closed/resources/caw_toolbar.naa#contacts.png" },
             ng::image{ ":/closed/resources/caw_toolbar.naa#favourite.png" },
-            ng::image{ ":/closed/resources/caw_toolbar.naa#folder.png" }
+            ng::image{ ":/closed/resources/caw_toolbar.naa#folder.png" },
+            {}
         } }
     {
     }
@@ -102,13 +103,15 @@ public:
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
     {
         if (column_image_size(aIndex.column()))
-            return iCellImages[(std::hash<uint32_t>{}(to_item_model_index(aIndex).row()) + std::hash<uint32_t>{}(to_item_model_index(aIndex).column())) % 5];
-        else
-            return ng::optional_texture{};
+        {
+            auto const idx = (std::hash<uint32_t>{}(to_item_model_index(aIndex).row()) + std::hash<uint32_t>{}(to_item_model_index(aIndex).column())) % 5;
+            return iCellImages[idx];
+        }
+        return ng::optional_texture{};
     }
 private:
     std::optional<ng::item_cell_color_type> iColorType;
-    std::array<ng::optional_texture, 4> iCellImages;
+    std::array<ng::optional_texture, 5> iCellImages;
 };
 
 class easing_item_presentation_model : public ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>>
