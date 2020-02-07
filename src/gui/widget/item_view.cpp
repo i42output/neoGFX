@@ -137,6 +137,7 @@ namespace neogfx
             iPresentationModelSink += presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
             iPresentationModelSink += presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
             iPresentationModelSink += presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_toggled([this](const item_presentation_model_index& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
             iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
             iPresentationModelSink += presentation_model().items_filtering([this]() { items_filtering(); });
@@ -281,11 +282,6 @@ namespace neogfx
                     auto const& cellInfo = model().cell_info(presentation_model().to_item_model_index(itemIndex));
                     if ((cellInfo.flags & item_cell_flags::Checkable) == item_cell_flags::Checkable)
                     {
-                        button_checked_state checkedState = false;
-                        if ((cellInfo.flags & item_cell_flags::Checked) == item_cell_flags::Checkable)
-                            checkedState = true;
-                        if ((cellInfo.flags & item_cell_flags::CheckedIndeterminate) == item_cell_flags::CheckedIndeterminate)
-                            checkedState = std::nullopt;
                         thread_local struct : i_skinnable_item
                         {
                             const item_view* widget;
@@ -314,7 +310,7 @@ namespace neogfx
                         } skinnableItem = {};
                         skinnableItem.widget = this;
                         skinnableItem.checkBoxRect = cell_rect(itemIndex, aGraphicsContext, cell_part::CheckBox);
-                        service<i_skin_manager>().active_skin().draw_check_box(aGraphicsContext, skinnableItem, checkedState);
+                        service<i_skin_manager>().active_skin().draw_check_box(aGraphicsContext, skinnableItem, presentation_model().cell_meta(itemIndex).checked);
                     }
                     auto const& cellImage = presentation_model().cell_image(itemIndex);
                     if (cellImage != std::nullopt)
@@ -374,19 +370,25 @@ namespace neogfx
             auto item = item_at(aPosition);
             if (item != std::nullopt)
             {
+                if ((model().cell_info(presentation_model().to_item_model_index(*item)).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable &&
+                    cell_rect(*item, cell_part::CheckBox).contains(aPosition))
+                    iClickedCheckBox = item;
                 selection_model().set_current_index(*item);
-                if (selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
+                if (!iClickedCheckBox && selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
                     edit(*item);
             }            
             if (capturing())
             {
-                iMouseTracker.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
-                {
-                    aTimer.again();
-                    auto item = item_at(root().mouse_position() - origin());
-                    if (item != std::nullopt)
-                        selection_model().set_current_index(*item);
-                }, 20);
+                if (!iClickedCheckBox)
+                    iMouseTracker.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+                        {
+                            aTimer.again();
+                            auto item = item_at(root().mouse_position() - origin());
+                            if (item != std::nullopt)
+                                selection_model().set_current_index(*item);
+                        }, 20);
+                else
+                    update(cell_rect(*iClickedCheckBox, cell_part::Background));
             }
         }
     }
@@ -399,12 +401,33 @@ namespace neogfx
             auto item = item_at(aPosition);
             if (item != std::nullopt)
             {
+                if ((model().cell_info(presentation_model().to_item_model_index(*item)).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable &&
+                    cell_rect(*item, cell_part::CheckBox).contains(aPosition))
+                    iClickedCheckBox = item;
                 selection_model().set_current_index(*item);
-                if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
-                    edit(*item);
-                else
-                    service<i_basic_services>().system_beep();
+                if (!iClickedCheckBox)
+                {
+                    if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
+                        edit(*item);
+                    else
+                        service<i_basic_services>().system_beep();
+                }
             }
+        }
+    }
+
+    void item_view::mouse_button_released(mouse_button aButton, const point& aPosition)
+    {
+        scrollable_widget::mouse_button_released(aButton, aPosition);
+        if (iClickedCheckBox != std::nullopt)
+        {
+            auto item = item_at(aPosition);
+            bool doCheck = (item == iClickedCheckBox && cell_rect(*item, cell_part::CheckBox).contains(aPosition));
+            if (!doCheck)
+                update(cell_rect(*iClickedCheckBox, cell_part::Background));
+            iClickedCheckBox = std::nullopt;
+            if (doCheck)
+                presentation_model().toggle_check(*item);
         }
     }
 
@@ -419,9 +442,22 @@ namespace neogfx
                 if (item != std::nullopt)
                     selection_model().set_current_index(*item);
             }
+            update_hover(aPosition);
         }
         else
             iIgnoreNextMouseMove = false;
+    }
+
+    void item_view::mouse_entered(const point& aPosition)
+    {
+        scrollable_widget::mouse_entered(aPosition);
+        update_hover(aPosition);
+    }
+
+    void item_view::mouse_left()
+    {
+        scrollable_widget::mouse_left();
+        update_hover({});
     }
 
     bool item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -1115,5 +1151,18 @@ namespace neogfx
             if (selection_model().has_current_index())
                 make_visible(selection_model().current_index());
         });
+    }
+
+    void item_view::update_hover(const optional_point& aPosition)
+    {
+        auto oldHoverCell = iHoverCell;
+        iHoverCell = item_at(*aPosition);
+        if (iHoverCell != oldHoverCell || (iHoverCell && (model().cell_info(presentation_model().to_item_model_index(*iHoverCell)).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable))
+        {
+            if (oldHoverCell)
+                update(cell_rect(*oldHoverCell, cell_part::Background));
+            if (iHoverCell)
+                update(cell_rect(*iHoverCell, cell_part::Background));
+        }
     }
 }

@@ -79,7 +79,7 @@ namespace neogfx
         uint32_t iRow;
     };
 
-    header_view::header_view(i_owner& aOwner, type_e aType) :
+    header_view::header_view(i_header_view_owner& aOwner, type_e aType) :
         splitter{ aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter },
         iOwner{ aOwner },
         iType{ aType },
@@ -88,7 +88,7 @@ namespace neogfx
         init();
     }
 
-    header_view::header_view(i_widget& aParent, i_owner& aOwner, type_e aType) :
+    header_view::header_view(i_widget& aParent, i_header_view_owner& aOwner, type_e aType) :
         splitter{ aParent, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter },
         iOwner{ aOwner },
         iType{ aType },
@@ -97,7 +97,7 @@ namespace neogfx
         init();
     }
 
-    header_view::header_view(i_layout& aLayout, i_owner& aOwner, type_e aType) :
+    header_view::header_view(i_layout& aLayout, i_header_view_owner& aOwner, type_e aType) :
         splitter{ aLayout, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter },
         iOwner{ aOwner },
         iType{ aType },

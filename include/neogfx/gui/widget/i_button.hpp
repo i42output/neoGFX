@@ -45,6 +45,8 @@ namespace neogfx
 {
     typedef std::optional<bool> button_checked_state;
 
+    struct not_tri_state_checkable : public std::logic_error { not_tri_state_checkable() : std::logic_error("neogfx::not_tri_state_checkable") {} };
+
     class i_button : public virtual i_skinnable_item
     {
     public:

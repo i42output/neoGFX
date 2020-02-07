@@ -26,6 +26,7 @@
 #include <neogfx/core/color.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gui/widget/i_button.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 #include <neogfx/gui/widget/i_item_model.hpp>
 
@@ -36,20 +37,20 @@ namespace neogfx
     struct item_presentation_model_index : item_index<item_presentation_model_index> { using item_index::item_index; };
     typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
-    enum class item_cell_selection_flags
+    enum class item_cell_selection_flags : uint8_t
     {
         Current = 0x01,
         Selected = 0x02
     };
 
-    enum class item_cell_editable
+    enum class item_cell_editable : uint8_t
     {
         No,
         WhenFocused,
         OnInputEvent
     };
 
-    enum class item_cell_color_type
+    enum class item_cell_color_type : uint8_t
     {
         Foreground = 0x01,
         Background = 0x02,
@@ -80,6 +81,10 @@ namespace neogfx
         declare_event(item_added, const item_presentation_model_index&)
         declare_event(item_changed, const item_presentation_model_index&)
         declare_event(item_removed, const item_presentation_model_index&)
+        declare_event(item_toggled, const item_presentation_model_index&)
+        declare_event(item_checked, const item_presentation_model_index&)
+        declare_event(item_unchecked, const item_presentation_model_index&)
+        declare_event(item_indeterminate, const item_presentation_model_index&)
         declare_event(items_sorting)
         declare_event(items_sorted)
         declare_event(items_filtering)
@@ -88,6 +93,7 @@ namespace neogfx
         struct cell_meta_type
         {
             mutable item_cell_selection_flags selection;
+            mutable button_checked_state checked = false;
             mutable optional_glyph_text text;
             mutable optional_size extents;
         };
@@ -139,6 +145,17 @@ namespace neogfx
         virtual void set_column_editable(item_presentation_model_index::column_type aColumnIndex, item_cell_editable aEditable) = 0;
         virtual optional_size column_image_size(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, const optional_size& aImageSize) = 0;
+    public:
+        virtual const button_checked_state& checked_state(const item_presentation_model_index& aIndex) = 0;
+        virtual bool is_checked(const item_presentation_model_index& aIndex) const = 0;
+        virtual bool is_unchecked(const item_presentation_model_index& aIndex) const = 0;
+        virtual bool is_indeterminate(const item_presentation_model_index& aIndex) const = 0;
+        virtual void set_checked_state(const item_presentation_model_index& aIndex, const button_checked_state& aState) = 0;
+        virtual void check(const item_presentation_model_index& aIndex) = 0;
+        virtual void uncheck(const item_presentation_model_index& aIndex) = 0;
+        virtual void set_indeterminate(const item_presentation_model_index& aIndex) = 0;
+        virtual void set_checked(const item_presentation_model_index& aIndex, bool aChecked) = 0;
+        virtual void toggle_check(const item_presentation_model_index& aIndex) = 0;
     public:
         virtual const font& default_font() const = 0;
         virtual void set_default_font(const optional_font& aDefaultFont) = 0;

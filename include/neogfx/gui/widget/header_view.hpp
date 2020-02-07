@@ -33,6 +33,14 @@ namespace neogfx
         PanesResized
     };
 
+    class header_view;
+
+    class i_header_view_owner
+    {
+    public:
+        virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
+    };
+
     class header_view : public splitter
     {
     private:
@@ -43,11 +51,6 @@ namespace neogfx
             HorizontalHeader,
             VerticalHeader
         };
-        class i_owner
-        {
-        public:
-            virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
-        };
     private:
         struct section_dimension
         {
@@ -56,9 +59,9 @@ namespace neogfx
             dimension max;
         };
     public:
-        header_view(i_owner& aOwner, type_e aType = HorizontalHeader);
-        header_view(i_widget& aParent, i_owner& aOwner, type_e aType = HorizontalHeader);
-        header_view(i_layout& aLayout, i_owner& aOwner, type_e aType = HorizontalHeader);
+        header_view(i_header_view_owner& aOwner, type_e aType = HorizontalHeader);
+        header_view(i_widget& aParent, i_header_view_owner& aOwner, type_e aType = HorizontalHeader);
+        header_view(i_layout& aLayout, i_header_view_owner& aOwner, type_e aType = HorizontalHeader);
         ~header_view();
     public:
         bool has_model() const;
@@ -101,7 +104,7 @@ namespace neogfx
         void update_from_row(uint32_t aRow, i_graphics_context& aGc);
         bool update_section_width(uint32_t aColumn, const size& aCellExtents, i_graphics_context& aGc);
     private:
-        i_owner& iOwner;
+        i_header_view_owner& iOwner;
         sink iSink;
         std::vector<std::array<sink, 2>> iButtonSinks;
         type_e iType;

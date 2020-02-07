@@ -44,7 +44,6 @@ namespace neogfx
         define_declared_event(Unchecked, unchecked)
         define_declared_event(Indeterminate, indeterminate)
     public:
-        struct not_tri_state_checkable : public std::logic_error { not_tri_state_checkable() : std::logic_error("neogfx::button::not_tri_state_checkable") {} };
         // button
     public:
         button(alignment aAlignment = alignment::Left | alignment::VCentre);

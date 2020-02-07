@@ -82,8 +82,6 @@ namespace neogfx
         CheckableTriState       = 0x00000020 | Checkable,
         Draggable               = 0x00001000,
         Droppable               = 0x00002000,
-        Checked                 = 0x00010000,
-        CheckedIndeterminate    = 0x00020000,
 
         Default                 = Enabled | Selectable | Editable
     };
@@ -165,8 +163,6 @@ const neolib::enum_enumerators_t<neogfx::item_cell_flags> neolib::enum_enumerato
     declare_enum_string(neogfx::item_cell_flags, CheckableTriState)
     declare_enum_string(neogfx::item_cell_flags, Draggable)
     declare_enum_string(neogfx::item_cell_flags, Droppable)
-    declare_enum_string(neogfx::item_cell_flags, Checked)
-    declare_enum_string(neogfx::item_cell_flags, CheckedIndeterminate)
 };                                               
 
 namespace neogfx

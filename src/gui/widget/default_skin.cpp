@@ -205,9 +205,9 @@ namespace neogfx
             widget.background_color().dark() ?
                 widget.background_color().lighter(0x20) :
                 widget.background_color().darker(0x20));
-        if (widget.capturing())
+        if (widget.capturing() && widget.capture_position() && aItem.element_rect(skin_element::ClickableArea).contains(*widget.capture_position()))
             widget.background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color fillColor = widget.enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ?
+        color fillColor = widget.enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.root().mouse_position() - widget.origin()) ?
             hoverColor : widget.background_color();
         aGraphicsContext.fill_rect(boxRect, fillColor.with_combined_alpha(enabledAlphaCoefficient));
         color borderColor1 = widget.container_background_color().mid(widget.container_background_color().mid(widget.background_color()));

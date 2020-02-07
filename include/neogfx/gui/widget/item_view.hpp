@@ -39,8 +39,11 @@ namespace neogfx
         CheckBox
     };
 
-    class item_view : public scrollable_widget, protected header_view::i_owner
+    class item_view : public scrollable_widget, protected i_header_view_owner
     {
+    public:
+        define_event(CellEntered, cell_entered, const item_presentation_model_index&)
+        define_event(CellLeft, cell_left, const item_presentation_model_index&)
     public:
         struct no_model : std::logic_error { no_model() : std::logic_error("neogfx::item_view::no_model") {} };
         struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::item_view::no_presentation_model") {} };
@@ -115,7 +118,10 @@ namespace neogfx
     protected:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_released(mouse_button aButton, const point& aPosition) override;
         void mouse_moved(const point& aPosition) override;
+        void mouse_entered(const point& aPosition) override;
+        void mouse_left() override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool text_input(const std::string& aText) override;
@@ -152,6 +158,7 @@ namespace neogfx
         optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
     private:
         void init();
+        void update_hover(const optional_point& aPosition);
     private:
         sink iSink;
         sink iModelSink;
@@ -167,6 +174,8 @@ namespace neogfx
         std::shared_ptr<i_item_editor> iEditor;
         bool iBeginningEdit;
         bool iEndingEdit;
+        optional_item_presentation_model_index iHoverCell;
+        optional_item_presentation_model_index iClickedCheckBox;
         optional_item_model_index iSavedModelIndex;
         basic_size<i_scrollbar::value_type> iOldPositionForScrollbarVisibility;
         optional_easing iDefaultTransition;

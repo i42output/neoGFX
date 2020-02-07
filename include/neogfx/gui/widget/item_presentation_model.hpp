@@ -51,6 +51,10 @@ namespace neogfx
         define_declared_event(ItemAdded, item_added, const item_presentation_model_index&)
         define_declared_event(ItemChanged, item_changed, const item_presentation_model_index&)
         define_declared_event(ItemRemoved, item_removed, const item_presentation_model_index&)
+        define_declared_event(ItemToggled, item_toggled, const item_presentation_model_index&)
+        define_declared_event(ItemChecked, item_checked, const item_presentation_model_index&)
+        define_declared_event(ItemUnchecked, item_unchecked, const item_presentation_model_index&)
+        define_declared_event(ItemIndeterminate, item_indeterminate, const item_presentation_model_index&)
         define_declared_event(ItemsSorting, items_sorting)
         define_declared_event(ItemsSorted, items_sorted)
         define_declared_event(ItemsFiltering, items_filtering)
@@ -235,6 +239,62 @@ namespace neogfx
                 reset_meta();
                 ColumnInfoChanged.trigger(aColumnIndex);
             }
+        }
+        const button_checked_state& checked_state(const item_presentation_model_index& aIndex) override
+        {
+            return cell_meta(aIndex).checked;
+        }
+        bool is_checked(const item_presentation_model_index& aIndex) const override
+        {
+            return cell_meta(aIndex).checked == true;
+        }
+        bool is_unchecked(const item_presentation_model_index& aIndex) const override
+        {
+            return cell_meta(aIndex).checked == false;
+        }
+        bool is_indeterminate(const item_presentation_model_index& aIndex) const override
+        {
+            return cell_meta(aIndex).checked == std::nullopt;
+        }
+        void set_checked_state(const item_presentation_model_index& aIndex, const button_checked_state& aState) override
+        {
+            if (cell_meta(aIndex).checked != aState)
+            {
+                cell_meta(aIndex).checked = aState;
+                if (aState == std::nullopt && (item_model().cell_info(to_item_model_index(aIndex)).flags & item_cell_flags::CheckableTriState) != item_cell_flags::CheckableTriState)
+                    throw not_tri_state_checkable();
+                cell_meta(aIndex).checked = aState;
+                ItemToggled.trigger(aIndex);
+                if (is_checked(aIndex))
+                    ItemChecked.trigger(aIndex);
+                else if (is_unchecked(aIndex))
+                    ItemUnchecked.trigger(aIndex);
+                else if (is_indeterminate(aIndex))
+                    ItemIndeterminate.trigger(aIndex);
+            }
+        }
+        void check(const item_presentation_model_index& aIndex) override
+        {
+            set_checked(aIndex, true);
+        }
+        void uncheck(const item_presentation_model_index& aIndex) override
+        {
+            set_checked(aIndex, false);
+        }
+        void set_indeterminate(const item_presentation_model_index& aIndex) override
+        {
+            set_checked_state(aIndex, button_checked_state{});
+        }
+        void set_checked(const item_presentation_model_index& aIndex, bool aChecked) override
+        {
+            set_checked_state(aIndex, aChecked);
+        }
+        void toggle_check(const item_presentation_model_index& aIndex) override
+        {
+            if (is_checked(aIndex) || is_indeterminate(aIndex))
+                set_checked(aIndex, false);
+            else
+                set_checked(aIndex, true);
         }
         const font& default_font() const override
         {
