@@ -28,6 +28,14 @@ namespace neogfx
 {
     class i_native_surface;
 
+    class offscreen_window
+    {
+    public:
+        virtual ~offscreen_window() = default;
+    public:
+        virtual void* handle() const = 0;
+    };
+
     class sdl_renderer : public opengl_renderer
     {
     public:
@@ -63,7 +71,7 @@ namespace neogfx
         virtual bool process_events();
     private:
         handle create_context(void* aNativeSurfaceHandle);
-        void* allocate_offscreen_window(const i_render_target* aRenderTarget);
+        std::shared_ptr<offscreen_window> allocate_offscreen_window(const i_render_target* aRenderTarget);
         void deallocate_offscreen_window(const i_render_target* aRenderTarget);
         void activate_current_target();
         static int filter_event(void* aSelf, SDL_Event* aEvent);
@@ -71,8 +79,9 @@ namespace neogfx
     private:
         bool iInitialized;
         bool iDoubleBuffering;
-        std::unordered_map<const i_render_target*, void*> iOffscreenWindows;
-        void* iDefaultOffscreenWindow;
+        std::vector<std::shared_ptr<offscreen_window>> iOffscreenWindowPool;
+        std::unordered_map<const i_render_target*, std::shared_ptr<offscreen_window>> iOffscreenWindows;
+        std::weak_ptr<offscreen_window> iDefaultOffscreenWindow;
         handle iContext;
         uint32_t iCreatingWindow;
         std::vector<const i_render_target*> iTargetStack;
