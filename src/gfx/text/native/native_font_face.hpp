@@ -142,10 +142,9 @@ namespace neogfx
         mutable std::unique_ptr<hb_handle> iAuxHandle;
         mutable std::shared_ptr<i_native_font_face> iFallbackFont;
         mutable glyph_map iGlyphs;
-        mutable std::vector<GLubyte> iGlyphTextureData;
-        mutable std::vector<std::array<GLubyte, 4>> iSubpixelGlyphTextureData;
         bool iHasKerning;
         mutable kerning_table iKerningTable;
         mutable std::optional<bool> iHasFallback;
+        mutable std::optional<neogfx::glyph_texture> iInvalidGlyph;
     };
 }

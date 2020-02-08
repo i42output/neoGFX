@@ -277,22 +277,54 @@ namespace neogfx
         auto existingGlyph = iGlyphs.find(aGlyph.value());
         if (existingGlyph != iGlyphs.end())
             return existingGlyph->second;
-
         try
         {
-            freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+            try
+            {
+                freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+            }
+            catch (freetype_error fe)
+            {
+                std::cerr << "neogfx: warning: Cannot load font glyph" << std::endl;
+                throw freetype_load_glyph_error(fe.what());
+            }
+            try
+            {
+                freetypeCheck(FT_Render_Glyph(iHandle->glyph, FT_RENDER_MODE_LCD));
+            }
+            catch (freetype_error fe)
+            {
+                std::cerr << "neogfx: warning: Cannot render font glyph" << std::endl;
+                throw freetype_render_glyph_error(fe.what());
+            }
         }
-        catch (freetype_error fe)
+        catch (...)
         {
-            throw freetype_load_glyph_error(fe.what());
-        }
-        try
-        {
-            freetypeCheck(FT_Render_Glyph(iHandle->glyph, FT_RENDER_MODE_LCD));
-        }
-        catch (freetype_error fe)
-        {
-            throw freetype_render_glyph_error(fe.what());
+            thread_local bool inHere = false;
+            if (!inHere)
+            {
+                neolib::scoped_flag sf{ inHere };
+                glyph invalid = aGlyph;
+                auto const replacementGlyph = FT_Get_Char_Index(iHandle, 0xFFFD);
+                if (replacementGlyph != 0)
+                {
+                    invalid.set_value(replacementGlyph);
+                    return glyph_texture(aGlyph);
+                }
+            }
+            if (iInvalidGlyph == std::nullopt)
+            {
+                auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
+                    neogfx::size{ height(), height() }.ceil(),
+                    1.0, texture_sampling::Normal, texture_data_format::SubPixel);
+                iInvalidGlyph.emplace(
+                    subTexture,
+                    true,
+                    point{},
+                    glyph_pixel_mode::LCD);
+                // todo: render an invalid glyph symbol
+            }
+            return *iInvalidGlyph;
         }
 
         bool useSubpixelFiltering = true;
@@ -319,15 +351,16 @@ namespace neogfx
                     (iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0 },
                 pixelMode })).first->second;
 
-        iGlyphTextureData.clear();
-        iGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
-        iSubpixelGlyphTextureData.clear();
-        iSubpixelGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
+        thread_local std::vector<GLubyte> glyphTextureData;
+        thread_local std::vector<std::array<GLubyte, 4>> subpixelGlyphTextureData;
+        glyphTextureData.clear();
+        subpixelGlyphTextureData.clear();
 
         const GLubyte* textureData = 0;
         
         if (useSubpixelFiltering)
         {
+            subpixelGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
             // sub-pixel FIR filter.
             static double coefficients[] = { 0.5 / 16.0, 4.0 / 16.0, 7.0 / 16.0, 4.0 / 16.0, 0.5 / 16.0 };
             for (uint32_t y = 0; y < bitmap.rows; y++)
@@ -337,30 +370,31 @@ namespace neogfx
                     uint8_t alpha = 0;
                     for (int32_t z = -2; z <= 2; ++z)
                         alpha += static_cast<uint8_t>(bitmap.buffer[std::max(0, std::min<int32_t>(bitmap.width - 1, x + z)) + bitmap.pitch * y] * coefficients[z + 2]);
-                    iSubpixelGlyphTextureData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
+                    subpixelGlyphTextureData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
                 }
             }
-            textureData = &iSubpixelGlyphTextureData[0][0];
+            textureData = &subpixelGlyphTextureData[0][0];
         }
         else
         {
+            glyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
             for (uint32_t y = 0; y < bitmap.rows; y++)
                 switch (bitmap.pixel_mode)
                 {
                 case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
                     for (uint32_t x = 0; x < bitmap.width; x += 8)
                         for (uint32_t b = 0; b < std::min(bitmap.width - x, 8u); ++b)
-                            iGlyphTextureData[(x + b) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
+                            glyphTextureData[(x + b) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
                                 (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : ((bitmap.buffer[x / 8 + bitmap.pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
                     break;
                 case FT_PIXEL_MODE_GRAY:
                 default:
                     for (uint32_t x = 0; x < bitmap.width; x++)
-                        iGlyphTextureData[x + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
+                        glyphTextureData[x + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
                             (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : bitmap.buffer[x + bitmap.pitch * y];
                     break;
                 }
-            textureData = &iGlyphTextureData[0];
+            textureData = &glyphTextureData[0];
         }
         
         glyphTexture.texture().native_texture()->set_pixels(glyphRect, &textureData[0], 1u);

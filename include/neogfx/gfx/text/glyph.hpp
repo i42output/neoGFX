@@ -290,15 +290,8 @@ namespace neogfx
             if (iExtents == basic_size<float>{})
             {
                 iExtents = size{ advance().cx, !is_emoji() ? aFont.height() : advance().cx };
-                try
-                {
-                    if (has_font_glyph())
-                        iExtents.cx = static_cast<float>(offset().cx + glyph_texture(aFont).placement().x + glyph_texture(aFont).texture().extents().cx);
-                }
-                catch (...)
-                {
-                    // silently ignore freetype exceptions.
-                }
+                if (has_font_glyph())
+                    iExtents.cx = static_cast<float>(offset().cx + glyph_texture(aFont).placement().x + glyph_texture(aFont).texture().extents().cx);
             }
             return iExtents;
         }

@@ -1065,7 +1065,7 @@ namespace neogfx
             if (!sReported)
             {
                 sReported = true;
-                std::cerr << "FreeType error in draw_glyph(): " << fe.what() << ", ignoring further errors." << std::endl;
+                std::cerr << "neogfx: FreeType error in draw_glyph(): " << fe.what() << ", ignoring further errors." << std::endl;
             }
         }
     }
@@ -1298,7 +1298,7 @@ namespace neogfx
             iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
             while (iGlyphsList.back().needs_fallback_font())
             {
-                if (tryFont.has_fallback())
+                if (tryFont.has_fallback() && tryFont.fallback() != tryFont)
                 {
                     tryFont = tryFont.fallback();
                     iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
