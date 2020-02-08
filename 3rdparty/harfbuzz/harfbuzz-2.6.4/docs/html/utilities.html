@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Utilities: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="pt01.html" title="Part I. User's manual">
+<link rel="prev" href="level-2.html" title="Level 2">
+<link rel="next" href="utilities-common-types-apis.html" title="Common data types and APIs">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="pt01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="level-2.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="utilities-common-types-apis.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="utilities"></a>Utilities</h2></div></div></div>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="utilities.html#utilities-command-line-tools">Command-line tools</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="utilities.html#utilities-command-line-hbshape">hb-shape</a></span></dt>
+<dt><span class="section"><a href="utilities.html#utilities-command-line-hbview">hb-view</a></span></dt>
+<dt><span class="section"><a href="utilities.html#utilities-command-line-hbsubset">hb-subset</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="utilities-common-types-apis.html">Common data types and APIs</a></span></dt>
+<dt><span class="section"><a href="utilities-ucdn.html">UCDN</a></span></dt>
+</dl></div>
+<p>
+    HarfBuzz includes several auxiliary components in addition to the
+    main APIs. These include a set of command-line tools, a set of
+    lower-level APIs for common data types that may be of interest to
+    client programs, and an embedded library for working with
+    Unicode Character Database (UCD) data.
+  </p>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="utilities-command-line-tools"></a>Command-line tools</h2></div></div></div>
+<p>
+      HarfBuzz include three command-line tools:
+      <span style="color: red">&lt;program&gt;hb-shape&lt;/program&gt;</span>, <span style="color: red">&lt;program&gt;hb-view&lt;/program&gt;</span>, and
+      <span style="color: red">&lt;program&gt;hb-subset&lt;/program&gt;</span>. They can be used to examine
+      HarfBuzz's functionality, debug font binaries, or explore the
+      various shaping models and features from a terminal.
+    </p>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="utilities-command-line-hbshape"></a>hb-shape</h3></div></div></div>
+<p>
+	<span class="emphasis"><em><span style="color: red">&lt;program&gt;hb-shape&lt;/program&gt;</span></em></span> allows you to run HarfBuzz's
+	<code class="function">hb_shape()</code> function on an input string and
+	to examine the outcome, in human-readable form, as terminal
+	output. <span style="color: red">&lt;program&gt;hb-shape&lt;/program&gt;</span> does
+	<span class="emphasis"><em>not</em></span> render the results of the shaping call
+	into rendered text (you can use <span style="color: red">&lt;program&gt;hb-view&lt;/program&gt;</span>, below, for
+	that). Instead, it prints out the final glyph indices and
+	positions, taking all shaping operations into account, as if the
+	input string were a HarfBuzz input buffer.
+      </p>
+<p>
+	You can specify the font to be used for shaping and, with
+	command-line options, you can add various aspects of the
+	internal state to the output that is sent to the terminal. The
+	general format is
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>hb-shape</strong></span> [<span class="optional">[OPTIONS]</span>]
+      <em class="parameter"><code>path/to/font/file.ttf</code></em>
+      <em class="parameter"><code>yourinputtext</code></em>
+      </pre>
+<p>
+	The default output format is plain text (although JSON output
+	can be selected instead by specifying the option
+	[<span class="optional">--output-format=json</span>]). The default output
+	syntax reports each glyph name (or glyph index if there is no
+	name) followed by its cluster value, its horizontal and vertical
+	position displacement, and its horizontal and vertical advances.
+      </p>
+<p>
+	Output options exist to skip any of these elements in the
+	output, and to include additional data, such as Unicode
+	code-point values, glyph extents, glyph flags, or interim
+	shaping results.
+      </p>
+<p>
+	Output can also be redirected to a file, or input read from a
+	file. Additional options enable you to enable or disable
+	specific font features, to set variation-font axis values, to
+	alter the language, script, direction, and clustering settings
+	used, to enable sanity checks, or to change which shaping engine is used.
+      </p>
+<p>
+	For a complete explanation of the options available, run
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>hb-shape</strong></span> <em class="parameter"><code>--help</code></em>
+      </pre>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="utilities-command-line-hbview"></a>hb-view</h3></div></div></div>
+<p>
+	<span class="emphasis"><em><span style="color: red">&lt;program&gt;hb-view&lt;/program&gt;</span></em></span> allows you to
+	see the shaped output of an input string in rendered
+	form. Like <span style="color: red">&lt;program&gt;hb-shape&lt;/program&gt;</span>,
+	<span style="color: red">&lt;program&gt;hb-view&lt;/program&gt;</span> takes a font file and a text string
+	as its arguments:
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>hb-view</strong></span> [<span class="optional">[OPTIONS]</span>]
+	<em class="parameter"><code>path/to/font/file.ttf</code></em>
+	<em class="parameter"><code>yourinputtext</code></em>
+      </pre>
+<p>
+	By default, <span style="color: red">&lt;program&gt;hb-view&lt;/program&gt;</span> renders the shaped
+	text in ASCII block-character images as terminal output. By
+	appending the
+	<span class="command"><strong>--output-file=[<span class="optional">filename</span>]</strong></span>
+	switch, you can write the output to a PNG, SVG, or PDF file
+	(among other formats).
+      </p>
+<p>
+	As with <span style="color: red">&lt;program&gt;hb-shape&lt;/program&gt;</span>, a lengthy set of options
+	is available, with which you can  enable or disable
+	specific font features, set variation-font axis values,
+	alter the language, script, direction, and clustering settings
+	used, enable sanity checks, or change which shaping engine is
+	used.
+      </p>
+<p>
+	You can also set the foreground and background colors used for
+	the output, independently control the width of all four
+	margins, alter the line spacing, and annotate the output image
+	with 
+      </p>
+<p>
+	In general, <span style="color: red">&lt;program&gt;hb-view&lt;/program&gt;</span> is a quick way to
+	verify that the output of HarfBuzz's shaping operation looks
+	correct for a given text-and-font combination, but you may
+	want to use <span style="color: red">&lt;program&gt;hb-shape&lt;/program&gt;</span> to figure out exactly
+	why something does not appear as expected.
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="utilities-command-line-hbsubset"></a>hb-subset</h3></div></div></div>
+<p>
+	<span class="emphasis"><em><span style="color: red">&lt;program&gt;hb-subset&lt;/program&gt;</span></em></span> allows you
+	to generate a subset of a given font, with a limited set of
+	supported characters, features, and variation settings.
+      </p>
+<p>
+	By default, you provide an input font and an input text string
+	as the arguments to <span style="color: red">&lt;program&gt;hb-subset&lt;/program&gt;</span>, and it will
+	generate a font that covers the input text exactly like the
+	input font does, but includes no other characters or features.
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>hb-subset</strong></span> [<span class="optional">[OPTIONS]</span>]
+	<em class="parameter"><code>path/to/font/file.ttf</code></em>
+	<em class="parameter"><code>yourinputtext</code></em>
+      </pre>
+<p>
+	For example, to create a subset of Noto Serif that just includes the
+	numerals and the lowercase Latin alphabet, you could run
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>hb-subset</strong></span> [<span class="optional">[OPTIONS]</span>]
+	<em class="parameter"><code>NotoSerif-Regular.ttf</code></em>
+	<em class="parameter"><code>0123456789abcdefghijklmnopqrstuvwxyz</code></em>
+      </pre>
+<p>
+	There are options available to remove hinting from the
+	subsetted font and to specify a list of variation-axis settings.
+      </p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

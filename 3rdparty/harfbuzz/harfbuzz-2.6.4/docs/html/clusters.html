@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Clusters: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="pt01.html" title="Part I. User's manual">
+<link rel="prev" href="shaping-plans-and-caching.html" title="Plans and caching">
+<link rel="next" href="working-with-harfbuzz-clusters.html" title="Working with HarfBuzz clusters">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="pt01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="shaping-plans-and-caching.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="working-with-harfbuzz-clusters.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="clusters"></a>Clusters</h2></div></div></div>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="clusters.html#clusters-and-shaping">Clusters and shaping</a></span></dt>
+<dt><span class="section"><a href="working-with-harfbuzz-clusters.html">Working with HarfBuzz clusters</a></span></dt>
+<dt><span class="section"><a href="a-clustering-example-for-levels-0-and-1.html">A clustering example for levels 0 and 1</a></span></dt>
+<dt><span class="section"><a href="reordering-in-levels-0-and-1.html">Reordering in levels 0 and 1</a></span></dt>
+<dt><span class="section"><a href="the-distinction-between-levels-0-and-1.html">The distinction between levels 0 and 1</a></span></dt>
+<dt><span class="section"><a href="level-2.html">Level 2</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="level-2.html#ligatures-with-combining-marks-in-level-2">Ligatures with combining marks in level 2</a></span></dt>
+<dt><span class="section"><a href="level-2.html#reordering-in-level-2">Reordering in level 2</a></span></dt>
+<dt><span class="section"><a href="level-2.html#other-considerations-in-level-2">Other considerations in level 2</a></span></dt>
+</dl></dd>
+</dl></div>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="clusters-and-shaping"></a>Clusters and shaping</h2></div></div></div>
+<p>
+      In text shaping, a <span class="emphasis"><em>cluster</em></span> is a sequence of
+      characters that needs to be treated as a single, indivisible
+      unit. A single letter or symbol can be a cluster of its
+      own. Other clusters correspond to longer subsequences of the
+      input code points — such as a ligature or conjunct form
+      — and require the shaper to ensure that the cluster is not
+      broken during the shaping process.
+    </p>
+<p>
+      A cluster is distinct from a <span class="emphasis"><em>grapheme</em></span>,
+      which is the smallest unit of meaning in a writing system or
+      script.
+    </p>
+<p>
+      The definitions of the two terms are similar. However, clusters
+      are only relevant for script shaping and glyph layout. In
+      contrast, graphemes are a property of the underlying script, and
+      are of interest when client programs implement orthographic 
+      or linguistic functionality.
+    </p>
+<p>
+      For example, two individual letters are often two separate
+      graphemes. When two letters form a ligature, however, they
+      combine into a single glyph. They are then part of the same
+      cluster and are treated as a unit by the shaping engine —
+      even though the two original, underlying letters remain separate
+      graphemes.
+    </p>
+<p>
+      HarfBuzz is concerned with clusters, <span class="emphasis"><em>not</em></span>
+      with graphemes — although client programs using HarfBuzz
+      may still care about graphemes for other reasons from time to time.
+    </p>
+<p>
+      During the shaping process, there are several shaping operations
+      that may merge adjacent characters (for example, when two code
+      points form a ligature or a conjunct form and are replaced by a
+      single glyph) or split one character into several (for example,
+      when decomposing a code point through the
+      <code class="literal">ccmp</code> feature). Operations like these alter
+      clusters; HarfBuzz tracks the changes to ensure that no clusters
+      get lost or broken during shaping. 
+    </p>
+<p>
+      HarfBuzz records cluster information independently from how
+      shaping operations affect the individual glyphs returned in an
+      output buffer. Consequently, a client program using HarfBuzz can
+      utilize the cluster information to implement features such as:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+	  Correctly positioning the cursor within a shaped text run,
+	  even when characters have formed ligatures, composed or
+	  decomposed, reordered, or undergone other shaping operations.
+	</p></li>
+<li class="listitem"><p>
+	  Correctly highlighting a text selection that includes some,
+	  but not all, of the characters in a word. 
+	</p></li>
+<li class="listitem"><p>
+	  Applying text attributes (such as color or underlining) to
+	  part, but not all, of a word.
+	</p></li>
+<li class="listitem"><p>
+	  Generating output document formats (such as PDF) with
+	  embedded text that can be fully extracted.
+	</p></li>
+<li class="listitem"><p>
+	  Determining the mapping between input characters and output
+	  glyphs, such as which glyphs are ligatures.
+	</p></li>
+<li class="listitem"><p>
+	  Performing line-breaking, justification, and other
+	  line-level or paragraph-level operations that must be done
+	  after shaping is complete, but which require examining
+	  character-level properties.
+	</p></li>
+</ul></div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

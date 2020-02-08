@@ -1,0 +1,412 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Building HarfBuzz: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="install-harfbuzz.html" title="Installing HarfBuzz">
+<link rel="prev" href="install-harfbuzz.html" title="Installing HarfBuzz">
+<link rel="next" href="getting-started.html" title="Getting started with HarfBuzz">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="install-harfbuzz.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="install-harfbuzz.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="getting-started.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="building"></a>Building HarfBuzz</h2></div></div></div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="building.linux"></a>Building on Linux</h3></div></div></div>
+<p>
+      <span class="emphasis"><em>(1)</em></span> To build HarfBuzz on Linux, you must first install the
+      development packages for FreeType, Cairo, and GLib. The exact
+      commands required for this step will vary depending on
+      the Linux distribution you use.
+    </p>
+<p>
+      For example, on an Ubuntu or Debian system, you would run:
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>sudo apt install</strong></span> <span class="package">gcc g++ libfreetype6-dev libglib2.0-dev libcairo2-dev</span>
+      </pre>
+<p>
+      On Fedora, RHEL, CentOS, or other Red-Hat–based systems, you would run:
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>sudo yum install</strong></span> <span class="package">gcc gcc-c++ freetype-devel glib2-devel cairo-devel</span>
+      </pre>
+<p>
+
+    </p>
+<p>
+      <span class="emphasis"><em>(2)</em></span> The next step depends on whether you
+      are building from the source in a downloaded release tarball or
+      from the source directly from the git repository.
+    </p>
+<p>
+      <span class="emphasis"><em>(2)(a)</em></span> If you downloaded the HarfBuzz
+      source code in a tarball, you can now extract the source.
+    </p>
+<p>
+      From a shell in the top-level directory of the extracted source
+      code, you can run <span class="command"><strong>./configure</strong></span> followed by
+      <span class="command"><strong>make</strong></span> as with any other standard package.
+    </p>
+<p>
+      This should leave you with a shared
+      library in the <code class="filename">src/</code> directory, and a few
+      utility programs including <span class="command"><strong>hb-view</strong></span> and
+      <span class="command"><strong>hb-shape</strong></span> under the <code class="filename">util/</code>
+      directory.
+    </p>
+<p>
+      <span class="emphasis"><em>(2)(b)</em></span> If you are building from the source in the HarfBuzz git
+      repository, rather than installing from a downloaded tarball
+      release, then you must install two more auxiliary tools before you 
+      can build for the first time: <span class="package">pkg-config</span> and
+      <a class="ulink" href="http://www.complang.org/ragel/" target="_top">ragel</a>.
+    </p>
+<p>
+      On Ubuntu or Debian, run:
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>sudo apt-get install</strong></span> <span class="package">autoconf automake libtool pkg-config ragel gtk-doc-tools</span>
+      </pre>
+<p>
+      On Fedora, RHEL, CentOS, run:
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>sudo yum install</strong></span> <span class="package">autoconf automake libtool pkgconfig ragel gtk-doc</span>
+      </pre>
+<p>
+      
+    </p>
+<p>
+      With <span class="package">pkg-config</span> and <span class="package">ragel</span>
+      installed, you can now run <span class="command"><strong>./autogen.sh</strong></span>,
+      followed by <span class="command"><strong>./configure</strong></span> and
+      <span class="command"><strong>make</strong></span> to build HarfBuzz.
+    </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="building.windows"></a>Building on Windows</h3></div></div></div>
+<p>
+	On Windows, consider using Microsoft's free <a class="ulink" href="https://github.com/Microsoft/vcpkg" target="_top">vcpkg</a> utility
+	to build HarfBuzz, its dependencies, and other open-source
+	libraries. 
+      </p>
+<p>
+	If you need to build HarfBuzz from source, first put the
+	<span class="package">ragel</span> binary on your
+	<code class="literal">PATH</code>, then follow the appveyor CI cmake
+	<a class="ulink" href="https://github.com/harfbuzz/harfbuzz/blob/master/appveyor.yml" target="_top">build
+	instructions</a>. 
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="building.macos"></a>Building on macOS</h3></div></div></div>
+<p>
+	There are two ways to build HarfBuzz on Mac systems: MacPorts
+	and Homebrew. The process is similar to the process used on a
+	Linux system.
+      </p>
+<p>
+	<span class="emphasis"><em>(1)</em></span> You must first install the
+	development packages for FreeType, Cairo, and GLib. If you are
+	using MacPorts, you should run:
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>sudo port install</strong></span> <span class="package">freetype glib2 cairo</span>
+      </pre>
+<p>
+      </p>
+<p>
+	If you are using Homebrew, you should run:
+	</p>
+<pre class="programlisting">	
+	  <span class="command"><strong>brew install</strong></span> <span class="package">freetype glib cairo</span>
+	</pre>
+<p>
+      </p>
+<p>
+	<span class="emphasis"><em>(2)</em></span> The next step depends on whether you are building from the
+	source in a downloaded release tarball or from the source directly
+	from the git repository.
+      </p>
+<p>
+	<span class="emphasis"><em>(2)(a)</em></span> If you are installing HarfBuzz
+	from a downloaded tarball release, extract the tarball and
+	open a Terminal in the extracted source-code directory. Run:
+	</p>
+<pre class="programlisting">
+	  <span class="command"><strong>./configure</strong></span>
+	</pre>
+<p>
+	followed by:
+	</p>
+<pre class="programlisting">	
+	  <span class="command"><strong>make</strong></span>
+	</pre>
+<p>
+	to build HarfBuzz.
+      </p>
+<p>
+	<span class="emphasis"><em>(2)(b)</em></span> Alternatively, if you are building
+	HarfBuzz from the source in the HarfBuzz git repository, then
+	you must install several built-time dependencies before
+	proceeding.
+      </p>
+<p>If you are
+	using MacPorts, you should run:
+      </p>
+<pre class="programlisting">
+	<span class="command"><strong>sudo port install</strong></span> <span class="package">autoconf automake libtool pkgconfig ragel gtk-doc</span> 
+      </pre>
+<p>
+      to install the build dependencies.
+      </p>
+<p>If you are using Homebrew, you should run:
+	</p>
+<pre class="programlisting">	
+	  <span class="command"><strong>brew install</strong></span> <span class="package">autoconf automake libtool pkgconfig ragel gtk-doc</span>
+	</pre>
+<p>
+      	Finally, you can run:
+	</p>
+<pre class="programlisting">
+	  <span class="command"><strong>./autogen.sh</strong></span>
+	</pre>
+<p>
+      </p>
+<p>
+	<span class="emphasis"><em>(3)</em></span> You can now build HarfBuzz (on either
+	a MacPorts or a Homebrew system) by running:
+	</p>
+<pre class="programlisting">
+	  <span class="command"><strong>./configure</strong></span>
+	</pre>
+<p>
+	followed by:
+	</p>
+<pre class="programlisting">
+	  <span class="command"><strong>make</strong></span>
+	</pre>
+<p>
+      </p>
+<p>
+	This should leave you with a shared
+	library in the <code class="filename">src/</code> directory, and a few
+	utility programs including <span class="command"><strong>hb-view</strong></span> and
+	<span class="command"><strong>hb-shape</strong></span> under the <code class="filename">util/</code>
+	directory.
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="configuration"></a>Configuration options</h3></div></div></div>
+<p>
+	The instructions in the "Building HarfBuzz" section will build
+	the source code under its default configuration. If needed,
+	the following additional configuration options are available.
+      </p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-libstdc++</strong></span></span></p></td>
+<td>
+<p>
+	      Allow linking with libstdc++. <span class="emphasis"><em>(Default = no)</em></span>
+	    </p>
+<p>
+	      This option enables or disables linking HarfBuzz to the
+	      system's libstdc++ library.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-glib</strong></span></span></p></td>
+<td>
+<p>
+	     Use <a class="ulink" href="https://developer.gnome.org/glib/" target="_top">GLib</a>. <span class="emphasis"><em>(Default = auto)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the GLib
+	      library.  The default setting is to check for the
+	      presence of GLib and, if it is found, build with
+	      GLib support. GLib is native to GNU/Linux systems but is
+	      available on other operating system as well.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-gobject</strong></span></span></p></td>
+<td>
+<p>
+	      Use <a class="ulink" href="https://developer.gnome.org/gobject/stable/" target="_top">GObject</a>. <span class="emphasis"><em>(Default = no)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the GObject
+	      library. The default setting is to check for the
+	      presence of GObject and, if it is found, build with
+	      GObject support. GObject is native to GNU/Linux systems but is
+	      available on other operating system as well.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-cairo</strong></span></span></p></td>
+<td>
+<p>
+	      Use <a class="ulink" href="https://cairographics.org/" target="_top">Cairo</a>. <span class="emphasis"><em>(Default = auto)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the Cairo
+	      graphics-rendering library. The default setting is to
+	      check for the presence of Cairo and, if it is found,
+	      build with Cairo support.
+	    </p>
+<p>
+	      Note: Cairo is used only by the HarfBuzz
+	      command-line utilities, and not by the HarfBuzz library.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-fontconfig</strong></span></span></p></td>
+<td>
+<p>
+	      Use <a class="ulink" href="https://www.freedesktop.org/wiki/Software/fontconfig/" target="_top">Fontconfig</a>. <span class="emphasis"><em>(Default = auto)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the Fontconfig
+	      library, which provides font-matching functions and
+	      provides access to font properties. The default setting
+	      is to check for the presence of Fontconfig and, if it is
+	      found, build with Fontconfig support.
+	    </p>
+<p>
+	      Note: Fontconfig is used only by the HarfBuzz
+	      command-line utilities, and not by the HarfBuzz library.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-icu</strong></span></span></p></td>
+<td>
+<p>
+	      Use the <a class="ulink" href="http://site.icu-project.org/home" target="_top">ICU</a> library. <span class="emphasis"><em>(Default = auto)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the
+	      <span class="emphasis"><em>International Components for
+	      Unicode</em></span> (ICU) library, which provides access
+	      to Unicode Character Database (UCD) properties as well
+	      as normalization and conversion functions. The default
+	      setting is to check for the presence of ICU and, if it
+	      is found, build with ICU support.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-graphite2</strong></span></span></p></td>
+<td>
+<p>
+	      Use the <a class="ulink" href="http://graphite.sil.org/" target="_top">Graphite2</a> library. <span class="emphasis"><em>(Default = no)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the Graphite2
+	      library, which provides support for the Graphite shaping
+	      model. 
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-freetype</strong></span></span></p></td>
+<td>
+<p>
+	      Use the <a class="ulink" href="https://www.freetype.org/" target="_top">FreeType</a> library. <span class="emphasis"><em>(Default = auto)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the FreeType
+	      font-rendering library. The default setting is to check for the
+	      presence of FreeType and, if it is found, build with
+	      FreeType support.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-uniscribe</strong></span></span></p></td>
+<td>
+<p>
+	      Use the <a class="ulink" href="https://docs.microsoft.com/en-us/windows/desktop/intl/uniscribe" target="_top">Uniscribe</a>
+	      library (experimental). <span class="emphasis"><em>(Default = no)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the Uniscribe
+	      font-rendering library. Uniscribe is available on
+	      Windows systems. Uniscribe support is used only for
+	      testing purposes and does not need to be enabled for
+	      HarfBuzz to run on Windows systems.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-directwrite</strong></span></span></p></td>
+<td>
+<p>
+	      Use the <a class="ulink" href="https://docs.microsoft.com/en-us/windows/desktop/directwrite/direct-write-portal" target="_top">DirectWrite</a> library (experimental). <span class="emphasis"><em>(Default = no)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the DirectWrite
+	      font-rendering library. DirectWrite is available on
+	      Windows systems. DirectWrite support is used only for
+	      testing purposes and does not need to be enabled for
+	      HarfBuzz to run on Windows systems.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--with-coretext</strong></span></span></p></td>
+<td>
+<p>
+	      Use the <a class="ulink" href="https://developer.apple.com/documentation/coretext" target="_top">CoreText</a> library. <span class="emphasis"><em>(Default = no)</em></span>
+	    </p>
+<p>
+	      This option enables or disables usage of the CoreText
+	      library. CoreText is available on macOS and iOS systems.
+	    </p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="command"><strong>--enable-gtk-doc</strong></span></span></p></td>
+<td>
+<p>
+	      Use <a class="ulink" href="https://www.gtk.org/gtk-doc/" target="_top">GTK-Doc</a>. <span class="emphasis"><em>(Default = no)</em></span>
+	    </p>
+<p>
+	      This option enables the building of the documentation.
+	    </p>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

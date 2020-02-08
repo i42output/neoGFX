@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>What HarfBuzz doesn't do: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="what-is-harfbuzz.html" title="What is HarfBuzz?">
+<link rel="prev" href="ch01s03.html" title="What does HarfBuzz do?">
+<link rel="next" href="why-is-it-called-harfbuzz.html" title="Why is it called HarfBuzz?">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="what-is-harfbuzz.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="ch01s03.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="why-is-it-called-harfbuzz.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="what-harfbuzz-doesnt-do"></a>What HarfBuzz doesn't do</h2></div></div></div>
+<p>
+      HarfBuzz will take a Unicode string, shape it, and give you the
+      information required to lay it out correctly on a single
+      horizontal (or vertical) line using the font provided. That is the
+      extent of HarfBuzz's responsibility.
+    </p>
+<p>
+      It is important to note that if you are implementing a complete
+      text-layout engine you may have other responsibilities that
+      HarfBuzz will <span class="emphasis"><em>not</em></span> help you with. For example:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+          HarfBuzz won't help you with bidirectionality. If you want to
+          lay out text that includes a mix of Hebrew and English, you
+	  will need to ensure that each buffer provided to HarfBuzz
+	  has all of its characters in the same order and that the
+	  directionality of the buffer is set correctly. This may mean
+	  segmenting the text before it is placed into HarfBuzz buffers. In
+          other words, the user will hit the keys in the following
+          sequence:
+        </p>
+<pre class="programlisting">
+	  A B C [space] ג ב א [space] D E F
+        </pre>
+<p>
+          but will expect to see in the output:
+        </p>
+<pre class="programlisting">
+	  ABC אבג DEF
+        </pre>
+<p>
+          This reordering is called <span class="emphasis"><em>bidi processing</em></span>
+          ("bidi" is short for bidirectional), and there's an
+          algorithm as an annex to the Unicode Standard which tells you how
+          to process a string of mixed directionality.
+          Before sending your string to HarfBuzz, you may need to apply the
+          bidi algorithm to it. Libraries such as <a class="ulink" href="http://icu-project.org/" target="_top">ICU</a> and <a class="ulink" href="http://fribidi.org/" target="_top">fribidi</a> can do this for you.
+        </p>
+</li>
+<li class="listitem">
+<p>
+          HarfBuzz won't help you with text that contains different font
+          properties. For instance, if you have the string "a
+          <span class="emphasis"><em>huge</em></span> breakfast", and you expect
+          "huge" to be italic, then you will need to send three
+          strings to HarfBuzz: <code class="literal">a</code>, in your Roman font;
+          <code class="literal">huge</code> using your italic font; and
+          <code class="literal">breakfast</code> using your Roman font again.
+	</p>
+<p>
+          Similarly, if you change the font, font size, script,
+	  language, or direction within your string, then you will
+	  need to shape each run independently and output them
+	  independently. HarfBuzz expects to shape a run of characters
+	  that all share the same properties.
+        </p>
+</li>
+<li class="listitem">
+<p>
+          HarfBuzz won't help you with line breaking, hyphenation, or
+          justification. As mentioned above, HarfBuzz lays out the string
+          along a <span class="emphasis"><em>single line</em></span> of, notionally,
+          infinite length. If you want to find out where the potential
+          word, sentence and line break points are in your text, you
+          could use the ICU library's break iterator functions.
+        </p>
+<p>
+          HarfBuzz can tell you how wide a shaped piece of text is, which is
+          useful input to a justification algorithm, but it knows nothing
+          about paragraphs, lines or line lengths. Nor will it adjust the
+          space between words to fit them proportionally into a line.
+        </p>
+</li>
+</ul></div>
+<p>
+      As a layout-engine implementor, HarfBuzz will help you with the
+      interface between your text and your font, and that's something
+      that you'll need—what you then do with the glyphs that your font
+      returns is up to you. 
+    </p>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

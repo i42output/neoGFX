@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Shaping and shape plans: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="pt01.html" title="Part I. User's manual">
+<link rel="prev" href="fonts-and-faces-variable.html" title="Working with OpenType Variable Fonts">
+<link rel="next" href="shaping-opentype-features.html" title="OpenType features">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="pt01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="fonts-and-faces-variable.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="shaping-opentype-features.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="shaping-and-shape-plans"></a>Shaping and shape plans</h2></div></div></div>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="shaping-and-shape-plans.html#shaping-buffer-output">Shaping and buffer output</a></span></dt>
+<dt><span class="section"><a href="shaping-opentype-features.html">OpenType features</a></span></dt>
+<dt><span class="section"><a href="shaping-shaper-selection.html">Shaper selection</a></span></dt>
+<dt><span class="section"><a href="shaping-plans-and-caching.html">Plans and caching</a></span></dt>
+</dl></div>
+<p>
+    Once you have your face and font objects configured as desired and
+    your input buffer is filled with the characters you need to shape,
+    all you need to do is call <code class="function">hb_shape()</code>.
+  </p>
+<p>
+    HarfBuzz will return the shaped version of the text in the same
+    buffer that you provided, but it will be in output mode. At that
+    point, you can iterate through the glyphs in the buffer, drawing
+    each one at the specified position or handing them off to the
+    appropriate graphics library.
+  </p>
+<p>
+    For the most part, HarfBuzz's shaping step is straightforward from
+    the outside. But that doesn't mean there will never be cases where
+    you want to look under the hood and see what is happening on the
+    inside. HarfBuzz provides facilities for doing that, too.
+  </p>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="shaping-buffer-output"></a>Shaping and buffer output</h2></div></div></div>
+<p>
+      The <code class="function">hb_shape()</code> function call takes four arguments: the font
+      object to use, the buffer of characters to shape, an array of
+      user-specified features to apply, and the length of that feature
+      array. The feature array can be NULL, so for the sake of
+      simplicity we will start with that case.
+    </p>
+<p>
+      Internally, HarfBuzz looks  at the tables of the font file to
+      determine where glyph classes, substitutions, and positioning
+      are defined, using that information to decide which
+      <span class="emphasis"><em>shaper</em></span> to use (<code class="literal">ot</code> for
+      OpenType fonts, <code class="literal">aat</code> for Apple Advanced
+      Typography fonts, and so on). It also looks at the direction,
+      script, and language properties of the segment to figure out
+      which script-specific shaping model is needed (at least, in
+      shapers that support multiple options).      
+    </p>
+<p>
+      If a font has a GDEF table, then that is used for
+      glyph classes; if not, HarfBuzz will fall back to Unicode
+      categorization by code point. If a font has an AAT "morx" table,
+      then it is used for substitutions; if not, but there is a GSUB
+      table, then the GSUB table is used. If the font has an AAT
+      "kerx" table, then it is used for positioning; if not, but
+      there is a GPOS table, then the GPOS table is used. If neither
+      table is found, but there is a "kern" table, then HarfBuzz will
+      use the "kern" table. If there is no "kerx", no GPOS, and no
+      "kern", HarfBuzz will fall back to positioning marks itself.
+    </p>
+<p>
+      With a well-behaved OpenType font, you expect GDEF, GSUB, and
+      GPOS tables to all be applied. HarfBuzz implements the
+      script-specific shaping models in internal functions, rather
+      than in the public API.
+    </p>
+<p>
+      The algorithms
+      used for complex scripts can be quite involved; HarfBuzz tries
+      to be compatible with the OpenType Layout specification
+      and, wherever there is any ambiguity, HarfBuzz attempts to replicate the
+      output of Microsoft's Uniscribe engine. See the <a class="ulink" href="https://docs.microsoft.com/en-us/typography/script-development/standard" target="_top">Microsoft
+      Typography pages</a> for more detail.
+    </p>
+<p>
+      In general, though, all that you need to know is that
+      <code class="function">hb_shape()</code> returns the results of shaping
+      in the same buffer that you provided. The buffer's content type
+      will now be set to
+      <code class="literal">HB_BUFFER_CONTENT_TYPE_GLYPHS</code>, indicating
+      that it contains shaped output, rather than input text. You can
+      now extract the glyph information and positioning arrays:
+    </p>
+<pre class="programlisting">
+      hb_glyph_info_t *glyph_info    = hb_buffer_get_glyph_infos(buf, &amp;glyph_count);
+      hb_glyph_position_t *glyph_pos = hb_buffer_get_glyph_positions(buf, &amp;glyph_count);
+    </pre>
+<p>
+      The glyph information array holds a <span class="type">hb_glyph_info_t</span>
+      for each output glyph, which has two fields:
+      <em class="parameter"><code>codepoint</code></em> and
+      <em class="parameter"><code>cluster</code></em>. Whereas, in the input buffer,
+      the <em class="parameter"><code>codepoint</code></em> field contained the Unicode
+      code point, it now contains the glyph ID of the corresponding
+      glyph in the font. The <em class="parameter"><code>cluster</code></em> field is
+      an integer that you can use to help identify when shaping has
+      reordered, split, or combined code points; we will say more
+      about that in the next chapter.
+    </p>
+<p>
+      The glyph positions array holds a corresponding
+      <span class="type">hb_glyph_position_t</span> for each output glyph,
+      containing four fields: <em class="parameter"><code>x_advance</code></em>,
+      <em class="parameter"><code>y_advance</code></em>,
+      <em class="parameter"><code>x_offset</code></em>, and
+      <em class="parameter"><code>y_offset</code></em>. The advances tell you how far
+      you need to move the drawing point after drawing this glyph,
+      depending on whether you are setting horizontal text (in which
+      case you will have x advances) or vertical text (for which you
+      will have y advances). The x and y offsets tell you where to
+      move to start drawing the glyph; usually you will have both and
+      x and a y offset, regardless of the text direction.
+    </p>
+<p>
+      Most of the time, you will rely on a font-rendering library or
+      other graphics library to do the actual drawing of glyphs, so
+      you will need to iterate through the glyphs in the buffer and
+      pass the corresponding values off.
+    </p>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

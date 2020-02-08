@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Part I. User's manual: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="index.html" title="HarfBuzz Manual">
+<link rel="prev" href="index.html" title="HarfBuzz Manual">
+<link rel="next" href="what-is-harfbuzz.html" title="What is HarfBuzz?">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><img src="up-insensitive.png" width="16" height="16" border="0"></td>
+<td><a accesskey="p" href="index.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="what-is-harfbuzz.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="part">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="id-1.2"></a>Part I. User's manual</h1></div></div></div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl class="toc">
+<dt><span class="chapter"><a href="what-is-harfbuzz.html">What is HarfBuzz?</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="what-is-harfbuzz.html#what-is-text-shaping">What is text shaping?</a></span></dt>
+<dt><span class="section"><a href="why-do-i-need-a-shaping-engine.html">Why do I need a shaping engine?</a></span></dt>
+<dt><span class="section"><a href="ch01s03.html">What does HarfBuzz do?</a></span></dt>
+<dt><span class="section"><a href="what-harfbuzz-doesnt-do.html">What HarfBuzz doesn't do</a></span></dt>
+<dt><span class="section"><a href="why-is-it-called-harfbuzz.html">Why is it called HarfBuzz?</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="install-harfbuzz.html">Installing HarfBuzz</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="install-harfbuzz.html#download">Downloading HarfBuzz</a></span></dt>
+<dt><span class="section"><a href="building.html">Building HarfBuzz</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="building.html#building.linux">Building on Linux</a></span></dt>
+<dt><span class="section"><a href="building.html#building.windows">Building on Windows</a></span></dt>
+<dt><span class="section"><a href="building.html#building.macos">Building on macOS</a></span></dt>
+<dt><span class="section"><a href="building.html#configuration">Configuration options</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="chapter"><a href="getting-started.html">Getting started with HarfBuzz</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="getting-started.html#id-1.2.4.2">An overview of the HarfBuzz shaping API</a></span></dt>
+<dt><span class="section"><a href="ch03s02.html">Terminology</a></span></dt>
+<dt><span class="section"><a href="ch03s03.html">A simple shaping example</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="shaping-concepts.html">Shaping concepts</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="shaping-concepts.html#text-shaping-concepts">Text shaping</a></span></dt>
+<dt><span class="section"><a href="complex-scripts.html">Complex scripts</a></span></dt>
+<dt><span class="section"><a href="shaping-operations.html">Shaping operations</a></span></dt>
+<dt><span class="section"><a href="unicode-character-categories.html">Unicode character categories</a></span></dt>
+<dt><span class="section"><a href="text-runs.html">Text runs</a></span></dt>
+<dt><span class="section"><a href="opentype-shaping-models.html">OpenType shaping models</a></span></dt>
+<dt><span class="section"><a href="graphite-shaping.html">Graphite shaping</a></span></dt>
+<dt><span class="section"><a href="aat-shaping.html">AAT shaping</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="object-model.html">The HarfBuzz object model</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="object-model.html#object-model-intro">An overview of data types in HarfBuzz</a></span></dt>
+<dt><span class="section"><a href="object-model-object-types.html">Objects in HarfBuzz</a></span></dt>
+<dt><span class="section"><a href="object-model-lifecycle.html">Object lifecycle management</a></span></dt>
+<dt><span class="section"><a href="object-model-user-data.html">User data</a></span></dt>
+<dt><span class="section"><a href="object-model-blobs.html">Blobs</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="buffers-language-script-and-direction.html">Buffers, language, script and direction</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="buffers-language-script-and-direction.html#creating-and-destroying-buffers">Creating and destroying buffers</a></span></dt>
+<dt><span class="section"><a href="adding-text-to-the-buffer.html">Adding text to the buffer</a></span></dt>
+<dt><span class="section"><a href="setting-buffer-properties.html">Setting buffer properties</a></span></dt>
+<dt><span class="section"><a href="customizing-unicode-functions.html">Customizing Unicode functions</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="fonts-and-faces.html">Fonts, faces, and output</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="fonts-and-faces.html#fonts-and-faces-objects">Font and face objects</a></span></dt>
+<dt><span class="section"><a href="fonts-and-faces-custom-functions.html">Customizing font functions</a></span></dt>
+<dt><span class="section"><a href="fonts-and-faces-native-opentype.html">Font objects and HarfBuzz's native OpenType implementation</a></span></dt>
+<dt><span class="section"><a href="fonts-and-faces-variable.html">Working with OpenType Variable Fonts</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="shaping-and-shape-plans.html">Shaping and shape plans</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="shaping-and-shape-plans.html#shaping-buffer-output">Shaping and buffer output</a></span></dt>
+<dt><span class="section"><a href="shaping-opentype-features.html">OpenType features</a></span></dt>
+<dt><span class="section"><a href="shaping-shaper-selection.html">Shaper selection</a></span></dt>
+<dt><span class="section"><a href="shaping-plans-and-caching.html">Plans and caching</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="clusters.html">Clusters</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="clusters.html#clusters-and-shaping">Clusters and shaping</a></span></dt>
+<dt><span class="section"><a href="working-with-harfbuzz-clusters.html">Working with HarfBuzz clusters</a></span></dt>
+<dt><span class="section"><a href="a-clustering-example-for-levels-0-and-1.html">A clustering example for levels 0 and 1</a></span></dt>
+<dt><span class="section"><a href="reordering-in-levels-0-and-1.html">Reordering in levels 0 and 1</a></span></dt>
+<dt><span class="section"><a href="the-distinction-between-levels-0-and-1.html">The distinction between levels 0 and 1</a></span></dt>
+<dt><span class="section"><a href="level-2.html">Level 2</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="level-2.html#ligatures-with-combining-marks-in-level-2">Ligatures with combining marks in level 2</a></span></dt>
+<dt><span class="section"><a href="level-2.html#reordering-in-level-2">Reordering in level 2</a></span></dt>
+<dt><span class="section"><a href="level-2.html#other-considerations-in-level-2">Other considerations in level 2</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="chapter"><a href="utilities.html">Utilities</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="utilities.html#utilities-command-line-tools">Command-line tools</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="utilities.html#utilities-command-line-hbshape">hb-shape</a></span></dt>
+<dt><span class="section"><a href="utilities.html#utilities-command-line-hbview">hb-view</a></span></dt>
+<dt><span class="section"><a href="utilities.html#utilities-command-line-hbsubset">hb-subset</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="utilities-common-types-apis.html">Common data types and APIs</a></span></dt>
+<dt><span class="section"><a href="utilities-ucdn.html">UCDN</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

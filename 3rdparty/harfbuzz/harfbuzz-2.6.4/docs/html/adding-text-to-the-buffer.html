@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Adding text to the buffer: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="buffers-language-script-and-direction.html" title="Buffers, language, script and direction">
+<link rel="prev" href="buffers-language-script-and-direction.html" title="Buffers, language, script and direction">
+<link rel="next" href="setting-buffer-properties.html" title="Setting buffer properties">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="buffers-language-script-and-direction.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="buffers-language-script-and-direction.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="setting-buffer-properties.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="adding-text-to-the-buffer"></a>Adding text to the buffer</h2></div></div></div>
+<p>
+      Now we have a brand new HarfBuzz buffer. Let's start filling it
+      with text! From HarfBuzz's perspective, a buffer is just a stream
+      of Unicode code points, but your input string is probably in one of
+      the standard Unicode character encodings (UTF-8, UTF-16, or
+      UTF-32). HarfBuzz provides convenience functions that accept
+      each of these encodings:
+      <code class="function">hb_buffer_add_utf8()</code>,
+      <code class="function">hb_buffer_add_utf16()</code>, and
+      <code class="function">hb_buffer_add_utf32()</code>. Other than the
+      character encoding they accept, they function identically.
+    </p>
+<p>
+      You can add UTF-8 text to a buffer by passing in the text array,
+      the array's length, an offset into the array for the first
+      character to add, and the length of the segment to add:
+    </p>
+<pre class="programlisting">
+    hb_buffer_add_utf8 (hb_buffer_t *buf,
+                    const char *text,
+                    int text_length,
+                    unsigned int item_offset,
+                    int item_length)
+    </pre>
+<p>
+      So, in practice, you can say:
+    </p>
+<pre class="programlisting">
+      hb_buffer_add_utf8(buf, text, strlen(text), 0, strlen(text));
+    </pre>
+<p>
+      This will append your new characters to
+      <em class="parameter"><code>buf</code></em>, not replace its existing
+      contents. Also, note that you can use <code class="literal">-1</code> in
+      place of the first instance of <code class="function">strlen(text)</code>
+      if your text array is NULL-terminated. Similarly, you can also use
+      <code class="literal">-1</code> as the final argument want to add its full
+      contents.
+    </p>
+<p>
+      Whatever start <em class="parameter"><code>item_offset</code></em> and
+      <em class="parameter"><code>item_length</code></em> you provide, HarfBuzz will also
+      attempt to grab the five characters <span class="emphasis"><em>before</em></span>
+      the offset point and the five characters
+      <span class="emphasis"><em>after</em></span> the designated end. These are the
+      before and after "context" segments, which are used internally
+      for HarfBuzz to make shaping decisions. They will not be part of
+      the final output, but they ensure that HarfBuzz's
+      script-specific shaping operations are correct. If there are
+      fewer than five characters available for the before or after
+      contexts, HarfBuzz will just grab what is there.
+    </p>
+<p>
+      For longer text runs, such as full paragraphs, it might be
+      tempting to only add smaller sub-segments to a buffer and
+      shape them in piecemeal fashion. Generally, this is not a good
+      idea, however, because a lot of shaping decisions are
+      dependent on this context information. For example, in Arabic
+      and other connected scripts, HarfBuzz needs to know the code
+      points before and after each character in order to correctly
+      determine which glyph to return.
+    </p>
+<p>
+      The safest approach is to add all of the text available, then
+      use <em class="parameter"><code>item_offset</code></em> and
+      <em class="parameter"><code>item_length</code></em> to indicate which characters you
+      want shaped, so that HarfBuzz has access to any context.
+    </p>
+<p>
+      You can also add Unicode code points directly with
+      <code class="function">hb_buffer_add_codepoints()</code>. The arguments
+      to this function are the same as those for the UTF
+      encodings. But it is particularly important to note that
+      HarfBuzz does not do validity checking on the text that is added
+      to a buffer. Invalid code points will be replaced, but it is up
+      to you to do any deep-sanity checking necessary.
+    </p>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>What is HarfBuzz?: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="pt01.html" title="Part I. User's manual">
+<link rel="prev" href="pt01.html" title="Part I. User's manual">
+<link rel="next" href="why-do-i-need-a-shaping-engine.html" title="Why do I need a shaping engine?">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="pt01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="pt01.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="why-do-i-need-a-shaping-engine.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="what-is-harfbuzz"></a>What is HarfBuzz?</h2></div></div></div>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="what-is-harfbuzz.html#what-is-text-shaping">What is text shaping?</a></span></dt>
+<dt><span class="section"><a href="why-do-i-need-a-shaping-engine.html">Why do I need a shaping engine?</a></span></dt>
+<dt><span class="section"><a href="ch01s03.html">What does HarfBuzz do?</a></span></dt>
+<dt><span class="section"><a href="what-harfbuzz-doesnt-do.html">What HarfBuzz doesn't do</a></span></dt>
+<dt><span class="section"><a href="why-is-it-called-harfbuzz.html">Why is it called HarfBuzz?</a></span></dt>
+</dl></div>
+<p>
+    HarfBuzz is a <span class="emphasis"><em>text-shaping engine</em></span>. If you
+    give HarfBuzz a font and a string containing a sequence of Unicode
+    codepoints, HarfBuzz selects and positions the corresponding
+    glyphs from the font, applying all of the necessary layout rules
+    and font features. HarfBuzz then returns the string to you in the
+    form that is correctly arranged for the language and writing
+    system. 
+  </p>
+<p>
+    HarfBuzz can properly shape all of the world's major writing
+    systems. It runs on all major operating systems and software
+    platforms and it supports the major font formats in use
+    today.
+  </p>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="what-is-text-shaping"></a>What is text shaping?</h2></div></div></div>
+<p>
+      Text shaping is the process of translating a string of character
+      codes (such as Unicode codepoints) into a properly arranged
+      sequence of glyphs that can be rendered onto a screen or into
+      final output form for inclusion in a document.
+    </p>
+<p>
+      The shaping process is dependent on the input string, the active
+      font, the script (or writing system) that the string is in, and
+      the language that the string is in.
+    </p>
+<p>
+      Modern software systems generally only deal with strings in the
+      Unicode encoding scheme (although legacy systems and documents may
+      involve other encodings).
+    </p>
+<p>
+      There are several font formats that a program might
+      encounter, each of which has a set of standard text-shaping
+      rules.
+    </p>
+<p>The dominant format is <a class="ulink" href="http://www.microsoft.com/typography/otspec/" target="_top">OpenType</a>. The
+    OpenType specification defines a series of <a class="ulink" href="https://github.com/n8willis/opentype-shaping-documents" target="_top">shaping models</a> for
+    various scripts from around the world. These shaping models depend on
+    the font incorporating certain features as
+    <span class="emphasis"><em>lookups</em></span> in its <code class="literal">GSUB</code> 
+    and <code class="literal">GPOS</code> tables.
+    </p>
+<p>
+      Alternatively, OpenType fonts can include shaping features for
+      the <a class="ulink" href="https://graphite.sil.org/" target="_top">Graphite</a> shaping model.
+    </p>
+<p>
+      TrueType fonts can also include OpenType shaping
+      features. Alternatively, TrueType fonts can also include <a class="ulink" href="https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html" target="_top">Apple
+      Advanced Typography</a> (AAT) tables to implement shaping
+      support. AAT fonts are generally only found on macOS and iOS systems.
+    </p>
+<p>
+      Text strings will usually be tagged with a script and language
+      tag that provide the context needed to perform text shaping
+      correctly.  The necessary <a class="ulink" href="https://docs.microsoft.com/en-us/typography/opentype/spec/scripttags" target="_top">script</a> 
+      and <a class="ulink" href="https://docs.microsoft.com/en-us/typography/opentype/spec/languagetags" target="_top">language</a>
+      tags are defined by OpenType.
+    </p>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

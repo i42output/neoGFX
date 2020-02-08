@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Font objects and HarfBuzz's native OpenType implementation: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="fonts-and-faces.html" title="Fonts, faces, and output">
+<link rel="prev" href="fonts-and-faces-custom-functions.html" title="Customizing font functions">
+<link rel="next" href="fonts-and-faces-variable.html" title="Working with OpenType Variable Fonts">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="fonts-and-faces.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="fonts-and-faces-custom-functions.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="fonts-and-faces-variable.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="fonts-and-faces-native-opentype"></a>Font objects and HarfBuzz's native OpenType implementation</h2></div></div></div>
+<p>
+      By default, whenever HarfBuzz creates a font object, it will
+      configure the font to use a built-in set of font functions that
+      supports contemporary OpenType font internals. If you want to
+      work with OpenType or TrueType fonts, you should be able to use
+      these functions without difficulty.
+    </p>
+<p>
+      Many of the methods in the font-functions structure deal with
+      the fundamental properties of glyphs that are required for
+      shaping text: extents (the maximums and minimums on each axis),
+      origins (the <code class="literal">(0,0)</code> coordinate point which
+      glyphs are drawn in reference to), and advances (the amount that
+      the cursor needs to be moved after drawing each glyph, including
+      any empty space for the glyph's side bearings).
+    </p>
+<p>
+      As you can see in the list of functions, there are separate "horizontal"
+      and "vertical" variants depending on whether the text is set in
+      the horizontal or vertical direction. For some scripts, fonts
+      that are designed to support text set horizontally or vertically (for
+      example, in Japanese) may include metrics for both text
+      directions. When fonts don't include this information, HarfBuzz
+      does its best to transform what the font provides.
+    </p>
+<p>
+      In addition to the direction-specific functions, HarfBuzz
+      provides some higher-level functions for fetching information
+      like extents and advances for a glyph. If you call
+    </p>
+<pre class="programlisting">
+      hb_font_get_glyph_advance_for_direction(font, direction, extents);
+    </pre>
+<p>
+      then you can provide any <span class="type">hb_direction_t</span> as the
+      <em class="parameter"><code>direction</code></em> parameter, and HarfBuzz will
+      use the correct function variant for the text direction. There
+      are similar higher-level versions of the functions for fetching
+      extents, origin coordinates, and contour-point
+      coordinates. There are also addition and subtraction functions
+      for moving points with respect to the origin.
+    </p>
+<p>
+      There are also methods for fetching the glyph ID that
+      corresponds to a Unicode code point (possibly when followed by a
+      variation-selector code point), fetching the glyph name from the
+      font, and fetching the glyph ID that corresponds to a glyph name
+      you already have.
+    </p>
+<p>
+      HarfBuzz also provides functions for converting between glyph
+      names and string
+      variables. <code class="function">hb_font_glyph_to_string(font, glyph, s,
+      size)</code> retrieves the name for the glyph ID
+      <em class="parameter"><code>glyph</code></em> from the font object. It generates a
+      generic name of the form <code class="literal">gidDDD</code> (where DDD is
+      the glyph index) if there is no name for the glyph in the
+      font. The <code class="function">hb_font_glyph_from_string(font, s, len,
+      glyph)</code> takes an input string <em class="parameter"><code>s</code></em>
+      and looks for a glyph with that name in the font, returning its
+      glyph ID in the <em class="parameter"><code>glyph</code></em>
+      output parameter. It automatically parses
+      <code class="literal">gidDDD</code> and <code class="literal">uniUUUU</code> strings.
+    </p>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>

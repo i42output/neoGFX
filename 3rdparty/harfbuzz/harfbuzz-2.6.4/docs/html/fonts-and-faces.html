@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Fonts, faces, and output: HarfBuzz Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="HarfBuzz Manual">
+<link rel="up" href="pt01.html" title="Part I. User's manual">
+<link rel="prev" href="customizing-unicode-functions.html" title="Customizing Unicode functions">
+<link rel="next" href="fonts-and-faces-custom-functions.html" title="Customizing font functions">
+<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="pt01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="customizing-unicode-functions.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="fonts-and-faces-custom-functions.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="fonts-and-faces"></a>Fonts, faces, and output</h2></div></div></div>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="fonts-and-faces.html#fonts-and-faces-objects">Font and face objects</a></span></dt>
+<dt><span class="section"><a href="fonts-and-faces-custom-functions.html">Customizing font functions</a></span></dt>
+<dt><span class="section"><a href="fonts-and-faces-native-opentype.html">Font objects and HarfBuzz's native OpenType implementation</a></span></dt>
+<dt><span class="section"><a href="fonts-and-faces-variable.html">Working with OpenType Variable Fonts</a></span></dt>
+</dl></div>
+<p>
+      In the previous chapter, we saw how to set up a buffer and fill
+      it with text as Unicode code points. In order to shape this
+      buffer text with HarfBuzz, you will need also need a font
+      object.
+    </p>
+<p>
+      HarfBuzz provides abstractions to help you cache and reuse the
+      heavier parts of working with binary fonts, so we will look at
+      how to do that. We will also look at how to work with the
+      FreeType font-rendering library and at how you can customize
+      HarfBuzz to work with other libraries.
+    </p>
+<p>
+      Finally, we will look at how to work with OpenType variable
+      fonts, the latest update to the OpenType font format, and at
+      some other recent additions to OpenType.
+    </p>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="fonts-and-faces-objects"></a>Font and face objects</h2></div></div></div>
+<p>
+      The outcome of shaping a run of text depends on the contents of
+      a specific font file (such as the substitutions and positioning
+      moves in the 'GSUB' and 'GPOS' tables), so HarfBuzz makes
+      accessing those internals fast.
+    </p>
+<p>
+      An <span class="type">hb_face_t</span> represents a <span class="emphasis"><em>face</em></span>
+      in HarfBuzz. This data type is a wrapper around an
+      <span class="type">hb_blob_t</span> blob that holds the contents of a binary
+      font file. Since HarfBuzz supports TrueType Collections and
+      OpenType Collections (each of which can include multiple
+      typefaces), a HarfBuzz face also requires an index number
+      specifying which typeface in the file you want to use. Most of
+      the font files you will encounter in the wild include just a
+      single face, however, so most of the time you would pass in
+      <code class="literal">0</code> as the index when you create a face:
+    </p>
+<pre class="programlisting">
+      hb_blob_t* blob = hb_blob_create_from_file(file);
+      ...
+      hb_face_t* face = hb_face_create(blob, 0);
+    </pre>
+<p>
+      On its own, a face object is not quite ready to use for
+      shaping. The typeface must be set to a specific point size in
+      order for some details (such as hinting) to work. In addition,
+      if the font file in question is an OpenType Variable Font, then
+      you may need to specify one or variation-axis settings (or a
+      named instance) in order to get the output you need.
+    </p>
+<p>
+      In HarfBuzz, you do this by creating a <span class="emphasis"><em>font</em></span>
+      object from your face.
+    </p>
+<p>
+      Font objects also have the advantage of being considerably
+      lighter-weight than face objects (remember that a face contains
+      the contents of a binary font file mapped into memory). As a
+      result, you can cache and reuse a font object, but you could
+      also create a new one for each additional size you needed.
+      Creating new fonts incurs some additional overhead, of course,
+      but whether or not it is excessive is your call in the end. In
+      contrast, face objects are substantially larger, and you really
+      should cache them and reuse them whenever possible.
+    </p>
+<p>
+      You can create a font object from a face object:
+    </p>
+<pre class="programlisting">
+      hb_font_t* hb_font = hb_font_create(hb_face);
+    </pre>
+<p>
+      After creating a font, there are a few properties you should
+      set. Many fonts enable and disable hints based on the size it
+      is used at, so setting this is important for font
+      objects. <code class="function">hb_font_set_ppem(font, x_ppem,
+      y_ppem)</code> sets the pixels-per-EM value of the font. You
+      can also set the point size of the font with
+      <code class="function">hb_font_set_ptem(font, ptem)</code>. HarfBuzz uses the
+      industry standard 72 points per inch.
+    </p>
+<p>
+      HarfBuzz lets you specify the degree subpixel precision you want
+      through a scaling factor. You can set horizontal and
+      vertical scaling factors on the
+      font by calling <code class="function">hb_font_set_scale(font, x_scale,
+      y_scale)</code>. 
+    </p>
+<p>
+      There may be times when you are handed a font object and need to
+      access the face object that it comes from. For that, you can call
+    </p>
+<pre class="programlisting">
+      hb_face = hb_font_get_face(hb_font);
+    </pre>
+<p>
+      You can also create a font object from an existing font object
+      using the <code class="function">hb_font_create_sub_font()</code>
+      function. This creates a child font object that is initiated
+      with the same attributes as its parent; it can be used to
+      quickly set up a new font for the purpose of overriding a specific
+      font-functions method.
+    </p>
+<p>
+      All face objects and font objects are lifecycle-managed by
+      HarfBuzz. After creating a face, you increase its reference
+      count with <code class="function">hb_face_reference(face)</code> and
+      decrease it with
+      <code class="function">hb_face_destroy(face)</code>. Likewise, you
+      increase the reference count on a font with
+      <code class="function">hb_font_reference(font)</code> and decrease it
+      with <code class="function">hb_font_destroy(font)</code>.
+    </p>
+<p>
+      You can also attach user data to face objects and font objects.
+    </p>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.29</div>
+</body>
+</html>
