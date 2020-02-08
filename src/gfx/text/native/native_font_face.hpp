@@ -34,7 +34,6 @@
 #else
 #include <hb.h>
 #include <hb-ft.h>
-#include <hb-ucdn\ucdn.h>
 #endif
 #include "..\..\native\opengl.hpp"
 #include <neogfx/core/geometrical.hpp>
