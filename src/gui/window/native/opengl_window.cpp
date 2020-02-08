@@ -77,6 +77,10 @@ namespace neogfx
             TargetActivating.trigger();
             service<i_rendering_engine>().activate_context(*this);
         }
+        glCheck(glEnable(GL_MULTISAMPLE));
+        glCheck(glEnable(GL_BLEND));
+        glCheck(glEnable(GL_DEPTH_TEST));
+        glCheck(glDepthFunc(GL_LEQUAL));
         if (iFrameBufferTexture != std::nullopt)
         {
             GLint currentFramebuffer;
@@ -274,11 +278,6 @@ namespace neogfx
         surface_window().rendering().trigger();
 
         scoped_render_target srt{ *this };
-
-        glCheck(glEnable(GL_MULTISAMPLE));
-        glCheck(glEnable(GL_BLEND));
-        glCheck(glEnable(GL_DEPTH_TEST));
-        glCheck(glDepthFunc(GL_LEQUAL));
 
         if (iFrameBufferExtents.cx < static_cast<double>(extents().cx) || iFrameBufferExtents.cy < static_cast<double>(extents().cy))
         {

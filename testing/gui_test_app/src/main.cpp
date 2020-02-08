@@ -136,6 +136,7 @@ public:
             ng::dimension const d = iLarge ? 48.0 : 24.0;
             ng::texture newTexture{ ng::size{d, d}, 1.0, ng::texture_sampling::Multisample };
             ng::graphics_context gc{ newTexture };
+            ng::scoped_snap_to_pixel snap{ gc };
             auto const textColor = ng::service<ng::i_app>().current_style().palette().text_color();
             gc.draw_rect(ng::rect{ ng::point{}, ng::size{d, d} }, ng::pen{ textColor, 1.0 });
             ng::optional_point lastPos;
@@ -939,6 +940,7 @@ int main(int argc, char* argv[])
         for (std::size_t i = 0; i < 4; ++i)
         {
             ng::graphics_context texGc{ tex[i] };
+            ng::scoped_snap_to_pixel snap{ texGc };
             test_pattern(texGc, ng::point{}, 1.0, texColor[i], "Render\nTo\nTexture");
         }
 
