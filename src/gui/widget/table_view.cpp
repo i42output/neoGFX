@@ -25,40 +25,49 @@
 
 namespace neogfx
 {
-    table_view::table_view() :
+    table_view::table_view(bool aCreateDefaultModels) :
         item_view{},
         iLayout{ *this },
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
     {
         layout().set_margins(neogfx::margins{});
-        set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-        set_model(std::shared_ptr<i_item_model>(new item_model()));
+        if (aCreateDefaultModels)
+        {
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_presentation_model>());
+            set_model(std::make_shared<item_model>());
+        }
     }
 
-    table_view::table_view(i_widget& aParent) : 
+    table_view::table_view(i_widget& aParent, bool aCreateDefaultModels) :
         item_view{ aParent },
         iLayout{ *this },
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
     {
         layout().set_margins(neogfx::margins{});
-        set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-        set_model(std::shared_ptr<i_item_model>(new item_model()));
+        if (aCreateDefaultModels)
+        {
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_presentation_model>());
+            set_model(std::make_shared<item_model>());
+        }
     }
 
-    table_view::table_view(i_layout& aLayout) :
+    table_view::table_view(i_layout& aLayout, bool aCreateDefaultModels) :
         item_view{ aLayout },
         iLayout{ *this },
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
     {
         layout().set_margins(neogfx::margins{});
-        set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-        set_model(std::shared_ptr<i_item_model>(new item_model()));
+        if (aCreateDefaultModels)
+        {
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_presentation_model>());
+            set_model(std::make_shared<item_model>());
+        }
     }
 
     table_view::~table_view()

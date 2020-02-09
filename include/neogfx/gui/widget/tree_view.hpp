@@ -1,7 +1,7 @@
 // tree_view.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2019 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,16 +20,18 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/table_view.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/list_view.hpp>
 
 namespace neogfx
 {
-    class tree_view : public table_view
+    class tree_view : public list_view
     {
     public:
-        tree_view();
-        tree_view(i_widget& aParent);
-        tree_view(i_layout& aLayout);
+        tree_view(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
+        tree_view(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
+        tree_view(i_layout& aLayout, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
         ~tree_view();
     };
 }

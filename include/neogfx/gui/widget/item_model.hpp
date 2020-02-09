@@ -26,6 +26,7 @@
 
 #include <neolib/vecarray.hpp>
 #include <neolib/segmented_array.hpp>
+#include <neolib/tree.hpp>
 
 #include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
@@ -39,6 +40,16 @@ namespace neogfx
     public:
         struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::default_item_flat_container_traits::operation_not_supported") {} };
     public:
+        template <typename Container>
+        static void reserve(Container& aContainer, std::size_t aCapacity)
+        {
+            return aContainer.reserve(aCapacity);
+        }
+        template <typename Container>
+        static std::size_t capacity(const Container& aContainer)
+        {
+            return aContainer.capacity();
+        }
         template <typename Container, typename T>
         static typename Container::iterator append(Container& aContainer, typename Container::const_iterator aPosition, const T& aValue)
         {
@@ -94,6 +105,88 @@ namespace neogfx
         {
             throw operation_not_supported();
         }
+        template <typename Container, typename Predicate>
+        static void sort(Container& aContainer, Predicate aPredicate)
+        {
+            std::sort(aContainer.begin(), aContainer.end(), aPredicate);
+        }
+    };
+
+    class default_item_tree_container_traits
+    {
+    public:
+        struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::default_item_tree_container_traits::operation_not_supported") {} };
+    public:
+        template <typename Container>
+        static void reserve(Container& aContainer, std::size_t aCapacity)
+        {
+            throw operation_not_supported();
+        }
+        template <typename Container>
+        static std::size_t capacity(const Container& aContainer)
+        {
+            throw operation_not_supported();
+        }
+        template <typename Container, typename T>
+        static typename Container::iterator append(Container& aContainer, typename Container::const_iterator aPosition, const T& aValue)
+        {
+            return aContainer.insert(aPosition, aValue);
+        }
+        template <typename Container>
+        static i_item_model::iterator sibling_begin(Container& aContainer)
+        {
+            return neolib::make_generic_iterator(aContainer.begin());
+        }
+        template <typename Container>
+        static i_item_model::const_iterator sibling_begin(const Container& aContainer)
+        {
+            return neolib::make_generic_iterator(aContainer.begin());
+        }
+        template <typename Container>
+        static i_item_model::iterator sibling_end(Container& aContainer)
+        {
+            return neolib::make_generic_iterator(aContainer.end());
+        }
+        template <typename Container>
+        static i_item_model::const_iterator sibling_end(const Container& aContainer)
+        {
+            return neolib::make_generic_iterator(aContainer.end());
+        }
+        template <typename Container>
+        static i_item_model::iterator parent(Container& aContainer, i_item_model::iterator aChild)
+        {
+            return neolib::make_generic_iterator(aContainer.parent(aChild.get<Container::const_iterator>()));
+        }
+        template <typename Container>
+        static i_item_model::const_iterator parent(const Container& aContainer, i_item_model::const_iterator aChild)
+        {
+            return neolib::make_generic_iterator(aContainer.parent(aChild.get<Container::const_sibling_iterator>()));
+        }
+        template <typename Container>
+        static i_item_model::iterator sibling_begin(Container& aContainer, i_item_model::iterator aParent)
+        {
+            return neolib::make_generic_iterator(aContainer.sibling_begin(aParent.get<Container::sibling_iterator>()));
+        }
+        template <typename Container>
+        static i_item_model::const_iterator sibling_begin(const Container& aContainer, i_item_model::const_iterator aParent)
+        {
+            return neolib::make_generic_iterator(aContainer.sibling_begin(aParent.get<Container::const_sibling_iterator>()));
+        }
+        template <typename Container>
+        static i_item_model::iterator sibling_end(Container& aContainer, i_item_model::iterator aParent)
+        {
+            return neolib::make_generic_iterator(aContainer.sibling_end(aParent.get<Container::sibling_iterator>()));
+        }
+        template <typename Container>
+        static i_item_model::const_iterator sibling_end(const Container& aContainer, i_item_model::const_iterator aParent)
+        {
+            return neolib::make_generic_iterator(aContainer.sibling_end(aParent.get<Container::const_sibling_iterator>()));
+        }
+        template <typename Container, typename Predicate>
+        static void sort(Container& aContainer, Predicate aPredicate)
+        {
+            aContainer.sort(aPredicate);
+        }
     };
 
     template <typename T, typename CellType, uint32_t Columns>
@@ -116,6 +209,26 @@ namespace neogfx
         };
     };
 
+    template <typename T, typename CellType, uint32_t Columns>
+    class item_tree_container_traits : public default_item_tree_container_traits
+    {
+    public:
+        typedef T value_type;
+        typedef std::allocator<value_type> allocator_type;
+        typedef CellType cell_type;
+        typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename allocator_type::template rebind<cell_type>::other> row_container_type;
+        typedef std::pair<value_type, row_container_type> row_type;
+        typedef neolib::tree<row_type, typename allocator_type::template rebind<row_type>::other> container_type;
+        typedef typename container_type::iterator sibling_iterator;
+        typedef typename container_type::const_iterator const_sibling_iterator;
+    public:
+        template <typename T2, typename CellType2>
+        struct rebind
+        {
+            typedef item_tree_container_traits<T2, CellType2, Columns> other;
+        };
+    };
+
     template <typename T, typename CellType>
     class item_flat_container_traits<T, CellType, 0> : public default_item_flat_container_traits
     {
@@ -133,6 +246,26 @@ namespace neogfx
         struct rebind
         {
             typedef item_flat_container_traits<T2, CellType2, 0> other;
+        };
+    };
+
+    template <typename T, typename CellType>
+    class item_tree_container_traits<T, CellType, 0> : public default_item_tree_container_traits
+    {
+    public:
+        typedef T value_type;
+        typedef std::allocator<value_type> allocator_type;
+        typedef CellType cell_type;
+        typedef std::vector<cell_type, typename allocator_type::template rebind<cell_type>::other> row_container_type;
+        typedef std::pair<value_type, row_container_type> row_type;
+        typedef neolib::tree<row_type, typename allocator_type::template rebind<row_type>::other> container_type;
+        typedef typename container_type::iterator sibling_iterator;
+        typedef typename container_type::const_iterator const_sibling_iterator;
+    public:
+        template <typename T2, typename CellType2>
+        struct rebind
+        {
+            typedef item_tree_container_traits<T2, CellType2, 0> other;
         };
     };
 
@@ -186,7 +319,7 @@ namespace neogfx
         }
         uint32_t columns(const item_model_index& aIndex) const override
         {
-            return static_cast<uint32_t>(iItems[aIndex.row()].second.size());
+            return static_cast<uint32_t>(row(aIndex).second.size());
         }
         const std::string& column_name(item_model_index::value_type aColumnIndex) const override
         {
@@ -357,8 +490,8 @@ namespace neogfx
     public:
         const item_cell_data& cell_data(const item_model_index& aIndex) const override
         {
-            if (aIndex.column() < iItems[aIndex.row()].second.size())
-                return iItems[aIndex.row()].second[aIndex.column()];
+            if (aIndex.column() < row(aIndex).second.size())
+                return row(aIndex).second[aIndex.column()];
             static const item_cell_data sEmpty;
             return sEmpty;
         }
@@ -373,11 +506,11 @@ namespace neogfx
         }
         void reserve(uint32_t aItemCount) override
         {
-            iItems.reserve(aItemCount);
+            container_traits::reserve(iItems, aItemCount);
         }
         uint32_t capacity() const override
         {
-            return static_cast<uint32_t>(iItems.capacity());
+            return static_cast<uint32_t>(container_traits::capacity(iItems));
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue) override
         {
@@ -462,9 +595,9 @@ namespace neogfx
         }
         void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) override
         {
-            if (iItems[aIndex.row()].second[aIndex.column()] == aCellData)
+            if (row(aIndex).second[aIndex.column()] == aCellData)
                 return;
-            iItems[aIndex.row()].second[aIndex.column()] = aCellData;
+            row(aIndex).second[aIndex.column()] = aCellData;
             if (default_cell_info(aIndex.column()).dataType == item_data_type::Unknown)
                 default_cell_info(aIndex.column()).dataType = static_cast<item_data_type>(aCellData.index());
             ItemChanged.trigger(aIndex);
@@ -472,13 +605,21 @@ namespace neogfx
     public:
         value_type& item(const item_model_index& aIndex) override
         {
-            return iItems[aIndex.row()].first;
+            return row(aIndex).first;
         }
         const value_type& item(const item_model_index& aIndex) const override
         {
-            return iItems[aIndex.row()].first;
+            return row(aIndex).first;
         }
     private:
+        row_type& row(const item_model_index& aIndex)
+        {
+            return *std::next(iItems.begin(), aIndex.row());
+        }
+        const row_type& row(const item_model_index& aIndex) const
+        {
+            return *std::next(iItems.begin(), aIndex.row());
+        }
         const item_cell_info& default_cell_info(item_model_index::column_type aColumnIndex) const
         {
             if (iColumns.size() < aColumnIndex + 1)
@@ -505,4 +646,5 @@ namespace neogfx
     };
 
     typedef basic_item_model<void*> item_model;
+    typedef basic_item_model<void*, 0, item_cell_data, item_tree_container_traits<void*, item_cell_data, 0>> item_tree_model;
 }

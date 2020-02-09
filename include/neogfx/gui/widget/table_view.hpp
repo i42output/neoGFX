@@ -29,9 +29,9 @@ namespace neogfx
     class table_view : public item_view
     {
     public:
-        table_view();
-        table_view(i_widget& aParent);
-        table_view(i_layout& aLayout);
+        table_view(bool aCreateDefaultModels = true);
+        table_view(i_widget& aParent, bool aCreateDefaultModels = true);
+        table_view(i_layout& aLayout, bool aCreateDefaultModels = true);
         ~table_view();
     public:
         bool can_defer_layout() const;

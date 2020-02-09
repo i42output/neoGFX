@@ -35,9 +35,9 @@ namespace neogfx
         layout().set_margins(neogfx::margins{});
         if (aCreateDefaultModels)
         {
-            set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-            set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-            set_model(std::shared_ptr<i_item_model>(new item_model()));
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_presentation_model>());
+            set_model(std::make_shared<item_model>());
         }
     }
 
@@ -50,9 +50,9 @@ namespace neogfx
         layout().set_margins(neogfx::margins{});
         if (aCreateDefaultModels)
         {
-            set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-            set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-            set_model(std::shared_ptr<i_item_model>(new item_model()));
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_presentation_model>());
+            set_model(std::make_shared<item_model>());
         }
     }
 
@@ -65,9 +65,9 @@ namespace neogfx
         layout().set_margins(neogfx::margins{});
         if (aCreateDefaultModels)
         {
-            set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-            set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-            set_model(std::shared_ptr<i_item_model>(new item_model()));
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_presentation_model>());
+            set_model(std::make_shared<item_model>());
         }
     }
 

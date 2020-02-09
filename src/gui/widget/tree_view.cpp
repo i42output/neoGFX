@@ -1,7 +1,7 @@
 // tree_view.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2019 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -18,23 +18,45 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/tree_view.hpp>
+#include <neogfx/gui/widget/item_selection_model.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
 
 namespace neogfx
 {
-    tree_view::tree_view() :
-        table_view{}
+    tree_view::tree_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
+        list_view{ aScrollbarStyle, aFrameStyle, false }
     {
+        if (aCreateDefaultModels)
+        {
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_tree_presentation_model>());
+            set_model(std::make_shared<item_tree_model>());
+        }
     }
 
-    tree_view::tree_view(i_widget& aParent) : 
-        table_view{ aParent }
+    tree_view::tree_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
+        list_view{ aParent, aScrollbarStyle, aFrameStyle, false }
     {
+        if (aCreateDefaultModels)
+        {
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_tree_presentation_model>());
+            set_model(std::make_shared<item_tree_model>());
+        }
     }
 
-    tree_view::tree_view(i_layout& aLayout) :
-        table_view{ aLayout }
+    tree_view::tree_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
+        list_view{ aLayout, aScrollbarStyle, aFrameStyle, false }
     {
+        if (aCreateDefaultModels)
+        {
+            set_selection_model(std::make_shared<item_selection_model>());
+            set_presentation_model(std::make_shared<item_tree_presentation_model>());
+            set_model(std::make_shared<item_tree_model>());
+        }
     }
 
     tree_view::~tree_view()
