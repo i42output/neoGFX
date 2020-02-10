@@ -301,6 +301,7 @@ namespace neogfx
         typedef neolib::generic_iterator iterator;
         typedef neolib::generic_iterator const_iterator;
     public:
+        struct invalid_operation : std::logic_error { invalid_operation() : std::logic_error("neogfx::i_item_model::invalid_operation") {} };
         struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_model::bad_column_index") {} };
     public:
         virtual ~i_item_model() {}
@@ -334,16 +335,16 @@ namespace neogfx
         virtual const_iterator begin() const = 0;
         virtual iterator end() = 0;
         virtual const_iterator end() const = 0;
-        virtual iterator sibling_begin() = 0;
-        virtual const_iterator sibling_begin() const = 0;
-        virtual iterator sibling_end() = 0;
-        virtual const_iterator sibling_end() const = 0;
+        virtual iterator sbegin() = 0;
+        virtual const_iterator sbegin() const = 0;
+        virtual iterator send() = 0;
+        virtual const_iterator send() const = 0;
         virtual iterator parent(const_iterator aChild) = 0;
         virtual const_iterator parent(const_iterator aChild) const = 0;
-        virtual iterator sibling_begin(const_iterator aParent) = 0;
-        virtual const_iterator sibling_begin(const_iterator aParent) const = 0;
-        virtual iterator sibling_end(const_iterator aParent) = 0;
-        virtual const_iterator sibling_end(const_iterator aParent) const = 0;
+        virtual iterator sbegin(const_iterator aParent) = 0;
+        virtual const_iterator sbegin(const_iterator aParent) const = 0;
+        virtual iterator send(const_iterator aParent) = 0;
+        virtual const_iterator send(const_iterator aParent) const = 0;
     public:
         virtual bool empty() const = 0;
         virtual void reserve(uint32_t aItemCount) = 0;

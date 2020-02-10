@@ -777,7 +777,7 @@ namespace neogfx
                 return;
             }
             ItemsSorting.trigger();
-            container_traits::sort(iRows, [&](const typename container_type::value_type& aLhs, const typename container_type::value_type& aRhs) -> bool
+            auto sortPredicate = [&](const typename container_type::value_type& aLhs, const typename container_type::value_type& aRhs) -> bool
             {
                 for (std::size_t i = 0; i < iSortOrder.size(); ++i)
                 {
@@ -799,7 +799,11 @@ namespace neogfx
                         return iSortOrder[i].second == SortDescending;
                 }
                 return false;
-            });
+            };
+            if constexpr (container_traits::is_flat)
+                std::sort(iRows.begin(), iRows.end(), sortPredicate);
+            else
+                iRows.sort(sortPredicate);
             reset_maps();
             reset_position_meta(0);
             ItemsSorted.trigger();
