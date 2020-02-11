@@ -71,11 +71,14 @@ public:
     }
 };
 
-class my_item_presentation_model : public ng::basic_item_presentation_model<my_item_model>
+template <typename Model>
+class my_basic_item_presentation_model : public ng::basic_item_presentation_model<Model>
 {
-    typedef ng::basic_item_presentation_model<my_item_model> base_type;
+    typedef ng::basic_item_presentation_model<Model> base_type;
 public:
-    my_item_presentation_model(my_item_model& aModel) : 
+    typedef Model model_type;
+public:
+    my_basic_item_presentation_model(model_type& aModel) :
         base_type{ aModel }, 
         iCellImages{ {
             ng::image{ ":/test/resources/icon.png" }, 
@@ -93,7 +96,7 @@ public:
     }
     ng::optional_color cell_color(const ng::item_presentation_model_index& aIndex, ng::item_cell_color_type aColorType) const override
     {
-        neolib::basic_random<double> prng{ (to_item_model_index(aIndex).row() << 16) + to_item_model_index(aIndex).column() }; // use seed to make random color based on row/index
+        neolib::basic_random<double> prng{ (base_type::to_item_model_index(aIndex).row() << 16) + base_type::to_item_model_index(aIndex).column() }; // use seed to make random color based on row/index
         if (aColorType == iColorType)
             return ng::hsv_color{ prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
         else if (aColorType == ng::item_cell_color_type::Foreground && iColorType)
@@ -102,9 +105,9 @@ public:
     }
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
     {
-        if (column_image_size(aIndex.column()))
+        if (base_type::column_image_size(aIndex.column()))
         {
-            auto const idx = (std::hash<uint32_t>{}(to_item_model_index(aIndex).row()) + std::hash<uint32_t>{}(to_item_model_index(aIndex).column())) % 5;
+            auto const idx = (std::hash<uint32_t>{}(base_type::to_item_model_index(aIndex).row()) + std::hash<uint32_t>{}(base_type::to_item_model_index(aIndex).column())) % 5;
             return iCellImages[idx];
         }
         return ng::optional_texture{};
@@ -113,6 +116,9 @@ private:
     std::optional<ng::item_cell_color_type> iColorType;
     std::array<ng::optional_texture, 5> iCellImages;
 };
+
+typedef my_basic_item_presentation_model<my_item_model> my_item_presentation_model;
+typedef my_basic_item_presentation_model<ng::item_tree_model> my_item_tree_presentation_model;
 
 class easing_item_presentation_model : public ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>>
 {
@@ -775,15 +781,6 @@ int main(int argc, char* argv[])
             itemModel.set_column_name(5, heading);
         };
 
-        ui.checkTableViewsCheckable.checked([&]() { itemModel.set_column_checkable(0, true); itemModel.set_column_checkable(1, true); });
-        ui.checkTableViewsCheckable.unchecked([&]() { itemModel.set_column_checkable(0, false); itemModel.set_column_checkable(1, false); });
-        ui.checkTableViewsCheckableTriState.checked([&]() { itemModel.set_column_tri_state_checkable(0, true); itemModel.set_column_tri_state_checkable(1, true); });
-        ui.checkTableViewsCheckableTriState.unchecked([&]() { itemModel.set_column_tri_state_checkable(0, false); itemModel.set_column_tri_state_checkable(1, false); });
-        ui.checkColumn5ReadOnly.checked([&]() { itemModel.set_column_read_only(5, true); update_column5_heading(); });
-        ui.checkColumn5ReadOnly.unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
-        ui.checkColumn5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
-        ui.checkColumn5Unselectable.unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
-
         itemModel.set_column_min_value(0, 0u);
         itemModel.set_column_max_value(0, 9999u);
         itemModel.set_column_min_value(1, 0u);
@@ -818,40 +815,54 @@ int main(int argc, char* argv[])
         auto entities = treeModel.insert_item(treeModel.send(), "Entity");
         auto components = treeModel.insert_item(treeModel.send(), "Component");
         auto systems = treeModel.insert_item(treeModel.send(), "System");
-/*        auto animals = tree.insert(entities.end(), "Animals");
-        auto people = tree.insert(entities.end(), "People");
-        auto athletes = tree.insert(people.end(), "Athletes");
-        tree.push_back(animals, "Dolphin");
-        tree.push_back(animals, "Kitten");
-        tree.push_back(animals, "Hedgehog");
-        tree.push_back(athletes, "Usain Bolt");
-        tree.push_back(athletes, "Usain Bolt");
-        tree.push_back(athletes, "Kirani James");
-        tree.push_back(athletes, "David Rudisha");
-        tree.push_back(athletes, "Taoufik Makhloufi");
-        tree.push_back(athletes, "Mo Farah");
-        tree.push_back(athletes, "Mo Farah");
-        tree.push_back(athletes, "Shelly-Ann Fraser-Pryce");
-        tree.push_back(athletes, "Allyson Felix");
-        tree.push_back(athletes, "Sanya Richards-Ross");
-        tree.push_back(athletes, "Caster Semenya");
-        tree.push_back(athletes, "Maryam Yusuf Jamal");
-        tree.push_back(athletes, "Meseret Defar Tola");
-        tree.push_back(athletes, "Tirunesh Dibaba Kenene"); */
+        auto animals = treeModel.append_item(entities, "Animals");
+        auto people = treeModel.append_item(entities, "People");
+        auto athletes = treeModel.append_item(people, "Athletes (London 2012 Gold Medalists, Running)");
+        treeModel.append_item(animals, "Dolphin");
+        treeModel.append_item(animals, "Kitten");
+        treeModel.append_item(animals, "Hedgehog");
+        treeModel.append_item(athletes, "Usain Bolt");
+        treeModel.append_item(athletes, "Usain Bolt");
+        treeModel.append_item(athletes, "Kirani James");
+        treeModel.append_item(athletes, "David Rudisha");
+        treeModel.append_item(athletes, "Taoufik Makhloufi");
+        treeModel.append_item(athletes, "Mo Farah");
+        treeModel.append_item(athletes, "Mo Farah");
+        treeModel.append_item(athletes, "Shelly-Ann Fraser-Pryce");
+        treeModel.append_item(athletes, "Allyson Felix");
+        treeModel.append_item(athletes, "Sanya Richards-Ross");
+        treeModel.append_item(athletes, "Caster Semenya");
+        treeModel.append_item(athletes, "Maryam Yusuf Jamal");
+        treeModel.append_item(athletes, "Meseret Defar Tola");
+        treeModel.append_item(athletes, "Tirunesh Dibaba Kenene");
+
+        my_item_tree_presentation_model itpm1{ treeModel };
+        my_item_tree_presentation_model itpm2{ treeModel };
 
         ui.treeView1.set_model(treeModel);
+        ui.treeView1.set_presentation_model(itpm1);
         ui.treeView2.set_model(treeModel);
+        ui.treeView2.set_presentation_model(itpm2);
 
-        ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); });
-        ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); });
-        ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_type({}); ui.tableView1.update(); });
-        ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView1.update(); });
-        ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Background); ui.tableView1.update(); });
-        ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); });
-        ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); });
-        ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_type({}); ui.tableView2.update(); });
-        ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView2.update(); });
-        ui.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Background); ui.tableView2.update(); });
+        ui.checkTableViewsCheckable.checked([&]() { itemModel.set_column_checkable(0, true); itemModel.set_column_checkable(1, true); treeModel.set_column_checkable(0, true); });
+        ui.checkTableViewsCheckable.unchecked([&]() { itemModel.set_column_checkable(0, false); itemModel.set_column_checkable(1, false); treeModel.set_column_checkable(0, false); });
+        ui.checkTableViewsCheckableTriState.checked([&]() { itemModel.set_column_tri_state_checkable(0, true); itemModel.set_column_tri_state_checkable(1, true); treeModel.set_column_tri_state_checkable(0, true); });
+        ui.checkTableViewsCheckableTriState.unchecked([&]() { itemModel.set_column_tri_state_checkable(0, false); itemModel.set_column_tri_state_checkable(1, false); treeModel.set_column_tri_state_checkable(0, false); });
+        ui.checkColumn5ReadOnly.checked([&]() { itemModel.set_column_read_only(5, true); update_column5_heading(); });
+        ui.checkColumn5ReadOnly.unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
+        ui.checkColumn5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
+        ui.checkColumn5Unselectable.unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
+
+        ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); itpm1.set_column_image_size(0, ng::size{ 16_dip }); });
+        ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); itpm1.set_column_image_size(0, ng::optional_size{}); });
+        ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_type({}); ui.tableView1.update(); itpm1.set_color_type({}); ui.treeView1.update(); });
+        ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView1.update(); itpm1.set_color_type(ng::item_cell_color_type::Foreground); ui.treeView1.update(); });
+        ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Background); ui.tableView1.update(); itpm1.set_color_type(ng::item_cell_color_type::Background); ui.treeView1.update(); });
+        ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); itpm2.set_column_image_size(0, ng::size{ 16_dip }); });
+        ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); itpm2.set_column_image_size(0, ng::optional_size{}); });
+        ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_type({}); ui.tableView2.update(); itpm2.set_color_type({}); ui.treeView2.update(); });
+        ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView2.update(); itpm2.set_color_type(ng::item_cell_color_type::Foreground); ui.treeView2.update(); });
+        ui.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Background); ui.tableView2.update(); itpm2.set_color_type(ng::item_cell_color_type::Background); ui.treeView2.update(); });
 
         ng::basic_item_model<ng::easing> easingItemModelUpperTableView;
         ui.dropListEasingUpperTableView.SelectionChanged([&](const ng::optional_item_model_index& aIndex) 
