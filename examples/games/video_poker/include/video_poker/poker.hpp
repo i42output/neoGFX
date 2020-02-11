@@ -151,7 +151,7 @@ namespace video_poker
         {
             bool possibleFlush = true;
             for (uint32_t cardIndex = 1; possibleFlush && cardIndex < GameTraits::hand_size; ++cardIndex)
-                if (static_cast<card_type::suit>(aHand.card_at(cardIndex - 1)) != static_cast<card_type::suit>(aHand.card_at(cardIndex)))
+                if (static_cast<typename card_type::suit>(aHand.card_at(cardIndex - 1)) != static_cast<typename card_type::suit>(aHand.card_at(cardIndex)))
                 possibleFlush = false;
             if (possibleFlush)
             {

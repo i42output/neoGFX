@@ -71,11 +71,11 @@ namespace neogfx
         const i_surface_window& surface() const override;
         i_surface_window& surface() override;
         bool has_native_surface() const override;
-        const i_native_surface& window::native_surface() const override;
-        i_native_surface& window::native_surface() override;
-        bool window::has_native_window() const override;
-        const i_native_window& window::native_window() const override;
-        i_native_window& window::native_window() override;
+        const i_native_surface& native_surface() const override;
+        i_native_surface& native_surface() override;
+        bool has_native_window() const override;
+        const i_native_window& native_window() const override;
+        i_native_window& native_window() override;
     public:
         bool has_parent_window(bool aSameSurface = true) const override;
         const i_window& parent_window() const override;

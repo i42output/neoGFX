@@ -72,12 +72,6 @@ namespace neogfx
             }
         }
 
-        template <typename T>
-        inline bool batchable(const std::optional<T>& lhs, const std::optional<T>& rhs)
-        {
-            return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
-        }
-
         bool batchable(const text_color& lhs, const text_color& rhs)
         {
             if (lhs.index() != rhs.index())
@@ -90,6 +84,12 @@ namespace neogfx
         bool batchable(const text_effect& lhs, const text_effect& rhs)
         {
             return batchable(lhs.color(), rhs.color());
+        }
+
+        template <typename T>
+        inline bool batchable(const std::optional<T>& lhs, const std::optional<T>& rhs)
+        {
+            return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
         }
 
         bool batchable(const operation& aLeft, const operation& aRight)

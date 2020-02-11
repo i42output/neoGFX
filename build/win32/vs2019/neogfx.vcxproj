@@ -119,6 +119,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,6 +147,7 @@
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -175,6 +177,7 @@
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -204,6 +207,7 @@
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -233,6 +237,7 @@
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -621,6 +626,7 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\render_target.cpp" />
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
     <ClCompile Include="..\..\..\src\gfx\standard_shader_program.cpp" />
     <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp" />

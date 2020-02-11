@@ -814,6 +814,34 @@ int main(int argc, char* argv[])
         ipm1.ItemChecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.check(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
         ipm1.ItemUnchecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.uncheck(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
 
+        ng::item_tree_model treeModel;
+        auto entities = treeModel.insert_item(treeModel.send(), "Entity");
+        auto components = treeModel.insert_item(treeModel.send(), "Component");
+        auto systems = treeModel.insert_item(treeModel.send(), "System");
+/*        auto animals = tree.insert(entities.end(), "Animals");
+        auto people = tree.insert(entities.end(), "People");
+        auto athletes = tree.insert(people.end(), "Athletes");
+        tree.push_back(animals, "Dolphin");
+        tree.push_back(animals, "Kitten");
+        tree.push_back(animals, "Hedgehog");
+        tree.push_back(athletes, "Usain Bolt");
+        tree.push_back(athletes, "Usain Bolt");
+        tree.push_back(athletes, "Kirani James");
+        tree.push_back(athletes, "David Rudisha");
+        tree.push_back(athletes, "Taoufik Makhloufi");
+        tree.push_back(athletes, "Mo Farah");
+        tree.push_back(athletes, "Mo Farah");
+        tree.push_back(athletes, "Shelly-Ann Fraser-Pryce");
+        tree.push_back(athletes, "Allyson Felix");
+        tree.push_back(athletes, "Sanya Richards-Ross");
+        tree.push_back(athletes, "Caster Semenya");
+        tree.push_back(athletes, "Maryam Yusuf Jamal");
+        tree.push_back(athletes, "Meseret Defar Tola");
+        tree.push_back(athletes, "Tirunesh Dibaba Kenene"); */
+
+        ui.treeView1.set_model(treeModel);
+        ui.treeView2.set_model(treeModel);
+
         ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); });
         ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); });
         ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_type({}); ui.tableView1.update(); });
@@ -891,6 +919,8 @@ int main(int argc, char* argv[])
         ng::image smallHash(":/test/resources/channel.png");
 
         create_game(ui.layoutGame);
+
+
 
         neolib::basic_random<uint8_t> rngColor;
         auto random_color = [&]()

@@ -109,7 +109,7 @@ namespace neogfx
             void select(const point& aPosition);
             representations color_at_position(const point& aCursorPos) const;
             void update_cursors();
-            point x_picker::current_cursor_position() const;
+            point current_cursor_position() const;
         private:
             color_dialog& iOwner;
             sink iSink;

@@ -426,20 +426,20 @@ namespace neogfx
                         auto const& sortingBy = *presentation_model().sorting_by();
                         if (sortingBy.first == i)
                         {
-                            if (sortingBy.second == i_item_presentation_model::SortAscending)
+                            if (sortingBy.second == i_item_presentation_model::sort_direction::Ascending)
                                 sortAscending.check();
-                            else if (sortingBy.second == i_item_presentation_model::SortDescending)
+                            else if (sortingBy.second == i_item_presentation_model::sort_direction::Descending)
                                 sortDescending.check();
                         }
                     }
                     sortAscending.checked([this, &sortDescending, i]()
                     {
-                        presentation_model().sort_by(i, i_item_presentation_model::SortAscending);
+                        presentation_model().sort_by(i, i_item_presentation_model::sort_direction::Ascending);
                         sortDescending.uncheck();
                     });
                     sortDescending.checked([this, &sortAscending, i]()
                     {
-                        presentation_model().sort_by(i, i_item_presentation_model::SortDescending);
+                        presentation_model().sort_by(i, i_item_presentation_model::sort_direction::Descending);
                         sortAscending.uncheck();
                     });
                     resetSort.triggered([&]()

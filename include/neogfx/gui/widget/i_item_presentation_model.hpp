@@ -97,27 +97,27 @@ namespace neogfx
             mutable optional_glyph_text text;
             mutable optional_size extents;
         };
-        enum sort_direction_e
+        enum class sort_direction
         {
-            SortAscending,
-            SortDescending,
+            Ascending,
+            Descending
         };
-        typedef std::optional<sort_direction_e> optional_sort_direction;
-        typedef std::pair<item_presentation_model_index::column_type, sort_direction_e> sort;
+        typedef std::optional<sort_direction> optional_sort_direction;
+        typedef std::pair<item_presentation_model_index::column_type, sort_direction> sort;
         typedef std::optional<sort> optional_sort;
         typedef std::string filter_search_key;
-        enum filter_search_type_e
+        enum class filter_search_type
         {
             Prefix,
             Glob,
             Regex
         };
-        enum case_sensitivity_e
+        enum class case_sensitivity
         {
             CaseInsensitive,
             CaseSensitive
         };
-        typedef std::tuple<item_presentation_model_index::column_type, filter_search_key, filter_search_type_e, case_sensitivity_e> filter;
+        typedef std::tuple<item_presentation_model_index::column_type, filter_search_key, filter_search_type, case_sensitivity> filter;
         typedef std::optional<filter> optional_filter;
     public:
         struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
@@ -189,11 +189,11 @@ namespace neogfx
         virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) = 0;
         virtual void reset_sort() = 0;
     public:
-        virtual optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type_e aFilterSearchType = Prefix, case_sensitivity_e aCaseSensitivity = CaseInsensitive) const = 0;
+        virtual optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const = 0;
     public:
         virtual bool filtering() const = 0;
         virtual optional_filter filtering_by() const = 0;
-        virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type_e aFilterSearchType = Prefix, case_sensitivity_e aCaseSensitivity = CaseInsensitive) = 0;
+        virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) = 0;
         virtual void reset_filter() = 0;
     };
 }

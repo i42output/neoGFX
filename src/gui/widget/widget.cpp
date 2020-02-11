@@ -1025,6 +1025,9 @@ namespace neogfx
         if (!requires_update())
             return;
 
+        if (debug == this)
+            std::cerr << "widget::render(...)" << std::endl;
+
         iDefaultClipRect = std::make_pair(std::nullopt, std::nullopt);
 
         const rect updateRect = update_rect();

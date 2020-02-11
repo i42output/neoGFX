@@ -24,4 +24,28 @@
 
 namespace neogfx
 {
+    use_shader_program::use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix, const optional_mat44& aTransformationMatrix) :
+        iRenderingContext{ aContext },
+        iCurrentProgram{ aShaderProgram },
+        iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
+    {
+        iCurrentProgram.activate(aContext);
+    }
+
+    use_shader_program::~use_shader_program()
+    {
+        if (&iCurrentProgram != iPreviousProgram)
+        {
+            iCurrentProgram.deactivate();
+            if (iPreviousProgram != nullptr)
+                iPreviousProgram->activate(iRenderingContext);
+        }
+        if (iCurrentProgram.type() == shader_program_type::Standard)
+        {
+            iCurrentProgram.as<i_standard_shader_program>().gradient_shader().clear_gradient();
+            iCurrentProgram.as<i_standard_shader_program>().texture_shader().clear_texture();
+            iCurrentProgram.as<i_standard_shader_program>().glyph_shader().clear_glyph();
+            iCurrentProgram.as<i_standard_shader_program>().stipple_shader().clear_stipple();
+        }
+    }
 }

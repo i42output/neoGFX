@@ -130,6 +130,7 @@ namespace neogfx
     template <typename T, uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_flat_container_traits<T, CellType, Columns>>
     class basic_item_model : public object<i_basic_item_model<T>>
     {
+        typedef object<i_basic_item_model<T>> base_type;
     public:
         define_declared_event(ColumnInfoChanged, column_info_changed, item_model_index::column_type)
         define_declared_event(ItemAdded, item_added, const item_model_index&)
@@ -164,7 +165,7 @@ namespace neogfx
         }
         ~basic_item_model()
         {
-            set_destroying();
+            base_type::set_destroying();
         }
     public:
         uint32_t rows() const override
@@ -182,7 +183,7 @@ namespace neogfx
         const std::string& column_name(item_model_index::value_type aColumnIndex) const override
         {
             if (iColumns.size() < aColumnIndex + 1u)
-                throw bad_column_index();
+                throw base_type::bad_column_index();
             return iColumns[aColumnIndex].name;
         }
         void set_column_name(item_model_index::value_type aColumnIndex, const std::string& aName) override
@@ -310,70 +311,70 @@ namespace neogfx
             if constexpr (container_traits::is_tree)
                 return base_iterator{ iItems.sbegin() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::const_iterator sbegin() const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ iItems.sbegin() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::iterator send() override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ iItems.send() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::const_iterator send() const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ iItems.send() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::iterator parent(i_item_model::iterator aChild) override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aChild.get<iterator, iterator, sibling_iterator>().parent() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::const_iterator parent(i_item_model::const_iterator aChild) const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aChild.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().parent() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::iterator sbegin(i_item_model::iterator aParent) override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aParent.get<iterator, iterator, sibling_iterator>().begin() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::const_iterator sbegin(i_item_model::const_iterator aParent) const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().begin() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::iterator send(i_item_model::iterator aParent) override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aParent.get<iterator, iterator, sibling_iterator>().end() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::const_iterator send(i_item_model::const_iterator aParent) const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end() };
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
     public:
         const item_cell_data& cell_data(const item_model_index& aIndex) const override
@@ -397,30 +398,38 @@ namespace neogfx
             if constexpr (container_traits::is_flat)
                 iItems.reserve(aItemCount);
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         uint32_t capacity() const override
         {
             if constexpr (container_traits::is_flat)
                 return static_cast<uint32_t>(iItems.capacity());
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue) override
         {
-            base_iterator i = iItems.insert(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));
-            ItemAdded.trigger(iterator_to_index(i));
-            return i;
+            auto result = base_iterator{ iItems.insert(aPosition.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type{ aValue, row_container_type{} }) };
+            ItemAdded.trigger(iterator_to_index(result));
+            return result;
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) override
         {
-            auto i = insert_item(aPosition, aValue);
-            insert_cell_data(i, 0, aCellData);
-            return i;
+            auto result = base_iterator{ insert_item(aPosition, aValue) };
+            insert_cell_data(result, 0, aCellData);
+            return result;
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const item_cell_data& aCellData) override
         {
-            return insert_item(aPosition, value_type(), aCellData);
+            return insert_item(aPosition, value_type{}, aCellData);
+        }
+        i_item_model::iterator insert_item(const item_model_index& aIndex, const value_type& aValue) override
+        {
+            return insert_item(index_to_iterator(aIndex), aValue);
+        }
+        i_item_model::iterator insert_item(const item_model_index& aIndex, const value_type& aValue, const item_cell_data& aCellData) override
+        {
+            return insert_item(index_to_iterator(aIndex), aValue, aCellData);
         }
         i_item_model::iterator insert_item(const item_model_index& aIndex, const item_cell_data& aCellData) override
         {
@@ -430,32 +439,45 @@ namespace neogfx
         {
             if constexpr (container_traits::is_tree)
             {
-                base_iterator i = iItems.insert(aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end(), row_type{ aValue, row_container_type{} });
-                ItemAdded.trigger(iterator_to_index(i));
-                return i;
+                auto result = base_iterator{ iItems.insert(aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end(), row_type{ aValue, row_container_type{} }) };
+                ItemAdded.trigger(iterator_to_index(result));
+                return result;
             }
             else
-                throw invalid_operation();
+                throw base_type::invalid_operation();
         }
         i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) override
         {
-            auto i = append_item(aParent, aValue);
-            insert_cell_data(i, 0, aCellData);
-            return i;
+            auto result = base_iterator{ append_item(aParent, aValue) };
+            insert_cell_data(result, 0, aCellData);
+            return result;
         }
         i_item_model::iterator append_item(i_item_model::const_iterator aParent, const item_cell_data& aCellData) override
         {
             return append_item(aParent, value_type(), aCellData);
+        }
+        i_item_model::iterator append_item(const item_model_index& aIndex, const value_type& aValue) override
+        {
+            return append_item(index_to_iterator(aIndex), aValue);
+        }
+        i_item_model::iterator append_item(const item_model_index& aIndex, const value_type& aValue, const item_cell_data& aCellData) override
+        {
+            return append_item(index_to_iterator(aIndex), aValue, aCellData);
+        }
+        i_item_model::iterator append_item(const item_model_index& aIndex, const item_cell_data& aCellData) override
+        {
+            return append_item(index_to_iterator(aIndex), aCellData);
         }
         void clear() override
         {
             while (!empty())
                 erase(begin());
         }
-        void erase(i_item_model::const_iterator aPosition) override
+        i_item_model::iterator erase(i_item_model::const_iterator aPosition) override
         {
             ItemRemoved.trigger(iterator_to_index(aPosition));
-            iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>());
+            auto result = base_iterator{ iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>()) };
+            return result;
         }
         void insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData) override
         {
@@ -522,7 +544,7 @@ namespace neogfx
         const item_cell_info& default_cell_info(item_model_index::column_type aColumnIndex) const
         {
             if (iColumns.size() < aColumnIndex + 1)
-                throw bad_column_index();
+                throw base_type::bad_column_index();
             if (iColumns[aColumnIndex].defaultDataInfo != std::nullopt)
                 return *iColumns[aColumnIndex].defaultDataInfo;
             else

@@ -35,6 +35,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/numerical.hpp>
 
 namespace neogfx
 {
@@ -48,7 +49,7 @@ namespace neogfx
     template <typename T>
     inline T ease_in_sine(T t)
     {
-        return 1.0 - std::cos(t * half_pi<T>());
+        return 1.0 - std::cos(t * math::half_pi<T>());
     }
 
     template <typename T>

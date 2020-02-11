@@ -45,9 +45,13 @@ namespace neogfx
     template <typename Base = i_fragment_shader>
     class standard_fragment_shader : public fragment_shader<Base>
     {
+        typedef fragment_shader<Base> base_type;
+    public:
+        using base_type::add_in_variable;
+        using base_type::add_out_variable;
     public:
         standard_fragment_shader(const std::string& aName = "standard_fragment_shader") :
-            fragment_shader{ aName }
+            fragment_shader<Base>{ aName }
         {
             add_in_variable<vec3f>("Coord"_s, 0u);
             auto& fragColor = add_in_variable<vec4f>("Color"_s, 1u);

@@ -26,9 +26,6 @@
 
 namespace neogfx
 {
-    template<>
-    i_rendering_engine& service<i_rendering_engine>();
-
     class i_texture;
     class i_rendering_context;
 
@@ -73,26 +70,8 @@ namespace neogfx
     class scoped_render_target
     {
     public:
-        scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ aRenderTarget }, iPreviouslyActivatedTarget{ nullptr }
-        {
-            iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();
-            if (iPreviouslyActivatedTarget != &iRenderTarget)
-            {
-                if (iPreviouslyActivatedTarget != nullptr)
-                    iPreviouslyActivatedTarget->deactivate_target();
-                iRenderTarget.activate_target();
-            }
-        }
-        ~scoped_render_target()
-        {
-            if (iPreviouslyActivatedTarget != &iRenderTarget)
-            {
-                if (iRenderTarget.target_active())
-                    iRenderTarget.deactivate_target();
-                if (iPreviouslyActivatedTarget != nullptr)
-                    iPreviouslyActivatedTarget->activate_target();
-            }
-        }
+        scoped_render_target(const i_render_target& aRenderTarget);
+        ~scoped_render_target();
     private:
         const i_render_target& iRenderTarget;
         const i_render_target* iPreviouslyActivatedTarget;

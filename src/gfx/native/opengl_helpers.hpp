@@ -142,6 +142,8 @@ namespace neogfx
         template <typename, typename>
         friend class opengl_buffer_allocator;
     public:
+        using typename std::allocator<T>::pointer;
+        using typename std::allocator<T>::size_type;
         template<class Other>
         struct rebind
         {    
@@ -391,29 +393,8 @@ namespace neogfx
     class use_shader_program
     {
     public:
-        use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
-            iRenderingContext{ aContext },
-            iCurrentProgram{ aShaderProgram },
-            iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
-        {
-            iCurrentProgram.activate(aContext);
-        }
-        ~use_shader_program()
-        {
-            if (&iCurrentProgram != iPreviousProgram)
-            {
-                iCurrentProgram.deactivate();
-                if (iPreviousProgram != nullptr)
-                    iPreviousProgram->activate(iRenderingContext);
-            }
-            if (iCurrentProgram.type() == shader_program_type::Standard)
-            {
-                iCurrentProgram.as<i_standard_shader_program>().gradient_shader().clear_gradient();
-                iCurrentProgram.as<i_standard_shader_program>().texture_shader().clear_texture();
-                iCurrentProgram.as<i_standard_shader_program>().glyph_shader().clear_glyph();
-                iCurrentProgram.as<i_standard_shader_program>().stipple_shader().clear_stipple();
-            }
-        }
+        use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{});
+        ~use_shader_program();
     private:
         i_rendering_context& iRenderingContext;
         i_shader_program& iCurrentProgram;

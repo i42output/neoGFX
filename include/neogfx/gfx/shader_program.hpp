@@ -39,6 +39,13 @@ namespace neogfx
         typedef neolib::vector<shader_t> shaders_t;
         typedef neolib::pair<shader_type, shaders_t> stage_t;
         typedef neolib::vector<stage_t> stages_t;
+    public:
+        using i_shader_program::have_stage;
+        using i_shader_program::compile;
+        using i_shader_program::link;
+        using i_shader_program::use;
+        using i_shader_program::update_uniform_locations;
+        using i_shader_program::update_uniforms;
     private:
         typedef std::map<neolib::string, shader_t> shader_index;
     public:

@@ -38,13 +38,11 @@
 
 namespace neogfx
 {
-    template<>
-    i_rendering_engine& service<i_rendering_engine>();
-
     template <typename ItemModel>
     class basic_item_presentation_model : public object<i_item_presentation_model>
     {
         typedef basic_item_presentation_model<ItemModel> self_type;
+        typedef object<i_item_presentation_model> base_type;
     public:
         define_declared_event(VisualAppearanceChanged, visual_appearance_changed)
         define_declared_event(ColumnInfoChanged, column_info_changed, item_presentation_model_index::column_type)
@@ -60,6 +58,14 @@ namespace neogfx
         define_declared_event(ItemsSorted, items_sorted)
         define_declared_event(ItemsFiltering, items_filtering)
         define_declared_event(ItemsFiltered, items_filtered)
+    public:
+        using typename base_type::sort_direction;
+        using typename base_type::optional_sort_direction;
+        using typename base_type::sort;
+        using typename base_type::optional_sort;
+        using typename base_type::filter_search_key;
+        using typename base_type::filter_search_type;
+        using typename base_type::case_sensitivity;
     private:
         typedef ItemModel item_model_type;
         typedef typename item_model_type::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other container_traits;
@@ -673,7 +679,7 @@ namespace neogfx
         }
         void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) override
         {
-            iSortOrder.push_front(sort{ aColumnIndex, aSortDirection == std::nullopt ? SortAscending : *aSortDirection });
+            iSortOrder.push_front(sort{ aColumnIndex, aSortDirection == std::nullopt ? sort_direction::Ascending : *aSortDirection });
             for (auto i = std::next(iSortOrder.begin()); i != iSortOrder.end(); ++i)
             {
                 if (i->first == aColumnIndex)
@@ -681,7 +687,7 @@ namespace neogfx
                     if (aSortDirection == std::nullopt)
                     {
                         if (i == std::next(iSortOrder.begin()))
-                            iSortOrder.front().second = (i->second == SortAscending ? SortDescending : SortAscending);
+                            iSortOrder.front().second = (i->second == sort_direction::Ascending ? sort_direction::Descending : sort_direction::Ascending);
                         else
                             iSortOrder.front().second = i->second;
                     }
@@ -698,20 +704,20 @@ namespace neogfx
                 execute_sort();
         }
     public:
-        optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type_e aFilterSearchType = Prefix, case_sensitivity_e aCaseSensitivity = CaseInsensitive) const override
+        optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const override
         {
             for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
             {
                 auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
                 const auto& origValue = item_model().cell_data(modelIndex).to_string();
-                const auto& value = aCaseSensitivity == CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue);
+                const auto& value = aCaseSensitivity == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue);
                 const auto& origKey = aFilterSearchKey;
-                const auto& key = aCaseSensitivity == CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey);
+                const auto& key = aCaseSensitivity == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey);
                 if (key.empty())
                     continue;
                 switch (aFilterSearchType)
                 {
-                case Prefix:
+                case filter_search_type::Prefix:
                     if (value.size() >= key.size() && value.substr(0, key.size()) == key)
                         return from_item_model_index(modelIndex);
                 }
@@ -730,7 +736,7 @@ namespace neogfx
             else
                 return optional_filter{};
         }
-        void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type_e aFilterSearchType = Value, case_sensitivity_e aCaseSensitivity = CaseInsensitive) override
+        void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Value, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) override
         {
             iFilters.push_back(filter{ aColumnIndex, aFilterSearchKey, aFilterSearchType, aCaseSensitivity });
             for (auto i = iFilters.begin(); i != std::prev(iFilters.end()); ++i)
@@ -773,7 +779,7 @@ namespace neogfx
                 return;
             if (iSortOrder.empty())
             {
-                sort_by(0, SortAscending);
+                sort_by(0, sort_direction::Ascending);
                 return;
             }
             ItemsSorting.trigger();
@@ -789,14 +795,14 @@ namespace neogfx
                         std::string s1 = boost::to_upper_copy<std::string>(std::get<std::string>(v1));
                         std::string s2 = boost::to_upper_copy<std::string>(std::get<std::string>(v2));
                         if (s1 < s2)
-                            return iSortOrder[i].second == SortAscending;
+                            return iSortOrder[i].second == sort_direction::Ascending;
                         else if (s2 < s1)
-                            return iSortOrder[i].second == SortDescending;
+                            return iSortOrder[i].second == sort_direction::Descending;
                     }
                     if (v1 < v2)
-                        return iSortOrder[i].second == SortAscending;
+                        return iSortOrder[i].second == sort_direction::Ascending;
                     else if (v2 < v1)
-                        return iSortOrder[i].second == SortDescending;
+                        return iSortOrder[i].second == sort_direction::Descending;
                 }
                 return false;
             };
@@ -820,21 +826,21 @@ namespace neogfx
                 for (const auto& filter : iFilters)
                 {
                     const auto& origValue = item_model().cell_data(item_model_index{ row, iColumns[std::get<0>(filter)].modelColumn }).to_string();
-                    const auto& value = (std::get<3>(filter) == CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue));
+                    const auto& value = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue));
                     const auto& origKey = std::get<1>(filter);
-                    const auto& key = (std::get<3>(filter) == CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey));
+                    const auto& key = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey));
                     if (key.empty())
                         continue;
                     switch (std::get<2>(filter))
                     {
-                    case Prefix:
+                    case filter_search_type::Prefix:
                         if (value.size() < key.size() || value.substr(0, key.size()) != key)
                             matches = false;
                         break;
-                    case Glob:
+                    case filter_search_type::Glob:
                         // todo
                         break;
-                    case Regex:
+                    case filter_search_type::Regex:
                         // todo
                         break;
                     }
@@ -922,7 +928,7 @@ namespace neogfx
         }
         row_map_type& row_map()
         {
-            return const_cast<row_map_type&>(to_const(*this).row_map()):
+            return const_cast<row_map_type&>(to_const(*this).row_map());
         }
         const column_map_type& column_map() const
         {
@@ -933,7 +939,7 @@ namespace neogfx
         }
         column_map_type& column_map()
         {
-            return const_cast<column_map_type&>(to_const(*this).column_map()) :
+            return const_cast<column_map_type&>(to_const(*this).column_map());
         }
         void reset_meta() const
         {

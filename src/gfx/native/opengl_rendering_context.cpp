@@ -51,10 +51,7 @@ namespace neogfx
                 iBegin{ aBegin }, iEnd{ aEnd }, iSkipAmount{ std::max<std::size_t>(1u, std::min<std::size_t>(aEnd - aBegin, aSkipAmount)) }, iPasses{ aPasses }, iNext{ aBegin }, iSkipPass{ 1u }, iPass{ 1u }
             {
             }
-            skip_iterator() :
-                iBegin{ aBegin }, iEnd{ aEnd }, iSkipAmount{ 2u }, iPasses{ 1u }, iNext{ aBegin }, iSkipPass{ 1u }, iPass{ 1u }
-            {
-            }
+            skip_iterator() = delete;
         public:
             std::size_t skip_amount() const
             {
