@@ -646,6 +646,7 @@ namespace neogfx
                 cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
             }
+            cellExtents.cx += indent(aIndex, aGraphicsContext);
             auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aGraphicsContext);
             if (maybeCheckBoxSize != std::nullopt)
             {
@@ -664,6 +665,18 @@ namespace neogfx
             if (iTotalHeight != std::nullopt)
                 *iTotalHeight += (item_height(aIndex, aGraphicsContext) - oldItemHeight);
             return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);
+        }
+        dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        {
+            if constexpr (container_traits::is_flat)
+                return 0.0;
+            else
+            {
+                auto baseIter = typename item_model_type::const_base_iterator{ item_model().index_to_iterator(to_item_model_index(aIndex)) };
+                auto treeIter = baseIter.get<typename item_model_type::const_iterator, typename item_model_type::const_iterator,
+                    typename item_model_type::iterator, typename item_model_type::const_sibling_iterator, typename item_model_type::sibling_iterator>();
+                return treeIter.depth() * item_height(aIndex, aGraphicsContext);
+            }
         }
     public:
         bool sortable() const override

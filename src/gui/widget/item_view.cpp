@@ -1078,6 +1078,7 @@ namespace neogfx
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
                 cellRect.extents() = *cellCheckBoxSize;
+                cellRect.x += presentation_model().indent(aItemIndex, aGraphicsContext);
                 return cellRect;
             }
             break;
@@ -1092,6 +1093,7 @@ namespace neogfx
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
                 if (cellCheckBoxSize)
                     cellRect.x += (cellCheckBoxSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
+                cellRect.x += presentation_model().indent(aItemIndex, aGraphicsContext);
                 return cellRect;
             }
             break;
@@ -1109,6 +1111,7 @@ namespace neogfx
                 auto const textHeight = std::max(glyphText.extents().cy,
                     (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());
                 cellRect.indent(point{ 0.0, (cellRect.height() - textHeight) / 2.0 });
+                cellRect.x += presentation_model().indent(aItemIndex, aGraphicsContext);
                 return cellRect;
             }
         }

@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "widget.hpp"
+#include <neogfx/gui/widget/widget.hpp>
 
 namespace neogfx
 {

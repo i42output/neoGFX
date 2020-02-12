@@ -183,6 +183,7 @@ namespace neogfx
         virtual optional_texture cell_image(const item_presentation_model_index& aIndex) const = 0;
         virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
         virtual size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
+        virtual dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
     public:
         virtual bool sortable() const = 0;
         virtual optional_sort sorting_by() const = 0;

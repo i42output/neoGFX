@@ -288,7 +288,7 @@ namespace neogfx
         }
         item_model_index iterator_to_index(i_item_model::const_iterator aPosition) const override
         {
-            return item_model_index(std::distance(iItems.begin(), const_base_iterator(aPosition).get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>()), 0);
+            return item_model_index{ static_cast<uint32_t>(std::distance(iItems.begin(), const_base_iterator{ aPosition }.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>())), 0 };
         }
         i_item_model::iterator begin() override
         {
