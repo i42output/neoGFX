@@ -839,6 +839,8 @@ int main(int argc, char* argv[])
         my_item_tree_presentation_model itpm1{ treeModel };
         my_item_tree_presentation_model itpm2{ treeModel };
 
+        itpm2.sort_by(0);
+
         ui.treeView1.set_model(treeModel);
         ui.treeView1.set_presentation_model(itpm1);
         ui.treeView2.set_model(treeModel);

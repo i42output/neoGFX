@@ -439,7 +439,7 @@ namespace neogfx
         {
             if constexpr (container_traits::is_tree)
             {
-                auto result = base_iterator{ iItems.insert(aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end(), row_type{ aValue, row_container_type{} }) };
+                auto result = base_iterator{ iItems.insert(aParent.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end(), row_type{ aValue, row_container_type{} }) };
                 ItemAdded.trigger(iterator_to_index(result));
                 return result;
             }
