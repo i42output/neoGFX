@@ -32,6 +32,8 @@ namespace neogfx
         typedef uint32_t value_type;
         typedef value_type row_type;
         typedef value_type column_type;
+        typedef std::optional<row_type> optional_row_type;
+        typedef std::optional<column_type> optional_column_type;
     public:
         item_index() :
             iRow{ 0 }, iColumn{ 0 }

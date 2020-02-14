@@ -71,13 +71,16 @@ namespace neogfx
         typedef typename item_model_type::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other container_traits;
         typedef typename container_traits::row_container_type row_container_type;
         typedef typename container_traits::container_type container_type;
+        typedef typename container_traits::const_iterator const_iterator;
+        typedef typename container_traits::iterator iterator;
+        typedef typename container_traits::const_sibling_iterator const_sibling_iterator;
+        typedef typename container_traits::sibling_iterator sibling_iterator;
+        typedef typename container_traits::allocator_type allocator_type;
         typedef typename container_type::value_type row_type;
         typedef std::optional<i_scrollbar::value_type> optional_position;
     private:
-        typedef std::unordered_map<item_model_index::row_type, item_presentation_model_index::row_type, std::hash<item_model_index::row_type>, std::equal_to<item_model_index::row_type>,
-            typename container_traits::allocator_type::template rebind<std::pair<const item_model_index::row_type, item_presentation_model_index::row_type>>::other> row_map_type;
-        typedef std::unordered_map<item_model_index::column_type, item_presentation_model_index::column_type, std::hash<item_model_index::column_type>, std::equal_to<item_model_index::column_type>,
-            typename container_traits::allocator_type::template rebind<std::pair<const item_model_index::column_type, item_presentation_model_index::column_type>>::other> column_map_type;
+        typedef std::vector<item_presentation_model_index::optional_row_type, typename std::allocator_traits<allocator_type>:: template rebind_alloc<item_presentation_model_index::optional_row_type>> row_map_type;
+        typedef std::vector<item_presentation_model_index::optional_column_type, typename std::allocator_traits<allocator_type>:: template rebind_alloc<item_presentation_model_index::optional_column_type>> column_map_type;
         struct column_info
         {
             column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }, editable{ item_cell_editable::OnInputEvent } {}
@@ -90,6 +93,12 @@ namespace neogfx
             optional_size imageSize;
         };
         typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
+    public:
+        using typename base_type::no_item_model;
+        using typename base_type::bad_column_index;
+        using typename base_type::bad_item_model_index;
+        using typename base_type::no_mapped_row;
+        using typename base_type::no_mapped_column;
     public:
         basic_item_presentation_model() : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
         {
@@ -159,14 +168,14 @@ namespace neogfx
         }
         bool have_item_model_index(const item_model_index& aIndex) const override
         {
-            return row_map().find(aIndex.row()) != row_map().end() && column_map().find(aIndex.column()) != column_map().end();
+            return aIndex.row() < row_map().size() && row_map()[aIndex.row()] &&
+                ((aIndex.column() < column_map().size() && column_map()[aIndex.column()]) || item_model().columns() == 0);
         }
         item_presentation_model_index from_item_model_index(const item_model_index& aIndex) const override
         {
-            auto index = std::make_pair(row_map().find(aIndex.row()), column_map().find(aIndex.column()));
-            if (index.first == row_map().end() || index.second == column_map().end())
-                throw bad_item_model_index();
-            return item_presentation_model_index{ index.first->second, index.second->second };
+            if (have_item_model_index(aIndex))
+                return item_presentation_model_index{ *row_map()[aIndex.row()], item_model().columns() > 0 ? *column_map()[aIndex.column()] : 0 };
+            throw bad_item_model_index();
         }
     public:
         uint32_t rows() const override
@@ -883,13 +892,31 @@ namespace neogfx
             for (auto& row : iRows)
                 if (row.first >= aItemIndex.row())
                     ++row.first;
-            iRows.push_back(std::make_pair(aItemIndex.row(), row_container_type{ item_model().columns() }));
+            if constexpr (container_traits::is_flat)
+                iRows.push_back(std::make_pair(aItemIndex.row(), row_container_type{ item_model().columns() }));
+            else
+            {
+                if (!item_model().has_parent(aItemIndex))
+                {
+                    auto const pos = iRows.csend();
+                    iRows.insert(pos, std::make_pair(aItemIndex.row(), row_container_type{ item_model().columns() }));
+                }
+                else
+                {
+                    auto const parentIndex = from_item_model_index(item_model().parent(aItemIndex));
+                    auto const pos = const_sibling_iterator{ std::next(iRows.cbegin(), parentIndex.row()) };
+                    iRows.insert(pos.end(), std::make_pair(aItemIndex.row(), row_container_type{ item_model().columns() }));
+                }
+            }
+
+            if (!iInitializing || container_traits::is_tree)
+                reset_maps(aItemIndex);
+
             if (!iInitializing)
             {
-                ItemAdded.trigger(item_presentation_model_index{ static_cast<uint32_t>(iRows.size() - 1u), 0u });
-                reset_maps();
                 reset_position_meta(0);
                 execute_sort();
+                ItemAdded.trigger(from_item_model_index(aItemIndex));
             }
         }
         void item_changed(const item_model_index& aItemIndex)
@@ -908,11 +935,11 @@ namespace neogfx
                 auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
                 cellMeta.text = std::nullopt;
                 cellMeta.extents = std::nullopt;
-                ItemChanged.trigger(from_item_model_index(aItemIndex));
                 iColumns[aItemIndex.column()].width = std::nullopt;
                 reset_maps();
                 reset_position_meta(0);
                 execute_sort();
+                ItemChanged.trigger(from_item_model_index(aItemIndex));
             }
         }
         void item_removed(const item_model_index& aItemIndex)
@@ -923,31 +950,57 @@ namespace neogfx
             for (auto& row : iRows)
                 if (row.first >= aItemIndex.row())
                     --row.first;
-            reset_maps();
+            reset_maps(aItemIndex);
             reset_position_meta(0);
         }
     private:
-        void reset_maps() const
+        void reset_maps(const item_model_index& aFrom = {}) const
         {
-            iRowMap.clear();
-            iColumnMap.clear();
+            if (aFrom.row() < iRowMap.size() && (iRowMapDirtyFrom == std::nullopt || *iRowMapDirtyFrom > aFrom.row()))
+                iRowMapDirtyFrom = aFrom.row();
+            if (aFrom.column() < iColumnMap.size() && (iColumnMapDirtyFrom == std::nullopt || *iColumnMapDirtyFrom > aFrom.column()))
+                iColumnMapDirtyFrom = aFrom.column();
+        }
+        item_presentation_model_index::row_type mapped_row(item_model_index::row_type aRowIndex) const
+        {
+            if (aRowIndex < row_map().size() && row_map()[aRowIndex])
+                return *row_map()[aRowIndex];
+            throw no_mapped_row();
         }
         const row_map_type& row_map() const
         {
-            if (iRowMap.empty())
+            if (iRowMapDirtyFrom)
+                iRowMap.erase(std::next(iRowMap.begin(), *iRowMapDirtyFrom), iRowMap.end());
+            iRowMapDirtyFrom = std::nullopt;
+            if (iRowMap.size() < item_model().rows())
+            {
+                iRowMap.resize(item_model().rows());
                 for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
                     iRowMap[self_type::row(row).first] = row;
+            }
             return iRowMap;
         }
         row_map_type& row_map()
         {
             return const_cast<row_map_type&>(to_const(*this).row_map());
         }
+        item_presentation_model_index::column_type mapped_column(item_model_index::column_type aColumnIndex) const
+        {
+            if (aColumnIndex < column_map().size() && column_map()[aColumnIndex])
+                return *column_map()[aColumnIndex];
+            throw no_mapped_column();
+        }
         const column_map_type& column_map() const
         {
-            if (iColumnMap.empty())
+            if (iColumnMapDirtyFrom)
+                iColumnMap.erase(std::next(iColumnMap.begin(), *iColumnMapDirtyFrom), iColumnMap.end());
+            iColumnMapDirtyFrom = std::nullopt;
+            if (iColumnMap.size() < item_model().columns())
+            {
+                iColumnMap.resize(item_model().columns());
                 for (item_presentation_model_index::column_type col = 0; col < iColumns.size(); ++col)
                     iColumnMap[iColumns[col].modelColumn] = col;
+            }
             return iColumnMap;
         }
         column_map_type& column_map()
@@ -962,7 +1015,7 @@ namespace neogfx
         }
         void reset_cell_meta(const std::optional<item_presentation_model_index::column_type>& aColumn = {}) const
         {
-            for (item_presentation_model_index::column_type row = 0; row < iRows.size(); ++row)
+            for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
             {
                 for (item_presentation_model_index::column_type col = 0; col < iColumns.size(); ++col)
                 {
@@ -1025,6 +1078,8 @@ namespace neogfx
         optional_margins iCellMargins;
         container_type iRows;
         mutable row_map_type iRowMap;
+        mutable item_model_index::optional_row_type iRowMapDirtyFrom;
+        mutable item_model_index::optional_column_type iColumnMapDirtyFrom;
         column_info_container_type iColumns;
         mutable column_map_type iColumnMap;
         mutable optional_font iDefaultFont;

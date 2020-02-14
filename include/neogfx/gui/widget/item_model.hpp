@@ -48,8 +48,10 @@ namespace neogfx
         typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename allocator_type::template rebind<cell_type>::other> row_container_type;
         typedef std::pair<value_type, row_container_type> row_type;
         typedef std::vector<row_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
-        typedef typename container_type::iterator sibling_iterator;
-        typedef typename container_type::const_iterator const_sibling_iterator;
+        typedef typename container_type::iterator iterator;
+        typedef typename container_type::const_iterator const_iterator;
+        typedef typename iterator sibling_iterator;
+        typedef typename const_iterator const_sibling_iterator;
     public:
         template <typename T2, typename CellType2>
         struct rebind
@@ -71,6 +73,8 @@ namespace neogfx
         typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_container_type;
         typedef std::pair<value_type, row_container_type> row_type;
         typedef neolib::tree<row_type, 64, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
+        typedef typename container_type::iterator iterator;
+        typedef typename container_type::const_iterator const_iterator;
         typedef typename container_type::sibling_iterator sibling_iterator;
         typedef typename container_type::const_sibling_iterator const_sibling_iterator;
     public:
@@ -94,8 +98,10 @@ namespace neogfx
         typedef std::vector<cell_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_container_type;
         typedef std::pair<value_type, row_container_type> row_type;
         typedef std::vector<row_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
-        typedef typename container_type::iterator sibling_iterator;
-        typedef typename container_type::const_iterator const_sibling_iterator;
+        typedef typename container_type::iterator iterator;
+        typedef typename container_type::const_iterator const_iterator;
+        typedef typename iterator sibling_iterator;
+        typedef typename const_iterator const_sibling_iterator;
     public:
         template <typename T2, typename CellType2>
         struct rebind
@@ -117,6 +123,8 @@ namespace neogfx
         typedef std::vector<cell_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_container_type;
         typedef std::pair<value_type, row_container_type> row_type;
         typedef neolib::tree<row_type, 64, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
+        typedef typename container_type::iterator iterator;
+        typedef typename container_type::const_iterator const_iterator;
         typedef typename container_type::sibling_iterator sibling_iterator;
         typedef typename container_type::const_sibling_iterator const_sibling_iterator;
     public:
@@ -334,6 +342,20 @@ namespace neogfx
             else
                 throw base_type::invalid_operation();
         }
+        bool has_parent(i_item_model::const_iterator aChild) const override
+        {
+            if constexpr (container_traits::is_tree)
+                return !aChild.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().parent_is_root();
+            else
+                throw base_type::invalid_operation();
+        }
+        bool has_parent(const item_model_index& aChildIndex) const override
+        {
+            if constexpr (container_traits::is_tree)
+                return has_parent(index_to_iterator(aChildIndex));
+            else
+                throw base_type::invalid_operation();
+        }
         i_item_model::iterator parent(i_item_model::iterator aChild) override
         {
             if constexpr (container_traits::is_tree)
@@ -345,6 +367,13 @@ namespace neogfx
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aChild.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().parent() };
+            else
+                throw base_type::invalid_operation();
+        }
+        item_model_index parent(const item_model_index& aChildIndex) const override
+        {
+            if constexpr (container_traits::is_tree)
+                return iterator_to_index(parent(index_to_iterator(aChildIndex)));
             else
                 throw base_type::invalid_operation();
         }

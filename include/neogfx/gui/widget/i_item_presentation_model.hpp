@@ -123,6 +123,8 @@ namespace neogfx
         struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
         struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_presentation_model::bad_column_index") {} };
         struct bad_item_model_index : std::logic_error { bad_item_model_index() : std::logic_error("neogfx::i_item_presentation_model::bad_item_model_index") {} };
+        struct no_mapped_row : std::logic_error { no_mapped_row() : std::logic_error("neogfx::i_item_presentation_model::no_mapped_row") {} };
+        struct no_mapped_column : std::logic_error { no_mapped_column() : std::logic_error("neogfx::i_item_presentation_model::no_mapped_column") {} };
     public:
         virtual ~i_item_presentation_model() {}
     public:
