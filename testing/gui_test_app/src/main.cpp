@@ -816,11 +816,13 @@ int main(int argc, char* argv[])
         auto components = treeModel.insert_item(treeModel.send(), "Component");
         auto systems = treeModel.insert_item(treeModel.send(), "System");
         auto animals = treeModel.append_item(entities, "Animals");
-        auto people = treeModel.append_item(entities, "People");
-        auto athletes = treeModel.append_item(people, "Athletes (London 2012 Gold Medalists, Running)");
-        treeModel.append_item(animals, "Dolphin");
         treeModel.append_item(animals, "Kitten");
         treeModel.append_item(animals, "Hedgehog");
+        auto dolphins = treeModel.append_item(animals, "Dolphins");
+        treeModel.append_item(dolphins, "T. truncatus");
+        treeModel.append_item(dolphins, "O. orca");
+        auto people = treeModel.append_item(entities, "People");
+        auto athletes = treeModel.append_item(people, "Athletes (London 2012 Gold Medalists, Running)");
         treeModel.append_item(athletes, "Usain Bolt");
         treeModel.append_item(athletes, "Usain Bolt");
         treeModel.append_item(athletes, "Kirani James");

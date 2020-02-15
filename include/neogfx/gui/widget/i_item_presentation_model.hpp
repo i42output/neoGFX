@@ -92,10 +92,10 @@ namespace neogfx
     public:
         struct cell_meta_type
         {
-            mutable item_cell_selection_flags selection;
-            mutable button_checked_state checked = false;
-            mutable optional_glyph_text text;
-            mutable optional_size extents;
+            item_cell_selection_flags selection;
+            button_checked_state checked = false;
+            optional_glyph_text text;
+            optional_size extents;
         };
         enum class sort_direction
         {
@@ -121,10 +121,10 @@ namespace neogfx
         typedef std::optional<filter> optional_filter;
     public:
         struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
-        struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_presentation_model::bad_column_index") {} };
         struct bad_item_model_index : std::logic_error { bad_item_model_index() : std::logic_error("neogfx::i_item_presentation_model::bad_item_model_index") {} };
         struct no_mapped_row : std::logic_error { no_mapped_row() : std::logic_error("neogfx::i_item_presentation_model::no_mapped_row") {} };
         struct no_mapped_column : std::logic_error { no_mapped_column() : std::logic_error("neogfx::i_item_presentation_model::no_mapped_column") {} };
+        struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_presentation_model::bad_column_index") {} };
     public:
         virtual ~i_item_presentation_model() {}
     public:
@@ -134,7 +134,7 @@ namespace neogfx
         virtual void set_item_model(i_item_model& aItemModel, bool aSortable = false) = 0;
         virtual item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const = 0;
         virtual bool have_item_model_index(const item_model_index& aIndex) const = 0;
-        virtual item_presentation_model_index from_item_model_index(const item_model_index& aIndex) const = 0;
+        virtual item_presentation_model_index from_item_model_index(const item_model_index& aIndex, bool aIgnoreColumn = false) const = 0;
     public:
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
@@ -171,7 +171,7 @@ namespace neogfx
         virtual double item_position(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const = 0;
         virtual std::pair<item_presentation_model_index::value_type, coordinate> item_at(double aPosition, const i_units_context& aUnitsContext) const = 0;
     public:
-        virtual const cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const = 0;
+        virtual cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const = 0;
     public:
         virtual item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const = 0;
         virtual std::string cell_to_string(const item_presentation_model_index& aIndex) const = 0;

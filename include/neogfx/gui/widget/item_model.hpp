@@ -35,7 +35,70 @@
 
 namespace neogfx
 {
+    template <typename T, typename CellType, uint32_t Columns, bool CellsCached>
+    class item_row_traits;
+
     template <typename T, typename CellType, uint32_t Columns>
+    class item_row_traits<T, CellType, Columns, false>
+    {
+    public:
+        typedef T value_type;
+        typedef std::allocator<value_type> allocator_type;
+        typedef CellType cell_type;
+        typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
+        struct row
+        {
+            value_type value;
+            row_cell_array cells;
+        };
+    };
+
+    template <typename T, typename CellType, uint32_t Columns>
+    class item_row_traits<T, CellType, Columns, true>
+    {
+    public:
+        typedef T value_type;
+        typedef std::allocator<value_type> allocator_type;
+        typedef CellType cell_type;
+        typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
+        struct row
+        {
+            value_type value;
+            mutable row_cell_array cells;
+        };
+    };
+
+    template <typename T, typename CellType>
+    class item_row_traits<T, CellType, 0, false>
+    {
+    public:
+        typedef T value_type;
+        typedef std::allocator<value_type> allocator_type;
+        typedef CellType cell_type;
+        typedef std::vector<cell_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
+        struct row
+        {
+            value_type value;
+            row_cell_array cells;
+        };
+    };
+
+    template <typename T, typename CellType>
+    class item_row_traits<T, CellType, 0, true>
+    {
+    public:
+        typedef T value_type;
+        typedef std::allocator<value_type> allocator_type;
+        typedef CellType cell_type;
+        typedef std::vector<cell_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
+        struct row
+        {
+            value_type value;
+            mutable row_cell_array cells;
+        };
+    };
+
+    template <typename T, typename CellType, uint32_t Columns, bool CellsCached = false>
     class item_flat_container_traits
     {
     public:
@@ -45,22 +108,22 @@ namespace neogfx
         typedef T value_type;
         typedef std::allocator<value_type> allocator_type;
         typedef CellType cell_type;
-        typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename allocator_type::template rebind<cell_type>::other> row_container_type;
-        typedef std::pair<value_type, row_container_type> row_type;
-        typedef std::vector<row_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
+        typedef typename item_row_traits<T, CellType, Columns, CellsCached>::row_cell_array row_cell_array;
+        typedef typename item_row_traits<T, CellType, Columns, CellsCached>::row row;
+        typedef std::vector<row, typename std::allocator_traits<allocator_type>::template rebind_alloc<row>> container_type;
         typedef typename container_type::iterator iterator;
         typedef typename container_type::const_iterator const_iterator;
         typedef typename iterator sibling_iterator;
         typedef typename const_iterator const_sibling_iterator;
     public:
-        template <typename T2, typename CellType2>
+        template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
         {
-            typedef item_flat_container_traits<T2, CellType2, Columns> other;
+            typedef item_flat_container_traits<T2, CellType2, Columns, CellsCached2> other;
         };
     };
 
-    template <typename T, typename CellType, uint32_t Columns>
+    template <typename T, typename CellType, uint32_t Columns, bool CellsCached = false>
     class item_tree_container_traits
     {
     public:
@@ -70,23 +133,23 @@ namespace neogfx
         typedef T value_type;
         typedef std::allocator<value_type> allocator_type;
         typedef CellType cell_type;
-        typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_container_type;
-        typedef std::pair<value_type, row_container_type> row_type;
-        typedef neolib::tree<row_type, 64, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
+        typedef typename item_row_traits<T, CellType, Columns, CellsCached>::row_cell_array row_cell_array;
+        typedef typename item_row_traits<T, CellType, Columns, CellsCached>::row row;
+        typedef neolib::tree<row, 64, typename std::allocator_traits<allocator_type>::template rebind_alloc<row>> container_type;
         typedef typename container_type::iterator iterator;
         typedef typename container_type::const_iterator const_iterator;
         typedef typename container_type::sibling_iterator sibling_iterator;
         typedef typename container_type::const_sibling_iterator const_sibling_iterator;
     public:
-        template <typename T2, typename CellType2>
+        template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
         {
-            typedef item_tree_container_traits<T2, CellType2, Columns> other;
+            typedef item_tree_container_traits<T2, CellType2, Columns, CellsCached2> other;
         };
     };
 
-    template <typename T, typename CellType>
-    class item_flat_container_traits<T, CellType, 0>
+    template <typename T, typename CellType, bool CellsCached>
+    class item_flat_container_traits<T, CellType, 0, CellsCached>
     {
     public:
         static constexpr bool is_flat = true;
@@ -95,23 +158,23 @@ namespace neogfx
         typedef T value_type;
         typedef std::allocator<value_type> allocator_type;
         typedef CellType cell_type;
-        typedef std::vector<cell_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_container_type;
-        typedef std::pair<value_type, row_container_type> row_type;
-        typedef std::vector<row_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
+        typedef typename item_row_traits<T, CellType, 0, CellsCached>::row_cell_array row_cell_array;
+        typedef typename item_row_traits<T, CellType, 0, CellsCached>::row row;
+        typedef std::vector<row, typename std::allocator_traits<allocator_type>::template rebind_alloc<row>> container_type;
         typedef typename container_type::iterator iterator;
         typedef typename container_type::const_iterator const_iterator;
         typedef typename iterator sibling_iterator;
         typedef typename const_iterator const_sibling_iterator;
     public:
-        template <typename T2, typename CellType2>
+        template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
         {
-            typedef item_flat_container_traits<T2, CellType2, 0> other;
+            typedef item_flat_container_traits<T2, CellType2, 0, CellsCached2> other;
         };
     };
 
-    template <typename T, typename CellType>
-    class item_tree_container_traits<T, CellType, 0>
+    template <typename T, typename CellType, bool CellsCached>
+    class item_tree_container_traits<T, CellType, 0, CellsCached>
     {
     public:
         static constexpr bool is_flat = false;
@@ -120,18 +183,18 @@ namespace neogfx
         typedef T value_type;
         typedef std::allocator<value_type> allocator_type;
         typedef CellType cell_type;
-        typedef std::vector<cell_type, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_container_type;
-        typedef std::pair<value_type, row_container_type> row_type;
-        typedef neolib::tree<row_type, 64, typename std::allocator_traits<allocator_type>::template rebind_alloc<row_type>> container_type;
+        typedef typename item_row_traits<T, CellType, 0, CellsCached>::row_cell_array row_cell_array;
+        typedef typename item_row_traits<T, CellType, 0, CellsCached>::row row;
+        typedef neolib::tree<row, 64, typename std::allocator_traits<allocator_type>::template rebind_alloc<row>> container_type;
         typedef typename container_type::iterator iterator;
         typedef typename container_type::const_iterator const_iterator;
         typedef typename container_type::sibling_iterator sibling_iterator;
         typedef typename container_type::const_sibling_iterator const_sibling_iterator;
     public:
-        template <typename T2, typename CellType2>
+        template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
         {
-            typedef item_tree_container_traits<T2, CellType2, 0> other;
+            typedef item_tree_container_traits<T2, CellType2, 0, CellsCached2> other;
         };
     };
 
@@ -148,7 +211,7 @@ namespace neogfx
         typedef ContainerTraits container_traits;
         typedef typename container_traits::value_type value_type;
         typedef typename container_traits::allocator_type allocator_type;
-        typedef typename container_traits::row_container_type row_container_type;
+        typedef typename container_traits::row_cell_array row_cell_array;
         typedef typename container_traits::container_type container_type;
         typedef typename container_type::value_type row_type;
         typedef typename container_traits::cell_type cell_type;
@@ -158,15 +221,15 @@ namespace neogfx
         typedef neolib::specialized_generic_iterator<const_iterator> const_base_iterator;
         typedef typename container_traits::sibling_iterator sibling_iterator;
         typedef typename container_traits::const_sibling_iterator const_sibling_iterator;
-        typedef typename row_type::second_type::iterator column_iterator;
-        typedef typename row_type::second_type::const_iterator const_column_iterator;
+        typedef typename row_cell_array::iterator column_iterator;
+        typedef typename row_cell_array::const_iterator const_column_iterator;
     private:
         struct column_info
         {
             std::string name;
             mutable optional_item_cell_info defaultDataInfo;
         };
-        typedef typename container_traits::template rebind<item_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
+        typedef typename container_traits::template rebind<item_model_index::row_type, column_info>::other::row_cell_array column_info_array;
     public:
         basic_item_model()
         {
@@ -186,7 +249,7 @@ namespace neogfx
         }
         uint32_t columns(const item_model_index& aIndex) const override
         {
-            return static_cast<uint32_t>(row(aIndex).second.size());
+            return static_cast<uint32_t>(row(aIndex).cells.size());
         }
         const std::string& column_name(item_model_index::value_type aColumnIndex) const override
         {
@@ -408,8 +471,8 @@ namespace neogfx
     public:
         const item_cell_data& cell_data(const item_model_index& aIndex) const override
         {
-            if (aIndex.column() < row(aIndex).second.size())
-                return row(aIndex).second[aIndex.column()];
+            if (aIndex.column() < row(aIndex).cells.size())
+                return row(aIndex).cells[aIndex.column()];
             static const item_cell_data sEmpty;
             return sEmpty;
         }
@@ -438,7 +501,7 @@ namespace neogfx
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue) override
         {
-            auto result = base_iterator{ iItems.insert(aPosition.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type{ aValue, row_container_type{} }) };
+            auto result = base_iterator{ iItems.insert(aPosition.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type{ aValue, row_cell_array{} }) };
             ItemAdded.trigger(iterator_to_index(result));
             return result;
         }
@@ -468,7 +531,7 @@ namespace neogfx
         {
             if constexpr (container_traits::is_tree)
             {
-                auto result = base_iterator{ iItems.insert(aParent.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end(), row_type{ aValue, row_container_type{} }) };
+                auto result = base_iterator{ iItems.insert(aParent.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end(), row_type{ aValue, row_cell_array{} }) };
                 ItemAdded.trigger(iterator_to_index(result));
                 return result;
             }
@@ -512,9 +575,9 @@ namespace neogfx
         {
             bool changed = false;
             auto ri = aItem.get<iterator, iterator, sibling_iterator>();
-            if (ri->second.size() < aColumnIndex + 1)
+            if (ri->cells.size() < aColumnIndex + 1)
             {
-                ri->second.resize(aColumnIndex + 1);
+                ri->cells.resize(aColumnIndex + 1);
                 changed = true;
             }
             if (iColumns.size() < aColumnIndex + 1)
@@ -527,9 +590,9 @@ namespace neogfx
                 default_cell_info(aColumnIndex).dataType = static_cast<item_data_type>(aCellData.index());
                 changed = true;
             }
-            if (ri->second[aColumnIndex] != aCellData)
+            if (ri->cells[aColumnIndex] != aCellData)
             {
-                ri->second[aColumnIndex] = aCellData;
+                ri->cells[aColumnIndex] = aCellData;
                 changed = true;
             }
             if (changed)
@@ -545,9 +608,9 @@ namespace neogfx
         }
         void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) override
         {
-            if (row(aIndex).second[aIndex.column()] == aCellData)
+            if (row(aIndex).cells[aIndex.column()] == aCellData)
                 return;
-            row(aIndex).second[aIndex.column()] = aCellData;
+            row(aIndex).cells[aIndex.column()] = aCellData;
             if (default_cell_info(aIndex.column()).dataType == item_data_type::Unknown)
                 default_cell_info(aIndex.column()).dataType = static_cast<item_data_type>(aCellData.index());
             ItemChanged.trigger(aIndex);
@@ -555,11 +618,11 @@ namespace neogfx
     public:
         value_type& item(const item_model_index& aIndex) override
         {
-            return row(aIndex).first;
+            return row(aIndex).value;
         }
         const value_type& item(const item_model_index& aIndex) const override
         {
-            return row(aIndex).first;
+            return row(aIndex).value;
         }
     private:
         row_type& row(const item_model_index& aIndex)
@@ -592,7 +655,7 @@ namespace neogfx
         }
     private:
         container_type iItems;
-        column_info_container_type iColumns;
+        column_info_array iColumns;
     };
 
     typedef basic_item_model<void*> item_model;
