@@ -78,8 +78,8 @@ class my_basic_item_presentation_model : public ng::basic_item_presentation_mode
 public:
     typedef Model model_type;
 public:
-    my_basic_item_presentation_model(model_type& aModel) :
-        base_type{ aModel }, 
+    my_basic_item_presentation_model(model_type& aModel, bool aSortable = false) :
+        base_type{ aModel, aSortable },
         iCellImages{ {
             ng::image{ ":/test/resources/icon.png" }, 
             ng::image{ ":/closed/resources/caw_toolbar.naa#contacts.png" },
@@ -839,9 +839,7 @@ int main(int argc, char* argv[])
         treeModel.append_item(athletes, "Tirunesh Dibaba Kenene");
 
         my_item_tree_presentation_model itpm1{ treeModel };
-        my_item_tree_presentation_model itpm2{ treeModel };
-
-        itpm2.sort_by(0);
+        my_item_tree_presentation_model itpm2{ treeModel, true };
 
         ui.treeView1.set_model(treeModel);
         ui.treeView1.set_presentation_model(itpm1);

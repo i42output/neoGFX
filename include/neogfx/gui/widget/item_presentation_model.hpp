@@ -103,7 +103,7 @@ namespace neogfx
         {
             init();
         }
-        basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = false) : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
+        basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = false) : iItemModel{ nullptr }, iSortable{ aSortable }, iInitializing{ false }, iFiltering{ false }
         {
             init();
             set_item_model(aItemModel, aSortable);

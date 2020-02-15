@@ -144,7 +144,7 @@ namespace neogfx
             iPresentationModelSink += presentation_model().items_filtered([this]() { items_filtered(); });
         }
         if (has_presentation_model() && has_model())
-            presentation_model().set_item_model(model(), false);
+            presentation_model().set_item_model(model(), presentation_model().sortable());
         if (has_presentation_model() && has_selection_model())
             selection_model().set_presentation_model(*aPresentationModel);
         presentation_model_changed();
