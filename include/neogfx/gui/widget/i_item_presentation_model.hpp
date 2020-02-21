@@ -81,6 +81,8 @@ namespace neogfx
         declare_event(item_added, const item_presentation_model_index&)
         declare_event(item_changed, const item_presentation_model_index&)
         declare_event(item_removed, const item_presentation_model_index&)
+        declare_event(item_expanded, const item_presentation_model_index&)
+        declare_event(item_collapsed, const item_presentation_model_index&)
         declare_event(item_toggled, const item_presentation_model_index&)
         declare_event(item_checked, const item_presentation_model_index&)
         declare_event(item_unchecked, const item_presentation_model_index&)
@@ -94,6 +96,7 @@ namespace neogfx
         {
             item_cell_selection_flags selection;
             button_checked_state checked = false;
+            bool expanded = false;
             optional_glyph_text text;
             optional_size extents;
         };
@@ -148,6 +151,8 @@ namespace neogfx
         virtual optional_size column_image_size(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, const optional_size& aImageSize) = 0;
     public:
+        virtual void toggle_expanded(const item_presentation_model_index& aIndex) = 0;
+    public:
         virtual const button_checked_state& checked_state(const item_presentation_model_index& aIndex) = 0;
         virtual bool is_checked(const item_presentation_model_index& aIndex) const = 0;
         virtual bool is_unchecked(const item_presentation_model_index& aIndex) const = 0;
@@ -182,6 +187,7 @@ namespace neogfx
         virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_size cell_image_size(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
+        virtual optional_size cell_tree_expander_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
         virtual optional_texture cell_image(const item_presentation_model_index& aIndex) const = 0;
         virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
         virtual size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;

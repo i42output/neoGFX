@@ -36,7 +36,8 @@ namespace neogfx
         Foreground,
         Text,
         Image,
-        CheckBox
+        CheckBox,
+        TreeExpander
     };
 
     class item_view : public scrollable_widget, protected i_header_view_owner

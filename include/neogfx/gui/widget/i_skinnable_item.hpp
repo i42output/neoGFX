@@ -47,6 +47,7 @@ namespace neogfx
         SpinnerUpArrow,
         SpinnerDownArrow,
         TabClose,
+        TreeExpander,
         Custom1,
         Custom2,
         Custom3,

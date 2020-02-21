@@ -26,13 +26,14 @@ namespace neogfx
 {
     const font& glyph_font_cache::glyph_font(const glyph& aGlyph) const
     {
+        cache_glyph_font(aGlyph.font_id());
         auto existing = cache().find(aGlyph.font_id());
         if (existing != cache().end())
             return existing->second.second;
         throw cached_font_not_found();
     }
 
-    void glyph_font_cache::cache_glyph_font(font_id aFontId)
+    void glyph_font_cache::cache_glyph_font(font_id aFontId) const
     {
         if (cache().find(aFontId) == cache().end())
         {
@@ -41,7 +42,7 @@ namespace neogfx
         }
     }
 
-    void glyph_font_cache::cache_glyph_font(const font& aFont)
+    void glyph_font_cache::cache_glyph_font(const font& aFont) const
     {
         if (cache().find(aFont.id()) == cache().end())
         {
@@ -55,12 +56,7 @@ namespace neogfx
         iCache.clear();
     }
 
-    const glyph_font_cache::font_cache& glyph_font_cache::cache() const
-    {
-        return iCache;
-    }
-
-    glyph_font_cache::font_cache& glyph_font_cache::cache()
+    glyph_font_cache::font_cache& glyph_font_cache::cache() const
     {
         return iCache;
     }

@@ -301,11 +301,12 @@ namespace neogfx
         typedef neolib::generic_iterator iterator;
         typedef neolib::generic_iterator const_iterator;
     public:
-        struct invalid_operation : std::logic_error { invalid_operation() : std::logic_error("neogfx::i_item_model::invalid_operation") {} };
+        struct wrong_model_type : std::logic_error { wrong_model_type() : std::logic_error("neogfx::i_item_model::wrong_model_type") {} };
         struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_model::bad_column_index") {} };
     public:
         virtual ~i_item_model() {}
     public:
+        virtual bool is_tree() const = 0;
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
         virtual uint32_t columns(const item_model_index& aIndex) const = 0;

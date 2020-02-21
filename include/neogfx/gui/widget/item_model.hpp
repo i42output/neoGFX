@@ -239,6 +239,10 @@ namespace neogfx
             base_type::set_destroying();
         }
     public:
+        bool is_tree() const override
+        {
+            return container_traits::is_tree;
+        }
         uint32_t rows() const override
         {
             return static_cast<uint32_t>(iItems.size());
@@ -382,91 +386,91 @@ namespace neogfx
             if constexpr (container_traits::is_tree)
                 return base_iterator{ iItems.sbegin() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::const_iterator sbegin() const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ iItems.sbegin() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::iterator send() override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ iItems.send() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::const_iterator send() const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ iItems.send() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         bool has_parent(i_item_model::const_iterator aChild) const override
         {
             if constexpr (container_traits::is_tree)
                 return !aChild.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().parent_is_root();
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         bool has_parent(const item_model_index& aChildIndex) const override
         {
             if constexpr (container_traits::is_tree)
                 return has_parent(index_to_iterator(aChildIndex));
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::iterator parent(i_item_model::iterator aChild) override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aChild.get<iterator, iterator, sibling_iterator>().parent() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::const_iterator parent(i_item_model::const_iterator aChild) const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aChild.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().parent() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         item_model_index parent(const item_model_index& aChildIndex) const override
         {
             if constexpr (container_traits::is_tree)
                 return iterator_to_index(parent(index_to_iterator(aChildIndex)));
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::iterator sbegin(i_item_model::iterator aParent) override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aParent.get<iterator, iterator, sibling_iterator>().begin() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::const_iterator sbegin(i_item_model::const_iterator aParent) const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().begin() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::iterator send(i_item_model::iterator aParent) override
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aParent.get<iterator, iterator, sibling_iterator>().end() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::const_iterator send(i_item_model::const_iterator aParent) const override
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end() };
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
     public:
         const item_cell_data& cell_data(const item_model_index& aIndex) const override
@@ -490,14 +494,14 @@ namespace neogfx
             if constexpr (container_traits::is_flat)
                 iItems.reserve(aItemCount);
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         uint32_t capacity() const override
         {
             if constexpr (container_traits::is_flat)
                 return static_cast<uint32_t>(iItems.capacity());
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue) override
         {
@@ -536,7 +540,7 @@ namespace neogfx
                 return result;
             }
             else
-                throw base_type::invalid_operation();
+                throw base_type::wrong_model_type();
         }
         i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) override
         {

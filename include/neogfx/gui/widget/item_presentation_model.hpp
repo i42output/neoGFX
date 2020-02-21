@@ -50,6 +50,8 @@ namespace neogfx
         define_declared_event(ItemAdded, item_added, const item_presentation_model_index&)
         define_declared_event(ItemChanged, item_changed, const item_presentation_model_index&)
         define_declared_event(ItemRemoved, item_removed, const item_presentation_model_index&)
+        define_declared_event(ItemExpanded, item_expanded, const item_presentation_model_index&)
+        define_declared_event(ItemCollapsed, item_collapsed, const item_presentation_model_index&)
         define_declared_event(ItemToggled, item_toggled, const item_presentation_model_index&)
         define_declared_event(ItemChecked, item_checked, const item_presentation_model_index&)
         define_declared_event(ItemUnchecked, item_unchecked, const item_presentation_model_index&)
@@ -253,6 +255,18 @@ namespace neogfx
                 column(aColumnIndex).imageSize = aImageSize;
                 reset_meta();
                 ColumnInfoChanged.trigger(aColumnIndex);
+            }
+        }
+        void toggle_expanded(const item_presentation_model_index& aIndex) override
+        {
+            if constexpr (container_traits::is_tree)
+            {
+                cell_meta(aIndex).expanded = !cell_meta(aIndex).expanded;
+                reset_position_meta(aIndex.row());
+                if (cell_meta(aIndex).expanded)
+                    ItemExpanded.trigger(aIndex);
+                else
+                    ItemCollapsed.trigger(aIndex);
             }
         }
         const button_checked_state& checked_state(const item_presentation_model_index& aIndex) override
@@ -629,6 +643,13 @@ namespace neogfx
             }
             return {};
         }
+        optional_size cell_tree_expander_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        {
+            if constexpr (container_traits::is_flat)
+                return {};
+            else
+                return size{ item_height(aIndex, aGraphicsContext) };
+        }
         optional_texture cell_image(const item_presentation_model_index&) const override
         {
             return optional_texture{};
@@ -679,12 +700,14 @@ namespace neogfx
         {
             if constexpr (container_traits::is_flat)
                 return 0.0;
+            else if (aIndex.column() != 0)
+                return 0.0;
             else
             {
                 auto baseIter = typename item_model_type::const_base_iterator{ item_model().index_to_iterator(to_item_model_index(aIndex)) };
                 auto treeIter = baseIter.get<typename item_model_type::const_iterator, typename item_model_type::const_iterator,
                     typename item_model_type::iterator, typename item_model_type::const_sibling_iterator, typename item_model_type::sibling_iterator>();
-                return treeIter.depth() * item_height(aIndex, aGraphicsContext);
+                return treeIter.depth() * item_height(aIndex, aGraphicsContext) + (aIndex.column() == 0 ? cell_tree_expander_size(aIndex, aGraphicsContext)->cx : 0.0);
             }
         }
     public:

@@ -93,8 +93,8 @@ namespace neogfx
     {
     public:
         virtual const font& glyph_font(const glyph& aGlyph) const = 0;
-        virtual void cache_glyph_font(font_id aFontId) = 0;
-        virtual void cache_glyph_font(const font& aFont) = 0;
+        virtual void cache_glyph_font(font_id aFontId) const = 0;
+        virtual void cache_glyph_font(const font& aFont) const = 0;
     };
 
     class glyph
@@ -277,21 +277,24 @@ namespace neogfx
         { 
             iOffset = aOffset; 
         }
-        size extents() const
-        {
-            return extents(font());
-        }
         size extents(const i_glyph_font_cache& aFontCache) const
         {
-            return extents(font(aFontCache));
+            if (iExtents != basic_size<float>{})
+                return iExtents;
+            if (!has_font_glyph())
+                return extents();
+            else
+                return extents(font(aFontCache));
         }
-        size extents(const neogfx::font& aFont) const
+        size extents(const optional_font& aFont = {}) const
         {
             if (iExtents == basic_size<float>{})
             {
-                iExtents = size{ advance().cx, !is_emoji() ? aFont.height() : advance().cx };
+                auto const& ourFont = (aFont ? aFont : font_specified() ? font() : optional_font{});
                 if (has_font_glyph())
-                    iExtents.cx = static_cast<float>(offset().cx + glyph_texture(aFont).placement().x + glyph_texture(aFont).texture().extents().cx);
+                    iExtents = size{ static_cast<float>(offset().cx + glyph_texture(*ourFont).placement().x + glyph_texture(*ourFont).texture().extents().cx), ourFont->height() };
+                else
+                    iExtents = size{ advance().cx, ourFont && !is_emoji() ? ourFont->height() : advance().cx };
             }
             return iExtents;
         }
@@ -369,15 +372,14 @@ namespace neogfx
         struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_font_cache::cached_font_not_found") {} };
     public:
         const font& glyph_font(const glyph& aGlyph) const override;
-        void cache_glyph_font(font_id aFontId) override;
-        void cache_glyph_font(const font& aFont) override;
+        void cache_glyph_font(font_id aFontId) const override;
+        void cache_glyph_font(const font& aFont) const override;
     public:
         void clear();
     private:
-        const font_cache& cache() const;
-        font_cache& cache();
+        font_cache& cache() const;
     private:
-        font_cache iCache;
+        mutable font_cache iCache;
     };
 
     class glyph_text : public glyph_font_cache, private neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>
