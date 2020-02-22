@@ -91,6 +91,16 @@ namespace neogfx
                         iCurrentIndex->set_row(iCurrentIndex->row() - 1);
                 }
             });
+            iSink += presentation_model().item_expanded([this](const item_presentation_model_index& aIndex)
+            {
+                if (has_current_index() && current_index().row() > aIndex.row())
+                    iCurrentIndex = std::nullopt;
+            });
+            iSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aIndex)
+            {
+                if (has_current_index() && current_index().row() > aIndex.row())
+                    iCurrentIndex = std::nullopt;
+            });
             iSink += presentation_model().items_sorting([this]()
             {
                 neolib::scoped_flag sf{ iSorting };
@@ -113,7 +123,7 @@ namespace neogfx
             iSink += presentation_model().items_filtered([this]()
             {
                 neolib::scoped_flag sf{ iFiltering };
-                if (iSavedModelIndex != std::nullopt && presentation_model().have_item_model_index(*iSavedModelIndex))
+                if (iSavedModelIndex != std::nullopt && presentation_model().has_item_model_index(*iSavedModelIndex))
                     set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
                 else if (presentation_model().rows() >= 1)
                     set_current_index(item_presentation_model_index{ 0, 0 });

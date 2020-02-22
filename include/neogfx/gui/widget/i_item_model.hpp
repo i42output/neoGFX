@@ -340,8 +340,10 @@ namespace neogfx
         virtual const_iterator sbegin() const = 0;
         virtual iterator send() = 0;
         virtual const_iterator send() const = 0;
+        virtual bool has_children(const_iterator aParent) const = 0;
+        virtual bool has_children(const item_model_index& aParentIndex) const = 0;
         virtual bool has_parent(const_iterator aChild) const = 0;
-        virtual bool has_parent(const item_model_index& aIndex) const = 0;
+        virtual bool has_parent(const item_model_index& aChildIndex) const = 0;
         virtual iterator parent(const_iterator aChild) = 0;
         virtual const_iterator parent(const_iterator aChild) const = 0;
         virtual item_model_index parent(const item_model_index& aChildIndex) const = 0;

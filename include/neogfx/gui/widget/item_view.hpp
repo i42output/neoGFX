@@ -159,6 +159,7 @@ namespace neogfx
         optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
     private:
         void init();
+        void invalidate_item(const item_presentation_model_index& aItemIndex);
         void update_hover(const optional_point& aPosition);
     private:
         sink iSink;

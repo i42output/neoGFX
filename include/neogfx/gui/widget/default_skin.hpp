@@ -39,5 +39,6 @@ namespace neogfx
         void draw_scrollbar(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const override;
         void draw_check_box(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const override;
         void draw_radio_button(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const override;
+        void draw_tree_expander(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, bool aExpandedState) const override;
     };
 }

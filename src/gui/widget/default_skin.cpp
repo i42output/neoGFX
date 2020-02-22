@@ -256,4 +256,10 @@ namespace neogfx
         if (aCheckedState != std::nullopt && *aCheckedState == true)
             aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
     }
+
+    void default_skin::draw_tree_expander(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, bool aExpandedState) const
+    {
+        auto const expanderRect = aItem.element_rect(skin_element::TreeExpander);
+        aGraphicsContext.draw_pixel(expanderRect.centre(), aExpandedState ? color::Red : color::Green);
+    }
 }

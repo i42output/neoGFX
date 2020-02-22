@@ -167,13 +167,13 @@ namespace neogfx
         {
             return item_model_index{ row(aIndex).value, model_column(aIndex.column()) };
         }
-        bool have_item_model_index(const item_model_index& aIndex) const override
+        bool has_item_model_index(const item_model_index& aIndex) const override
         {
             return aIndex.row() < row_map().size() && row_map()[aIndex.row()];
         }
         item_presentation_model_index from_item_model_index(const item_model_index& aIndex, bool aIgnoreColumn = false) const override
         {
-            if (have_item_model_index(aIndex))
+            if (has_item_model_index(aIndex))
                 return item_presentation_model_index{ *row_map()[aIndex.row()], !aIgnoreColumn ? mapped_column(aIndex.column()) : 0 };
             throw bad_item_model_index();
         }
@@ -269,7 +269,8 @@ namespace neogfx
                     std::next(begin(), aIndex.row()).skip_children();
                 else
                     std::next(begin(), aIndex.row()).unskip_children();
-                reset_position_meta(aIndex.row());
+                reset_maps();
+                reset_meta();
                 if (cell_meta(aIndex).expanded)
                     ItemExpanded.trigger(aIndex);
                 else
@@ -474,7 +475,8 @@ namespace neogfx
                 if ((i == iPositions.end() || (*i != std::nullopt && **i > aPosition)) && i != iPositions.begin())
                     --i;
             }
-            return std::pair<item_presentation_model_index::row_type, coordinate>{ static_cast<item_presentation_model_index::row_type>(std::distance(iPositions.begin(), i)), static_cast<coordinate>(**i - aPosition) };
+            auto const result = std::pair<item_presentation_model_index::row_type, coordinate>{ static_cast<item_presentation_model_index::row_type>(std::distance(iPositions.begin(), i)), static_cast<coordinate>(**i - aPosition) };
+            return result;
         }
     public:
         cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const override
@@ -909,7 +911,7 @@ namespace neogfx
     private:
         void item_model_column_info_changed(item_model_index::column_type aColumnIndex)
         {
-            if (have_item_model_index(item_model_index{ 0, aColumnIndex }))
+            if (has_item_model_index(item_model_index{ 0, aColumnIndex }))
             {
                 auto const index = from_item_model_index(item_model_index{ 0, aColumnIndex });
                 reset_cell_meta(index.column());
@@ -919,6 +921,9 @@ namespace neogfx
         }
         void item_added(const item_model_index& aItemIndex)
         {
+            if constexpr (container_traits::is_tree)
+                if (item_model().has_parent(aItemIndex) && !has_item_model_index(item_model().parent(aItemIndex)))
+                    return;
             for (auto& row : iRows)
                 if (row.value >= aItemIndex.row())
                     ++row.value;
@@ -951,6 +956,8 @@ namespace neogfx
         }
         void item_changed(const item_model_index& aItemIndex)
         {
+            if (!has_item_model_index(aItemIndex))
+                return;
             if (!iInitializing)
             {
                 auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
@@ -965,6 +972,8 @@ namespace neogfx
         }
         void item_removed(const item_model_index& aItemIndex)
         {
+            if (!has_item_model_index(aItemIndex))
+                return;
             if (!iInitializing)
                 ItemRemoved.trigger(from_item_model_index(aItemIndex));
             iRows.erase(std::next(begin(), from_item_model_index(aItemIndex).row()));

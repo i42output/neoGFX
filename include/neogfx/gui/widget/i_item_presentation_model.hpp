@@ -136,7 +136,7 @@ namespace neogfx
         virtual i_item_model& item_model() const = 0;
         virtual void set_item_model(i_item_model& aItemModel, bool aSortable = false) = 0;
         virtual item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const = 0;
-        virtual bool have_item_model_index(const item_model_index& aIndex) const = 0;
+        virtual bool has_item_model_index(const item_model_index& aIndex) const = 0;
         virtual item_presentation_model_index from_item_model_index(const item_model_index& aIndex, bool aIgnoreColumn = false) const = 0;
     public:
         virtual uint32_t rows() const = 0;

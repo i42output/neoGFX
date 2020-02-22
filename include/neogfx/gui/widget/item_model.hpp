@@ -417,6 +417,20 @@ namespace neogfx
             else
                 throw base_type::wrong_model_type();
         }
+        bool has_children(i_item_model::const_iterator aParent) const override
+        {
+            if constexpr (container_traits::is_tree)
+                return aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().descendent_count() != 0;
+            else
+                throw base_type::wrong_model_type();
+        }
+        bool has_children(const item_model_index& aParentIndex) const override
+        {
+            if constexpr (container_traits::is_tree)
+                return has_children(index_to_iterator(aParentIndex));
+            else
+                throw base_type::wrong_model_type();
+        }
         bool has_parent(i_item_model::const_iterator aChild) const override
         {
             if constexpr (container_traits::is_tree)

@@ -131,24 +131,24 @@ namespace neogfx
             return;
         iPresentationModelSink.clear();
         iPresentationModel = aPresentationModel;
+        if (has_presentation_model() && has_model())
+            presentation_model().set_item_model(model(), presentation_model().sortable());
+        if (has_presentation_model() && has_selection_model())
+            selection_model().set_presentation_model(*aPresentationModel);
         if (has_presentation_model())
         {
             iPresentationModelSink += presentation_model().item_model_changed([this](const i_item_model& aItemModel) { item_model_changed(aItemModel); });
             iPresentationModelSink += presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
             iPresentationModelSink += presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
             iPresentationModelSink += presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_expanded([this](const item_presentation_model_index& aItemIndex) { update_scrollbar_visibility(); update(); });
-            iPresentationModelSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aItemIndex) { update_scrollbar_visibility(); update(); });
+            iPresentationModelSink += presentation_model().item_expanded([this](const item_presentation_model_index& aItemIndex) { invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aItemIndex) { invalidate_item(aItemIndex); });
             iPresentationModelSink += presentation_model().item_toggled([this](const item_presentation_model_index& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
             iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
             iPresentationModelSink += presentation_model().items_filtering([this]() { items_filtering(); });
             iPresentationModelSink += presentation_model().items_filtered([this]() { items_filtered(); });
         }
-        if (has_presentation_model() && has_model())
-            presentation_model().set_item_model(model(), presentation_model().sortable());
-        if (has_presentation_model() && has_selection_model())
-            selection_model().set_presentation_model(*aPresentationModel);
         presentation_model_changed();
         update_scrollbar_visibility();
         update();
@@ -189,6 +189,8 @@ namespace neogfx
         iSelectionModel = aSelectionModel;
         if (has_selection_model())
         {
+            if (has_presentation_model())
+                selection_model().set_presentation_model(presentation_model());
             iSelectionModelSink += selection_model().presentation_model_added([this](i_item_presentation_model& aNewModel) { presentation_model_added(aNewModel); });
             iSelectionModelSink += selection_model().presentation_model_changed([this](i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) { presentation_model_changed(aNewModel, aOldModel); });
             iSelectionModelSink += selection_model().presentation_model_removed([this](i_item_presentation_model& aOldModel) { presentation_model_removed(aOldModel); });
@@ -196,8 +198,6 @@ namespace neogfx
             iSelectionModelSink += selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) { current_index_changed(aCurrentIndex, aPreviousIndex); });
             iSelectionModelSink += selection_model().selection_changed([this](const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) { selection_changed(aCurrentSelection, aPreviousSelection); });
             iSelectionModelSink += selection_model().destroyed([this]() { iSelectionModel = nullptr; });
-            if (has_presentation_model())
-                selection_model().set_presentation_model(presentation_model());
         }
         selection_model_changed();
         update_scrollbar_visibility();
@@ -282,6 +282,38 @@ namespace neogfx
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
                     auto const& cellInfo = model().cell_info(presentation_model().to_item_model_index(itemIndex));
+                    if (model().is_tree() && model().has_children(presentation_model().to_item_model_index(itemIndex)))
+                    {
+                        thread_local struct : i_skinnable_item
+                        {
+                            const item_view* widget;
+                            rect treeExpanderRect;
+
+                            bool is_widget() const override
+                            {
+                                return true;
+                            }
+                            const i_widget& as_widget() const override
+                            {
+                                return *widget;
+                            }
+
+                            rect element_rect(skin_element aElement) const override
+                            {
+                                switch (aElement)
+                                {
+                                case skin_element::ClickableArea:
+                                case skin_element::TreeExpander:
+                                    return treeExpanderRect;
+                                default:
+                                    return widget->element_rect(aElement);
+                                }
+                            }
+                        } skinnableItem = {};
+                        skinnableItem.widget = this;
+                        skinnableItem.treeExpanderRect = cell_rect(itemIndex, aGraphicsContext, cell_part::TreeExpander);
+                        service<i_skin_manager>().active_skin().draw_tree_expander(aGraphicsContext, skinnableItem, presentation_model().cell_meta(itemIndex).expanded);
+                    }
                     if ((cellInfo.flags & item_cell_flags::Checkable) == item_cell_flags::Checkable)
                     {
                         thread_local struct : i_skinnable_item
@@ -684,22 +716,19 @@ namespace neogfx
         update();
     }
 
-    void item_view::item_added(const item_presentation_model_index&)
+    void item_view::item_added(const item_presentation_model_index& aItemIndex)
     {
-        update_scrollbar_visibility();
-        update();
+        invalidate_item(aItemIndex);
     }
 
-    void item_view::item_changed(const item_presentation_model_index&)
+    void item_view::item_changed(const item_presentation_model_index& aItemIndex)
     {
-        update_scrollbar_visibility();
-        update();
+        invalidate_item(aItemIndex);
     }
 
-    void item_view::item_removed(const item_presentation_model_index&)
+    void item_view::item_removed(const item_presentation_model_index& aItemIndex)
     {
-        update_scrollbar_visibility();
-        update();
+        invalidate_item(aItemIndex);
     }
 
     void item_view::items_sorting()
@@ -711,7 +740,7 @@ namespace neogfx
 
     void item_view::items_sorted()
     {
-        if (iSavedModelIndex != std::nullopt && presentation_model().have_item_model_index(*iSavedModelIndex))
+        if (iSavedModelIndex != std::nullopt && presentation_model().has_item_model_index(*iSavedModelIndex))
             selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
         iSavedModelIndex = std::nullopt;
         update();
@@ -1178,6 +1207,14 @@ namespace neogfx
             if (selection_model().has_current_index())
                 make_visible(selection_model().current_index());
         });
+    }
+
+    void item_view::invalidate_item(const item_presentation_model_index& aItemIndex)
+    {
+        update_scrollbar_visibility();
+        update();
+        if (iHoverCell && iHoverCell->row() >= aItemIndex.row())
+            iHoverCell = std::nullopt;
     }
 
     void item_view::update_hover(const optional_point& aPosition)
