@@ -73,8 +73,8 @@ namespace neogfx
         typedef typename item_model_type::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type, true>::other container_traits;
         typedef typename container_traits::row_cell_array row_cell_array;
         typedef typename container_traits::container_type container_type;
-        typedef typename container_traits::const_iterator const_iterator;
-        typedef typename container_traits::iterator iterator;
+        typedef typename container_traits::const_skip_iterator const_iterator;
+        typedef typename container_traits::skip_iterator iterator;
         typedef typename container_traits::const_sibling_iterator const_sibling_iterator;
         typedef typename container_traits::sibling_iterator sibling_iterator;
         typedef typename container_traits::allocator_type allocator_type;
@@ -180,8 +180,11 @@ namespace neogfx
     public:
         uint32_t rows() const override
         {
-            return static_cast<uint32_t>(iRows.size());
-        } 
+            if constexpr (container_traits::is_flat)
+                return static_cast<uint32_t>(iRows.size());
+            else
+                return static_cast<uint32_t>(iRows.ksize());
+        }
         uint32_t columns() const override
         {
             return static_cast<uint32_t>(iColumns.size());
@@ -198,7 +201,7 @@ namespace neogfx
             if (columnWidth != std::nullopt)
                 return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
             columnWidth = 0.0;
-            for (item_presentation_model_index::row_type row = 0u; row < iRows.size(); ++row)
+            for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
             {
                 auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
                 if (modelIndex.column() >= item_model().columns(modelIndex))
@@ -262,6 +265,10 @@ namespace neogfx
             if constexpr (container_traits::is_tree)
             {
                 cell_meta(aIndex).expanded = !cell_meta(aIndex).expanded;
+                if (cell_meta(aIndex).expanded)
+                    std::next(begin(), aIndex.row()).skip_children();
+                else
+                    std::next(begin(), aIndex.row()).unskip_children();
                 reset_position_meta(aIndex.row());
                 if (cell_meta(aIndex).expanded)
                     ItemExpanded.trigger(aIndex);
@@ -402,7 +409,7 @@ namespace neogfx
             if (iTotalHeight != std::nullopt)
                 return *iTotalHeight;
             i_scrollbar::value_type height = 0.0;
-            for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+            for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
                 height += item_height(item_presentation_model_index(row, 0), aUnitsContext);
             iTotalHeight = height;
             return *iTotalHeight;
@@ -436,7 +443,7 @@ namespace neogfx
         }
         std::pair<item_presentation_model_index::row_type, coordinate> item_at(double aPosition, const i_units_context& aUnitsContext) const override
         {
-            if (iRows.size() == 0)
+            if (rows() == 0)
                 return std::pair<item_presentation_model_index::row_type, coordinate>{ 0u, 0.0 };
             auto pred = [](const optional_position& lhs, const optional_position& rhs) -> bool
             {
@@ -751,7 +758,7 @@ namespace neogfx
     public:
         optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const override
         {
-            for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+            for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
             {
                 auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
                 const auto& origValue = item_model().cell_data(modelIndex).to_string();
@@ -820,7 +827,7 @@ namespace neogfx
         {
             if (!sortable() && !aForce)
                 return;
-            if (iRows.size() <= 1)
+            if (rows() <= 1)
                 return;
             if (iSortOrder.empty())
             {
@@ -960,7 +967,7 @@ namespace neogfx
         {
             if (!iInitializing)
                 ItemRemoved.trigger(from_item_model_index(aItemIndex));
-            iRows.erase(std::next(iRows.begin(), from_item_model_index(aItemIndex).row()));
+            iRows.erase(std::next(begin(), from_item_model_index(aItemIndex).row()));
             for (auto& row : iRows)
                 if (row.value >= aItemIndex.row())
                     --row.value;
@@ -988,7 +995,7 @@ namespace neogfx
             if (iRowMap.size() < item_model().rows())
             {
                 iRowMap.resize(item_model().rows());
-                for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+                for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
                     iRowMap[self_type::row(row).value] = row;
             }
             return iRowMap;
@@ -1039,7 +1046,7 @@ namespace neogfx
         }
         void reset_cell_meta(const std::optional<item_presentation_model_index::column_type>& aColumn = {}) const
         {
-            for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+            for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
             {
                 for (item_presentation_model_index::column_type col = 0; col < iColumns.size(); ++col)
                 {
@@ -1063,14 +1070,51 @@ namespace neogfx
         void reset_position_meta(item_presentation_model_index::row_type aFromRow) const
         {
             iTotalHeight = std::nullopt;
-            iPositions.resize(iRows.size());
+            iPositions.resize(rows());
             for (std::size_t i = aFromRow; i < iPositions.size(); ++i)
                 iPositions[i] = std::nullopt;
         }
     private:
+        const_iterator cbegin() const
+        {
+            if constexpr (container_traits::is_flat)
+                return iRows.begin();
+            else
+                return iRows.kbegin();
+        }
+        const_iterator begin() const
+        {
+            return cbegin();
+        }
+        iterator begin()
+        {
+            if constexpr (container_traits::is_flat)
+                return iRows.begin();
+            else
+                return iRows.kbegin();
+        }
+        const_iterator cend() const
+        {
+            if constexpr (container_traits::is_flat)
+                return iRows.end();
+            else
+                return iRows.kend();
+        }
+        const_iterator end() const
+        {
+            return cend();
+        }
+        iterator end()
+        {
+            if constexpr (container_traits::is_flat)
+                return iRows.end();
+            else
+                return iRows.kend();
+        }
+    private:
         const row_type& row(item_presentation_model_index::row_type aRow) const
         {
-            return *std::next(iRows.begin(), aRow);
+            return *std::next(begin(), aRow);
         }
         const row_type& row(item_presentation_model_index aIndex) const
         {
@@ -1078,7 +1122,7 @@ namespace neogfx
         }
         row_type& row(item_presentation_model_index::row_type aRow)
         {
-            return *std::next(iRows.begin(), aRow);
+            return *std::next(begin(), aRow);
         }
         row_type& row(item_presentation_model_index aIndex)
         {

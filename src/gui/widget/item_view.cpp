@@ -137,8 +137,8 @@ namespace neogfx
             iPresentationModelSink += presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
             iPresentationModelSink += presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
             iPresentationModelSink += presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_expanded([this](const item_presentation_model_index& aItemIndex) { update(); });
-            iPresentationModelSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aItemIndex) { update(); });
+            iPresentationModelSink += presentation_model().item_expanded([this](const item_presentation_model_index& aItemIndex) { update_scrollbar_visibility(); update(); });
+            iPresentationModelSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aItemIndex) { update_scrollbar_visibility(); update(); });
             iPresentationModelSink += presentation_model().item_toggled([this](const item_presentation_model_index& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
             iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
@@ -408,6 +408,11 @@ namespace neogfx
             auto item = item_at(aPosition);
             if (item != std::nullopt)
             {
+                if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
+                {
+                    presentation_model().toggle_expanded(*item);
+                    return;
+                }
                 if ((model().cell_info(presentation_model().to_item_model_index(*item)).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable &&
                     cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;

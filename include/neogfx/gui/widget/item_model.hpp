@@ -115,6 +115,8 @@ namespace neogfx
         typedef typename container_type::const_iterator const_iterator;
         typedef typename iterator sibling_iterator;
         typedef typename const_iterator const_sibling_iterator;
+        typedef typename iterator skip_iterator;
+        typedef typename const_iterator const_skip_iterator;
     public:
         template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
@@ -140,6 +142,8 @@ namespace neogfx
         typedef typename container_type::const_iterator const_iterator;
         typedef typename container_type::sibling_iterator sibling_iterator;
         typedef typename container_type::const_sibling_iterator const_sibling_iterator;
+        typedef typename container_type::skip_iterator skip_iterator;
+        typedef typename container_type::const_skip_iterator const_skip_iterator;
     public:
         template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
@@ -165,6 +169,8 @@ namespace neogfx
         typedef typename container_type::const_iterator const_iterator;
         typedef typename iterator sibling_iterator;
         typedef typename const_iterator const_sibling_iterator;
+        typedef typename iterator skip_iterator;
+        typedef typename const_iterator const_skip_iterator;
     public:
         template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
@@ -190,6 +196,8 @@ namespace neogfx
         typedef typename container_type::const_iterator const_iterator;
         typedef typename container_type::sibling_iterator sibling_iterator;
         typedef typename container_type::const_sibling_iterator const_sibling_iterator;
+        typedef typename container_type::skip_iterator skip_iterator;
+        typedef typename container_type::const_skip_iterator const_skip_iterator;
     public:
         template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
