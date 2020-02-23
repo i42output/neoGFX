@@ -98,7 +98,10 @@ namespace neogfx
                 if (iFonts[modelRow] == std::nullopt)
                 {
                     auto& fm = service<i_font_manager>();
-                    iFonts[modelRow] = font{ fm.font_family(familyModelRow), static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), std::max(service<i_app>().current_style().font_info().size(), 12.0) };
+                    iFonts[modelRow] = font{ 
+                        fm.font_family(familyModelRow), 
+                        static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), 
+                        std::max(service<i_app>().current_style().font_info().size(), 12.0) };
                 }
                 return iFonts[modelRow];
             }

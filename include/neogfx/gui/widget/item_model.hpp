@@ -533,8 +533,10 @@ namespace neogfx
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) override
         {
-            auto result = base_iterator{ insert_item(aPosition, aValue) };
-            insert_cell_data(result, 0, aCellData);
+            auto result = base_iterator{ iItems.insert(aPosition.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type{ aValue, row_cell_array{} }) };
+            do_insert_cell_data(result, 0, aCellData);
+            ItemAdded.trigger(iterator_to_index(result));
+            ItemChanged.trigger(iterator_to_index(result));
             return result;
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const item_cell_data& aCellData) override
@@ -599,29 +601,7 @@ namespace neogfx
         }
         void insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData) override
         {
-            bool changed = false;
-            auto ri = aItem.get<iterator, iterator, sibling_iterator>();
-            if (ri->cells.size() < aColumnIndex + 1)
-            {
-                ri->cells.resize(aColumnIndex + 1);
-                changed = true;
-            }
-            if (iColumns.size() < aColumnIndex + 1)
-            {
-                iColumns.resize(aColumnIndex + 1);
-                changed = true;
-            }
-            if (default_cell_info(aColumnIndex).dataType == item_data_type::Unknown)
-            {
-                default_cell_info(aColumnIndex).dataType = static_cast<item_data_type>(aCellData.index());
-                changed = true;
-            }
-            if (ri->cells[aColumnIndex] != aCellData)
-            {
-                ri->cells[aColumnIndex] = aCellData;
-                changed = true;
-            }
-            if (changed)
+            if (do_insert_cell_data(aItem, aColumnIndex, aCellData))
             {
                 item_model_index index = iterator_to_index(aItem);
                 index.set_column(aColumnIndex);
@@ -678,6 +658,32 @@ namespace neogfx
             if (iColumns[aColumnIndex].defaultDataInfo == std::nullopt)
                 iColumns[aColumnIndex].defaultDataInfo = item_cell_info{};
             return *iColumns[aColumnIndex].defaultDataInfo;
+        }
+        bool do_insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData)
+        {
+            bool changed = false;
+            auto ri = aItem.get<iterator, iterator, sibling_iterator>();
+            if (ri->cells.size() < aColumnIndex + 1)
+            {
+                ri->cells.resize(aColumnIndex + 1);
+                changed = true;
+            }
+            if (iColumns.size() < aColumnIndex + 1)
+            {
+                iColumns.resize(aColumnIndex + 1);
+                changed = true;
+            }
+            if (default_cell_info(aColumnIndex).dataType == item_data_type::Unknown)
+            {
+                default_cell_info(aColumnIndex).dataType = static_cast<item_data_type>(aCellData.index());
+                changed = true;
+            }
+            if (ri->cells[aColumnIndex] != aCellData)
+            {
+                ri->cells[aColumnIndex] = aCellData;
+                changed = true;
+            }
+            return changed;
         }
     private:
         container_type iItems;
