@@ -422,7 +422,8 @@ namespace neogfx
                     iMouseTracker.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
                         {
                             aTimer.again();
-                            auto item = item_at(root().mouse_position() - origin());
+                            auto const pos = root().mouse_position() - origin();
+                            auto const item = item_at(pos);
                             if (item != std::nullopt)
                                 selection_model().set_current_index(*item);
                         }, 20);
@@ -1190,11 +1191,11 @@ namespace neogfx
             {
                 if (aPosition.y < item_display_rect().top() && index.row() > 0)
                     index.set_row(index.row() - 1);
-                else if (aPosition.y >= item_display_rect().bottom() && index.row() < model().rows() - 1)
+                else if (aPosition.y >= item_display_rect().bottom() && index.row() < presentation_model().rows() - 1)
                     index.set_row(index.row() + 1);
                 if (aPosition.x < item_display_rect().left() && index.column() > 0)
                     index.set_column(index.column() - 1);
-                else if (aPosition.x >= item_display_rect().right() && index.column() < model().columns(index.row()) - 1)
+                else if (aPosition.x >= item_display_rect().right() && index.column() < presentation_model().columns(index.row()) - 1)
                     index.set_column(index.column() + 1);
                 return index;
             }
