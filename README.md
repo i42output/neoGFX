@@ -56,9 +56,9 @@ Toolbars                        | 90      |     Drop-down button support
 Layout Managers                 | 95      |     Need to fully support size policies
 Label                           | 100     |     
 Button                          | 100     |     
-Table View                      | 85      |     Selection; icon; cell widget; cell check box
-Tree View                       | 0       |
-List View                       | 85      |
+Table View                      | 95      |     Selection; cell widget
+Tree View                       | 95      |
+List View                       | 95      |
 Text Edit                       | 85      |     Columns; rich text (HTML); undo/redo; performance optimization
 Line Edit                       | 100     |     
 Spin Box                        | 100     |
@@ -69,6 +69,7 @@ Combo Box                       | 95      |     Glob and regex filters; review U
 Group Box                       | 100     |
 Tool Tips                       | 0       |
 Status Bar                      | 100     |
+Progress Bar                    | 0       |
 Font Picker                     | 100     |
 Colour Gradient Selector        | 100     |
 Colour Picker                   | 100     |
@@ -79,6 +80,6 @@ UI/Resource Description (RJSON) | 40      |
 tool: neoGFX Design Studio      | 0       |
 i18n                            | 0       |
 l10n                            | 0       |     UK English, US English, French, German, Chinese
-Skins                           | 0       |
+Skins                           | 40      |
 
-Last updated: 17/11/2019
+Last updated: 23/02/2020
