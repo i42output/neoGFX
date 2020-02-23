@@ -430,10 +430,10 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_path{ path, aPen });
     }
 
-    void graphics_context::draw_shape(const game::mesh& aShape, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill) const
     {
         if (aFill != neolib::none)
-            fill_shape(aShape, aFill);
+            fill_shape(aShape, aPosition, aFill);
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_shape{
@@ -442,6 +442,7 @@ namespace neogfx
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 0.0 }, 
                     { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
+                aPosition,
                 aPen });
     }
 
@@ -495,7 +496,7 @@ namespace neogfx
         native_context().enqueue(graphics_operation::fill_path{ path, aFill });
     }
 
-    void graphics_context::fill_shape(const game::mesh& aShape, const brush& aFill) const
+    void graphics_context::fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
@@ -505,6 +506,7 @@ namespace neogfx
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 0.0 }, 
                     { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
+                aPosition,
                 aFill });
     }
 

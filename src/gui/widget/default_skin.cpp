@@ -260,6 +260,18 @@ namespace neogfx
     void default_skin::draw_tree_expander(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, bool aExpandedState) const
     {
         auto const expanderRect = aItem.element_rect(skin_element::TreeExpander);
-        aGraphicsContext.draw_pixel(expanderRect.centre(), aExpandedState ? color::Red : color::Green);
+        auto const expanderColor = aItem.as_widget().has_foreground_color() ? aItem.as_widget().foreground_color() : service<i_app>().current_style().palette().text_color();
+        vertices expanderVertices;
+        auto const d1 = 3.0_dip;
+        auto const d2 = 1.0_dip;
+        if (!aExpandedState)
+            expanderVertices = { vec3{ -d1 + d2, -d1 - d2 }, vec3{ d1 - d2, 0.0 }, vec3{ -d1 + d2, d1 + d2 } };
+        else
+            expanderVertices = { vec3{ -d1, d1 }, vec3{ d1, -d1 }, vec3{ d1, d1 } };
+        neogfx::game::mesh mesh{ expanderVertices, neogfx::vertices_2d{expanderVertices.size(), neogfx::vec2{} }, neogfx::game::default_faces(expanderVertices) };
+        if (!aExpandedState)
+            aGraphicsContext.draw_shape(mesh, expanderRect.centre().to_vec3(), expanderColor);
+        else
+            aGraphicsContext.fill_shape(mesh, expanderRect.centre().to_vec3(), expanderColor);
     }
 }

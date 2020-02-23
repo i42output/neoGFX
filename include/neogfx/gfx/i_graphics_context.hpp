@@ -136,7 +136,7 @@ namespace neogfx
         virtual void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const = 0;
         virtual void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_path(const path& aPath, const pen& aPen, const brush& aFill = brush{}) const = 0;
-        virtual void draw_shape(const game::mesh& aShape, const pen& aPen, const brush& aFill = brush{}) const = 0;
+        virtual void draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_entities(game::i_ecs& aEcs) const = 0;
         virtual void draw_focus_rect(const rect& aRect) const = 0;
         virtual void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0) const = 0;
@@ -144,7 +144,7 @@ namespace neogfx
         virtual void fill_circle(const point& aCentre, dimension aRadius, const brush& aFill) const = 0;
         virtual void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const = 0;
         virtual void fill_path(const path& aPath, const brush& aFill) const = 0;
-        virtual void fill_shape(const game::mesh& aShape, const brush& aFill) const = 0;
+        virtual void fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const = 0;
         virtual size text_extent(const std::string& aText, const font& aFont) const = 0;
         virtual size text_extent(const std::string& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
         virtual size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const = 0;

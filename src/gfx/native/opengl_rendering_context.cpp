@@ -107,16 +107,18 @@ namespace neogfx
             std::size_t iPass;
         };
 
-        inline vertices line_loop_to_lines(const vertices& aLineLoop)
+        inline vertices line_loop_to_lines(const vertices& aLineLoop, bool aClosed = true)
         {
             vertices result;
             result.reserve(aLineLoop.size() * 2);
             for (auto v = aLineLoop.begin(); v != aLineLoop.end(); ++v)
             {
                 result.push_back(*v);
-                if (v != aLineLoop.begin() && v != aLineLoop.end() - 1)
+                if (v != aLineLoop.begin() && (aClosed || v != std::prev(aLineLoop.end())))
                     result.push_back(*v);
             }
+            if (aClosed)
+                result.push_back(*aLineLoop.begin());
             return result;
         }
 
@@ -529,10 +531,11 @@ namespace neogfx
                 }
                 break;
             case graphics_operation::operation_type::DrawShape:
+                // todo: batch
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     const auto& args = static_variant_cast<const graphics_operation::draw_shape&>(*op);
-                    draw_shape(args.mesh, args.pen);
+                    draw_shape(args.mesh, args.position, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawEntities:
@@ -978,7 +981,7 @@ namespace neogfx
 
         auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline);
 
-        auto lines = line_loop_to_lines(vertices);
+        auto lines = line_loop_to_lines(vertices, false);
         thread_local vec3_list quads;
         quads.clear();
         lines_to_quads(lines, aPen.width(), quads);
@@ -1031,10 +1034,8 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
+    void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen)
     {
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.color()))
@@ -1053,7 +1054,7 @@ namespace neogfx
         use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
+            vertexArrays.push_back({ v + aPosition, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
                     static_variant_cast<color>(aPen.color()).red<float>(),
                     static_variant_cast<color>(aPen.color()).green<float>(),
@@ -1166,9 +1167,9 @@ namespace neogfx
 
     void opengl_rendering_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
     {
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aFill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
@@ -1193,9 +1194,9 @@ namespace neogfx
 
     void opengl_rendering_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
     {
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aFill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
@@ -1256,6 +1257,8 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
         auto& firstOp = static_variant_cast<const graphics_operation::fill_shape&>(*aFillShapeOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
@@ -1265,10 +1268,10 @@ namespace neogfx
             vec3 max = min;
             for (auto const& v : vertices)
             {
-                min.x = std::min(min.x, v.x);
-                max.x = std::max(max.x, v.x);
-                min.y = std::min(min.y, v.y);
-                max.y = std::max(max.y, v.y);
+                min.x = std::min(min.x, v.x + firstOp.position.x);
+                max.x = std::max(max.x, v.x + firstOp.position.x);
+                min.y = std::min(min.y, v.y + firstOp.position.y);
+                max.y = std::max(max.y, v.y + firstOp.position.y);
             }
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill),
                 rect{
@@ -1291,7 +1294,7 @@ namespace neogfx
                     {
                         auto const& v = vertices[vi];
                         vertexArrays.push_back({
-                            v,
+                            v + drawOp.position,
                             std::holds_alternative<color>(drawOp.fill) ?
                                 vec4f{{
                                     static_variant_cast<const color&>(drawOp.fill).red<float>(),

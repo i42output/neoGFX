@@ -97,9 +97,8 @@ namespace neogfx
         typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_cell_array column_info_array;
     public:
         using typename base_type::no_item_model;
-        using typename base_type::bad_item_model_index;
+        using typename base_type::bad_index;
         using typename base_type::no_mapped_row;
-        using typename base_type::bad_column_index;
     public:
         basic_item_presentation_model() : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
         {
@@ -175,7 +174,7 @@ namespace neogfx
         {
             if (has_item_model_index(aIndex))
                 return item_presentation_model_index{ *row_map()[aIndex.row()], !aIgnoreColumn ? mapped_column(aIndex.column()) : 0 };
-            throw bad_item_model_index();
+            throw bad_index();
         }
     public:
         uint32_t rows() const override
@@ -264,14 +263,15 @@ namespace neogfx
         {
             if constexpr (container_traits::is_tree)
             {
-                cell_meta(aIndex).expanded = !cell_meta(aIndex).expanded;
-                if (cell_meta(aIndex).expanded)
-                    std::next(begin(), aIndex.row()).skip_children();
-                else
+                item_presentation_model_index const indexFirstColumn{ aIndex.row() };
+                cell_meta(indexFirstColumn).expanded = !cell_meta(indexFirstColumn).expanded;
+                if (cell_meta(indexFirstColumn).expanded)
                     std::next(begin(), aIndex.row()).unskip_children();
+                else
+                    std::next(begin(), aIndex.row()).skip_children();
                 reset_maps();
                 reset_meta();
-                if (cell_meta(aIndex).expanded)
+                if (cell_meta(indexFirstColumn).expanded)
                     ItemExpanded.trigger(aIndex);
                 else
                     ItemCollapsed.trigger(aIndex);
@@ -481,11 +481,18 @@ namespace neogfx
     public:
         cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const override
         {
-            if (aIndex.column() >= row(aIndex).cells.size())
-                row(aIndex).cells.resize(aIndex.column() + 1);
-            if (aIndex.column() < row(aIndex).cells.size())
+            if (aIndex.row() < rows())
+            {
+                if (aIndex.column() >= row(aIndex).cells.size())
+                {
+                    row(aIndex).cells.resize(aIndex.column() + 1);
+                    if constexpr (container_traits::is_tree)
+                        if (aIndex.column() == 0)
+                            row(aIndex).cells[aIndex.column()].expanded = !std::next(begin(), aIndex.row()).children_skipped();
+                }
                 return row(aIndex).cells[aIndex.column()];
-            throw bad_column_index();
+            }
+            throw bad_index();
         }
     public:
         item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const override
@@ -1037,7 +1044,7 @@ namespace neogfx
             auto const& col = column(aColumnIndex);
             if (col.modelColumn)
                 return *col.modelColumn;
-            throw bad_column_index();
+            throw bad_index();
         }
         const column_map_type& column_map() const
         {

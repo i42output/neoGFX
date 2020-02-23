@@ -175,6 +175,7 @@ namespace neogfx
         struct draw_shape
         {
             game::mesh mesh;
+            vec3 position;
             pen pen;
         };
 
@@ -223,6 +224,7 @@ namespace neogfx
         struct fill_shape
         {
             game::mesh mesh;
+            vec3 position;
             brush fill;
         };
 
