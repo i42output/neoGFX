@@ -173,7 +173,7 @@ namespace neogfx
         item_presentation_model_index from_item_model_index(const item_model_index& aIndex, bool aIgnoreColumn = false) const override
         {
             if (has_item_model_index(aIndex))
-                return item_presentation_model_index{ *row_map()[aIndex.row()], !aIgnoreColumn ? mapped_column(aIndex.column()) : 0 };
+                return item_presentation_model_index{ mapped_row(aIndex.row()), !aIgnoreColumn ? mapped_column(aIndex.column()) : 0 };
             throw bad_index();
         }
     public:
@@ -956,7 +956,7 @@ namespace neogfx
 
             if (!iInitializing)
             {
-                reset_position_meta(0);
+                reset_meta();
                 execute_sort();
                 ItemAdded.trigger(from_item_model_index(aItemIndex, true));
             }
@@ -967,13 +967,13 @@ namespace neogfx
                 return;
             if (!iInitializing)
             {
+                reset_maps();
+                reset_meta();
+                execute_sort();
                 auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
                 cellMeta.text = std::nullopt;
                 cellMeta.extents = std::nullopt;
                 column(mapped_column(aItemIndex.column())).width = std::nullopt;
-                reset_maps();
-                reset_position_meta(0);
-                execute_sort();
                 ItemChanged.trigger(from_item_model_index(aItemIndex));
             }
         }

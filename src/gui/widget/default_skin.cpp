@@ -260,15 +260,14 @@ namespace neogfx
     void default_skin::draw_tree_expander(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, bool aExpandedState) const
     {
         auto const expanderRect = aItem.element_rect(skin_element::TreeExpander);
-        auto const expanderColor = aItem.as_widget().has_foreground_color() ? aItem.as_widget().foreground_color() : service<i_app>().current_style().palette().text_color();
-        vertices expanderVertices;
+        auto const expanderColor = aItem.is_widget() && aItem.as_widget().has_foreground_color() ? aItem.as_widget().foreground_color() : service<i_app>().current_style().palette().text_color();
+        thread_local neogfx::game::mesh mesh{ {}, neogfx::vertices_2d{ 3, neogfx::vec2{} }, neogfx::game::default_faces(3) };
         auto const d1 = 3.0_dip;
         auto const d2 = 1.0_dip;
         if (!aExpandedState)
-            expanderVertices = { vec3{ -d1 + d2, -d1 - d2 }, vec3{ d1 - d2, 0.0 }, vec3{ -d1 + d2, d1 + d2 } };
+            mesh.vertices = { vec3{ -d1 + d2, -d1 - d2 }, vec3{ d1 - d2, 0.0 }, vec3{ -d1 + d2, d1 + d2 } };
         else
-            expanderVertices = { vec3{ -d1, d1 }, vec3{ d1, -d1 }, vec3{ d1, d1 } };
-        neogfx::game::mesh mesh{ expanderVertices, neogfx::vertices_2d{expanderVertices.size(), neogfx::vec2{} }, neogfx::game::default_faces(expanderVertices) };
+            mesh.vertices = { vec3{ -d1, d1 }, vec3{ d1, -d1 }, vec3{ d1, d1 } };
         if (!aExpandedState)
             aGraphicsContext.draw_shape(mesh, expanderRect.centre().to_vec3(), expanderColor);
         else
