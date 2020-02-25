@@ -101,6 +101,15 @@ public:
             return ng::hsv_color{ prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
         else if (aColorRole == ng::color_role::Foreground && iColorRole)
             return ng::color::Black;
+        else if (aColorRole == ng::color_role::Background)
+        {
+            if (aIndex.row() % 2 == 0)
+                return ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background);
+            else
+                return ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).light() ?
+                    ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).darker(0x08) :
+                    ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).lighter(0x08);
+        }
         return {};
     }
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
