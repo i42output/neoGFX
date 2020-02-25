@@ -243,11 +243,11 @@ namespace neogfx
 
         service<i_keyboard>().grab_keyboard(*this);
 
-        style whiteStyle("Default");
-        register_style(whiteStyle);
-        style slateStyle("Slate");
-        slateStyle.palette().set_color(color(0x35, 0x35, 0x35));
-        register_style(slateStyle);
+        style lightStyle("Light");
+        register_style(lightStyle);
+        style darkStyle("Dark");
+        darkStyle.palette().set_color(color_role::Theme, color{ 0x35, 0x35, 0x35 });
+        register_style(darkStyle);
 
         add_action(actionFileNew);
         add_action(actionFileOpen);

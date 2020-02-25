@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     {
         ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
         
-        app.current_style().palette().set_color(ng::color{ 64, 64, 64 });
+        app.current_style().palette().set_color(ng::color_role::Theme, ng::color{ 64, 64, 64 });
         app.current_style().set_spacing(ng::size{ 4.0 });
 
         ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect().extents() * ng::size{ 0.5, 0.5 } };

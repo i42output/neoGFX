@@ -201,7 +201,7 @@ namespace neogfx
         scoped_units su{ widget, units::Pixels };
         rect boxRect = aItem.element_rect(skin_element::CheckBox);
         auto enabledAlphaCoefficient = widget.effectively_enabled() ? 1.0 : 0.25;
-        color hoverColor = service<i_app>().current_style().palette().hover_color().same_lightness_as(
+        color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(
             widget.background_color().dark() ?
                 widget.background_color().lighter(0x20) :
                 widget.background_color().darker(0x20));
@@ -221,11 +221,11 @@ namespace neogfx
         {
             scoped_snap_to_pixel snap{ aGraphicsContext, false };
             /* todo: draw tick image eye candy */
-            aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient), 2.0));
-            aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient), 2.0));
+            aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient), 2.0));
+            aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient), 2.0));
         }
         else if (aCheckedState == std::nullopt)
-            aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
+            aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient));
     }
 
     void default_skin::draw_radio_button(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const
@@ -243,7 +243,7 @@ namespace neogfx
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);
         aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.mid(widget.background_color()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        color hoverColor = service<i_app>().current_style().palette().hover_color().same_lightness_as(
+        color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(
             widget.background_color().dark() ?
                 widget.background_color().lighter(0x20) :
                 widget.background_color().darker(0x20));
@@ -254,13 +254,13 @@ namespace neogfx
         aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColor.with_combined_alpha(enabledAlphaCoefficient));
         discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
         if (aCheckedState != std::nullopt && *aCheckedState == true)
-            aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().widget_detail_primary_color().with_combined_alpha(enabledAlphaCoefficient));
+            aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient));
     }
 
     void default_skin::draw_tree_expander(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, bool aExpandedState) const
     {
         auto const expanderRect = aItem.element_rect(skin_element::TreeExpander);
-        auto const expanderColor = aItem.is_widget() && aItem.as_widget().has_foreground_color() ? aItem.as_widget().foreground_color() : service<i_app>().current_style().palette().text_color();
+        auto const expanderColor = aItem.is_widget() && aItem.as_widget().has_foreground_color() ? aItem.as_widget().foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
         thread_local neogfx::game::mesh mesh{ {}, neogfx::vertices_2d{ 3, neogfx::vec2{} }, neogfx::game::default_faces(3) };
         auto const d1 = 3.0_dip;
         auto const d2 = 1.0_dip;

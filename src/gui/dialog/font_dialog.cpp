@@ -49,17 +49,17 @@ namespace neogfx
                 return item_cell_editable::No;
             }
         public:
-            optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const override
+            optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
             {
-                if (aColorType == item_cell_color_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+                if (aColorRole == color_role::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
                 {
-                    auto backgroundColor = service<i_app>().current_style().palette().color().dark() ? color::Black : color::White;
-                    if (backgroundColor == service<i_app>().current_style().palette().color())
+                    auto backgroundColor = service<i_app>().current_style().palette().color(color_role::Theme).dark() ? color::Black : color::White;
+                    if (backgroundColor == service<i_app>().current_style().palette().color(color_role::Theme))
                         backgroundColor = backgroundColor.dark() ? backgroundColor.lighter(0x20) : backgroundColor.darker(0x20);
                     return backgroundColor;
                 }
                 else
-                    return item_presentation_model::cell_color(aIndex, aColorType);
+                    return item_presentation_model::cell_color(aIndex, aColorRole);
             }
         private:
             mutable std::vector<optional_font> iFonts;
@@ -111,17 +111,17 @@ namespace neogfx
                 return item_cell_editable::No;
             }
         public:
-            optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const override
+            optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
             {
-                if (aColorType == item_cell_color_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+                if (aColorRole == color_role::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
                 {
-                    auto backgroundColor = service<i_app>().current_style().palette().color().dark() ? color::Black : color::White;
-                    if (backgroundColor == service<i_app>().current_style().palette().color())
+                    auto backgroundColor = service<i_app>().current_style().palette().color(color_role::Theme).dark() ? color::Black : color::White;
+                    if (backgroundColor == service<i_app>().current_style().palette().color(color_role::Theme))
                         backgroundColor = backgroundColor.dark() ? backgroundColor.lighter(0x20) : backgroundColor.darker(0x20);
                     return backgroundColor;
                 }
                 else
-                    return item_presentation_model::cell_color(aIndex, aColorType);
+                    return item_presentation_model::cell_color(aIndex, aColorRole);
             }
         private:
             i_item_selection_model& iOurSelectionModel;

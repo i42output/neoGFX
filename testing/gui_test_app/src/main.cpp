@@ -90,16 +90,16 @@ public:
     {
     }
 public:
-    void set_color_type(const std::optional<ng::item_cell_color_type>& aColorType)
+    void set_color_role(const std::optional<ng::color_role>& aColorRole)
     {
-        iColorType = aColorType;
+        iColorRole = aColorRole;
     }
-    ng::optional_color cell_color(const ng::item_presentation_model_index& aIndex, ng::item_cell_color_type aColorType) const override
+    ng::optional_color cell_color(const ng::item_presentation_model_index& aIndex, ng::color_role aColorRole) const override
     {
         neolib::basic_random<double> prng{ (base_type::to_item_model_index(aIndex).row() << 16) + base_type::to_item_model_index(aIndex).column() }; // use seed to make random color based on row/index
-        if (aColorType == iColorType)
+        if (aColorRole == iColorRole)
             return ng::hsv_color{ prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
-        else if (aColorType == ng::item_cell_color_type::Foreground && iColorType)
+        else if (aColorRole == ng::color_role::Foreground && iColorRole)
             return ng::color::Black;
         return {};
     }
@@ -113,7 +113,7 @@ public:
         return ng::optional_texture{};
     }
 private:
-    std::optional<ng::item_cell_color_type> iColorType;
+    std::optional<ng::color_role> iColorRole;
     std::array<ng::optional_texture, 5> iCellImages;
 };
 
@@ -143,7 +143,7 @@ public:
             ng::texture newTexture{ ng::size{d, d}, 1.0, ng::texture_sampling::Multisample };
             ng::graphics_context gc{ newTexture };
             ng::scoped_snap_to_pixel snap{ gc };
-            auto const textColor = ng::service<ng::i_app>().current_style().palette().text_color();
+            auto const textColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Text);
             gc.draw_rect(ng::rect{ ng::point{}, ng::size{d, d} }, ng::pen{ textColor, 1.0 });
             ng::optional_point lastPos;
             ng::pen pen{ textColor, 2.0 };
@@ -175,7 +175,7 @@ public:
         clicked([this, aNumber]()
         {
             ng::service<ng::i_app>().change_style("Keypad").
-                palette().set_color(aNumber != 9 ? ng::color{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::color::LightGoldenrod);
+                palette().set_color(ng::color_role::Theme, aNumber != 9 ? ng::color{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::color::LightGoldenrod);
             if (aNumber == 9)
                 iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::color::DarkGoldenrod, ng::color::LightGoldenrodYellow, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} });
             else if (aNumber == 8)
@@ -241,12 +241,12 @@ int main(int argc, char* argv[])
 
     try
     {
-        app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
-        app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+        app.change_style("Light").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+        app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.change_style("Keypad");
-        app.current_style().palette().set_color(ng::color::Black);
-        app.change_style("Slate");
+        app.current_style().palette().set_color(ng::color_role::Theme, ng::color::Black);
+        app.change_style("Dark");
 
         ng::window& window = ui.mainWindow;
 
@@ -270,12 +270,12 @@ int main(int argc, char* argv[])
         
         app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
         {
-            ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color::LightGoldenrod);
+            ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, ng::color::LightGoldenrod);
         });
 
         ui.actionContacts.triggered([]()
         {
-            ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color::White);
+            ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, ng::color::White);
         });
         
         neolib::callback_timer ct{ app, [&app, &ui](neolib::callback_timer& aTimer)
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
             auto& button = ui.layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
             ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
             button.set_foreground_color(randomColor);
-            button.clicked([&, randomColor]() { ui.textEdit.BackgroundColor = randomColor.same_lightness_as(app.current_style().palette().background_color()); });
+            button.clicked([&, randomColor]() { ui.textEdit.BackgroundColor = randomColor.same_lightness_as(app.current_style().palette().color(ng::color_role::Background)); });
             transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
         }
         ng::event<> startAnimation;
@@ -525,8 +525,8 @@ int main(int argc, char* argv[])
         {
             ui.effectWidthSlider.set_value(1);
             auto s = ui.textEdit.default_style();
-            s.set_text_color(app.current_style().palette().text_color().light() ? ng::color::Black : ng::color::White);
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_color() });
+            s.set_text_color(app.current_style().palette().color(ng::color_role::Text).light() ? ng::color::Black : ng::color::White);
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().color(ng::color_role::Text) });
             ui.textEdit.set_default_style(s);
             auto s2 = ui.textEditEditor.default_style();
             s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::color::White });
@@ -579,9 +579,9 @@ int main(int argc, char* argv[])
         });
         auto update_theme_color = [&ui]()
         {
-            auto themeColor = ng::service<ng::i_app>().current_style().palette().color().to_hsv();
+            auto themeColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Theme).to_hsv();
             themeColor.set_hue(ui.slider1.normalized_value() * 360.0);
-            ng::service<ng::i_app>().current_style().palette().set_color(themeColor.to_rgb());
+            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColor.to_rgb());
         };
         ui.slider1.ValueChanged([update_theme_color, &ui, &app]()
         {
@@ -594,7 +594,7 @@ int main(int argc, char* argv[])
         ui.slider1.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
         ui.radioThemeColor.checked([update_theme_color, &ui, &app]()
         {
-            ui.slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().color().to_hsv().hue() / 360.0);
+            ui.slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Theme).to_hsv().hue() / 360.0);
             update_theme_color();
         });
 
@@ -606,17 +606,17 @@ int main(int argc, char* argv[])
                 sCustomColors = ng::color_dialog::custom_color_list{};
                 std::fill(sCustomColors->begin(), sCustomColors->end(), ng::color::White);
             }
-            auto oldColor = ng::service<ng::i_app>().change_style("Keypad").palette().color();
-            ng::color_dialog colorPicker(window, ng::service<ng::i_app>().change_style("Keypad").palette().color());
+            auto oldColor = ng::service<ng::i_app>().change_style("Keypad").palette().color(ng::color_role::Theme);
+            ng::color_dialog colorPicker(window, ng::service<ng::i_app>().change_style("Keypad").palette().color(ng::color_role::Theme));
             colorPicker.set_custom_colors(*sCustomColors);
             colorPicker.SelectionChanged([&]()
             {
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(colorPicker.selected_color());
+                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, colorPicker.selected_color());
             });
             if (colorPicker.exec() == ng::dialog_result::Accepted)
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(colorPicker.selected_color());
+                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, colorPicker.selected_color());
             else
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(oldColor);
+                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, oldColor);
             *sCustomColors = colorPicker.custom_colors();
         });
 
@@ -630,7 +630,7 @@ int main(int argc, char* argv[])
         ui.editColor.clicked([&]()
         {
             static std::optional<ng::color_dialog::custom_color_list> sCustomColors;
-            static ng::color sInk = ng::service<ng::i_app>().current_style().palette().text_color();
+            static ng::color sInk = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Text);
             ng::color_dialog colorPicker(window, sInk);
             if (sCustomColors != std::nullopt)
                 colorPicker.set_custom_colors(*sCustomColors);
@@ -647,10 +647,10 @@ int main(int argc, char* argv[])
         ng::vertical_spacer spacer1{ ui.layout4 };
         ui.button9.clicked([&app]()
         {
-            if (app.current_style().name() == "Default")
-                app.change_style("Slate");
+            if (app.current_style().name() == "Light")
+                app.change_style("Dark");
             else
-                app.change_style("Default");
+                app.change_style("Light");
         });
         for (uint32_t row = 0; row < 3; ++row)
             for (uint32_t col = 0; col < 3; ++col)
@@ -857,14 +857,14 @@ int main(int argc, char* argv[])
 
         ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); itpm1.set_column_image_size(0, ng::size{ 16_dip }); });
         ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); itpm1.set_column_image_size(0, ng::optional_size{}); });
-        ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_type({}); ui.tableView1.update(); itpm1.set_color_type({}); ui.treeView1.update(); });
-        ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView1.update(); itpm1.set_color_type(ng::item_cell_color_type::Foreground); ui.treeView1.update(); });
-        ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_type(ng::item_cell_color_type::Background); ui.tableView1.update(); itpm1.set_color_type(ng::item_cell_color_type::Background); ui.treeView1.update(); });
+        ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_role({}); ui.tableView1.update(); itpm1.set_color_role({}); ui.treeView1.update(); });
+        ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_role(ng::color_role::Foreground); ui.tableView1.update(); itpm1.set_color_role(ng::color_role::Foreground); ui.treeView1.update(); });
+        ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_role(ng::color_role::Background); ui.tableView1.update(); itpm1.set_color_role(ng::color_role::Background); ui.treeView1.update(); });
         ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); itpm2.set_column_image_size(0, ng::size{ 16_dip }); });
         ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); itpm2.set_column_image_size(0, ng::optional_size{}); });
-        ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_type({}); ui.tableView2.update(); itpm2.set_color_type({}); ui.treeView2.update(); });
-        ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Foreground); ui.tableView2.update(); itpm2.set_color_type(ng::item_cell_color_type::Foreground); ui.treeView2.update(); });
-        ui.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_type(ng::item_cell_color_type::Background); ui.tableView2.update(); itpm2.set_color_type(ng::item_cell_color_type::Background); ui.treeView2.update(); });
+        ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_role({}); ui.tableView2.update(); itpm2.set_color_role({}); ui.treeView2.update(); });
+        ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_role(ng::color_role::Foreground); ui.tableView2.update(); itpm2.set_color_role(ng::color_role::Foreground); ui.treeView2.update(); });
+        ui.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_role(ng::color_role::Background); ui.tableView2.update(); itpm2.set_color_role(ng::color_role::Background); ui.treeView2.update(); });
 
         ng::basic_item_model<ng::easing> easingItemModelUpperTableView;
         ui.dropListEasingUpperTableView.SelectionChanged([&](const ng::optional_item_model_index& aIndex) 

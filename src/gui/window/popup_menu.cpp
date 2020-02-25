@@ -253,7 +253,7 @@ namespace neogfx
     {
         return window::has_background_color() ?
             window::background_color() :
-            service<i_app>().current_style().palette().color();
+            service<i_app>().current_style().palette().color(color_role::Theme);
     }
 
     color popup_menu::frame_color() const

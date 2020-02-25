@@ -91,9 +91,9 @@ namespace neogfx
     template <typename T>
     color basic_spin_box<T>::frame_color() const
     {
-        if (service<i_app>().current_style().palette().color().similar_intensity(background_color(), 0.03125))
+        if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
             return framed_widget::frame_color();
-        return service<i_app>().current_style().palette().color().mid(background_color());
+        return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
     template <typename T>
@@ -280,7 +280,7 @@ namespace neogfx
     template <typename T>
     void basic_spin_box<T>::update_arrows()
     {
-        auto ink = service<i_app>().current_style().palette().text_color();
+        auto ink = service<i_app>().current_style().palette().color(color_role::Text);
         const char* sUpArrowImagePattern
         {
             "[9,5]"

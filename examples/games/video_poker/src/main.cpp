@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
     try
     {
         app.set_default_window_icon(ng::image(":/video_poker/resources/icon.png"));
-        app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
-        app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+        app.change_style("Light").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+        app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
         ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
 

@@ -631,7 +631,7 @@ namespace neogfx
             static const boost::basic_format<char> sDefaultFormat("%1%");
             return sDefaultFormat;
         }
-        optional_color cell_color(const item_presentation_model_index&, item_cell_color_type) const override
+        optional_color cell_color(const item_presentation_model_index&, color_role) const override
         {
             return optional_color{};
         }

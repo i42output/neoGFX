@@ -24,6 +24,7 @@
 
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/color.hpp>
+#include <neogfx/app/i_palette.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
@@ -49,13 +50,6 @@ namespace neogfx
         WhenFocused,
         OnInputEvent
     };
-
-    enum class item_cell_color_type : uint8_t
-    {
-        Foreground = 0x01,
-        Background = 0x02,
-    };
-    typedef item_cell_color_type item_cell_color_type;
 
     inline item_cell_selection_flags operator|(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
     {
@@ -181,7 +175,7 @@ namespace neogfx
         virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const = 0;
         virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString, bool& aError) const = 0;
         virtual boost::basic_format<char> cell_format(const item_presentation_model_index& aIndex) const = 0;
-        virtual optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const = 0;
+        virtual optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const = 0;
         virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_size cell_image_size(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;

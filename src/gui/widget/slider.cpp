@@ -76,7 +76,7 @@ namespace neogfx
             selectionRect.y = selection.y;
         }
         if (normalized_value() > 0.0)
-            aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, service<i_app>().current_style().palette().selection_color());
+            aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, service<i_app>().current_style().palette().color(color_role::Selection));
         rect rectIndicator = indicator_box();
         color indicatorColor = foreground_color();
         if (iDragOffset != std::nullopt)

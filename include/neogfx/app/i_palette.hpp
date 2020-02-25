@@ -26,6 +26,18 @@
 
 namespace neogfx
 {
+    enum color_role : uint32_t
+    {
+        Theme,
+        Background,
+        Foreground,
+        Text,
+        Selection,
+        Hover,
+        WidgetDetailPrimary,
+        WidgetDetailSecondary
+    };
+
     class i_palette
     {
     public:
@@ -33,30 +45,10 @@ namespace neogfx
     public:
         virtual ~i_palette() {}
     public:
-        virtual bool has_color() const = 0;
-        virtual neogfx::color color() const = 0;
-        virtual void set_color(const optional_color& aDefaultColor) = 0;
-        virtual bool has_background_color() const = 0;
-        virtual neogfx::color background_color() const = 0;
-        virtual void set_background_color(const optional_color& aBackgroundColor) = 0;
-        virtual bool has_foreground_color() const = 0;
-        virtual neogfx::color foreground_color() const = 0;
-        virtual void set_foreground_color(const optional_color& aForegroundColor) = 0;
-        virtual bool has_text_color() const = 0;
-        virtual neogfx::color text_color() const = 0;
-        virtual void set_text_color(const optional_color& aTextColor) = 0;
-        virtual bool has_selection_color() const = 0;
-        virtual neogfx::color selection_color() const = 0;
-        virtual void set_selection_color(const optional_color& aSelectionColor) = 0;
-        virtual bool has_hover_color() const = 0;
-        virtual neogfx::color hover_color() const = 0;
-        virtual void set_hover_color(const optional_color& aHoverColor) = 0;
-        virtual bool has_widget_detail_primary_color() const = 0;
-        virtual neogfx::color widget_detail_primary_color() const = 0;
-        virtual void set_widget_detail_primary_color(const optional_color& aWidgetDetailPrimaryColor) = 0;
-        virtual bool has_widget_detail_secondary_color() const = 0;
-        virtual neogfx::color widget_detail_secondary_color() const = 0;
-        virtual void set_widget_detail_secondary_color(const optional_color& aWidgetDetailSecondaryColor) = 0;
+        virtual bool has_color(color_role aRole) const = 0;
+        virtual neogfx::color color(color_role aRole) const = 0;
+        virtual const optional_color& maybe_color(color_role aRole) const = 0;
+        virtual void set_color(color_role aRole, const optional_color& aColor) = 0;
         // helpers
     public:
         neogfx::color text_color_for_widget(const i_widget& aWidget) const
@@ -80,7 +72,7 @@ namespace neogfx
                     break;
                 }
             } while (w->has_parent());
-            auto defaultTextColor = text_color();
+            auto defaultTextColor = color(color_role::Text);
             if (textColor == std::nullopt || textColor->similar_intensity(defaultTextColor))
                 textColor = defaultTextColor;
             return *textColor;

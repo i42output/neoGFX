@@ -38,32 +38,12 @@ namespace neogfx
         bool operator==(const i_palette& aOther) const;
         bool operator!=(const i_palette& aOther) const;
     public:
-        bool has_color() const override;
-        neogfx::color color() const override;
-        void set_color(const optional_color& aColor) override;
-        bool has_background_color() const override;
-        neogfx::color background_color() const override;
-        void set_background_color(const optional_color& aBackgroundColor) override;
-        bool has_foreground_color() const override;
-        neogfx::color foreground_color() const override;
-        void set_foreground_color(const optional_color& aForegroundColor) override;
-        bool has_text_color() const override;
-        neogfx::color text_color() const override;
-        void set_text_color(const optional_color& aTextColor) override;
-        bool has_selection_color() const override;
-        neogfx::color selection_color() const override;
-        void set_selection_color(const optional_color& aSelectionColor) override;
-        bool has_hover_color() const override;
-        neogfx::color hover_color() const override;
-        void set_hover_color(const optional_color& aHoverColor) override;
-        bool has_widget_detail_primary_color() const override;
-        neogfx::color widget_detail_primary_color() const override;
-        void set_widget_detail_primary_color(const optional_color& aWidgetDetailPrimaryColor) override;
-        bool has_widget_detail_secondary_color() const override;
-        neogfx::color widget_detail_secondary_color() const override;
-        void set_widget_detail_secondary_color(const optional_color& aWidgetDetailSecondaryColor) override;
+        bool has_color(color_role aRole) const override;
+        neogfx::color color(color_role aRole) const override;
+        const optional_color& maybe_color(color_role aRole) const override;
+        void set_color(color_role aRole, const optional_color& aColor) override;
     private:
-        optional_color iColor;
+        optional_color iThemeColor;
         optional_color iBackgroundColor;
         optional_color iForegroundColor;
         optional_color iTextColor;

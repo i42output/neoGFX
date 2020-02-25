@@ -51,7 +51,7 @@ namespace neogfx
         rect line = client_rect(false);
         line.deflate(size{ 0.0_dip, 2.0_dip });
         line.cx = 1.0;
-        color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().foreground_color());
+        color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));
         aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0x80));
         ++line.x;
         aGraphicsContext.fill_rect(line, ink.lighter(0x40).with_alpha(0x80));
@@ -264,7 +264,7 @@ namespace neogfx
         iPermanentWidgetLayout.set_margins(neogfx::margins{});
         auto update_size_grip = [this](style_aspect)
         {
-            auto ink1 = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().foreground_color());
+            auto ink1 = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));
             ink1 = ink1.light() ? ink1.darker(0x40) : ink1.lighter(0x40);
             auto ink2 = ink1.darker(0x30);
             if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)

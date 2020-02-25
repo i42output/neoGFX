@@ -30,9 +30,9 @@ namespace neogfx
 
     color text_field::input_box_container::frame_color() const
     {
-        if (service<i_app>().current_style().palette().color().similar_intensity(background_color(), 0.03125))
+        if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
             return framed_widget::frame_color();
-        return service<i_app>().current_style().palette().color().mid(background_color());
+        return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
     text_field::text_field(const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :

@@ -272,7 +272,7 @@ namespace neogfx
                 if (cellRect.y > clipRect.bottom())
                     continue;
                 finished = false;
-                optional_color backgroundColor = presentation_model().cell_color(itemIndex, item_cell_color_type::Background);
+                optional_color backgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Background);
                 if (backgroundColor != std::nullopt)
                 {
@@ -351,9 +351,9 @@ namespace neogfx
                         aGraphicsContext.draw_texture(cell_rect(itemIndex, aGraphicsContext, cell_part::Image), *cellImage);
                     auto cellTextRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Text);
                     auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGraphicsContext);
-                    optional_color textColor = presentation_model().cell_color(itemIndex, item_cell_color_type::Foreground);
+                    optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Foreground);
                     if (textColor == std::nullopt)
-                        textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().text_color();
+                        textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
                     aGraphicsContext.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
                 }
                 if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == itemIndex && has_focus())
@@ -917,8 +917,8 @@ namespace neogfx
         if (!selection_model().has_current_index() || selection_model().current_index() != newIndex)
             selection_model().set_current_index(newIndex);
         iEditing = newIndex;
-        if (presentation_model().cell_color(newIndex, item_cell_color_type::Background) != optional_color{})
-            editor().set_background_color(presentation_model().cell_color(newIndex, item_cell_color_type::Background));
+        if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
+            editor().set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
         editor().set_margins(presentation_model().cell_margins(*this));
         auto editorRect = cell_rect(newIndex, cell_part::Text);
         editorRect.inflate(presentation_model().cell_margins(*this));
@@ -927,14 +927,14 @@ namespace neogfx
         if (editor_has_text_edit())
         {
             auto& textEdit = editor_text_edit();
-            if (presentation_model().cell_color(newIndex, item_cell_color_type::Background) != optional_color{})
-                textEdit.set_background_color(presentation_model().cell_color(newIndex, item_cell_color_type::Background));
+            if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
+                textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
             if (&editor() != &textEdit)
                 textEdit.set_margins(neogfx::margins{});
-            optional_color textColor = presentation_model().cell_color(newIndex, item_cell_color_type::Foreground);
+            optional_color textColor = presentation_model().cell_color(newIndex, color_role::Foreground);
             if (textColor == std::nullopt)
-                textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().text_color();
-            optional_color backgroundColor = presentation_model().cell_color(newIndex, item_cell_color_type::Background);
+                textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
+            optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
             textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
             textEdit.set_text(presentation_model().cell_to_string(newIndex));
             textEdit.Focus([this, newIndex](neogfx::focus_event fe)

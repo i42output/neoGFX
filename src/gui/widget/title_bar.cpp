@@ -226,7 +226,7 @@ namespace neogfx
 
     void title_bar::update_textures()
     {
-        auto ink = service<i_app>().current_style().palette().text_color();
+        auto ink = service<i_app>().current_style().palette().color(color_role::Text);
         auto paper = background_color();
         const char* sMinimizeTexturePattern
         {

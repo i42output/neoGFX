@@ -42,9 +42,9 @@ namespace neogfx
             return item_cell_editable::No;
         }
     public:    
-        optional_color cell_color(const item_presentation_model_index& aIndex, item_cell_color_type aColorType) const override
+        optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
         {
-            if (aColorType == item_cell_color_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+            if (aColorRole == color_role::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
             {
                 auto backgroundColor = iDropList.view().background_color().dark() ? color::Black : color::White;
                 if (backgroundColor == iDropList.view().background_color())
@@ -52,7 +52,7 @@ namespace neogfx
                 return backgroundColor;
             }
             else
-                return item_presentation_model::cell_color(aIndex, aColorType);
+                return item_presentation_model::cell_color(aIndex, aColorRole);
         }
     private:
         drop_list& iDropList;
@@ -161,7 +161,7 @@ namespace neogfx
     {
         if (list_view::has_background_color())
             return list_view::background_color();
-        return service<i_app>().current_style().palette().color();
+        return service<i_app>().current_style().palette().color(color_role::Theme);
     }
 
     drop_list_popup::drop_list_popup(drop_list& aDropList) :
@@ -1062,7 +1062,7 @@ namespace neogfx
 
     void drop_list::update_arrow()
     {
-        auto ink = service<i_app>().current_style().palette().text_color();
+        auto ink = service<i_app>().current_style().palette().color(color_role::Text);
         if (iDownArrowTexture == std::nullopt || iDownArrowTexture->first != ink)
         {
             const char* sDownArrowImagePattern

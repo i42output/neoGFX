@@ -518,9 +518,9 @@ namespace neogfx
         if (effectively_enabled() && !scrollable_widget::has_frame_color() && is_active())
         {
             if (!is_nested())
-                return service<i_app>().current_style().palette().selection_color();
+                return service<i_app>().current_style().palette().color(color_role::Selection);
             else
-                return service<i_app>().current_style().palette().widget_detail_secondary_color();
+                return service<i_app>().current_style().palette().color(color_role::WidgetDetailSecondary);
         }
         else
             return scrollable_widget::frame_color().with_alpha(is_active() ? 0xFF : 0x40);

@@ -82,8 +82,8 @@ namespace neogfx
             color fillColor = background_color().dark() ? color::Black : color::White;
             if (openSubMenu && menu().type() == menu_type::MenuBar)
             {
-                if (fillColor.similar_intensity(service<i_app>().current_style().palette().color(), 0.05))
-                    fillColor = service<i_app>().current_style().palette().selection_color();
+                if (fillColor.similar_intensity(service<i_app>().current_style().palette().color(color_role::Theme), 0.05))
+                    fillColor = service<i_app>().current_style().palette().color(color_role::Selection);
             }
             else if (fillColor.similar_intensity(background_color(), 0.05))
                 fillColor = fillColor.dark() ? fillColor.lighter(0x20) : fillColor.darker(0x20);
@@ -100,7 +100,7 @@ namespace neogfx
             if (menu_item().type() == menu_item_type::SubMenu && menu().type() == menu_type::Popup)
             {
                 bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
-                color ink = openSubMenu ? service<i_app>().current_style().palette().selection_color()
+                color ink = openSubMenu ? service<i_app>().current_style().palette().color(color_role::Selection)
                     : background_color().light() ? background_color().darker(0x80) : background_color().lighter(0x80);
                 if (iSubMenuArrow == std::nullopt || iSubMenuArrow->first != ink)
                 {
@@ -177,7 +177,7 @@ namespace neogfx
             widget::background_color() :
             parent().has_background_color() ?
                 parent().background_color() :
-                service<i_app>().current_style().palette().color();
+                service<i_app>().current_style().palette().color(color_role::Theme);
     }
 
     bool menu_item_widget::can_capture() const
@@ -333,7 +333,7 @@ namespace neogfx
                         "00000000000001100000000000000000"
                         "00000000000001100000000000000000"
                     };
-                    color ink = service<i_app>().current_style().palette().text_color();
+                    color ink = service<i_app>().current_style().palette().color(color_role::Text);
                     iIcon.set_image(!high_dpi() ?
                         image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", color{} },{ "ink", ink } } } :
                         image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });

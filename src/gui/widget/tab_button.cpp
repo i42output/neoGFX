@@ -59,7 +59,7 @@ namespace neogfx
             {
                 double radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
                 aGraphicsContext.fill_circle(
-                    to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().centre())), radius, service<i_app>().current_style().palette().text_color());
+                    to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().centre())), radius, service<i_app>().current_style().palette().color(color_role::Text));
             }
             if (has_focus())
             {
@@ -71,7 +71,7 @@ namespace neogfx
     private:
         void update_textures()
         {
-            auto ink = service<i_app>().current_style().palette().text_color();
+            auto ink = service<i_app>().current_style().palette().color(color_role::Text);
             auto paper = background_color();
             const char* sTexture
             {

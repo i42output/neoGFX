@@ -634,9 +634,9 @@ namespace neogfx
 
     color text_edit::frame_color() const
     {
-        if (service<i_app>().current_style().palette().color().similar_intensity(background_color(), 0.03125))
+        if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
             return scrollable_widget::frame_color();
-        return service<i_app>().current_style().palette().color().mid(background_color());
+        return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
     bool text_edit::can_undo() const
@@ -1896,8 +1896,8 @@ namespace neogfx
                 auto const& glyphFont = glyph.font(iGlyphs);
                 auto nextTextAppearance = selected ?
                     text_appearance{ 
-                        service<i_app>().current_style().palette().selection_color().light() ? color::Black : color::White,
-                        has_focus() ? service<i_app>().current_style().palette().selection_color() : service<i_app>().current_style().palette().selection_color().with_alpha(64) } :
+                        service<i_app>().current_style().palette().color(color_role::Selection).light() ? color::Black : color::White,
+                        has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) } :
                     text_appearance{
                         style.glyph_color() == neolib::none ?
                             std::holds_alternative<color>(style.text_color()) ?

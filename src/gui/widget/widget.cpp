@@ -1132,7 +1132,7 @@ namespace neogfx
         if (has_foreground_color())
             return *ForegroundColor;
         else
-            return service<i_app>().current_style().palette().foreground_color();
+            return service<i_app>().current_style().palette().color(color_role::Foreground);
     }
 
     void widget::set_foreground_color(const optional_color& aForegroundColor)
@@ -1151,7 +1151,7 @@ namespace neogfx
         if (has_background_color())
             return *BackgroundColor;
         else
-            return service<i_app>().current_style().palette().background_color();
+            return service<i_app>().current_style().palette().color(color_role::Background);
     }
 
     void widget::set_background_color(const optional_color& aBackgroundColor)
@@ -1168,7 +1168,7 @@ namespace neogfx
         if (!w->transparent_background() && w->has_background_color())
             return w->background_color();
         else
-            return service<i_app>().current_style().palette().color();
+            return service<i_app>().current_style().palette().color(color_role::Theme);
     }
 
     bool widget::has_font() const
