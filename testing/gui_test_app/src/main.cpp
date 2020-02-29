@@ -52,23 +52,6 @@ public:
         }
         return ng::basic_item_model<void*, 9u>::cell_data(aIndex);
     }
-    const ng::item_cell_info& cell_info(const ng::item_model_index& aIndex) const override
-    {
-        if (aIndex.column() == 4)
-        {
-            if (aIndex.row() == 4)
-            {
-                static const ng::item_cell_info sReadOnly = { ng::item_cell_flags::Default & ~ng::item_cell_flags::Editable };
-                return sReadOnly;
-            }
-            if (aIndex.row() == 5)
-            {
-                static const ng::item_cell_info sUnselectable = { ng::item_cell_flags::Default & ~ng::item_cell_flags::Selectable };
-                return sUnselectable;
-            }
-        }
-        return ng::basic_item_model<void*, 9u>::cell_info(aIndex);
-    }
 };
 
 template <typename Model>
@@ -90,6 +73,21 @@ public:
     {
     }
 public:
+    ng::item_cell_flags cell_flags(const ng::item_presentation_model_index& aIndex) const override
+    {
+        if constexpr (model_type::container_traits::is_flat)
+        {
+            auto const modelIndex = base_type::to_item_model_index(aIndex);
+            if (modelIndex.column() == 4)
+            {
+                if (modelIndex.row() == 4)
+                    return base_type::cell_flags(aIndex) & ~ng::item_cell_flags::Editable;
+                if (modelIndex.row() == 5)
+                    return base_type::cell_flags(aIndex) & ~ng::item_cell_flags::Selectable;
+            }
+        }
+        return base_type::cell_flags(aIndex);
+    }
     void set_color_role(const std::optional<ng::color_role>& aColorRole)
     {
         iColorRole = aColorRole;
@@ -772,12 +770,42 @@ int main(int argc, char* argv[])
             }
         } 
 
-        auto update_column5_heading = [&]()
+        itemModel.set_column_min_value(0, 0u);
+        itemModel.set_column_max_value(0, 9999u);
+        itemModel.set_column_min_value(1, 0u);
+        itemModel.set_column_max_value(1, 9999u);
+        itemModel.set_column_step_value(1, 1u);
+        tableView1.set_model(itemModel);
+        my_item_presentation_model ipm1{ itemModel };
+        tableView1.set_presentation_model(ipm1);
+        ipm1.set_column_editable_when_focused(4);
+        ipm1.set_column_editable_when_focused(5);
+        ipm1.set_column_editable_when_focused(6);
+        ipm1.set_column_editable_when_focused(7);
+        ipm1.set_column_editable_when_focused(8);
+        tableView2.set_model(itemModel);
+        my_item_presentation_model ipm2{ itemModel };
+        ipm2.set_column_editable_when_focused(0);
+        ipm2.set_column_editable_when_focused(1);
+        ipm2.set_column_editable_when_focused(2);
+        ipm2.set_column_editable_when_focused(3);
+        tableView2.set_presentation_model(ipm2);
+        tableView2.column_header().set_expand_last_column(true);
+        tableView1.Keyboard([&tableView1](const ng::keyboard_event& ke)
+        {
+            if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
+                tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
+        });
+
+        ipm1.ItemChecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.check(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
+        ipm1.ItemUnchecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.uncheck(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
+
+        auto update_column5_heading = [&](bool aReadOnly, bool aUnselectable)
         {
             std::string heading;
-            if (itemModel.column_read_only(5))
+            if (aReadOnly)
                 heading = "Read only";
-            if (!itemModel.column_selectable(5))
+            if (aUnselectable)
             {
                 if (!heading.empty())
                     heading += "/\n";
@@ -789,36 +817,6 @@ int main(int argc, char* argv[])
                 heading = "*****" + heading + "*****";
             itemModel.set_column_name(5, heading);
         };
-
-        itemModel.set_column_min_value(0, 0u);
-        itemModel.set_column_max_value(0, 9999u);
-        itemModel.set_column_min_value(1, 0u);
-        itemModel.set_column_max_value(1, 9999u);
-        itemModel.set_column_step_value(1, 1u);
-        tableView1.set_model(itemModel);
-        my_item_presentation_model ipm1{ itemModel };
-        tableView1.set_presentation_model(ipm1);
-        ipm1.set_column_editable(4, ng::item_cell_editable::WhenFocused);
-        ipm1.set_column_editable(5, ng::item_cell_editable::WhenFocused);
-        ipm1.set_column_editable(6, ng::item_cell_editable::WhenFocused);
-        ipm1.set_column_editable(7, ng::item_cell_editable::WhenFocused);
-        ipm1.set_column_editable(8, ng::item_cell_editable::WhenFocused);
-        tableView2.set_model(itemModel);
-        my_item_presentation_model ipm2{ itemModel };
-        ipm2.set_column_editable(0, ng::item_cell_editable::WhenFocused);
-        ipm2.set_column_editable(1, ng::item_cell_editable::WhenFocused);
-        ipm2.set_column_editable(2, ng::item_cell_editable::WhenFocused);
-        ipm2.set_column_editable(3, ng::item_cell_editable::WhenFocused);
-        tableView2.set_presentation_model(ipm2);
-        tableView2.column_header().set_expand_last_column(true);
-        tableView1.Keyboard([&tableView1](const ng::keyboard_event& ke)
-        {
-            if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
-                tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
-        });
-
-        ipm1.ItemChecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.check(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
-        ipm1.ItemUnchecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.uncheck(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
 
         ng::item_tree_model treeModel;
         auto entities = treeModel.insert_item(treeModel.send(), "Entity");
@@ -855,14 +853,14 @@ int main(int argc, char* argv[])
         ui.treeView2.set_model(treeModel);
         ui.treeView2.set_presentation_model(itpm2);
 
-        ui.checkTableViewsCheckable.checked([&]() { itemModel.set_column_checkable(0, true); itemModel.set_column_checkable(1, true); treeModel.set_column_checkable(0, true); });
-        ui.checkTableViewsCheckable.unchecked([&]() { itemModel.set_column_checkable(0, false); itemModel.set_column_checkable(1, false); treeModel.set_column_checkable(0, false); });
-        ui.checkTableViewsCheckableTriState.checked([&]() { itemModel.set_column_tri_state_checkable(0, true); itemModel.set_column_tri_state_checkable(1, true); treeModel.set_column_tri_state_checkable(0, true); });
-        ui.checkTableViewsCheckableTriState.unchecked([&]() { itemModel.set_column_tri_state_checkable(0, false); itemModel.set_column_tri_state_checkable(1, false); treeModel.set_column_tri_state_checkable(0, false); });
-        ui.checkColumn5ReadOnly.checked([&]() { itemModel.set_column_read_only(5, true); update_column5_heading(); });
-        ui.checkColumn5ReadOnly.unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
-        ui.checkColumn5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
-        ui.checkColumn5Unselectable.unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
+        ui.checkTableViewsCheckable.checked([&]() { ipm1.set_column_checkable(0, true); ipm2.set_column_checkable(0, true); ipm1.set_column_checkable(1, true); ipm2.set_column_checkable(1, true); itpm1.set_column_checkable(0, true); itpm2.set_column_checkable(0, true); });
+        ui.checkTableViewsCheckable.unchecked([&]() { ipm1.set_column_checkable(0, false); ipm2.set_column_checkable(0, false); ipm1.set_column_checkable(1, false); ipm2.set_column_checkable(1, false); itpm1.set_column_checkable(0, false); itpm2.set_column_checkable(0, false); });
+        ui.checkTableViewsCheckableTriState.checked([&]() { ipm1.set_column_tri_state_checkable(0, true); ipm1.set_column_tri_state_checkable(1, true); ipm2.set_column_tri_state_checkable(0, true); ipm2.set_column_tri_state_checkable(1, true); itpm1.set_column_tri_state_checkable(0, true); itpm2.set_column_tri_state_checkable(0, true); });
+        ui.checkTableViewsCheckableTriState.unchecked([&]() { ipm1.set_column_tri_state_checkable(0, false); ipm1.set_column_tri_state_checkable(1, false); ipm2.set_column_tri_state_checkable(0, false); ipm2.set_column_tri_state_checkable(1, false); itpm1.set_column_tri_state_checkable(0, false); itpm2.set_column_tri_state_checkable(0, false); });
+        ui.checkColumn5ReadOnly.checked([&]() { ipm1.set_column_read_only(5, true); ipm2.set_column_read_only(5, true); update_column5_heading(true, ui.checkColumn5Unselectable.is_checked()); });
+        ui.checkColumn5ReadOnly.unchecked([&]() { ipm1.set_column_read_only(5, false); ipm2.set_column_read_only(5, false); update_column5_heading(false, ui.checkColumn5Unselectable.is_checked()); });
+        ui.checkColumn5Unselectable.checked([&]() { ipm1.set_column_selectable(5, false); ipm2.set_column_selectable(5, false); update_column5_heading(ui.checkColumn5ReadOnly.is_checked(), true); });
+        ui.checkColumn5Unselectable.unchecked([&]() { ipm1.set_column_selectable(5, true); ipm2.set_column_selectable(5, true); update_column5_heading(ui.checkColumn5ReadOnly.is_checked(), false); });
 
         ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); itpm1.set_column_image_size(0, ng::size{ 16_dip }); });
         ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); itpm1.set_column_image_size(0, ng::optional_size{}); });

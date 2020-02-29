@@ -37,9 +37,9 @@ namespace neogfx
         {
         }
     public:
-        item_cell_editable column_editable(item_presentation_model_index::value_type) const override
+        item_cell_flags column_flags(item_presentation_model_index::value_type aColumn) const override
         {
-            return item_cell_editable::No;
+            return item_presentation_model::column_flags(aColumn) & ~item_cell_flags::Editable;
         }
     public:    
         optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override

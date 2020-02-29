@@ -85,9 +85,9 @@ namespace neogfx
         typedef std::vector<item_presentation_model_index::optional_column_type, typename std::allocator_traits<allocator_type>:: template rebind_alloc<item_presentation_model_index::optional_column_type>> column_map_type;
         struct column_info
         {
-            column_info(const item_model_index::optional_column_type modelColumn = {}) : modelColumn{ modelColumn }, editable { item_cell_editable::OnInputEvent } {}
+            column_info(const item_model_index::optional_column_type modelColumn = {}) : modelColumn{ modelColumn } {}
             mutable item_model_index::optional_column_type modelColumn;
-            item_cell_editable editable;
+            item_cell_flags flags = item_cell_flags::Default;
             mutable optional_dimension width;
             mutable std::optional<std::string> headingText;
             mutable font headingFont;
@@ -202,10 +202,7 @@ namespace neogfx
             columnWidth = 0.0;
             for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
             {
-                auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
-                if (modelIndex.column() >= item_model().columns(modelIndex))
-                    continue;
-                auto cellWidth = cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx;
+                auto const cellWidth = cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx;
                 columnWidth = std::max(*columnWidth, cellWidth);
             }
             return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
@@ -238,13 +235,19 @@ namespace neogfx
             column(aColumnIndex).headingExtents = std::nullopt;
             ColumnInfoChanged.trigger(aColumnIndex);
         }
-        item_cell_editable column_editable(item_presentation_model_index::column_type aColumnIndex) const override
+        item_cell_flags column_flags(item_presentation_model_index::column_type aColumnIndex) const override
         {
-            return column(aColumnIndex).editable;
+            if (aColumnIndex < columns())
+                return column(aColumnIndex).flags;
+            return item_cell_flags::Default;
         }
-        void set_column_editable(item_presentation_model_index::column_type aColumnIndex, item_cell_editable aEditable) override
+        void set_column_flags(item_presentation_model_index::column_type aColumnIndex, item_cell_flags aFlags) override
         {
-            column(aColumnIndex).editable = aEditable;
+            if (column(aColumnIndex).flags != aFlags)
+            {
+                column(aColumnIndex).flags = aFlags;
+                ColumnInfoChanged.trigger(aColumnIndex);
+            }
         }
         optional_size column_image_size(item_presentation_model_index::column_type aColumnIndex) const override
         {
@@ -298,7 +301,7 @@ namespace neogfx
             if (cell_meta(aIndex).checked != aState)
             {
                 cell_meta(aIndex).checked = aState;
-                if (aState == std::nullopt && (item_model().cell_info(to_item_model_index(aIndex)).flags & item_cell_flags::CheckableTriState) != item_cell_flags::CheckableTriState)
+                if (aState == std::nullopt && !cell_tri_state_checkable(aIndex))
                     throw not_tri_state_checkable();
                 cell_meta(aIndex).checked = aState;
                 ItemToggled.trigger(aIndex);
@@ -479,6 +482,20 @@ namespace neogfx
             return result;
         }
     public:
+        item_cell_flags cell_flags(const item_presentation_model_index& aIndex) const override
+        {
+            if (cell_meta(aIndex).flags != std::nullopt)
+                return *cell_meta(aIndex).flags;
+            return column_flags(aIndex.column());
+        }
+        void set_cell_flags(const item_presentation_model_index& aIndex, item_cell_flags aFlags) override
+        {
+            if (cell_meta(aIndex).flags != aFlags)
+            {
+                cell_meta(aIndex).flags = aFlags;
+                ItemChanged.trigger(aIndex);
+            }
+        }
         cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const override
         {
             if (aIndex.row() < rows())
@@ -495,13 +512,6 @@ namespace neogfx
             throw bad_index();
         }
     public:
-        item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const override
-        {
-            if ((item_model().cell_info(to_item_model_index(aIndex)).flags & item_cell_flags::Editable) == item_cell_flags::Editable)
-                return column_editable(aIndex.column());
-            else
-                return item_cell_editable::No;
-        }
         std::string cell_to_string(const item_presentation_model_index& aIndex) const override
         {
             auto const modelIndex = to_item_model_index(aIndex);
@@ -649,8 +659,7 @@ namespace neogfx
         }
         optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
         {
-            auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
-            if ((cellInfo.flags & item_cell_flags::Checkable) == item_cell_flags::Checkable)
+            if (cell_checkable(aIndex))
             {
                 auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : * cell_font(aIndex));
                 dimension const length = units_converter(aGraphicsContext).from_device_units(cellFont.height() * (2.0 / 3.0));
@@ -687,7 +696,7 @@ namespace neogfx
                 return units_converter(aGraphicsContext).from_device_units(*cellMeta.extents);
             size cellExtents = cell_glyph_text(aIndex, aGraphicsContext).extents();
             auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
-            if ((cellInfo.flags & item_cell_flags::Editable) == item_cell_flags::Editable && cellInfo.dataStep != neolib::none)
+            if (cell_editable(aIndex) && cellInfo.dataStep != neolib::none)
             {
                 cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)

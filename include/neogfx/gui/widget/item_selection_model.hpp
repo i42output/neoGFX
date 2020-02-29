@@ -307,7 +307,7 @@ namespace neogfx
         }    
         bool is_selectable(const item_presentation_model_index& aIndex) const override
         {
-            return (presentation_model().item_model().cell_info(presentation_model().to_item_model_index(aIndex)).flags & item_cell_flags::Selectable) == item_cell_flags::Selectable;
+            return (presentation_model().cell_flags(aIndex) & item_cell_flags::Selectable) == item_cell_flags::Selectable;
         }
         void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
         {
@@ -333,7 +333,7 @@ namespace neogfx
     public:
         bool is_editable(const item_presentation_model_index& aIndex) const override
         {
-            return is_selectable(aIndex) && !(has_presentation_model() && presentation_model().cell_editable(aIndex) == item_cell_editable::No);
+            return is_selectable(aIndex) && has_presentation_model() && presentation_model().cell_editable(aIndex);
         }
     private:
         void do_set_current_index(const optional_item_presentation_model_index& aNewIndex)

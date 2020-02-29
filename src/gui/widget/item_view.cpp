@@ -281,7 +281,6 @@ namespace neogfx
                 }
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
-                    auto const& cellInfo = model().cell_info(presentation_model().to_item_model_index(itemIndex));
                     if (model().is_tree() && model().has_children(presentation_model().to_item_model_index(itemIndex)))
                     {
                         thread_local struct : i_skinnable_item
@@ -314,7 +313,7 @@ namespace neogfx
                         skinnableItem.treeExpanderRect = cell_rect(itemIndex, aGraphicsContext, cell_part::TreeExpander);
                         service<i_skin_manager>().active_skin().draw_tree_expander(aGraphicsContext, skinnableItem, presentation_model().cell_meta(itemIndex).expanded);
                     }
-                    if ((cellInfo.flags & item_cell_flags::Checkable) == item_cell_flags::Checkable)
+                    if (presentation_model().cell_checkable(itemIndex))
                     {
                         thread_local struct : i_skinnable_item
                         {
@@ -386,7 +385,7 @@ namespace neogfx
             auto item = item_at(root().mouse_position() - origin());
             if (item != std::nullopt)
                 selection_model().set_current_index(*item);
-            if (editing() == std::nullopt && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
+            if (editing() == std::nullopt && selection_model().has_current_index() && presentation_model().cell_editable_when_focused(selection_model().current_index()))
                 edit(selection_model().current_index());
         }
         else if (aFocusReason != focus_reason::Other)
@@ -409,11 +408,10 @@ namespace neogfx
                     presentation_model().toggle_expanded(*item);
                     return;
                 }
-                if ((model().cell_info(presentation_model().to_item_model_index(*item)).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable &&
-                    cell_rect(*item, cell_part::CheckBox).contains(aPosition))
+                if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;
                 selection_model().set_current_index(*item);
-                if (!iClickedCheckBox && selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
+                if (!iClickedCheckBox && selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable_when_focused(*item))
                     edit(*item);
             }            
             if (capturing())
@@ -446,8 +444,7 @@ namespace neogfx
                     presentation_model().toggle_expanded(*item);
                     return;
                 }
-                if ((model().cell_info(presentation_model().to_item_model_index(*item)).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable &&
-                    cell_rect(*item, cell_part::CheckBox).contains(aPosition))
+                if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;
                 bool itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 selection_model().set_current_index(*item);
@@ -455,7 +452,7 @@ namespace neogfx
                 {
                     if (itemWasCurrent)
                     {
-                        if (presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
+                        if (presentation_model().cell_editable_on_input_event(*item))
                             edit(*item);
                         else
                             service<i_basic_services>().system_beep();
@@ -699,7 +696,7 @@ namespace neogfx
     {
         update_scrollbar_visibility();
         update();
-        if (editing() != std::nullopt && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
+        if (editing() != std::nullopt && !presentation_model().cell_editable(*editing()))
             end_edit(false);
     }
 
@@ -790,7 +787,7 @@ namespace neogfx
             {
                 if (aPreviousIndex != std::nullopt)
                 {
-                    if (editing() != std::nullopt && presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
+                    if (editing() != std::nullopt && presentation_model().cell_editable_when_focused(*aCurrentIndex) && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
                         edit(*aCurrentIndex);
                     else if (editing() != std::nullopt)
                         end_edit(true);
@@ -861,7 +858,7 @@ namespace neogfx
 
     void item_view::edit(const item_presentation_model_index& aItemIndex)
     {
-        if (editing() == aItemIndex || beginning_edit() || ending_edit() || presentation_model().cell_editable(aItemIndex) == item_cell_editable::No )
+        if (editing() == aItemIndex || beginning_edit() || ending_edit() || !presentation_model().cell_editable(aItemIndex) )
             return;
         neolib::scoped_flag sf{ iBeginningEdit };
         auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
@@ -973,7 +970,7 @@ namespace neogfx
     {
         if (editing() == std::nullopt)
             return;
-        if (aCommit && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
+        if (aCommit && !presentation_model().cell_editable(*editing()))
             aCommit = false;
         neolib::scoped_flag sf{ iEndingEdit };
         bool hadFocus = (editor().has_focus() || (has_root() && root().has_focused_widget() && root().focused_widget().is_descendent_of(editor())));
@@ -1226,7 +1223,7 @@ namespace neogfx
     {
         auto oldHoverCell = iHoverCell;
         iHoverCell = item_at(*aPosition);
-        if (iHoverCell != oldHoverCell || (iHoverCell && (model().cell_info(presentation_model().to_item_model_index(*iHoverCell)).flags & item_cell_flags::Checkable) == item_cell_flags::Checkable))
+        if (iHoverCell != oldHoverCell || (iHoverCell && (presentation_model().cell_checkable(*iHoverCell))))
         {
             if (oldHoverCell)
                 update(cell_rect(*oldHoverCell, cell_part::Background));

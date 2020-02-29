@@ -71,47 +71,6 @@ namespace neogfx
         ChoosePointer,
         ChooseCustomType
     };
-
-    enum class item_cell_flags : uint32_t
-    {
-        Enabled                 = 0x00000001,
-        Selectable              = 0x00000002,
-        Editable                = 0x00000004,
-        Checkable               = 0x00000010,
-        CheckableBiState        = Checkable,
-        CheckableTriState       = 0x00000020 | Checkable,
-        Draggable               = 0x00001000,
-        Droppable               = 0x00002000,
-
-        Default                 = Enabled | Selectable | Editable
-    };
-
-    inline item_cell_flags operator|(item_cell_flags lhs, item_cell_flags rhs)
-    {
-        return static_cast<item_cell_flags>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
-    }
-
-    inline item_cell_flags operator&(item_cell_flags lhs, item_cell_flags rhs)
-    {
-        return static_cast<item_cell_flags>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
-    }
-
-    inline item_cell_flags& operator|=(item_cell_flags& lhs, item_cell_flags rhs)
-    {
-        lhs = lhs | rhs;
-        return lhs;
-    }
-
-    inline item_cell_flags& operator&=(item_cell_flags& lhs, item_cell_flags rhs)
-    {
-        lhs = lhs & rhs;
-        return lhs;
-    }
-
-    inline item_cell_flags operator~(item_cell_flags flags)
-    {
-        return static_cast<item_cell_flags>(~static_cast<uint32_t>(flags));
-    }
 }
 
 template <>
@@ -151,19 +110,6 @@ const neolib::enum_enumerators_t<neogfx::item_cell_data_category> neolib::enum_e
     declare_enum_string(neogfx::item_cell_data_category, ChoosePointer)
     declare_enum_string(neogfx::item_cell_data_category, ChooseCustomType)
 };
-
-template <>
-const neolib::enum_enumerators_t<neogfx::item_cell_flags> neolib::enum_enumerators_v<neogfx::item_cell_flags>
-{
-    declare_enum_string(neogfx::item_cell_flags, Enabled)
-    declare_enum_string(neogfx::item_cell_flags, Selectable)
-    declare_enum_string(neogfx::item_cell_flags, Editable)
-    declare_enum_string(neogfx::item_cell_flags, Checkable)
-    declare_enum_string(neogfx::item_cell_flags, CheckableBiState)
-    declare_enum_string(neogfx::item_cell_flags, CheckableTriState)
-    declare_enum_string(neogfx::item_cell_flags, Draggable)
-    declare_enum_string(neogfx::item_cell_flags, Droppable)
-};                                               
 
 namespace neogfx
 {
@@ -281,7 +227,6 @@ namespace neogfx
 
     struct item_cell_info
     {
-        item_cell_flags flags = item_cell_flags::Default;
         item_data_type dataType;
         item_cell_data dataMin;
         item_cell_data dataMax;
@@ -312,14 +257,6 @@ namespace neogfx
         virtual uint32_t columns(const item_model_index& aIndex) const = 0;
         virtual const std::string& column_name(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_name(item_model_index::column_type aColumnIndex, const std::string& aName) = 0;
-        virtual bool column_selectable(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) = 0;
-        virtual bool column_read_only(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_read_only(item_model_index::column_type aColumnIndex, bool aReadOnly) = 0;
-        virtual bool column_checkable(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_checkable(item_model_index::column_type aColumnIndex, bool aCheckable) = 0;
-        virtual bool column_tri_state_checkable(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_tri_state_checkable(item_model_index::column_type aColumnIndex, bool aCheckableTriState) = 0;
         virtual item_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) = 0;
         virtual const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const = 0;
