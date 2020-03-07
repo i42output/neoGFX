@@ -21,17 +21,17 @@
 
 namespace neogfx
 {
-    std::string save_file_dialog(const file_dialog_spec& aSpec)
+    file_path save_file_dialog(const file_dialog_spec& aSpec)
     {
         throw std::logic_error("neogfx::save_file_dialog: not yet implemented");
     }
 
-    std::string open_file_dialog(const file_dialog_spec& aSpec, bool aAllowMultipleSelection)
+    file_paths open_file_dialog(const file_dialog_spec& aSpec, bool aAllowMultipleSelection)
     {
         throw std::logic_error("neogfx::open_file_dialog: not yet implemented");
     }
 
-	std::string select_folder_dialog(const std::string& aTitle, const std::string& aDefaultPath)
+    file_path select_folder_dialog(const std::string& aTitle, const file_path& aDefaultPath)
     {
         throw std::logic_error("neogfx::select_folder_dialog: not yet implemented");
     }
