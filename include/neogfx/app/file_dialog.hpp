@@ -28,13 +28,13 @@ namespace neogfx
     typedef std::string file_path;
     typedef std::vector<std::string> file_paths;
 
-	struct file_dialog_spec
-	{
-		std::string title;
+    struct file_dialog_spec
+    {
+        std::string title;
         file_path defaultPathAndFile;
-		std::vector<std::string> filterPatterns;
-		std::string filterPatternDescritpion;
-	};
+        std::vector<std::string> filterPatterns;
+        std::string filterPatternDescritpion;
+    };
 
     file_path save_file_dialog(const file_dialog_spec& aSpec = {});
     file_paths open_file_dialog(const file_dialog_spec& aSpec = {}, bool aAllowMultipleSelection = false);
