@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace neogfx
 {
@@ -40,5 +41,5 @@ namespace neogfx
 
     optional_file_path save_file_dialog(const file_dialog_spec& aSpec = {});
     file_paths open_file_dialog(const file_dialog_spec& aSpec = {}, bool aAllowMultipleSelection = false);
-    optional_file_path select_folder_dialog(const std::string& aTitle = {}, const file_path& aDefaultPath = {});
+    optional_file_path select_folder_dialog(const std::string& aTitle = {}, const optional_file_path& aDefaultPath = {});
 }
