@@ -25,8 +25,8 @@
 
 namespace neogfx
 {
-    typedef std::string file_path;
-    typedef std::vector<std::string> file_paths;
+    using file_path = std::string;
+    using file_paths = std::vector<std::string>;
 
     struct file_dialog_spec
     {
