@@ -27,7 +27,7 @@
 namespace neogfx
 {
     using file_path = std::string;
-    using file_paths = std::vector<std::string>;
+    using file_paths = std::vector<file_path>;
 
     using optional_file_path = std::optional<file_path>; ///< If dialog is cancelled value is std::nullopt
 
