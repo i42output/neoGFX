@@ -123,6 +123,7 @@ namespace neogfx
         virtual void centre_on_parent(bool aSetMinimumSize = true) = 0;
         virtual bool window_enabled() const = 0;
         virtual void counted_window_enable(bool aEnable) = 0;
+        virtual void modal_enable(bool aEnable) = 0;
     public:
         virtual bool is_dismissing_children() const = 0;
         virtual bool can_dismiss(const i_widget* aClickedWidget) const = 0;

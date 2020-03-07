@@ -26,20 +26,29 @@
 
 namespace neogfx
 {
+    class i_widget;
+
     using file_path = std::string;
     using file_paths = std::vector<file_path>;
-
     using optional_file_path = std::optional<file_path>; ///< If dialog is cancelled value is std::nullopt
+    using optional_file_paths = std::optional<file_paths>; ///< If dialog is cancelled value is std::nullopt
+
+    using filter_pattern = std::string;
+    using filter_patterns = std::vector<filter_pattern>;
 
     struct file_dialog_spec
     {
-        std::string title;
+        std::optional<std::string> title;
         optional_file_path defaultPathAndFile;
-        std::vector<std::string> filterPatterns;
-        std::string filterPatternDescription;
+        filter_patterns filterPatterns;
+        std::optional<std::string> filterPatternDescription;
     };
 
-    optional_file_path save_file_dialog(const file_dialog_spec& aSpec = {});
-    file_paths open_file_dialog(const file_dialog_spec& aSpec = {}, bool aAllowMultipleSelection = false);
-    optional_file_path select_folder_dialog(const std::string& aTitle = {}, const optional_file_path& aDefaultPath = {});
+    optional_file_path save_file_dialog(file_dialog_spec const& aSpec = {});
+    optional_file_paths open_file_dialog(file_dialog_spec const& aSpec = {}, bool aAllowMultipleSelection = false);
+    optional_file_path select_folder_dialog(std::optional<std::string> const& aTitle = {}, optional_file_path const& aDefaultPath = {});
+
+    optional_file_path save_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec = {});
+    optional_file_paths open_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec = {}, bool aAllowMultipleSelection = false);
+    optional_file_path select_folder_dialog(i_widget& aParent, std::optional<std::string> const& aTitle = {}, optional_file_path const& aDefaultPath = {});
 }

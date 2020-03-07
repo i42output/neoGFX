@@ -912,6 +912,14 @@ namespace neogfx
             enable(iCountedEnable >= 0);
     }
 
+    void window::modal_enable(bool aEnable)
+    {
+        counted_window_enable(aEnable);
+        update_modality(aEnable);
+        if (aEnable && (style() & window_style::NoActivate) != window_style::NoActivate)
+            activate();
+    }
+
     void window::init()
     {
         iSurfaceDestroyed.emplace(surface().native_surface().as_lifetime());

@@ -13,6 +13,7 @@
 #include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
+#include <neogfx/app/file_dialog.hpp>
 
 #include "test.ui.hpp"
 
@@ -273,6 +274,16 @@ int main(int argc, char* argv[])
         {
             if (fullRefresh)
                 window.update();
+        });
+
+        app.actionFileOpen.triggered([&]()
+        {
+            auto textFile = ng::open_file_dialog(window, ng::file_dialog_spec{ "Edit Text File", {}, { "*.txt" }, "Text Files" });
+            if (textFile)
+            {
+                std::ifstream file{ (*textFile)[0] };
+                ui.textEdit.set_plain_text(std::string{ std::istreambuf_iterator<char>{file}, {} });
+            }
         });
         
         app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()

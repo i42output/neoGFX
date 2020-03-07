@@ -152,6 +152,7 @@ namespace neogfx
         void centre_on_parent(bool aSetMinimumSize = true) override;
         bool window_enabled() const override;
         void counted_window_enable(bool aEnable) override;
+        void modal_enable(bool aEnable) override;
     public:
         bool is_dismissing_children() const override;
         bool can_dismiss(const i_widget* aClickedWidget) const override;
