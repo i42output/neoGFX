@@ -33,7 +33,7 @@ namespace neogfx
         std::string title;
         file_path defaultPathAndFile;
         std::vector<std::string> filterPatterns;
-        std::string filterPatternDescritpion;
+        std::string filterPatternDescription;
     };
 
     file_path save_file_dialog(const file_dialog_spec& aSpec = {});
