@@ -25,12 +25,15 @@
     <Filter Include="Game\Source Files">
       <UniqueIdentifier>{116b0a7b-b514-4f31-a00d-0f792944974c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="UI Files">
-      <UniqueIdentifier>{0a6d76fe-1c36-4df9-865d-7e0edd3713a7}</UniqueIdentifier>
+    <Filter Include="Source Files\app">
+      <UniqueIdentifier>{00a4f40f-f7e9-48e4-88a2-4085803b6516}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <Filter Include="Source Files\app\native">
+      <UniqueIdentifier>{285f99c6-1625-43bd-8712-220b4f463d1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\app\native\3rdparty">
+      <UniqueIdentifier>{79280b3e-734a-4e55-be84-1c834a647c07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp">
@@ -57,9 +60,6 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\app\native\sdl_basic_services.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -70,9 +70,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font.hpp">
@@ -939,6 +936,18 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp">
+      <Filter>Source Files\app\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\sdl_basic_services.hpp">
+      <Filter>Source Files\app\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.h">
+      <Filter>Source Files\app\native\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\app\file_dialog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -949,15 +958,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\app\resource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\clipboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -970,16 +970,10 @@
     <ClCompile Include="..\..\..\src\gui\window\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\app\app.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\layout\layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp">
@@ -1064,9 +1058,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\module_resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp">
@@ -1156,9 +1147,6 @@
     <ClCompile Include="..\..\..\src\gui\layout\vertical_layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\app\action.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1190,9 +1178,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\palette.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\html.cpp">
@@ -1249,9 +1234,6 @@
     <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\app\i18n.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\layout\border_layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1301,12 +1283,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\animator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\native\sdl_services.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\event_processing_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp">
@@ -1377,6 +1353,45 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\render_target.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\action.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\app.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\clipboard.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\event_processing_context.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\i18n.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\module_resource.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\palette.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\resource.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\style.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp">
+      <Filter>Source Files\app\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\sdl_services.cpp">
+      <Filter>Source Files\app\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.c">
+      <Filter>Source Files\app\native\3rdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\file_dialog.cpp">
+      <Filter>Source Files\app</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
