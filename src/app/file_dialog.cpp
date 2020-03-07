@@ -21,7 +21,7 @@
 
 namespace neogfx
 {
-    file_path save_file_dialog(const file_dialog_spec& aSpec)
+    optional_file_path save_file_dialog(const file_dialog_spec& aSpec)
     {
         throw std::logic_error("neogfx::save_file_dialog: not yet implemented");
     }
@@ -31,7 +31,7 @@ namespace neogfx
         throw std::logic_error("neogfx::open_file_dialog: not yet implemented");
     }
 
-    file_path select_folder_dialog(const std::string& aTitle, const file_path& aDefaultPath)
+    optional_file_path select_folder_dialog(const std::string& aTitle, const file_path& aDefaultPath)
     {
         throw std::logic_error("neogfx::select_folder_dialog: not yet implemented");
     }
