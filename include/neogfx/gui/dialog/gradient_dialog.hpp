@@ -50,6 +50,8 @@ namespace neogfx
         vertical_layout iLayout4;
         group_box iSelectorGroupBox;
         gradient_widget iGradientSelector;
+        horizontal_layout iLayout3_1;
+        push_button iImportGradient;
         horizontal_layout iLayout3_2;
         group_box iDirectionGroupBox;
         radio_button iDirectionHorizontalRadioButton;

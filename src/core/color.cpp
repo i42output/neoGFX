@@ -24,6 +24,7 @@
 #include <boost/lexical_cast.hpp>
 #include <neolib/vecarray.hpp>
 #include <neolib/string_ci.hpp>
+#include <neogfx/core/numerical.hpp>
 #include <neogfx/core/color.hpp>
 
 namespace neogfx
@@ -56,6 +57,24 @@ namespace neogfx
             (static_cast<argb>(aRed) << RedShift) |
             (static_cast<argb>(aGreen) << GreenShift) |
             (static_cast<argb>(aBlue) << BlueShift) }
+    {
+    }
+
+    color::color(const vec3& aValue) :
+        color{
+            static_cast<component>(aValue[0] * 0xFF),
+            static_cast<component>(aValue[1] * 0xFF),
+            static_cast<component>(aValue[2] * 0xFF),
+            static_cast<component>(1.0 * 0xFF) }
+    {
+    }
+
+    color::color(const vec3f& aValue) :
+        color{
+            static_cast<component>(aValue[0] * 0xFF),
+            static_cast<component>(aValue[1] * 0xFF),
+            static_cast<component>(aValue[2] * 0xFF),
+            static_cast<component>(1.0 * 0xFF) }
     {
     }
 
@@ -490,6 +509,20 @@ namespace neogfx
         fix();
     }
 
+    gradient::gradient(const gradient& aOther, const color_stop_list& aColorStops, const alpha_stop_list& aAlphaStops) :
+        iUseCache{ aOther.iUseCache },
+        iColorStops{ aColorStops },
+        iAlphaStops{ aAlphaStops },
+        iDirection{ aOther.iDirection },
+        iOrientation{ aOther.iOrientation },
+        iShape{ aOther.iShape },
+        iSize{ aOther.iSize },
+        iExponents{ aOther.iExponents },
+        iCentre{ aOther.iCentre },
+        iSmoothness{ aOther.iSmoothness }
+    {
+    }
+
     bool gradient::use_cache() const
     {
         return iUseCache;
@@ -637,17 +670,6 @@ namespace neogfx
         return alpha_stops().size();
     }
     
-    namespace
-    {
-        template <typename T>
-        T interpolate(T aX1, T aX2, double aAmount)
-        {
-            double x1 = aX1;
-            double x2 = aX2;
-            return static_cast<T>((x2 - x1) * aAmount + x1);
-        }
-    }
-
     color gradient::at(double aPos) const
     {
         color result = color_at(aPos);
@@ -679,10 +701,10 @@ namespace neogfx
             --right;
         aPos = std::min(std::max(left->first, aPos), right->first);
         double nc = (left != right ? (aPos - left->first) / (right->first - left->first) : 0.0);
-        red = interpolate(left->second.red(), right->second.red(), nc);
-        green = interpolate(left->second.green(), right->second.green(), nc);
-        blue = interpolate(left->second.blue(), right->second.blue(), nc);
-        alpha = interpolate(left->second.alpha(), right->second.alpha(), nc);
+        red = lerp(left->second.red(), right->second.red(), nc);
+        green = lerp(left->second.green(), right->second.green(), nc);
+        blue = lerp(left->second.blue(), right->second.blue(), nc);
+        alpha = lerp(left->second.alpha(), right->second.alpha(), nc);
         return color{ red, green, blue, alpha };
     }
 
@@ -708,7 +730,7 @@ namespace neogfx
             --right;
         aPos = std::min(std::max(left->first, aPos), right->first);
         double na = (left != right ? (aPos - left->first) / (right->first - left->first) : 0.0);
-        color::component alpha = static_cast<color::component>((interpolate(left->second, right->second, na) / 255.0) * 255.0);
+        color::component alpha = static_cast<color::component>((lerp(left->second, right->second, na) / 255.0) * 255.0);
         return alpha;
     }
 

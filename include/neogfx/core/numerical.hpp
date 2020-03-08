@@ -50,6 +50,14 @@ namespace neogfx
             constexpr T two = static_cast<T>(2.0);
         }
 
+        template <typename T, typename SFINAE = std::enable_if_t<std::is_scalar_v<T>, sfinae>>
+        inline T lerp(T aX1, T aX2, double aAmount)
+        {
+            double x1 = aX1;
+            double x2 = aX2;
+            return static_cast<T>((x2 - x1) * aAmount + x1);
+        }
+
         inline angle to_rad(angle aDegrees)
         {
             return aDegrees / 180.0 * pi<angle>();
@@ -571,6 +579,19 @@ namespace neogfx
         inline basic_vector<T, 3, Type, IsScalar> midpoint(const basic_vector<T, 3, Type, IsScalar>& left, const basic_vector<T, 3, Type, IsScalar>& right)
         {
             return (left + right) / constants::two<T>;
+        }
+
+        template <typename T, uint32_t Size, typename Type, bool IsScalar>
+        inline basic_vector<T, Size, Type, IsScalar> lerp(const basic_vector<T, Size, Type, IsScalar>& aV1, const basic_vector<T, Size, Type, IsScalar>& aV2, double aAmount)
+        {
+            basic_vector<T, Size, Type, IsScalar> result;
+            for (uint32_t i = 0; i < Size; ++i)
+            {
+                double x1 = aV1[i];
+                double x2 = aV2[i];
+                result[i] = static_cast<T>((x2 - x1) * aAmount + x1);
+            }
+            return result;
         }
 
         /* todo: specializations that use SIMD intrinsics. */

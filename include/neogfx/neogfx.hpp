@@ -35,6 +35,8 @@ namespace neogfx
     using namespace neolib::stdint_suffix;
     using namespace std::string_literals;
 
+    using neolib::sfinae;
+
     using neolib::to_const;
 
     using neolib::ref_ptr;

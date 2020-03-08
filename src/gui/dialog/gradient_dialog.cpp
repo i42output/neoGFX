@@ -17,13 +17,71 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neogfx/neogfx.hpp>
-#include <neolib/thread.hpp>
-
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
+#include <neolib/string_utils.hpp>
+#include <neolib/thread.hpp>
+#include <neogfx/core/numerical.hpp>
+#include <neogfx/gui/dialog/message_box.hpp>
+#include <neogfx/app/file_dialog.hpp>
 
 namespace neogfx
 {
+    namespace
+    {
+        inline gradient convert_gimp_gradient(const gradient& aGradient, const std::string& aPath)
+        {
+            // todo: midpoint support
+            std::ifstream gimpGradient{ aPath };
+            std::string line;
+            std::getline(gimpGradient, line);
+            std::getline(gimpGradient, line);
+            std::getline(gimpGradient, line);
+            struct segment
+            {
+                double start;
+                double mid;
+                double end;
+                vec4 startRgba;
+                vec4 endRgba;
+            };
+            std::optional<segment> s;
+            gradient::color_stop_list colorStops;
+            gradient::alpha_stop_list alphaStops;
+            while (std::getline(gimpGradient, line))
+            {
+                neolib::vecarray<std::string, 13> bits;
+                neolib::tokens(line, " "s, bits);
+                if (bits.size() != 13)
+                    continue;
+                s = segment
+                {
+                    boost::lexical_cast<double>(bits[0]),
+                    boost::lexical_cast<double>(bits[1]),
+                    boost::lexical_cast<double>(bits[2]),
+                    vec4{
+                        boost::lexical_cast<double>(bits[3]),
+                        boost::lexical_cast<double>(bits[4]),
+                        boost::lexical_cast<double>(bits[5]),
+                        boost::lexical_cast<double>(bits[6]),
+                    },
+                    vec4{
+                        boost::lexical_cast<double>(bits[7]),
+                        boost::lexical_cast<double>(bits[8]),
+                        boost::lexical_cast<double>(bits[9]),
+                        boost::lexical_cast<double>(bits[10]),
+                    }
+                };
+                colorStops.emplace_back(s->start, vec3{ s->startRgba.xyz });
+                alphaStops.emplace_back(s->start, s->startRgba[3] * 0xFF);
+                colorStops.emplace_back(s->mid, lerp(vec3{ s->startRgba.xyz }, vec3{ s->endRgba.xyz }, 0.5));
+                alphaStops.emplace_back(s->mid, lerp(s->startRgba[3], s->endRgba[3], 0.5) * 0xFF);
+            }
+            colorStops.emplace_back(s->end, vec3{ s->endRgba.xyz });
+            alphaStops.emplace_back(s->end, s->endRgba[3] * 0xFF);
+            return gradient{ aGradient, colorStops, alphaStops };
+        }
+    }
+
     void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
     class gradient_dialog::preview_box : public framed_widget
@@ -110,6 +168,8 @@ namespace neogfx
         iLayout{ client_layout() }, iLayout2{ iLayout }, iLayout3{ iLayout2 }, iLayout4{ iLayout2 },
         iSelectorGroupBox{ iLayout3 },
         iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },
+        iLayout3_1{ iSelectorGroupBox.item_layout() },
+        iImportGradient{ iLayout3_1, image{ ":/neogfx/resources/icons.naa#open.png" } },
         iLayout3_2{ iLayout3, alignment::Top },
         iDirectionGroupBox{ iLayout3_2, "Direction"_t },
         iDirectionHorizontalRadioButton{ iDirectionGroupBox.item_layout(), "Horizontal"_t },
@@ -197,6 +257,7 @@ namespace neogfx
         iLayout3.set_margins(neogfx::margins{});
         iLayout3.set_spacing(standardSpacing);
         iLayout5.set_alignment(alignment::Top);
+        iImportGradient.image_widget().set_fixed_size(size{ 16.0_dip });
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);
         iSmoothnessSpinBox.set_step(0.1);
@@ -246,6 +307,23 @@ namespace neogfx
 
         iGradientSelector.GradientChanged([this]() { update_widgets(); });
 
+        iImportGradient.Clicked([this]()
+        {
+            auto const imports = open_file_dialog(*this, file_dialog_spec{ "Import Gradients", {}, { "*.ggr" }, "Gradient Files (*.ggr)" }, true);
+            if (imports)
+            {
+                // todo: populate swatch library
+                try
+                {
+                    set_gradient(convert_gimp_gradient(gradient(), (*imports)[0]));
+                }
+                catch (...)
+                {
+                    message_box::error("Import Gradient", "Failed to import gradient(s)");
+                }
+            }
+        });
+
         iSmoothnessSpinBox.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSpinBox.value() / 100.0)); });
         iSmoothnessSlider.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSlider.value() / 100.0)); });
 
@@ -259,7 +337,11 @@ namespace neogfx
         iTopRightRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(corner::TopRight)); });
         iBottomRightRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(corner::BottomRight)); });
         iBottomLeftRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(corner::BottomLeft)); });
-        iAngleRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_orientation(0.0)); });
+        iAngleRadioButton.checked([this]() 
+        { 
+            if (!std::holds_alternative<double>(iGradientSelector.gradient().orientation())) 
+                iGradientSelector.set_gradient(gradient().with_orientation(0.0)); 
+        });
 
         iAngleSpinBox.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_orientation(to_rad(iAngleSpinBox.value()))); });
         iAngleSlider.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_orientation(to_rad(iAngleSlider.value()))); });

@@ -718,6 +718,8 @@ namespace neogfx
             color(static_cast<component>(aRed), static_cast<component>(aGreen), static_cast<component>(aBlue), static_cast<component>(aAlpha))
         {
         }
+        color(const vec3& aValue);
+        color(const vec3f& aValue);
         color(const vec4& aValue);
         color(const vec4f& aValue);
         color(const std::string& aTextValue);
@@ -886,6 +888,7 @@ namespace neogfx
         gradient(const color& aColor1, const color& aColor2, gradient_direction aDirection = gradient_direction::Vertical);
         gradient(const color_stop_list& aColorStops, gradient_direction aDirection = gradient_direction::Vertical);
         gradient(const color_stop_list& aColorStops, const alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
+        gradient(const gradient& aOther, const color_stop_list& aColorStops, const alpha_stop_list& aAlphaStops);
         gradient(const std::initializer_list<color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
         // operations
     public:
