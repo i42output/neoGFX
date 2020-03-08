@@ -19,8 +19,7 @@
 
 #include <neogfx/app/file_dialog.hpp>
 #include <neolib/string_utils.hpp>
-#include <neogfx/app/i_app.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/app/modal_task.hpp>
 #include "native/3rdparty/tinyfiledialogs.h"
 
 namespace neogfx
@@ -83,31 +82,16 @@ namespace neogfx
 
     optional_file_path save_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec)
     {
-        aParent.root().modal_enable(false);
-        auto result = std::async(do_save_file_dialog, aSpec);
-        while (result.wait_for(std::chrono::seconds{ 0 }) != std::future_status::ready)
-            service<i_app>().process_events();
-        aParent.root().modal_enable(true);
-        return result.get();
+        return modal_task<optional_file_path>(aParent, "neogfx::save_file_dialog", do_save_file_dialog, aSpec);
     }
 
     optional_file_paths open_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec, bool aAllowMultipleSelection)
     {
-        aParent.root().modal_enable(false);
-        auto result = std::async(do_open_file_dialog, aSpec, aAllowMultipleSelection);
-        while (result.wait_for(std::chrono::seconds{ 0 }) != std::future_status::ready)
-            service<i_app>().process_events();
-        aParent.root().modal_enable(true);
-        return result.get();
+        return modal_task<optional_file_paths>(aParent, "neogfx::open_file_dialog", do_open_file_dialog, aSpec, aAllowMultipleSelection);
     }
 
     optional_file_path select_folder_dialog(i_widget& aParent, std::optional<std::string> const& aTitle, optional_file_path const& aDefaultPath)
     {
-        aParent.root().modal_enable(false);
-        auto result = std::async(do_select_folder_dialog, aTitle, aDefaultPath);
-        while (result.wait_for(std::chrono::seconds{ 0 }) != std::future_status::ready)
-            service<i_app>().process_events();
-        aParent.root().modal_enable(true);
-        return result.get();
+        return modal_task<optional_file_path>(aParent, "neogfx::select_folder_dialog", do_select_folder_dialog, aTitle, aDefaultPath);
     }
 }

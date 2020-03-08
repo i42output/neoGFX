@@ -269,6 +269,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\i_service_factory.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_shared_menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_style.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\modal_task.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\module_resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\palette.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\resource.hpp" />

@@ -1,4 +1,4 @@
-// event_processing_conteixt.cpp
+// modal_task.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -17,33 +17,23 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/event_processing_context.hpp>
-#include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
-    event_processing_context::event_processing_context(const std::string& aName) :
-        event_processing_context{ service<neolib::async_task>(), aName }
+    template <typename T, typename... TaskArgs>
+    inline T modal_task(i_widget& aParent, const std::string& aTaskName, TaskArgs&&... aTaskArgs)
     {
-    }
-
-    event_processing_context::event_processing_context(neolib::async_task& aParent, const std::string& aName) :
-        iName{ aName }
-    {
-        if (aParent.have_message_queue() && aParent.message_queue().in_idle())
-            throw currently_idle();
-        if (!aParent.have_message_queue())
-            aParent.create_message_queue();
-    }
-
-    const std::string& event_processing_context::name() const
-    {
-        return iName;
-    }
-
-    bool event_processing_context::process_events()
-    {
-        return service<i_app>().process_events(*this);
+        aParent.root().modal_enable(false);
+        auto result = std::async(std::forward<TaskArgs>(aTaskArgs)...);
+        event_processing_context epc{ aTaskName };
+        while (result.wait_for(std::chrono::seconds{ 0 }) != std::future_status::ready)
+            epc.process_events();
+        aParent.root().modal_enable(true);
+        return result.get();
     }
 }
