@@ -71,10 +71,10 @@ Tool Tips                       | 0       |
 Status Bar                      | 100     |
 Progress Bar                    | 0       |
 Font Picker                     | 100     |
-Colour Gradient Selector        | 100     |
+Colour Gradient Selector        | 95      |     Swatch library
 Colour Picker                   | 100     |
 Date/Time                       | 0       |
-File Browsers (Native)          | 0       |
+File Browsers (Native)          | 99      |
 Drag and drop                   | 10      |
 UI/Resource Description (RJSON) | 40      |
 tool: neoGFX Design Studio      | 0       |
