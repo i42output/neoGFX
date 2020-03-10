@@ -28,6 +28,9 @@ namespace neogfx
     template <typename ModelIndexType>
     class item_index
     {
+        typedef item_index<ModelIndexType> self_type;
+    public:
+        typedef self_type abstract_type; // todo: create abstract interface
     public:
         typedef uint32_t value_type;
         typedef value_type row_type;

@@ -114,12 +114,28 @@ namespace neogfx
         return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
     }
 
+    inline item_cell_selection_flags& operator|=(item_cell_selection_flags& lhs, item_cell_selection_flags rhs)
+    {
+        lhs = lhs | rhs;
+        return lhs;
+    }
+
+    inline item_cell_selection_flags& operator&=(item_cell_selection_flags& lhs, item_cell_selection_flags rhs)
+    {
+        lhs = lhs & rhs;
+        return lhs;
+    }
+
     inline item_cell_selection_flags operator~(item_cell_selection_flags aLhs)
     {
         return static_cast<item_cell_selection_flags>(~static_cast<uint32_t>(aLhs));
     }
 
-    struct item_presentation_model_index : item_index<item_presentation_model_index> { using item_index::item_index; };
+    struct item_presentation_model_index : item_index<item_presentation_model_index> 
+    { 
+        typedef item_presentation_model_index abstract_type; // todo: create abstract interface
+        using item_index::item_index; 
+    };
     typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
     class i_item_presentation_model : public i_object

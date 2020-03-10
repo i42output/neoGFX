@@ -168,9 +168,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_page_container.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

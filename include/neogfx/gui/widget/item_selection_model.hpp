@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/scoped.hpp>
+#include <neolib/map.hpp>
 
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
@@ -37,6 +38,8 @@ namespace neogfx
         define_declared_event(PresentationModelChanged, presentation_model_changed, i_item_presentation_model&, i_item_presentation_model&)
         define_declared_event(PresentationModelRemoved, presentation_model_removed, i_item_presentation_model&)
         define_declared_event(ModeChanged, mode_changed, item_selection_mode)
+    private:
+        using concrete_item_selection = neolib::map<item_presentation_model_index, selection_area>;
     public:
         item_selection_model(item_selection_mode aMode = item_selection_mode::SingleSelection) :
             iModel{ nullptr },
@@ -135,7 +138,7 @@ namespace neogfx
                 iModel = nullptr;
                 iCurrentIndex = std::nullopt;
                 iSavedModelIndex = std::nullopt;
-                iSelection = item_selection{};
+                iSelection = {};
                 PresentationModelRemoved.trigger(*oldModel);
             });
 
@@ -311,15 +314,20 @@ namespace neogfx
         }
         void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
         {
-            /* todo */
-            (void)aIndex;
-            (void)aOperation;
-        }
-        void select(const item_selection::range& aRange, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
-        {
-            /* todo */
-            (void)aRange;
-            (void)aOperation;
+            auto update = [&, this](concrete_item_selection& aSelection, bool aUpdateCells = true)
+            {
+                if ((aOperation & item_selection_operation::Clear) == item_selection_operation::Clear)
+                {
+                    if (aUpdateCells)
+                        for (auto& cellIndex : *this)
+                            presentation_model().cell_meta(cellIndex).selection &= ~item_cell_selection_flags::Selected;
+                    aSelection.clear();
+                }
+                // todo
+            };
+            update(iSelection, true);
+            SelectionChanged.trigger(iSelection, iPreviousSelection);
+            update(iPreviousSelection);
         }
     public:
         bool sorting() const override
@@ -358,7 +366,8 @@ namespace neogfx
         item_selection_mode iMode;
         optional_item_presentation_model_index iCurrentIndex;
         optional_item_model_index iSavedModelIndex;
-        item_selection iSelection;
+        concrete_item_selection iPreviousSelection;
+        concrete_item_selection iSelection;
         bool iSorting;
         bool iFiltering;
         sink iSink;

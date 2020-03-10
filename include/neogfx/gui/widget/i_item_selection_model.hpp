@@ -20,10 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_map.hpp>
 #include <neogfx/core/i_event.hpp>
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
-#include <neogfx/gui/widget/item_selection.hpp>
 
 namespace neogfx
 {
@@ -39,22 +39,23 @@ namespace neogfx
 
     enum class item_selection_operation
     {
-        None                    = 0x00,
-        Select                    = 0x01,
-        Deselect                = 0x02,
-        Toggle                    = 0x04,
-        Clear                    = 0x08,
-        Row                        = 0x10,
-        Column                    = 0x20,
-        SelectRow                = Select | Row,
-        SelectColumn            = Select | Column,
-        DeselectRow                = Deselect | Row,
-        DeselectColumn            = Deselect | Column,
-        ToggleRow                = Toggle | Row,
-        ToggleColumn            = Toggle | Column,
-        ClearAndSelect            = Clear | Select,
-        ClearAndSelectRow        = Clear | Select | Row,
-        ClearAndSelectColumn    = Clear | Select | Column
+        None                 = 0x00,
+        Select               = 0x01,
+        Deselect             = 0x02,
+        Toggle               = 0x03,
+        Clear                = 0x08,
+        Row                  = 0x10,
+        Column               = 0x20,
+
+        SelectRow            = Select | Row,
+        SelectColumn         = Select | Column,
+        DeselectRow          = Deselect | Row,
+        DeselectColumn       = Deselect | Column,
+        ToggleRow            = Toggle | Row,
+        ToggleColumn         = Toggle | Column,
+        ClearAndSelect       = Clear | Select,
+        ClearAndSelectRow    = Clear | Select | Row,
+        ClearAndSelectColumn = Clear | Select | Column
     };
 
     enum class index_location
@@ -74,7 +75,128 @@ namespace neogfx
         RowBelow
     };
 
-    class i_item_selection_model;
+    inline item_selection_operation operator|(item_selection_operation aLhs, item_selection_operation aRhs)
+    {
+        return static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline item_selection_operation operator&(item_selection_operation aLhs, item_selection_operation aRhs)
+    {
+        return static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+    }
+
+    inline item_selection_operation operator~(item_selection_operation aLhs)
+    {
+        return static_cast<item_selection_operation>(~static_cast<uint32_t>(aLhs));
+    }
+
+    struct selection_area
+    {
+        typedef selection_area abstract_type; // todo: create abstract interface
+        item_presentation_model_index topLeft;
+        item_presentation_model_index bottomRight;
+    };
+
+    using item_selection = neolib::i_map<item_presentation_model_index, selection_area>;
+
+    class selection_iterator
+    {
+        friend class i_item_selection_model;
+    public:
+        using value_type = item_presentation_model_index;
+        using pointer = value_type const*;
+        using reference = value_type const&;
+        using difference_type = std::ptrdiff_t;
+        using iterator_catagory = std::forward_iterator_tag;
+    public:
+        selection_iterator() : 
+            iSelection{ nullptr }, iIterator {}
+        {
+        }
+    private:
+        selection_iterator(item_selection const& aSelection, item_selection::const_iterator aPosition) :
+            iSelection{ &aSelection }, iIterator{ aPosition }
+        {
+        }
+    public:
+        bool operator==(const selection_iterator& aRhs) const
+        {
+            if (singular() || aRhs.singular())
+                return false;
+            else if (&selection() != &aRhs.selection())
+                return false;
+            else if (is_end() || aRhs.is_end())
+                return is_end() == aRhs.is_end();
+            else if (iterator() != aRhs.iterator())
+                return false;
+            else
+                return index() == aRhs.index();
+        }
+        bool operator!=(const selection_iterator& aRhs) const
+        {
+            return !(*this == aRhs);
+        }
+    public:
+        reference operator*() const
+        {
+            return index();
+        }
+        pointer operator->() const
+        {
+            return &index();
+        }
+    public:
+        selection_iterator& operator++()
+        {
+            index() += item_presentation_model_index{ 0, 1 };
+            if (index().column() > iIterator->second().bottomRight.column())
+            {
+                index().set_column(iIterator->second().topLeft.column());
+                index() += item_presentation_model_index{ 1, 0 };
+                if (index().row() > iIterator->second().bottomRight.row())
+                {
+                    ++iterator();
+                    index() = {};
+                }
+            }
+            return *this;
+        }
+    private:
+        bool singular() const
+        {
+            return iSelection == nullptr;
+        }
+        bool is_end() const
+        {
+            return !singular() && iterator() == selection().end();
+        }
+        item_selection const& selection() const
+        {
+            return *iSelection;
+        }
+        item_selection::const_iterator const& iterator() const
+        {
+            return iIterator;
+        }
+        item_selection::const_iterator& iterator()
+        {
+            return iIterator;
+        }
+        const item_presentation_model_index& index() const
+        {
+            if (iIndex == std::nullopt)
+                iIndex = iterator()->first();
+            return *iIndex;
+        }
+        item_presentation_model_index& index()
+        {
+            return const_cast<item_presentation_model_index&>(const_cast<selection_iterator const&>(*this).index());
+        }
+    private:
+        item_selection const* iSelection;
+        item_selection::const_iterator iIterator;
+        mutable std::optional<item_presentation_model_index> iIndex;
+    };
 
     class i_item_selection_model : public i_object
     {
@@ -112,27 +234,21 @@ namespace neogfx
         virtual const item_selection& selection() const = 0;
         virtual bool is_selected(const item_presentation_model_index& aIndex) const = 0;
         virtual bool is_selectable(const item_presentation_model_index& aIndex) const = 0;
-        virtual void select(const item_presentation_model_index& aIndex, item_selection_operation = item_selection_operation::Select) = 0;
-        virtual void select(const item_selection::range& aRange, item_selection_operation = item_selection_operation::Select) = 0;
+        virtual void select(const item_presentation_model_index& aIndex, item_selection_operation = item_selection_operation::ClearAndSelect) = 0;
     public:
         virtual bool sorting() const = 0;
         virtual bool filtering() const = 0;
     public:
         virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
+        // helpers
+    public:
+        selection_iterator begin() const
+        {
+            return selection_iterator{ selection(), selection().begin() };
+        }
+        selection_iterator end() const
+        {
+            return selection_iterator{ selection(), selection().end() };
+        }
     };
-
-    inline item_selection_operation operator|(item_selection_operation aLhs, item_selection_operation aRhs)
-    {
-        return static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-    }
-
-    inline item_selection_operation operator&(item_selection_operation aLhs, item_selection_operation aRhs)
-    {
-        return static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
-    }
-
-    inline item_selection_operation operator~(item_selection_operation aLhs)
-    {
-        return static_cast<item_selection_operation>(~static_cast<uint32_t>(aLhs));
-    }
 }

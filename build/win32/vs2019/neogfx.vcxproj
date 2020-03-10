@@ -445,7 +445,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\image_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_index.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_presentation_model.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_basic_item_model.hpp" />
