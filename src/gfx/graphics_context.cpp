@@ -463,8 +463,8 @@ namespace neogfx
     void graphics_context::draw_focus_rect(const rect& aRect) const
     {
         push_logical_operation(neogfx::logical_operation::Xor);
-        line_stipple_on(dpi_scale(1u), 0x5555);
-        draw_rect(deflate_rect(aRect, delta{ dpi_scale(1.0) - 1.0 }), pen(color::White, dpi_scale(1.0)));
+        line_stipple_on(1.0_dip, 0x5555);
+        draw_rect(aRect, pen{ color::White, 1.0_dip });
         line_stipple_off();
         pop_logical_operation();
     }
