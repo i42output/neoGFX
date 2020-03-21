@@ -23,6 +23,10 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_LCD_FILTER_H
+#ifdef _WIN32
+#include <Shlobj.h>
+#endif
+#include <neolib/file.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
@@ -116,13 +120,24 @@ namespace neogfx
             std::string get_system_font_directory()
             {
 #ifdef WIN32
-                std::string windowsDirectory;
-                windowsDirectory.resize(MAX_PATH);
-                GetWindowsDirectoryA(&windowsDirectory[0], static_cast<UINT>(windowsDirectory.size()));
-                windowsDirectory.resize(std::strlen(windowsDirectory.c_str()));
-                return windowsDirectory + "\\fonts";
+                char szPath[MAX_PATH];
+                GetWindowsDirectoryA(szPath, MAX_PATH);
+                return neolib::tidy_path(szPath) + "/fonts";
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Unknown system");
+#endif
+            }
+
+            std::string get_local_font_directory()
+            {
+#ifdef WIN32
+                char szPath[MAX_PATH];
+                if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, szPath)))
+                    return neolib::tidy_path(szPath) + "/../Local/Microsoft/Windows/Fonts";
+                else
+                    throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Error");
+#else
+                throw std::logic_error("neogfx::detail::platform_specific::get_local_font_directory: Unknown system");
 #endif
             }
 
@@ -171,27 +186,31 @@ namespace neogfx
         {
             throw error_initializing_font_library();
         }
-        std::string fontsDirectory = detail::platform_specific::get_system_font_directory();
-        for (boost::filesystem::directory_iterator file(fontsDirectory); file != boost::filesystem::directory_iterator(); ++file)
+        auto enumerate = [this](const std::string fontsDirectory)
         {
-            if (!boost::filesystem::is_regular_file(file->status())) 
-                continue;
-            try
+            for (boost::filesystem::directory_iterator file(fontsDirectory); file != boost::filesystem::directory_iterator(); ++file)
             {
-                if (is_font_file(file->path().string()))
+                if (!boost::filesystem::is_regular_file(file->status()))
+                    continue;
+                try
                 {
-                    auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, file->path().string());
-                    iFontFamilies[neolib::make_ci_string(font->family_name())].push_back(font);
+                    if (is_font_file(file->path().string()))
+                    {
+                        auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, file->path().string());
+                        iFontFamilies[neolib::make_ci_string(font->family_name())].push_back(font);
+                    }
+                }
+                catch (native_font::failed_to_load_font&)
+                {
+                }
+                catch (...)
+                {
+                    throw;
                 }
             }
-            catch (native_font::failed_to_load_font&)
-            {
-            }
-            catch (...)
-            {
-                throw;
-            }
-        }
+        };
+        enumerate(detail::platform_specific::get_system_font_directory());
+        enumerate(detail::platform_specific::get_local_font_directory());
         for (auto& famlily : iFontFamilies)
             std::sort(famlily.second.begin(), famlily.second.end(),
                 [](auto const& f1, auto const& f2) { return f1->min_style() < f2->min_style() || (f1->min_style() == f2->min_style() && f1->min_weight() < f2->min_weight()); });
