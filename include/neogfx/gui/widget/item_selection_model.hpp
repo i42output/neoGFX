@@ -1,4 +1,4 @@
-// item_selection_model.hpp
+// basic_item_selection_model.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -29,7 +29,8 @@
 
 namespace neogfx
 {
-    class item_selection_model : public object<i_item_selection_model>
+    template <typename Alloc = std::allocator<std::pair<const item_presentation_model_index, selection_area>>>
+    class basic_item_selection_model : public object<i_item_selection_model>
     {
     public:
         define_declared_event(CurrentIndexChanged, current_index_changed, const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
@@ -38,17 +39,19 @@ namespace neogfx
         define_declared_event(PresentationModelChanged, presentation_model_changed, i_item_presentation_model&, i_item_presentation_model&)
         define_declared_event(PresentationModelRemoved, presentation_model_removed, i_item_presentation_model&)
         define_declared_event(ModeChanged, mode_changed, item_selection_mode)
-    private:
-        using concrete_item_selection = neolib::map<item_presentation_model_index, selection_area>;
     public:
-        item_selection_model(item_selection_mode aMode = item_selection_mode::SingleSelection) :
+        typedef Alloc allocator_type;
+    private:
+        using concrete_item_selection = neolib::map<item_presentation_model_index, selection_area, std::less<item_presentation_model_index>, allocator_type>;
+    public:
+        basic_item_selection_model(item_selection_mode aMode = item_selection_mode::SingleSelection) :
             iModel{ nullptr },
             iMode{ aMode },
             iSorting{ false },
             iFiltering{ false }
         {
         }
-        item_selection_model(i_item_presentation_model& aModel, item_selection_mode aMode = item_selection_mode::SingleSelection) :
+        basic_item_selection_model(i_item_presentation_model& aModel, item_selection_mode aMode = item_selection_mode::SingleSelection) :
             iModel{ nullptr },
             iMode{ aMode },
             iSorting{ false },
@@ -56,7 +59,7 @@ namespace neogfx
         {
             set_presentation_model(aModel);
         }
-        ~item_selection_model()
+        ~basic_item_selection_model()
         {
             iSink.clear();
             set_destroying();
@@ -397,4 +400,6 @@ namespace neogfx
         bool iFiltering;
         sink iSink;
     };
+
+    using item_selection_model = basic_item_selection_model<>;
 }
