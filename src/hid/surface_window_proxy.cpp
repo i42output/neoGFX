@@ -356,6 +356,8 @@ namespace neogfx
     {
         if (iCapturingWidget != &aWidget)
         {
+            if (iCapturingWidget != nullptr)
+                release_capture(*iCapturingWidget);
             iCapturingWidget = &aWidget;
             native_window().set_capture();
             aWidget.captured();
@@ -487,20 +489,24 @@ namespace neogfx
     {
         i_widget& w = widget_for_mouse_event(aPosition);
         neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
-        w.root().dismiss_children(&w);
-        w.root().update_click_focus(w, aPosition - w.origin());
         if (w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event())))
+        {
+            w.root().dismiss_children(&w);
             w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
+            w.root().update_click_focus(w, aPosition);
+        }
     }
 
     void surface_window_proxy::native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         i_widget& w = widget_for_mouse_event(aPosition);
         neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
-        w.root().dismiss_children(&w);
-        w.root().update_click_focus(w, aPosition - w.origin());
         if (w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event())))
+        {
+            w.root().dismiss_children(&w);
             w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
+            w.root().update_click_focus(w, aPosition);
+        }
     }
 
     void surface_window_proxy::native_window_mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -626,7 +632,7 @@ namespace neogfx
                     w = &w->before())
                     ;
             }
-            if ((w->focus_policy() & focus_policy::TabFocus) == focus_policy::TabFocus)
+            if ((w->can_set_focus(focus_reason::Tab)))
                 w->set_focus(focus_reason::Tab);
         }
         else

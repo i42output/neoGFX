@@ -188,6 +188,7 @@ namespace neogfx
         virtual void capture_released() = 0;
         virtual neogfx::focus_policy focus_policy() const = 0;
         virtual void set_focus_policy(neogfx::focus_policy aFocusPolicy) = 0;
+        virtual bool can_set_focus(focus_reason aFocusReason) const = 0;
         virtual bool has_focus() const = 0;
         virtual void set_focus(focus_reason aFocusReason = focus_reason::Other) = 0;
         virtual void release_focus() = 0;

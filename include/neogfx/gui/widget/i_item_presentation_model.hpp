@@ -111,7 +111,12 @@ namespace neogfx
 
     inline item_cell_selection_flags operator&(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
     {
-        return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+        return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
+    inline item_cell_selection_flags operator^(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
+    {
+        return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs) ^ static_cast<uint32_t>(aRhs));
     }
 
     inline item_cell_selection_flags& operator|=(item_cell_selection_flags& lhs, item_cell_selection_flags rhs)
@@ -123,6 +128,12 @@ namespace neogfx
     inline item_cell_selection_flags& operator&=(item_cell_selection_flags& lhs, item_cell_selection_flags rhs)
     {
         lhs = lhs & rhs;
+        return lhs;
+    }
+
+    inline item_cell_selection_flags& operator^=(item_cell_selection_flags& lhs, item_cell_selection_flags rhs)
+    {
+        lhs = lhs ^ rhs;
         return lhs;
     }
 

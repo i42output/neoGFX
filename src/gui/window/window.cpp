@@ -1158,14 +1158,18 @@ namespace neogfx
 
     void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)
     {
-        if (aCandidateWidget.enabled() && (aCandidateWidget.focus_policy() & focus_policy::ClickFocus) == focus_policy::ClickFocus)
+        bool const childHasFocus = has_focused_widget() && focused_widget().is_descendent_of(aCandidateWidget);
+        if (childHasFocus && focused_widget().client_rect().contains(aClickPos - focused_widget().origin()))
+            return;
+        bool const inClientArea = (aCandidateWidget.hit_test(aClickPos - aCandidateWidget.origin()) == widget_part::Client);
+        bool const ignoreNonClientArea = (aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient;
+        focus_reason const focusReason = (inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
+        if (aCandidateWidget.enabled() && aCandidateWidget.can_set_focus(focusReason))
         {
-            bool inClientArea = (aCandidateWidget.hit_test(aClickPos) == widget_part::Client);
-            if (inClientArea ||
-                (aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient && (!has_focused_widget() || !focused_widget().is_descendent_of(aCandidateWidget)))
-                aCandidateWidget.set_focus(inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
+            if ((inClientArea || (!ignoreNonClientArea && !childHasFocus)))
+                aCandidateWidget.set_focus(focusReason);
         }
-        else if (aCandidateWidget.has_parent() && (!has_focused_widget() || !focused_widget().is_descendent_of(aCandidateWidget)))
-            update_click_focus(aCandidateWidget.parent(), aClickPos + aCandidateWidget.origin() - aCandidateWidget.parent().origin());
+        else if (aCandidateWidget.has_parent() && !childHasFocus)
+            update_click_focus(aCandidateWidget.parent(), aClickPos);
     }
 }

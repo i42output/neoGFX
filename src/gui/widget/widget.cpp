@@ -1375,6 +1375,26 @@ namespace neogfx
         FocusPolicy = aFocusPolicy;
     }
 
+    bool widget::can_set_focus(focus_reason aFocusReason) const
+    {
+        switch (aFocusReason)
+        {
+        case focus_reason::ClickNonClient:
+            return (focus_policy() & (neogfx::focus_policy::ClickFocus | neogfx::focus_policy::IgnoreNonClient)) == neogfx::focus_policy::ClickFocus;
+        case focus_reason::ClickClient:
+            return (focus_policy() & neogfx::focus_policy::ClickFocus) == neogfx::focus_policy::ClickFocus;
+        case focus_reason::Tab:
+            return (focus_policy() & neogfx::focus_policy::TabFocus) == neogfx::focus_policy::TabFocus;
+        case focus_reason::Wheel:
+            return (focus_policy() & neogfx::focus_policy::WheelFocus) == neogfx::focus_policy::WheelFocus;
+        case focus_reason::Pointer:
+            return (focus_policy() & neogfx::focus_policy::PointerFocus) == neogfx::focus_policy::PointerFocus;
+        case focus_reason::WindowActivation:
+        case focus_reason::Other:
+            return focus_policy() != neogfx::focus_policy::NoFocus;
+        }
+    }
+
     bool widget::has_focus() const
     {
         return has_root() && root().is_active() && root().has_focused_widget() && &root().focused_widget() == this;

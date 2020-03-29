@@ -242,6 +242,10 @@ namespace neogfx
         virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
         // helpers
     public:
+        void clear(const item_presentation_model_index& aIndex)
+        {
+            select(aIndex, item_selection_operation::Clear);
+        }
         selection_iterator begin() const
         {
             return selection_iterator{ selection(), selection().begin() };

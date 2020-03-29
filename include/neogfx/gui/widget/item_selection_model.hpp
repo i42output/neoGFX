@@ -88,10 +88,10 @@ namespace neogfx
             {
                 if (has_current_index())
                 {
-                    if (presentation_model().rows() <= 1)
+                    if (presentation_model().rows() <= 1u)
                         iCurrentIndex = std::nullopt;
-                    else if (iCurrentIndex->row() >= presentation_model().rows() - 1)
-                        iCurrentIndex->set_row(iCurrentIndex->row() - 1);
+                    else if (iCurrentIndex->row() >= presentation_model().rows() - 1u)
+                        iCurrentIndex->set_row(iCurrentIndex->row() - 1u);
                 }
             });
             iSink += presentation_model().item_expanded([this](const item_presentation_model_index& aIndex)
@@ -129,7 +129,7 @@ namespace neogfx
                 if (iSavedModelIndex != std::nullopt && presentation_model().has_item_model_index(*iSavedModelIndex))
                     set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
                 else if (presentation_model().rows() >= 1)
-                    set_current_index(item_presentation_model_index{ 0, 0 });
+                    set_current_index(item_presentation_model_index{ 0u, 0u });
                 iSavedModelIndex = std::nullopt;
             });
             iSink += presentation_model().destroying([this]()
@@ -193,13 +193,13 @@ namespace neogfx
             {
             case index_location::None:
             case index_location::FirstCell:
-                result = item_presentation_model_index{ 0, 0 };
-                while (!acceptable(result) && (result = next_cell(result)) != item_presentation_model_index{ 0, 0 })
+                result = item_presentation_model_index{ 0u, 0u };
+                while (!acceptable(result) && (result = next_cell(result)) != item_presentation_model_index{ 0u, 0u })
                     ;
                 break;
             case index_location::LastCell:
-                result = item_presentation_model_index{ presentation_model().rows() - 1 , presentation_model().columns() - 1 };
-                while (!acceptable(result) && (result = previous_cell(result)) != item_presentation_model_index{ presentation_model().rows() - 1 , presentation_model().columns() - 1 })
+                result = item_presentation_model_index{ presentation_model().rows() - 1u , presentation_model().columns() - 1u };
+                while (!acceptable(result) && (result = previous_cell(result)) != item_presentation_model_index{ presentation_model().rows() - 1u , presentation_model().columns() - 1u })
                     ;
                 break;
             case index_location::PreviousCell:
@@ -213,54 +213,54 @@ namespace neogfx
                     ;
                 break;
             case index_location::StartOfCurrentRow:
-                result.set_column(0);
-                while (!acceptable(result) && (result += item_presentation_model_index{ 0, 1 }).column() != presentation_model().columns() - 1)
+                result.set_column(0u);
+                while (!acceptable(result) && (result += item_presentation_model_index{ 0u, 1u }).column() != presentation_model().columns() - 1u)
                     ;
                 break;
             case index_location::EndOfCurrentRow:
-                result.set_column(presentation_model().columns() - 1);
-                while (!acceptable(result) && (result -= item_presentation_model_index{ 0, 1 }).column() != 0)
+                result.set_column(presentation_model().columns() - 1u);
+                while (!acceptable(result) && (result -= item_presentation_model_index{ 0u, 1u }).column() != 0u)
                     ;
                 break;
             case index_location::StartOfCurrentColumn:
                 result.set_row(0);
-                while (!acceptable(result) && (result += item_presentation_model_index{ 1, 0 }).column() != presentation_model().rows() - 1)
+                while (!acceptable(result) && (result += item_presentation_model_index{ 1u, 0u }).column() != presentation_model().rows() - 1u)
                     ;
                 break;
             case index_location::EndOfCurrentColumn:
-                result.set_row(presentation_model().rows() - 1);
-                while (!acceptable(result) && (result -= item_presentation_model_index{ 1, 0 }).row() != 0)
+                result.set_row(presentation_model().rows() - 1u);
+                while (!acceptable(result) && (result -= item_presentation_model_index{ 1, 0 }).row() != 0u)
                     ;
                 break;
             case index_location::CellToLeft:
-                if (result.column() > 0)
+                if (result.column() > 0u)
                 {
-                    result -= item_presentation_model_index{ 0, 1 };
-                    while (!acceptable(result) && (result -= item_presentation_model_index{ 0, 1 }).column() != 0)
+                    result -= item_presentation_model_index{ 0u, 1u };
+                    while (!acceptable(result) && (result -= item_presentation_model_index{ 0u, 1u }).column() != 0u)
                         ;
                 }
                 break;
             case index_location::CellToRight:
-                if (result.column() < presentation_model().columns() - 1)
+                if (result.column() < presentation_model().columns() - 1u)
                 {
-                    result += item_presentation_model_index{ 0, 1 };
-                    while (!acceptable(result) && (result += item_presentation_model_index{ 0, 1 }).column() != presentation_model().columns() - 1)
+                    result += item_presentation_model_index{ 0u, 1u };
+                    while (!acceptable(result) && (result += item_presentation_model_index{ 0u, 1u }).column() != presentation_model().columns() - 1u)
                         ;
                 }
                 break;
             case index_location::RowAbove:
-                if (result.row() > 0)
+                if (result.row() > 0u)
                 {
-                    result -= item_presentation_model_index{ 1, 0 };
-                    while (!acceptable(result) && (result -= item_presentation_model_index{ 1, 0 }).row() != 0)
+                    result -= item_presentation_model_index{ 1u, 0u };
+                    while (!acceptable(result) && (result -= item_presentation_model_index{ 1u, 0u }).row() != 0u)
                         ;
                 }
                 break;
             case index_location::RowBelow:
-                if (result.row() < presentation_model().rows() - 1)
+                if (result.row() < presentation_model().rows() - 1u)
                 {
-                    result += item_presentation_model_index{ 1, 0 };
-                    while (!acceptable(result) && (result += item_presentation_model_index{ 1, 0 }).row() != presentation_model().rows() - 1)
+                    result += item_presentation_model_index{ 1u, 0u };
+                    while (!acceptable(result) && (result += item_presentation_model_index{ 1u, 0u }).row() != presentation_model().rows() - 1u)
                         ;
                 }
                 break;
@@ -270,34 +270,34 @@ namespace neogfx
         item_presentation_model_index next_cell() const override
         {
             if (!has_current_index())
-                return item_presentation_model_index{ 0, 0 };
+                return item_presentation_model_index{ 0u, 0u };
             else
                 return next_cell(current_index());
         }
         item_presentation_model_index next_cell(const item_presentation_model_index& aIndex) const override
         {
-            if (aIndex.column() + 1 < presentation_model().columns())
-                return item_presentation_model_index{ aIndex.row(), aIndex.column() + 1 };
-            else if (aIndex.row() + 1 < presentation_model().rows())
-                return item_presentation_model_index{ aIndex.row() + 1, 0 };
+            if (aIndex.column() + 1u < presentation_model().columns())
+                return item_presentation_model_index{ aIndex.row(), aIndex.column() + 1u };
+            else if (aIndex.row() + 1u < presentation_model().rows())
+                return item_presentation_model_index{ aIndex.row() + 1u, 0u };
             else
-                return item_presentation_model_index{ 0, 0 };
+                return item_presentation_model_index{ 0u, 0u };
         }
         item_presentation_model_index previous_cell() const override
         {
             if (!has_current_index())
-                return item_presentation_model_index{ 0, 0 };
+                return item_presentation_model_index{ 0u, 0u };
             else
                 return previous_cell(current_index());
         }
         item_presentation_model_index previous_cell(const item_presentation_model_index& aIndex) const override
         {
-            if (aIndex.column() > 0)
-                return item_presentation_model_index{ aIndex.row(), aIndex.column() - 1 };
-            else if (aIndex.row() > 0)
-                return item_presentation_model_index{ aIndex.row() - 1, presentation_model().columns() - 1 };
+            if (aIndex.column() > 0u)
+                return item_presentation_model_index{ aIndex.row(), aIndex.column() - 1u };
+            else if (aIndex.row() > 0u)
+                return item_presentation_model_index{ aIndex.row() - 1u, presentation_model().columns() - 1u };
             else
-                return item_presentation_model_index{ presentation_model().rows() - 1 , presentation_model().columns() - 1 };
+                return item_presentation_model_index{ presentation_model().rows() - 1u , presentation_model().columns() - 1u };
         }
     public:
         const item_selection& selection() const override
@@ -316,14 +316,39 @@ namespace neogfx
         {
             auto update = [&, this](concrete_item_selection& aSelection, bool aUpdateCells = true)
             {
-                if ((aOperation & item_selection_operation::Clear) == item_selection_operation::Clear)
+                // todo: cell and column
+                bool const clear = (aOperation & item_selection_operation::Clear) == item_selection_operation::Clear;
+                bool const rowCurrentlySelected = (presentation_model().cell_meta(aIndex.with_column(0u)).selection & item_cell_selection_flags::Selected) ==
+                    item_cell_selection_flags::Selected;
+                bool const select = (aOperation & item_selection_operation::Select) == item_selection_operation::Select ||
+                    ((aOperation & item_selection_operation::Toggle) == item_selection_operation::Toggle && !rowCurrentlySelected);
+                bool const deselect = (aOperation & item_selection_operation::Deselect) == item_selection_operation::Deselect ||
+                    ((aOperation & item_selection_operation::Toggle) == item_selection_operation::Toggle && rowCurrentlySelected);
+                if (clear)
                 {
                     if (aUpdateCells)
                         for (auto& cellIndex : *this)
                             presentation_model().cell_meta(cellIndex).selection &= ~item_cell_selection_flags::Selected;
                     aSelection.clear();
                 }
-                // todo
+                if (select)
+                {
+                    aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), aIndex.with_column(presentation_model().columns() - 1u) });
+                    if (aUpdateCells)
+                        for (auto& cellIndex : *this)
+                            if (cellIndex.row() == aIndex.row())
+                                presentation_model().cell_meta(cellIndex).selection |= item_cell_selection_flags::Selected;
+                }
+                else if (deselect)
+                {
+                    if (aUpdateCells)
+                        for (auto& cellIndex : *this)
+                            if (cellIndex.row() == aIndex.row())
+                                presentation_model().cell_meta(cellIndex).selection &= ~item_cell_selection_flags::Selected;
+                    auto existing = aSelection.find(aIndex.with_column(0u));
+                    if (existing != aSelection.end())
+                        aSelection.erase(existing);
+                }
             };
             update(iSelection, true);
             SelectionChanged.trigger(iSelection, iPreviousSelection);

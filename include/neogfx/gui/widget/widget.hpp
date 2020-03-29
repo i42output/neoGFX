@@ -221,6 +221,7 @@ namespace neogfx
         void capture_released() override;
         neogfx::focus_policy focus_policy() const override;
         void set_focus_policy(neogfx::focus_policy aFocusPolicy) override;
+        bool can_set_focus(focus_reason aFocusReason) const override;
         bool has_focus() const override;
         void set_focus(focus_reason aFocusReason = focus_reason::Other) override;
         void release_focus() override;

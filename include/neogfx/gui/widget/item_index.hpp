@@ -28,7 +28,8 @@ namespace neogfx
     template <typename ModelIndexType>
     class item_index
     {
-        typedef item_index<ModelIndexType> self_type;
+        typedef ModelIndexType index_type;
+        typedef item_index<index_type> self_type;
     public:
         typedef self_type abstract_type; // todo: create abstract interface
     public:
@@ -51,22 +52,26 @@ namespace neogfx
         {
         }
     public:
-        ModelIndexType& operator+=(const item_index& aRhs)
+        index_type& operator+=(const item_index& aRhs)
         {
             iRow += aRhs.iRow;
             iColumn += aRhs.iColumn;
-            return static_cast<ModelIndexType&>(*this);
+            return static_cast<index_type&>(*this);
         }
-        ModelIndexType& operator-=(const item_index& aRhs)
+        index_type& operator-=(const item_index& aRhs)
         {
             iRow -= aRhs.iRow;
             iColumn -= aRhs.iColumn;
-            return static_cast<ModelIndexType&>(*this);
+            return static_cast<index_type&>(*this);
         }
     public:
         row_type row() const
         {
             return iRow;
+        }
+        index_type with_row(row_type aRow) const
+        {
+            return index_type{ aRow, column() };
         }
         void set_row(row_type aRow)
         {
@@ -75,6 +80,10 @@ namespace neogfx
         column_type column() const
         {
             return iColumn;
+        }
+        index_type with_column(column_type aColumn) const
+        {
+            return index_type{ row(), aColumn };
         }
         void set_column(column_type aColumn)
         {

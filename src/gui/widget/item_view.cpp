@@ -417,14 +417,16 @@ namespace neogfx
             if (capturing())
             {
                 if (!iClickedCheckBox)
+                {
                     iMouseTracker.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
-                        {
-                            aTimer.again();
-                            auto const pos = root().mouse_position() - origin();
-                            auto const item = item_at(pos);
-                            if (item != std::nullopt)
-                                selection_model().set_current_index(*item);
-                        }, 20);
+                    {
+                        aTimer.again();
+                        auto const pos = root().mouse_position() - origin();
+                        auto const item = item_at(pos);
+                        if (item != std::nullopt)
+                            selection_model().set_current_index(*item);
+                    }, 20);
+                }
                 else
                     update(cell_rect(*iClickedCheckBox, cell_part::Background));
             }
@@ -955,12 +957,7 @@ namespace neogfx
             auto& textEdit = editor_text_edit();
             textEdit.set_focus();
             if (textEdit.client_rect().contains(root().mouse_position() - textEdit.origin()))
-            {
-                bool enableDragger = capturing();
-                if (enableDragger)
-                    release_capture();
-                textEdit.set_cursor_position(root().mouse_position() - textEdit.origin(), true, enableDragger);
-            }
+                textEdit.set_cursor_position(root().mouse_position() - textEdit.origin(), true, capturing());
             else
                 textEdit.cursor().set_anchor(textEdit.cursor().position());
         }
