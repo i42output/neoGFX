@@ -29,6 +29,8 @@ namespace neogfx::game
     class i_system
     {
     public:
+        virtual ~i_system() = default;
+    public:
         virtual const system_id& id() const = 0;
         virtual const i_string& name() const = 0;
     public:

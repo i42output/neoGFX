@@ -51,7 +51,7 @@ namespace neogfx
     public:
         struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
     public:
-        virtual ~i_program_options() {}
+        virtual ~i_program_options() = default;
     public:
         virtual const boost::program_options::variables_map& options() const = 0;
     public:

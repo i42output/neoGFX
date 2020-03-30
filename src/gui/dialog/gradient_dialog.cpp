@@ -72,12 +72,12 @@ namespace neogfx
                     }
                 };
                 colorStops.emplace_back(s->start, vec3{ s->startRgba.xyz });
-                alphaStops.emplace_back(s->start, s->startRgba[3] * 0xFF);
+                alphaStops.emplace_back(s->start, static_cast<color::component>(s->startRgba[3] * 0xFF));
                 colorStops.emplace_back(s->mid, lerp(vec3{ s->startRgba.xyz }, vec3{ s->endRgba.xyz }, 0.5));
-                alphaStops.emplace_back(s->mid, lerp(s->startRgba[3], s->endRgba[3], 0.5) * 0xFF);
+                alphaStops.emplace_back(s->mid, static_cast<color::component>(lerp(s->startRgba[3], s->endRgba[3], 0.5) * 0xFF));
             }
             colorStops.emplace_back(s->end, vec3{ s->endRgba.xyz });
-            alphaStops.emplace_back(s->end, s->endRgba[3] * 0xFF);
+            alphaStops.emplace_back(s->end, static_cast<color::component>(s->endRgba[3] * 0xFF));
             return gradient{ aGradient, colorStops, alphaStops };
         }
     }

@@ -60,7 +60,7 @@ namespace neogfx
         typedef i_spacer abstract_type;
         typedef std::optional<size> optional_weight;
     public:
-        virtual ~i_spacer() {}
+        virtual ~i_spacer() = default;
     public:
         virtual neogfx::expansion_policy expansion_policy() const = 0;
         virtual void set_expansion_policy(neogfx::expansion_policy aExpansionPolicy) = 0;

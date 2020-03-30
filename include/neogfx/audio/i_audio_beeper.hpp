@@ -33,6 +33,8 @@ namespace neogfx
     class i_audio_beeper
     {
     public:
+        virtual ~i_audio_beeper() = default;
+    public:
         virtual void beep(double aDuration, double aFrequency) = 0;
         virtual void beep(const audio_envelope& aEnvelope, double aFrequency) = 0;
         virtual void silence(double aDuration) = 0;

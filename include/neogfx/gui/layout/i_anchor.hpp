@@ -79,7 +79,7 @@ namespace neogfx
     {
         // construction
     public:
-        virtual ~i_anchor() {}
+        virtual ~i_anchor() = default;
         // meta
     public:
         virtual const i_string& name() const = 0;

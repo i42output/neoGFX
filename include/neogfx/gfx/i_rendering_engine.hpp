@@ -70,7 +70,7 @@ namespace neogfx
         typedef neolib::i_vector<neolib::i_ref_ptr<i_shader_program>> shader_program_list;
         // construction
     public:
-        virtual ~i_rendering_engine() {}
+        virtual ~i_rendering_engine() = default;
         // operations
     public:
         virtual const i_device_metrics& default_screen_metrics() const = 0;

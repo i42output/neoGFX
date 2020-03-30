@@ -33,7 +33,7 @@ namespace neogfx
         struct window_not_found : std::logic_error { window_not_found() : std::logic_error("neogfx::i_surface_manager::window_not_found") {} };
         struct no_window_active : std::logic_error { no_window_active() : std::logic_error("neogfx::i_surface_manager::no_window_active") {} };
     public:
-        virtual ~i_window_manager() {}
+        virtual ~i_window_manager() = default;
     public:
         virtual void add_window(i_window& aWindow) = 0;
         virtual void remove_window(i_window& aWindow) = 0;

@@ -55,7 +55,7 @@ namespace neogfx
     public:
         struct failed_to_get_monitor_dpi : std::runtime_error { failed_to_get_monitor_dpi() : std::runtime_error("neogfx::i_display::failed_to_get_monitor_dpi") {} };
     public:
-        virtual ~i_display() {};
+        virtual ~i_display() = default;
     public:
         virtual uint32_t index() const = 0;
     public:

@@ -32,7 +32,7 @@ namespace neogfx
     class i_help_source
     {
     public:
-        virtual ~i_help_source() {}
+        virtual ~i_help_source() = default;
     public:
         virtual bool help_active() const = 0;
         virtual neogfx::help_type help_type() const = 0;
@@ -48,7 +48,7 @@ namespace neogfx
         declare_event(help_activated, const i_help_source&)
         declare_event(help_deactivated, const i_help_source&)
     public:
-        virtual ~i_help() {}
+        virtual ~i_help() = default;
     public:
         virtual bool help_active() const = 0;
         virtual const i_help_source& active_help() const = 0;

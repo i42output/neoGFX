@@ -30,7 +30,7 @@ namespace neogfx::game
     class i_component_base
     {
     public:
-        virtual ~i_component_base() {}
+        virtual ~i_component_base() = default;
     public:
         virtual game::i_ecs& ecs() const = 0;
         virtual const component_id& id() const = 0;

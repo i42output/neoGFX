@@ -98,7 +98,7 @@ namespace neogfx
             virtual void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) = 0;
         };
     public:
-        virtual ~i_drop_list_input_widget() {}
+        virtual ~i_drop_list_input_widget() = default;
     public:
         virtual void accept(i_visitor& aVisitor) = 0;
     public:

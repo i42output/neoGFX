@@ -211,7 +211,7 @@ namespace neogfx
         struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::i_item_selection_model::no_presentation_model") {} };
         struct no_current_index : std::logic_error { no_current_index() : std::logic_error("neogfx::i_item_selection_model::no_current_index") {} };
     public:
-        virtual ~i_item_selection_model() {}
+        virtual ~i_item_selection_model() = default;
     public:
         virtual bool has_presentation_model() const = 0;
         virtual i_item_presentation_model& presentation_model() const = 0;

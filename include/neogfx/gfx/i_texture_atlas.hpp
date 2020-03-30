@@ -31,6 +31,8 @@ namespace neogfx
         struct sub_texture_not_found : std::logic_error { sub_texture_not_found() : std::logic_error("neogfx::i_texture_atlas::sub_texture_not_found") {} };
         struct texture_too_big_for_atlas : std::logic_error { texture_too_big_for_atlas() : std::logic_error("neogfx::i_texture_atlas::texture_too_big_for_atlas") {} };
     public:
+        virtual ~i_texture_atlas() = default;
+    public:
         virtual const i_sub_texture& sub_texture(texture_id aSubTextureId) const = 0;
         virtual i_sub_texture& sub_texture(texture_id aSubTextureId) = 0;
         virtual i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat = texture_data_format::RGBA) = 0;

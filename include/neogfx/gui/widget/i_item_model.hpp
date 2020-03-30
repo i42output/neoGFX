@@ -249,7 +249,7 @@ namespace neogfx
         struct wrong_model_type : std::logic_error { wrong_model_type() : std::logic_error("neogfx::i_item_model::wrong_model_type") {} };
         struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_model::bad_column_index") {} };
     public:
-        virtual ~i_item_model() {}
+        virtual ~i_item_model() = default;
     public:
         virtual bool is_tree() const = 0;
         virtual uint32_t rows() const = 0;

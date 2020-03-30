@@ -43,7 +43,7 @@ namespace neogfx
     public:
         declare_event(changed)
     public:
-        virtual ~i_palette() {}
+        virtual ~i_palette() = default;
     public:
         virtual bool has_color(color_role aRole) const = 0;
         virtual neogfx::color color(color_role aRole) const = 0;

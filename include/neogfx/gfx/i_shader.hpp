@@ -426,7 +426,7 @@ namespace neogfx
         typedef neolib::i_vector<i_shader_uniform> uniform_list;
         typedef neolib::i_set<i_shader_variable> variable_list;
     public:
-        virtual ~i_shader() {}
+        virtual ~i_shader() = default;
     public:
         virtual shader_type type() const = 0;
         virtual const i_string& name() const = 0;

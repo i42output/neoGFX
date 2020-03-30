@@ -274,9 +274,9 @@ namespace neogfx
         {
             const auto& item = *i;
             if (&item.subject() == &aItem)
-                return std::distance(iItems.begin(), i);
+                return static_cast<item_index>(std::distance(iItems.begin(), i));
         }
-        return optional_item_index();
+        return optional_item_index{};
     }
 
     bool layout::is_widget_at(item_index aIndex) const

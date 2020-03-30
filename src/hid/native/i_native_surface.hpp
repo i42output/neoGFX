@@ -39,7 +39,7 @@ namespace neogfx
         struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
         struct no_invalidated_area : std::logic_error { no_invalidated_area() : std::logic_error("neogfx::i_native_surface::no_invalidated_area") {} };
     public:
-        virtual ~i_native_surface() {}
+        virtual ~i_native_surface() = default;
     public:
         virtual bool has_parent() const = 0;
         virtual const i_native_surface& parent() const = 0;

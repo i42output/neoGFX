@@ -205,7 +205,7 @@ namespace neogfx
         struct bad_index : std::logic_error { bad_index() : std::logic_error("neogfx::i_item_presentation_model::bad_index") {} };
         struct no_mapped_row : std::logic_error { no_mapped_row() : std::logic_error("neogfx::i_item_presentation_model::no_mapped_row") {} };
     public:
-        virtual ~i_item_presentation_model() {}
+        virtual ~i_item_presentation_model() = default;
     public:
         virtual bool initializing() const = 0;
         virtual bool has_item_model() const = 0;

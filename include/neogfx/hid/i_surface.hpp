@@ -57,7 +57,7 @@ namespace neogfx
         struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };
         struct not_a_window : std::logic_error { not_a_window() : std::logic_error("neogfx::i_surface::not_a_window") {} };
     public:
-        virtual ~i_surface() {}
+        virtual ~i_surface() = default;
     public:
         virtual i_rendering_engine& rendering_engine() const = 0;
     public:

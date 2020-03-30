@@ -59,7 +59,7 @@ namespace neogfx::nrc
         typedef i_ui_element_parser::data_t data_t;
         typedef i_ui_element_parser::array_data_t array_data_t;
     public:
-        virtual ~i_ui_element() {}
+        virtual ~i_ui_element() = default;
     public:
         virtual const i_ui_element_parser& parser() const = 0;
     public:

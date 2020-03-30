@@ -74,7 +74,7 @@ namespace neogfx
         struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
         struct not_sub_texture : std::logic_error { not_sub_texture() : std::logic_error("neogfx::i_texture::not_sub_texture") {} };
     public:
-        virtual ~i_texture() {}
+        virtual ~i_texture() = default;
     public:
         virtual texture_id id() const = 0;
         virtual texture_type type() const = 0;

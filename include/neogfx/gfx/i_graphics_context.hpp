@@ -79,7 +79,7 @@ namespace neogfx
         struct password_not_set : std::logic_error { password_not_set() : std::logic_error("neogfx::i_graphics_context::password_not_set") {} };
         // construction
     public:
-        virtual ~i_graphics_context() {}
+        virtual ~i_graphics_context() = default;
         // operations
     public:
         virtual ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const = 0;

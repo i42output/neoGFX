@@ -30,6 +30,8 @@ namespace neogfx
     public:
         struct no_nested_parent : std::logic_error { no_nested_parent() : std::logic_error("neogfx::i_nested_window::no_nested_parent") {} };
     public:
+        virtual ~i_nested_window() = default;
+    public:
         virtual const i_nest& nested_root() const = 0;
         virtual i_nest& nested_root() = 0;
         virtual bool has_nested_parent() const = 0;

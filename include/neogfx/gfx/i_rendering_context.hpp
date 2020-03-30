@@ -35,7 +35,7 @@ namespace neogfx
     public:
         struct texture_not_resident : std::runtime_error { texture_not_resident() : std::runtime_error("neogfx::i_rendering_context::texture_not_resident") {} };
     public:
-        virtual ~i_rendering_context() {}
+        virtual ~i_rendering_context() = default;
         virtual std::unique_ptr<i_rendering_context> clone() const = 0;
     public:
         virtual i_rendering_engine& rendering_engine() = 0;

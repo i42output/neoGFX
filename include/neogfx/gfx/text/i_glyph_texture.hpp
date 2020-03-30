@@ -41,7 +41,7 @@ namespace neogfx
     class i_glyph_texture
     {
     public:
-        virtual ~i_glyph_texture() {}
+        virtual ~i_glyph_texture() = default;
     public:
         virtual const i_sub_texture& texture() const = 0;
         virtual bool subpixel() const = 0;

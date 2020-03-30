@@ -38,7 +38,7 @@ namespace neogfx
     public:
         typedef uint32_t glyph_index_t;
     public:
-        virtual ~i_native_font_face() {}
+        virtual ~i_native_font_face() = default;
     public:
         virtual font_id id() const = 0;
         virtual i_native_font& native_font() = 0;

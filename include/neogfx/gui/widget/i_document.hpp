@@ -27,7 +27,7 @@ namespace neogfx
     class i_document
     {
     public:
-        virtual ~i_document() {}
+        virtual ~i_document() = default;
     public:
         virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) = 0;
     };

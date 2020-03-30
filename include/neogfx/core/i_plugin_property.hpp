@@ -49,7 +49,7 @@ namespace neogfx
             declare_event(changed, const property_variant&)
             declare_event(changed_from_to, const property_variant&, const property_variant&)
         public:
-            virtual ~i_property() {}
+            virtual ~i_property() = default;
         public:
             virtual neolib::i_lifetime& as_lifetime() = 0;
         public:

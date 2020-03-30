@@ -36,7 +36,7 @@ namespace neogfx
         declare_event(destroying);
         declare_event(destroyed);
     public:
-        virtual ~i_object() {}
+        virtual ~i_object() = default;
     public:
         virtual neogfx::object_type object_type() const = 0;
     public:

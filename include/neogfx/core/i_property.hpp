@@ -138,7 +138,7 @@ namespace neogfx
         struct no_delegate : std::logic_error { no_delegate() : std::logic_error("neogfx::i_property::no_delegate") {} };
         // construction
     public:
-        virtual ~i_property() {}
+        virtual ~i_property() = default;
         // object
     public:
         virtual neolib::i_lifetime& as_lifetime() = 0;

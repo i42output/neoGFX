@@ -1391,6 +1391,7 @@ namespace neogfx
             return (focus_policy() & neogfx::focus_policy::PointerFocus) == neogfx::focus_policy::PointerFocus;
         case focus_reason::WindowActivation:
         case focus_reason::Other:
+        default:
             return focus_policy() != neogfx::focus_policy::NoFocus;
         }
     }

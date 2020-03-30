@@ -36,7 +36,7 @@ namespace neogfx
     public:
         struct unknown_image_format : std::runtime_error { unknown_image_format() : std::runtime_error("neogfx::i_image::unknown_image_format") {} };
     public:
-        virtual ~i_image() {}
+        virtual ~i_image() = default;
     public:
         virtual dimension dpi_scale_factor() const = 0;
         virtual neogfx::color_format color_format() const = 0;

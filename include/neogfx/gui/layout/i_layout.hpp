@@ -47,7 +47,7 @@ namespace neogfx
         struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_layout::item_not_found") {} };
         struct incompatible_layouts : std::logic_error { incompatible_layouts() : std::logic_error("neogfx::i_layout::incompatible_layouts") {} };
     public:
-        virtual ~i_layout() {}
+        virtual ~i_layout() = default;
     public:    
         virtual i_layout_item& add(i_layout_item& aItem) = 0;
         virtual i_layout_item& add_at(item_index aPosition, i_layout_item& aItem) = 0;

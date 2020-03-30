@@ -43,7 +43,7 @@ namespace neogfx
         struct bad_display_index : std::logic_error { bad_display_index() : std::logic_error("neogfx::i_basic_services::bad_display_index") {} };
         struct no_system_menu_bar : std::logic_error { no_system_menu_bar() : std::logic_error("neogfx::i_basic_services::no_system_menu_bar") {} };
     public:
-        virtual ~i_basic_services() {}
+        virtual ~i_basic_services() = default;
     public:
         virtual neogfx::platform platform() const = 0;
         virtual neolib::async_task& app_task() = 0;

@@ -29,7 +29,7 @@ namespace neogfx
     class i_item_editor
     {
     public:
-        virtual ~i_item_editor() {}
+        virtual ~i_item_editor() = default;
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;

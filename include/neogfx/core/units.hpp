@@ -395,9 +395,9 @@ namespace neogfx
             return aValue;
         length_units_converter uc(aSourceUnitsContext);
         uc.set_units(aUnits);
-        T result = uc.to_device_units(aValue);
+        auto const result = static_cast<T>(uc.to_device_units(aValue));
         uc.set_units(basic_scoped_units<length_units::units>::current_units());
-        return uc.from_device_units(result);
+        return static_cast<T>(uc.from_device_units(result));
     }
 
     template<typename T>

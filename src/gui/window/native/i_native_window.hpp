@@ -38,7 +38,7 @@ namespace neogfx
     public:
         struct no_current_event : std::logic_error { no_current_event() : std::logic_error("neogfx::i_native_window::no_current_event") {} };
     public:
-        virtual ~i_native_window() {}
+        virtual ~i_native_window() = default;
     public:
         virtual const i_native_window& parent() const = 0;
         virtual i_native_window& parent() = 0;

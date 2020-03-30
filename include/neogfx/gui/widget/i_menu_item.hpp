@@ -40,6 +40,8 @@ namespace neogfx
     public:
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::i_menu_item::wrong_type") {} };
     public:
+        virtual ~i_menu_item() = default;
+    public:
         virtual menu_item_type type() const = 0;
         virtual const i_action& action() const = 0;
         virtual i_action& action() = 0;

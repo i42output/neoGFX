@@ -59,7 +59,7 @@ namespace neogfx
         struct no_available_items : std::logic_error { no_available_items() : std::logic_error("neogfx::i_menu::no_available_items") {} };
         struct already_closed : std::logic_error { already_closed() : std::logic_error("neogfx::i_menu::already_closed") {} };
     public:
-        virtual ~i_menu() {}
+        virtual ~i_menu() = default;
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;

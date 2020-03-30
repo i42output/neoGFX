@@ -51,7 +51,7 @@ namespace neogfx
     public:
         declare_event(changed, style_aspect)
     public:
-        virtual ~i_style() {}
+        virtual ~i_style() = default;
     public:
         virtual const std::string& name() const = 0;
         virtual const neogfx::margins& margins() const = 0;

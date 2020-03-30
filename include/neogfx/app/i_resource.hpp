@@ -39,7 +39,7 @@ namespace neogfx
         struct no_data : std::logic_error { no_data() : std::logic_error("neogfx::i_resource::no_data") {} };
         struct const_data : std::logic_error { const_data() : std::logic_error("neogfx::i_resource::const_data") {} };
     public:
-        virtual ~i_resource() {}
+        virtual ~i_resource() = default;
     public:
         virtual bool available() const = 0;
         virtual std::pair<bool, double> downloading() const = 0;

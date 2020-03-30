@@ -31,7 +31,7 @@ namespace neogfx
     {
         // construction
     public:
-        virtual ~i_native_font() {}
+        virtual ~i_native_font() = default;
         // operations
     public:
         virtual const std::string& family_name() const = 0;

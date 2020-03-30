@@ -434,7 +434,7 @@ namespace neogfx
                         return *lhs < *rhs;
                 };
                 auto i = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
-                uint32_t row = std::distance(iPositions.begin(), i);
+                auto row = static_cast<item_presentation_model_index::row_type>(std::distance(iPositions.begin(), i));
                 double position = (row == 0 ? 0.0 : **(std::prev(i)) + item_height(item_presentation_model_index(row - 1), aUnitsContext));
                 while (row <= aIndex.row())
                 {
@@ -466,7 +466,7 @@ namespace neogfx
             while (*i == std::nullopt)
             {
                 auto j = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
-                uint32_t row = std::distance(iPositions.begin(), j);
+                auto row = static_cast<item_presentation_model_index::row_type>(std::distance(iPositions.begin(), j));
                 double position = (row == 0 ? 0.0 : **(std::prev(j)) + item_height(item_presentation_model_index(row - 1), aUnitsContext));
                 while (row < iPositions.size())
                 {

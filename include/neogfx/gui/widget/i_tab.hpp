@@ -34,7 +34,7 @@ namespace neogfx
         declare_event(selected)
         declare_event(deselected)
     public:
-        virtual ~i_tab() {}
+        virtual ~i_tab() = default;
     public:
         virtual const i_tab_container& container() const = 0;
         virtual i_tab_container& container() = 0;

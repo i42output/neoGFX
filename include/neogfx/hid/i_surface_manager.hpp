@@ -34,7 +34,7 @@ namespace neogfx
     public:
         struct surface_not_found : std::logic_error { surface_not_found() : std::logic_error("neogfx::i_surface_manager::surface_not_found") {} };
     public:
-        virtual ~i_surface_manager() {}
+        virtual ~i_surface_manager() = default;
     public:
         virtual bool initialising_surface() const = 0;
         virtual void add_surface(i_surface& aSurface) = 0;

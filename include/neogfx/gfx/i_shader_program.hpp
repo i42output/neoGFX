@@ -59,7 +59,7 @@ namespace neogfx
         typedef neolib::i_vector<i_stage_t> i_stages_t;
         // construction
     public:
-        virtual ~i_shader_program() {}
+        virtual ~i_shader_program() = default;
         // operations
     public:
         virtual shader_program_type type() const = 0;

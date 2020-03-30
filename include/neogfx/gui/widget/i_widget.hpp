@@ -72,7 +72,7 @@ namespace neogfx
         struct layout_already_set : std::logic_error { layout_already_set() : std::logic_error("neogfx::i_widget::layout_already_set") {} };
         struct no_layout : std::logic_error { no_layout() : std::logic_error("neogfx::i_widget::no_layout") {} };
     public:
-        virtual ~i_widget() {}
+        virtual ~i_widget() = default;
     public:
         virtual bool is_singular() const = 0;
         virtual void set_singular(bool aSingular) = 0;

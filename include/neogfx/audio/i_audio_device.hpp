@@ -29,6 +29,8 @@ namespace neogfx
         struct already_open : std::logic_error { already_open() : std::logic_error("neogfx::i_audio_device::already_open") {} };
         struct not_open : std::logic_error { not_open() : std::logic_error("neogfx::i_audio_device::not_open") {} };
     public:
+        virtual ~i_audio_device() = default;
+    public:
         virtual const std::string& name() const = 0;
     public:
         virtual bool is_open() const = 0;
