@@ -430,6 +430,7 @@ namespace neogfx
         neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const;
     public:
         const neogfx::size& extents() const;
+        void set_extents(const neogfx::size& aExtents);
         std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const;
     private:
         mutable std::optional<neogfx::size> iExtents;

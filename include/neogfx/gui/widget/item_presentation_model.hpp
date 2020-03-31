@@ -399,7 +399,7 @@ namespace neogfx
                     std::string cellString = cell_to_string(item_presentation_model_index(aIndex.row(), col));
                     auto const& cellFont = cell_font(aIndex);
                     auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
-                    height = std::max(height, units_converter(aUnitsContext).from_device_units(size(0.0, std::ceil(effectiveFont.height()))).cy *
+                    height = std::max(height, units_converter(aUnitsContext).from_device_units(size{ 0.0, std::ceil(effectiveFont.height()) }).cy *
                         (1 + std::count(cellString.begin(), cellString.end(), '\n')));
                     auto const& maybeCellImageSize = cell_image_size(aIndex);
                     if (maybeCellImageSize != std::nullopt)
@@ -714,8 +714,7 @@ namespace neogfx
                 cellExtents.cx += (maybeCellImageSize->cx + units_converter(aGraphicsContext).to_device_units(cell_spacing(aGraphicsContext)).cx);
                 cellExtents.cy = std::max(cellExtents.cy, maybeCellImageSize->cy);
             }
-            if (cellExtents.cy == 0.0)
-                cellExtents.cy = cellFont.height();
+            cellExtents.cy = std::max(cellExtents.cy, cellFont.height());
             cellMeta.extents = cellExtents.ceil();
             if (iTotalHeight != std::nullopt)
                 *iTotalHeight += (item_height(aIndex, aGraphicsContext) - oldItemHeight);

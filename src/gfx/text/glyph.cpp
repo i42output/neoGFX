@@ -162,6 +162,11 @@ namespace neogfx
         return *iExtents;
     }
 
+    void glyph_text::set_extents(const neogfx::size& aExtents)
+    {
+        iExtents = aExtents;
+    }
+
     std::pair<glyph_text::const_iterator, glyph_text::const_iterator> glyph_text::word_break(const_iterator aBegin, const_iterator aFrom) const
     {
         std::pair<const_iterator, const_iterator> result(aFrom, aFrom);
