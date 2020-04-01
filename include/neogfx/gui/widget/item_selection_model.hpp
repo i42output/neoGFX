@@ -315,11 +315,32 @@ namespace neogfx
         {
             return (presentation_model().cell_flags(aIndex) & item_cell_flags::Selectable) == item_cell_flags::Selectable;
         }
-        void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
+        void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation) override
         {
+            // todo: cell and column
+            static auto find = [](const item_presentation_model_index& aIndex, concrete_item_selection& aSelection)
+            {
+                if (aSelection.empty())
+                    return aSelection.end();
+                auto existing = aSelection.lower_bound(aIndex.with_column(0u));
+                if (existing == aSelection.end())
+                    existing = std::prev(existing);
+                if (existing->second().topLeft.row() <= aIndex.row() &&
+                    existing->second().bottomRight.row() >= aIndex.row())
+                    return existing;
+                return aSelection.end();
+            };
+            static auto find_adjacent = [](const item_presentation_model_index& aIndex, concrete_item_selection& aSelection)
+            {
+                if (aSelection.empty())
+                    return aSelection.end();
+                auto existing = find(aIndex.with_row(aIndex.row() - 1u));
+                if (existing != aSelection.end())
+                    return existing;
+                return find(aIndex.with_row(aIndex.row() + 1u));
+            };
             auto update = [&, this](concrete_item_selection& aSelection, bool aUpdateCells = true)
             {
-                // todo: cell and column
                 bool const clear = (aOperation & item_selection_operation::Clear) == item_selection_operation::Clear;
                 bool const rowCurrentlySelected = (presentation_model().cell_meta(aIndex.with_column(0u)).selection & item_cell_selection_flags::Selected) ==
                     item_cell_selection_flags::Selected;
@@ -336,7 +357,22 @@ namespace neogfx
                 }
                 if (select)
                 {
-                    aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), aIndex.with_column(presentation_model().columns() - 1u) });
+                    if (find(aIndex, aSelection) == aSelection.end())
+                    {
+                        auto adjacent = find_adjacent(aIndex, aSelection);
+                        if (adjacent == aSelection.end())
+                            aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), aIndex.with_column(presentation_model().columns() - 1u) });
+                        else
+                        {
+                            if (adjacent->second().bottomRight.row() == aIndex.row() - 1u)
+                                adjacent->second().bottomRIght = aIndex.with_column(presentation_model().columns() - 1u);
+                            else
+                            {
+                                aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), adjacent->second().bottomRight });
+                                aSelection.erase(adjacent);
+                            }
+                        }
+                    }
                     if (aUpdateCells)
                         for (auto& cellIndex : *this)
                             if (cellIndex.row() == aIndex.row())
@@ -348,10 +384,26 @@ namespace neogfx
                         for (auto& cellIndex : *this)
                             if (cellIndex.row() == aIndex.row())
                                 presentation_model().cell_meta(cellIndex).selection &= ~item_cell_selection_flags::Selected;
-                    auto existing = aSelection.find(aIndex.with_column(0u));
+                    auto existing = find(aIndex, aSelection);
                     if (existing != aSelection.end())
-                        aSelection.erase(existing);
+                    {
+                        if (existing->second().topLeft.row() == existing->second().bottomRight.row())
+                            aSelection.erase(existing);
+                        else if (existing->second().topLeft.row() == aIndex.row())
+                        {
+                            aSelection.emplace(aIndex.with_row(aIndex.row() + 1u).with_column(0u), selection_area{ aIndex.with_row(aIndex.row() + 1u).with_column(0u), existing->second().bottomRight });
+                            aSelection.erase(existing);
+                        }
+                        else if (existing->second().bottomRight.row() == aIndex.row())
+                            existing->second().bottomRight.set_row(aIndex.row() - 1u);
+                        else
+                        {
+                            aSelection.emplace(aIndex.with_row(aIndex.row() + 1u).with_column(0u), selection_area{ aIndex.with_row(aIndex.row() + 1u).with_column(0u), existing->second().bottomRight });
+                            existing->second().bottomRight.set_row(aIndex.row() - 1u);
+                        }
+                    }
                 }
+                compact(aSelection);
             };
             update(iSelection, true);
             SelectionChanged.trigger(iSelection, iPreviousSelection);

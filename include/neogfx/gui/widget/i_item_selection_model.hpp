@@ -234,7 +234,7 @@ namespace neogfx
         virtual const item_selection& selection() const = 0;
         virtual bool is_selected(const item_presentation_model_index& aIndex) const = 0;
         virtual bool is_selectable(const item_presentation_model_index& aIndex) const = 0;
-        virtual void select(const item_presentation_model_index& aIndex, item_selection_operation = item_selection_operation::ClearAndSelect) = 0;
+        virtual void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation) = 0;
     public:
         virtual bool sorting() const = 0;
         virtual bool filtering() const = 0;
@@ -242,6 +242,23 @@ namespace neogfx
         virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
         // helpers
     public:
+        void select(const item_presentation_model_index& aIndex)
+        {
+            switch (mode())
+            {
+            case item_selection_mode::NoSelection:
+                break;
+            case item_selection_mode::SingleSelection:
+                select(aIndex, item_selection_operation::ClearAndSelect);
+                break;
+            case item_selection_mode::MultipleSelection:
+                select(aIndex, item_selection_operation::ClearAndSelect);
+                break;
+            case item_selection_mode::ExtendedSelection:
+                select(aIndex, item_selection_operation::Select);
+                break;
+            }
+        }
         void clear(const item_presentation_model_index& aIndex)
         {
             select(aIndex, item_selection_operation::Clear);
