@@ -72,13 +72,13 @@ Status Bar                      | 100     |
 Progress Bar                    | 0       |
 Font Picker                     | 100     |
 Colour Gradient Selector        | 95      |     Swatch library
-Colour Picker                   | 100     |
+Colour Picker                   | 95      |     Eyedropper tool
 Date/Time                       | 0       |
 File Browsers (Native)          | 99      |
 Drag and drop                   | 10      |
 UI/Resource Description (RJSON) | 40      |
 tool: neoGFX Design Studio      | 0       |
-i18n                            | 0       |
+i18n                            | 40      |
 l10n                            | 0       |     UK English, US English, French, German, Chinese
 Skins                           | 40      |
 
