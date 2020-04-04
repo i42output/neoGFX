@@ -84,7 +84,7 @@ namespace neogfx
             public:
                 virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
                 virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-                virtual void mouse_moved(const point& aPosition);
+                virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
             private:
                 x_picker& iParent;
                 optional_point iDragOffset;
@@ -102,7 +102,7 @@ namespace neogfx
         public:
             virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
             virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-            virtual void mouse_moved(const point& aPosition);
+            virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
         public:
             using framed_widget::effective_frame_width;
         private:
@@ -129,7 +129,7 @@ namespace neogfx
         public:
             virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
             virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-            virtual void mouse_moved(const point& aPosition);
+            virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
         private:
             void select(const point& aPosition);
             representations color_at_position(const point& aCursorPos) const;

@@ -137,6 +137,7 @@ for the console mode:
   dialog whiptail basicinput */
 
 int tinyfd_messageBox (
+	void* const aParent,
 	char const * const aTitle , /* "" */
 	char const * const aMessage , /* "" may contain \n \t */
 	char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
@@ -191,6 +192,7 @@ char const * tinyfd_colorChooser(
 
 /* windows only - utf-16 version */
 int tinyfd_messageBoxW(
+	void* const aParent,
 	wchar_t const * const aTitle ,
 	wchar_t const * const aMessage, /* "" may contain \n \t */
 	wchar_t const * const aDialogType, /* "ok" "okcancel" "yesno" */

@@ -1451,10 +1451,10 @@ namespace neogfx
             return true;
     }
 
-    void widget::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
+    void widget::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (has_parent())
-            parent().mouse_wheel_scrolled(aWheel, aDelta);
+            parent().mouse_wheel_scrolled(aWheel, aPosition + position(), aDelta, aKeyModifiers);
     }
 
     void widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -1481,7 +1481,7 @@ namespace neogfx
             release_capture(capture_reason::MouseEvent);
     }
 
-    void widget::mouse_moved(const point&)
+    void widget::mouse_moved(const point&, key_modifiers_e)
     {
         // do nothing
     }

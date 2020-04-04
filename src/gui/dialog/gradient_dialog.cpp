@@ -134,7 +134,7 @@ namespace neogfx
             if (!capturing())
                 iTracking = false;
         }
-        virtual void mouse_moved(const point& aPosition)
+        virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
         {
             if (iTracking)
                 select(aPosition - client_rect(false).top_left());

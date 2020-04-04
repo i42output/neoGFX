@@ -207,7 +207,7 @@ namespace neogfx
             iDragOffset = std::nullopt;
     }
 
-    void color_dialog::x_picker::cursor_widget::mouse_moved(const point& aPosition)
+    void color_dialog::x_picker::cursor_widget::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         if (iDragOffset != std::nullopt)
         {
@@ -308,7 +308,7 @@ namespace neogfx
             iTracking = false;
     }
 
-    void color_dialog::x_picker::mouse_moved(const point& aPosition)
+    void color_dialog::x_picker::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         if (iTracking)
             select(aPosition - client_rect(false).top_left());
@@ -517,7 +517,7 @@ namespace neogfx
             iTracking = false;
     }
 
-    void color_dialog::yz_picker::mouse_moved(const point& aPosition)
+    void color_dialog::yz_picker::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         if (iTracking)
             select(aPosition - client_rect(false).top_left());

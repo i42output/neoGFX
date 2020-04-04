@@ -33,9 +33,9 @@ namespace neogfx
         Close,
         Enabled,
         Disabled,
+        Moved,
         Resizing,
         Resized,
-        SizeChanged,
         Maximized,
         Iconized,
         Restored,
@@ -104,8 +104,13 @@ namespace neogfx
     public:
         typedef neolib::variant<neogfx::point, neogfx::delta, neogfx::mouse_button, neogfx::mouse_wheel, neogfx::key_modifiers_e> parameter_type;
     public:
-        basic_mouse_event(mouse_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
-            iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
+        basic_mouse_event(
+            mouse_event_type aType, 
+            const parameter_type& aParameter1 = parameter_type{}, 
+            const parameter_type& aParameter2 = parameter_type{}, 
+            const parameter_type& aParameter3 = parameter_type{},
+            const parameter_type& aParameter4 = parameter_type{}) :
+            iType{ aType }, iParameter1{ aParameter1 }, iParameter2{ aParameter2 }, iParameter3{ aParameter3 }, iParameter4{ aParameter4 }
         {
         }
     public:
@@ -116,10 +121,6 @@ namespace neogfx
         neogfx::point position() const
         {
             return static_variant_cast<neogfx::point>(iParameter1);
-        }
-        neogfx::delta delta() const
-        {
-            return static_variant_cast<neogfx::delta>(iParameter1);
         }
         neogfx::mouse_button mouse_button() const
         {
@@ -133,11 +134,16 @@ namespace neogfx
         {
             return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
         }
+        neogfx::delta wheel_delta() const
+        {
+            return static_variant_cast<neogfx::delta>(iParameter4);
+        }
     private:
         mouse_event_type iType;
         parameter_type iParameter1;
         parameter_type iParameter2;
         parameter_type iParameter3;
+        parameter_type iParameter4;
     };
 
     typedef basic_mouse_event<mouse_event_location::Client> mouse_event;

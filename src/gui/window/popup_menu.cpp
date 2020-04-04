@@ -262,7 +262,7 @@ namespace neogfx
             return window::frame_color();
         color result = background_color().darker(0x30);
         if (result.similar_intensity(background_color(), 0.05))
-            result = result.dark() ? result.lighter(0x20) : result.darker(0x20);
+            result = result.shade(0x20);
         return result;
     }
 

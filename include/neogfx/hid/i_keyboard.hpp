@@ -1,4 +1,5 @@
 // i_keyboard.hpp
+// Parts of this source file based on Simple DirectMedia Layer, Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -15,6 +16,26 @@
   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*
+  Simple DirectMedia Layer
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
 */
 
 #pragma once
@@ -295,6 +316,9 @@ namespace neogfx
         ScanCode_APP1 = 283,
         ScanCode_APP2 = 284,
 
+        ScanCode_AUDIOREWIND = 285,
+        ScanCode_AUDIOFASTFORWARD = 286,
+
         ScanCodeCount = 512
     };
 
@@ -551,7 +575,11 @@ namespace neogfx
         KeyCode_KBDILLUMDOWN = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_KBDILLUMDOWN),
         KeyCode_KBDILLUMUP = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_KBDILLUMUP),
         KeyCode_EJECT = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_EJECT),
-        KeyCode_SLEEP = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_SLEEP)
+        KeyCode_SLEEP = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_SLEEP),
+        KeyCode_APP1 = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_APP1),
+        KeyCode_APP2 = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_APP2),
+        KeyCode_AUDIOREWIND = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_AUDIOREWIND),
+        KeyCode_AUDIOFASTFORWARD = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_AUDIOFASTFORWARD)
     };
 
     enum key_modifiers_e : uint16_t
@@ -589,9 +617,9 @@ namespace neogfx
     {
         None        = 0x0000,
         CapsLock    = 0x0001,
-        NumLock        = 0x0002,
-        ScrollLock    = 0x0004,
-        InsertLock    = 0x0008
+        NumLock     = 0x0002,
+        ScrollLock  = 0x0004,
+        InsertLock  = 0x0008
     };
 
     constexpr keyboard_locks operator|(keyboard_locks aLhs, keyboard_locks aRhs)

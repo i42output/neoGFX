@@ -86,7 +86,7 @@ namespace neogfx
                     fillColor = service<i_app>().current_style().palette().color(color_role::Selection);
             }
             else if (fillColor.similar_intensity(background_color(), 0.05))
-                fillColor = fillColor.dark() ? fillColor.lighter(0x20) : fillColor.darker(0x20);
+                fillColor = fillColor.shade(0x20);
             fillColor.set_alpha(0xC0);
             aGraphicsContext.fill_rect(client_rect(), fillColor);
         }
@@ -101,7 +101,7 @@ namespace neogfx
             {
                 bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
                 color ink = openSubMenu ? service<i_app>().current_style().palette().color(color_role::Selection)
-                    : background_color().light() ? background_color().darker(0x80) : background_color().lighter(0x80);
+                    : background_color().shade(0x80);
                 if (iSubMenuArrow == std::nullopt || iSubMenuArrow->first != ink)
                 {
                     const char* sArrowImagePattern
@@ -165,7 +165,7 @@ namespace neogfx
             line.cx -= dpi_scale(iGap * 2.0);
             color ink = color::Black;
             if (ink.similar_intensity(background_color(), 0.05))
-                ink = ink.dark() ? ink.lighter(0x20) : ink.darker(0x20);
+                ink = ink.shade(0x20);
             ink.set_alpha(0x40);
             aGraphicsContext.fill_rect(line, ink);
         }

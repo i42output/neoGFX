@@ -775,6 +775,7 @@ static void runSilentW(wchar_t const * const aString)
 
 
 int tinyfd_messageBoxW(
+	void * const aParent,
 	wchar_t const * const aTitle, /* NULL or "" */
 	wchar_t const * const aMessage, /* NULL or ""  may contain \n and \t */
 	wchar_t const * const aDialogType, /* "ok" "okcancel" "yesno" "yesnocancel" */
@@ -822,7 +823,7 @@ int tinyfd_messageBoxW(
 		aCode += MB_OK;
 	}
 
-	lBoxReturnValue = MessageBoxW(NULL, aMessage, aTitle, aCode);
+	lBoxReturnValue = MessageBoxW((HWND)aParent, aMessage, aTitle, aCode);
 	if (((aDialogType
 		&& wcscmp(L"okcancel", aDialogType)
 		&& wcscmp(L"yesno", aDialogType)))
@@ -839,6 +840,7 @@ int tinyfd_messageBoxW(
 
 
 static int messageBoxWinGui8(
+	void * const aParent,
 	char const * const aTitle, /* NULL or "" */
 	char const * const aMessage, /* NULL or ""  may contain \n and \t */
 	char const * const aDialogType, /* "ok" "okcancel" "yesno" "yesnocancel" */
@@ -856,7 +858,7 @@ static int messageBoxWinGui8(
 	lDialogType = utf8to16(aDialogType);
 	lIconType = utf8to16(aIconType);
 
-	lIntRetVal = tinyfd_messageBoxW(lTitle, lMessage,
+	lIntRetVal = tinyfd_messageBoxW(aParent, lTitle, lMessage,
 								lDialogType, lIconType, aDefaultButton );
 
 	free(lTitle);
@@ -1639,6 +1641,7 @@ static char const * colorChooserWinGui8(
 
 
 static int messageBoxWinGuiA (
+	void * aParent,
     char const * const aTitle , /* NULL or "" */
     char const * const aMessage , /* NULL or ""  may contain \n and \t */
     char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
@@ -2458,6 +2461,7 @@ static char const * selectFolderDialogWinConsole (
 
 
 int tinyfd_messageBox (
+	void * const aParent,
 	char const * const aTitle , /* NULL or "" */
 	char const * const aMessage , /* NULL or ""  may contain \n and \t */
 	char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */
@@ -2474,12 +2478,12 @@ int tinyfd_messageBox (
 		if (tinyfd_winUtf8)
 		{
 			return messageBoxWinGui8(
-				aTitle, aMessage, aDialogType, aIconType, aDefaultButton);
+				aParent, aTitle, aMessage, aDialogType, aIconType, aDefaultButton);
 		}
 		else
 		{
 			return messageBoxWinGuiA(
-				aTitle, aMessage, aDialogType, aIconType, aDefaultButton);
+				aParent, aTitle, aMessage, aDialogType, aIconType, aDefaultButton);
 		}
 	}
 	else
@@ -3417,6 +3421,7 @@ static int tkinter2Present ( )
 
 
 int tinyfd_messageBox (
+	void* const aParent,
 	char const * const aTitle , /* NULL or "" */
 	char const * const aMessage , /* NULL or ""  may contain \n and \t */
 	char const * const aDialogType , /* "ok" "okcancel" "yesno" "yesnocancel" */

@@ -418,9 +418,9 @@ namespace neogfx
         }
     }
 
-    void text_edit::mouse_moved(const point& aPosition)
+    void text_edit::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        scrollable_widget::mouse_moved(aPosition);
+        scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
         if (iDragger != std::nullopt)
             set_cursor_position(aPosition, false);
     }

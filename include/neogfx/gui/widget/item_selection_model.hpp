@@ -161,6 +161,7 @@ namespace neogfx
                 return;
             iMode = aMode;
             ModeChanged.trigger(mode());
+            clear({});
         }
     public:
         bool has_current_index() const override
@@ -317,6 +318,10 @@ namespace neogfx
         }
         void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation) override
         {
+            if (aOperation == item_selection_operation::None)
+                return;
+            else if (mode() == item_selection_mode::NoSelection)
+                aOperation = item_selection_operation::Clear;
             // todo: cell and column
             static auto find = [](const item_presentation_model_index& aIndex, concrete_item_selection& aSelection)
             {
@@ -334,12 +339,12 @@ namespace neogfx
             {
                 if (aSelection.empty())
                     return aSelection.end();
-                auto existing = find(aIndex.with_row(aIndex.row() - 1u));
+                auto existing = find(aIndex.with_row(aIndex.row() - 1u), aSelection);
                 if (existing != aSelection.end())
                     return existing;
-                return find(aIndex.with_row(aIndex.row() + 1u));
+                return find(aIndex.with_row(aIndex.row() + 1u), aSelection);
             };
-            auto update = [&, this](concrete_item_selection& aSelection, bool aUpdateCells = true)
+            auto update = [&, this](concrete_item_selection& aSelection, bool aUpdateCells)
             {
                 bool const clear = (aOperation & item_selection_operation::Clear) == item_selection_operation::Clear;
                 bool const rowCurrentlySelected = (presentation_model().cell_meta(aIndex.with_column(0u)).selection & item_cell_selection_flags::Selected) ==
@@ -365,7 +370,7 @@ namespace neogfx
                         else
                         {
                             if (adjacent->second().bottomRight.row() == aIndex.row() - 1u)
-                                adjacent->second().bottomRIght = aIndex.with_column(presentation_model().columns() - 1u);
+                                adjacent->second().bottomRight = aIndex.with_column(presentation_model().columns() - 1u);
                             else
                             {
                                 aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), adjacent->second().bottomRight });
@@ -403,11 +408,10 @@ namespace neogfx
                         }
                     }
                 }
-                compact(aSelection);
             };
             update(iSelection, true);
             SelectionChanged.trigger(iSelection, iPreviousSelection);
-            update(iPreviousSelection);
+            update(iPreviousSelection, false);
         }
     public:
         bool sorting() const override

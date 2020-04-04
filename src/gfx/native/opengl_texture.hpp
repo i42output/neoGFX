@@ -86,6 +86,7 @@ namespace neogfx
     public:
         render_target_type target_type() const override;
         void* target_handle() const override;
+        void* target_device_handle() const override;
         const i_texture& target_texture() const override;
         size target_extents() const override;
     public:

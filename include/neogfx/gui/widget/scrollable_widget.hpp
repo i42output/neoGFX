@@ -72,11 +72,11 @@ namespace neogfx
     public:
         void paint_non_client_after(i_graphics_context& aGraphicsContext) const override;
     public:
-        void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
+        void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
-        void mouse_moved(const point& aPosition) override;
+        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
     public:

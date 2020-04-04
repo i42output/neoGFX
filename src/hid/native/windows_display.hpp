@@ -1,7 +1,7 @@
-// mouse.hpp
+// windows_display.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,14 +20,24 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/hid/i_mouse.hpp>
+#include <neogfx/hid/display.hpp>
 
 namespace neogfx
 {
-    class mouse : public i_mouse
+    namespace native::windows
     {
-    public:
-        define_declared_event(ButtonPressed, button_pressed, mouse_button)
-        define_declared_event(ButtonReleased, button_released, mouse_button)
-    };
+        class display : public neogfx::display
+        {
+        public:
+            display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle);
+            ~display();
+        public:
+            void update_dpi() override;
+        public:
+            color read_pixel(const point& aPosition) const override;
+        private:
+            void* iNativeDisplayHandle;
+            void* iNativeDeviceContextHandle;
+        };
+    }
 }

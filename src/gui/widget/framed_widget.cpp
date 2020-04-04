@@ -141,7 +141,7 @@ namespace neogfx
         if (has_frame_color())
             return *iFrameColor;
         else if (iStyle != frame_style::ContainerFrame)
-            return (background_color().dark() ? background_color().lighter(0x60) : background_color().darker(0x60));
+            return background_color().shade(0x60);
         else
             return (has_foreground_color() ? foreground_color() : container_background_color()).darker(0x40);
     }

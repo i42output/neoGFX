@@ -42,7 +42,7 @@ namespace neogfx
         None                 = 0x00,
         Select               = 0x01,
         Deselect             = 0x02,
-        Toggle               = 0x03,
+        Toggle               = 0x04,
         Clear                = 0x08,
         Row                  = 0x10,
         Column               = 0x20,
@@ -55,7 +55,8 @@ namespace neogfx
         ToggleColumn         = Toggle | Column,
         ClearAndSelect       = Clear | Select,
         ClearAndSelectRow    = Clear | Select | Row,
-        ClearAndSelectColumn = Clear | Select | Column
+        ClearAndSelectColumn = Clear | Select | Column,
+        ClearAndToggle       = Clear | Toggle
     };
 
     enum class index_location

@@ -117,12 +117,12 @@ namespace neogfx
             if (has_color(color_role::Background))
                 return *iBackgroundColor;
             else
-                return color(color_role::Theme).light() ? color(color_role::Theme).lighter(0x20) : color(color_role::Theme).darker(0x20);
+                return color(color_role::Theme).unshade(0x20);
         case color_role::Foreground:
             if (has_color(color_role::Foreground))
                 return *iForegroundColor;
             else
-                return color(color_role::Theme).light() ? color(color_role::Theme).darker(0x20) : color(color_role::Theme).lighter(0x20);
+                return color(color_role::Theme).shade(0x20);
         case color_role::Text:
             if (has_color(color_role::Text))
                 return *iTextColor;

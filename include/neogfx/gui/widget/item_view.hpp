@@ -120,7 +120,7 @@ namespace neogfx
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
-        void mouse_moved(const point& aPosition) override;
+        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
     protected:
@@ -161,6 +161,9 @@ namespace neogfx
         void init();
         void invalidate_item(const item_presentation_model_index& aItemIndex);
         void update_hover(const optional_point& aPosition);
+        item_selection_operation to_selection_operation(key_modifiers_e aKeyModifiers) const;
+        void select(const item_presentation_model_index& aItemIndex, key_modifiers_e aKeyModifiers);
+        void select(const item_presentation_model_index& aItemIndex, item_selection_operation aSelectionOperation = item_selection_operation::ClearAndSelect);
     private:
         sink iSink;
         sink iModelSink;

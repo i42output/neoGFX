@@ -1,7 +1,7 @@
-// mouse.hpp
+// windows_mouse.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,14 +20,23 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/hid/i_mouse.hpp>
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/hid/mouse.hpp>
 
 namespace neogfx
 {
-    class mouse : public i_mouse
+    namespace native::windows
     {
-    public:
-        define_declared_event(ButtonPressed, button_pressed, mouse_button)
-        define_declared_event(ButtonReleased, button_released, mouse_button)
-    };
+        class mouse : public neogfx::mouse
+        {
+        public:
+            typedef uint32_t virtual_key_code_t;
+        public:
+            point position() const override;
+            mouse_button button_state() const override;
+        public:
+            static mouse_button convert_button(virtual_key_code_t aVirtualKeyCode);
+            static virtual_key_code_t convert_button(mouse_button aButton);
+        };
+    }
 }

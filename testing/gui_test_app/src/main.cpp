@@ -912,6 +912,13 @@ int main(int argc, char* argv[])
         ui.dropListEasingLowerTableView.selection_model().set_current_index(ng::item_presentation_model_index{ ng::standard_easing_index(ng::easing::One) });
         ui.dropListEasingLowerTableView.accept_selection();
 
+        ui.radioNoTableViewSelection.checked([&]() { ui.tableView1.selection_model().set_mode(ng::item_selection_mode::NoSelection); ui.tableView2.selection_model().set_mode(ng::item_selection_mode::NoSelection); });
+        ui.radioSingleTableViewSelection.checked([&]() { ui.tableView1.selection_model().set_mode(ng::item_selection_mode::SingleSelection); ui.tableView2.selection_model().set_mode(ng::item_selection_mode::SingleSelection); });
+        ui.radioMultipleTableViewSelection.checked([&]() { ui.tableView1.selection_model().set_mode(ng::item_selection_mode::MultipleSelection); ui.tableView2.selection_model().set_mode(ng::item_selection_mode::MultipleSelection); });
+        ui.radioExtendedTableViewSelection.checked([&]() { ui.tableView1.selection_model().set_mode(ng::item_selection_mode::ExtendedSelection); ui.tableView2.selection_model().set_mode(ng::item_selection_mode::ExtendedSelection); });
+
+        ui.radioSingleTableViewSelection.check();
+
         tableView1.selection_model().current_index_changed([&](const ng::optional_item_presentation_model_index& aCurrentIndex, const ng::optional_item_presentation_model_index&)
         {
             if (aCurrentIndex)
@@ -950,8 +957,6 @@ int main(int argc, char* argv[])
         ng::image smallHash(":/test/resources/channel.png");
 
         create_game(ui.layoutGame);
-
-
 
         neolib::basic_random<uint8_t> rngColor;
         auto random_color = [&]()

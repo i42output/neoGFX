@@ -72,10 +72,10 @@ namespace neogfx
         point oldOrigin = aGraphicsContext.origin();
         aGraphicsContext.set_origin(point(0.0, 0.0));
         color baseColor = aScrollbar.container().scrollbar_color(aScrollbar);
-        color backgroundColor = baseColor.light() ? baseColor.darker(0x40) : baseColor.lighter(0x40);
+        color backgroundColor = baseColor.shade(0x40);
         if (widget.transparent_background())
             backgroundColor = widget.container_background_color();
-        color foregroundColor = baseColor.light() ? baseColor.darker(0x80) : baseColor.lighter(0x80);
+        color foregroundColor = baseColor.shade(0x80);
         if (aScrollbar.style() == scrollbar_style::Normal)
             aGraphicsContext.fill_rect(g, backgroundColor);
         else if (aScrollbar.style() == scrollbar_style::Menu)
@@ -202,9 +202,7 @@ namespace neogfx
         rect boxRect = aItem.element_rect(skin_element::CheckBox);
         auto enabledAlphaCoefficient = widget.effectively_enabled() ? 1.0 : 0.25;
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(
-            widget.background_color().dark() ?
-                widget.background_color().lighter(0x20) :
-                widget.background_color().darker(0x20));
+            widget.background_color().shade(0x20));
         if (widget.capturing() && widget.capture_position() && aItem.element_rect(skin_element::ClickableArea).contains(*widget.capture_position()))
             widget.background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
         color fillColor = widget.enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.root().mouse_position() - widget.origin()) ?

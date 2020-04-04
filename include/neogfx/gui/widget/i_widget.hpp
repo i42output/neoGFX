@@ -200,11 +200,11 @@ namespace neogfx
         virtual bool ignore_non_client_mouse_events() const = 0;
         virtual void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) = 0;
         virtual bool mouse_event_is_non_client() const = 0;
-        virtual void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) = 0;
+        virtual void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
-        virtual void mouse_moved(const point& aPosition) = 0;
+        virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_entered(const point& aPosition) = 0;
         virtual void mouse_left() = 0;
         virtual neogfx::mouse_cursor mouse_cursor() const = 0;

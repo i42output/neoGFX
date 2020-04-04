@@ -1,4 +1,4 @@
-// mouse.hpp
+// windows_keyboard.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -20,14 +20,23 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/hid/i_mouse.hpp>
+#include <neogfx/hid/keyboard.hpp>
 
 namespace neogfx
 {
-    class mouse : public i_mouse
+    namespace native::windows
     {
-    public:
-        define_declared_event(ButtonPressed, button_pressed, mouse_button)
-        define_declared_event(ButtonReleased, button_released, mouse_button)
-    };
+        scan_code_e scan_code_from_message(LPARAM aLParam, WPARAM aWParam);
+        key_code_e scan_code_to_key_code(scan_code_e aScanCode);
+            
+        class keyboard : public neogfx::keyboard
+        {
+        public:
+            keyboard();
+        public:
+            bool is_key_pressed(scan_code_e aScanCode) const override;
+            keyboard_locks locks() const override;
+            static key_modifiers_e modifiers();
+        };
+    }
 }

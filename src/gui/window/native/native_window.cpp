@@ -94,8 +94,8 @@ namespace neogfx
             const auto& windowEvent = static_variant_cast<const window_event&>(aEvent);
             switch (windowEvent.type())
             {
+            case window_event_type::Moved:
             case window_event_type::Resized:
-            case window_event_type::SizeChanged:
                 for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
                 {
                     if (std::holds_alternative<window_event>(*e) && static_variant_cast<const window_event&>(*e).type() == windowEvent.type())
@@ -179,7 +179,6 @@ namespace neogfx
                         switch (static_variant_cast<const window_event&>(*e).type())
                         {
                         case window_event_type::Resized:
-                        case window_event_type::SizeChanged:
                             e = iEventQueue.erase(e);
                             break;
                         default:
@@ -190,9 +189,6 @@ namespace neogfx
                 }
                 break;
             case window_event_type::Resized:
-                surface_window().native_window_resized();
-                break;
-            case window_event_type::SizeChanged:
                 surface_window().native_window_resized();
                 break;
             case window_event_type::Enter:
@@ -230,7 +226,7 @@ namespace neogfx
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
-                surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
+                surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
                 surface_window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
@@ -242,7 +238,7 @@ namespace neogfx
                 surface_window().native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
                 break;
             case mouse_event_type::Moved:
-                surface_window().native_window_mouse_moved(mouseEvent.position());
+                surface_window().native_window_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             default:
                 /* do nothing */
@@ -255,7 +251,7 @@ namespace neogfx
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
-                surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
+                surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
                 surface_window().native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
@@ -267,7 +263,7 @@ namespace neogfx
                 surface_window().native_window_non_client_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
                 break;
             case mouse_event_type::Moved:
-                surface_window().native_window_non_client_mouse_moved(mouseEvent.position());
+                surface_window().native_window_non_client_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             default:
                 /* do nothing */

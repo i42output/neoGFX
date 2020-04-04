@@ -42,7 +42,7 @@ namespace neogfx
                 {
                     auto backgroundColor = service<i_app>().current_style().palette().color(color_role::Theme).dark() ? color::Black : color::White;
                     if (backgroundColor == service<i_app>().current_style().palette().color(color_role::Theme))
-                        backgroundColor = backgroundColor.dark() ? backgroundColor.lighter(0x20) : backgroundColor.darker(0x20);
+                        backgroundColor = backgroundColor.shade(0x20);
                     return backgroundColor;
                 }
                 else

@@ -23,8 +23,14 @@
 
 namespace neogfx
 {
+    struct clipboard_error : std::runtime_error { using runtime_error::runtime_error; };
+
     class i_native_clipboard
     {
+    public:
+        struct failed_to_open_clipboard : clipboard_error { failed_to_open_clipboard() : clipboard_error{"neogfx::i_native_clipboard::failed_to_open_clipboard"} {} };
+        struct failed_to_get_clipboard_data : clipboard_error { failed_to_get_clipboard_data() : clipboard_error{"neogfx::i_native_clipboard::failed_to_get_clipboard_data"} {} };
+        struct failed_to_set_clipboard_data : clipboard_error { failed_to_set_clipboard_data() : clipboard_error{"neogfx::i_native_clipboard::failed_to_set_clipboard_data"} {} };
     public:
         virtual bool has_text() const = 0;
         virtual std::string text() const = 0;

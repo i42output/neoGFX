@@ -48,7 +48,7 @@ namespace neogfx
             {
                 auto backgroundColor = iDropList.view().background_color().dark() ? color::Black : color::White;
                 if (backgroundColor == iDropList.view().background_color())
-                    backgroundColor = backgroundColor.dark() ? backgroundColor.lighter(0x20) : backgroundColor.darker(0x20);
+                    backgroundColor = backgroundColor.shade(0x20);
                 return backgroundColor;
             }
             else
@@ -199,9 +199,9 @@ namespace neogfx
         if (window::has_frame_color())
             return window::frame_color();
         auto viewBackgroundColor = iView.background_color();
-        auto backgroundColor = viewBackgroundColor.dark() ? viewBackgroundColor.darker(0x20) : viewBackgroundColor.lighter(0x20);
+        auto backgroundColor = viewBackgroundColor.unshade(0x20);
         if (backgroundColor == viewBackgroundColor)
-            backgroundColor = viewBackgroundColor.dark() ? viewBackgroundColor.lighter(0x20) : viewBackgroundColor.darker(0x20);
+            backgroundColor = viewBackgroundColor.shade(0x20);
         return backgroundColor;
     }
 

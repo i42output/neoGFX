@@ -28,11 +28,14 @@
     <Filter Include="Source Files\app">
       <UniqueIdentifier>{00a4f40f-f7e9-48e4-88a2-4085803b6516}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\app\native">
+    <Filter Include="Source Files\native">
       <UniqueIdentifier>{285f99c6-1625-43bd-8712-220b4f463d1c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\app\native\3rdparty">
+    <Filter Include="Source Files\native\3rdparty">
       <UniqueIdentifier>{79280b3e-734a-4e55-be84-1c834a647c07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\native\windows">
+      <UniqueIdentifier>{2938ee9a-9f1d-40cf-9c80-e6542b209f8d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -45,16 +48,10 @@
     <ClInclude Include="..\..\..\src\gui\window\native\i_native_window.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\sdl_renderer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\opengl_renderer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\hid\native\sdl_keyboard.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp">
@@ -82,9 +79,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\window\native\sdl_window.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\font_manager.hpp">
@@ -309,9 +303,6 @@
     <ClInclude Include="..\..\..\include\neogfx\app\module_resource.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\hid\mouse.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -501,12 +492,6 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\window_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\hid\native\sdl_window_manager.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\hid\native\sdl_mouse.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\window\i_window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -525,17 +510,8 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_device.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\audio\native\sdl_audio.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_playback_device.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\audio\native\sdl_audio_playback_device.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\audio\native\sdl_audio_device.hpp">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_sample.hpp">
       <Filter>Header Files</Filter>
@@ -934,19 +910,46 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp">
-      <Filter>Source Files\app\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\app\native\sdl_basic_services.hpp">
-      <Filter>Source Files\app\native</Filter>
+      <Filter>Source Files\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.h">
-      <Filter>Source Files\app\native\3rdparty</Filter>
+      <Filter>Source Files\native\3rdparty</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\file_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\modal_task.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\windows_keyboard.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\windows_mouse.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_mouse.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\mouse.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\windows_renderer.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\windows_basic_services.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\windows_display.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\windows_window_manager.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\wgl.hpp">
+      <Filter>Source Files\native\windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -998,12 +1001,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\slider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\window\native\sdl_window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp">
@@ -1189,25 +1186,10 @@
     <ClCompile Include="..\..\..\src\gui\dialog\message_box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\hid\native\sdl_keyboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\hid\native\sdl_window_manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\hid\surface_window_proxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\audio\native\sdl_audio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\audio\native\sdl_audio_playback_device.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\audio\native\sdl_audio_device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\audio\audio_track.cpp">
@@ -1381,17 +1363,38 @@
     <ClCompile Include="..\..\..\src\app\style.cpp">
       <Filter>Source Files\app</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp">
-      <Filter>Source Files\app\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\app\native\sdl_services.cpp">
-      <Filter>Source Files\app\native</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.c">
-      <Filter>Source Files\app\native\3rdparty</Filter>
+      <Filter>Source Files\native\3rdparty</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\app\file_dialog.cpp">
       <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\native\windows_keyboard.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\native\windows_window.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\windows_renderer.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\windows_basic_services.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\native\windows_display.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\native\windows_window_manager.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\windows_services.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\native\windows_mouse.cpp">
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

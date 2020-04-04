@@ -265,7 +265,7 @@ namespace neogfx
         auto update_size_grip = [this](style_aspect)
         {
             auto ink1 = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));
-            ink1 = ink1.light() ? ink1.darker(0x40) : ink1.lighter(0x40);
+            ink1 = ink1.shade(0x40);
             auto ink2 = ink1.darker(0x30);
             if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
             {

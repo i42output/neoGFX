@@ -327,6 +327,14 @@ namespace neogfx
             return lighter(aDelta);
     }
     
+    color color::unshade(component aDelta) const
+    {
+        if (light())
+            return lighter(aDelta);
+        else
+            return darker(aDelta);
+    }
+
     color color::monochrome() const
     {
         component i = static_cast<component>(intensity() * 255.0);

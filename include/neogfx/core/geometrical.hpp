@@ -839,6 +839,12 @@ namespace neogfx
                 return aabb_2d{ bottom_left().to_vec2(), top_right().to_vec2() };
         }
     public:
+        template <typename T>
+        basic_rect<T, CoordinateSystem> as() const
+        {
+            return basic_rect<T, CoordinateSystem>{ *this };
+        }
+    public:
         size_type epsilon = size_type{ zero };
     };
 

@@ -70,7 +70,7 @@ namespace neogfx
     protected:
         color frame_color() const override;
     protected:
-        void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
+        void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     private:

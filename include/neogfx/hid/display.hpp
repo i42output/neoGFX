@@ -30,7 +30,7 @@ namespace neogfx
     class display : public i_display, public i_device_metrics
     {
     public:
-        display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle);
+        display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect);
         ~display();
     public:
         bool high_dpi() const override;
@@ -42,12 +42,10 @@ namespace neogfx
         uint32_t index() const override;
     public:
         const i_device_metrics& metrics() const override;
-        void update_dpi() override;
     public:
         neogfx::rect rect() const override;
         neogfx::rect desktop_rect() const override;
         window_placement default_window_placement() const override;
-        color read_pixel(const point& aPosition) const override;
     public:
         neogfx::subpixel_format subpixel_format() const override;
     public:
@@ -59,11 +57,10 @@ namespace neogfx
         dimension em_size() const override;
     private:
         uint32_t iIndex;
-        neogfx::size iPixelDensityDpi;
         mutable neogfx::rect iRect;
         mutable neogfx::rect iDesktopRect;
+    protected:
+        neogfx::size iPixelDensityDpi;
         neogfx::subpixel_format iSubpixelFormat;
-        void* iNativeDisplayHandle;
-        void* iNativeDeviceContextHandle;
     };
 }

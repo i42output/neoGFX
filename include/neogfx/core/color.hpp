@@ -765,6 +765,7 @@ namespace neogfx
         color lighter(component aDelta) const;
         color darker(component aDelta) const;
         color shade(component aDelta) const;
+        color unshade(component aDelta) const;
         color monochrome() const;
         color same_lightness_as(const color& aOther) const;
         color with_lightness(double aLightness) const;

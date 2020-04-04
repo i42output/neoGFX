@@ -50,6 +50,7 @@ namespace neogfx
     public:
         virtual render_target_type target_type() const = 0;
         virtual void* target_handle() const = 0;
+        virtual void* target_device_handle() const = 0;
         virtual const i_texture& target_texture() const = 0;
         virtual size target_extents() const = 0;
     public:

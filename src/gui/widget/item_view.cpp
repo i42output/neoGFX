@@ -279,6 +279,12 @@ namespace neogfx
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
                     aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColor);
                 }
+                if (selection_model().is_selected(itemIndex))
+                {
+                    scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
+                    aGraphicsContext.fill_rect(cellBackgroundRect, (backgroundColor ? *backgroundColor : background_color()).
+                        shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0xC0));
+                }
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
                     if (model().is_tree() && model().has_children(presentation_model().to_item_model_index(itemIndex)))
@@ -384,14 +390,14 @@ namespace neogfx
         {
             auto item = item_at(root().mouse_position() - origin());
             if (item != std::nullopt)
-                selection_model().set_current_index(*item);
+                select(*item);
             if (editing() == std::nullopt && selection_model().has_current_index() && presentation_model().cell_editable_when_focused(selection_model().current_index()))
                 edit(selection_model().current_index());
         }
         else if (aFocusReason != focus_reason::Other)
         {
             if (model().rows() > 0 && !selection_model().has_current_index())
-                selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
+                select(item_presentation_model_index{ 0, 0 });
         }
     }
 
@@ -410,7 +416,7 @@ namespace neogfx
                 }
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;
-                selection_model().set_current_index(*item);
+                select(*item, aKeyModifiers);
                 if (!iClickedCheckBox && selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable_when_focused(*item))
                     edit(*item);
             }            
@@ -418,13 +424,18 @@ namespace neogfx
             {
                 if (!iClickedCheckBox)
                 {
-                    iMouseTracker.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+                    iMouseTracker.emplace(service<neolib::async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
                     {
                         aTimer.again();
                         auto const pos = root().mouse_position() - origin();
                         auto const item = item_at(pos);
                         if (item != std::nullopt)
-                            selection_model().set_current_index(*item);
+                        {
+                            if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                                select(*item, item_selection_operation::None);
+                            else
+                                select(*item);
+                        }
                     }, 20);
                 }
                 else
@@ -449,7 +460,10 @@ namespace neogfx
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;
                 bool itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                selection_model().set_current_index(*item);
+                if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                    select(*item, item_selection_operation::None);
+                else
+                    select(*item);
                 if (!iClickedCheckBox)
                 {
                     if (itemWasCurrent)
@@ -479,16 +493,21 @@ namespace neogfx
         }
     }
 
-    void item_view::mouse_moved(const point& aPosition)
+    void item_view::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        scrollable_widget::mouse_moved(aPosition);
+        scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
         if (!iIgnoreNextMouseMove)
         {
-            if (hot_tracking() && client_rect().contains(aPosition))
+            if ((capturing() || hot_tracking()) && client_rect().contains(aPosition))
             {
                 auto item = item_at(aPosition);
                 if (item != std::nullopt)
-                    selection_model().set_current_index(*item);
+                {
+                    if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                        select(*item, item_selection_operation::None);
+                    else
+                        select(*item);
+                }
             }
             update_hover(aPosition);
         }
@@ -531,9 +550,9 @@ namespace neogfx
                     end_edit(true);
                     item_presentation_model_index originalIndex = selection_model().current_index();
                     if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
-                        selection_model().set_current_index(selection_model().relative_to_current_index(index_location::NextCell, true, true));
+                        select(selection_model().relative_to_current_index(index_location::NextCell, true, true));
                     else
-                        selection_model().set_current_index(selection_model().relative_to_current_index(index_location::PreviousCell, true, true));
+                        select(selection_model().relative_to_current_index(index_location::PreviousCell, true, true));
                     edit(selection_model().current_index());
                     if (editing() != std::nullopt && editor_has_text_edit())
                     {
@@ -594,7 +613,10 @@ namespace neogfx
                 handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                 break;
             }
-            selection_model().set_current_index(newIndex);
+            if (aScanCode == ScanCode_SPACE)
+                select(newIndex, aKeyModifiers);
+            else if (newIndex != currentIndex)
+                select(newIndex, item_selection_operation::None);
         }
         else
         {
@@ -609,7 +631,7 @@ namespace neogfx
             case ScanCode_HOME:
             case ScanCode_END:
                 if (presentation_model().rows() > 0 && has_focus())
-                    selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
+                    select(item_presentation_model_index{ 0, 0 });
                 else
                     handled = false;
                 break;
@@ -745,7 +767,7 @@ namespace neogfx
     void item_view::items_sorted()
     {
         if (iSavedModelIndex != std::nullopt && presentation_model().has_item_model_index(*iSavedModelIndex))
-            selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
+            select(presentation_model().from_item_model_index(*iSavedModelIndex));
         iSavedModelIndex = std::nullopt;
         update();
     }
@@ -758,7 +780,7 @@ namespace neogfx
     void item_view::items_filtered()
     {
         if (presentation_model().rows() != 0)
-            selection_model().set_current_index(item_presentation_model_index{});
+            select(item_presentation_model_index{});
         update_scrollbar_visibility();
         update();
     }
@@ -784,7 +806,6 @@ namespace neogfx
         if (aCurrentIndex != std::nullopt)
         {
             make_visible(*aCurrentIndex);
-            update(cell_rect(*aCurrentIndex, cell_part::Background));
             if (!selection_model().sorting() && !selection_model().filtering())
             {
                 if (aPreviousIndex != std::nullopt)
@@ -796,12 +817,12 @@ namespace neogfx
                 }
             }
         }
-        if (aPreviousIndex != std::nullopt)
-            update(cell_rect(*aPreviousIndex, cell_part::Background));
+        update();
     }
 
     void item_view::selection_changed(const item_selection&, const item_selection&)
     {
+        update();
     }
 
     bool item_view::hot_tracking() const
@@ -914,7 +935,7 @@ namespace neogfx
         }
         auto newIndex = presentation_model().from_item_model_index(modelIndex);
         if (!selection_model().has_current_index() || selection_model().current_index() != newIndex)
-            selection_model().set_current_index(newIndex);
+            select(newIndex);
         iEditing = newIndex;
         if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
             editor().set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
@@ -1227,5 +1248,42 @@ namespace neogfx
             if (iHoverCell)
                 update(cell_rect(*iHoverCell, cell_part::Background));
         }
+    }
+
+    item_selection_operation item_view::to_selection_operation(key_modifiers_e aKeyModifiers) const
+    {
+        switch (selection_model().mode())
+        {
+        case item_selection_mode::NoSelection:
+            return item_selection_operation::None;
+        case item_selection_mode::SingleSelection:
+            if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+                return item_selection_operation::ClearAndToggle;
+            else
+                return item_selection_operation::ClearAndSelect;
+            break;
+        case item_selection_mode::MultipleSelection:
+            // todo
+            return item_selection_operation::None;
+        case item_selection_mode::ExtendedSelection:
+            if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+                return item_selection_operation::Toggle;
+            else
+                return item_selection_operation::ClearAndSelect;
+            break;
+        default:
+            return item_selection_operation::None;
+        }
+    }
+
+    void item_view::select(const item_presentation_model_index& aItemIndex, key_modifiers_e aKeyModifiers)
+    {
+        select(aItemIndex, to_selection_operation(aKeyModifiers));
+    }
+
+    void item_view::select(const item_presentation_model_index& aItemIndex, item_selection_operation aSelectionOperation)
+    {
+        selection_model().set_current_index(aItemIndex);
+        selection_model().select(aItemIndex, aSelectionOperation);
     }
 }

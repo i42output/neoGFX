@@ -61,7 +61,7 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect rectBarBox = bar_box();
-        color ink = background_color().light(0x80) ? background_color().darker(0x80) : background_color().lighter(0x80);
+        color ink = background_color().shade(0x80);
         aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink);
         rectBarBox.inflate(size{ 1.0, 1.0 });
         aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink.mid(background_color()));
@@ -127,17 +127,17 @@ namespace neogfx
         }
     }
 
-    void slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
+    void slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
             set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))));
         else
-            widget::mouse_wheel_scrolled(aWheel, aDelta);
+            widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
 
-    void slider_impl::mouse_moved(const point& aPosition)
+    void slider_impl::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        widget::mouse_moved(aPosition);
+        widget::mouse_moved(aPosition, aKeyModifiers);
         if (iDragOffset != std::nullopt)
         {
             if (iOrientation == slider_orientation::Horizontal)

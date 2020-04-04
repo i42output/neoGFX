@@ -519,6 +519,12 @@ namespace neogfx
     }
 
     template <typename T>
+    void* opengl_texture<T>::target_device_handle() const
+    {
+        return nullptr;
+    }
+
+    template <typename T>
     const i_texture& opengl_texture<T>::target_texture() const
     {
         return *this;

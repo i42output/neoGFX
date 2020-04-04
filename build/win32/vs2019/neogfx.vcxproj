@@ -515,6 +515,7 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_window_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\keyboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_mouse.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\mouse.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_window_proxy.hpp" />
@@ -523,10 +524,7 @@
     <ClInclude Include="..\..\..\include\neogfx\neogfx.hpp" />
     <ClInclude Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.h" />
     <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp" />
-    <ClInclude Include="..\..\..\src\app\native\sdl_basic_services.hpp" />
-    <ClInclude Include="..\..\..\src\audio\native\sdl_audio.hpp" />
-    <ClInclude Include="..\..\..\src\audio\native\sdl_audio_device.hpp" />
-    <ClInclude Include="..\..\..\src\audio\native\sdl_audio_playback_device.hpp" />
+    <ClInclude Include="..\..\..\src\app\native\windows_basic_services.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp" />
@@ -537,7 +535,8 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_vertex_arrays.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\sdl_renderer.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\wgl.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\windows_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font.hpp" />
@@ -546,11 +545,12 @@
     <ClInclude Include="..\..\..\src\gui\window\native\i_native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />
-    <ClInclude Include="..\..\..\src\gui\window\native\sdl_window.hpp" />
+    <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp" />
-    <ClInclude Include="..\..\..\src\hid\native\sdl_keyboard.hpp" />
-    <ClInclude Include="..\..\..\src\hid\native\sdl_mouse.hpp" />
-    <ClInclude Include="..\..\..\src\hid\native\sdl_window_manager.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\windows_display.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\windows_keyboard.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\windows_mouse.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\windows_window_manager.hpp" />
     <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
@@ -577,8 +577,8 @@
     <ClCompile Include="..\..\..\src\app\i18n.cpp" />
     <ClCompile Include="..\..\..\src\app\module_resource.cpp" />
     <ClCompile Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.c" />
-    <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp" />
-    <ClCompile Include="..\..\..\src\app\native\sdl_services.cpp" />
+    <ClCompile Include="..\..\..\src\app\native\windows_basic_services.cpp" />
+    <ClCompile Include="..\..\..\src\app\native\windows_services.cpp" />
     <ClCompile Include="..\..\..\src\app\palette.cpp" />
     <ClCompile Include="..\..\..\src\app\resource.cpp" />
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
@@ -588,9 +588,6 @@
     <ClCompile Include="..\..\..\src\audio\audio_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_track.cpp" />
-    <ClCompile Include="..\..\..\src\audio\native\sdl_audio.cpp" />
-    <ClCompile Include="..\..\..\src\audio\native\sdl_audio_device.cpp" />
-    <ClCompile Include="..\..\..\src\audio\native\sdl_audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\core\animator.cpp" />
     <ClCompile Include="..\..\..\src\core\color.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
@@ -625,7 +622,7 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_shader_program.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\windows_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
     <ClCompile Include="..\..\..\src\gfx\render_target.cpp" />
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
@@ -703,12 +700,15 @@
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\opengl_window.cpp" />
-    <ClCompile Include="..\..\..\src\gui\window\native\sdl_window.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\native\windows_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
+    <ClCompile Include="..\..\..\src\hid\display.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
-    <ClCompile Include="..\..\..\src\hid\native\sdl_keyboard.cpp" />
-    <ClCompile Include="..\..\..\src\hid\native\sdl_window_manager.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\windows_display.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\windows_keyboard.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\windows_mouse.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\windows_window_manager.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_window_proxy.cpp" />
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />

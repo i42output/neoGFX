@@ -139,12 +139,12 @@ namespace neogfx
                 rect{
                     point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(iVerticalScrollbar).bottom() },
                     size{ scrollbar_geometry(iVerticalScrollbar).width(), scrollbar_geometry(horizontal_scrollbar()).height() } },
-                scrollbarColor.light() ? scrollbarColor.darker(0x40) : scrollbarColor.lighter(0x40));
+                scrollbarColor.shade(0x40));
             aGraphicsContext.set_origin(oldOrigin);
         }
     }
 
-    void scrollable_widget::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
+    void scrollable_widget::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         bool handledVertical = false;
         bool handledHorizontal = false;
@@ -159,7 +159,7 @@ namespace neogfx
         mouse_wheel passOn = static_cast<mouse_wheel>(
             aWheel & ((handledVertical ? ~verticalSense : verticalSense) | (handledHorizontal ? ~horizontalSense : horizontalSense)));
         if (passOn != mouse_wheel::None)
-            framed_widget::mouse_wheel_scrolled(passOn, aDelta);
+            framed_widget::mouse_wheel_scrolled(passOn, aPosition, aDelta, aKeyModifiers);
     }
 
     void scrollable_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -248,9 +248,9 @@ namespace neogfx
         }
     }
 
-    void scrollable_widget::mouse_moved(const point& aPosition)
+    void scrollable_widget::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_widget::mouse_moved(aPosition);
+        framed_widget::mouse_moved(aPosition, aKeyModifiers);
         vertical_scrollbar().update(aPosition + origin());
         horizontal_scrollbar().update(aPosition + origin());
     }

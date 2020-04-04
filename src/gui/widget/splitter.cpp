@@ -123,7 +123,7 @@ namespace neogfx
         }
     }
 
-    void splitter::mouse_moved(const point& aPosition)
+    void splitter::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         if (iTracking != std::nullopt)
         {
