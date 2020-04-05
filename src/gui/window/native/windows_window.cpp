@@ -78,6 +78,8 @@ namespace neogfx
 {
     namespace native::windows
     {
+        extern std::string GetLastErrorText();
+
         extern const std::wstring sWindowClassName;
 
         window* window::sNewWindow;
@@ -178,7 +180,7 @@ namespace neogfx
                 GetModuleHandle(NULL),
                 0);
             if (iHandle == nullptr)
-                throw failed_to_create_window("CreateWindow()");
+                throw failed_to_create_window(GetLastErrorText());
 
             init();
 
@@ -217,7 +219,7 @@ namespace neogfx
                 GetModuleHandle(NULL),
                 0);
             if (iHandle == nullptr)
-                throw failed_to_create_window("CreateWindow()");
+                throw failed_to_create_window(GetLastErrorText());
 
             init();
 
@@ -256,7 +258,7 @@ namespace neogfx
                 GetModuleHandle(NULL),
                 0);
             if (iHandle == nullptr)
-                throw failed_to_create_window("CreateWindow()");
+                throw failed_to_create_window(GetLastErrorText());
 
             init();
 
@@ -295,7 +297,7 @@ namespace neogfx
                 GetModuleHandle(NULL),
                 0);
             if (iHandle == nullptr)
-                throw failed_to_create_window("CreateWindow()");
+                throw failed_to_create_window(GetLastErrorText());
 
             init();
 
@@ -334,7 +336,7 @@ namespace neogfx
                 GetModuleHandle(NULL),
                 0);
             if (iHandle == nullptr)
-                throw failed_to_create_window("CreateWindow()");
+                throw failed_to_create_window(GetLastErrorText());
 
             init();
 
@@ -373,7 +375,7 @@ namespace neogfx
                 GetModuleHandle(NULL),
                 0);
             if (iHandle == nullptr)
-                throw failed_to_create_window("CreateWindow()");
+                throw failed_to_create_window(GetLastErrorText());
 
             init();
 
@@ -510,7 +512,7 @@ namespace neogfx
             if (::GetLayeredWindowAttributes(iHandle, NULL, &alpha, NULL))
                 return alpha / 255.0;
             else
-                throw failed_to_get_window_information("GetLayeredWindowAttributes()");
+                throw failed_to_get_window_information(GetLastErrorText());
         }
     
         void window::set_opacity(double aOpacity)
@@ -521,7 +523,7 @@ namespace neogfx
                 if (exStyle & WS_EX_LAYERED)
                 {
                     if (::SetWindowLong(iHandle, GWL_EXSTYLE, exStyle & ~WS_EX_LAYERED) == 0)
-                        throw failed_to_set_window_attributes("SetWindowLong()");
+                        throw failed_to_set_window_attributes(GetLastErrorText());
                 }
             }
             else 
@@ -531,10 +533,10 @@ namespace neogfx
                 if (!(exStyle & WS_EX_LAYERED))
                 {
                     if (::SetWindowLong(iHandle, GWL_EXSTYLE, exStyle | WS_EX_LAYERED) == 0)
-                        throw failed_to_set_window_attributes("SetWindowLong()");
+                        throw failed_to_set_window_attributes(GetLastErrorText());
                 }
                 if (::SetLayeredWindowAttributes(iHandle, 0, alpha, LWA_ALPHA) == 0)
-                    throw failed_to_set_window_attributes("SetLayeredWindowAttributes()");
+                    throw failed_to_set_window_attributes(GetLastErrorText());
             }
         }
 
@@ -823,8 +825,14 @@ namespace neogfx
                     result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_PAINT:
-                ValidateRect(hwnd, NULL);
-                self.handle_event(window_event(window_event_type::Paint));
+                {
+                    RECT rect;
+                    if (GetUpdateRect(hwnd, &rect, FALSE)) 
+                    {
+                        ValidateRect(hwnd, NULL);
+                        self.handle_event(window_event(window_event_type::Paint));
+                    }
+                }
                 result = 0;
                 break;
             case WM_SYSCHAR:

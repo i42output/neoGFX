@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <strsafe.h>
+#include <GL/glew.h>
 #include <GL/wglew.h>
 
 #include <neolib/scoped.hpp>
@@ -57,12 +58,36 @@ namespace neogfx
 
         void enable_opengl(HWND hWnd, HDC hDC, HGLRC& hRC, bool doubleBuffering)
         {
-            hRC = nullptr;
+            if (hWnd == NULL)
+                throw renderer::failed_to_create_opengl_context("No window!");
+            if (hDC == NULL)
+                throw renderer::failed_to_create_opengl_context("No device context!");
 
+            HWND hTempWND = nullptr;
+            HDC hTempDC = nullptr;
             HGLRC hTempRC = nullptr;
 
-            auto init = [&]() -> PFNWGLCREATECONTEXTATTRIBSARBPROC
+            auto init = [&]()
             {
+                hTempWND = ::CreateWindow(
+                    sWindowClassName.c_str(),
+                    L"neogfx::temp_window",
+                    WS_POPUP,
+                    0,
+                    0,
+                    0,
+                    0,
+                    NULL,
+                    NULL,
+                    ::GetModuleHandle(NULL),
+                    0);
+                if (hTempWND == nullptr)
+                    throw renderer::failed_to_create_opengl_context(GetLastErrorText());
+
+                hTempDC = ::GetDC(hTempWND);
+                if (hTempDC == nullptr)
+                    throw renderer::failed_to_create_opengl_context(GetLastErrorText());
+
                 PIXELFORMATDESCRIPTOR pfd =
                 {
                     sizeof(pfd),
@@ -74,22 +99,31 @@ namespace neogfx
                 pfd.cDepthBits = 24;
                 pfd.cStencilBits = 8;
                 pfd.iLayerType = PFD_MAIN_PLANE;
-                if (!::SetPixelFormat(hDC, ::ChoosePixelFormat(hDC, &pfd), &pfd))
+
+                if (!::SetPixelFormat(hTempDC, ::ChoosePixelFormat(hTempDC, &pfd), &pfd))
                     throw renderer::failed_to_create_opengl_context(GetLastErrorText());
 
-                hTempRC = ::wglCreateContext(hDC);
+                hTempRC = ::wglCreateContext(hTempDC);
                 if (hTempRC == NULL)
                     throw renderer::failed_to_create_opengl_context(GetLastErrorText());
-                if (!::wglMakeCurrent(hDC, hTempRC))
+                if (!::wglMakeCurrent(hTempDC, hTempRC))
                     throw renderer::failed_to_activate_opengl_context(GetLastErrorText());
-                return reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(::wglGetProcAddress("wglCreateContextAttribsARB"));
+
+                auto errGlew = glewInit();
+                if (GLEW_OK != errGlew)
+                    throw renderer::failed_to_initialize_renderer("GLEW error: "s + reinterpret_cast<const char*>(glewGetErrorString(errGlew)));
+
+                return true;
             };
 
-            int attributes[] = 
+            static bool initResult = init();
+
+            int attributes[] =
             {
                 WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
                 WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
                 WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+                WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
                 WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
                 WGL_COLOR_BITS_ARB, 32,
                 WGL_DEPTH_BITS_ARB, 24,
@@ -99,23 +133,41 @@ namespace neogfx
                 0
             };
 
-            static PFNWGLCREATECONTEXTATTRIBSARBPROC const wglCreateContextAttribsARB = init();
-
-            int contextAttributes[] =
-            {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-                0, 0
-            };
-            if (hRC == NULL)
-                hRC = wglCreateContextAttribsARB(hDC, 0, contextAttributes);
-            if (hRC == NULL)
+            int pixelFormat = 0;
+            unsigned int matching;
+            if (!wglChoosePixelFormatARB(hDC, attributes, NULL, 1, &pixelFormat, &matching))
                 throw renderer::failed_to_create_opengl_context(GetLastErrorText());
+
+            PIXELFORMATDESCRIPTOR pfd = {};
+            ::DescribePixelFormat(hDC, pixelFormat, sizeof(pfd), &pfd);
+            if (!::SetPixelFormat(hDC, pixelFormat, &pfd))
+                throw renderer::failed_to_create_opengl_context(GetLastErrorText());
+
+            if (hRC == NULL)
+            {
+                int contextAttributes[] =
+                {
+                    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+                    0, 0
+                };
+
+                hRC = wglCreateContextAttribsARB(hDC, 0, contextAttributes);
+
+                if (hRC == NULL)
+                    throw renderer::failed_to_create_opengl_context(GetLastErrorText());
+            }
+
             if (!::wglMakeCurrent(hDC, hRC))
                 throw renderer::failed_to_activate_opengl_context(GetLastErrorText());
 
-            if (hTempRC && !::wglDeleteContext(hTempRC))
-                throw renderer::failed_to_destroy_opengl_context(GetLastErrorText());
+            if (hTempWND)
+            {
+                if (!::wglDeleteContext(hTempRC))
+                    throw renderer::failed_to_destroy_opengl_context(GetLastErrorText());
+                ::ReleaseDC(hTempWND, hTempDC);
+                ::DestroyWindow(hTempWND);
+            }
         }
 
         class offscreen_window : public neogfx::offscreen_window
@@ -136,12 +188,12 @@ namespace neogfx
                     ::GetModuleHandle(NULL),
                     0);
                 if (iHandle == nullptr)
-                    throw renderer::failed_to_create_offscreen_window("CreateWindow()");
+                    throw renderer::failed_to_create_offscreen_window(GetLastErrorText());
                 iDeviceHandle = ::GetDC(iHandle);
-                if (iHandle == nullptr)
+                if (iDeviceHandle == nullptr)
                 {
                     ::DestroyWindow(iHandle);
-                    throw renderer::failed_to_create_offscreen_window("GetDC()");
+                    throw renderer::failed_to_create_offscreen_window(GetLastErrorText());
                 }
             }
             ~offscreen_window()
@@ -165,10 +217,10 @@ namespace neogfx
 
         renderer::renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows) :
             opengl_renderer{ aRenderer },
+            iInitialized{ false },
             iDoubleBuffering{ aDoubleBufferedWindows },
-            iCreatingWindow{ 0 },
             iContext{ nullptr },
-            iInitialized{ false }
+            iCreatingWindow{ 0 }
         {
             if (aRenderer != neogfx::renderer::None)
             {
@@ -211,9 +263,6 @@ namespace neogfx
                 auto dow = allocate_offscreen_window(nullptr);
                 iDefaultOffscreenWindow = dow;
                 create_context(dow->handle(), dow->device_handle());
-                auto errGlew = glewInit();
-                if (GLEW_OK != errGlew)
-                    throw failed_to_initialize_renderer("GLEW error: "s + reinterpret_cast<const char*>(glewGetErrorString(errGlew)));
                 opengl_renderer::initialize();
                 iInitialized = true;
             }
@@ -250,8 +299,7 @@ namespace neogfx
             //if constexpr (!ndebug)
             //    std::cerr << "renderer: activating context..." << std::endl;
 
-            if (iContext == nullptr)
-                create_context(aTarget);
+            create_context(aTarget);
 
             iTargetStack.push_back(&aTarget);
 
