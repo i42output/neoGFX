@@ -84,5 +84,31 @@ namespace neogfx
                 return 0u;
             }
         }
+
+        mouse_button mouse::button_from_message(WPARAM aWParam)
+        {
+            mouse_button result = mouse_button::None;
+            if (aWParam & MK_LBUTTON)
+                result = result | mouse_button::Left;
+            if (aWParam & MK_RBUTTON)
+                result = result | mouse_button::Right;
+            if (aWParam & MK_MBUTTON)
+                result = result | mouse_button::Middle;
+            if (aWParam & MK_XBUTTON1)
+                result = result | mouse_button::X1;
+            if (aWParam & MK_XBUTTON2)
+                result = result | mouse_button::X2;
+            return result;
+        }
+
+        key_modifiers_e mouse::modifiers_from_message(WPARAM aWParam)
+        {
+            key_modifiers_e result = KeyModifier_NONE;
+            if (aWParam & MK_CONTROL)
+                result = static_cast<key_modifiers_e>(result | KeyModifier_CTRL);
+            if (aWParam & MK_SHIFT)
+                result = static_cast<key_modifiers_e>(result | KeyModifier_SHIFT);
+            return result;
+        }
     }
 }

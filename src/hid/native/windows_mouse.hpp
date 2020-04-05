@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/hid/mouse.hpp>
 
 namespace neogfx
@@ -37,6 +38,8 @@ namespace neogfx
         public:
             static mouse_button convert_button(virtual_key_code_t aVirtualKeyCode);
             static virtual_key_code_t convert_button(mouse_button aButton);
+            static mouse_button button_from_message(WPARAM aWParam);
+            static key_modifiers_e modifiers_from_message(WPARAM aWParam);
         };
     }
 }

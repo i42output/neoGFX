@@ -26,7 +26,7 @@ namespace neogfx
 {
     namespace native::windows
     {
-        scan_code_e scan_code_from_message(LPARAM aLParam, WPARAM aWParam)
+        scan_code_e keyboard::scan_code_from_message(LPARAM aLParam, WPARAM aWParam)
         {
             auto const rawScanCode = static_cast<scan_code_e>(aLParam >> 16) & 0xFF;
             bool const extended = ((aLParam & (1 << 24)) != 0);
@@ -354,7 +354,7 @@ namespace neogfx
             KeyCode_AUDIOFASTFORWARD,
         };
 
-        key_code_e scan_code_to_key_code(scan_code_e aScanCode)
+        key_code_e keyboard::scan_code_to_key_code(scan_code_e aScanCode)
         {
             return static_cast<key_code_e>(sDefaultKeyMap[aScanCode]);
         }

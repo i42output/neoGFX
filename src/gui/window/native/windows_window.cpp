@@ -638,7 +638,6 @@ namespace neogfx
             {
                 iCapturingMouse = true;
                 iNonClientCapturing = true;
-                ::SetCapture(iHandle);
             }
         }
 
@@ -648,7 +647,6 @@ namespace neogfx
             {
                 iCapturingMouse = false;
                 iNonClientCapturing = false;
-                ::ReleaseCapture();
             }
         }
 
@@ -845,17 +843,7 @@ namespace neogfx
                 {
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-                    uint8_t ch = static_cast<uint8_t>(text[0]);
-                    switch (ch)
-                    {
-                    case '\t':
-                    case '\n':
-                    case '\r':
-                        self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
-                        break;
-                    default:
-                        break;
-                    }
+                    self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
                 }
                 break;
             case WM_KEYDOWN:
@@ -863,8 +851,8 @@ namespace neogfx
                 self.push_event(
                     keyboard_event{
                         keyboard_event_type::KeyPressed,
-                        scan_code_from_message(lparam, wparam),
-                        scan_code_to_key_code(scan_code_from_message(lparam, wparam)),
+                        keyboard::scan_code_from_message(lparam, wparam),
+                        keyboard::scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
                         keyboard::modifiers()
                     });
                 break;
@@ -873,8 +861,8 @@ namespace neogfx
                 self.push_event(
                     keyboard_event{ 
                         keyboard_event_type::KeyReleased, 
-                        scan_code_from_message(lparam, wparam), 
-                        scan_code_to_key_code(scan_code_from_message(lparam, wparam)), 
+                        keyboard::scan_code_from_message(lparam, wparam),
+                        keyboard::scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
                         keyboard::modifiers()
                     });
                 break;
@@ -914,49 +902,49 @@ namespace neogfx
                             TrackMouseEvent(&trackMouseEvent);
                             self.handle_event(window_event{ window_event_type::Enter, pt });
                         }
-                        self.handle_event(mouse_event{ mouse_event_type::Moved, pt, {}, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::Moved, pt, mouse::button_from_message(wparam), mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, keyboard::modifiers() });
+                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MOUSEWHEEL:
-                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Vertical, keyboard::modifiers(), neogfx::basic_delta<int>{ 0, HIWORD(wparam) } });
+                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Vertical, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int>{ 0, HIWORD(wparam) } });
                         break;
                     case WM_MOUSEHWHEEL:
-                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Horizontal, keyboard::modifiers(), neogfx::basic_delta<int>{ HIWORD(wparam), 0 } });
+                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Horizontal, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int>{ HIWORD(wparam), 0 } });
                         break;
                     }
                 }
