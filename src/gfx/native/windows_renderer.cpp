@@ -249,7 +249,7 @@ namespace neogfx
             if (!iInitialized)
             {
                 WNDCLASS wc;
-                wc.style = CS_OWNDC;
+                wc.style = CS_OWNDC | CS_DBLCLKS | CS_DROPSHADOW;
                 wc.lpfnWndProc = window::WindowProc;
                 wc.cbClsExtra = 0;
                 wc.cbWndExtra = 0;

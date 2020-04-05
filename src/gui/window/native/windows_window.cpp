@@ -909,7 +909,6 @@ namespace neogfx
             case WM_MOUSEWHEEL:
                 {
                     POINT winPt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
-                    ScreenToClient(hwnd, &winPt);
                     point pt{ basic_point<LONG>{winPt.x, winPt.y} };
                     switch (msg)
                     {
