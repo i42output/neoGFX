@@ -67,6 +67,7 @@ namespace neogfx
         // types
     public:
         typedef void* handle;
+        typedef int pixel_format_t;
         typedef neolib::i_vector<neolib::i_ref_ptr<i_shader_program>> shader_program_list;
         // construction
     public:
@@ -79,6 +80,7 @@ namespace neogfx
         virtual bool double_buffering() const = 0;
         virtual void initialize() = 0;
         virtual void cleanup() = 0;
+        virtual pixel_format_t set_pixel_format(const i_render_target& aTarget) = 0;
         virtual const i_render_target* active_target() const = 0;
         virtual void activate_context(const i_render_target& aTarget) = 0;
         virtual void deactivate_context() = 0;

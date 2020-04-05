@@ -50,6 +50,7 @@ namespace neogfx
             struct failed_to_deactivate_opengl_context : std::runtime_error { failed_to_deactivate_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_deactivate_opengl_context: " + aReason) {} };
             struct failed_to_destroy_opengl_context : std::runtime_error { failed_to_destroy_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_destroy_opengl_context: " + aReason) {} };
             struct failed_to_get_opengl_function : std::runtime_error { failed_to_get_opengl_function(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_get_opengl_function: " + aReason) {} };
+            struct failed_to_set_pixel_format : std::runtime_error { failed_to_set_pixel_format(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_set_pixel_format: " + aReason) {} };
             struct no_target_active : std::logic_error { no_target_active() : std::logic_error("neogfx::native::windows::renderer::no_target_active") {} };
         public:
             renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows);
@@ -59,6 +60,7 @@ namespace neogfx
             void cleanup() override;
         public:
             bool double_buffering() const override;
+            pixel_format_t set_pixel_format(const i_render_target& aTarget) override;
             const i_render_target* active_target() const override;
             void activate_context(const i_render_target& aTarget) override;
             void deactivate_context() override;
@@ -76,12 +78,13 @@ namespace neogfx
             bool use_rendering_priority() const override;
         public:
             virtual bool process_events();
+        public:
+            static pixel_format_t set_pixel_format(void* aNativeSurfaceDevinceHandle);
         private:
-            handle create_context(void* aNativeSurfaceHandle, void* aNativeSurfaceDevinceHandle);
             std::shared_ptr<neogfx::offscreen_window> allocate_offscreen_window(const i_render_target* aRenderTarget);
             void deallocate_offscreen_window(const i_render_target* aRenderTarget);
             void activate_current_target();
-          private:
+        private:
             bool iInitialized;
             bool iDoubleBuffering;
             std::vector<std::shared_ptr<offscreen_window>> iOffscreenWindowPool;
