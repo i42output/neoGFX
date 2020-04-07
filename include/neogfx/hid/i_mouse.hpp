@@ -46,7 +46,7 @@ namespace neogfx
     enum class mouse_system_cursor
     {
         Arrow,
-        Ibeam,
+        IBeam,
         Wait,
         Crosshair,
         WaitArrow,

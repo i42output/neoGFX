@@ -827,7 +827,7 @@ namespace neogfx
                 result = 0;
                 break;
             case WM_INPUTLANGCHANGE:
-                //keyboard::update_keymap();
+                service<i_keyboard>().update_keymap();
                 break;
             case WM_SYSCHAR:
                 result = wndproc(hwnd, msg, wparam, lparam);
@@ -872,10 +872,13 @@ namespace neogfx
                     });
                 break;
             case WM_SETCURSOR:
-                if (!self.iNonClientCapturing)
-                    result = wndproc(hwnd, msg, wparam, lparam);
-                else
+                if (!self.iNonClientCapturing && LOWORD(lparam) == HTCLIENT)
+                {
+                    service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                     result = TRUE;
+                }
+                else
+                    result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_MOUSEMOVE:
             case WM_LBUTTONDOWN:
@@ -946,10 +949,10 @@ namespace neogfx
                         self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MOUSEWHEEL:
-                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Vertical, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int>{ 0, HIWORD(wparam) } });
+                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Vertical, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ 0, static_cast<int16_t>(HIWORD(wparam)) } });
                         break;
                     case WM_MOUSEHWHEEL:
-                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Horizontal, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int>{ HIWORD(wparam), 0 } });
+                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Horizontal, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ static_cast<int16_t>(HIWORD(wparam)), 0 } });
                         break;
                     }
                 }

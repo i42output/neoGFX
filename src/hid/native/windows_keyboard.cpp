@@ -483,5 +483,9 @@ namespace neogfx
                 modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_ALT);
             return modifiers;
         }
+
+        void keyboard::update_keymap()
+        {
+        }
     }
 }

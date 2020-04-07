@@ -653,6 +653,8 @@ namespace neogfx
         virtual void grab_keyboard(i_keyboard_handler& aKeyboardHandler) = 0;
         virtual void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler) = 0;
         virtual i_keyboard_handler& grabber() const = 0;
+    public:
+        virtual void update_keymap() = 0;
     };
 
     class key_sequence

@@ -65,7 +65,7 @@ namespace neogfx
             case mouse_system_cursor::Arrow:
                 cursorResource = IDC_ARROW;
                 break;
-            case mouse_system_cursor::Ibeam:
+            case mouse_system_cursor::IBeam:
                 cursorResource = IDC_IBEAM;
                 break;
             case mouse_system_cursor::Wait:

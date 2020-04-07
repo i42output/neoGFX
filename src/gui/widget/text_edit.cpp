@@ -437,7 +437,7 @@ namespace neogfx
 
     neogfx::mouse_cursor text_edit::mouse_cursor() const
     {
-        return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt ? mouse_system_cursor::Ibeam : scrollable_widget::mouse_cursor();
+        return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt ? mouse_system_cursor::IBeam : scrollable_widget::mouse_cursor();
     }
 
     bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
