@@ -18,12 +18,20 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_surface.hpp>
+#include "i_native_surface.hpp"
 #include "windows_mouse.hpp"
 
 namespace neogfx
 {
     namespace native::windows
     {
+        mouse::mouse() :
+            iCaptureTarget{ nullptr },
+            iCaptureType{ mouse_capture_type::None }
+        {
+        }
+
         point mouse::position() const
         {
             POINT pt = {};
@@ -45,6 +53,57 @@ namespace neogfx
             if (GetKeyState(convert_button(mouse_button::X2)) & 0x0001)
                 result = result | mouse_button::X2;
             return result;
+        }
+
+        bool mouse::capturing() const
+        {
+            return iCaptureTarget != nullptr;
+        }
+
+        const i_surface& mouse::capture_target() const
+        {
+            if (iCaptureTarget == nullptr)
+                throw not_capturing();
+            return *iCaptureTarget;
+        }
+
+        mouse_capture_type mouse::capture_type() const
+        {
+            return iCaptureType;
+        }
+
+        void mouse::capture(const i_surface& aTarget)
+        {
+            if (iCaptureTarget != nullptr)
+                throw already_capturing();
+            ::SetCapture(static_cast<HWND>(aTarget.native_surface().native_handle()));
+            iCaptureTarget = &aTarget;
+            iCaptureType = mouse_capture_type::Normal;
+        }
+
+        void mouse::capture_raw(const i_surface& aTarget)
+        {
+            if (iCaptureTarget != nullptr)
+                throw already_capturing();
+            RAWINPUTDEVICE rawMouse = { 0x01, 0x02, 0, NULL };
+            ::RegisterRawInputDevices(&rawMouse, 1, sizeof(RAWINPUTDEVICE));
+            iCaptureTarget = &aTarget;
+            iCaptureType = mouse_capture_type::Raw;
+        }
+
+        void mouse::release_capture()
+        {
+            if (iCaptureTarget == nullptr)
+                throw not_capturing();
+            if (capture_type() == mouse_capture_type::Normal)
+                ::ReleaseCapture();
+            else if (capture_type() == mouse_capture_type::Raw)
+            {
+                RAWINPUTDEVICE rawMouse = { 0x01, 0x02, RIDEV_REMOVE, NULL }; /* Mouse: UsagePage = 1, Usage = 2 */
+                ::RegisterRawInputDevices(&rawMouse, 1, sizeof(RAWINPUTDEVICE));
+            }
+            iCaptureTarget = nullptr;
+            iCaptureType = mouse_capture_type::None;
         }
  
         mouse_button mouse::convert_button(virtual_key_code_t aVirtualKeyCode)

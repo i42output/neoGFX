@@ -33,7 +33,7 @@ namespace neogfx
         public:
             bool is_key_pressed(scan_code_e aScanCode) const override;
             keyboard_locks locks() const override;
-            static key_modifiers_e modifiers();
+            key_modifiers_e modifiers() const override;
             static scan_code_e scan_code_from_message(LPARAM aLParam, WPARAM aWParam);
             static key_code_e scan_code_to_key_code(scan_code_e aScanCode);
         };

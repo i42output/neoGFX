@@ -127,16 +127,36 @@ namespace neogfx
         return static_cast<mouse_wheel>(~static_cast<uint32_t>(aLhs));
     }
 
+    class i_surface;
+
+    enum class mouse_capture_type : uint32_t
+    {
+        None,
+        Normal,
+        Raw
+    };
+
     class i_mouse
     {
     public:
         declare_event(button_pressed, mouse_button)
         declare_event(button_released, mouse_button)
     public:
+        struct not_capturing : std::logic_error { not_capturing() : std::logic_error{ "neogfx::i_mouse::not_capturing" } {} };
+        struct already_capturing : std::logic_error { already_capturing() : std::logic_error{ "neogfx::i_mouse::already_capturing" } {} };
+        struct bad_surface : std::logic_error { bad_surface() : std::logic_error{ "neogfx::i_mouse::bad_surface" } {} };
+    public:
         virtual ~i_mouse() = default;
     public:
         virtual point position() const = 0;
         virtual mouse_button button_state() const = 0;
+    public:
+        virtual bool capturing() const = 0;
+        virtual const i_surface& capture_target() const = 0;
+        virtual mouse_capture_type capture_type() const = 0;
+        virtual void capture(const i_surface& aTarget) = 0;
+        virtual void capture_raw(const i_surface& aTarget) = 0;
+        virtual void release_capture() = 0;
     public:
         bool is_button_pressed(mouse_button aButton) const
         {

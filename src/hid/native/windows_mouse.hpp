@@ -33,13 +33,25 @@ namespace neogfx
         public:
             typedef uint32_t virtual_key_code_t;
         public:
+            mouse();
+        public:
             point position() const override;
             mouse_button button_state() const override;
+        public:
+            bool capturing() const override;
+            const i_surface& capture_target() const override;
+            mouse_capture_type capture_type() const override;
+            void capture(const i_surface& aTarget) override;
+            void capture_raw(const i_surface& aTarget) override;
+            void release_capture() override;
         public:
             static mouse_button convert_button(virtual_key_code_t aVirtualKeyCode);
             static virtual_key_code_t convert_button(mouse_button aButton);
             static mouse_button button_from_message(WPARAM aWParam);
             static key_modifiers_e modifiers_from_message(WPARAM aWParam);
+        private:
+            const i_surface* iCaptureTarget;
+            mouse_capture_type iCaptureType;
         };
     }
 }

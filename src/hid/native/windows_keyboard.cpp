@@ -1,4 +1,5 @@
 // keyboard.cpp
+// Parts of this file based on Simple DirectMedia Layer Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -16,6 +17,26 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+/*
+  Simple DirectMedia Layer
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
 
 #pragma once
 
@@ -26,11 +47,73 @@ namespace neogfx
 {
     namespace native::windows
     {
+        scan_code_e vk_to_scan_code(WPARAM vkey)
+        {
+            switch (vkey) 
+            {
+            case VK_LEFT: return ScanCode_LEFT;
+            case VK_UP: return ScanCode_UP;
+            case VK_RIGHT: return ScanCode_RIGHT;
+            case VK_DOWN: return ScanCode_DOWN;
+
+            case VK_MODECHANGE: return ScanCode_MODE;
+            case VK_SELECT: return ScanCode_SELECT;
+            case VK_EXECUTE: return ScanCode_EXECUTE;
+            case VK_HELP: return ScanCode_HELP;
+            case VK_PAUSE: return ScanCode_PAUSE;
+            case VK_NUMLOCK: return ScanCode_NUMLOCKCLEAR;
+
+            case VK_F13: return ScanCode_F13;
+            case VK_F14: return ScanCode_F14;
+            case VK_F15: return ScanCode_F15;
+            case VK_F16: return ScanCode_F16;
+            case VK_F17: return ScanCode_F17;
+            case VK_F18: return ScanCode_F18;
+            case VK_F19: return ScanCode_F19;
+            case VK_F20: return ScanCode_F20;
+            case VK_F21: return ScanCode_F21;
+            case VK_F22: return ScanCode_F22;
+            case VK_F23: return ScanCode_F23;
+            case VK_F24: return ScanCode_F24;
+
+            case VK_OEM_NEC_EQUAL: return ScanCode_KP_EQUALS;
+            case VK_BROWSER_BACK: return ScanCode_AC_BACK;
+            case VK_BROWSER_FORWARD: return ScanCode_AC_FORWARD;
+            case VK_BROWSER_REFRESH: return ScanCode_AC_REFRESH;
+            case VK_BROWSER_STOP: return ScanCode_AC_STOP;
+            case VK_BROWSER_SEARCH: return ScanCode_AC_SEARCH;
+            case VK_BROWSER_FAVORITES: return ScanCode_AC_BOOKMARKS;
+            case VK_BROWSER_HOME: return ScanCode_AC_HOME;
+            case VK_VOLUME_MUTE: return ScanCode_AUDIOMUTE;
+            case VK_VOLUME_DOWN: return ScanCode_VOLUMEDOWN;
+            case VK_VOLUME_UP: return ScanCode_VOLUMEUP;
+
+            case VK_MEDIA_NEXT_TRACK: return ScanCode_AUDIONEXT;
+            case VK_MEDIA_PREV_TRACK: return ScanCode_AUDIOPREV;
+            case VK_MEDIA_STOP: return ScanCode_AUDIOSTOP;
+            case VK_MEDIA_PLAY_PAUSE: return ScanCode_AUDIOPLAY;
+            case VK_LAUNCH_MAIL: return ScanCode_MAIL;
+            case VK_LAUNCH_MEDIA_SELECT: return ScanCode_MEDIASELECT;
+
+            case VK_OEM_102: return ScanCode_NONUSBACKSLASH;
+
+            case VK_ATTN: return ScanCode_SYSREQ;
+            case VK_CRSEL: return ScanCode_CRSEL;
+            case VK_EXSEL: return ScanCode_EXSEL;
+            case VK_OEM_CLEAR: return ScanCode_CLEAR;
+
+            case VK_LAUNCH_APP1: return ScanCode_APP1;
+            case VK_LAUNCH_APP2: return ScanCode_APP2;
+
+            default: return ScanCode_UNKNOWN;
+            }
+        }
+
         scan_code_e keyboard::scan_code_from_message(LPARAM aLParam, WPARAM aWParam)
         {
-            auto const rawScanCode = static_cast<scan_code_e>(aLParam >> 16) & 0xFF;
+            auto const rawScanCode = (aLParam >> 16) & 0xFF;
             bool const extended = ((aLParam & (1 << 24)) != 0);
-            auto scanCode = static_cast<scan_code_e>(MapVirtualKey(static_cast<UINT>(aWParam), MAPVK_VK_TO_VSC));
+            auto scanCode = vk_to_scan_code(aWParam);
             if (scanCode == ScanCode_UNKNOWN && rawScanCode <= 127)
             {
                 static constexpr scan_code_e sWindowsScanCodes[] =
@@ -371,7 +454,8 @@ namespace neogfx
         {
             BYTE kbdState[256];
             GetKeyboardState(kbdState);
-            return kbdState[MapVirtualKey(aScanCode, MAPVK_VSC_TO_VK_EX)];
+            auto const vk = MapVirtualKey(aScanCode, MAPVK_VSC_TO_VK_EX);
+            return kbdState[vk];
         }
 
         keyboard_locks keyboard::locks() const
@@ -388,7 +472,7 @@ namespace neogfx
             return result;
         }
 
-        key_modifiers_e keyboard::modifiers()
+        key_modifiers_e keyboard::modifiers() const
         {
             key_modifiers_e modifiers = KeyModifier_NONE;
             if (GetKeyState(VK_SHIFT) >> 1)

@@ -618,7 +618,7 @@ namespace neogfx
             {
                 iCapturingMouse = true;
                 iNonClientCapturing = false;
-                ::SetCapture(iHandle);
+                service<i_mouse>().capture(surface_window());
             }
         }
 
@@ -628,7 +628,7 @@ namespace neogfx
             {
                 iCapturingMouse = false;
                 iNonClientCapturing = false;
-                ::ReleaseCapture();
+                service<i_mouse>().release_capture();
             }
         }
 
@@ -638,6 +638,7 @@ namespace neogfx
             {
                 iCapturingMouse = true;
                 iNonClientCapturing = true;
+                service<i_mouse>().capture_raw(surface_window());
             }
         }
 
@@ -647,6 +648,7 @@ namespace neogfx
             {
                 iCapturingMouse = false;
                 iNonClientCapturing = false;
+                service<i_mouse>().release_capture();
             }
         }
 
@@ -721,43 +723,43 @@ namespace neogfx
                     case WM_NCMOUSEMOVE:
                         if (!self.non_client_entered())
                             self.push_event(window_event{ window_event_type::NonClientEnter, pt });
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::Moved, pt, {}, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::Moved, pt, {}, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCLBUTTONDOWN:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCLBUTTONUP:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCLBUTTONDBLCLK:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCRBUTTONDOWN:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCRBUTTONUP:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCRBUTTONDBLCLK:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCMBUTTONDOWN:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCMBUTTONUP:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCMBUTTONDBLCLK:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCXBUTTONDOWN:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCXBUTTONUP:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCXBUTTONDBLCLK:
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, keyboard::modifiers() });
+                        self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, service<i_keyboard>().modifiers() });
                         break;
                     }
                 }
@@ -824,6 +826,9 @@ namespace neogfx
                 }
                 result = 0;
                 break;
+            case WM_INPUTLANGCHANGE:
+                //keyboard::update_keymap();
+                break;
             case WM_SYSCHAR:
                 result = wndproc(hwnd, msg, wparam, lparam);
                 {
@@ -853,7 +858,7 @@ namespace neogfx
                         keyboard_event_type::KeyPressed,
                         keyboard::scan_code_from_message(lparam, wparam),
                         keyboard::scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
-                        keyboard::modifiers()
+                        service<i_keyboard>().modifiers()
                     });
                 break;
             case WM_SYSKEYUP:
@@ -863,7 +868,7 @@ namespace neogfx
                         keyboard_event_type::KeyReleased, 
                         keyboard::scan_code_from_message(lparam, wparam),
                         keyboard::scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
-                        keyboard::modifiers()
+                        service<i_keyboard>().modifiers()
                     });
                 break;
             case WM_SETCURSOR:
@@ -1118,6 +1123,49 @@ namespace neogfx
                 else
                     self.release_capture();
                 result = wndproc(hwnd, msg, wparam, lparam);
+                break;
+            case WM_INPUT:
+                {
+                    HRAWINPUT hRawInput = reinterpret_cast<HRAWINPUT>(lparam);
+                    RAWINPUT inp;
+                    UINT size;
+                    GetRawInputData(hRawInput, RID_INPUT, &inp, &size, sizeof(RAWINPUTHEADER));
+                    if (inp.header.dwType == RIM_TYPEMOUSE) 
+                    {
+                        if (service<i_mouse>().capture_type() == mouse_capture_type::Raw) 
+                        {
+                            POINT pt;
+                            RECT hwndRect;
+                            HWND currentHnd;
+                            GetCursorPos(&pt);
+                            currentHnd = WindowFromPoint(pt);
+                            ScreenToClient(hwnd, &pt);
+                            GetClientRect(hwnd, &hwndRect);
+                            if (currentHnd != hwnd || pt.x < 0 || pt.y < 0 || pt.x > hwndRect.right || pt.y > hwndRect.right) 
+                                self.handle_event(mouse_event{ mouse_event_type::Moved, basic_point<LONG>{ pt.x, pt.y }, service<i_mouse>().button_state(), service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Left, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Left, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Middle, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Middle, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Right, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Right, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X1, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X1, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X2, service<i_keyboard>().modifiers() });
+                            if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)
+                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X2, service<i_keyboard>().modifiers() });
+                        }
+                    }
+                }
                 break;
             case WM_WINDOWPOSCHANGED:
                 {
