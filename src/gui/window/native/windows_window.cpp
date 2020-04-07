@@ -910,49 +910,49 @@ namespace neogfx
                             TrackMouseEvent(&trackMouseEvent);
                             self.handle_event(window_event{ window_event_type::Enter, pt });
                         }
-                        self.handle_event(mouse_event{ mouse_event_type::Moved, pt, mouse::button_from_message(wparam), mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::Moved, pt, mouse::button_from_message(wparam), mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONDOWN:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONUP:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONDBLCLK:
-                        self.handle_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
+                        self.push_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MOUSEWHEEL:
-                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Vertical, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ 0, static_cast<int16_t>(HIWORD(wparam)) } });
+                        self.push_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Vertical, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ 0, static_cast<int16_t>(HIWORD(wparam)) } });
                         break;
                     case WM_MOUSEHWHEEL:
-                        self.handle_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Horizontal, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ static_cast<int16_t>(HIWORD(wparam)), 0 } });
+                        self.push_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Horizontal, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ static_cast<int16_t>(HIWORD(wparam)), 0 } });
                         break;
                     }
                 }
@@ -1145,27 +1145,27 @@ namespace neogfx
                             ScreenToClient(hwnd, &pt);
                             GetClientRect(hwnd, &hwndRect);
                             if (currentHnd != hwnd || pt.x < 0 || pt.y < 0 || pt.x > hwndRect.right || pt.y > hwndRect.right) 
-                                self.handle_event(mouse_event{ mouse_event_type::Moved, basic_point<LONG>{ pt.x, pt.y }, service<i_mouse>().button_state(), service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::Moved, basic_point<LONG>{ pt.x, pt.y }, service<i_mouse>().button_state(), service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Left, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Left, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Left, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Left, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Middle, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Middle, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Middle, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Middle, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Right, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Right, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Right, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::Right, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X1, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X1, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X1, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X1, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X2, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonClicked, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X2, service<i_keyboard>().modifiers() });
                             if (inp.data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)
-                                self.handle_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X2, service<i_keyboard>().modifiers() });
+                                self.push_event(mouse_event{ mouse_event_type::ButtonReleased, basic_point<LONG>{ pt.x, pt.y }, mouse_button::X2, service<i_keyboard>().modifiers() });
                         }
                     }
                 }
