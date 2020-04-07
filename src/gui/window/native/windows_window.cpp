@@ -723,7 +723,7 @@ namespace neogfx
                     case WM_NCMOUSEMOVE:
                         if (!self.non_client_entered())
                             self.push_event(window_event{ window_event_type::NonClientEnter, pt });
-                        self.handle_event(non_client_mouse_event{ mouse_event_type::Moved, pt, {}, service<i_keyboard>().modifiers() });
+                        self.push_event(non_client_mouse_event{ mouse_event_type::Moved, pt, {}, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCLBUTTONDOWN:
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, service<i_keyboard>().modifiers() });
@@ -1185,13 +1185,13 @@ namespace neogfx
                 switch (wparam) 
                 {
                 case SIZE_MAXIMIZED:
-                    self.handle_event(window_event{ window_event_type::Maximized, *self.iPosition });
+                    self.push_event(window_event{ window_event_type::Maximized, *self.iPosition });
                     break;
                 case SIZE_MINIMIZED:
-                    self.handle_event(window_event{ window_event_type::Iconized, *self.iPosition });
+                    self.push_event(window_event{ window_event_type::Iconized, *self.iPosition });
                     break;
                 default:
-                    self.handle_event(window_event{ window_event_type::Restored, *self.iPosition });
+                    self.push_event(window_event{ window_event_type::Restored, *self.iPosition });
                     break;
                 }
                 break;

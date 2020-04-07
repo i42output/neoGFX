@@ -172,21 +172,8 @@ namespace neogfx
                 break;
             case window_event_type::Resizing:
                 surface_window().native_window_resized();
-                for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
-                {
-                    if (std::holds_alternative<window_event>(*e))
-                    {
-                        switch (static_variant_cast<const window_event&>(*e).type())
-                        {
-                        case window_event_type::Resized:
-                            e = iEventQueue.erase(e);
-                            break;
-                        default:
-                            ++e;
-                            break;
-                        }
-                    }
-                }
+                invalidate(rect{ surface_size() });
+                render(true);
                 break;
             case window_event_type::Resized:
                 surface_window().native_window_resized();
