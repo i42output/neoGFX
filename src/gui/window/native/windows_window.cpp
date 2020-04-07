@@ -1333,8 +1333,8 @@ namespace neogfx
             if ((surface_window().style() & window_style::Resize) == window_style::Resize)
             {
                 RECT borderThickness;
-                SetRectEmpty(&borderThickness);
-                AdjustWindowRectEx(&borderThickness, GetWindowLong(iHandle, GWL_STYLE) | WS_THICKFRAME & ~WS_CAPTION, FALSE, NULL);
+                ::SetRectEmpty(&borderThickness);
+                ::AdjustWindowRectEx(&borderThickness, GetWindowLong(iHandle, GWL_STYLE) | WS_THICKFRAME & ~WS_CAPTION, FALSE, NULL);
                 borderThickness.left *= -1;
                 borderThickness.top *= -1;
                 iBorderThickness = basic_margins<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };
@@ -1348,9 +1348,9 @@ namespace neogfx
         void window::display()
         {
             if (rendering_engine().double_buffering())
-                SwapBuffers(static_cast<HDC>(iHdc));
+                ::SwapBuffers(static_cast<HDC>(iHdc));
             else
-                glCheck(glFinish())
+                glCheck(glDrawBuffer(GL_FRONT));
         }
 
     }
