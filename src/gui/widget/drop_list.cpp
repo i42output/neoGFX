@@ -966,7 +966,7 @@ namespace neogfx
 
     void drop_list::init()
     {
-        set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model{}));
+        set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model{ item_selection_mode::NoSelection }));
         set_presentation_model(std::shared_ptr<i_item_presentation_model>(new drop_list_presentation_model{ *this }));
         set_model(std::shared_ptr<i_item_model>(new item_model{}));
 
