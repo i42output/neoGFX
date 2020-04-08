@@ -848,7 +848,9 @@ namespace neogfx
                 {
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-                    self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
+                    static std::string const backspace = "\b";
+                    if (text != backspace)
+                        self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
                 }
                 break;
             case WM_KEYDOWN:
@@ -857,7 +859,7 @@ namespace neogfx
                     keyboard_event{
                         keyboard_event_type::KeyPressed,
                         keyboard::scan_code_from_message(lparam, wparam),
-                        keyboard::scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
+                        service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
                         service<i_keyboard>().modifiers()
                     });
                 break;
@@ -867,7 +869,7 @@ namespace neogfx
                     keyboard_event{ 
                         keyboard_event_type::KeyReleased, 
                         keyboard::scan_code_from_message(lparam, wparam),
-                        keyboard::scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
+                        service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
                         service<i_keyboard>().modifiers()
                     });
                 break;

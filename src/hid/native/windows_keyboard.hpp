@@ -26,6 +26,14 @@ namespace neogfx
 {
     namespace native::windows
     {
+        typedef int32_t vkey_t;
+        struct kaymapping
+        {
+            key_code_e keyCode;
+            vkey_t vk;
+        };
+        typedef std::array<kaymapping, ScanCodeCount> keymap_t;
+
         class keyboard : public neogfx::keyboard
         {
         public:
@@ -35,10 +43,15 @@ namespace neogfx
             keyboard_locks locks() const override;
             key_modifiers_e modifiers() const override;
         public:
+            key_code_e scan_code_to_key_code(scan_code_e aScanCode) const override;
+        public:
             void update_keymap() override;
+        private:
+            void set_keymap(const keymap_t& aKeymap);
         public:
             static scan_code_e scan_code_from_message(LPARAM aLParam, WPARAM aWParam);
-            static key_code_e scan_code_to_key_code(scan_code_e aScanCode);
+        private:
+            keymap_t iKeymap;
         };
     }
 }
