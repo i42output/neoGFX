@@ -93,13 +93,18 @@ namespace neogfx
 
         uint32_t basic_services::display_count() const
         {
-            uint32_t count = 0u;
-            EnumDisplayMonitors(NULL, NULL, &count_display_monitors_proc, reinterpret_cast<LPARAM>(&count));
-            return count;
+            // todo: invalidate diplay count if monitor connected/disconnected
+            if (iDisplayCount == std::nullopt)
+            {
+                iDisplayCount = 0u;
+                EnumDisplayMonitors(NULL, NULL, &count_display_monitors_proc, reinterpret_cast<LPARAM>(&*iDisplayCount));
+            }
+            return *iDisplayCount;
         }
 
         i_display& basic_services::display(uint32_t aDisplayIndex) const
         {
+            // todo: invalidate diplays if monitor connected/disconnected
             if (iDisplays.size() != display_count())
             {
                 iDisplays.clear();

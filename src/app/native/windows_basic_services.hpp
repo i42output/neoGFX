@@ -45,6 +45,7 @@ namespace neogfx
             i_shared_menu_bar& system_menu_bar() override;
         private:
             neolib::async_task& iAppTask;
+            mutable std::optional<uint32_t> iDisplayCount;
             mutable std::vector<std::unique_ptr<i_display>> iDisplays;
         };
     }
