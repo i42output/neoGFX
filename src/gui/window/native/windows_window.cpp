@@ -848,8 +848,7 @@ namespace neogfx
                 {
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-                    static std::string const backspace = "\b";
-                    if (text != backspace)
+                    if (!text.empty() && (text.size() > 1 || text[0] >= ' ' || std::isspace(text[0])))
                         self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
                 }
                 break;
