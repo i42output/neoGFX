@@ -498,7 +498,7 @@ namespace neogfx
         scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
         if (!iIgnoreNextMouseMove)
         {
-            if ((capturing() || hot_tracking()) && client_rect().contains(aPosition))
+            if ((iMouseTracker || hot_tracking()) && client_rect().contains(aPosition))
             {
                 auto item = item_at(aPosition);
                 if (item != std::nullopt)
