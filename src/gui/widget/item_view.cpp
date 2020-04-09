@@ -424,7 +424,7 @@ namespace neogfx
                 bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 select(*item, aKeyModifiers);
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                if (!iClickedCheckBox && itemIsCurrent &&
+                if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
                     (presentation_model().cell_editable_when_focused(*item) || 
                         (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item))))
                     edit(*item);
@@ -474,7 +474,7 @@ namespace neogfx
                 else
                     select(*item);
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                if (!iClickedCheckBox && itemIsCurrent &&
+                if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
                     (presentation_model().cell_editable_when_focused(*item) || 
                         (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item))))
                     edit(*item);
