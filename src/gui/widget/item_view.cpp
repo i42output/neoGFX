@@ -268,22 +268,28 @@ namespace neogfx
             for (uint32_t col = 0; col < presentation_model().columns(); ++col)
             {
                 auto const itemIndex = item_presentation_model_index{ row, col };
+                bool const currentCell = selection_model().has_current_index() && selection_model().current_index() == itemIndex;
                 rect cellRect = cell_rect(itemIndex, aGraphicsContext);
                 if (cellRect.y > clipRect.bottom())
                     continue;
                 finished = false;
-                optional_color backgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
+                optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
+                if (!cellBackgroundColor)
+                    cellBackgroundColor = background_color();
+                optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Foreground);
+                if (textColor == std::nullopt)
+                    textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Background);
-                if (backgroundColor != std::nullopt)
+                if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
-                    aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColor);
-                }
-                if (selection_model().is_selected(itemIndex))
-                {
-                    scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
-                    aGraphicsContext.fill_rect(cellBackgroundRect, (backgroundColor ? *backgroundColor : background_color()).
+                    aGraphicsContext.fill_rect(cellBackgroundRect, cellBackgroundColor->
                         shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0xC0));
+                }
+                else
+                {
+                    scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
+                    aGraphicsContext.fill_rect(cellBackgroundRect, *cellBackgroundColor);
                 }
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
@@ -356,15 +362,14 @@ namespace neogfx
                         aGraphicsContext.draw_texture(cell_rect(itemIndex, aGraphicsContext, cell_part::Image), *cellImage);
                     auto cellTextRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Text);
                     auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGraphicsContext);
-                    optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Foreground);
-                    if (textColor == std::nullopt)
-                        textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
                     aGraphicsContext.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
                 }
-                if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == itemIndex && has_focus())
+                if (currentCell)
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
-                    aGraphicsContext.draw_focus_rect(cellBackgroundRect);
+                    aGraphicsContext.draw_rect(cellBackgroundRect, pen{ selection_model().current_index() == editing() ? *textColor : *cellBackgroundColor });
+                    if (selection_model().current_index() != editing() && has_focus())
+                        aGraphicsContext.draw_focus_rect(cellBackgroundRect);
                 }
             }
         }
@@ -416,8 +421,12 @@ namespace neogfx
                 }
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;
+                bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 select(*item, aKeyModifiers);
-                if (!iClickedCheckBox && selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable_when_focused(*item))
+                bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
+                if (!iClickedCheckBox && itemIsCurrent &&
+                    (presentation_model().cell_editable_when_focused(*item) || 
+                        (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item))))
                     edit(*item);
             }            
             if (capturing())
@@ -459,21 +468,16 @@ namespace neogfx
                 }
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;
-                bool itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
+                bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
                     select(*item, item_selection_operation::None);
                 else
                     select(*item);
-                if (!iClickedCheckBox)
-                {
-                    if (itemWasCurrent)
-                    {
-                        if (presentation_model().cell_editable_on_input_event(*item))
-                            edit(*item);
-                        else
-                            service<i_basic_services>().system_beep();
-                    }
-                }
+                bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
+                if (!iClickedCheckBox && itemIsCurrent &&
+                    (presentation_model().cell_editable_when_focused(*item) || 
+                        (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item))))
+                    edit(*item);
             }
         }
     }
