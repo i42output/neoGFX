@@ -22,10 +22,48 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/list_view.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
 
 namespace neogfx
 {
     class drop_list;
+
+    template <typename ItemModel = item_model>
+    class default_drop_list_presentation_model : public basic_item_presentation_model<ItemModel>
+    {
+        typedef basic_item_presentation_model<ItemModel> base_type;
+    public:
+        using item_model_type = ItemModel;
+    public:
+        default_drop_list_presentation_model(drop_list& aDropList) : base_type{}, iDropList{ aDropList }
+        {
+        }
+        default_drop_list_presentation_model(drop_list& aDropList, item_model_type& aModel) : base_type{ aModel }, iDropList{ aDropList }
+        {
+        }
+    public:
+        item_cell_flags column_flags(item_presentation_model_index::value_type aColumn) const override
+        {
+            return base_type::column_flags(aColumn) & ~item_cell_flags::Editable;
+        }
+    public:
+        optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
+        {
+            if (aColorRole == color_role::Background && 
+                (base_type::cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current &&
+                iDropList.view_created()) 
+            {
+                auto backgroundColor = iDropList.view().background_color().dark() ? color::Black : color::White;
+                if (backgroundColor == iDropList.view().background_color())
+                    backgroundColor = backgroundColor.shade(0x20);
+                return backgroundColor;
+            }
+            else
+                return base_type::cell_color(aIndex, aColorRole);
+        }
+    private:
+        drop_list& iDropList;
+    };
 
     class drop_list_view : public list_view
     {

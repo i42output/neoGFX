@@ -30,34 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class drop_list_presentation_model : public item_presentation_model
-    {
-    public:
-        drop_list_presentation_model(drop_list& aDropList) : item_presentation_model{}, iDropList{ aDropList }
-        {
-        }
-    public:
-        item_cell_flags column_flags(item_presentation_model_index::value_type aColumn) const override
-        {
-            return item_presentation_model::column_flags(aColumn) & ~item_cell_flags::Editable;
-        }
-    public:    
-        optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
-        {
-            if (aColorRole == color_role::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
-            {
-                auto backgroundColor = iDropList.view().background_color().dark() ? color::Black : color::White;
-                if (backgroundColor == iDropList.view().background_color())
-                    backgroundColor = backgroundColor.shade(0x20);
-                return backgroundColor;
-            }
-            else
-                return item_presentation_model::cell_color(aIndex, aColorRole);
-        }
-    private:
-        drop_list& iDropList;
-    };
-
     drop_list_view::drop_list_view(i_layout& aLayout, drop_list& aDropList) :
         list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame, false },
         iDropList{ aDropList },
@@ -967,7 +939,7 @@ namespace neogfx
     void drop_list::init()
     {
         set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model{ item_selection_mode::NoSelection }));
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>(new drop_list_presentation_model{ *this }));
+        set_presentation_model(std::shared_ptr<i_item_presentation_model>(new default_drop_list_presentation_model<>{ *this }));
         set_model(std::shared_ptr<i_item_model>(new item_model{}));
 
         set_margins(neogfx::margins{});

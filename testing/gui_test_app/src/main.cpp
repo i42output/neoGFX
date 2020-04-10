@@ -128,22 +128,17 @@ private:
 typedef my_basic_item_presentation_model<my_item_model> my_item_presentation_model;
 typedef my_basic_item_presentation_model<ng::item_tree_model> my_item_tree_presentation_model;
 
-class easing_item_presentation_model : public ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>>
+class easing_item_presentation_model : public ng::default_drop_list_presentation_model<ng::basic_item_model<ng::easing>>
 {
-    typedef ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>> base_type;
+    typedef ng::default_drop_list_presentation_model<ng::basic_item_model<ng::easing>> base_type;
 public:
-    easing_item_presentation_model(ng::basic_item_model<ng::easing>& aModel, bool aLarge = true) : base_type{ aModel, false }, iLarge{ aLarge }
+    easing_item_presentation_model(ng::drop_list& aDropList, ng::basic_item_model<ng::easing>& aModel, bool aLarge = true) : base_type{ aDropList, aModel }, iLarge{ aLarge }
     {
         iSink += ng::service<ng::i_app>().current_style_changed([this](ng::style_aspect)
         {
             iTextures.clear();
             VisualAppearanceChanged.async_trigger();
         });
-    }
-public:
-    ng::item_cell_flags column_flags(ng::item_presentation_model_index::value_type aColumn) const override
-    {
-        return base_type::column_flags(aColumn) & ~ng::item_cell_flags::Editable;
     }
 public:
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
@@ -896,7 +891,7 @@ int main(int argc, char* argv[])
         });
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModelUpperTableView.insert_item(easingItemModelUpperTableView.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
-        easing_item_presentation_model easingPresentationModelUpperTableView{ easingItemModelUpperTableView, false };
+        easing_item_presentation_model easingPresentationModelUpperTableView{ ui.dropListEasingUpperTableView, easingItemModelUpperTableView, false };
         ui.dropListEasingUpperTableView.set_size_policy(ng::size_constraint::Minimum);
         ui.dropListEasingUpperTableView.set_model(easingItemModelUpperTableView);
         ui.dropListEasingUpperTableView.set_presentation_model(easingPresentationModelUpperTableView);
@@ -910,7 +905,7 @@ int main(int argc, char* argv[])
         });
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModelLowerTableView.insert_item(easingItemModelLowerTableView.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
-        easing_item_presentation_model easingPresentationModelLowerTableView{ easingItemModelLowerTableView, false };
+        easing_item_presentation_model easingPresentationModelLowerTableView{ ui.dropListEasingUpperTableView, easingItemModelLowerTableView, false };
         ui.dropListEasingLowerTableView.set_size_policy(ng::size_constraint::Minimum);
         ui.dropListEasingLowerTableView.set_model(easingItemModelLowerTableView);
         ui.dropListEasingLowerTableView.set_presentation_model(easingPresentationModelLowerTableView);
@@ -972,7 +967,7 @@ int main(int argc, char* argv[])
         ng::basic_item_model<ng::easing> easingItemModel;
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModel.insert_item(easingItemModel.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
-        easing_item_presentation_model easingPresentationModel{ easingItemModel };
+        easing_item_presentation_model easingPresentationModel{ ui.dropListEasing, easingItemModel };
         ui.dropListEasing.set_size_policy(ng::size_constraint::Minimum);
         ui.dropListEasing.set_model(easingItemModel);
         ui.dropListEasing.set_presentation_model(easingPresentationModel);
