@@ -1,4 +1,4 @@
-// i_mouse.hpp
+    // i_mouse.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
