@@ -29,11 +29,11 @@ namespace neogfx
     {
         None    = 0x00,
         Left    = 0x01,
-        Right    = 0x02,
-        Middle    = 0x04,
-        X1        = 0x08,
-        X2        = 0x10,
-        Other    = 0x20
+        Right   = 0x02,
+        Middle  = 0x04,
+        X1      = 0x08,
+        X2      = 0x10,
+        Other   = 0x20
     };
 
     enum class mouse_wheel : uint32_t
