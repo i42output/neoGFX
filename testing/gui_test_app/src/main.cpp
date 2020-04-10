@@ -141,6 +141,11 @@ public:
         });
     }
 public:
+    ng::item_cell_flags column_flags(ng::item_presentation_model_index::value_type aColumn) const override
+    {
+        return base_type::column_flags(aColumn) & ~ng::item_cell_flags::Editable;
+    }
+public:
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
     {
         auto easingFunction = item_model().item(to_item_model_index(aIndex));
