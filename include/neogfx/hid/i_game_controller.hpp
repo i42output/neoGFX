@@ -115,6 +115,8 @@ namespace neogfx
         declare_event(button_pressed, game_controller_button, key_modifiers_e)
         declare_event(button_released, game_controller_button, key_modifiers_e)
         declare_event(button_repeat, game_controller_button, key_modifiers_e)
+        declare_event(left_trigger_moved, double, key_modifiers_e)
+        declare_event(right_trigger_moved, double, key_modifiers_e)
         declare_event(left_thumb_moved, const vec2&, key_modifiers_e)
         declare_event(right_thumb_moved, const vec2&, key_modifiers_e)
         declare_event(stick_moved, const vec3&, key_modifiers_e)
