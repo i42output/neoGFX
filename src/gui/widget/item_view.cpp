@@ -276,9 +276,9 @@ namespace neogfx
                 optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
                 if (!cellBackgroundColor)
                     cellBackgroundColor = background_color();
-                optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Foreground);
+                optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Text);
                 if (textColor == std::nullopt)
-                    textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
+                    textColor = service<i_app>().current_style().palette().color(color_role::Text);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Background);
                 if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
                 {

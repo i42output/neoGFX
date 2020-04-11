@@ -1,7 +1,7 @@
-// mouse.hpp
+// i_game_controllers.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,17 +20,22 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/hid/hid_device.hpp>
-#include <neogfx/hid/i_mouse.hpp>
+#include <neolib/i_vector.hpp>
+#include <neogfx/hid/i_game_controller.hpp>
 
 namespace neogfx
 {
-    class mouse : public hid_device<i_mouse>
+    class i_game_controllers
     {
     public:
-        define_declared_event(ButtonPressed, button_pressed, mouse_button)
-        define_declared_event(ButtonReleased, button_released, mouse_button)
+        declare_event(controller_connected, i_game_controller&)
+        declare_event(controller_disconnected, i_game_controller&)
     public:
-        mouse(const i_string& aName = string{ "Generic Mouse" });
+        typedef neolib::i_vector<i_game_controller> controller_list;
+    public:
+        virtual ~i_game_controllers() = default;
+    public:
+        virtual const controller_list& controllers() const = 0;
+        virtual controller_list& controllers() = 0;
     };
 }

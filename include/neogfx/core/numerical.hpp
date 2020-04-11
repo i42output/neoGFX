@@ -97,15 +97,17 @@ namespace neogfx
         public:
             basic_vector() : base_type{} {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type = 0) : base_type{ {x} } {}
+            explicit basic_vector(value_type x, typename std::enable_if_t<Size == 1, SFINAE> = 0) : base_type{ {x} } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type = 0) : base_type{ {x, y} } {}
+            explicit basic_vector(value_type x, value_type y, typename std::enable_if_t<Size == 2, SFINAE> = 0) : base_type{ {x, y} } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type = 0) : base_type{ {x, y, z} } {}
+            explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if_t<Size == 3, SFINAE> = 0) : base_type{ {x, y, z} } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type = 0) : base_type{ { x, y, z, w } } {}
+            explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if_t<Size == 4, SFINAE> = 0) : base_type{ { x, y, z, w } } {}
             template <typename... Arguments>
-            explicit basic_vector(value_type value, Arguments... aArguments) : base_type{ {value, aArguments...} } {}
+            explicit basic_vector(const value_type& value, Arguments&&... aArguments) : base_type{ {value, std::forward<Arguments>(aArguments)...} } {}
+            template <typename... Arguments>
+            explicit basic_vector(value_type&& value, Arguments&&... aArguments) : base_type{ {std::move(value), std::forward<Arguments>(aArguments)...} } {}
             explicit basic_vector(const array_type& v) : base_type{ v } {}
             template <typename V, typename A, uint32_t S, uint32_t... Indexes>
             basic_vector(const swizzle<V, A, S, Indexes...>& aSwizzle) : self_type{ ~aSwizzle } {}
@@ -114,7 +116,7 @@ namespace neogfx
             template <typename T2>
             basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             template <typename T2, uint32_t Size2, typename SFINAE = int>
-            basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : base_type{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
+            basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if_t<Size2 < Size, SFINAE> = 0) : base_type{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             self_type& operator=(const self_type& other) { v = other.v; return *this; }
             self_type& operator=(self_type&& other) { v = std::move(other.v); return *this; }
             self_type& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
@@ -195,13 +197,13 @@ namespace neogfx
         public:
             basic_vector() : v{} {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type = 0) : v{ { x } } {}
+            explicit basic_vector(value_type x, typename std::enable_if_t<Size == 1, SFINAE> = 0) : v{ { x } } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type = 0) : v{ { x, y } } {}
+            explicit basic_vector(value_type x, value_type y, typename std::enable_if_t<Size == 2, SFINAE> = 0) : v{ { x, y } } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type = 0) : v{ { x, y, z } } {}
+            explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if_t<Size == 3, SFINAE> = 0) : v{ { x, y, z } } {}
             template <typename SFINAE = int>
-            explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type = 0) : v{ { x, y, z, w } } {}
+            explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if_t<Size == 4, SFINAE> = 0) : v{ { x, y, z, w } } {}
             template <typename... Arguments>
             explicit basic_vector(const value_type& value, Arguments&&... aArguments) : v{ {value, std::forward<Arguments>(aArguments)...} } {}
             template <typename... Arguments>
@@ -212,7 +214,7 @@ namespace neogfx
             template <typename T2>
             basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             template <typename T2, uint32_t Size2, typename SFINAE = int>
-            basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : v{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
+            basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if_t<Size2 < Size, SFINAE> = 0) : v{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             self_type& operator=(const self_type& other) { v = other.v; return *this; }
             self_type& operator=(self_type&& other) { v = std::move(other.v); return *this; }
             self_type& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }

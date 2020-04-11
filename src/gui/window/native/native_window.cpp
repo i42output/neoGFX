@@ -209,6 +209,9 @@ namespace neogfx
         }
         else if (std::holds_alternative<mouse_event>(iCurrentEvent))
         {
+            auto& mouse = service<i_mouse>();
+            if (!mouse.is_enabled())
+                return;
             const auto& mouseEvent = static_variant_cast<const mouse_event&>(iCurrentEvent);
             switch (mouseEvent.type())
             {
@@ -234,6 +237,9 @@ namespace neogfx
         }
         else if (std::holds_alternative<non_client_mouse_event>(iCurrentEvent))
         {
+            auto& mouse = service<i_mouse>();
+            if (!mouse.is_enabled())
+                return;
             const auto& mouseEvent = static_variant_cast<const non_client_mouse_event&>(iCurrentEvent);
             switch (mouseEvent.type())
             {
@@ -260,6 +266,8 @@ namespace neogfx
         else if (std::holds_alternative<keyboard_event>(iCurrentEvent))
         {
             auto& keyboard = service<i_keyboard>();
+            if (!keyboard.is_enabled())
+                return;
             const auto& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
             switch (keyboardEvent.type())
             {

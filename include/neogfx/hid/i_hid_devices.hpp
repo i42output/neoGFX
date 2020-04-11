@@ -1,7 +1,7 @@
-// mouse.hpp
+// i_hid_devices.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,17 +20,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/hid/hid_device.hpp>
-#include <neogfx/hid/i_mouse.hpp>
+#include <neolib/i_vector.hpp>
+#include <neogfx/hid/i_hid_device.hpp>
 
 namespace neogfx
 {
-    class mouse : public hid_device<i_mouse>
+    class i_hid_devices
     {
     public:
-        define_declared_event(ButtonPressed, button_pressed, mouse_button)
-        define_declared_event(ButtonReleased, button_released, mouse_button)
+        declare_event(device_connected, i_hid_device&)
+        declare_event(device_disconnected, i_hid_device&)
     public:
-        mouse(const i_string& aName = string{ "Generic Mouse" });
+        typedef neolib::i_vector<i_hid_device> device_list;
+    public:
+        virtual ~i_hid_devices() = default;
+    public:
+        virtual const device_list& devices() const = 0;
+        virtual device_list& devices() = 0;
+    public:
+        virtual hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const = 0;
+        virtual hid_device_subclass device_subclass(const hid_device_class_uuid& aClassUuid) const = 0;
     };
 }

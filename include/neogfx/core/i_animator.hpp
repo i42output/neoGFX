@@ -125,7 +125,7 @@ namespace neogfx
 
     inline color mix(double aMixValue, const color& aLhs, const color& aRhs)
     {
-        return vec4{ 
+        return color{ 
             mix(aMixValue, aLhs.red<double>(), aRhs.red<double>()), 
             mix(aMixValue, aLhs.green<double>(), aRhs.green<double>()), 
             mix(aMixValue, aLhs.blue<double>(), aRhs.blue<double>()), 

@@ -51,48 +51,57 @@ namespace neogfx
     {
     }
 
-    color::color(component aRed, component aGreen, component aBlue, component aAlpha) :
+    color::color(const vec3u32& aValue) :
         color{
-            (static_cast<argb>(aAlpha) << AlphaShift) |
-            (static_cast<argb>(aRed) << RedShift) |
-            (static_cast<argb>(aGreen) << GreenShift) |
-            (static_cast<argb>(aBlue) << BlueShift) }
+            (static_cast<argb>(0xFF) << AlphaShift) |
+            (static_cast<argb>(aValue[0]) << RedShift) |
+            (static_cast<argb>(aValue[1]) << GreenShift) |
+            (static_cast<argb>(aValue[2]) << BlueShift) }
+    {
+    }
+
+    color::color(const vec4u32& aValue) :
+        color{
+            (static_cast<argb>(aValue[3]) << AlphaShift) |
+            (static_cast<argb>(aValue[0]) << RedShift) |
+            (static_cast<argb>(aValue[1]) << GreenShift) |
+            (static_cast<argb>(aValue[2]) << BlueShift) }
     {
     }
 
     color::color(const vec3& aValue) :
         color{
-            static_cast<component>(aValue[0] * 0xFF),
-            static_cast<component>(aValue[1] * 0xFF),
-            static_cast<component>(aValue[2] * 0xFF),
-            static_cast<component>(1.0 * 0xFF) }
+            (static_cast<argb>(0xFF) << AlphaShift) |
+            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
+            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
+            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) }
     {
     }
 
     color::color(const vec3f& aValue) :
         color{
-            static_cast<component>(aValue[0] * 0xFF),
-            static_cast<component>(aValue[1] * 0xFF),
-            static_cast<component>(aValue[2] * 0xFF),
-            static_cast<component>(1.0 * 0xFF) }
+            (static_cast<argb>(0xFF) << AlphaShift) |
+            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
+            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
+            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) }
     {
     }
 
     color::color(const vec4& aValue) :
         color{
-            static_cast<component>(aValue[0] * 0xFF),
-            static_cast<component>(aValue[1] * 0xFF),
-            static_cast<component>(aValue[2] * 0xFF),
-            static_cast<component>(aValue[3] * 0xFF) }
+            (static_cast<argb>(aValue[3] * 0xFF) << AlphaShift) |
+            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
+            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
+            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) }    
     {
     }
 
     color::color(const vec4f& aValue) :
         color{
-            static_cast<component>(aValue[0] * 0xFF),
-            static_cast<component>(aValue[1] * 0xFF),
-            static_cast<component>(aValue[2] * 0xFF),
-            static_cast<component>(aValue[3] * 0xFF) }
+            (static_cast<argb>(aValue[3] * 0xFF) << AlphaShift) |
+            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
+            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
+            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) } 
     {
     }
 
@@ -132,10 +141,10 @@ namespace neogfx
                             neolib::tokens(bits[1], std::string(","), moreBits, 3, false);
                             if (moreBits.size() == 3)
                             {
-                                *this = color(
-                                    static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[0])),
-                                    static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[1])),
-                                    static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[2])));
+                                *this = color{
+                                    boost::lexical_cast<uint32_t>(moreBits[0]),
+                                    boost::lexical_cast<uint32_t>(moreBits[1]),
+                                    boost::lexical_cast<uint32_t>(moreBits[2]) };
                             }
                         }
                         else if (bits[0] == "rgba")
@@ -144,11 +153,11 @@ namespace neogfx
                             neolib::tokens(bits[1], std::string(","), moreBits, 4, false);
                             if (moreBits.size() == 4)
                             {
-                                *this = color(
-                                    static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[0])),
-                                    static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[1])),
-                                    static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[2])),
-                                    static_cast<uint8_t>(boost::lexical_cast<double>(moreBits[3]) * 255.0));
+                                *this = color{
+                                    boost::lexical_cast<uint32_t>(moreBits[0]),
+                                    boost::lexical_cast<uint32_t>(moreBits[1]),
+                                    boost::lexical_cast<uint32_t>(moreBits[2]),
+                                    static_cast<uint32_t>(boost::lexical_cast<double>(moreBits[3]) * 255.0) };
                             }
                         }
                         else
@@ -163,6 +172,54 @@ namespace neogfx
                 }
             }
         }
+    }
+
+    color& color::operator=(const color& aOther)
+    {
+        iValue = aOther.iValue;
+        return *this;
+    }
+
+    color& color::operator=(argb aOther)
+    {
+        iValue = aOther;
+        return *this;
+    }
+
+    color& color::operator=(const vec3u32& aValue)
+    {
+        *this = color{ aValue };
+        return *this;
+    }
+
+    color& color::operator=(const vec4u32& aValue)
+    {
+        *this = color{ aValue };
+        return *this;
+    }
+
+    color& color::operator=(const vec3& aValue)
+    {
+        *this = color{ aValue };
+        return *this;
+    }
+
+    color& color::operator=(const vec3f& aValue)
+    {
+        *this = color{ aValue };
+        return *this;
+    }
+
+    color& color::operator=(const vec4& aValue)
+    {
+        *this = color{ aValue };
+        return *this;
+    }
+
+    color& color::operator=(const vec4f& aValue)
+    {
+        *this = color{ aValue };
+        return *this;
     }
 
     color::argb color::value() const 
@@ -357,7 +414,7 @@ namespace neogfx
 
     color color::inverse() const
     {
-        return color(0xFF - red(), 0xFF - green(), 0xFF - blue(), alpha());
+        return color{ static_cast<component>(0xFF - red()), static_cast<component>(0xFF - green()), static_cast<component>(0xFF - blue()), alpha() };
     }
 
     color& color::operator+=(component aDelta)
@@ -380,7 +437,7 @@ namespace neogfx
     
     color color::operator~() const 
     { 
-        return color(~red() & 0xFF, ~green() & 0xFF, ~blue() & 0xFF, alpha()); 
+        return color(static_cast<component>(~red() & 0xFF), static_cast<component>(~green() & 0xFF), static_cast<component>(~blue() & 0xFF), alpha());
     }
 
     bool color::operator==(const color& aOther) const 

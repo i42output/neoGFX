@@ -951,6 +951,18 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\i_game_controller.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_game_controllers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_hid_device.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_hid_devices.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\hid_device.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1395,6 +1407,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\hid\native\windows_mouse.cpp">
       <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\mouse.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

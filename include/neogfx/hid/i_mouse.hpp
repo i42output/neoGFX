@@ -21,7 +21,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/event.hpp>
+#include <neogfx/hid/i_hid_device.hpp>
 
 namespace neogfx
 {
@@ -136,7 +138,7 @@ namespace neogfx
         Raw
     };
 
-    class i_mouse
+    class i_mouse : public i_hid_device
     {
     public:
         declare_event(button_pressed, mouse_button)
@@ -145,8 +147,6 @@ namespace neogfx
         struct not_capturing : std::logic_error { not_capturing() : std::logic_error{ "neogfx::i_mouse::not_capturing" } {} };
         struct already_capturing : std::logic_error { already_capturing() : std::logic_error{ "neogfx::i_mouse::already_capturing" } {} };
         struct bad_surface : std::logic_error { bad_surface() : std::logic_error{ "neogfx::i_mouse::bad_surface" } {} };
-    public:
-        virtual ~i_mouse() = default;
     public:
         virtual point position() const = 0;
         virtual mouse_button button_state() const = 0;

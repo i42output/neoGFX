@@ -712,17 +712,32 @@ namespace neogfx
         color();
         color(const color& aOther);
         explicit color(argb aValue);
-        color(component aRed, component aGreen, component aBlue, component aAlpha = 0xFF);
+        explicit color(const vec3u32& aValue);
+        explicit color(const vec4u32& aValue);
+        explicit color(const vec3& aValue);
+        explicit color(const vec3f& aValue);
+        explicit color(const vec4& aValue);
+        explicit color(const vec4f& aValue);
         template <typename T>
-        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(0xFF), typename std::enable_if<std::is_integral<T>::value, void>::type* = nullptr) :
-            color(static_cast<component>(aRed), static_cast<component>(aGreen), static_cast<component>(aBlue), static_cast<component>(aAlpha))
-        {
-        }
-        color(const vec3& aValue);
-        color(const vec3f& aValue);
-        color(const vec4& aValue);
-        color(const vec4f& aValue);
+        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(0xFF), std::enable_if_t<std::is_integral_v<T>, void*> = 0) :
+            color{ vec4u32{ static_cast<uint32_t>(aRed), static_cast<uint32_t>(aGreen), static_cast<uint32_t>(aBlue), static_cast<uint32_t>(aAlpha) } } {}
+        template <typename T>
+        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(1.0), std::enable_if_t<std::is_same_v<T, double>, void*> = 0) :
+            color{ vec4{ aRed, aGreen, aBlue, aAlpha } } {}
+        template <typename T>
+        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(1.0), std::enable_if_t<std::is_same_v<T, float>, void*> = 0) :
+            color{ vec4f{ aRed, aGreen, aBlue, aAlpha } } {}
         color(const std::string& aTextValue);
+        // assignment
+    public:
+        color& operator=(const color& aOther);
+        color& operator=(argb aOther);
+        color& operator=(const vec3u32& aValue);
+        color& operator=(const vec4u32& aValue);
+        color& operator=(const vec3& aValue);
+        color& operator=(const vec3f& aValue);
+        color& operator=(const vec4& aValue);
+        color& operator=(const vec4f& aValue);
         // operations
     public:
         static color from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha = 1.0);
@@ -801,7 +816,7 @@ namespace neogfx
 
     inline color operator*(const color& aLeft, double aCoefficient)
     {
-        return aLeft.to_vec4() *= vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 };
+        return color{ aLeft.to_vec4() *= vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 } };
     }
 
     template <typename Elem, typename Traits>

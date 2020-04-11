@@ -45,6 +45,7 @@
 #include <neolib/vecarray.hpp>
 #include <neolib/string_ci.hpp>
 #include <neogfx/core/event.hpp>
+#include <neogfx/hid/i_hid_device.hpp>
 
 namespace neogfx
 {
@@ -632,7 +633,7 @@ namespace neogfx
         return static_cast<keyboard_locks>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    class i_keyboard
+    class i_keyboard : public i_hid_device
     {
     public:
         declare_event(key_pressed, scan_code_e, key_code_e, key_modifiers_e)

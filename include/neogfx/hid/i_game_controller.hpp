@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
 #include <neogfx/core/numerical.hpp>
+#include <neogfx/hid/i_hid_device.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 
 namespace neogfx
@@ -109,7 +109,7 @@ namespace neogfx
 
     typedef uint32_t game_controller_button_index;
 
-    class i_game_controller
+    class i_game_controller : public i_hid_device
     {
     public:
         declare_event(button_pressed, game_controller_button, key_modifiers_e)
@@ -123,13 +123,7 @@ namespace neogfx
         declare_event(stick_rotated, const vec3&, key_modifiers_e)
         declare_event(slider_moved, const vec2&, key_modifiers_e)
     public:
-        virtual ~i_game_controller() = default;
-    public:
-        virtual const i_string& name() const = 0;
         virtual game_controller_port port() const = 0;
-        virtual bool enabled() const = 0;
-        virtual void enable() = 0;
-        virtual void disable() = 0;
     public:
         virtual bool is_button_pressed(game_controller_button_index aButtonIndex) const = 0;
         virtual bool is_button_pressed(game_controller_button aButton) const = 0;

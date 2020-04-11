@@ -21,7 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <deque>
-#include "i_keyboard.hpp"
+#include <neogfx/hid/hid_device.hpp>
+#include <neogfx/hid/i_keyboard.hpp>
 
 namespace neogfx
 {
@@ -40,7 +41,7 @@ namespace neogfx
         keyboard& iKeyboard;
     };
 
-    class keyboard : public i_keyboard
+    class keyboard : public hid_device<i_keyboard>
     {
     public:
         define_declared_event(KeyPressed, key_pressed, scan_code_e, key_code_e, key_modifiers_e)
@@ -50,7 +51,7 @@ namespace neogfx
     private:
         friend class keyboard_grabber;
     public:
-        keyboard();
+        keyboard(const i_string& aName = string{ "Generic Keyboard" });
     public:
         bool is_keyboard_grabbed() const override;
         bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const override;

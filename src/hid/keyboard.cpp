@@ -58,7 +58,8 @@ namespace neogfx
         return false;
     }
 
-    keyboard::keyboard() : iGrabber(*this)
+    keyboard::keyboard(const i_string& aName) :
+        hid_device<i_keyboard>{ hid_device_type::Input, hid_device_class::Keyboard, hid_device_subclass::Keyboard, aName }, iGrabber { *this }
     {
     }
 

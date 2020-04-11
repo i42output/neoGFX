@@ -95,20 +95,16 @@ public:
     }
     ng::optional_color cell_color(const ng::item_presentation_model_index& aIndex, ng::color_role aColorRole) const override
     {
-        neolib::basic_random<double> prng{ (base_type::to_item_model_index(aIndex).row() << 16) + base_type::to_item_model_index(aIndex).column() }; // use seed to make random color based on row/index
+        // use seed to make random color based on row/index ...
+        neolib::basic_random<double> prng{ (base_type::to_item_model_index(aIndex).row() << 16) + base_type::to_item_model_index(aIndex).column() };
+        auto const textColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Text);
+        auto const backgroundColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background);
         if (aColorRole == iColorRole)
-            return ng::hsv_color{ prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
+            return ng::color{ prng(0.0, 1.0), prng(0.0, 1.0), prng(0.0, 1.0) }.with_lightness((aColorRole == ng::color_role::Text ? textColor.light() : backgroundColor.light()) ? 0.85 : 0.15);
         else if (aColorRole == ng::color_role::Foreground && iColorRole)
             return ng::color::Black;
         else if (aColorRole == ng::color_role::Background)
-        {
-            if (aIndex.row() % 2 == 0)
-                return ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background);
-            else
-                return ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).light() ?
-                    ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).darker(0x08) :
-                    ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).lighter(0x08);
-        }
+            return backgroundColor.shade(aIndex.row() % 2 == 0 ? 0x00 : 0x08);
         return {};
     }
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
@@ -876,12 +872,12 @@ int main(int argc, char* argv[])
         ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); itpm1.set_column_image_size(0, ng::size{ 16_dip }); });
         ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); itpm1.set_column_image_size(0, ng::optional_size{}); });
         ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_role({}); ui.tableView1.update(); itpm1.set_color_role({}); ui.treeView1.update(); });
-        ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_role(ng::color_role::Foreground); ui.tableView1.update(); itpm1.set_color_role(ng::color_role::Foreground); ui.treeView1.update(); });
+        ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_role(ng::color_role::Text); ui.tableView1.update(); itpm1.set_color_role(ng::color_role::Text); ui.treeView1.update(); });
         ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_role(ng::color_role::Background); ui.tableView1.update(); itpm1.set_color_role(ng::color_role::Background); ui.treeView1.update(); });
         ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); itpm2.set_column_image_size(0, ng::size{ 16_dip }); });
         ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); itpm2.set_column_image_size(0, ng::optional_size{}); });
         ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_role({}); ui.tableView2.update(); itpm2.set_color_role({}); ui.treeView2.update(); });
-        ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_role(ng::color_role::Foreground); ui.tableView2.update(); itpm2.set_color_role(ng::color_role::Foreground); ui.treeView2.update(); });
+        ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_role(ng::color_role::Text); ui.tableView2.update(); itpm2.set_color_role(ng::color_role::Text); ui.treeView2.update(); });
         ui.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_role(ng::color_role::Background); ui.tableView2.update(); itpm2.set_color_role(ng::color_role::Background); ui.treeView2.update(); });
 
         ng::basic_item_model<ng::easing> easingItemModelUpperTableView;
