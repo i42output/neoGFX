@@ -633,7 +633,10 @@ namespace neogfx
                 }
             case item_data_type::String:
             default:
-                return aString;
+                if (!aString.empty())
+                    return aString;
+                else
+                    return {};
             }
         }
         boost::basic_format<char> cell_format(const item_presentation_model_index&) const override

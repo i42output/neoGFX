@@ -1090,6 +1090,7 @@ namespace neogfx
                 coordinate x = 0.0;
                 for (uint32_t col = 0; col < presentation_model().columns(); ++col)
                 {
+                    bool const lastColumn = (col == presentation_model().columns() - 1);
                     if (col != 0)
                         x += cellSpacing.cx;
                     else
@@ -1102,16 +1103,18 @@ namespace neogfx
                         switch (aPart)
                         {
                         case cell_part::Background:
-                            if (col == presentation_model().columns() - 1)
+                            if (!lastColumn)
+                                result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
+                            else
                             {
                                 result.indent(point{ -cellSpacing.cx / 2.0, 0.0 });
                                 result.cx += (item_display_rect().right() - result.right());
                             }
-                            else
-                                result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
                             break;
                         case cell_part::Foreground:
                             result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
+                            if (lastColumn)
+                                result.cx -= cellSpacing.cx / 2.0;
                             break;
                         }
                         return result;
