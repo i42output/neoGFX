@@ -955,7 +955,7 @@ namespace neogfx
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
             if (&editor() != &textEdit)
                 textEdit.set_margins(neogfx::margins{});
-            optional_color textColor = presentation_model().cell_color(newIndex, color_role::Foreground);
+            optional_color textColor = presentation_model().cell_color(newIndex, color_role::Text);
             if (textColor == std::nullopt)
                 textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
