@@ -35,6 +35,7 @@ namespace neogfx
     public:
         virtual ~i_hid_devices() = default;
     public:
+        virtual void enumerate_devices() = 0;
         virtual const device_list& devices() const = 0;
     public:
         virtual hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const = 0;

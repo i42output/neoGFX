@@ -63,7 +63,7 @@ namespace neogfx
     {
         extern std::string GetLastErrorText();
 
-        extern const std::wstring sWindowClassName;
+        extern const std::wstring sWindowClassName = L"neoGFX::Window";
 
         window* window::sNewWindow;
 

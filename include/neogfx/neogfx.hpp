@@ -40,6 +40,7 @@ namespace neogfx
     using neolib::to_const;
 
     using neolib::ref_ptr;
+    using neolib::make_ref;
 
     using neolib::to_abstract;
     using neolib::abstract_t;

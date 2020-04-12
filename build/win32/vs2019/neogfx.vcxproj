@@ -714,6 +714,7 @@
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\mouse.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_display.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\windows_hid_devices.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_mouse.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_window_manager.cpp" />

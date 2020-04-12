@@ -54,7 +54,7 @@ namespace neogfx
             return message;
         }
 
-        extern const std::wstring sWindowClassName = L"neoGFX::Window";
+        extern const std::wstring sWindowClassName;
 
         bool init_opengl(bool doubleBuffering)
         {
@@ -226,7 +226,7 @@ namespace neogfx
                 wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
                 wc.lpszMenuName = NULL;
                 wc.lpszClassName = sWindowClassName.c_str();
-                RegisterClass(&wc);
+                ::RegisterClass(&wc);
                 init_opengl(iDoubleBuffering);
                 auto dow = allocate_offscreen_window(nullptr);
                 iDefaultOffscreenWindow = dow;
@@ -247,6 +247,7 @@ namespace neogfx
                     destroy_context(iContext);
                 iOffscreenWindows.clear();
                 iOffscreenWindowPool.clear();
+                ::UnregisterClass(sWindowClassName.c_str(), GetModuleHandle(NULL));
             }
         }
 

@@ -38,8 +38,16 @@ namespace neogfx
         ~hid_devices();
     public:
         const device_list& devices() const override;
-        void add_device(const neolib::ref_ptr<i_hid_device>& aDevice);
-        void remove_device(const neolib::ref_ptr<i_hid_device>& aDevice);
+        device_list::iterator add_device(const ref_ptr<i_hid_device>& aDevice);
+        device_list::iterator remove_device(const ref_ptr<i_hid_device>& aDevice);
+    public:
+        template <typename Device>
+        ref_ptr<Device> add_device()
+        {
+            auto newDevice = make_ref<Device>();
+            add_device(newDevice);
+            return newDevice;
+        }
     private:
         device_list iDevices;
     };

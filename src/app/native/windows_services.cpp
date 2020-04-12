@@ -21,6 +21,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/clipboard.hpp>
 #include "windows_basic_services.hpp"
+#include "../../hid/native/windows_hid_devices.hpp"
 #include "../../hid/native/windows_keyboard.hpp"
 #include "../../hid/native/windows_mouse.hpp"
 #include "../../hid/native/windows_window_manager.hpp"
@@ -35,16 +36,27 @@ namespace neogfx
         return sWindowsBasicServices; 
     }
 
+    template<> i_hid_devices& service<i_hid_devices>()
+    {
+        static native::windows::hid_devices sHidDevices;
+        return sHidDevices;
+    }
+
+    template<> hid_devices& service<hid_devices>()
+    {
+        return static_cast<hid_devices&>(service<i_hid_devices>());
+    }
+
     template<> i_keyboard& service<i_keyboard>()
     { 
-        static native::windows::keyboard sWindowsKeyboard; 
-        return sWindowsKeyboard; 
+        static auto sWindowsKeyboard = service<hid_devices>().add_device<native::windows::keyboard>();
+        return *sWindowsKeyboard;
     }
 
     template<> i_mouse& service<i_mouse>()
     {
-        static native::windows::mouse sWindowsMouse;
-        return sWindowsMouse;
+        static auto sWindowsMouse = service<hid_devices>().add_device<native::windows::mouse>();
+        return *sWindowsMouse;
     }
 
     template<> i_rendering_engine& service<i_rendering_engine>()

@@ -26,32 +26,19 @@ namespace neogfx
 {
     namespace native::windows
     {
-        typedef int32_t vkey_t;
-        struct kaymapping
-        {
-            key_code_e keyCode;
-            vkey_t vk;
-        };
-        typedef std::array<kaymapping, ScanCodeCount> keymap_t;
-
-        class keyboard : public neogfx::keyboard
+        class hid_devices : public neogfx::hid_devices
         {
         public:
-            keyboard();
+            hid_devices();
+            ~hid_devices();
         public:
-            bool is_key_pressed(scan_code_e aScanCode) const override;
-            keyboard_locks locks() const override;
-            key_modifiers_e modifiers() const override;
+            void enumerate_devices() override;
         public:
-            key_code_e scan_code_to_key_code(scan_code_e aScanCode) const override;
-        public:
-            void update_keymap() override;
+            hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const override;
+            hid_device_subclass device_subclass(const hid_device_class_uuid& aClassUuid) const override;
         private:
-            void set_keymap(const keymap_t& aKeymap);
-        public:
-            static scan_code_e scan_code_from_message(LPARAM aLParam, WPARAM aWParam);
-        private:
-            keymap_t iKeymap;
+            HWND iHidHelperWindow;
+            HDEVNOTIFY iHidHelperNotifyHandle;
         };
     }
 }
