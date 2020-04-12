@@ -23,12 +23,25 @@
 #include <Dbt.h>
 #include <initguid.h>
 #include <Usbiodef.h>
+#include <hidclass.h>
 #include "windows_hid_devices.hpp"
 
 namespace neogfx
 {
     namespace native::windows
     {
+        neolib::uuid guid_to_uuid(const GUID& aGuid)
+        {
+            return neolib::uuid
+            {
+                aGuid.Data1,
+                aGuid.Data2,
+                aGuid.Data3,
+                static_cast<uint16_t>(aGuid.Data4[0] * 0x100 + aGuid.Data4[1]),
+                { aGuid.Data4[2], aGuid.Data4[3], aGuid.Data4[4], aGuid.Data4[5], aGuid.Data4[6], aGuid.Data4[7] }
+            };
+        }
+
         LRESULT hid_helper_wndproc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             switch (message) 
@@ -37,9 +50,30 @@ namespace neogfx
                 switch (wParam) 
                 {
                 case DBT_DEVICEARRIVAL:
+                    if (reinterpret_cast<DEV_BROADCAST_HDR*>(lParam)->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+                    {
+                        auto& devInfo = *reinterpret_cast<const DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
+                        if (devInfo.dbcc_classguid == GUID_DEVINTERFACE_HID)
+                        {
+#ifndef NDEBUG
+                            std::cout << "HID device connected." << std::endl;
+#endif
+                            service<i_hid_devices>().enumerate_devices();
+                        }
+                    }
+                    break;
                 case DBT_DEVICEREMOVECOMPLETE:
                     if (reinterpret_cast<DEV_BROADCAST_HDR*>(lParam)->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
-                        service<i_hid_devices>().enumerate_devices();
+                    {
+                        auto& devInfo = *reinterpret_cast<const DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
+                        if (devInfo.dbcc_classguid == GUID_DEVINTERFACE_HID)
+                        {
+#ifndef NDEBUG
+                            std::cout << "HID device disconnected." << std::endl;
+#endif
+                            service<i_hid_devices>().enumerate_devices();
+                        }
+                    }
                     break;
                 }
                 return TRUE;
