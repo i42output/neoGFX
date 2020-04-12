@@ -1,4 +1,4 @@
-// i_hid_devices.hpp
+// hid_devices.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -17,27 +17,36 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_vector.hpp>
-#include <neogfx/hid/i_hid_device.hpp>
+#include <neogfx/hid/hid_devices.hpp>
 
 namespace neogfx
 {
-    class i_hid_devices
+    hid_devices::hid_devices()
     {
-    public:
-        declare_event(device_connected, i_hid_device&)
-        declare_event(device_disconnected, i_hid_device&)
-    public:
-        typedef neolib::i_vector<neolib::i_ref_ptr<i_hid_device>> device_list;
-    public:
-        virtual ~i_hid_devices() = default;
-    public:
-        virtual const device_list& devices() const = 0;
-    public:
-        virtual hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const = 0;
-        virtual hid_device_subclass device_subclass(const hid_device_class_uuid& aClassUuid) const = 0;
-    };
+    }
+
+    hid_devices::~hid_devices()
+    {
+    }
+
+    const hid_devices::device_list& hid_devices::devices() const
+    {
+        return iDevices;
+    }
+
+    void hid_devices::add_device(const neolib::ref_ptr<i_hid_device>& aDevice)
+    {
+        iDevices.push_back(aDevice);
+        DeviceConnected.trigger(*aDevice);
+    }
+
+    void hid_devices::remove_device(const neolib::ref_ptr<i_hid_device>& aDevice)
+    {
+        neolib::ref_ptr<i_hid_device> detached{ aDevice };
+        auto existing = std::find(iDevices.begin(), iDevices.end(), detached);
+        if (existing != iDevices.end())
+            iDevices.erase(existing);
+        DeviceDisconnected.trigger(*detached);
+    }
 }

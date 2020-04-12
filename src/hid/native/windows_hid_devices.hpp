@@ -1,4 +1,4 @@
-// windows_keyboard.hpp
+// windows_hid_devices.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/hid/keyboard.hpp>
+#include <neogfx/hid/hid_devices.hpp>
 
 namespace neogfx
 {

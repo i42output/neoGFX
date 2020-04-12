@@ -20,12 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/reference_counted.hpp>
 #include <neogfx/hid/i_hid_device.hpp>
 
 namespace neogfx
 {
     template <typename HidInterface>
-    class hid_device : public HidInterface
+    class hid_device : public neolib::reference_counted<HidInterface>
     {
     public:
         define_declared_event(Enabled, enabled)

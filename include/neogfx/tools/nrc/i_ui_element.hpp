@@ -147,16 +147,25 @@ namespace neogfx::nrc
             T result;
             std::visit([&result](auto&& v)
             {
+// For some reason VS2019 is not suppressing warning C4244 for the conversion marked "Flibble cross" below even though an explicit static_cast is used.
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4244 ) // warning C4244: 'argument': conversion from 'const T' to 'double', possible loss of data
+#endif
+// At the time of writing I am unsure if the line marked "Flibble very cross" below is legal or not: g++ and clang++ disagree.
                 typedef std::decay_t<decltype(v)> vt;
                 if constexpr (std::is_same_v<vt, double>)
                     result = static_cast<T>(v);
-                else if constexpr (std::is_same_v<vt, int64_t>)
-                    result = static_cast<T>(v);
+                else if constexpr (std::is_same_v<vt, int64_t>) 
+                    result = static_cast<T>(v); // Flibble cross
                 else if constexpr (std::is_same_v<vt, neolib::i_string> && std::is_class_v<T>)
-                    result = T::from_string(v.to_std_string());
+                    result = T::from_string(v.to_std_string()); // Flibble very cross
                 else
                     throw wrong_type();
             }, aData);
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
             return result;
         }
         template <typename T>

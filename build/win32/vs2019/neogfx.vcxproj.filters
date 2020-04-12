@@ -963,6 +963,12 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\hid_device.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\windows_hid_devices.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\hid_devices.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1409,6 +1415,9 @@
       <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\hid\mouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\hid_devices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

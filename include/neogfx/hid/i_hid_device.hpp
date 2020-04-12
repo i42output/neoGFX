@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_reference_counted.hpp>
 #include <neolib/uuid.hpp>
 #include <neogfx/core/event.hpp>
 
@@ -53,13 +54,11 @@ namespace neogfx
 
     typedef neolib::uuid hid_device_class_uuid;
 
-    class i_hid_device
+    class i_hid_device : public neolib::i_reference_counted
     {
     public:
         declare_event(enabled)
         declare_event(disabled)
-    public:
-        virtual ~i_hid_device() = default;
     public:
         virtual hid_device_type device_type() const = 0;
         virtual hid_device_class device_class() const = 0;

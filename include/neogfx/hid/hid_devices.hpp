@@ -1,4 +1,4 @@
-// i_hid_devices.hpp
+// hid_devices.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,24 +20,27 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_vector.hpp>
-#include <neogfx/hid/i_hid_device.hpp>
+#include <neolib/vector.hpp>
+#include <neolib/reference_counted.hpp>
+#include <neogfx/hid/i_hid_devices.hpp>
 
 namespace neogfx
 {
-    class i_hid_devices
+    class hid_devices : public i_hid_devices
     {
     public:
-        declare_event(device_connected, i_hid_device&)
-        declare_event(device_disconnected, i_hid_device&)
+        define_declared_event(DeviceConnected, device_connected, i_hid_device&)
+        define_declared_event(DeviceDisconnected, device_disconnected, i_hid_device&)
     public:
-        typedef neolib::i_vector<neolib::i_ref_ptr<i_hid_device>> device_list;
+        typedef neolib::vector<neolib::ref_ptr<i_hid_device>> device_list;
     public:
-        virtual ~i_hid_devices() = default;
+        hid_devices();
+        ~hid_devices();
     public:
-        virtual const device_list& devices() const = 0;
-    public:
-        virtual hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const = 0;
-        virtual hid_device_subclass device_subclass(const hid_device_class_uuid& aClassUuid) const = 0;
+        const device_list& devices() const override;
+        void add_device(const neolib::ref_ptr<i_hid_device>& aDevice);
+        void remove_device(const neolib::ref_ptr<i_hid_device>& aDevice);
+    private:
+        device_list iDevices;
     };
 }

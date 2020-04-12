@@ -509,6 +509,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\display.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\hid_device.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\hid_devices.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_display.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_game_controller.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_game_controllers.hpp" />
@@ -552,6 +553,7 @@
     <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_display.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\windows_hid_devices.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_keyboard.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_mouse.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_window_manager.hpp" />
@@ -708,6 +710,7 @@
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
     <ClCompile Include="..\..\..\src\hid\display.cpp" />
+    <ClCompile Include="..\..\..\src\hid\hid_devices.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\mouse.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_display.cpp" />

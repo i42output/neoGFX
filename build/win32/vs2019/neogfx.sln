@@ -49,6 +49,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DesignStudio", "..\..\..\to
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "default", "..\..\..\tools\nrc\element_libraries\default\build\win32\default\default.vcxproj", "{49E42449-D0D4-4083-AC36-11851B0D80DE}"
 	ProjectSection(ProjectDependencies) = postProject
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
 		{5BE004BF-A083-422F-8287-E7238B633466} = {5BE004BF-A083-422F-8287-E7238B633466}
 	EndProjectSection
 EndProject
