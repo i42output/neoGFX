@@ -25,6 +25,9 @@
 
 namespace neogfx
 {
+    typedef hid_device_uuid hid_device_class_uuid;
+    typedef hid_device_uuid hid_device_subclass_uuid;
+
     class i_hid_devices
     {
     public:
@@ -39,6 +42,7 @@ namespace neogfx
         virtual const device_list& devices() const = 0;
     public:
         virtual hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const = 0;
-        virtual hid_device_subclass device_subclass(const hid_device_class_uuid& aClassUuid) const = 0;
+        virtual hid_device_subclass device_subclass(const hid_device_subclass_uuid& aClassUuid) const = 0;
+        virtual const i_string& product_name(hid_device_class aClass, const hid_device_uuid& aProductId) const = 0;
     };
 }

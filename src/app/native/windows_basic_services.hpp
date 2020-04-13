@@ -32,6 +32,7 @@ namespace neogfx
         {
         public:
             basic_services(neolib::async_task& aAppThread);
+            ~basic_services();
         public:
             neogfx::platform platform() const override;
             neolib::async_task& app_task() override;

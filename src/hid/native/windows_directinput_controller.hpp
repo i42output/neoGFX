@@ -1,4 +1,4 @@
-// windows_xinput_controller.hpp
+// windows_directinput_controller.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -23,19 +23,17 @@
 #include <d3d11_1.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#include <xinput.h>
-#pragma comment(lib, "Xinput.lib")
 #include <neogfx/hid/game_controller.hpp>
 
 namespace neogfx
 {
     namespace native::windows
     {
-        class xinput_controller : public game_controller
+        class directinput_controller : public game_controller
         {
         public:
-            xinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
-            ~xinput_controller();
+            directinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
+            ~directinput_controller();
         public:
             bool is_button_pressed(game_controller_button_index aButtonIndex) const override;
             bool is_button_pressed(game_controller_button aButton) const override;

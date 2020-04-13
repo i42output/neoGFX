@@ -30,7 +30,7 @@ namespace neogfx
 {
     namespace native::windows
     {
-        neolib::uuid guid_to_uuid(const GUID& aGuid)
+        neolib::uuid GUID_to_uuid(const GUID& aGuid)
         {
             return neolib::uuid
             {
@@ -55,7 +55,7 @@ namespace neogfx
                         auto& devInfo = *reinterpret_cast<const DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
                         if (devInfo.dbcc_classguid == GUID_DEVINTERFACE_HID)
                         {
-#ifndef NDEBUG
+#ifdef DEBUG_HID
                             std::cout << "HID device connected." << std::endl;
 #endif
                             service<i_hid_devices>().enumerate_devices();
@@ -68,7 +68,7 @@ namespace neogfx
                         auto& devInfo = *reinterpret_cast<const DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
                         if (devInfo.dbcc_classguid == GUID_DEVINTERFACE_HID)
                         {
-#ifndef NDEBUG
+#ifdef DEBUG_HID
                             std::cout << "HID device disconnected." << std::endl;
 #endif
                             service<i_hid_devices>().enumerate_devices();
@@ -99,8 +99,6 @@ namespace neogfx
             devBroadcast.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
             devBroadcast.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
             iHidHelperNotifyHandle = ::RegisterDeviceNotification(iHidHelperWindow, &devBroadcast, DEVICE_NOTIFY_WINDOW_HANDLE | DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
-
-            enumerate_devices();
         }
 
         hid_devices::~hid_devices()
@@ -120,7 +118,7 @@ namespace neogfx
             return hid_device_class::Unknown;
         }
 
-        hid_device_subclass hid_devices::device_subclass(const hid_device_class_uuid& aClassUuid) const
+        hid_device_subclass hid_devices::device_subclass(const hid_device_subclass_uuid& aClassUuid) const
         {
             return hid_device_subclass::Unknown;
         }

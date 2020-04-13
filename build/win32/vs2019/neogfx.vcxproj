@@ -108,7 +108,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;DEBUG_HID;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -554,6 +554,7 @@
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\windows_directinput_controller.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_display.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_game_controllers.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_hid_devices.hpp" />
@@ -719,6 +720,7 @@
     <ClCompile Include="..\..\..\src\hid\hid_devices.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\mouse.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\windows_directinput_controller.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_display.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_game_controllers.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_hid_devices.cpp" />

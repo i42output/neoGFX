@@ -35,7 +35,7 @@ namespace neogfx
             void enumerate_devices() override;
         public:
             hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const override;
-            hid_device_subclass device_subclass(const hid_device_class_uuid& aClassUuid) const override;
+            hid_device_subclass device_subclass(const hid_device_subclass_uuid& aClassUuid) const override;
         private:
             HWND iHidHelperWindow;
             HDEVNOTIFY iHidHelperNotifyHandle;

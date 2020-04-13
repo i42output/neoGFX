@@ -61,4 +61,16 @@ namespace neogfx
         }
         return iDevices.end();
     }
+
+    const i_string& hid_devices::product_name(hid_device_class aClass, const hid_device_uuid& aProductId) const
+    {
+        static const string sUnknownProductName = "Generic HID Device";
+        switch (aClass)
+        {
+        case hid_device_class::GameController:
+            return service<i_game_controllers>().product_name(aProductId);
+        default:
+            return sUnknownProductName;
+        }
+    }
 }

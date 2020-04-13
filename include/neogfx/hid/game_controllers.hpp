@@ -39,10 +39,10 @@ namespace neogfx
         controller_list::iterator add_device(const ref_ptr<i_game_controller>& aController);
         controller_list::iterator remove_device(const ref_ptr<i_game_controller>& aController);
     public:
-        template <typename Controller>
-        ref_ptr<Controller> add_controller()
+        template <typename Controller, typename... Args>
+        ref_ptr<Controller> add_controller(Args&&... aArgs)
         {
-            auto newController = make_ref<Controller>();
+            auto newController = make_ref<Controller>(std::forward<Args>(aArgs)...);
             add_device(newController);
             return newController;
         }

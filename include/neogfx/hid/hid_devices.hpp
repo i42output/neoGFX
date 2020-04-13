@@ -42,6 +42,8 @@ namespace neogfx
         device_list::iterator add_device(const ref_ptr<i_hid_device>& aDevice);
         device_list::iterator remove_device(const ref_ptr<i_hid_device>& aDevice);
     public:
+        const i_string& product_name(hid_device_class aClass, const hid_device_uuid& aProductId) const override;
+    public:
         template <typename Device>
         ref_ptr<Device> add_device()
         {

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/reference_counted.hpp>
 #include <neogfx/hid/i_hid_device.hpp>
+#include <neogfx/hid/i_hid_devices.hpp>
 
 namespace neogfx
 {
@@ -32,11 +33,12 @@ namespace neogfx
         define_declared_event(Enabled, enabled)
         define_declared_event(Disabled, disabled)
     public:
-        hid_device(hid_device_type aType, hid_device_class aClass, hid_device_subclass aSubclass, const i_string& aName) : 
+        hid_device(hid_device_type aType, hid_device_class aClass, hid_device_subclass aSubclass, hid_device_uuid aProductId = {}, hid_device_uuid aInstanceId = {}) :
             iType{ aType },
             iClass{ aClass },
             iSubclass{ aSubclass },
-            iName{ aName },
+            iProductId{ aProductId },
+            iInstanceId{ aInstanceId },
             iEnabled{ true }
         {
         }
@@ -53,9 +55,13 @@ namespace neogfx
         {
             return iSubclass;
         }
-        const i_string& device_name() const override
+        hid_device_uuid product_id() const override
         {
-            return iName;
+            return iProductId;
+        }
+        hid_device_uuid instance_id() const override
+        {
+            return iInstanceId;
         }
         bool is_enabled() const override
         {
@@ -77,11 +83,17 @@ namespace neogfx
                 Disabled.trigger();
             }
         }
+    public:
+        const i_string& product_name() const override
+        {
+            return service<i_hid_devices>().product_name(device_class(), product_id());
+        }
     private:
         hid_device_type const iType;
         hid_device_class const iClass;
         hid_device_subclass const iSubclass;
-        string const iName;
+        hid_device_uuid const iProductId;
+        hid_device_uuid const iInstanceId;
         bool iEnabled;
     };
 }

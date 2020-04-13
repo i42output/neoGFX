@@ -22,14 +22,26 @@
 
 namespace neogfx
 {
-    game_controller::game_controller(game_controller_port aPort, hid_device_subclass aSubclass, const i_string& aName) :
-        hid_device<i_game_controller>{ hid_device_type::Input, hid_device_class::GameController, aSubclass, aName }, iPort{ aPort }
+    game_controller::game_controller(hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId) :
+        hid_device<i_game_controller>{ hid_device_type::Input, hid_device_class::GameController, aSubclass, aProductId, aInstanceId }
     {
+    }
+
+    bool game_controller::have_port() const
+    {
+        return !!iPort;
     }
 
     game_controller_port game_controller::port() const
     {
-        return iPort;
+        if (iPort)
+            return *iPort;
+        throw unknown_port();
+    }
+
+    void game_controller::set_port(game_controller_port aPort)
+    {
+        iPort = aPort;
     }
 
     uint32_t game_controller::button_count() const

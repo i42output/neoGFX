@@ -37,5 +37,7 @@ namespace neogfx
     public:
         virtual void enumerate_controllers() = 0;
         virtual const controller_list& controllers() const = 0;
+    public:
+        virtual const i_string& product_name(const hid_device_uuid& aProductId) const = 0;
     };
 }

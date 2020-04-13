@@ -26,6 +26,7 @@
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
+#include <neogfx/hid/i_hid_devices.hpp>
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
@@ -241,6 +242,8 @@ namespace neogfx
         actionDelete.set_shortcut("Del");
         actionSelectAll.set_shortcut("Ctrl+A");
 
+        service<i_basic_services>();
+        service<i_hid_devices>().enumerate_devices();
         service<i_keyboard>().grab_keyboard(*this);
 
         style lightStyle("Light");

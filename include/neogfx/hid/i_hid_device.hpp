@@ -47,12 +47,20 @@ namespace neogfx
         Mouse,
         Touchpad,
         Touchscreen,
-        Joystick,
         Gamepad,
+        Wheel,
+        ArcadeStick,
+        FlightStick,
+        DancePad,
+        Guitar,
+        GuitarAlternate,
+        DrumKit,
+        GuitarBass,
+        ArcadePad,
         Unknown
     };
 
-    typedef neolib::uuid hid_device_class_uuid;
+    typedef neolib::uuid hid_device_uuid;
 
     class i_hid_device : public neolib::i_reference_counted
     {
@@ -63,9 +71,12 @@ namespace neogfx
         virtual hid_device_type device_type() const = 0;
         virtual hid_device_class device_class() const = 0;
         virtual hid_device_subclass device_subclass() const = 0;
-        virtual const i_string& device_name() const = 0;
+        virtual hid_device_uuid product_id() const = 0;
+        virtual hid_device_uuid instance_id() const = 0;
         virtual bool is_enabled() const = 0;
         virtual void enable() = 0;
         virtual void disable() = 0;
+    public:
+        virtual const i_string& product_name() const = 0;
     };
 }

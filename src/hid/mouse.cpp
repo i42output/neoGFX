@@ -23,7 +23,7 @@
 namespace neogfx
 {
     mouse::mouse(const i_string& aName) :
-        hid_device<i_mouse>{ hid_device_type::Input, hid_device_class::Mouse, hid_device_subclass::Mouse, aName }
+        hid_device<i_mouse>{ hid_device_type::Input, hid_device_class::Mouse, hid_device_subclass::Mouse }
     {
     }
 }
