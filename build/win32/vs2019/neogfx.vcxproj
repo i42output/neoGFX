@@ -508,6 +508,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window_events.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\display.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\game_controller.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\game_controllers.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\hid_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\hid_devices.hpp" />
@@ -559,6 +560,7 @@
     <ClInclude Include="..\..\..\src\hid\native\windows_keyboard.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_mouse.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_window_manager.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\windows_xinput_controller.hpp" />
     <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
@@ -712,6 +714,7 @@
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
     <ClCompile Include="..\..\..\src\hid\display.cpp" />
+    <ClCompile Include="..\..\..\src\hid\game_controller.cpp" />
     <ClCompile Include="..\..\..\src\hid\game_controllers.cpp" />
     <ClCompile Include="..\..\..\src\hid\hid_devices.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
@@ -722,6 +725,7 @@
     <ClCompile Include="..\..\..\src\hid\native\windows_keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_mouse.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_window_manager.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\windows_xinput_controller.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_window_proxy.cpp" />
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />

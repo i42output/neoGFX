@@ -975,6 +975,12 @@
     <ClInclude Include="..\..\..\src\hid\native\windows_game_controllers.hpp">
       <Filter>Source Files\native\windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\windows_xinput_controller.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\game_controller.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1434,6 +1440,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\hid\native\windows_game_controllers.cpp">
       <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\native\windows_xinput_controller.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\game_controller.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

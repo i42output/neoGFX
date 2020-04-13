@@ -1,0 +1,38 @@
+// windows_xinput_controller.cpp
+/*
+  neogfx C++ GUI Library
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
+  
+  This program is free software: you can redistribute it and / or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
+
+#include <neogfx/neogfx.hpp>
+#include "windows_xinput_controller.hpp"
+
+namespace neogfx
+{
+    namespace native::windows
+    {
+        xinput_controller::xinput_controller(game_controller_port aPort, const i_string& aName) : 
+            game_controller{ aPort, aName }
+        {
+        }
+
+        xinput_controller::~xinput_controller()
+        {
+        }
+    }
+}
