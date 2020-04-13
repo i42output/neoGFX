@@ -10,4 +10,9 @@
         ref: languages
         file: resources/language-subtag-registry.txt
     }
+
+    resource: {
+        ref: game_controller_db
+        file: resources/gamecontrollerdb.txt
+    }
 }

@@ -1,4 +1,4 @@
-// hid_devices.hpp
+// game_controllers.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -21,35 +21,32 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/vector.hpp>
-#include <neolib/reference_counted.hpp>
-#include <neogfx/hid/i_hid_devices.hpp>
+#include <neogfx/hid/i_game_controllers.hpp>
 
 namespace neogfx
 {
-    class hid_devices : public i_hid_devices
+    class game_controllers : public i_game_controllers
     {
     public:
-        define_declared_event(DeviceConnected, device_connected, i_hid_device&)
-        define_declared_event(DeviceDisconnected, device_disconnected, i_hid_device&)
+        define_declared_event(ControllerConnected, controller_connected, i_game_controller&)
+        define_declared_event(ControllerDisconnected, controller_disconnected, i_game_controller&)
     public:
-        typedef neolib::vector<neolib::ref_ptr<i_hid_device>> device_list;
+        typedef neolib::vector<ref_ptr<i_game_controller>> controller_list;
     public:
-        hid_devices();
-        ~hid_devices();
+        game_controllers();
     public:
-        void enumerate_devices() override;
-        const device_list& devices() const override;
-        device_list::iterator add_device(const ref_ptr<i_hid_device>& aDevice);
-        device_list::iterator remove_device(const ref_ptr<i_hid_device>& aDevice);
+        const controller_list& controllers() const override;
+        controller_list::iterator add_device(const ref_ptr<i_game_controller>& aController);
+        controller_list::iterator remove_device(const ref_ptr<i_game_controller>& aController);
     public:
-        template <typename Device>
-        ref_ptr<Device> add_device()
+        template <typename Controller>
+        ref_ptr<Controller> add_controller()
         {
-            auto newDevice = make_ref<Device>();
-            add_device(newDevice);
-            return newDevice;
+            auto newController = make_ref<Controller>();
+            add_device(newController);
+            return newController;
         }
     private:
-        device_list iDevices;
+        controller_list iControllers;
     };
 }

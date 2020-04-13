@@ -1,4 +1,4 @@
-// i_hid_devices.hpp
+// windows_game_controllers.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,25 +20,19 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_vector.hpp>
-#include <neogfx/hid/i_hid_device.hpp>
+#include <neogfx/hid/game_controllers.hpp>
 
 namespace neogfx
 {
-    class i_hid_devices
+    namespace native::windows
     {
-    public:
-        declare_event(device_connected, i_hid_device&)
-        declare_event(device_disconnected, i_hid_device&)
-    public:
-        typedef neolib::i_vector<i_ref_ptr<i_hid_device>> device_list;
-    public:
-        virtual ~i_hid_devices() = default;
-    public:
-        virtual void enumerate_devices() = 0;
-        virtual const device_list& devices() const = 0;
-    public:
-        virtual hid_device_class device_class(const hid_device_class_uuid& aClassUuid) const = 0;
-        virtual hid_device_subclass device_subclass(const hid_device_class_uuid& aClassUuid) const = 0;
-    };
+        class game_controllers : public neogfx::game_controllers
+        {
+        public:
+            game_controllers();
+            ~game_controllers();
+        public:
+            void enumerate_controllers() override;
+        };
+    }
 }

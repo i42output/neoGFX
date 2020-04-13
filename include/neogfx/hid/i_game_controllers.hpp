@@ -31,11 +31,11 @@ namespace neogfx
         declare_event(controller_connected, i_game_controller&)
         declare_event(controller_disconnected, i_game_controller&)
     public:
-        typedef neolib::i_vector<i_game_controller> controller_list;
+        typedef neolib::i_vector<i_ref_ptr<i_game_controller>> controller_list;
     public:
         virtual ~i_game_controllers() = default;
     public:
+        virtual void enumerate_controllers() = 0;
         virtual const controller_list& controllers() const = 0;
-        virtual controller_list& controllers() = 0;
     };
 }

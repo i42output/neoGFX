@@ -99,6 +99,7 @@ namespace neogfx
             devBroadcast.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
             devBroadcast.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
             iHidHelperNotifyHandle = ::RegisterDeviceNotification(iHidHelperWindow, &devBroadcast, DEVICE_NOTIFY_WINDOW_HANDLE | DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
+
             enumerate_devices();
         }
 
@@ -111,20 +112,7 @@ namespace neogfx
 
         void hid_devices::enumerate_devices()
         {
-            // todo: keyboard and mouse connection/disconnection
-            for (auto device = devices().begin(); device != devices().end();)
-            {
-                switch ((**device).device_class())
-                {
-                case hid_device_class::Keyboard:
-                case hid_device_class::Mouse:
-                    ++device;
-                    break;
-                default:
-                    device = remove_device(*device);
-                    break;
-                }
-            }
+            neogfx::hid_devices::enumerate_devices();
         }
 
         hid_device_class hid_devices::device_class(const hid_device_class_uuid& aClassUuid) const

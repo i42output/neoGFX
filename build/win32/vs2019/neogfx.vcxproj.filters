@@ -969,6 +969,12 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\hid_devices.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\game_controllers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\windows_game_controllers.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1423,6 +1429,12 @@
     <ClCompile Include="..\..\..\src\hid\native\windows_hid_devices.cpp">
       <Filter>Source Files\native\windows</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\game_controllers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\native\windows_game_controllers.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
@@ -1443,5 +1455,13 @@
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl">
       <Filter>Header Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\src\resources\gamecontrollerdb.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\..\src\resources\language-subtag-registry.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

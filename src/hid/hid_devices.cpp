@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/hid_devices.hpp>
+#include <neogfx/hid/i_game_controllers.hpp>
 
 namespace neogfx
 {
@@ -28,6 +29,12 @@ namespace neogfx
 
     hid_devices::~hid_devices()
     {
+    }
+
+    void hid_devices::enumerate_devices()
+    {
+        // todo: keyboard and mouse connection/disconnection
+        service<i_game_controllers>().enumerate_controllers();
     }
 
     const hid_devices::device_list& hid_devices::devices() const
