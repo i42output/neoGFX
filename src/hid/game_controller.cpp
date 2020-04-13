@@ -31,4 +31,25 @@ namespace neogfx
     {
         return iPort;
     }
+
+    uint32_t game_controller::button_count() const
+    {
+        return static_cast<uint32_t>(iButtonMap.size());
+    }
+
+    game_controller_button_index game_controller::button_to_button_index(game_controller_button aButton) const
+    {
+        auto existing = iButtonMap.right.find(aButton);
+        if (existing != iButtonMap.right.end())
+            return existing->get_left();
+        throw button_not_found();
+    }
+
+    game_controller_button game_controller::button_index_to_button(game_controller_button_index aButtonIndex) const
+    {
+        auto existing = iButtonMap.left.find(aButtonIndex);
+        if (existing != iButtonMap.left.end())
+            return existing->get_right();
+        throw button_not_found();
+    }
 }

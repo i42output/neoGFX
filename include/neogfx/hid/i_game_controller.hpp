@@ -135,6 +135,7 @@ namespace neogfx
         virtual const vec3& stick_rotation() const = 0;
         virtual const vec2& slider_position() const = 0;
     public:
+        virtual uint32_t button_count() const = 0;
         virtual game_controller_button_index button_to_button_index(game_controller_button aButton) const = 0;
         virtual game_controller_button button_index_to_button(game_controller_button_index aButtonIndex) const = 0;
     };

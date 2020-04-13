@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/bimap.hpp>
 #include <neogfx/hid/hid_device.hpp>
 #include <neogfx/hid/i_game_controller.hpp>
 
@@ -39,10 +40,19 @@ namespace neogfx
         define_declared_event(StickRotated, stick_rotated, const vec3&, key_modifiers_e)
         define_declared_event(SliderMoved, slider_moved, const vec2&, key_modifiers_e)
     public:
+        struct button_not_found : std::logic_error { button_not_found() : std::logic_error{ "neogfx::game_controller::button_not_found" } {} };
+    private:
+        typedef boost::bimap<game_controller_button_index, game_controller_button> button_map_type;
+    public:
         game_controller(game_controller_port aPort, const i_string& aName = string{ "Generic Game Controller" });
     public:
         game_controller_port port() const override;
     public:
+        uint32_t button_count() const override;
+        game_controller_button_index button_to_button_index(game_controller_button aButton) const override;
+        game_controller_button button_index_to_button(game_controller_button_index aButtonIndex) const override;
+    public:
         game_controller_port iPort;
+        button_map_type iButtonMap;
     };
 }
