@@ -44,7 +44,7 @@ namespace neogfx
     private:
         typedef boost::bimap<game_controller_button_index, game_controller_button> button_map_type;
     public:
-        game_controller(game_controller_port aPort, const i_string& aName = string{ "Generic Game Controller" });
+        game_controller(game_controller_port aPort, hid_device_subclass aSubclass = hid_device_subclass::Gamepad, const i_string& aName = string{ "Generic Game Controller" });
     public:
         game_controller_port port() const override;
     public:

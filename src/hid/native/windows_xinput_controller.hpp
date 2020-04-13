@@ -29,7 +29,7 @@ namespace neogfx
         class xinput_controller : public game_controller
         {
         public:
-            xinput_controller(game_controller_port aPort, const i_string& aName = string{ "Generic XInput Game Controller" });
+            xinput_controller(game_controller_port aPort, hid_device_subclass aSubclass = hid_device_subclass::Gamepad, const i_string& aName = string{ "Generic XInput Game Controller" });
             ~xinput_controller();
         };
     }

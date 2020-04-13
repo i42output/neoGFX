@@ -26,8 +26,8 @@ namespace neogfx
 {
     namespace native::windows
     {
-        xinput_controller::xinput_controller(game_controller_port aPort, const i_string& aName) : 
-            game_controller{ aPort, aName }
+        xinput_controller::xinput_controller(game_controller_port aPort, hid_device_subclass aSubclass, const i_string& aName) :
+            game_controller{ aPort, aSubclass, aName }
         {
         }
 
