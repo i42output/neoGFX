@@ -23,7 +23,12 @@
 namespace neogfx
 {
     game_controller::game_controller(hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId) :
-        hid_device<i_game_controller>{ hid_device_type::Input, hid_device_class::GameController, aSubclass, aProductId, aInstanceId }
+        hid_device<i_game_controller>{ hid_device_type::Input, hid_device_class::GameController, aSubclass, aProductId, aInstanceId },
+        iUpdater{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+        {
+            aTimer.again();
+            update_state();
+        }, 50u }
     {
     }
 
@@ -49,12 +54,57 @@ namespace neogfx
         iPort = {};
     }
 
+    bool game_controller::is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const
+    {
+        return iButtonState[aButtonOrdinal - 1u];
+    }
+
+    bool game_controller::is_button_pressed(game_controller_button aButton) const
+    {
+        return is_button_pressed(button_to_button_ordinal(aButton));
+    }
+
+    double game_controller::left_trigger_position() const
+    {
+        return iLeftTriggerPosition;
+    }
+
+    double game_controller::right_trigger_position() const
+    {
+        return iRightTriggerPosition;
+    }
+
+    const vec2& game_controller::left_thumb_position() const
+    {
+        return iLeftThumbPosition;
+    }
+
+    const vec2& game_controller::right_thumb_position() const
+    {
+        return iRightThumbPosition;
+    }
+
+    const vec3& game_controller::stick_position() const
+    {
+        return iStickPosition;
+    }
+
+    const vec3& game_controller::stick_rotation() const
+    {
+        return iStickRotation;
+    }
+
+    const vec2& game_controller::slider_position() const
+    {
+        return iSliderPosition;
+    }
+
     uint32_t game_controller::button_count() const
     {
         return static_cast<uint32_t>(iButtonMap.size());
     }
 
-    game_controller_button_index game_controller::button_to_button_index(game_controller_button aButton) const
+    game_controller_button_ordinal game_controller::button_to_button_ordinal(game_controller_button aButton) const
     {
         auto existing = iButtonMap.right.find(aButton);
         if (existing != iButtonMap.right.end())
@@ -62,11 +112,96 @@ namespace neogfx
         throw button_not_found();
     }
 
-    game_controller_button game_controller::button_index_to_button(game_controller_button_index aButtonIndex) const
+    game_controller_button game_controller::button_ordinal_to_button(game_controller_button_ordinal aButtonOrdinal) const
     {
-        auto existing = iButtonMap.left.find(aButtonIndex);
+        auto existing = iButtonMap.left.find(aButtonOrdinal);
         if (existing != iButtonMap.left.end())
             return existing->get_right();
         throw button_not_found();
+    }
+
+    game_controller::button_map_type& game_controller::button_map()
+    {
+        return iButtonMap;
+    }
+
+    void game_controller::set_button_state(game_controller_button_ordinal aButtonOrdinal, bool aIsPressed)
+    {
+        if (iButtonState[aButtonOrdinal - 1u] != aIsPressed)
+        {
+            iButtonState[aButtonOrdinal - 1u] = aIsPressed;
+            if (aIsPressed)
+                ButtonPressed.trigger(button_ordinal_to_button(aButtonOrdinal), service<i_keyboard>().modifiers());
+            else
+                ButtonReleased.trigger(button_ordinal_to_button(aButtonOrdinal), service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_button_state(game_controller_button aButton, bool aIsPressed)
+    {
+        set_button_state(button_to_button_ordinal(aButton), aIsPressed);
+    }
+
+    void game_controller::set_left_trigger_position(double aPosition)
+    {
+        if (iLeftTriggerPosition != aPosition)
+        {
+            iLeftTriggerPosition = aPosition;
+            LeftTriggerMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_right_trigger_position(double aPosition)
+    {
+        if (iRightTriggerPosition != aPosition)
+        {
+            iRightTriggerPosition = aPosition;
+            RightTriggerMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_left_thumb_position(const vec2& aPosition)
+    {
+        if (iLeftThumbPosition != aPosition)
+        {
+            iLeftThumbPosition = aPosition;
+            LeftThumbMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_right_thumb_position(const vec2& aPosition)
+    {
+        if (iRightThumbPosition != aPosition)
+        {
+            iRightThumbPosition = aPosition;
+            RightThumbMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_stick_position(const vec3& aPosition)
+    {
+        if (iStickPosition != aPosition)
+        {
+            iStickPosition = aPosition;
+            StickMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_stick_rotation(const vec3& aRotation)
+    {
+        if (iStickRotation != aRotation)
+        {
+            iStickRotation = aRotation;
+            StickRotated.trigger(aRotation, service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_slider_position(const vec2& aPosition)
+    {
+        if (iSliderPosition != aPosition)
+        {
+            iSliderPosition = aPosition;
+            SliderMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+        }
     }
 }

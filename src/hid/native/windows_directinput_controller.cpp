@@ -36,49 +36,8 @@ namespace neogfx
             iDevice->Release();
         }
 
-        bool directinput_controller::is_button_pressed(game_controller_button_index aButtonIndex) const
+        void directinput_controller::update_state()
         {
-            throw std::logic_error("not yet implemented");
-        }
-
-        bool directinput_controller::is_button_pressed(game_controller_button aButton) const
-        {
-            throw std::logic_error("not yet implemented");
-        }
-
-        double directinput_controller::left_trigger_position() const
-        {
-            throw std::logic_error("not yet implemented");
-        }
-
-        double directinput_controller::right_trigger_position() const
-        {
-            throw std::logic_error("not yet implemented");
-        }
-
-        const vec2& directinput_controller::left_thumb_position() const
-        {
-            throw std::logic_error("not yet implemented");
-        }
-
-        const vec2& directinput_controller::right_thumb_position() const
-        {
-            throw std::logic_error("not yet implemented");
-        }
-
-        const vec3& directinput_controller::stick_position() const
-        {
-            throw std::logic_error("not yet implemented");
-        }
-
-        const vec3& directinput_controller::stick_rotation() const
-        {
-            throw std::logic_error("not yet implemented");
-        }
-
-        const vec2& directinput_controller::slider_position() const
-        {
-            throw std::logic_error("not yet implemented");
         }
     }
 }

@@ -34,16 +34,8 @@ namespace neogfx
         public:
             directinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
             ~directinput_controller();
-        public:
-            bool is_button_pressed(game_controller_button_index aButtonIndex) const override;
-            bool is_button_pressed(game_controller_button aButton) const override;
-            double left_trigger_position() const override;
-            double right_trigger_position() const override;
-            const vec2& left_thumb_position() const override;
-            const vec2& right_thumb_position() const override;
-            const vec3& stick_position() const override;
-            const vec3& stick_rotation() const override;
-            const vec2& slider_position() const override;
+        protected:
+            void update_state() override;
         private:
             IDirectInputDevice8* iDevice;
         };

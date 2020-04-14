@@ -901,7 +901,7 @@ int main(int argc, char* argv[])
         });
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModelLowerTableView.insert_item(easingItemModelLowerTableView.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
-        easing_item_presentation_model easingPresentationModelLowerTableView{ ui.dropListEasingUpperTableView, easingItemModelLowerTableView, false };
+        easing_item_presentation_model easingPresentationModelLowerTableView{ ui.dropListEasingLowerTableView, easingItemModelLowerTableView, false };
         ui.dropListEasingLowerTableView.set_size_policy(ng::size_constraint::Minimum);
         ui.dropListEasingLowerTableView.set_model(easingItemModelLowerTableView);
         ui.dropListEasingLowerTableView.set_presentation_model(easingPresentationModelLowerTableView);

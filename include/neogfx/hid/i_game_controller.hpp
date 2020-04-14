@@ -107,7 +107,7 @@ namespace neogfx
         Function32          = 0x8000000000000000
     };
 
-    typedef uint32_t game_controller_button_index;
+    typedef uint32_t game_controller_button_ordinal;
 
     class i_game_controller : public i_hid_device
     {
@@ -130,7 +130,7 @@ namespace neogfx
         virtual void set_port(game_controller_port aPort) = 0;
         virtual void clear_port() = 0;
     public:
-        virtual bool is_button_pressed(game_controller_button_index aButtonIndex) const = 0;
+        virtual bool is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const = 0;
         virtual bool is_button_pressed(game_controller_button aButton) const = 0;
         virtual double left_trigger_position() const = 0;
         virtual double right_trigger_position() const = 0;
@@ -141,7 +141,7 @@ namespace neogfx
         virtual const vec2& slider_position() const = 0;
     public:
         virtual uint32_t button_count() const = 0;
-        virtual game_controller_button_index button_to_button_index(game_controller_button aButton) const = 0;
-        virtual game_controller_button button_index_to_button(game_controller_button_index aButtonIndex) const = 0;
+        virtual game_controller_button_ordinal button_to_button_ordinal(game_controller_button aButton) const = 0;
+        virtual game_controller_button button_ordinal_to_button(game_controller_button_ordinal aButtonOrdinal) const = 0;
     };
 }

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/bimap.hpp>
+#include <neolib/timer.hpp>
 #include <neogfx/hid/hid_device.hpp>
 #include <neogfx/hid/i_game_controller.hpp>
 
@@ -41,8 +42,10 @@ namespace neogfx
         define_declared_event(SliderMoved, slider_moved, const vec2&, key_modifiers_e)
     public:
         struct button_not_found : std::logic_error { button_not_found() : std::logic_error{ "neogfx::game_controller::button_not_found" } {} };
-    private:
-        typedef boost::bimap<game_controller_button_index, game_controller_button> button_map_type;
+    public:
+        static constexpr game_controller_button_ordinal MAX_BUTTONS = 64u;
+    protected:
+        typedef boost::bimap<game_controller_button_ordinal, game_controller_button> button_map_type;
     public:
         game_controller(hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
     public:
@@ -51,11 +54,43 @@ namespace neogfx
         void set_port(game_controller_port aPort) override;
         void clear_port() override;
     public:
-        uint32_t button_count() const override;
-        game_controller_button_index button_to_button_index(game_controller_button aButton) const override;
-        game_controller_button button_index_to_button(game_controller_button_index aButtonIndex) const override;
+        bool is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const override;
+        bool is_button_pressed(game_controller_button aButton) const override;
+        double left_trigger_position() const override;
+        double right_trigger_position() const override;
+        const vec2& left_thumb_position() const override;
+        const vec2& right_thumb_position() const override;
+        const vec3& stick_position() const override;
+        const vec3& stick_rotation() const override;
+        const vec2& slider_position() const override;
     public:
+        uint32_t button_count() const override;
+        game_controller_button_ordinal button_to_button_ordinal(game_controller_button aButton) const override;
+        game_controller_button button_ordinal_to_button(game_controller_button_ordinal aButtonOrdinal) const override;
+    protected:
+        virtual void update_state() = 0;
+    protected:
+        button_map_type& button_map();
+        void set_button_state(game_controller_button_ordinal aButtonOrdinal, bool aIsPressed);
+        void set_button_state(game_controller_button aButton, bool aIsPressed);
+        void set_left_trigger_position(double aPosition);
+        void set_right_trigger_position(double aPosition);
+        void set_left_thumb_position(const vec2& aPosition);
+        void set_right_thumb_position(const vec2& aPosition);
+        void set_stick_position(const vec3& aPosition);
+        void set_stick_rotation(const vec3& aRotation);
+        void set_slider_position(const vec2& aPosition);
+    private:
+        neolib::callback_timer iUpdater;
         std::optional<game_controller_port> iPort;
         button_map_type iButtonMap;
+        std::array<bool, MAX_BUTTONS> iButtonState = {};
+        double iLeftTriggerPosition = 0.0;
+        double iRightTriggerPosition = 0.0;
+        vec2 iLeftThumbPosition;
+        vec2 iRightThumbPosition;
+        vec3 iStickPosition;
+        vec3 iStickRotation;
+        vec2 iSliderPosition;
     };
 }
