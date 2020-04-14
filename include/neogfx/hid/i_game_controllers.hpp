@@ -32,12 +32,16 @@ namespace neogfx
         declare_event(controller_disconnected, i_game_controller&)
         declare_event(controller_calibration_required, i_game_controller&)
     public:
+        struct unassigned_player : std::logic_error { unassigned_player() : std::logic_error{ "neogfx::i_game_controllers::unassigned_player" } {} };
+    public:
         typedef neolib::i_vector<i_ref_ptr<i_game_controller>> controller_list;
     public:
         virtual ~i_game_controllers() = default;
     public:
         virtual void enumerate_controllers() = 0;
         virtual const controller_list& controllers() const = 0;
+        virtual bool have_controller_for(game_player aPlayer) const = 0;
+        virtual i_game_controller& controller_for(game_player aPlayer) const = 0;
     public:
         virtual const i_string& product_name(const hid_device_uuid& aProductId) const = 0;
     };

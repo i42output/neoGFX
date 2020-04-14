@@ -32,6 +32,22 @@ namespace neogfx
         return iControllers;
     }
 
+    bool game_controllers::have_controller_for(game_player aPlayer) const
+    {
+        for (auto const& controller : controllers())
+            if ((*controller).player_assigned() && (*controller).player() == aPlayer)
+                return true;
+        return false;
+    }
+
+    i_game_controller& game_controllers::controller_for(game_player aPlayer) const
+    {
+        for (auto const& controller : controllers())
+            if ((*controller).player() == aPlayer)
+                return *controller;
+        throw unassigned_player();
+    }
+
     game_controllers::controller_list::iterator game_controllers::add_device(const ref_ptr<i_game_controller>& aController)
     {
         auto newController = iControllers.insert(iControllers.end(), aController);

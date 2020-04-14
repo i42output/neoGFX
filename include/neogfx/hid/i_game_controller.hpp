@@ -26,6 +26,14 @@
 
 namespace neogfx
 {
+    enum class game_player : uint32_t
+    {
+        One     = 0x00000001,
+        Two     = 0x00000002,
+        Three   = 0x00000003,
+        Four    = 0x00000004
+    };
+
     typedef uint32_t game_controller_port;
 
     enum class game_controller_button : uint64_t
@@ -123,7 +131,13 @@ namespace neogfx
         declare_event(stick_rotated, const vec3&, key_modifiers_e)
         declare_event(slider_moved, const vec2&, key_modifiers_e)
     public:
+        struct player_not_assigned : std::logic_error { player_not_assigned() : std::logic_error{ "neogfx::i_game_controller::player_not_assigned" } {} };
         struct unknown_port : std::logic_error { unknown_port() : std::logic_error{ "neogfx::i_game_controller::unknown_port" } {} };
+    public:
+        virtual bool player_assigned() const = 0;
+        virtual game_player player() const = 0;
+        virtual void assign_player(game_player aPlayer) = 0;
+        virtual void unassign_player() = 0;
     public:
         virtual bool have_port() const = 0;
         virtual game_controller_port port() const = 0;

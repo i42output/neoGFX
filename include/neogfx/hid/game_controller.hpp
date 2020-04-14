@@ -49,6 +49,11 @@ namespace neogfx
     public:
         game_controller(hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
     public:
+        bool player_assigned() const override;
+        game_player player() const override;
+        void assign_player(game_player aPlayer) override;
+        void unassign_player() override;    
+    public:
         bool have_port() const override;
         game_controller_port port() const override;
         void set_port(game_controller_port aPort) override;
@@ -82,6 +87,7 @@ namespace neogfx
         void set_slider_position(const vec2& aPosition);
     private:
         neolib::callback_timer iUpdater;
+        std::optional<game_player> iPlayer;
         std::optional<game_controller_port> iPort;
         button_map_type iButtonMap;
         std::array<bool, MAX_BUTTONS> iButtonState = {};

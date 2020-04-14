@@ -4,6 +4,7 @@
 #include <neolib/random.hpp>
 #include <neolib/singleton.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/game/chrono.hpp>
@@ -214,13 +215,22 @@ void create_game(ng::i_layout& aLayout)
             keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
             keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0
         };
-        if (keyboard.is_key_pressed(ng::ScanCode_X))
-            spaceshipPhysics.spin.z = ng::to_rad(-30.0);
-        else if (keyboard.is_key_pressed(ng::ScanCode_Z))
-            spaceshipPhysics.spin.z = ng::to_rad(30.0);
-        else
-            spaceshipPhysics.spin.z = 0.0;
 
+        spaceshipPhysics.spin.z = 0.0;
+
+        if (keyboard.is_key_pressed(ng::ScanCode_Z))
+            spaceshipPhysics.spin.z = ng::to_rad(30.0);
+        else if (keyboard.is_key_pressed(ng::ScanCode_X))
+            spaceshipPhysics.spin.z = ng::to_rad(-30.0);
+
+        if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
+        {
+            auto const& controller = ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One);
+            if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadLeft))
+                spaceshipPhysics.spin.z = ng::to_rad(30.0);
+            else if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadRight))
+                spaceshipPhysics.spin.z = ng::to_rad(-30.0);
+        }
 
         /*
                 std::ostringstream oss;

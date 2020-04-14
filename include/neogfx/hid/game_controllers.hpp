@@ -37,6 +37,9 @@ namespace neogfx
         game_controllers();
     public:
         const controller_list& controllers() const override;
+        bool have_controller_for(game_player aPlayer) const override;
+        i_game_controller& controller_for(game_player aPlayer) const override;
+    public:
         controller_list::iterator add_device(const ref_ptr<i_game_controller>& aController);
         controller_list::iterator remove_device(const ref_ptr<i_game_controller>& aController);
     public:

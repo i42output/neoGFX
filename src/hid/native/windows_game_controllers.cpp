@@ -250,7 +250,11 @@ namespace neogfx
                     if (xinputController)
                     {
                         if (connectedXinputPorts.size() == 1)
+                        {
                             controller.set_port(*connectedXinputPorts.begin());
+                            if (!have_controller_for(game_player::One))
+                                controller.assign_player(game_player::One);
+                        }
                         else
                         {
                             controller.clear_port();

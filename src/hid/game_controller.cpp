@@ -32,6 +32,28 @@ namespace neogfx
     {
     }
 
+    bool game_controller::player_assigned() const
+    {
+        return !!iPlayer;
+    }
+
+    game_player game_controller::player() const
+    {
+        if (iPlayer)
+            return *iPlayer;
+        throw player_not_assigned();
+    }
+
+    void game_controller::assign_player(game_player aPlayer)
+    {
+        iPlayer = aPlayer;
+    }
+
+    void game_controller::unassign_player()
+    {
+        iPlayer = {};
+    }
+        
     bool game_controller::have_port() const
     {
         return !!iPort;
