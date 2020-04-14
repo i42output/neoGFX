@@ -44,6 +44,11 @@ namespace neogfx
         iPort = aPort;
     }
 
+    void game_controller::clear_port()
+    {
+        iPort = {};
+    }
+
     uint32_t game_controller::button_count() const
     {
         return static_cast<uint32_t>(iButtonMap.size());

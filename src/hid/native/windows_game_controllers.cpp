@@ -227,12 +227,16 @@ namespace neogfx
         void game_controllers::do_enumerate_controllers()
         {
             iEnumerationRequested = false;
-            bool xinputDeviceConnected[XUSER_MAX_COUNT] = {};
+
+            std::set<DWORD> connectedXinputPorts;
+            connectedXinputPorts.clear();
             for (DWORD i = 0; i < XUSER_MAX_COUNT; i++)
             {
                 XINPUT_STATE state = {};
-                xinputDeviceConnected[i] = (::XInputGetState(i, &state) == ERROR_SUCCESS);
+                if (::XInputGetState(i, &state) == ERROR_SUCCESS)
+                    connectedXinputPorts.insert(i);
             }
+
             iEnumerationResults.clear();
             iDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, this, DIEDFL_ATTACHEDONLY);
             for (auto existing = controllers().begin(); existing != controllers().end();)
@@ -240,7 +244,22 @@ namespace neogfx
                 auto found = std::find_if(iEnumerationResults.begin(), iEnumerationResults.end(),
                     [&](auto&& er) { return er == (**existing).instance_id(); });
                 if (found != iEnumerationResults.end())
-                    ++existing;
+                {
+                    auto& controller = **existing++;
+                    bool const xinputController = (dynamic_cast<xinput_controller*>(&controller) != nullptr);
+                    if (xinputController)
+                    {
+                        if (connectedXinputPorts.size() == 1)
+                            controller.set_port(*connectedXinputPorts.begin());
+                        else
+                        {
+                            controller.clear_port();
+                            ControllerCalibrationRequired.trigger(controller);
+                        }
+                    }
+                    else
+                        controller.clear_port();
+                }
                 else
                     existing = remove_device(*existing);
             }

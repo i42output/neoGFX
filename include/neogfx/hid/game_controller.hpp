@@ -49,6 +49,7 @@ namespace neogfx
         bool have_port() const override;
         game_controller_port port() const override;
         void set_port(game_controller_port aPort) override;
+        void clear_port() override;
     public:
         uint32_t button_count() const override;
         game_controller_button_index button_to_button_index(game_controller_button aButton) const override;

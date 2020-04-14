@@ -30,6 +30,7 @@ namespace neogfx
     public:
         declare_event(controller_connected, i_game_controller&)
         declare_event(controller_disconnected, i_game_controller&)
+        declare_event(controller_calibration_required, i_game_controller&)
     public:
         typedef neolib::i_vector<i_ref_ptr<i_game_controller>> controller_list;
     public:

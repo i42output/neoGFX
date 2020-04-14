@@ -128,6 +128,7 @@ namespace neogfx
         virtual bool have_port() const = 0;
         virtual game_controller_port port() const = 0;
         virtual void set_port(game_controller_port aPort) = 0;
+        virtual void clear_port() = 0;
     public:
         virtual bool is_button_pressed(game_controller_button_index aButtonIndex) const = 0;
         virtual bool is_button_pressed(game_controller_button aButton) const = 0;
