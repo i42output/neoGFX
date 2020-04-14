@@ -396,6 +396,16 @@ namespace neogfx
             return iParent != nullptr;  
         }
 
+        void window::activate_target() const
+        {
+            opengl_window::activate_target();
+            if (iFirstActivation)
+            {
+                iFirstActivation = false;
+                ::InvalidateRect(iHandle, NULL, true);
+            }
+        }
+
         const i_native_window& window::parent() const
         {
             if (has_parent())
@@ -1174,12 +1184,12 @@ namespace neogfx
             case WM_WINDOWPOSCHANGED:
                 {
                     RECT rect;
-                    GetWindowRect(hwnd, &rect);
+                    ::GetWindowRect(hwnd, &rect);
                     self.iPosition.emplace(rect.left, rect.top);
                     self.iExtents.emplace(rect.right - rect.left, rect.bottom - rect.top);
                     self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
                     self.push_event(window_event{ window_event_type::Resized, *self.iExtents });
-                    InvalidateRect(hwnd, NULL, FALSE);
+                    ::InvalidateRect(hwnd, NULL, FALSE);
                 }
                 break;
             case WM_SIZE:
@@ -1312,7 +1322,7 @@ namespace neogfx
             if (iParent != nullptr)
                 SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, static_cast<LONG>(reinterpret_cast<std::intptr_t>(iParent->native_handle())));
 
-            SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            ::SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
         }
 
          void window::set_destroying()

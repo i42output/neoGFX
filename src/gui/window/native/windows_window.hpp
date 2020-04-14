@@ -78,6 +78,8 @@ namespace neogfx
             void* target_device_handle() const override;
             i_rendering_engine::pixel_format_t pixel_format() const override;
         public:
+            void activate_target() const override;
+        public:
             bool has_parent() const override;
             const i_native_window& parent() const override;
             i_native_window& parent() override;
@@ -136,6 +138,7 @@ namespace neogfx
             surface_style iStyle;
             HWND iHandle;
             HDC iHdc;
+            mutable bool iFirstActivation = true;
             mutable std::optional<i_rendering_engine::pixel_format_t> iPixelFormat;
             static window* sNewWindow;
             mutable optional_point iPosition;
