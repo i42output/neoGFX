@@ -226,6 +226,7 @@ void create_game(ng::i_layout& aLayout)
         if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
         {
             auto const& controller = ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One);
+            spaceshipPhysics.acceleration += (ng::vec3{ 16.0, 16.0, 0.0 }.hadamard_product(ng::vec3{ controller.left_thumb_position() }));
             if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadLeft))
                 spaceshipPhysics.spin.z = ng::to_rad(30.0);
             else if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadRight))
@@ -244,7 +245,10 @@ void create_game(ng::i_layout& aLayout)
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
         static bool sExtraFire = false;
-        if (keyboard.is_key_pressed(ng::ScanCode_SPACE) || sExtraFire)
+        bool const fireMissile = sExtraFire || keyboard.is_key_pressed(ng::ScanCode_SPACE) ||
+            (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One) &&
+                ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).is_button_pressed(ng::game_controller_button::A));
+        if (fireMissile)
         {
             auto stepTime_ms = static_cast<decltype(aPhysicsStepTime)>(ng::game::chrono::to_milliseconds(ng::game::chrono::flicks{ aPhysicsStepTime }));
             static auto sLastTime_ms = stepTime_ms;

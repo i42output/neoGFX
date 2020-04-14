@@ -172,6 +172,12 @@ namespace neogfx
                     base_type::z * right.base_type::x - base_type::x * right.base_type::z, 
                     base_type::x * right.base_type::y - base_type::y * right.base_type::x };
             }
+            self_type hadamard_product(const self_type& right) const
+            {
+                self_type result = *this;
+                result *= right;
+                return result;
+            }
         public:
             using base_type::v;
         };
@@ -270,6 +276,12 @@ namespace neogfx
                 auto const& yy = right.v[1];
                 auto const& zz = right.v[2];
                 return self_type{ y * zz - z * yy, z * xx - x * zz, x * yy - y * xx };
+            }
+            self_type hadamard_product(const self_type& right) const
+            {
+                self_type result = *this;
+                result *= right;
+                return result;
             }
         public:
             array_type v;
