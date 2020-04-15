@@ -199,7 +199,7 @@ namespace neogfx::game
         iFlags{ aCreationFlags }, iNextEntityId { null_entity }, iNextHandleId{ null_id },
         iSystemTimer
         {
-            service<neolib::async_task>(),
+            service<async_task>(),
             [this](neolib::callback_timer& aTimer)
             {
                 aTimer.again();

@@ -77,7 +77,7 @@ namespace neogfx
         auto scrlLock = std::make_shared<label>();
         scrlLock->text_widget().set_size_hint(size_hint{ "SCRL" });
         iLayout.add(scrlLock);
-        iUpdater = std::make_unique<neolib::callback_timer>(service<neolib::async_task>(), root().surface().as_lifetime(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
+        iUpdater = std::make_unique<neolib::callback_timer>(service<async_task>(), root().surface().as_lifetime(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             const auto& keyboard = service<i_keyboard>();

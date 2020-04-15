@@ -55,6 +55,7 @@ namespace neogfx
             void enumerate_controllers() override;
         public:
             const i_string& product_name(const hid_device_uuid& aProductId) const override;
+            const hid_device_uuid& product_database_id(const hid_device_uuid& aProductId) const override;
         private:
             void do_enumerate_controllers();
             bool is_xinput_controller(const GUID& aProductId) const;
@@ -68,6 +69,7 @@ namespace neogfx
             IDirectInput8* iDirectInput = nullptr;
             std::vector<hid_device_uuid> iEnumerationResults;
             neolib::map<hid_device_uuid, string> iProductNames;
+            neolib::map<hid_device_uuid, hid_device_uuid> iProductDatabaseIds;
         };
     }
 }

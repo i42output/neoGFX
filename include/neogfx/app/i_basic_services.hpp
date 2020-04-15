@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/async_task.hpp>
+#include <neogfx/core/async_task.hpp>
 #include <neogfx/core/primitives.hpp>
 
 namespace neogfx
@@ -46,7 +46,7 @@ namespace neogfx
         virtual ~i_basic_services() = default;
     public:
         virtual neogfx::platform platform() const = 0;
-        virtual neolib::async_task& app_task() = 0;
+        virtual async_task& app_task() = 0;
         virtual void system_beep() = 0;
         virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
         virtual uint32_t display_count() const = 0;

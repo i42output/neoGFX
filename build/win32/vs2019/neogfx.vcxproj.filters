@@ -984,6 +984,12 @@
     <ClInclude Include="..\..\..\src\hid\native\windows_directinput_controller.hpp">
       <Filter>Source Files\native\windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\async_thread.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1452,6 +1458,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\hid\native\windows_directinput_controller.cpp">
       <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\async_task.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\async_thread.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

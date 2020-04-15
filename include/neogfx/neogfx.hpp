@@ -29,6 +29,7 @@ using namespace boost::multiprecision;
 #include <neolib/enum.hpp>
 #include <neolib/string.hpp>
 #include <neogfx/app/i18n.hpp>
+#include <neogfx/core/async_task.hpp>
 
 namespace neogfx
 {

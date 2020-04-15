@@ -37,7 +37,7 @@ namespace neogfx
         iSurfaceManager{ aSurfaceManager },
         iProcessingEvent{ 0u },
         iNonClientEntered{ false },
-        iUpdater{ service<neolib::async_task>(), *this, [this](neolib::callback_timer& aTimer)
+        iUpdater{ service<async_task>(), *this, [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             if (non_client_entered() && 

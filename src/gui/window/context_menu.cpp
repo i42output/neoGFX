@@ -67,7 +67,7 @@ namespace neogfx
         sWidget = (iParent != nullptr ?
             std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
             std::make_unique<popup_menu>(iPosition, menu(), iStyle));
-        event_processing_context epc{ service<neolib::async_task>(), "neogfx::context_menu" };
+        event_processing_context epc{ service<async_task>(), "neogfx::context_menu" };
         while (!finished)
         {
             service<i_app>().process_events(epc);

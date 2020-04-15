@@ -289,6 +289,8 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\animator.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\async_thread.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\css.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\device_metrics.hpp" />
@@ -600,6 +602,8 @@
     <ClCompile Include="..\..\..\src\audio\audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_track.cpp" />
     <ClCompile Include="..\..\..\src\core\animator.cpp" />
+    <ClCompile Include="..\..\..\src\core\async_task.cpp" />
+    <ClCompile Include="..\..\..\src\core\async_thread.cpp" />
     <ClCompile Include="..\..\..\src\core\color.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
     <ClCompile Include="..\..\..\src\core\units.cpp" />

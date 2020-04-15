@@ -433,7 +433,7 @@ namespace neogfx
             {
                 if (!iClickedCheckBox)
                 {
-                    iMouseTracker.emplace(service<neolib::async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
+                    iMouseTracker.emplace(service<async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
                     {
                         aTimer.again();
                         auto const pos = root().mouse_position() - origin();

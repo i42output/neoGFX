@@ -44,7 +44,7 @@
 
 namespace neogfx
 {
-    frame_counter::frame_counter(uint32_t aDuration) : iTimer{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+    frame_counter::frame_counter(uint32_t aDuration) : iTimer{ service<async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             ++iCounter;

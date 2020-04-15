@@ -19,7 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/async_thread.hpp>
+#include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/clock.hpp>
@@ -30,10 +30,10 @@
 
 namespace neogfx::game
 {
-    class simple_physics::thread : public neolib::async_thread
+    class simple_physics::thread : public async_thread
     {
     public:
-        thread(simple_physics& aOwner) : neolib::async_thread{ "neogfx::game::simple_physics::thread" }, iOwner{ aOwner }
+        thread(simple_physics& aOwner) : async_thread{ "neogfx::game::simple_physics::thread" }, iOwner{ aOwner }
         {
             start();
         }

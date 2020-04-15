@@ -226,7 +226,7 @@ namespace neogfx
         auto step_up = [this]()
         {
             do_step(step_direction::Up);
-            iStepper.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+            iStepper.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.set_duration(125, true);
                 aTimer.again();
@@ -248,7 +248,7 @@ namespace neogfx
         auto step_down = [this]()
         {
             do_step(step_direction::Down);
-            iStepper.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+            iStepper.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.set_duration(125, true);
                 aTimer.again();

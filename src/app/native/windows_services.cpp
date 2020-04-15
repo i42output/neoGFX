@@ -33,7 +33,7 @@ namespace neogfx
 {
     template<> i_basic_services& service<i_basic_services>() 
     { 
-        static native::windows::basic_services sWindowsBasicServices{ service<neolib::async_task>() }; 
+        static native::windows::basic_services sWindowsBasicServices{ service<async_task>() }; 
         return sWindowsBasicServices; 
     }
 

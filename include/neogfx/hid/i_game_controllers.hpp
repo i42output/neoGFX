@@ -46,6 +46,7 @@ namespace neogfx
         virtual i_game_controller& controller_for(game_player aPlayer) const = 0;
     public:
         virtual const i_string& product_name(const hid_device_uuid& aProductId) const = 0;
+        virtual const hid_device_uuid& product_database_id(const hid_device_uuid& aProductId) const = 0;
         virtual const button_map_type& button_map(const hid_device_uuid& aProductId) const = 0;
     };
 }

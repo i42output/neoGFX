@@ -6,6 +6,7 @@
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_animator.hpp>
 #include <neogfx/hid/i_surface.hpp>
+#include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
@@ -345,6 +346,16 @@ int main(int argc, char* argv[])
         ui.actionNextTab.triggered([&]() { ui.tabPages.select_next_tab(); });
         ui.actionPreviousTab.triggered([&]() { ui.tabPages.select_previous_tab(); });
 
+        auto display_controller_info = [&](ng::i_game_controller const& aController, bool aConnected)
+        {
+            std::ostringstream oss;
+            oss << aController.product_name() << " [" << ng::service<ng::i_game_controllers>().product_database_id(aController.product_id()) << "] " << (aConnected ? "connected." : "disconnected.") << std::endl;
+            ui.textEdit.append_text(oss.str(), true);
+        };
+        for (auto const& controller : ng::service<ng::i_game_controllers>().controllers())
+            display_controller_info(*controller, true);
+        ng::service<ng::i_game_controllers>().controller_connected([&](ng::i_game_controller& aController) { display_controller_info(aController, true); } );
+        ng::service<ng::i_game_controllers>().controller_disconnected([&](ng::i_game_controller& aController) { display_controller_info(aController, false); });
         ui.gradientWidget.gradient_changed([&]()
         {
             auto s = ui.textEdit.default_style();

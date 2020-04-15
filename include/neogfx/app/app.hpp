@@ -23,9 +23,9 @@
 #include <map>
 #include <optional>
 #include <boost/pool/pool_alloc.hpp>
-#include <neolib/async_thread.hpp>
 #include <neolib/timer.hpp>
 
+#include <neogfx/core/async_thread.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/event_processing_context.hpp>
 #include <neogfx/app/i_app.hpp>
@@ -57,7 +57,7 @@ namespace neogfx
         boost::program_options::variables_map iOptions;
     };
 
-    class app : public neolib::async_thread, public i_app, private i_keyboard_handler
+    class app : public neogfx::async_thread, public i_app, private i_keyboard_handler
     {
     public:
         define_declared_event(ExecutionStarted, execution_started)

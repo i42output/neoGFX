@@ -241,7 +241,7 @@ namespace neogfx
     }
 
     animator::animator() :
-        iTimer { service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+        iTimer { service<async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             next_frame();

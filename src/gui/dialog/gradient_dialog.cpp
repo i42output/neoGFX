@@ -90,7 +90,7 @@ namespace neogfx
         preview_box(gradient_dialog& aOwner) :
             framed_widget(aOwner.iPreviewGroupBox.item_layout()),
             iOwner(aOwner),
-            iAnimationTimer{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+            iAnimationTimer{ service<async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 iSink += surface().closed([&aTimer]() { aTimer.cancel(); });
                 aTimer.again();

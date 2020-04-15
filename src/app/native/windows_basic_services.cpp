@@ -55,7 +55,7 @@ namespace neogfx
             return true;
         }
 
-        basic_services::basic_services(neolib::async_task& aAppTask) :
+        basic_services::basic_services(async_task& aAppTask) :
             iAppTask{ aAppTask }
         {
             if (::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED) == RPC_E_CHANGED_MODE)
@@ -72,7 +72,7 @@ namespace neogfx
             return neogfx::platform::Windows;
         }
 
-        neolib::async_task& basic_services::app_task()
+        async_task& basic_services::app_task()
         {
             return iAppTask;
         }

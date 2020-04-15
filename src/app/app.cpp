@@ -36,7 +36,7 @@
 
 namespace neogfx
 {
-    template<> neolib::async_task& service<neolib::async_task>() { return app::instance(); }
+    template<> async_task& service<async_task>() { return app::instance(); }
     template<> i_app& service<i_app>() { return app::instance(); }
 
     program_options::program_options(int argc, char* argv[])
@@ -158,7 +158,7 @@ namespace neogfx
         
     app::app(int argc, char* argv[], const std::string& aName)
         try :
-        neolib::async_thread{ "neogfx::app", true },
+        async_thread{ "neogfx::app", true },
         iProgramOptions{ argc, argv },
         iLoader{ iProgramOptions, *this },
         iName{ aName },

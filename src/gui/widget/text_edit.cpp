@@ -180,7 +180,7 @@ namespace neogfx
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
-        iAnimator{ service<neolib::async_task>(), [this](neolib::callback_timer&)
+        iAnimator{ service<async_task>(), [this](neolib::callback_timer&)
         {
             iAnimator.again();
             animate();
@@ -199,7 +199,7 @@ namespace neogfx
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
-        iAnimator{ service<neolib::async_task>(), [this](neolib::callback_timer&)
+        iAnimator{ service<async_task>(), [this](neolib::callback_timer&)
         {
             iAnimator.again();
             animate();
@@ -218,7 +218,7 @@ namespace neogfx
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
-        iAnimator{ service<neolib::async_task>(), [this](neolib::callback_timer&)
+        iAnimator{ service<async_task>(), [this](neolib::callback_timer&)
         {
             iAnimator.again();
             animate();
@@ -1028,7 +1028,7 @@ namespace neogfx
         {
             if (!capturing())
                 set_capture();
-            iDragger.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
+            iDragger.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.again();
                 set_cursor_position(root().mouse_position() - origin(), false);
@@ -1261,17 +1261,37 @@ namespace neogfx
 
     std::size_t text_edit::set_text(const std::string& aText, const style& aStyle)
     {
-        return do_insert_text(aText, aStyle, true, true);
+        return do_insert_text(0, aText, aStyle, true, true);
+    }
+
+    std::size_t text_edit::append_text(const std::string& aText, bool aMoveCursor)
+    {
+        return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
+    }
+
+    std::size_t text_edit::append_text(const std::string& aText, const style& aStyle, bool aMoveCursor)
+    {
+        return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
     }
 
     std::size_t text_edit::insert_text(const std::string& aText, bool aMoveCursor)
     {
-        return do_insert_text(aText, default_style(), aMoveCursor, false);
+        return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
     }
 
     std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor)
     {
-        return do_insert_text(aText, aStyle, aMoveCursor, false);
+        return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
+    }
+
+    std::size_t text_edit::insert_text(position_type aPosition, const std::string& aText, bool aMoveCursor)
+    {
+        return do_insert_text(aPosition, aText, default_style(), aMoveCursor, false);
+    }
+
+    std::size_t text_edit::insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor)
+    {
+        return do_insert_text(aPosition, aText, aStyle, aMoveCursor, false);
     }
 
     void text_edit::delete_text(position_type aStart, position_type aEnd)
@@ -1465,7 +1485,7 @@ namespace neogfx
         });
     }
 
-    std::size_t text_edit::do_insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
+    std::size_t text_edit::do_insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
     {
         bool accept = true;
         TextFilter.trigger(aText, accept);
@@ -1493,7 +1513,7 @@ namespace neogfx
                 eos = eol;
         }
         auto s = (&aStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end());
-        auto insertionPoint = iText.begin() + cursor().position();
+        auto insertionPoint = iText.begin() + aPosition;
         insertionPoint = iText.insert(s != iStyles.end() ? document_text::tag_type::tag_data{ static_cast<style_list::const_iterator>(s) } : document_text::tag_type::tag_data{ nullptr },
             insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
         refresh_paragraph(insertionPoint, eos);

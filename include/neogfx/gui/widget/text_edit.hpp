@@ -512,8 +512,12 @@ namespace neogfx
         const std::string& text() const;
         std::size_t set_text(const std::string& aText);
         std::size_t set_text(const std::string& aText, const style& aStyle);
+        std::size_t append_text(const std::string& aText, bool aMoveCursor = false);
+        std::size_t append_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
         std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
         std::size_t insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t insert_text(position_type aPosition, const std::string& aText, bool aMoveCursor = false);
+        std::size_t insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor = false);
         void delete_text(position_type aStart, position_type aEnd);
         std::size_t columns() const;
         void set_columns(std::size_t aColumnCount);
@@ -555,7 +559,7 @@ namespace neogfx
         void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
     private:
         void init();
-        std::size_t do_insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
+        std::size_t do_insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
         std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
