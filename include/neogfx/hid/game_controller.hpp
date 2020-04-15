@@ -44,10 +44,10 @@ namespace neogfx
         struct button_not_found : std::logic_error { button_not_found() : std::logic_error{ "neogfx::game_controller::button_not_found" } {} };
     public:
         static constexpr game_controller_button_ordinal MAX_BUTTONS = 64u;
-    protected:
+    public:
         typedef boost::bimap<game_controller_button_ordinal, game_controller_button> button_map_type;
     public:
-        game_controller(hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
+        game_controller(hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId, const button_map_type& aButtonMap = {});
     public:
         bool player_assigned() const override;
         game_player player() const override;
@@ -70,6 +70,7 @@ namespace neogfx
         const vec2& slider_position() const override;
     public:
         uint32_t button_count() const override;
+        bool button_mapped(game_controller_button aButton) const override;
         game_controller_button_ordinal button_to_button_ordinal(game_controller_button aButton) const override;
         game_controller_button button_ordinal_to_button(game_controller_button_ordinal aButtonOrdinal) const override;
     protected:

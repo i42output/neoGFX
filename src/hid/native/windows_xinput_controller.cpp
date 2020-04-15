@@ -32,45 +32,9 @@ namespace neogfx
             return boost::bimap<L, R>(list.begin(), list.end());
         }
 
-        xinput_controller::xinput_controller(IDirectInputDevice8* aDevice,  hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId) :
-            game_controller{ aSubclass, aProductId, aInstanceId }, iDevice{ aDevice }
+        xinput_controller::xinput_controller(IDirectInputDevice8* aDevice,  hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId) :
+            game_controller{ aSubclass, aProductId, aInstanceId, xinput_button_map() }, iDevice{ aDevice }
         {
-            make_bimap<game_controller_button_ordinal, game_controller_button>(
-            {
-                { 1u, game_controller_button::A },
-                { 2u, game_controller_button::B },
-                { 3u, game_controller_button::X },
-                { 4u, game_controller_button::Y },
-                { 5u, game_controller_button::LeftShoulder },
-                { 6u, game_controller_button::RightShoulder },
-                { 7u, game_controller_button::Back },
-                { 8u, game_controller_button::Start },
-                { 9u, game_controller_button::LeftThumb },
-                { 10u, game_controller_button::RightThumb },
-                // todo: what should the mapping of the rest of these actually be? see what DirectInput says.
-                { 11u, game_controller_button::LeftTrigger },
-                { 12u, game_controller_button::RightTrigger },
-                { 13u, game_controller_button::DirectionalPadUp },
-                { 14u, game_controller_button::DirectionalPadDown },
-                { 15u, game_controller_button::DirectionalPadLeft },
-                { 16u, game_controller_button::DirectionalPadRight },
-                { 17u, game_controller_button::LeftThumbUp },
-                { 18u, game_controller_button::LeftThumbDown },
-                { 19u, game_controller_button::LeftThumbRight },
-                { 20u, game_controller_button::LeftThumbLeft },
-                { 21u, game_controller_button::LeftThumbUpLeft },
-                { 22u, game_controller_button::LeftThumbUpRight },
-                { 23u, game_controller_button::LeftThumbDownRight },
-                { 24u, game_controller_button::LeftThumbDownLeft },
-                { 25u, game_controller_button::RightThumbUp },
-                { 26u, game_controller_button::RightThumbDown },
-                { 27u, game_controller_button::RightThumbRight },
-                { 28u, game_controller_button::RightThumbLeft },
-                { 29u, game_controller_button::RightThumbUpLeft },
-                { 30u, game_controller_button::RightThumbUpRight },
-                { 31u, game_controller_button::RightThumbDownRight },
-                { 32u, game_controller_button::RightThumbDownLeft }
-            }).swap(button_map());
         }
 
         xinput_controller::~xinput_controller()
@@ -155,7 +119,50 @@ namespace neogfx
                     vec2{
                         std::abs(state.Gamepad.sThumbRX) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ? state.Gamepad.sThumbRX / 32767.0 : 0.0,
                         std::abs(state.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ? state.Gamepad.sThumbRY / 32767.0 : 0.0 });
+                set_stick_position(left_thumb_position());
+                set_stick_rotation(right_thumb_position());
             }
+        }
+
+        const xinput_controller::button_map_type& xinput_controller::xinput_button_map()
+        {
+            static auto const sXinputButtonMap = make_bimap<game_controller_button_ordinal, game_controller_button>(
+                {
+                    { 1u, game_controller_button::A },
+                    { 2u, game_controller_button::B },
+                    { 3u, game_controller_button::X },
+                    { 4u, game_controller_button::Y },
+                    { 5u, game_controller_button::LeftShoulder },
+                    { 6u, game_controller_button::RightShoulder },
+                    { 7u, game_controller_button::Back },
+                    { 8u, game_controller_button::Start },
+                    { 9u, game_controller_button::LeftThumb },
+                    { 10u, game_controller_button::RightThumb },
+                    // todo: what should the mapping of the rest of these actually be? see what DirectInput says.
+                    { 11u, game_controller_button::LeftTrigger },
+                    { 12u, game_controller_button::RightTrigger },
+                    { 13u, game_controller_button::DirectionalPadUp },
+                    { 14u, game_controller_button::DirectionalPadDown },
+                    { 15u, game_controller_button::DirectionalPadLeft },
+                    { 16u, game_controller_button::DirectionalPadRight },
+                    { 17u, game_controller_button::LeftThumbUp },
+                    { 18u, game_controller_button::LeftThumbDown },
+                    { 19u, game_controller_button::LeftThumbRight },
+                    { 20u, game_controller_button::LeftThumbLeft },
+                    { 21u, game_controller_button::LeftThumbUpLeft },
+                    { 22u, game_controller_button::LeftThumbUpRight },
+                    { 23u, game_controller_button::LeftThumbDownRight },
+                    { 24u, game_controller_button::LeftThumbDownLeft },
+                    { 25u, game_controller_button::RightThumbUp },
+                    { 26u, game_controller_button::RightThumbDown },
+                    { 27u, game_controller_button::RightThumbRight },
+                    { 28u, game_controller_button::RightThumbLeft },
+                    { 29u, game_controller_button::RightThumbUpLeft },
+                    { 30u, game_controller_button::RightThumbUpRight },
+                    { 31u, game_controller_button::RightThumbDownRight },
+                    { 32u, game_controller_button::RightThumbDownLeft }
+                });
+            return sXinputButtonMap;
         }
     }
 }

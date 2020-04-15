@@ -48,6 +48,12 @@ namespace neogfx
         throw unassigned_player();
     }
 
+    const game_controllers::button_map_type& game_controllers::button_map(const hid_device_uuid& aProductId) const
+    {
+        // todo
+        return iButtonMaps[aProductId];
+    }
+
     game_controllers::controller_list::iterator game_controllers::add_device(const ref_ptr<i_game_controller>& aController)
     {
         auto newController = iControllers.insert(iControllers.end(), aController);

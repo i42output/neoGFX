@@ -20,15 +20,17 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_game_controllers.hpp>
 #include "windows_directinput_controller.hpp"
 
 namespace neogfx
 {
     namespace native::windows
     {
-        directinput_controller::directinput_controller(IDirectInputDevice8* aDevice,  hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId) :
-            game_controller{ aSubclass, aProductId, aInstanceId }, iDevice{ aDevice }
+        directinput_controller::directinput_controller(IDirectInputDevice8* aDevice,  hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId) :
+            game_controller{ aSubclass, aProductId, aInstanceId, directinput_button_map(aProductId) }, iDevice{ aDevice }
         {
+            iDevice->SetDataFormat(&c_dfDIJoystick2);
         }
 
         directinput_controller::~directinput_controller()
@@ -38,6 +40,22 @@ namespace neogfx
 
         void directinput_controller::update_state()
         {
+            DIJOYSTATE2 djs = {};
+            if (FAILED(iDevice->GetDeviceState(sizeof(djs), &djs)))
+                return;
+            // todo
+        }
+
+        const directinput_controller::button_map_type& directinput_controller::directinput_button_map(const hid_device_uuid& aProductId)
+        {
+            thread_local std::map<hid_device_uuid, button_map_type> tMapCache;
+            if (tMapCache.find(aProductId) == tMapCache.end())
+            {
+                auto const& map = service<i_game_controllers>().button_map(aProductId);
+                for (auto const& mapping : map)
+                    tMapCache[aProductId].insert(button_map_type::value_type{ mapping.first(), mapping.second() });
+            }
+            return tMapCache[aProductId];
         }
     }
 }

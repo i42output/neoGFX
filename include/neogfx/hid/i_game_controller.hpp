@@ -155,6 +155,7 @@ namespace neogfx
         virtual const vec2& slider_position() const = 0;
     public:
         virtual uint32_t button_count() const = 0;
+        virtual bool button_mapped(game_controller_button aButton) const = 0;
         virtual game_controller_button_ordinal button_to_button_ordinal(game_controller_button aButton) const = 0;
         virtual game_controller_button button_ordinal_to_button(game_controller_button_ordinal aButtonOrdinal) const = 0;
     };

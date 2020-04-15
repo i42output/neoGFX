@@ -23,6 +23,7 @@
 #include <d3d11_1.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#pragma comment(lib, "dinput8.lib")
 #include <neogfx/hid/game_controller.hpp>
 
 namespace neogfx
@@ -32,10 +33,12 @@ namespace neogfx
         class directinput_controller : public game_controller
         {
         public:
-            directinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
+            directinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId);
             ~directinput_controller();
         protected:
             void update_state() override;
+        private:
+            static const button_map_type& directinput_button_map(const hid_device_uuid& aProductId);
         private:
             IDirectInputDevice8* iDevice;
         };

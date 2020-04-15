@@ -226,7 +226,10 @@ void create_game(ng::i_layout& aLayout)
         if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
         {
             auto const& controller = ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One);
-            spaceshipPhysics.acceleration += (ng::vec3{ 16.0, 16.0, 0.0 }.hadamard_product(ng::vec3{ controller.left_thumb_position() }));
+            spaceshipPhysics.acceleration += ng::vec3{ 16.0, 16.0, 0.0 }.hadamard_product(ng::vec3{ controller.left_thumb_position() });
+            spaceshipPhysics.acceleration += ng::vec3{ 0.0,
+                controller.is_button_pressed(ng::game_controller_button::DirectionalPadUp) ? 16.0 : 
+                    controller.is_button_pressed(ng::game_controller_button::DirectionalPadDown) ? -16.0 : 0.0 };
             if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadLeft))
                 spaceshipPhysics.spin.z = ng::to_rad(30.0);
             else if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadRight))

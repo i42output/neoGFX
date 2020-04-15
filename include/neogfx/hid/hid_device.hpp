@@ -33,7 +33,7 @@ namespace neogfx
         define_declared_event(Enabled, enabled)
         define_declared_event(Disabled, disabled)
     public:
-        hid_device(hid_device_type aType, hid_device_class aClass, hid_device_subclass aSubclass, hid_device_uuid aProductId = {}, hid_device_uuid aInstanceId = {}) :
+        hid_device(hid_device_type aType, hid_device_class aClass, hid_device_subclass aSubclass, const hid_device_uuid& aProductId = {}, const hid_device_uuid& aInstanceId = {}) :
             iType{ aType },
             iClass{ aClass },
             iSubclass{ aSubclass },

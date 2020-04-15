@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/vector.hpp>
+#include <neolib/map.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 
 namespace neogfx
@@ -33,12 +34,15 @@ namespace neogfx
         define_declared_event(ControllerCalibrationRequired, controller_calibration_required, i_game_controller&)
     public:
         typedef neolib::vector<ref_ptr<i_game_controller>> controller_list;
+        typedef neolib::map<game_controller_button_ordinal, game_controller_button> button_map_type;
     public:
         game_controllers();
     public:
         const controller_list& controllers() const override;
         bool have_controller_for(game_player aPlayer) const override;
         i_game_controller& controller_for(game_player aPlayer) const override;
+    public:
+        const button_map_type& button_map(const hid_device_uuid& aProductId) const override;
     public:
         controller_list::iterator add_device(const ref_ptr<i_game_controller>& aController);
         controller_list::iterator remove_device(const ref_ptr<i_game_controller>& aController);
@@ -52,5 +56,6 @@ namespace neogfx
         }
     private:
         controller_list iControllers;
+        mutable std::map<hid_device_uuid, button_map_type> iButtonMaps;
     };
 }

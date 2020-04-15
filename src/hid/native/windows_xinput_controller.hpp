@@ -34,10 +34,12 @@ namespace neogfx
         class xinput_controller : public game_controller
         {
         public:
-            xinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId);
+            xinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId);
             ~xinput_controller();
         protected:
             void update_state() override;
+        private:
+            static const button_map_type& xinput_button_map();
         private:
             IDirectInputDevice8* iDevice;
         };

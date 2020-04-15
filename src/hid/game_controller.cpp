@@ -19,16 +19,18 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/game_controller.hpp>
+#include <neogfx/hid/i_game_controllers.hpp>
 
 namespace neogfx
 {
-    game_controller::game_controller(hid_device_subclass aSubclass, hid_device_uuid aProductId, hid_device_uuid aInstanceId) :
+    game_controller::game_controller(hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId, const button_map_type& aButtonMap) :
         hid_device<i_game_controller>{ hid_device_type::Input, hid_device_class::GameController, aSubclass, aProductId, aInstanceId },
         iUpdater{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             update_state();
-        }, 50u }
+        }, 50u },
+        iButtonMap{ aButtonMap }
     {
     }
 
@@ -46,7 +48,12 @@ namespace neogfx
 
     void game_controller::assign_player(game_player aPlayer)
     {
-        iPlayer = aPlayer;
+        if (iPlayer != aPlayer)
+        {
+            if (service<i_game_controllers>().have_controller_for(aPlayer))
+                service<i_game_controllers>().controller_for(aPlayer).unassign_player();
+            iPlayer = aPlayer;
+        }
     }
 
     void game_controller::unassign_player()
@@ -124,6 +131,11 @@ namespace neogfx
     uint32_t game_controller::button_count() const
     {
         return static_cast<uint32_t>(iButtonMap.size());
+    }
+
+    bool game_controller::button_mapped(game_controller_button aButton) const
+    {
+        return iButtonMap.right.find(aButton) != iButtonMap.right.end();
     }
 
     game_controller_button_ordinal game_controller::button_to_button_ordinal(game_controller_button aButton) const

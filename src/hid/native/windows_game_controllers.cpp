@@ -246,15 +246,11 @@ namespace neogfx
                 if (found != iEnumerationResults.end())
                 {
                     auto& controller = **existing++;
-                    bool const xinputController = (dynamic_cast<xinput_controller*>(&controller) != nullptr);
-                    if (xinputController)
+                    bool const isXinputController = (dynamic_cast<xinput_controller*>(&controller) != nullptr);
+                    if (isXinputController)
                     {
                         if (connectedXinputPorts.size() == 1)
-                        {
                             controller.set_port(*connectedXinputPorts.begin());
-                            if (!have_controller_for(game_player::One))
-                                controller.assign_player(game_player::One);
-                        }
                         else
                         {
                             controller.clear_port();
@@ -266,6 +262,18 @@ namespace neogfx
                 }
                 else
                     existing = remove_device(*existing);
+            }
+
+            if (!controllers().empty() && !have_controller_for(game_player::One))
+            {
+                for (auto& controller : controllers())
+                {
+                    bool const isXinputController = (dynamic_cast<const xinput_controller*>(&*controller) != nullptr);
+                    if (isXinputController)
+                        controller->assign_player(game_player::One);
+                }
+                if (!have_controller_for(game_player::One))
+                    controllers()[0]->assign_player(game_player::One);
             }
         }
     }

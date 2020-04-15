@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/i_vector.hpp>
+#include <neolib/i_map.hpp>
 #include <neogfx/hid/i_game_controller.hpp>
 
 namespace neogfx
@@ -35,6 +36,7 @@ namespace neogfx
         struct unassigned_player : std::logic_error { unassigned_player() : std::logic_error{ "neogfx::i_game_controllers::unassigned_player" } {} };
     public:
         typedef neolib::i_vector<i_ref_ptr<i_game_controller>> controller_list;
+        typedef neolib::i_map<game_controller_button_ordinal, game_controller_button> button_map_type;
     public:
         virtual ~i_game_controllers() = default;
     public:
@@ -44,5 +46,6 @@ namespace neogfx
         virtual i_game_controller& controller_for(game_player aPlayer) const = 0;
     public:
         virtual const i_string& product_name(const hid_device_uuid& aProductId) const = 0;
+        virtual const button_map_type& button_map(const hid_device_uuid& aProductId) const = 0;
     };
 }
