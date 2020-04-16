@@ -20,6 +20,11 @@
             name: "neoGFX Test App (Pre-Release)"
             default_window_icon: ":/test/resources/icon.png"
             action: {
+                id: actionGameControllerCalibration
+                text: "Game Controller Calibration"
+                image: ":/neogfx/resources/icons.naa#gamecontroller.png"
+            }
+            action: {
                 id: actionGoldenrodStyle
                 text: "Goldenrod Style"
                 shortcut: "Ctrl+Alt+Shift+G"
@@ -174,6 +179,8 @@
                     action: appTest.actionFileNew
                     action: appTest.actionFileOpen
                     action: appTest.actionFileSave
+                    action: separator
+                    action: actionGameControllerCalibration
                     action: separator
                     action: actionContacts
                     action: actionAddFavourite

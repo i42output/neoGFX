@@ -4,6 +4,7 @@
     resource: {
         ref: resources
         file: resources/icons/neoGFX.png
+        file: resources/images/game_controller.png
     }
 
     resource: {

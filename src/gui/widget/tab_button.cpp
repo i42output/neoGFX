@@ -290,7 +290,7 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect result = push_button::path_bounding_rect();
-        switch (container().style())
+        switch (container().style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
             result.extents() += size{ 0.0, 5.0 };
@@ -333,7 +333,7 @@ namespace neogfx
         auto result = push_button::minimum_size(aAvailableSpace);
         if (has_minimum_size())
             return result;
-        switch (container().style())
+        switch (container().style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
         case tab_container_style::TabAlignmentBottom:

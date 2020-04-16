@@ -14,6 +14,7 @@
 #include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
+#include <neogfx/gui/dialog/game_controller_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
 
 #include "test.ui.hpp"
@@ -369,14 +370,14 @@ int main(int argc, char* argv[])
 
         ui.button1.clicked([&ui]()
         {
-            if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentTop)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentBottom);
-            else if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentBottom)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentLeft);
-            else if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentLeft)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentRight);
-            else if (ui.tabPages.style() == ng::tab_container_style::TabAlignmentRight)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentTop);
+            if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentTop)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentBottom | ng::tab_container_style::ResizeToTabs);
+            else if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentBottom)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentLeft | ng::tab_container_style::ResizeToTabs);
+            else if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentLeft)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentRight | ng::tab_container_style::ResizeToTabs);
+            else if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentRight)
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentTop | ng::tab_container_style::ResizeToTabs);
         });
         ui.buttonChina.clicked([&window, &ui]() 
         { 
@@ -621,6 +622,12 @@ int main(int argc, char* argv[])
         {
             ui.slider1.set_normalized_value(ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Theme).to_hsv().hue() / 360.0);
             update_theme_color();
+        });
+
+        ui.actionGameControllerCalibration.triggered([&window]()
+        {
+            ng::game_controller_dialog gameControllerDialog(window);
+            gameControllerDialog.exec();
         });
 
         ui.themeColor.clicked([&window]()

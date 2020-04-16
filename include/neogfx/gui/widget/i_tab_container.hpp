@@ -28,14 +28,15 @@ namespace neogfx
 {
     enum class tab_container_style : uint32_t
     {
-        TabAlignmentTop                = 0x0000,
-        TabAlignmentBottom            = 0x0001,
+        TabAlignmentTop             = 0x0000,
+        TabAlignmentBottom          = 0x0001,
         TabAlignmentLeft            = 0x0002,
-        TabAlignmentRight            = 0x0003,
+        TabAlignmentRight           = 0x0003,
         TabAlignmentMask            = 0x0003,
         TabOrientationHorizontal    = 0x0000,
-        TabOrientationVertical        = 0x0004, // todo
-        TabOrientationMask            = 0x0004,
+        TabOrientationVertical      = 0x0004, // todo
+        TabOrientationMask          = 0x0004,
+        ResizeToTabs                = 0x1000
     };
     inline tab_container_style operator|(tab_container_style aLhs, tab_container_style aRhs)
     {

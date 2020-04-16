@@ -332,7 +332,7 @@ namespace neogfx
         return true;
     }
 
-    void tab_page_container::update_tab_bar_placement()
+     void tab_page_container::update_tab_bar_placement()
     {
         switch (style() & tab_container_style::TabAlignmentMask)
         {

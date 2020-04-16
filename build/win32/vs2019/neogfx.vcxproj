@@ -402,6 +402,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\font_dialog.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\game_controller_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\gradient_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\message_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchor.hpp" />
@@ -658,6 +659,7 @@
     <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\game_controller_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\gradient_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\message_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\border_layout.cpp" />

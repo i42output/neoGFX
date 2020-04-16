@@ -55,7 +55,7 @@ namespace neogfx
 
     size tab_page::minimum_size(const optional_size& aAvailableSpace) const
     {
-        if (has_minimum_size())
+        if (has_minimum_size() || (iTab.container().style() & tab_container_style::ResizeToTabs) == tab_container_style::ResizeToTabs)
             return scrollable_widget::minimum_size(aAvailableSpace);
         else
             return size{};
