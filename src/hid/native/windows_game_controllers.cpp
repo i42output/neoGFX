@@ -18,7 +18,6 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <boost/endian/conversion.hpp>
 #include "windows_game_controllers.hpp"
 #include "windows_xinput_controller.hpp"
 #include "windows_directinput_controller.hpp"
@@ -149,21 +148,10 @@ namespace neogfx
             auto& self = *reinterpret_cast<game_controllers*>(pContext);
             IDirectInputDevice8* directinputDevice;
             auto const deviceProductId = GUID_to_uuid(pdidInstance->guidProduct);
-            auto const vendor = static_cast<uint16_t>(LOWORD(pdidInstance->guidProduct.Data1));
-            auto const product = static_cast<uint16_t>(HIWORD(pdidInstance->guidProduct.Data1));
-            // todo: Bluetooth support
-            neolib::uuid deviceDatabaseId
-            {
-                boost::endian::endian_reverse(HARDWARE_BUS_USB),
-                boost::endian::endian_reverse(vendor),
-                0,
-                boost::endian::endian_reverse(product)
-            };
             auto const deviceInstanceId = GUID_to_uuid(pdidInstance->guidInstance);
             auto const deviceProductName = neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(pdidInstance->tszProductName));
             self.iEnumerationResults.push_back(deviceInstanceId);
             self.iProductNames[deviceProductId] = deviceProductName;
-            self.iProductDatabaseIds[deviceProductId] = deviceDatabaseId;
             for (auto const& existingDevice : service<neogfx::game_controllers>().controllers())
                 if (existingDevice->instance_id() == deviceInstanceId)
                     return DIENUM_CONTINUE;
@@ -234,15 +222,6 @@ namespace neogfx
             if (existing != iProductNames.end())
                 return existing->second();
             return sUnknownProductName;
-        }
-
-        const hid_device_uuid& game_controllers::product_database_id(const hid_device_uuid& aProductId) const
-        {
-            static const hid_device_uuid sUnknownProductDatabaseId = {};
-            auto existing = iProductDatabaseIds.find(aProductId);
-            if (existing != iProductDatabaseIds.end())
-                return existing->second();
-            return sUnknownProductDatabaseId;
         }
 
         void game_controllers::do_enumerate_controllers()

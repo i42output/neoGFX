@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
         auto display_controller_info = [&](ng::i_game_controller const& aController, bool aConnected)
         {
             std::ostringstream oss;
-            oss << aController.product_name() << " [" << ng::service<ng::i_game_controllers>().product_database_id(aController.product_id()) << "] " << (aConnected ? "connected." : "disconnected.") << std::endl;
+            oss << aController.product_name() << " {" << aController.product_id() << "} " << (aConnected ? " connected." : " disconnected.") << std::endl;
             ui.textEdit.append_text(oss.str(), true);
         };
         for (auto const& controller : ng::service<ng::i_game_controllers>().controllers())
