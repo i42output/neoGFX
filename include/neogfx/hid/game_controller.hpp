@@ -59,6 +59,8 @@ namespace neogfx
         void set_port(game_controller_port aPort) override;
         void clear_port() override;
     public:
+        bool needs_calibrating() const override;
+    public:
         bool is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const override;
         bool is_button_pressed(game_controller_button aButton) const override;
         double left_trigger_position() const override;

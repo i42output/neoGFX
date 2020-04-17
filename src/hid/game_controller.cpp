@@ -83,6 +83,11 @@ namespace neogfx
         iPort = {};
     }
 
+    bool game_controller::needs_calibrating() const
+    {
+        return button_count() == 0u;
+    }
+
     bool game_controller::is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const
     {
         return iButtonState[aButtonOrdinal - 1u];

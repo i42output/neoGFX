@@ -43,7 +43,7 @@ namespace neogfx
     i_game_controller& game_controllers::controller_for(game_player aPlayer) const
     {
         for (auto const& controller : controllers())
-            if ((*controller).player() == aPlayer)
+            if ((*controller).player_assigned() && (*controller).player() == aPlayer)
                 return *controller;
         throw unassigned_player();
     }

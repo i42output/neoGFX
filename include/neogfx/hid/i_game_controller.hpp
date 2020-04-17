@@ -144,6 +144,8 @@ namespace neogfx
         virtual void set_port(game_controller_port aPort) = 0;
         virtual void clear_port() = 0;
     public:
+        virtual bool needs_calibrating() const = 0;
+    public:
         virtual bool is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const = 0;
         virtual bool is_button_pressed(game_controller_button aButton) const = 0;
         virtual double left_trigger_position() const = 0;

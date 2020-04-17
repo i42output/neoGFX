@@ -268,11 +268,13 @@ namespace neogfx
             {
                 for (auto& controller : controllers())
                 {
+                    if (controller->needs_calibrating())
+                        continue;
                     bool const isXinputController = (dynamic_cast<const xinput_controller*>(&*controller) != nullptr);
                     if (isXinputController)
                         controller->assign_player(game_player::One);
                 }
-                if (!have_controller_for(game_player::One))
+                if (!have_controller_for(game_player::One) && !controllers()[0]->needs_calibrating())
                     controllers()[0]->assign_player(game_player::One);
             }
         }
