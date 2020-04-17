@@ -34,7 +34,7 @@ namespace neogfx
             bool noSpace = (aAvailableSpace == std::nullopt || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer));
             for (const auto& item : aLayout.items())
             {
-                if (!item.visible())
+                if (!item.visible() && !aLayout.ignore_visibility())
                     continue;
                 const auto sizeTest = noSpace ? item.minimum_size(aAvailableSpace) : item.maximum_size(aAvailableSpace);
                 if (!item.is_spacer() && (SpecializedPolicy::cx(sizeTest) == 0.0 || SpecializedPolicy::cy(sizeTest) == 0.0))
@@ -149,7 +149,7 @@ namespace neogfx
             uint32_t itemsZeroSized = 0;
             for (const auto& item : items())
             {
-                if (!item.visible())
+                if (!item.visible() && !ignore_visibility())
                     continue;
                 const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
                 if (!item.is_spacer() && (AxisPolicy::cx(itemMinSize) == 0.0 || AxisPolicy::cy(itemMinSize) == 0.0))
@@ -199,7 +199,7 @@ namespace neogfx
         size result;
         for (const auto& item : items())
         {
-            if (!item.visible())
+            if (!item.visible() && !ignore_visibility())
                 continue;
             const auto itemMaxSize = item.maximum_size(availableSpaceForChildren);
             if (!item.is_spacer() && (AxisPolicy::cx(itemMaxSize) == 0.0 || AxisPolicy::cy(itemMaxSize) == 0.0))
@@ -258,7 +258,7 @@ namespace neogfx
         std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, neolib::fast_pool_allocator<std::pair<const item* const, disposition_e>>> itemDispositions;
         for (const auto& item : items())
         {
-            if (!item.visible())
+            if (!item.visible() && !ignore_visibility())
                 continue;
             if (AxisPolicy::size_policy_x(item.size_policy()) == size_constraint::Minimum)
             {
@@ -286,7 +286,7 @@ namespace neogfx
             done = true;
             for (const auto& item : items())
             {
-                if (!item.visible())
+                if (!item.visible() && !ignore_visibility())
                     continue;
                 auto& disposition = itemDispositions[&item];
                 if (disposition != Unknown && disposition != Weighted)
@@ -319,7 +319,7 @@ namespace neogfx
         size::dimension_type weightedAmount = 0.0;
         if (AxisPolicy::cx(totalExpanderWeight) > 0.0)
             for (const auto& item : items())
-                if (item.visible() && itemDispositions[&item] == Weighted)
+                if ((item.visible() || ignore_visibility()) && itemDispositions[&item] == Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
         uint32_t bitsLeft = 0;
         if (itemsUsingLeftover > 0)
@@ -331,7 +331,7 @@ namespace neogfx
         nextPos.y += margins().top;
         for (auto& item : *this)
         {
-            if (!item.visible())
+            if (!item.visible() && !ignore_visibility())
                 continue;
             auto itemMinSize = item.minimum_size(availableSize);
             auto itemMaxSize = item.maximum_size(availableSize);
@@ -403,7 +403,7 @@ namespace neogfx
             }
             for (auto& item : *this)
             {
-                if (!item.visible())
+                if (!item.visible() && !ignore_visibility())
                     continue;
                 item.set_position(item.position() + adjust);
             }

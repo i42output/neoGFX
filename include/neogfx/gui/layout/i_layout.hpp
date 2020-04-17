@@ -78,6 +78,8 @@ namespace neogfx
         virtual void set_always_use_spacing(bool aAlwaysUseSpacing) = 0;
         virtual neogfx::alignment alignment() const = 0;
         virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
+        virtual bool ignore_visibility() const = 0;
+        virtual void set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout = true) = 0;
     public:
         virtual void enable() = 0;
         virtual void disable() = 0;

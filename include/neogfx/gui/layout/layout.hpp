@@ -122,6 +122,8 @@ namespace neogfx
         void set_always_use_spacing(bool aAlwaysUseSpacing) override;
         neogfx::alignment alignment() const override;
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        bool ignore_visibility() const override;
+        void set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout = true) override;
     public:
         void enable() override;
         void disable() override;
@@ -184,6 +186,7 @@ namespace neogfx
         optional_size iSpacing;
         bool iAlwaysUseSpacing;
         neogfx::alignment iAlignment;
+        bool iIgnoreVisibility;
         bool iEnabled;
         point iPosition;
         size iExtents;

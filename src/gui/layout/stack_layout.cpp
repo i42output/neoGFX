@@ -60,6 +60,8 @@ namespace neogfx
         {
             for (const auto& item : items())
             {
+                if (!item.visible() && !ignore_visibility())
+                    continue;
                 result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
                 result.cy = std::max(result.cy, item.minimum_size(aAvailableSpace).cy);
             }
@@ -76,6 +78,8 @@ namespace neogfx
         size result{ size::max_size() };
         for (const auto& item : items())
         {
+            if (!item.visible() && !ignore_visibility())
+                continue;
             const auto& itemMaxSize = item.maximum_size(aAvailableSpace);
             if (itemMaxSize.cx != 0.0)
                 result.cx = std::min(result.cx, itemMaxSize.cx);

@@ -365,7 +365,12 @@ namespace neogfx
 
     bool layout_item_proxy::visible() const
     {
-        return subject().visible();
+        if (iVisible.first != global_layout_id())
+        {
+            iVisible.second = subject().visible() || parent_layout().ignore_visibility();
+            iVisible.first = global_layout_id();
+        }
+        return iVisible.second;
     }
 
     bool layout_item_proxy::operator==(const layout_item_proxy& aOther) const

@@ -43,6 +43,7 @@ namespace neogfx
         iOwner{ nullptr },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
+        iIgnoreVisibility{ false },
         iEnabled{ false },
         iMinimumSize{},
         iMaximumSize{},
@@ -57,6 +58,7 @@ namespace neogfx
         iOwner{ &aOwner },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
+        iIgnoreVisibility{ false },
         iEnabled{ false },
         iMinimumSize{},
         iMaximumSize{},
@@ -73,6 +75,7 @@ namespace neogfx
         iMargins{ neogfx::margins{} },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
+        iIgnoreVisibility{ false },
         iEnabled{ false },
         iMinimumSize{},
         iMaximumSize{},
@@ -188,12 +191,12 @@ namespace neogfx
 
     i_layout_item& layout::add(i_layout_item& aItem)
     {
-        return add(std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, &aItem});
+        return add(std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, & aItem});
     }
 
     i_layout_item& layout::add_at(item_index aPosition, i_layout_item& aItem)
     {
-        return add_at(aPosition, std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, &aItem});
+        return add_at(aPosition, std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, & aItem});
     }
 
     i_layout_item& layout::add(std::shared_ptr<i_layout_item> aItem)
@@ -314,7 +317,7 @@ namespace neogfx
     {
         return const_cast<i_widget&>(to_const(*this).get_widget_at(aIndex));
     }
-        
+
     const i_layout& layout::get_layout_at(item_index aIndex) const
     {
         if (aIndex >= iItems.size())
@@ -345,8 +348,8 @@ namespace neogfx
 
     bool layout::high_dpi() const
     {
-        return has_layout_owner() && layout_owner().has_surface() ? 
-            layout_owner().surface().ppi() >= 150.0 : 
+        return has_layout_owner() && layout_owner().has_surface() ?
+            layout_owner().surface().ppi() >= 150.0 :
             service<i_surface_manager>().display().metrics().ppi() >= 150.0;
     }
 
@@ -354,8 +357,8 @@ namespace neogfx
     {
         return default_dpi_scale_factor(
             has_layout_owner() && layout_owner().has_surface() ?
-                layout_owner().surface().ppi() : 
-                service<i_surface_manager>().display().metrics().ppi());
+            layout_owner().surface().ppi() :
+            service<i_surface_manager>().display().metrics().ppi());
     }
 
     bool layout::has_margins() const
@@ -395,7 +398,7 @@ namespace neogfx
     {
         if (iSpacing != aSpacing)
         {
-            iSpacing = (aSpacing != std::nullopt ? 
+            iSpacing = (aSpacing != std::nullopt ?
                 optional_size{ units_converter(*this).to_device_units(*aSpacing) } :
                 aSpacing);
             if (aUpdateLayout)
@@ -424,6 +427,21 @@ namespace neogfx
         {
             iAlignment = aAlignment;
             AlignmentChanged.trigger();
+            if (aUpdateLayout)
+                invalidate();
+        }
+    }
+
+    bool layout::ignore_visibility() const
+    {
+        return iIgnoreVisibility || (has_parent_layout() && parent_layout().ignore_visibility());
+    }
+
+    void layout::set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout)
+    {
+        if (iIgnoreVisibility != aIgnoreVisibility)
+        {
+            iIgnoreVisibility = aIgnoreVisibility;
             if (aUpdateLayout)
                 invalidate();
         }
@@ -728,7 +746,7 @@ namespace neogfx
     {
         uint32_t count = 0u;
         for (const auto& i : iItems)
-            if (i.visible())
+            if (i.visible() || ignore_visibility())
             {
                 if ((aItemType & ItemTypeWidget) && i.is_widget())
                     ++count;

@@ -38,7 +38,7 @@ namespace neogfx
         bool previousNonZeroSize = false;
         for (const auto& item : items())
         {
-            if (!item.visible())
+            if (!item.visible() && !ignore_visibility())
                 continue;
             auto itemMinimumSize = item.minimum_size(availableSpaceForChildren);
             if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
@@ -83,7 +83,7 @@ namespace neogfx
         point pos;
         for (const auto& item : items())
         {
-            if (!item.visible())
+            if (!item.visible() && !ignore_visibility())
                 continue;
             auto itemMaximumSize = item.maximum_size(availableSpaceForChildren);
             if (AxisPolicy::cx(itemMaximumSize) != size::max_dimension())
@@ -155,7 +155,7 @@ namespace neogfx
         typename AxisPolicy::minor_layout rows(*this);
         for (auto& item : *this)
         {
-            if (!item.visible())
+            if (!item.visible() && !ignore_visibility())
                 continue;
             if (&item == &items().back())
                 continue;

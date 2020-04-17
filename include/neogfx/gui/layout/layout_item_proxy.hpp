@@ -102,6 +102,7 @@ namespace neogfx
     private:
         std::shared_ptr<i_layout_item> iSubject;
         bool iSubjectIsProxy;
+        mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, size> iMinimumSize;
         mutable std::pair<uint32_t, size> iMaximumSize;
         mutable std::optional<const i_anchor_t<decltype(layout_item<i_layout>::MinimumSize)>*> iMinimumSizeAnchor;
