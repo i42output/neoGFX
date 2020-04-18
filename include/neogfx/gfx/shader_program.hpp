@@ -28,7 +28,7 @@
 namespace neogfx
 {
     template <typename Base = i_shader_program>
-    class shader_program : public neolib::reference_counted<Base>
+    class shader_program : public reference_counted<Base>
     {
     public:
         using i_shader_program::i_shader_t;

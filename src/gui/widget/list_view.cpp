@@ -26,8 +26,8 @@
 
 namespace neogfx
 {
-    list_view::list_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
-        item_view{ aScrollbarStyle, aFrameStyle },
+    list_view::list_view(bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        item_view{ aFrameStyle, aScrollbarStyle },
         iLayout{ *this },
         iSpacer{ iLayout }
     {
@@ -41,8 +41,8 @@ namespace neogfx
         }
     }
 
-    list_view::list_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
-        item_view{ aParent, aScrollbarStyle, aFrameStyle },
+    list_view::list_view(i_widget& aParent, bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        item_view{ aParent, aFrameStyle, aScrollbarStyle },
         iLayout{ *this },
         iSpacer{ iLayout }
     {
@@ -56,8 +56,8 @@ namespace neogfx
         }
     }
 
-    list_view::list_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
-        item_view{ aLayout, aScrollbarStyle, aFrameStyle },
+    list_view::list_view(i_layout& aLayout, bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        item_view{ aLayout, aFrameStyle, aScrollbarStyle },
         iLayout{ *this },
         iSpacer{ iLayout }
     {

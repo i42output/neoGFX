@@ -46,7 +46,7 @@ namespace neogfx
         User
     };
 
-    class i_shader_program : public neolib::i_reference_counted
+    class i_shader_program : public i_reference_counted
     {
         typedef i_shader_program self_type;
         // types

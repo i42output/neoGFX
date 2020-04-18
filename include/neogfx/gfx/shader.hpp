@@ -30,10 +30,10 @@ namespace neogfx
     #define cache_uniform( uniformName ) cached_uniform uniformName = { *this, #uniformName };
 
     template <typename Base>
-    class shader : public neolib::reference_counted<Base>
+    class shader : public reference_counted<Base>
     {
         typedef shader<Base> self_type;
-        typedef neolib::reference_counted<Base> base_type;
+        typedef reference_counted<Base> base_type;
     public:
         using typename base_type::abstract_type;
         typedef i_shader::value_type abstract_value_type;

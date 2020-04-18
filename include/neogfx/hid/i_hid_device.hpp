@@ -62,7 +62,7 @@ namespace neogfx
 
     typedef neolib::uuid hid_device_uuid;
 
-    class i_hid_device : public neolib::i_reference_counted
+    class i_hid_device : public i_reference_counted
     {
     public:
         declare_event(enabled)

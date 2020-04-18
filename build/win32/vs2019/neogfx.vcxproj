@@ -438,6 +438,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\dock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\dockable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_editor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model.hpp" />
@@ -681,6 +682,8 @@
     <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\default_skin.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\dock.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\dockable.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp" />

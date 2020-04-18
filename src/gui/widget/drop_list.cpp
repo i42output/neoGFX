@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     drop_list_view::drop_list_view(i_layout& aLayout, drop_list& aDropList) :
-        list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame, false },
+        list_view{ aLayout, false, frame_style::NoFrame },
         iDropList{ aDropList },
         iChangingText{ false }
     {

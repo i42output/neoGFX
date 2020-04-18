@@ -25,8 +25,8 @@
 
 namespace neogfx
 {
-    table_view::table_view(bool aCreateDefaultModels) :
-        item_view{},
+    table_view::table_view(bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        item_view{ aFrameStyle, aScrollbarStyle },
         iLayout{ *this },
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
@@ -40,8 +40,8 @@ namespace neogfx
         }
     }
 
-    table_view::table_view(i_widget& aParent, bool aCreateDefaultModels) :
-        item_view{ aParent },
+    table_view::table_view(i_widget& aParent, bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        item_view{ aParent, aFrameStyle, aScrollbarStyle },
         iLayout{ *this },
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
@@ -55,8 +55,8 @@ namespace neogfx
         }
     }
 
-    table_view::table_view(i_layout& aLayout, bool aCreateDefaultModels) :
-        item_view{ aLayout },
+    table_view::table_view(i_layout& aLayout, bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        item_view{ aLayout, aFrameStyle, aScrollbarStyle },
         iLayout{ *this },
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }

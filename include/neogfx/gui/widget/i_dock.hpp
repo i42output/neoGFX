@@ -21,7 +21,6 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/i_vector.hpp>
-#include <neolib/i_enum.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/i_dockable.hpp>
 
@@ -74,12 +73,21 @@ namespace neogfx
 {
     class i_dock : public virtual i_skinnable_item
     {
+        friend class dockable;
+    public:
+        struct item_not_found : std::logic_error { item_not_found() : std::logic_error{ "neogfx::i_dock::item_not_found" } {} };
+    public:
+        using item = i_ref_ptr<i_dockable>;
+        using item_list = neolib::i_vector<item>;
     public:
         virtual dock_area area() const = 0;
         virtual void set_area(dock_area aArea) = 0;
     public:
         virtual ~i_dock() = default;
     public:
-        virtual const neolib::i_vector<i_dockable>& items() const = 0;
+        virtual const item_list& items() const = 0;
+    private:
+        virtual void add(const item& aItem) = 0;
+        virtual void remove(const item& aItem) = 0;
     };
 }

@@ -40,6 +40,8 @@ namespace neogfx
 
     using neolib::to_const;
 
+    using neolib::i_reference_counted;
+    using neolib::reference_counted;
     using neolib::i_ref_ptr;
     using neolib::ref_ptr;
     using neolib::make_ref;

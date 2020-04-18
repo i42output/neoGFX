@@ -29,9 +29,9 @@ namespace neogfx
     class tree_view : public list_view
     {
     public:
-        tree_view(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
-        tree_view(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
-        tree_view(i_layout& aLayout, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame, bool aCreateDefaultModels = true);
+        tree_view(bool aCreateDefaultModels = true, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        tree_view(i_widget& aParent, bool aCreateDefaultModels = true, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        tree_view(i_layout& aLayout, bool aCreateDefaultModels = true, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
         ~tree_view();
     };
 }

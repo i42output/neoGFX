@@ -174,7 +174,7 @@ namespace neogfx
     };
 
     text_edit::text_edit(type_e aType, frame_style aFrameStyle) :
-        scrollable_widget{ aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        scrollable_widget{ aFrameStyle, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible},
         iType{ aType },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -193,7 +193,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_widget& aParent, type_e aType, frame_style aFrameStyle) :
-        scrollable_widget{ aParent, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        scrollable_widget{ aParent, aFrameStyle, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible },
         iType{ aType },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -212,7 +212,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_layout& aLayout, type_e aType, frame_style aFrameStyle) :
-        scrollable_widget{ aLayout, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        scrollable_widget{ aLayout, aFrameStyle, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible },
         iType{ aType },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },

@@ -120,7 +120,7 @@ namespace neogfx
         vertical_layout iLayout0;
         tab_container iTabContainer;
         horizontal_layout iLayout1;
-        std::vector<std::shared_ptr<i_controller>> iControllers;
         neogfx::view_stack iViewStack;
+        std::vector<std::shared_ptr<i_controller>> iControllers;
     };
 }

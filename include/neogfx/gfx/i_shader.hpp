@@ -417,7 +417,7 @@ namespace neogfx
     class i_rendering_context;
     class i_shader_program;
 
-    class i_shader : public neolib::i_reference_counted
+    class i_shader : public i_reference_counted
     {
         typedef i_shader self_type;
     public:

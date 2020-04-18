@@ -28,6 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/toolbar.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
 #include <neogfx/gui/view/view_container.hpp>
+#include <neogfx/gui/widget/dock.hpp>
+#include <neogfx/gui/widget/dockable.hpp>
+#include <neogfx/gui/widget/table_view.hpp>
 #include <neogfx/core/css.hpp>
 #include "new_project_dialog.hpp"
 
@@ -45,6 +48,13 @@ int main(int argc, char* argv[])
         app.current_style().set_spacing(ng::size{ 4.0 });
 
         ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect().extents() * ng::size{ 0.5, 0.5 } };
+
+        ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
+        ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right };
+
+        auto properties = ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        properties.dock(rightDock);
+
         ng::i_layout& mainLayout = mainWindow.client_layout();
         mainLayout.set_margins(ng::margins{});
         mainLayout.set_spacing(ng::size{});

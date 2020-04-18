@@ -26,8 +26,8 @@
 
 namespace neogfx
 {
-    tree_view::tree_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
-        list_view{ aScrollbarStyle, aFrameStyle, false }
+    tree_view::tree_view(bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        list_view{ false, aFrameStyle, aScrollbarStyle }
     {
         if (aCreateDefaultModels)
         {
@@ -37,8 +37,8 @@ namespace neogfx
         }
     }
 
-    tree_view::tree_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
-        list_view{ aParent, aScrollbarStyle, aFrameStyle, false }
+    tree_view::tree_view(i_widget& aParent, bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        list_view{ aParent, false, aFrameStyle, aScrollbarStyle }
     {
         if (aCreateDefaultModels)
         {
@@ -48,8 +48,8 @@ namespace neogfx
         }
     }
 
-    tree_view::tree_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
-        list_view{ aLayout, aScrollbarStyle, aFrameStyle, false }
+    tree_view::tree_view(i_layout& aLayout, bool aCreateDefaultModels, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        list_view{ aLayout, false, aFrameStyle, aScrollbarStyle }
     {
         if (aCreateDefaultModels)
         {

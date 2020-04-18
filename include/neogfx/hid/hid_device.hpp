@@ -27,7 +27,7 @@
 namespace neogfx
 {
     template <typename HidInterface>
-    class hid_device : public neolib::reference_counted<HidInterface>
+    class hid_device : public reference_counted<HidInterface>
     {
     public:
         define_declared_event(Enabled, enabled)

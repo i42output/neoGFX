@@ -53,9 +53,9 @@ namespace neogfx
         struct unknown_editor_type : std::logic_error { unknown_editor_type() : std::logic_error("neogfx::item_view::unknown_editor_type") {} };
         struct invalid_cell_part : std::logic_error { invalid_cell_part() : std::logic_error("neogfx::item_view::invalid_cell_part") {} };
     public:
-        item_view(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
-        item_view(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
-        item_view(i_layout& aLayout, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
+        item_view(frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        item_view(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        item_view(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
         ~item_view();
     public:
         bool has_model() const;

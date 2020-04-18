@@ -30,18 +30,18 @@ namespace neogfx
     }
 
     tab_page::tab_page(i_tab_page_container& aContainer, i_tab& aTab) :
-        scrollable_widget{ aContainer.page_layout(), scrollbar_style::Normal, frame_style::ContainerFrame }, iTab{ aTab }
+        scrollable_widget{ aContainer.page_layout(), frame_style::ContainerFrame }, iTab{ aTab }
     {
         aContainer.add_tab_page(aTab, *this);
     }
 
     tab_page::tab_page(i_widget& aParent, i_tab& aTab) :
-        scrollable_widget{ aParent, scrollbar_style::Normal, frame_style::ContainerFrame }, iTab{ aTab }
+        scrollable_widget{ aParent, frame_style::ContainerFrame }, iTab{ aTab }
     {
     }
 
     tab_page::tab_page(i_layout& aLayout, i_tab& aTab) :
-        scrollable_widget{ aLayout, scrollbar_style::Normal, frame_style::ContainerFrame }, iTab{ aTab }
+        scrollable_widget{ aLayout, frame_style::ContainerFrame }, iTab{ aTab }
     {
     }
 

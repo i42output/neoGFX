@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    scrollable_widget::scrollable_widget(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+    scrollable_widget::scrollable_widget(frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
         framed_widget{ aFrameStyle },
         iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
@@ -34,7 +34,7 @@ namespace neogfx
             init_scrollbars();
     }
     
-    scrollable_widget::scrollable_widget(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+    scrollable_widget::scrollable_widget(i_widget& aParent, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
         framed_widget{ aParent, aFrameStyle },
         iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
@@ -44,7 +44,7 @@ namespace neogfx
             init_scrollbars();
     }
     
-    scrollable_widget::scrollable_widget(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+    scrollable_widget::scrollable_widget(i_layout& aLayout, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
         framed_widget{ aLayout, aFrameStyle },
         iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },

@@ -145,7 +145,7 @@ namespace neogfx
     };
 
     window::client::client(i_layout& aLayout, scrollbar_style aScrollbarStyle) :
-        scrollable_widget{ aLayout, aScrollbarStyle, frame_style::NoFrame },
+        scrollable_widget{ aLayout, frame_style::NoFrame, aScrollbarStyle },
         iLayout{ *this }
     {
         set_margins(neogfx::margins{});
@@ -180,43 +180,43 @@ namespace neogfx
         return true;
     }
 
-    window::window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) : 
-        window{ nullptr, window_placement::default_placement(), {}, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) : 
+        window{ nullptr, window_placement::default_placement(), {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(const window_placement& aPlacement, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        window{ nullptr, aPlacement, {}, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(const window_placement& aPlacement, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        window{ nullptr, aPlacement, {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        window{ nullptr, aPlacement, aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        window{ nullptr, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        window{ nullptr, window_placement::default_placement(), aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        window{ nullptr, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        window{ &aParent, window_placement::default_placement(), {}, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(i_widget& aParent, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        window{ &aParent, window_placement::default_placement(), {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        window{ &aParent, aPlacement, {}, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        window{ &aParent, aPlacement, {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        window{ &aParent, aPlacement, aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        window{ &aParent, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        window{ &aParent, window_placement::default_placement(), aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
+    window::window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        window{ &aParent, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
@@ -227,8 +227,8 @@ namespace neogfx
         set_destroyed();
     }
 
-    window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        scrollable_widget{ aScrollbarStyle, aFrameStyle },
+    window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        scrollable_widget{ aFrameStyle, aScrollbarStyle },
         iWindowManager{ service<i_window_manager>() },
         iParentWindow{ nullptr },
         iPlacement{ aPlacement },
@@ -942,14 +942,19 @@ namespace neogfx
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
             iTitleBar.emplace(*this, title_bar_layout(), service<i_app>().default_window_icon(), title_text());
 
-        set_margins(neogfx::margins{});
+        set_margins({});
         iNonClientLayout.set_margins(neogfx::margins{});
         iNonClientLayout.set_spacing(size{});
         iTitleBarLayout.set_margins(neogfx::margins{});
         iMenuLayout.set_margins(neogfx::margins{});
         iToolbarLayout.set_margins(neogfx::margins{});
         iDockLayout.set_margins(neogfx::margins{});
-        iClientLayout.set_margins(neogfx::optional_margins{});
+        iDockLayout.top().set_margins(neogfx::margins{});
+        iDockLayout.bottom().set_margins(neogfx::margins{});
+        iDockLayout.left().set_margins(neogfx::margins{});
+        iDockLayout.right().set_margins(neogfx::margins{});
+        iDockLayout.centre().set_margins(neogfx::margins{});
+        iClientLayout.set_margins(neogfx::margins{});
         iStatusBarLayout.set_margins(neogfx::margins{});
 
         if (!is_nested())
@@ -1069,14 +1074,25 @@ namespace neogfx
         return iToolbarLayout.part(aPosition);
     }
 
-    const i_layout& window::dock_layout(layout_position aPosition) const
+    const i_layout& window::dock_layout(dock_area aDockArea) const
     {
-        return iDockLayout.part(aPosition);
+        switch (aDockArea)
+        {
+        case dock_area::Top:
+            return iDockLayout.part(layout_position::Top);
+        case dock_area::Bottom:
+            return iDockLayout.part(layout_position::Bottom);
+        case dock_area::Left:
+        default:
+            return iDockLayout.part(layout_position::Left);
+        case dock_area::Right:
+            return iDockLayout.part(layout_position::Right);
+        }
     }
 
-    i_layout& window::dock_layout(layout_position aPosition)
+    i_layout& window::dock_layout(dock_area aDockArea)
     {
-        return iDockLayout.part(aPosition);
+        return const_cast<i_layout&>(to_const(*this).dock_layout(aDockArea));
     }
 
     const i_layout& window::client_layout() const

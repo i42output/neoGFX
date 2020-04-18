@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     view_stack::view_stack(i_layout& aLayout, i_view_container& aParent) :
-        scrollable_widget{ aLayout, scrollbar_style::Normal, frame_style::NoFrame }, iLayout{ *this }, iParent{ aParent }
+        scrollable_widget{ aLayout, frame_style::NoFrame }, iLayout{ *this }, iParent{ aParent }
     {
         set_margins(neogfx::margins{});
         iLayout.set_margins(neogfx::margins{});

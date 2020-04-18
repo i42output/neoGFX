@@ -55,9 +55,9 @@ namespace neogfx
             UsvStageDone
         };
     public:
-        scrollable_widget(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
-        scrollable_widget(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
-        scrollable_widget(i_layout& aLayout, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
+        scrollable_widget(frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        scrollable_widget(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        scrollable_widget(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
         ~scrollable_widget();
         scrollable_widget(const scrollable_widget&) = delete;
     public:

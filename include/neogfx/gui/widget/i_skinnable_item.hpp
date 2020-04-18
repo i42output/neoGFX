@@ -63,6 +63,8 @@ namespace neogfx
     class i_skinnable_item
     {
     public:
+        virtual ~i_skinnable_item() = default;
+    public:
         virtual bool is_widget() const = 0;
         virtual const i_widget& as_widget() const = 0;
     public:

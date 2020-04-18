@@ -28,20 +28,20 @@
 
 namespace neogfx
 {
-    item_view::item_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        scrollable_widget{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+    item_view::item_view(frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        scrollable_widget{ aFrameStyle, aScrollbarStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
     {
         init();
     }
 
-    item_view::item_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        scrollable_widget{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+    item_view::item_view(i_widget& aParent, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        scrollable_widget{ aParent, aFrameStyle, aScrollbarStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
     {
         init();
     }
 
-    item_view::item_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-        scrollable_widget{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+    item_view::item_view(i_layout& aLayout, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+        scrollable_widget{ aLayout, aFrameStyle, aScrollbarStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
     {
         init();
     }
