@@ -70,6 +70,7 @@ Group Box                       | 100     |
 Tool Tips                       | 0       |
 Status Bar                      | 100     |
 Progress Bar                    | 0       |
+Docks							| 10      |
 Font Picker                     | 100     |
 Colour Gradient Selector        | 95      |     Swatch library
 Colour Picker                   | 95      |     Eyedropper tool
@@ -80,6 +81,7 @@ UI/Resource Description (RJSON) | 40      |
 tool: neoGFX Design Studio      | 0       |
 i18n                            | 40      |
 l10n                            | 0       |     UK English, US English, French, German, Chinese
+HID: Game Controllers           | 80      |     Calibration/settings UI; DirectInput button mapping
 Skins                           | 40      |
 
-Last updated: 23/02/2020
+Last updated: 18/04/2020
