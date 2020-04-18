@@ -438,6 +438,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\dockable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_editor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp" />
@@ -452,6 +453,8 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_basic_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dock.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dockable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_document.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_presentation_model.hpp" />
