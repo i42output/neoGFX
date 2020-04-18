@@ -15,7 +15,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - sub-pixel text rendering;
 - simple window style for specifying that a window is "nested" rather than being a separate native desktop window;
 - "text_edit" widget supports multiple fonts, text colours (with optional gradient effects), colour emojis and rendering text in columns;
-- "Green" and "Arcade" modes to optimize CPU power consumption, #ClimateChange
+- "Green" and "Arcade" modes to optimize CPU power consumption, fight #ClimateChange!
 - GPU shader rendered CSS3 compliant gradients with optional gaussian smoothing;
 - MVC (model-view-controller) related classes supporting robust and fast app design;
 - optional MDI support utilizing "nested" windows;
