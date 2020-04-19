@@ -27,14 +27,14 @@
 namespace neogfx
 {
     dock::dock(i_widget& aParent, dock_area aArea) :
-        framed_widget{ aParent }, iArea { aArea }
+        widget{ aParent }, iArea { aArea }
     {
         set_margins(neogfx::margins{});
         update_layout();
     }
 
     dock::dock(i_layout& aLayout, dock_area aArea) :
-        framed_widget{ aLayout }, iArea{ aArea }
+        widget{ aLayout }, iArea{ aArea }
     {
         set_margins(neogfx::margins{});
         update_layout();
@@ -57,11 +57,6 @@ namespace neogfx
     const dock::item_list& dock::items() const
     {
         return iItems;
-    }
-
-    color dock::frame_color() const
-    {
-        return has_frame_color() ? framed_widget::frame_color() : framed_widget::frame_color().shade(0x40);
     }
 
     void dock::add(const abstract_item& aItem)
@@ -93,6 +88,22 @@ namespace neogfx
             set_layout(std::make_shared<horizontal_layout>());
         else
             set_layout(std::make_shared<vertical_layout>());
-        layout().set_margins(neogfx::margins{});
+        layout().set_margins(neogfx::margins{ 1.5_mm });
+        layout().set_spacing(neogfx::size{ 1.5_mm });
+        layout().set_size_policy(neogfx::size_constraint::Expanding);
     }
+
+    bool dock::transparent_background() const
+    {
+        return false;
+    }
+
+    color dock::background_color() const
+    {
+        if (has_background_color())
+            return widget::background_color();
+        else
+            return container_background_color();
+    }
+
 }

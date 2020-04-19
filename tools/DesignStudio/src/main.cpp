@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neogfx/neogfx.hpp>
+#include "DesignStudio.hpp"
 #include <fstream>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -30,21 +30,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/view/view_container.hpp>
 #include <neogfx/gui/widget/dock.hpp>
 #include <neogfx/gui/widget/dockable.hpp>
-#include <neogfx/gui/widget/table_view.hpp>
+#include <neogfx/gui/widget/tree_view.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/core/css.hpp>
 #include "new_project_dialog.hpp"
 
-namespace ng = neogfx;
-using namespace ng::unit_literals;
 
 int main(int argc, char* argv[])
 {
     ng::app app(argc, argv, "neoGFX Design Studio");
     try
     {
-        ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
-        
-        app.current_style().palette().set_color(ng::color_role::Theme, ng::color{ 64, 64, 64 });
+        app.current_style().palette().set_color(ng::color_role::Theme, ng::color{ 48, 48, 48 });
         app.current_style().set_spacing(ng::size{ 4.0 });
 
         ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect().extents() * ng::size{ 0.5, 0.5 } };
@@ -52,7 +50,9 @@ int main(int argc, char* argv[])
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right };
 
-        auto properties = ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        auto objects = ng::make_dockable<ng::tree_view>("Objects"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        auto properties = ng::make_dockable<ng::tree_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        objects.dock(rightDock);
         properties.dock(rightDock);
 
         ng::i_layout& mainLayout = mainWindow.client_layout();
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 
         app.action_file_new().triggered([&]()
         {
-            neogui::new_project_dialog dialog{ mainWindow };
+            design_studio::new_project_dialog dialog{ mainWindow };
             if (dialog.exec() == ng::dialog_result::Accepted)
             {
                 // todo

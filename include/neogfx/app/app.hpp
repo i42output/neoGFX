@@ -48,7 +48,7 @@ namespace neogfx
         program_options(int argc, char* argv[]);
     public:
         const boost::program_options::variables_map& options() const override;
-        bool debug() const override;
+        bool console() const override;
         neogfx::renderer renderer() const override;
         std::optional<size_u32> full_screen() const override;
         bool double_buffering() const override;

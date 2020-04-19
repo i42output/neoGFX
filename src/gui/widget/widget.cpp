@@ -909,6 +909,8 @@ namespace neogfx
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
+        if (debug == this)
+            std::cerr << "widget::maximum_size(...)" << std::endl;
         if (has_maximum_size())
             return units_converter(*this).from_device_units(*MaximumSize);
         else if (size_policy() == size_constraint::Minimum || size_policy() == size_constraint::Fixed)
@@ -1025,14 +1027,13 @@ namespace neogfx
         if (!requires_update())
             return;
 
-        if (debug == this)
-            std::cerr << "widget::render(...)" << std::endl;
-
         iDefaultClipRect = std::make_pair(std::nullopt, std::nullopt);
 
         const rect updateRect = update_rect();
-
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
+
+        if (debug == this)
+            std::cerr << "widget::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 
         aGraphicsContext.set_extents(extents());
         aGraphicsContext.set_origin(origin());
@@ -1233,7 +1234,7 @@ namespace neogfx
                 parent_layout().invalidate();
             if (effectively_hidden())
             {
-                if (root().has_focused_widget() &&
+                if (has_root() && root().has_focused_widget() &&
                     (root().focused_widget().is_descendent_of(*this) || &root().focused_widget() == this))
                 {
                     root().release_focused_widget(root().focused_widget());
@@ -1287,7 +1288,7 @@ namespace neogfx
 
     bool widget::entered() const
     {
-        return root().has_entered_widget() && &root().entered_widget() == this;
+        return has_root() && root().has_entered_widget() && &root().entered_widget() == this;
     }
 
     bool widget::can_capture() const
@@ -1399,6 +1400,11 @@ namespace neogfx
     bool widget::has_focus() const
     {
         return has_root() && root().is_active() && root().has_focused_widget() && &root().focused_widget() == this;
+    }
+
+    bool widget::child_has_focus() const
+    {
+        return has_root() && root().is_active() && root().has_focused_widget() && root().focused_widget().is_descendent_of(*this);
     }
 
     void widget::set_focus(focus_reason aFocusReason)

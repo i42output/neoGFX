@@ -19,11 +19,11 @@
 
 #pragma once
 
-#include <neogfx/neogfx.hpp>
+#include "DesignStudio.hpp"
 #include <neolib/string_utils.hpp>
 #include "symbol.hpp"
 
-namespace neogui
+namespace design_studio
 {
     enum class naming_convention
     {

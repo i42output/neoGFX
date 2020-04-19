@@ -209,9 +209,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\DesignStudio.hpp" />
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
-    <ClInclude Include="symbol.hpp" />
+    <ClInclude Include="..\..\..\src\symbol.hpp" />
+    <ClInclude Include="..\..\..\src\widget.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\resources\win32\DesignStudio.rc" />

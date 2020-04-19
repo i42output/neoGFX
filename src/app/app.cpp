@@ -43,7 +43,7 @@ namespace neogfx
     {
         boost::program_options::options_description description{ "Allowed options" };
         description.add_options()
-            ("debug", "open debug console")
+            ("console", "open console")
             ("fullscreen", boost::program_options::value<std::string>()->implicit_value(""s), "run full screen")
             ("nest", "display child windows nested within main window rather than using the main desktop")
             ("vulkan", "use Vulkan renderer")
@@ -60,9 +60,9 @@ namespace neogfx
         return iOptions;
     }
 
-    bool program_options::debug() const
+    bool program_options::console() const
     {
-        return options().count("debug") == 1;
+        return options().count("console") == 1;
     }
 
     neogfx::renderer program_options::renderer() const
@@ -122,7 +122,7 @@ namespace neogfx
         if (sFirstInstance == &aApp)
         {
 #if defined(_WIN32)
-            if (aProgramOptions.debug())
+            if (aProgramOptions.console())
             {
                 AllocConsole();
                 freopen("CONOUT$", "w", stdout);

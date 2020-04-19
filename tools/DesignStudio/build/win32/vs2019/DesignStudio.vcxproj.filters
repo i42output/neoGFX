@@ -38,7 +38,13 @@
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="symbol.hpp">
+    <ClInclude Include="..\..\..\src\widget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\DesignStudio.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\symbol.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

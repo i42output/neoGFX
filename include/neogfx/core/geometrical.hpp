@@ -169,6 +169,8 @@ namespace neogfx
         return ret;
     }
 
+    struct bad_size : std::logic_error { bad_size() : std::logic_error{ "neogfx::bad_size" } {} };
+
     template <typename CoordinateType>
     class basic_size 
     { 
@@ -192,29 +194,31 @@ namespace neogfx
         constexpr basic_size(const basic_delta<CoordinateType>& other) : cx{ other.dx }, cy{ other.dy } {}
         // operations
     public:
-        basic_vector<dimension_type, 2> to_vec2() const { return basic_vector<dimension_type, 2>{ cx, cy }; }
-        basic_vector<dimension_type, 3> to_vec3() const { return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
+        basic_vector<dimension_type, 2> to_vec2() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 2>{ cx, cy }; }
+        basic_vector<dimension_type, 3> to_vec3() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
         delta_type to_delta() const { return delta_type(cx, cy); }
         bool empty() const { return cx == 0 || cy == 0; }
         bool operator==(const basic_size& other) const { return cx == other.cx && cy == other.cy; }
         bool operator!=(const basic_size& other) const { return !operator==(other); }
-        basic_size operator-() const { return basic_size{ -cx, -cy }; }
-        basic_size& operator+=(const basic_size& other) { cx += other.cx; cy += other.cy; return *this; }
-        basic_size& operator+=(const basic_delta<CoordinateType>& other) { cx += other.dx; cy += other.dy; return *this; }
-        basic_size& operator+=(dimension_type amount) { cx += amount; cy += amount; return *this; }
-        basic_size& operator-=(const basic_size& other) { cx -= other.cx; cy -= other.cy; return *this; }
-        basic_size& operator-=(const basic_delta<CoordinateType>& other) { cx -= other.dx; cy -= other.dy; return *this; }
-        basic_size& operator-=(dimension_type amount) { cx -= amount; cy -= amount; return *this; }
-        basic_size& operator*=(const basic_size& other) { cx *= other.cx; cy *= other.cy; return *this; }
-        basic_size& operator*=(dimension_type amount) { cx *= amount; cy *= amount; return *this; }
-        basic_size& operator/=(const basic_size& other) { cx /= other.cx; cy /= other.cy; return *this; }
-        basic_size& operator/=(dimension_type amount) { cx /= amount; cy /= amount; return *this; }
-        basic_size ceil() const { return basic_size(std::ceil(cx), std::ceil(cy)); }
-        basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
-        basic_size round() const { return basic_size(std::round(cx), std::round(cy)); }
+        basic_size operator-() const { throw_on_bad_size(*this); return basic_size{ -cx, -cy }; }
+        basic_size& operator+=(const basic_size& other) { throw_on_bad_size(other);  cx += other.cx; cy += other.cy; return *this; }
+        basic_size& operator+=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx += other.dx; cy += other.dy; return *this; }
+        basic_size& operator+=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx += amount; cy += amount; return *this; }
+        basic_size& operator-=(const basic_size& other) { throw_on_bad_size(other); cx -= other.cx; cy -= other.cy; return *this; }
+        basic_size& operator-=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx -= other.dx; cy -= other.dy; return *this; }
+        basic_size& operator-=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx -= amount; cy -= amount; return *this; }
+        basic_size& operator*=(const basic_size& other) { throw_on_bad_size(other); cx *= other.cx; cy *= other.cy; return *this; }
+        basic_size& operator*=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx *= amount; cy *= amount; return *this; }
+        basic_size& operator/=(const basic_size& other) { throw_on_bad_size(other); cx /= other.cx; cy /= other.cy; return *this; }
+        basic_size& operator/=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx /= amount; cy /= amount; return *this; }
+        basic_size ceil() const { return basic_size{ cx != max_dimension() ? std::ceil(cx) : cx, cy != max_dimension() ? std::ceil(cy) : cy }; }
+        basic_size floor() const { return basic_size{ cx != max_dimension() ? std::floor(cx) : cx, cy != max_dimension() ? std::floor(cy) : cy }; }
+        basic_size round() const { return basic_size{ cx != max_dimension() ? std::round(cx) : cx, cy != max_dimension() ? std::round(cy) : cy }; }
         basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
         basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
-        dimension_type magnitude() const { return std::sqrt(cx * cx + cy * cy); }
+        dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
+    private:
+        void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx == max_dimension()) || (rhs.cy != 0.0 && cy == max_dimension())) throw bad_size(); }
         // helpers
     public:
         static constexpr dimension_type max_dimension() { return std::numeric_limits<dimension_type>::max(); }

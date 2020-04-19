@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <neogfx/neogfx.hpp>
+#include "DesignStudio.hpp"
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/label.hpp>
@@ -27,9 +27,9 @@
 #include <neogfx/gui/widget/group_box.hpp>
 #include "symbol.hpp"
 
-namespace neogui
+namespace design_studio
 {
-    class new_project_dialog : public neogfx::dialog
+    class new_project_dialog : public ng::dialog
     {
     public:
         enum result_code_e
@@ -39,7 +39,7 @@ namespace neogui
         };
     public:
         new_project_dialog(i_widget& aParent) :
-            dialog{ aParent, "New Project"_t, neogfx::window_style::Modal | neogfx::window_style::TitleBar | neogfx::window_style::Close },
+            dialog{ aParent, "New Project"_t, ng::window_style::Modal | ng::window_style::TitleBar | ng::window_style::Close },
             iNamingConvention{ naming_convention::NeoGfx },
             iLayout0{ client_layout() }, iLayout01{ iLayout0 }, iLayout1{ iLayout01 }, iLayout2{ iLayout01 }, 
             iType{ iLayout1, "Project Type"_t }, iDefaults{ iLayout2, "Project Defaults"_t },
@@ -64,14 +64,14 @@ namespace neogui
             iSpacer1{ iLayout1 },
             iSpacer2{ iLayout2 }
         {
-            button_box().add_button(neogfx::standard_button::Ok);
-            button_box().add_button(neogfx::standard_button::Cancel);
+            button_box().add_button(ng::standard_button::Ok);
+            button_box().add_button(ng::standard_button::Cancel);
             iNew2DGame.enable(false);
             iNew25DGame.enable(false);
             iNew3DGame.enable(false);
-            iName.set_size_hint(neogfx::size_hint{ "Medium sized project name" });
+            iName.set_size_hint(ng::size_hint{ "Medium sized project name" });
             iName.set_focus();
-            iNamespace.set_size_hint(neogfx::size_hint{ "Medium sized namespace name" });
+            iNamespace.set_size_hint(ng::size_hint{ "Medium sized namespace name" });
             centre_on_parent();
             auto updateNamespace = [this]()
             {
@@ -102,31 +102,31 @@ namespace neogui
         }
     private:
         naming_convention iNamingConvention;
-        neogfx::vertical_layout iLayout0;
-        neogfx::horizontal_layout iLayout01;
-        neogfx::vertical_layout iLayout1;
-        neogfx::vertical_layout iLayout2;
-        neogfx::group_box iType;
-        neogfx::radio_button iNewApp;
-        neogfx::radio_button iNewMVCApp;
-        neogfx::radio_button iNewDialogApp;
-        neogfx::radio_button iNew2DGame;
-        neogfx::radio_button iNew25DGame;
-        neogfx::radio_button iNew3DGame;
-        neogfx::group_box iDefaults;
-        neogfx::horizontal_layout iLayout3;
-        neogfx::label iNameLabel;
-        neogfx::line_edit iName;
-        neogfx::horizontal_layout iLayout4;
-        neogfx::label iNamespaceLabel;
-        neogfx::line_edit iNamespace;
-        neogfx::group_box iSourceCode;
-        neogfx::radio_button iLowerCaseWithUnderscores;
-        neogfx::radio_button iMixedCaseWithUnderscores;
-        neogfx::radio_button iUpperCamelCase;
-        neogfx::radio_button iLowerCamelCase;
-        neogfx::radio_button iNeoGfx;
-        neogfx::vertical_spacer iSpacer1;
-        neogfx::vertical_spacer iSpacer2;
+        ng::vertical_layout iLayout0;
+        ng::horizontal_layout iLayout01;
+        ng::vertical_layout iLayout1;
+        ng::vertical_layout iLayout2;
+        ng::group_box iType;
+        ng::radio_button iNewApp;
+        ng::radio_button iNewMVCApp;
+        ng::radio_button iNewDialogApp;
+        ng::radio_button iNew2DGame;
+        ng::radio_button iNew25DGame;
+        ng::radio_button iNew3DGame;
+        ng::group_box iDefaults;
+        ng::horizontal_layout iLayout3;
+        ng::label iNameLabel;
+        ng::line_edit iName;
+        ng::horizontal_layout iLayout4;
+        ng::label iNamespaceLabel;
+        ng::line_edit iNamespace;
+        ng::group_box iSourceCode;
+        ng::radio_button iLowerCaseWithUnderscores;
+        ng::radio_button iMixedCaseWithUnderscores;
+        ng::radio_button iUpperCamelCase;
+        ng::radio_button iLowerCamelCase;
+        ng::radio_button iNeoGfx;
+        ng::vertical_spacer iSpacer1;
+        ng::vertical_spacer iSpacer2;
     };
 }

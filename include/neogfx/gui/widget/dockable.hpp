@@ -20,11 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/timer.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 #include <neogfx/gui/widget/i_dockable.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
+#include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
 
 namespace neogfx
 {
@@ -32,13 +35,32 @@ namespace neogfx
     {
     public:
         dockable_title_bar(i_dockable& aDockable);
+    protected:
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+    protected:
+        bool transparent_background() const override;
+    protected:
+        color background_color() const override;
+    protected:
+        neogfx::focus_policy focus_policy() const override;
+    private:
+        void update_textures();
     private:
         i_dockable& iDockable;
+        neolib::callback_timer iUpdater;
         horizontal_layout iLayout;
         label iTitle;
+        horizontal_spacer iSpacer;
+        push_button iPinButton;
+        push_button iUnpinButton;
+        push_button iCloseButton;
+        sink iSink;
+        mutable std::optional<std::pair<color, texture>> iPinTexture;
+        mutable std::optional<std::pair<color, texture>> iUnpinTexture;
+        mutable std::optional<std::pair<color, texture>> iCloseTexture;
     };
 
-    class dockable : public widget, public reference_counted<i_dockable>
+    class dockable : public framed_widget, public reference_counted<i_dockable>
     {
     public:
         define_declared_event(Docked, docked, i_dock&)
@@ -57,6 +79,8 @@ namespace neogfx
         i_widget& as_widget() override;
         const i_widget& docked_widget() const override;
         i_widget& docked_widget() override;
+    protected:
+        color frame_color() const override;
     private:
         neolib::string iTitle;
         dock_area iAcceptableDocks;

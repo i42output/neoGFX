@@ -21,12 +21,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/vector.hpp>
-#include <neogfx/gui/widget/framed_widget.hpp>
+#include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 
 namespace neogfx
 {
-    class dock : public framed_widget, public i_dock
+    class dock : public widget, public i_dock
     {
     public:
         using item = ref_ptr<i_dockable>;
@@ -41,13 +41,14 @@ namespace neogfx
         void set_area(dock_area aArea) override;
     public:
         const item_list& items() const override;
-    protected:
-        color frame_color() const override;
     private:
         void add(const abstract_item& aItem) override;
         void remove(const abstract_item& aItem) override;
     private:
         void update_layout();
+    protected:
+        bool transparent_background() const override;
+        color background_color() const override;
     private:
         dock_area iArea;
         item_list iItems;
