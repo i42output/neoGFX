@@ -113,13 +113,13 @@ namespace neogfx
     class size_policy
     {
     public:
-        struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("size_policy::no_aspect_ratio") {} };
+        struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("neogfx::size_policy::no_aspect_ratio") {} };
     public:
-        size_policy(size_constraint aConstraint, const optional_size& aAspectRatio = optional_size{}) :
+        size_policy(size_constraint aConstraint, const optional_size& aAspectRatio = {}) :
             iHorizontalConstraint{ aConstraint }, iVerticalConstraint{ aConstraint }, iAspectRatio{ aAspectRatio }
         {
         }
-        size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, const optional_size& aAspectRatio = optional_size{}) :
+        size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, const optional_size& aAspectRatio = {}) :
             iHorizontalConstraint{ aHorizontalConstraint }, iVerticalConstraint{ aVerticalConstraint }, iAspectRatio{ aAspectRatio }
         {
         }
@@ -195,6 +195,8 @@ namespace neogfx
     class i_geometry : public i_units_context
     {
     public:
+        struct no_fixed_size : std::logic_error { no_fixed_size() : std::logic_error("neogfx::i_geometry::no_fixed_size") {} };
+    public:
         virtual point position() const = 0;
         virtual void set_position(const point& aPosition) = 0;
         virtual size extents() const = 0;
@@ -206,11 +208,14 @@ namespace neogfx
         virtual size weight() const = 0;
         virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) = 0;
         virtual bool has_minimum_size() const = 0;
-        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const = 0;
+        virtual size minimum_size(const optional_size& aAvailableSpace = {}) const = 0;
         virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) = 0;
         virtual bool has_maximum_size() const = 0;
-        virtual size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const = 0;
+        virtual size maximum_size(const optional_size& aAvailableSpace = {}) const = 0;
         virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) = 0;
+        virtual bool has_fixed_size() const = 0;
+        virtual size fixed_size() const = 0;
+        virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) = 0;
     public:
         virtual bool has_margins() const = 0;
         virtual neogfx::margins margins() const = 0;
@@ -232,11 +237,6 @@ namespace neogfx
         void set_size_policy(neogfx::size_constraint aHorizontalConstraint, neogfx::size_constraint aVerticalConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
         {
             set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint, aAspectRatio }, aUpdateLayout);
-        }
-        void set_fixed_size(const size& aSize, bool aUpdateLayout = true)
-        {
-            set_minimum_size(aSize, aUpdateLayout);
-            set_maximum_size(aSize, aUpdateLayout);
         }
         void set_minimum_width(dimension aWidth, bool aUpdateLayout = true)
         {
@@ -262,6 +262,24 @@ namespace neogfx
             newSize.cy = aHeight;
             set_maximum_size(newSize, aUpdateLayout);
         }
+    };
+
+    class scoped_fixed_size_suppression
+    {
+    public:
+        scoped_fixed_size_suppression(i_geometry& aGeometry) :
+            iGeometry{ aGeometry },
+            iFixedSize{ aGeometry.has_fixed_size() ? aGeometry.fixed_size() : std::optional<size>{} }
+        {
+            iGeometry.set_fixed_size({}, false);
+        }
+        ~scoped_fixed_size_suppression()
+        {
+            iGeometry.set_fixed_size(iFixedSize, false);
+        }
+    private:
+        i_geometry& iGeometry;
+        std::optional<size> iFixedSize;
     };
 
     struct size_hint

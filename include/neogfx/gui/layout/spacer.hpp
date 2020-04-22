@@ -81,6 +81,9 @@ namespace neogfx
         bool has_maximum_size() const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
+        bool has_fixed_size() const override;
+        size fixed_size() const override;
+        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
         neogfx::margins margins() const override;
         bool has_margins() const override;
@@ -99,6 +102,7 @@ namespace neogfx
         optional_size_policy iSizePolicy;
         optional_size iMinimumSize;
         optional_size iMaximumSize;
+        optional_size iFixedSize;
         optional_margins iMargins;
         neogfx::expansion_policy iExpansionPolicy;
         optional_size iWeight;

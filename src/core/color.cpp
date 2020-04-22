@@ -643,9 +643,9 @@ namespace neogfx
         color_stop_list results;
         results.reserve(color_stops().size() + alpha_stops().size() + 2);
         results.push_back(std::make_pair(0.0, at(0.0)));
-        for (const auto& colorStop : color_stops())
+        for (auto const& colorStop : color_stops())
             results.push_back(std::make_pair(colorStop.first, at(colorStop.first)));
-        for (const auto& alphaStops : alpha_stops())
+        for (auto const& alphaStops : alpha_stops())
             results.push_back(std::make_pair(alphaStops.first, at(alphaStops.first)));
         results.push_back(std::make_pair(1.0, at(1.0)));
         std::sort(results.begin(), results.end(), [](const color_stop& aLeft, const color_stop& aRight)

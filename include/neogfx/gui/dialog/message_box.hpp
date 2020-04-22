@@ -72,7 +72,7 @@ namespace neogfx
     public:
         dialog_result exec() override;
     protected:
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(const optional_size& aAvailableSpace = {}) const override;
     private:
         void init();
     private:

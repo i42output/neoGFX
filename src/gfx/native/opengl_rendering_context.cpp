@@ -491,42 +491,42 @@ namespace neogfx
             case graphics_operation::operation_type::DrawLine:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_line&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_line&>(*op);
                     draw_line(args.from, args.to, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawRect:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_rect&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_rect&>(*op);
                     draw_rect(args.rect, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawRoundedRect:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
                     draw_rounded_rect(args.rect, args.radius, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawCircle:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_circle&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_circle&>(*op);
                     draw_circle(args.centre, args.radius, args.pen, args.startAngle);
                 }
                 break;
             case graphics_operation::operation_type::DrawArc:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_arc&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_arc&>(*op);
                     draw_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawPath:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_path&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_path&>(*op);
                     draw_path(args.path, args.pen);
                 }
                 break;
@@ -534,14 +534,14 @@ namespace neogfx
                 // todo: batch
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_shape&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_shape&>(*op);
                     draw_shape(args.mesh, args.position, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawEntities:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_entities&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_entities&>(*op);
                     draw_entities(args.ecs, args.transformation);
                 }
                 break;
@@ -551,21 +551,21 @@ namespace neogfx
             case graphics_operation::operation_type::FillRoundedRect:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::fill_rounded_rect&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::fill_rounded_rect&>(*op);
                     fill_rounded_rect(args.rect, args.radius, args.fill);
                 }
                 break;
             case graphics_operation::operation_type::FillCircle:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::fill_circle&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::fill_circle&>(*op);
                     fill_circle(args.centre, args.radius, args.fill);
                 }
                 break;
             case graphics_operation::operation_type::FillArc:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::fill_arc&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::fill_arc&>(*op);
                     fill_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.fill);
                 }
                 break;
@@ -582,7 +582,7 @@ namespace neogfx
             case graphics_operation::operation_type::DrawMesh:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
-                    const auto& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
                     draw_mesh(args.mesh, args.material, args.transformation);
                 }
                 break;
@@ -1122,7 +1122,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
                 auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles, drawOp.zpos);
-                for (const auto& v : rectVertices)
+                for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             vec4f{{
@@ -1152,7 +1152,7 @@ namespace neogfx
         {
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, vertices.size() };
 
-            for (const auto& v : vertices)
+            for (auto const& v : vertices)
             {
                 vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                     vec4f{{
@@ -1179,7 +1179,7 @@ namespace neogfx
 
         {
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
-            for (const auto& v : vertices)
+            for (auto const& v : vertices)
             {
                 vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                     vec4f{{
@@ -1206,7 +1206,7 @@ namespace neogfx
 
         {
             use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
-            for (const auto& v : vertices)
+            for (auto const& v : vertices)
             {
                 vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                     vec4f{{
@@ -1238,7 +1238,7 @@ namespace neogfx
 
                 {
                     use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
-                    for (const auto& v : vertices)
+                    for (auto const& v : vertices)
                     {
                         vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
                             vec4f{{

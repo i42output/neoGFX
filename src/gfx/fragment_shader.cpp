@@ -285,7 +285,7 @@ namespace neogfx
             iGradientStopColors.reserve(combinedStops.size());
             iGradientStopPositions.clear();
             iGradientStopColors.clear();
-            for (const auto& stop : combinedStops)
+            for (auto const& stop : combinedStops)
             {
                 iGradientStopPositions.push_back(static_cast<float>(stop.first));
                 iGradientStopColors.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});

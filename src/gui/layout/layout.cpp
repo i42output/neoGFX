@@ -275,7 +275,7 @@ namespace neogfx
     {
         for (auto i = iItems.begin(); i != iItems.end(); ++i)
         {
-            const auto& item = *i;
+            auto const& item = *i;
             if (&item.subject() == &aItem)
                 return static_cast<item_index>(std::distance(iItems.begin(), i));
         }
@@ -368,7 +368,7 @@ namespace neogfx
 
     margins layout::margins() const
     {
-        const auto& adjustedMargins = (has_margins() ? *iMargins : service<i_app>().current_style().margins() * dpi_scale_factor());
+        auto const& adjustedMargins = (has_margins() ? *iMargins : service<i_app>().current_style().margins() * dpi_scale_factor());
         return units_converter(*this).from_device_units(adjustedMargins);
     }
 
@@ -390,7 +390,7 @@ namespace neogfx
 
     size layout::spacing() const
     {
-        const auto& adjustedSpacing = (has_spacing() ? *iSpacing : service<i_app>().current_style().spacing() * dpi_scale_factor());
+        auto const& adjustedSpacing = (has_spacing() ? *iSpacing : service<i_app>().current_style().spacing() * dpi_scale_factor());
         return units_converter(*this).from_device_units(adjustedSpacing);
     }
 
@@ -591,12 +591,14 @@ namespace neogfx
 
     bool layout::has_minimum_size() const
     {
-        return iMinimumSize != std::nullopt;
+        return has_fixed_size() || iMinimumSize != std::nullopt;
     }
 
     size layout::minimum_size(const optional_size&) const
     {
-        if (has_minimum_size())
+        if (has_fixed_size())
+            return fixed_size();
+        else if (has_minimum_size())
             return units_converter(*this).from_device_units(*iMinimumSize);
         else
             return size{};
@@ -615,14 +617,17 @@ namespace neogfx
 
     bool layout::has_maximum_size() const
     {
-        return iMaximumSize != std::nullopt;
+        return has_fixed_size() || iMaximumSize != std::nullopt;
     }
 
     size layout::maximum_size(const optional_size&) const
     {
-        return has_maximum_size() ?
-            units_converter(*this).from_device_units(*iMaximumSize) :
-            size::max_size();
+        if (has_fixed_size())
+            return fixed_size();
+        else if (has_maximum_size())
+            return units_converter(*this).from_device_units(*iMaximumSize);
+        else
+            return size::max_size();
     }
 
     void layout::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
@@ -631,6 +636,29 @@ namespace neogfx
         if (iMaximumSize != newMaximumSize)
         {
             iMaximumSize = newMaximumSize;
+            if (aUpdateLayout)
+                invalidate();
+        }
+    }
+
+    bool layout::has_fixed_size() const
+    {
+        return iFixedSize != std::nullopt;
+    }
+
+    size layout::fixed_size() const
+    {
+        if (has_fixed_size())
+            return units_converter(*this).from_device_units(*iFixedSize);
+        throw no_fixed_size();
+    }
+
+    void layout::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
+    {
+        optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
+        if (iFixedSize != newFixedSize)
+        {
+            iFixedSize = newFixedSize;
             if (aUpdateLayout)
                 invalidate();
         }
@@ -722,7 +750,7 @@ namespace neogfx
     uint32_t layout::spacer_count() const
     {
         uint32_t count = 0u;
-        for (const auto& i : iItems)
+        for (auto const& i : iItems)
             if (i.is_spacer())
                 ++count;
         return count;
@@ -745,7 +773,7 @@ namespace neogfx
     uint32_t layout::items_visible(item_type_e aItemType) const
     {
         uint32_t count = 0u;
-        for (const auto& i : iItems)
+        for (auto const& i : iItems)
             if (i.visible() || ignore_visibility())
             {
                 if ((aItemType & ItemTypeWidget) && i.is_widget())

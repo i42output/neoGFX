@@ -32,7 +32,7 @@ namespace neogfx
             { platform::Kde, { button_role::Help, button_role::Reset, button_role::Yes, button_role::No, button_role::Action, button_role::Accept, button_role::Apply, button_role::Destructive, button_role::Reject } },
             { platform::Gnome, { button_role::Help, button_role::Reset, button_role::Action, button_role::Apply, button_role::Destructive, button_role::Reject, button_role::Accept, button_role::No, button_role::Yes } }
         };
-        static const auto& sPlatformSpecific = sRoleOrder.find(service<i_basic_services>().platform())->second;
+        static auto const& sPlatformSpecific = sRoleOrder.find(service<i_basic_services>().platform())->second;
         auto left = std::find(sPlatformSpecific.begin(), sPlatformSpecific.end(), aLhs.second);
         auto right = std::find(sPlatformSpecific.begin(), sPlatformSpecific.end(), aRhs.second);
         return left < right;

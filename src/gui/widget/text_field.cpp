@@ -187,7 +187,7 @@ namespace neogfx
             if (iPlacement == text_field_placement::LabelAbove)
                 iLabel.set_margins(neogfx::margins{ iInputBoxContainer.margins().left + iInputBoxContainer.effective_frame_width(), 0.0 });
             else
-                iLabel.set_margins(neogfx::optional_margins{});
+                iLabel.set_margins({});
         };
         iInputBoxContainer.Margins.Changed(label_margin_updater);
         label_margin_updater(iInputBoxContainer.Margins);

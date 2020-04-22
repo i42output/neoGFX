@@ -677,7 +677,7 @@ namespace neogfx
         {
             std::vector<neolib::ci_string> sequenceBits;
             neolib::tokens(neolib::make_ci_string(aSequence), neolib::ci_string(", "), sequenceBits);
-            for (const auto& combo : sequenceBits)
+            for (auto const& combo : sequenceBits)
             {
                 combo_type nextCombo;
                 neolib::vecarray<neolib::ci_string, 5> comboBits;

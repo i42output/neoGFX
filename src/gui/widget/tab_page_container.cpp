@@ -109,7 +109,7 @@ namespace neogfx
     {
         if (aTabIndex >= iTabs.size())
             throw tab_not_found();
-        const auto& tabPagePtr = iTabs.find(&tab(aTabIndex))->second;
+        auto const& tabPagePtr = iTabs.find(&tab(aTabIndex))->second;
         if (tabPagePtr == nullptr)
             throw tab_page_not_found();
         return *tabPagePtr;

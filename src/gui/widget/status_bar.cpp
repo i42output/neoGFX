@@ -80,7 +80,7 @@ namespace neogfx
         iUpdater = std::make_unique<neolib::callback_timer>(service<async_task>(), root().surface().as_lifetime(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
         {
             aTimer.again();
-            const auto& keyboard = service<i_keyboard>();
+            auto const& keyboard = service<i_keyboard>();
             insertLock->set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
                 "Insert" : std::string{});
             capsLock->set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?

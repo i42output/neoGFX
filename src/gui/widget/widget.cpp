@@ -800,7 +800,7 @@ namespace neogfx
     {
         if (client_rect().contains(aPosition))
         {
-            for (const auto& child : children())
+            for (auto const& child : children())
                 if (child->visible() && to_client_coordinates(child->non_client_rect()).contains(aPosition))
                     return child->get_widget_at(aPosition - child->position());
         }
@@ -869,14 +869,16 @@ namespace neogfx
 
     bool widget::has_minimum_size() const
     {
-        return MinimumSize != std::nullopt;
+        return has_fixed_size() || MinimumSize != std::nullopt;
     }
 
     size widget::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (debug == this)
             std::cerr << "widget::minimum_size(...)" << std::endl;
-        if (has_minimum_size())
+        if (has_fixed_size())
+            return fixed_size();
+        else if (has_minimum_size())
             return units_converter(*this).from_device_units(*MinimumSize);
         else if (has_layout())
         {
@@ -904,14 +906,16 @@ namespace neogfx
 
     bool widget::has_maximum_size() const
     {
-        return MaximumSize != std::nullopt;
+        return has_fixed_size() || MaximumSize != std::nullopt;
     }
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
         if (debug == this)
             std::cerr << "widget::maximum_size(...)" << std::endl;
-        if (has_maximum_size())
+        if (has_fixed_size())
+            return fixed_size();
+        else if (has_maximum_size())
             return units_converter(*this).from_device_units(*MaximumSize);
         else if (size_policy() == size_constraint::Minimum || size_policy() == size_constraint::Fixed)
             return minimum_size(aAvailableSpace);
@@ -939,6 +943,29 @@ namespace neogfx
         }
     }
 
+    bool widget::has_fixed_size() const
+    {
+        return FixedSize != std::nullopt;
+    }
+
+    size widget::fixed_size() const
+    {
+        if (has_fixed_size())
+            return units_converter(*this).from_device_units(*FixedSize);
+        throw no_fixed_size();
+    }
+
+    void widget::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
+    {
+        optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
+        if (FixedSize != newFixedSize)
+        {
+            FixedSize.assign(newFixedSize, aUpdateLayout);
+            if (aUpdateLayout && has_managing_layout())
+                managing_layout().layout_items(true);
+        }
+    }
+
     bool widget::has_margins() const
     {
         return Margins != std::nullopt;
@@ -946,7 +973,7 @@ namespace neogfx
 
     margins widget::margins() const
     {
-        const auto& adjustedMargins =
+        auto const& adjustedMargins =
             (has_margins() ?
                 *Margins :
                 service<i_app>().current_style().margins() * 1.0_dip);
@@ -955,7 +982,7 @@ namespace neogfx
 
     void widget::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
     {
-        optional_margins newMargins = (aMargins != std::nullopt ? units_converter(*this).to_device_units(*aMargins) : optional_margins{});
+        auto newMargins = (aMargins != std::nullopt ? units_converter(*this).to_device_units(*aMargins) : optional_margins{});
         if (Margins != newMargins)
         {
             Margins = newMargins;
@@ -1061,7 +1088,7 @@ namespace neogfx
 
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
-                const auto& child = *i;
+                auto const& child = *i;
                 rect intersection = clipRect.intersection(to_client_coordinates(child->non_client_rect()));
                 if (!intersection.empty())
                     child->render(aGraphicsContext);

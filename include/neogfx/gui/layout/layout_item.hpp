@@ -57,6 +57,7 @@ namespace neogfx
         define_property(property_category::hard_geometry, optional_size, Weight, weight)
         define_property(property_category::hard_geometry, optional_size, MinimumSize, minimum_size)
         define_property(property_category::hard_geometry, optional_size, MaximumSize, maximum_size)
+        define_property(property_category::hard_geometry, optional_size, FixedSize, fixed_size)
         define_anchor(Position)
         define_anchor(Size)
         define_anchor(Margins)

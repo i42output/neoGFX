@@ -120,11 +120,14 @@ namespace neogfx
         size weight() const override;
         void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
         bool has_minimum_size() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
         void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
         bool has_maximum_size() const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(const optional_size& aAvailableSpace = {}) const override;
         void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
+        bool has_fixed_size() const override;
+        size fixed_size() const override;
+        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
         bool has_margins() const override;
         neogfx::margins margins() const override;
         void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;

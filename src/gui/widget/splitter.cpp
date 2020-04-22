@@ -25,35 +25,35 @@
 
 namespace neogfx
 {
-    splitter::splitter(type_e aType) :
+    splitter::splitter(splitter_type aType) :
         iType(aType)
     {
         set_margins(neogfx::margins(0.0));
-        if (iType == HorizontalSplitter)
+        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             set_layout(std::make_shared<horizontal_layout>());
         else
             set_layout(std::make_shared<vertical_layout>());
         layout().set_margins(neogfx::margins(0.0));
     }
 
-    splitter::splitter(i_widget& aParent, type_e aType) : 
+    splitter::splitter(i_widget& aParent, splitter_type aType) : 
         widget(aParent), 
         iType(aType)
     {
         set_margins(neogfx::margins(0.0));
-        if (iType == HorizontalSplitter)
+        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             set_layout(std::make_shared<horizontal_layout>());
         else
             set_layout(std::make_shared<vertical_layout>());
         layout().set_margins(neogfx::margins(0.0));
     }
 
-    splitter::splitter(i_layout& aLayout, type_e aType) :
+    splitter::splitter(i_layout& aLayout, splitter_type aType) :
         widget(aLayout), 
         iType(aType)
     {
         set_margins(neogfx::margins(0.0));
-        if (iType == HorizontalSplitter)
+        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             set_layout(std::make_shared<horizontal_layout>());
         else
             set_layout(std::make_shared<vertical_layout>());
@@ -76,7 +76,7 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        if (iType == HorizontalSplitter)
+        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
         else
             return neogfx::size_policy{size_constraint::Minimum, size_constraint::Expanding};
@@ -92,14 +92,9 @@ namespace neogfx
             {
                 iTracking = s;
                 iTrackFrom = aPosition;
-                if (iType == HorizontalSplitter)
-                    iSizeBeforeTracking = std::make_pair(
-                        layout().get_widget_at(iTracking->first).minimum_size().cx, 
-                        layout().get_widget_at(iTracking->second).minimum_size().cx);
-                else
-                    iSizeBeforeTracking = std::make_pair(
-                        layout().get_widget_at(iTracking->first).minimum_size().cy,
-                        layout().get_widget_at(iTracking->second).minimum_size().cy);
+                iSizeBeforeTracking = std::make_pair(
+                    layout().get_widget_at(iTracking->first).extents(), 
+                    layout().get_widget_at(iTracking->second).extents());
                 if (has_root())
                     root().window_manager().update_mouse_cursor(root());
             }
@@ -127,34 +122,50 @@ namespace neogfx
     {
         if (iTracking != std::nullopt)
         {
-            if (iType == HorizontalSplitter)
+            auto& firstWidget = layout().get_widget_at(iTracking->first);
+            auto& secondWidget = layout().get_widget_at(iTracking->second);
+            bool const resizeBothPanes = (iType & splitter_type::ResizeSinglePane) == splitter_type::None || 
+                service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT);
+            if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             {
-                layout().get_widget_at(iTracking->first).set_minimum_size(size{
-                    std::max(iSizeBeforeTracking.first + (aPosition.x - iTrackFrom.x), layout().spacing().cx * 3.0),
-                    layout().get_widget_at(iTracking->first).minimum_size().cy }, false);
-                if (service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT))
+                auto const delta = aPosition.x - iTrackFrom.x;
+                auto& minimizingWidget = (!resizeBothPanes || delta < 0.0 ) ? firstWidget : secondWidget;
+                auto& maximizingWidget = (!resizeBothPanes || delta > 0.0 ) ? firstWidget : secondWidget;
+                auto const& minimizingWidgetSizeBeforeTracking = (!resizeBothPanes || delta < 0.0) ? iSizeBeforeTracking.first : iSizeBeforeTracking.second;
+                auto const& maximizingWidgetSizeBeforeTracking = (!resizeBothPanes || delta > 0.0) ? iSizeBeforeTracking.first : iSizeBeforeTracking.second;
+                std::optional<scoped_fixed_size_suppression> sfss{ minimizingWidget };
+                auto const minSize = minimizingWidget.minimum_size();
+                sfss = std::nullopt;
+                if (&minimizingWidget != &maximizingWidget)
                 {
-                    layout().get_widget_at(iTracking->second).set_minimum_size(size(
-                        std::max(iSizeBeforeTracking.second - (aPosition.x - iTrackFrom.x), layout().spacing().cx * 3.0),
-                        layout().get_widget_at(iTracking->second).minimum_size().cy), false);
+                    auto const adjusted = std::max(minSize.cx, minimizingWidgetSizeBeforeTracking.cx - std::abs(delta));
+                    minimizingWidget.set_fixed_size(size{ adjusted, minimizingWidgetSizeBeforeTracking.cy }, false);
+                    maximizingWidget.set_fixed_size(size{ maximizingWidgetSizeBeforeTracking.cx + minimizingWidgetSizeBeforeTracking.cx - adjusted, maximizingWidgetSizeBeforeTracking.cy }, false);
                 }
-                layout_items();
-                panes_resized();
+                else
+                    minimizingWidget.set_fixed_size(size{ std::max(minSize.cx, minimizingWidgetSizeBeforeTracking.cx + delta), minimizingWidgetSizeBeforeTracking.cy }, false);
             }
             else
             {
-                layout().get_widget_at(iTracking->first).set_minimum_size(size{
-                    layout().get_widget_at(iTracking->first).minimum_size().cx,
-                    std::max(iSizeBeforeTracking.first + (aPosition.y - iTrackFrom.y), layout().spacing().cy * 3.0) }, false);
-                if (service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT))
+                auto const delta = aPosition.y - iTrackFrom.y;
+                auto& minimizingWidget = (!resizeBothPanes || delta < 0.0) ? firstWidget : secondWidget;
+                auto& maximizingWidget = (!resizeBothPanes || delta > 0.0) ? firstWidget : secondWidget;
+                auto const& minimizingWidgetSizeBeforeTracking = (!resizeBothPanes || delta < 0.0) ? iSizeBeforeTracking.first : iSizeBeforeTracking.second;
+                auto const& maximizingWidgetSizeBeforeTracking = (!resizeBothPanes || delta > 0.0) ? iSizeBeforeTracking.first : iSizeBeforeTracking.second;
+                std::optional<scoped_fixed_size_suppression> sfss{ minimizingWidget };
+                auto const minSize = minimizingWidget.minimum_size();
+                sfss = std::nullopt;
+                if (&minimizingWidget != &maximizingWidget)
                 {
-                    layout().get_widget_at(iTracking->second).set_minimum_size(size{
-                        layout().get_widget_at(iTracking->second).minimum_size().cx,
-                        std::max(iSizeBeforeTracking.second - (aPosition.y - iTrackFrom.y), layout().spacing().cy * 3.0) }, false);
+                    auto const adjusted = std::max(minSize.cy, minimizingWidgetSizeBeforeTracking.cy - std::abs(delta));
+                    minimizingWidget.set_fixed_size(size{ minimizingWidgetSizeBeforeTracking.cx, adjusted}, false);
+                    maximizingWidget.set_fixed_size(size{ maximizingWidgetSizeBeforeTracking.cx, maximizingWidgetSizeBeforeTracking.cy + minimizingWidgetSizeBeforeTracking.cy - adjusted }, false);
                 }
-                layout_items();
-                panes_resized();
+                else
+                    minimizingWidget.set_fixed_size(size{ minimizingWidgetSizeBeforeTracking.cx, std::max(minSize.cy, minimizingWidgetSizeBeforeTracking.cy + delta) }, false);
             }
+            layout_items();
+            panes_resized();
         }
     }
 
@@ -170,7 +181,7 @@ namespace neogfx
     {
         auto s = separator_at(root().mouse_position() - origin());
         if (s != std::nullopt || iTracking != std::nullopt)
-            return iType == HorizontalSplitter ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
+            return (iType & splitter_type::Horizontal) == splitter_type::Horizontal ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
         else
             return widget::mouse_cursor();
     }
@@ -194,7 +205,7 @@ namespace neogfx
         {
             rect r1(layout().get_widget_at(i - 1u).position(), layout().get_widget_at(i - 1u).extents());
             rect r2(layout().get_widget_at(i).position(), layout().get_widget_at(i).extents());
-            if (iType == HorizontalSplitter)
+            if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             {
                 rect r3(point(r1.right(), r1.top()), size(r2.left() - r1.right(), r1.height()));
                 rect r4 = r3;

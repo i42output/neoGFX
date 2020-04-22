@@ -58,7 +58,7 @@ namespace neogfx
         size result;
         if (items_visible() != 0)
         {
-            for (const auto& item : items())
+            for (auto const& item : items())
             {
                 if (!item.visible() && !ignore_visibility())
                     continue;
@@ -76,11 +76,11 @@ namespace neogfx
     size stack_layout::maximum_size(const optional_size& aAvailableSpace) const
     {
         size result{ size::max_size() };
-        for (const auto& item : items())
+        for (auto const& item : items())
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
-            const auto& itemMaxSize = item.maximum_size(aAvailableSpace);
+            auto const& itemMaxSize = item.maximum_size(aAvailableSpace);
             if (itemMaxSize.cx != 0.0)
                 result.cx = std::min(result.cx, itemMaxSize.cx);
             if (itemMaxSize.cy != 0.0)

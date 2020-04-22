@@ -66,7 +66,7 @@ namespace neogfx
 
     bool controller::only_weak_views() const
     {
-        for (const auto& v : iViews)
+        for (auto const& v : iViews)
             if (!v->is_weak())
                 return false;
         return true;

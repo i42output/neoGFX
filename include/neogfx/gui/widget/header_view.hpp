@@ -41,16 +41,16 @@ namespace neogfx
         virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
     };
 
+    enum class header_view_type : uint32_t
+    {
+        Horizontal      = 0x0001,
+        Vertical        = 0x0002
+    };
+
     class header_view : public splitter
     {
     private:
         class updater;
-    public:
-        enum type_e
-        {
-            HorizontalHeader,
-            VerticalHeader
-        };
     private:
         struct section_dimension
         {
@@ -59,11 +59,12 @@ namespace neogfx
             dimension max;
         };
     public:
-        header_view(i_header_view_owner& aOwner, type_e aType = HorizontalHeader);
-        header_view(i_widget& aParent, i_header_view_owner& aOwner, type_e aType = HorizontalHeader);
-        header_view(i_layout& aLayout, i_header_view_owner& aOwner, type_e aType = HorizontalHeader);
+        header_view(i_header_view_owner& aOwner, header_view_type aType = header_view_type::Horizontal);
+        header_view(i_widget& aParent, i_header_view_owner& aOwner, header_view_type aType = header_view_type::Horizontal);
+        header_view(i_layout& aLayout, i_header_view_owner& aOwner, header_view_type aType = header_view_type::Horizontal);
         ~header_view();
     public:
+        header_view_type type() const;
         bool has_model() const;
         const i_item_model& model() const;
         i_item_model& model();
@@ -107,7 +108,7 @@ namespace neogfx
         i_header_view_owner& iOwner;
         sink iSink;
         std::vector<std::array<sink, 2>> iButtonSinks;
-        type_e iType;
+        header_view_type iType;
         std::shared_ptr<i_item_model> iModel;
         std::shared_ptr<i_item_presentation_model> iPresentationModel;
         sink iPresentationModelSink;

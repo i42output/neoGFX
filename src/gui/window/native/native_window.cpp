@@ -91,7 +91,7 @@ namespace neogfx
     {
         if (std::holds_alternative<window_event>(aEvent))
         {
-            const auto& windowEvent = static_variant_cast<const window_event&>(aEvent);
+            auto const& windowEvent = static_variant_cast<const window_event&>(aEvent);
             switch (windowEvent.type())
             {
             case window_event_type::Moved:
@@ -212,7 +212,7 @@ namespace neogfx
             auto& mouse = service<i_mouse>();
             if (!mouse.is_enabled())
                 return;
-            const auto& mouseEvent = static_variant_cast<const mouse_event&>(iCurrentEvent);
+            auto const& mouseEvent = static_variant_cast<const mouse_event&>(iCurrentEvent);
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
@@ -240,7 +240,7 @@ namespace neogfx
             auto& mouse = service<i_mouse>();
             if (!mouse.is_enabled())
                 return;
-            const auto& mouseEvent = static_variant_cast<const non_client_mouse_event&>(iCurrentEvent);
+            auto const& mouseEvent = static_variant_cast<const non_client_mouse_event&>(iCurrentEvent);
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
@@ -268,7 +268,7 @@ namespace neogfx
             auto& keyboard = service<i_keyboard>();
             if (!keyboard.is_enabled())
                 return;
-            const auto& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
+            auto const& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
             switch (keyboardEvent.type())
             {
             case keyboard_event_type::KeyPressed:

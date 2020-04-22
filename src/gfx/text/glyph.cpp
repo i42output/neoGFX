@@ -143,13 +143,13 @@ namespace neogfx
         neogfx::size result;
         for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
         {
-            const auto& g = *i;
+            auto const& g = *i;
             result.cx += g.advance().cx;
             result.cy = std::max(result.cy, g.extents(*this).cy);
         }
         if (aEndIsLineEnd)
         {
-            const auto& lastGlyph = *std::prev(aEnd);
+            auto const& lastGlyph = *std::prev(aEnd);
             result.cx += (lastGlyph.extents(*this).cx - lastGlyph.advance().cx);
         }
         return result.ceil();

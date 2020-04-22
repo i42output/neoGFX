@@ -383,7 +383,7 @@ int main(int argc, char* argv[])
         { 
             window.set_title_text(u8"请停止食用犬"); 
             if (ui.buttonChina.has_maximum_size())
-                ui.buttonChina.set_maximum_size(ng::optional_size{});
+                ui.buttonChina.set_maximum_size({});
             else 
                 ui.buttonChina.set_maximum_size(ng::size{ 128_dip, 64_dip });
         });
@@ -888,12 +888,12 @@ int main(int argc, char* argv[])
         ui.checkColumn5Unselectable.unchecked([&]() { ipm1.set_column_selectable(5, true); ipm2.set_column_selectable(5, true); update_column5_heading(ui.checkColumn5ReadOnly.is_checked(), false); });
 
         ui.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); itpm1.set_column_image_size(0, ng::size{ 16_dip }); });
-        ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::optional_size{}); itpm1.set_column_image_size(0, ng::optional_size{}); });
+        ui.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, {}); itpm1.set_column_image_size(0, {}); });
         ui.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_role({}); ui.tableView1.update(); itpm1.set_color_role({}); ui.treeView1.update(); });
         ui.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_role(ng::color_role::Text); ui.tableView1.update(); itpm1.set_color_role(ng::color_role::Text); ui.treeView1.update(); });
         ui.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_role(ng::color_role::Background); ui.tableView1.update(); itpm1.set_color_role(ng::color_role::Background); ui.treeView1.update(); });
         ui.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); itpm2.set_column_image_size(0, ng::size{ 16_dip }); });
-        ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::optional_size{}); itpm2.set_column_image_size(0, ng::optional_size{}); });
+        ui.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, {}); itpm2.set_column_image_size(0, {}); });
         ui.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_role({}); ui.tableView2.update(); itpm2.set_color_role({}); ui.treeView2.update(); });
         ui.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_role(ng::color_role::Text); ui.tableView2.update(); itpm2.set_color_role(ng::color_role::Text); ui.treeView2.update(); });
         ui.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_role(ng::color_role::Background); ui.tableView2.update(); itpm2.set_color_role(ng::color_role::Background); ui.treeView2.update(); });

@@ -263,7 +263,7 @@ namespace neogfx
 
     bool menu::has_available_items() const
     {
-        for (const auto& i : iItems)
+        for (auto const& i : iItems)
             if (i->available())
                 return true;
         return false;

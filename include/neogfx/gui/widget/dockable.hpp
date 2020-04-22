@@ -36,7 +36,7 @@ namespace neogfx
     public:
         dockable_title_bar(i_dockable& aDockable);
     protected:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
     protected:
         bool transparent_background() const override;
     protected:

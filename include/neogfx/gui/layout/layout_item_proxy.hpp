@@ -83,6 +83,9 @@ namespace neogfx
         bool has_maximum_size() const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
+        bool has_fixed_size() const override;
+        size fixed_size() const override;
+        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
         bool has_margins() const override;
         neogfx::margins margins() const override;
@@ -105,6 +108,7 @@ namespace neogfx
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, size> iMinimumSize;
         mutable std::pair<uint32_t, size> iMaximumSize;
+        mutable std::pair<uint32_t, size> iFixedSize;
         mutable std::optional<const i_anchor_t<decltype(layout_item<i_layout>::MinimumSize)>*> iMinimumSizeAnchor;
     };
 }

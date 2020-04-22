@@ -32,11 +32,11 @@ namespace neogfx
         {
             uint32_t result = 0;
             bool noSpace = (aAvailableSpace == std::nullopt || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer));
-            for (const auto& item : aLayout.items())
+            for (auto const& item : aLayout.items())
             {
                 if (!item.visible() && !aLayout.ignore_visibility())
                     continue;
-                const auto sizeTest = noSpace ? item.minimum_size(aAvailableSpace) : item.maximum_size(aAvailableSpace);
+                auto const sizeTest = noSpace ? item.minimum_size(aAvailableSpace) : item.maximum_size(aAvailableSpace);
                 if (!item.is_spacer() && (SpecializedPolicy::cx(sizeTest) == 0.0 || SpecializedPolicy::cy(sizeTest) == 0.0))
                     ++result;
             }
@@ -94,7 +94,7 @@ namespace neogfx
         {
             if (aSizePolicy.maintain_aspect_ratio())
             {
-                const auto& aspectRatio = aSizePolicy.aspect_ratio();
+                auto const& aspectRatio = aSizePolicy.aspect_ratio();
                 if (aspectRatio.cx < aspectRatio.cy)
                 {
                     size result{ aSize.cx, aSize.cx * (aspectRatio.cy / aspectRatio.cx) };
@@ -147,11 +147,11 @@ namespace neogfx
             if (availableSpaceForChildren != std::nullopt)
                 *availableSpaceForChildren -= margins().size();
             uint32_t itemsZeroSized = 0;
-            for (const auto& item : items())
+            for (auto const& item : items())
             {
                 if (!item.visible() && !ignore_visibility())
                     continue;
-                const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
+                auto const itemMinSize = item.minimum_size(availableSpaceForChildren);
                 if (!item.is_spacer() && (AxisPolicy::cx(itemMinSize) == 0.0 || AxisPolicy::cy(itemMinSize) == 0.0))
                 {
                     ++itemsZeroSized;
@@ -197,11 +197,11 @@ namespace neogfx
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         uint32_t itemsZeroSized = 0;
         size result;
-        for (const auto& item : items())
+        for (auto const& item : items())
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
-            const auto itemMaxSize = item.maximum_size(availableSpaceForChildren);
+            auto const itemMaxSize = item.maximum_size(availableSpaceForChildren);
             if (!item.is_spacer() && (AxisPolicy::cx(itemMaxSize) == 0.0 || AxisPolicy::cy(itemMaxSize) == 0.0))
                 ++itemsZeroSized;
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), 
@@ -256,7 +256,7 @@ namespace neogfx
         size totalExpanderWeight;
         enum disposition_e { Unknown, Weighted, Unweighted, TooSmall, FixedSize };
         std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, neolib::fast_pool_allocator<std::pair<const item* const, disposition_e>>> itemDispositions;
-        for (const auto& item : items())
+        for (auto const& item : items())
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
@@ -284,7 +284,7 @@ namespace neogfx
         while (!done && itemsUsingLeftover > 0)
         {
             done = true;
-            for (const auto& item : items())
+            for (auto const& item : items())
             {
                 if (!item.visible() && !ignore_visibility())
                     continue;
@@ -318,7 +318,7 @@ namespace neogfx
         }
         size::dimension_type weightedAmount = 0.0;
         if (AxisPolicy::cx(totalExpanderWeight) > 0.0)
-            for (const auto& item : items())
+            for (auto const& item : items())
                 if ((item.visible() || ignore_visibility()) && itemDispositions[&item] == Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
         uint32_t bitsLeft = 0;

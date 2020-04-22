@@ -139,7 +139,7 @@ namespace neogames
             neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } +neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, 0.0, aCardTextures.suit_texture(aCard), uvRotate180);
 
             auto faceTextureRects = face_texture_rects(aabb, static_cast<typename basic_card<GameTraits>::value>(aCard));
-            for (const auto& r : faceTextureRects)
+            for (auto const& r : faceTextureRects)
                 neogfx::add_patch(mesh, meshRenderer, r.first, 0.0, aCardTextures.face_texture(aCard), r.second ? uvRotate180 : neogfx::mat33::identity());
 
             return aEcs.create_entity(cardArchetype, neogfx::game::mesh_filter{ {}, mesh, {} }, meshRenderer);

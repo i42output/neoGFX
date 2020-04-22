@@ -658,7 +658,7 @@ namespace neogfx
                 return column(aIndex.column()).imageSize;
             else if (cell_image(aIndex))
                 return cell_image(aIndex)->extents();
-            return optional_size{};
+            return {};
         }
         optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
         {
@@ -781,10 +781,10 @@ namespace neogfx
             for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
             {
                 auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
-                const auto& origValue = item_model().cell_data(modelIndex).to_string();
-                const auto& value = aCaseSensitivity == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue);
-                const auto& origKey = aFilterSearchKey;
-                const auto& key = aCaseSensitivity == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey);
+                auto const& origValue = item_model().cell_data(modelIndex).to_string();
+                auto const& value = aCaseSensitivity == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue);
+                auto const& origKey = aFilterSearchKey;
+                auto const& key = aCaseSensitivity == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey);
                 if (key.empty())
                     continue;
                 switch (aFilterSearchType)
@@ -860,8 +860,8 @@ namespace neogfx
                 for (std::size_t i = 0; i < iSortOrder.size(); ++i)
                 {
                     auto col = iSortOrder[i].first;
-                    const auto& v1 = item_model().cell_data(item_model_index{ aLhs.value, model_column(col) });
-                    const auto& v2 = item_model().cell_data(item_model_index{ aRhs.value, model_column(col) });
+                    auto const& v1 = item_model().cell_data(item_model_index{ aLhs.value, model_column(col) });
+                    auto const& v2 = item_model().cell_data(item_model_index{ aRhs.value, model_column(col) });
                     if (std::holds_alternative<std::string>(v1) && std::holds_alternative<std::string>(v2))
                     {
                         std::string s1 = boost::to_upper_copy<std::string>(std::get<std::string>(v1));
@@ -895,12 +895,12 @@ namespace neogfx
             for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
             {
                 bool matches = true;
-                for (const auto& filter : iFilters)
+                for (auto const& filter : iFilters)
                 {
-                    const auto& origValue = item_model().cell_data(item_model_index{ row, model_column(std::get<0>(filter)) }).to_string();
-                    const auto& value = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue));
-                    const auto& origKey = std::get<1>(filter);
-                    const auto& key = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey));
+                    auto const& origValue = item_model().cell_data(item_model_index{ row, model_column(std::get<0>(filter)) }).to_string();
+                    auto const& value = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue));
+                    auto const& origKey = std::get<1>(filter);
+                    auto const& key = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey));
                     if (key.empty())
                         continue;
                     switch (std::get<2>(filter))

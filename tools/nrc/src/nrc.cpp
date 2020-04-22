@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
             std::optional<std::ofstream> uiOutput;
             auto const& ns = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
             std::optional<resource_parser> resourceParser;
-            for (const auto& item : input.root())
+            for (auto const& item : input.root())
             {
                 if (item.name() == "resource")
                 {

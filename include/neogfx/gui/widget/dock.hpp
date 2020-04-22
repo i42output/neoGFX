@@ -21,12 +21,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/vector.hpp>
-#include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/widget/splitter.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 
 namespace neogfx
 {
-    class dock : public widget, public i_dock
+    class dock : public splitter, public i_dock
     {
     public:
         using item = ref_ptr<i_dockable>;

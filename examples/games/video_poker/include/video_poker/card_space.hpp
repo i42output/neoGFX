@@ -41,8 +41,8 @@ namespace video_poker
     public:
         card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures);
     protected:
-        neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
-        neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
+        neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = {}) const override;
+        neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = {}) const override;
     protected:
         void paint(neogfx::i_graphics_context& aGraphicsContext) const override;
     public:

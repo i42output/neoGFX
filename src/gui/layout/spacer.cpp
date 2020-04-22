@@ -238,14 +238,17 @@ namespace neogfx
 
     bool spacer::has_minimum_size() const
     {
-        return iMinimumSize != std::nullopt;
+        return has_fixed_size() || iMinimumSize != std::nullopt;
     }
 
     size spacer::minimum_size(const optional_size&) const
     {
-        return has_minimum_size() ?
-            units_converter(*this).from_device_units(*iMinimumSize) :
-            size{};
+        if (has_fixed_size())
+            return fixed_size();
+        else if (has_minimum_size())
+            return units_converter(*this).from_device_units(*iMinimumSize);
+        else
+            return size{};
     }
 
     void spacer::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
@@ -261,14 +264,17 @@ namespace neogfx
 
     bool spacer::has_maximum_size() const
     {
-        return iMaximumSize != std::nullopt;
+        return has_fixed_size() || iMaximumSize != std::nullopt;
     }
 
     size spacer::maximum_size(const optional_size&) const
     {
-        return has_maximum_size() ?
-            units_converter(*this).from_device_units(*iMaximumSize) :
-            size::max_size();
+        if (has_fixed_size())
+            return fixed_size();
+        else if (has_maximum_size())
+            return units_converter(*this).from_device_units(*iMaximumSize);
+        else
+            return size::max_size();
     }
 
     void spacer::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
@@ -277,6 +283,29 @@ namespace neogfx
         if (iMaximumSize != newMaximumSize)
         {
             iMaximumSize = newMaximumSize;
+            if (has_layout_owner() && aUpdateLayout)
+                layout_owner().layout_root(true);
+        }
+    }
+
+    bool spacer::has_fixed_size() const
+    {
+        return iFixedSize != std::nullopt;
+    }
+
+    size spacer::fixed_size() const
+    {
+        if (has_fixed_size())
+            return units_converter(*this).from_device_units(*iFixedSize);
+        throw no_fixed_size();
+    }
+
+    void spacer::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
+    {
+        optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
+        if (iFixedSize != newFixedSize)
+        {
+            iFixedSize = newFixedSize;
             if (has_layout_owner() && aUpdateLayout)
                 layout_owner().layout_root(true);
         }

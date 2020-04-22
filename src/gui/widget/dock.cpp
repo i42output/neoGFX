@@ -27,14 +27,14 @@
 namespace neogfx
 {
     dock::dock(i_widget& aParent, dock_area aArea) :
-        widget{ aParent }, iArea { aArea }
+        splitter{ aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
     {
         set_margins(neogfx::margins{});
         update_layout();
     }
 
     dock::dock(i_layout& aLayout, dock_area aArea) :
-        widget{ aLayout }, iArea{ aArea }
+        splitter{ aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
     {
         set_margins(neogfx::margins{});
         update_layout();
@@ -84,10 +84,7 @@ namespace neogfx
 
     void dock::update_layout()
     {
-        if ((area() & dock_area::Horizontal) != dock_area::None)
-            set_layout(std::make_shared<horizontal_layout>());
-        else
-            set_layout(std::make_shared<vertical_layout>());
+        // todo: update splitter layout
         layout().set_margins(neogfx::margins{ 1.5_mm });
         layout().set_spacing(neogfx::size{ 1.5_mm });
         layout().set_size_policy(neogfx::size_constraint::Expanding);

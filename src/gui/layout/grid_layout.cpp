@@ -427,7 +427,7 @@ namespace neogfx
             row_layout(itemPos.y).add_spacer_at(itemPos.x);
         iCells.erase(iCells.find(itemPos));
         iDimensions = cell_dimensions{};
-        for (const auto& cell : iCells)
+        for (auto const& cell : iCells)
         {
             iDimensions.cy = std::max(iDimensions.cy, cell.first.y);
             iDimensions.cx = std::max(iDimensions.cx, cell.first.x);
@@ -495,7 +495,7 @@ namespace neogfx
     size::dimension_type grid_layout::row_minimum_size(cell_coordinate aRow, const optional_size& aAvailableSpace) const
     {
         size::dimension_type result {};
-        for (const auto& item : iCells)
+        for (auto const& item : iCells)
             if (item.first.y == aRow)
             {
                 auto s = find_span(item.first);
@@ -508,7 +508,7 @@ namespace neogfx
     size::dimension_type grid_layout::column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace) const
     {
         size::dimension_type result {};
-        for (const auto& item : iCells)
+        for (auto const& item : iCells)
             if (item.first.x == aColumn)
             {
                 auto s = find_span(item.first);
@@ -521,7 +521,7 @@ namespace neogfx
     size::dimension_type grid_layout::row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace) const
     {
         size::dimension_type result {};
-        for (const auto& item : iCells)
+        for (auto const& item : iCells)
             if (item.first.y == aRow)
                 result = std::max(result, item.second->maximum_size(aAvailableSpace).cy);
         return result;
@@ -530,7 +530,7 @@ namespace neogfx
     size::dimension_type grid_layout::column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace) const
     {
         size::dimension_type result {};
-        for (const auto& item : iCells)
+        for (auto const& item : iCells)
             if (item.first.x == aColumn)
                 result = std::max(result, item.second->maximum_size(aAvailableSpace).cx);
         return result;

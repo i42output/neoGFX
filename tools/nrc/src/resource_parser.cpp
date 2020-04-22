@@ -54,7 +54,7 @@ namespace neogfx::nrc
 
         auto nextResourceIndex = iResourceIndex;
 
-        for (const auto& resourceItem : resource.contents())
+        for (auto const& resourceItem : resource.contents())
         {
             auto process_file = [&](const neolib::fjson_string& aInputFilename)
             {

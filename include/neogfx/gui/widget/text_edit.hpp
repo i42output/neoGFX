@@ -368,9 +368,9 @@ namespace neogfx
                     auto iterGlyph = start();
                     for (auto i = glyphsStartIndex; i != glyphsEndIndex; ++i)
                     {
-                        const auto& glyph = *(iterGlyph++);
-                        const auto& tag = parent().iText.tag(parent().iText.begin() + textStartIndex + glyph.source().first);
-                        const auto& style = std::holds_alternative<style_list::const_iterator>(tag.style()) ? *static_variant_cast<style_list::const_iterator>(tag.style()) : parent().default_style();
+                        auto const& glyph = *(iterGlyph++);
+                        auto const& tag = parent().iText.tag(parent().iText.begin() + textStartIndex + glyph.source().first);
+                        auto const& style = std::holds_alternative<style_list::const_iterator>(tag.style()) ? *static_variant_cast<style_list::const_iterator>(tag.style()) : parent().default_style();
                         auto& glyphFont = style.font() != std::nullopt ? *style.font() : parent().font();
                         dimension cy = glyph.extents(glyphFont).cy;
                         if (i == glyphsStartIndex || cy != previousHeight)

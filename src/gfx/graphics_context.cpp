@@ -572,7 +572,7 @@ namespace neogfx
 
     bool graphics_context::is_text_left_to_right(const std::string& aText, const font& aFont) const
     {
-        const auto& glyphText = to_glyph_text(aText.begin(), aText.end(), aFont);
+        auto const& glyphText = to_glyph_text(aText.begin(), aText.end(), aFont);
         return glyph_text_direction(glyphText.cbegin(), glyphText.cend()) == text_direction::LTR;
     }
 
@@ -970,7 +970,7 @@ namespace neogfx
         dimension maxLineWidth = 0.0;
         for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
         {
-            const auto& line = (logical_coordinates().is_gui_orientation() ? *i : *(lines.rbegin() + (i - lines.begin())));
+            auto const& line = (logical_coordinates().is_gui_orientation() ? *i : *(lines.rbegin() + (i - lines.begin())));
             if (aMaxWidth == 0)
             {
                 vec3 linePos = pos;
@@ -1318,7 +1318,7 @@ namespace neogfx
             iResults.reserve(g->glyph_count());
             for (uint32_t i = 0; i < g->glyph_count();)
             {
-                const auto& gi = g->glyph_info(i);
+                auto const& gi = g->glyph_info(i);
                 auto tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
                 if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
                     iResults.push_back(std::make_pair(g, i++));
@@ -1335,7 +1335,7 @@ namespace neogfx
                     while (nextFallback != iGlyphsList.end() && !clusters.empty())
                     {
                         auto currentFallback = nextFallback++;
-                        const auto& fallbackGlyphs = *currentFallback;
+                        auto const& fallbackGlyphs = *currentFallback;
                         for (uint32_t j = 0; j < fallbackGlyphs.glyph_count(); ++j)
                         {
                             if (fallbackGlyphs.glyph_info(j).codepoint != 0)

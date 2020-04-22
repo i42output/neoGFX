@@ -171,8 +171,8 @@ namespace neogfx::game
             void update_object(i_collidable_object& aObject)
             {
                 iTree.iDepth = std::max(iTree.iDepth, iDepth);
-                const auto& currentAabb = aObject.aabb();
-                const auto& savedAabb = aObject.saved_aabb();
+                auto const& currentAabb = aObject.aabb();
+                auto const& savedAabb = aObject.saved_aabb();
                 if (currentAabb == savedAabb)
                     return;
                 if (aabb_intersects(currentAabb, iAabb))
@@ -314,9 +314,9 @@ namespace neogfx::game
         private:
             void populate_octants()
             {
-                const auto& min = iAabb.min;
-                const auto& max = iAabb.max;
-                const auto& centre = (min + max) / 2.0;
+                auto const& min = iAabb.min;
+                auto const& max = iAabb.max;
+                auto const& centre = (min + max) / 2.0;
                 iOctants[0][0][0] = neogfx::aabb{ min, centre };
                 iOctants[0][1][0] = neogfx::aabb{ vec3{ min.x, centre.y, min.z }, vec3{ centre.x, max.y, centre.z } };
                 iOctants[1][0][0] = neogfx::aabb{ vec3{ centre.x, min.y, min.z }, vec3{ max.x, centre.y, centre.z } };

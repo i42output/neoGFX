@@ -109,7 +109,7 @@ namespace video_poker
         bool possibleStraight = (valueCounter.size() == GameTraits::hand_size);
         if (possibleStraight)
         {
-            auto is_straight = [](const auto& aHandValues)
+            auto is_straight = [](auto const& aHandValues)
             {
                 for (auto iterHand = std::next(aHandValues.begin()); iterHand != aHandValues.end(); ++iterHand)
                     if (static_cast<uint32_t>(std::prev(iterHand)->first) - static_cast<uint32_t>(iterHand->first) != 1)
@@ -178,7 +178,7 @@ namespace video_poker
         for (uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
             ++valueCounter[aHand.card_at(cardIndex)];
         std::pair<typename card_type::value, uint32_t> mostFrequent;
-        for (const auto& v : valueCounter)
+        for (auto const& v : valueCounter)
             if (v.second > mostFrequent.second)
                 mostFrequent = v;
         return mostFrequent.first;

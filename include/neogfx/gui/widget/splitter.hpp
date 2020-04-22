@@ -24,20 +24,32 @@
 
 namespace neogfx
 {
+    enum class splitter_type : uint32_t
+    {
+        None                = 0x0000,
+        Horizontal          = 0x0001,
+        Vertical            = 0x0002,
+        ResizeSinglePane    = 0x1000
+    };
+
+    inline constexpr splitter_type operator|(splitter_type aLhs, splitter_type aRhs)
+    {
+        return static_cast<splitter_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr splitter_type operator&(splitter_type aLhs, splitter_type aRhs)
+    {
+        return static_cast<splitter_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
     class splitter : public widget
     {
-    public:
-        enum type_e
-        {
-            HorizontalSplitter,
-            VerticalSplitter
-        };
     private:
         typedef std::pair<uint32_t, uint32_t> separator_type;
     public:
-        splitter(type_e aType = HorizontalSplitter);
-        splitter(i_widget& aParent, type_e aType = HorizontalSplitter);
-        splitter(i_layout& aLayout, type_e aType = HorizontalSplitter);
+        splitter(splitter_type aType = splitter_type::Horizontal);
+        splitter(i_widget& aParent, splitter_type aType = splitter_type::Horizontal);
+        splitter(i_layout& aLayout, splitter_type aType = splitter_type::Horizontal);
         ~splitter();
     public:
         i_widget& get_widget_at(const point& aPosition) override;
@@ -57,9 +69,9 @@ namespace neogfx
     private:
         std::optional<separator_type> separator_at(const point& aPosition) const;
     private:
-        type_e iType;
+        splitter_type iType;
         std::optional<separator_type> iTracking;
-        std::pair<dimension, dimension> iSizeBeforeTracking;
+        std::pair<size, size> iSizeBeforeTracking;
         point iTrackFrom;
     };
 }

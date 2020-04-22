@@ -412,8 +412,8 @@ namespace neogfx
             }
             else
             {
-                image_widget().set_minimum_size(optional_size{});
-                image_widget().set_maximum_size(optional_size{});
+                image_widget().set_minimum_size({});
+                image_widget().set_maximum_size({});
                 image_widget().set_aspect_ratio(aspect_ratio::Keep);
             }
             label().layout().invalidate();

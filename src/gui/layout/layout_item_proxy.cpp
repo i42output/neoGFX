@@ -294,7 +294,7 @@ namespace neogfx
                 minSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
             if (size_policy().maintain_aspect_ratio())
             {
-                const auto& aspectRatio = size_policy().aspect_ratio();
+                auto const& aspectRatio = size_policy().aspect_ratio();
                 if (aspectRatio.cx < aspectRatio.cy)
                 {
                     if (minSize.cx < minSize.cy)
@@ -346,6 +346,30 @@ namespace neogfx
         subject().set_maximum_size(aMaximumSize, aUpdateLayout);
         if (aMaximumSize != std::nullopt)
             iMaximumSize.second = *aMaximumSize;
+    }
+
+    bool layout_item_proxy::has_fixed_size() const
+    {
+        return subject().has_fixed_size();
+    }
+
+    size layout_item_proxy::fixed_size() const
+    {
+        if (iFixedSize.first == global_layout_id())
+            return iFixedSize.second;
+        else
+        {
+            iFixedSize.second = subject().fixed_size();
+            iFixedSize.first = global_layout_id();
+            return iFixedSize.second;
+        }
+    }
+
+    void layout_item_proxy::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
+    {
+        subject().set_fixed_size(aFixedSize, aUpdateLayout);
+        if (aFixedSize != std::nullopt)
+            iFixedSize.second = *aFixedSize;
     }
 
     bool layout_item_proxy::has_margins() const

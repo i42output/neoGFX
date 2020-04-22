@@ -144,11 +144,14 @@ namespace neogfx
         size weight() const override;
         void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
         bool has_minimum_size() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
         void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
         bool has_maximum_size() const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(const optional_size& aAvailableSpace = {}) const override;
         void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
+        bool has_fixed_size() const override;
+        size fixed_size() const override;
+        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
@@ -194,6 +197,7 @@ namespace neogfx
         optional_size iWeight;
         optional_size iMinimumSize;
         optional_size iMaximumSize;
+        optional_size iFixedSize;
         item_list iItems;
         bool iLayoutStarted;
         bool iInvalidated;

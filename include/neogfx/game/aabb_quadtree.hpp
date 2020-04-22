@@ -150,8 +150,8 @@ namespace neogfx::game
             void update_object(entity_id aObjectId, const broadphase_collider_2d& aCollider)
             {
                 iTree.iDepth = std::max(iTree.iDepth, iDepth);
-                const auto& currentAabb = aCollider.currentAabb;
-                const auto& previousAabb = aCollider.previousAabb;
+                auto const& currentAabb = aCollider.currentAabb;
+                auto const& previousAabb = aCollider.previousAabb;
                 if (currentAabb == previousAabb)
                     return;
                 if (aabb_intersects(currentAabb, iAabb))
@@ -233,9 +233,9 @@ namespace neogfx::game
         private:
             void populate_quadrants()
             {
-                const auto& min = iAabb.min;
-                const auto& max = iAabb.max;
-                const auto& centre = (min + max) / 2.0;
+                auto const& min = iAabb.min;
+                auto const& max = iAabb.max;
+                auto const& centre = (min + max) / 2.0;
                 iQuadrants[0][0] = aabb_2d{ min, centre };
                 iQuadrants[0][1] = aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
                 iQuadrants[1][0] = aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };

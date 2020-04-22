@@ -36,7 +36,7 @@ namespace neogfx
         size extent;
         point pos;
         bool previousNonZeroSize = false;
-        for (const auto& item : items())
+        for (auto const& item : items())
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
@@ -81,7 +81,7 @@ namespace neogfx
         size result;
         coordinate extent = 0.0;
         point pos;
-        for (const auto& item : items())
+        for (auto const& item : items())
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
