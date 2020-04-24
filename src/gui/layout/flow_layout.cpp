@@ -54,7 +54,7 @@ namespace neogfx
         return add_spacer_at(count());
     }
 
-    i_spacer& flow_layout::add_spacer_at(item_index aPosition)
+    i_spacer& flow_layout::add_spacer_at(layout_item_index aPosition)
     {
         if (iFlowDirection == FlowDirectionHorizontal)
         {

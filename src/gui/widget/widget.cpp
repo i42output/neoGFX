@@ -861,7 +861,7 @@ namespace neogfx
     {
         if (Weight != aWeight)
         {
-            Weight = aWeight;
+            Weight.assign(aWeight, aUpdateLayout);
             if (aUpdateLayout && has_managing_layout())
                 managing_layout().layout_items(true);
         }

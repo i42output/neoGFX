@@ -34,7 +34,7 @@ namespace neogfx
         horizontal_layout(horizontal_layout& aParent);
     public:
         i_spacer& add_spacer() override;
-        i_spacer& add_spacer_at(item_index aPosition) override;
+        i_spacer& add_spacer_at(layout_item_index aPosition) override;
     public:
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;

@@ -54,7 +54,7 @@ namespace neogfx
         vertical_layout& bottom();
     public:
         i_spacer& add_spacer() override;
-        i_spacer& add_spacer_at(item_index aPosition) override;
+        i_spacer& add_spacer_at(layout_item_index aPosition) override;
     public:
         void invalidate() override;
     public:

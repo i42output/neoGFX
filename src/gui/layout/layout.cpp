@@ -194,17 +194,17 @@ namespace neogfx
         return add(std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, & aItem});
     }
 
-    i_layout_item& layout::add_at(item_index aPosition, i_layout_item& aItem)
+    i_layout_item& layout::add_at(layout_item_index aPosition, i_layout_item& aItem)
     {
         return add_at(aPosition, std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, & aItem});
     }
 
     i_layout_item& layout::add(std::shared_ptr<i_layout_item> aItem)
     {
-        return add_at(static_cast<item_index>(iItems.size()), aItem);
+        return add_at(static_cast<layout_item_index>(iItems.size()), aItem);
     }
 
-    i_layout_item& layout::add_at(item_index aPosition, std::shared_ptr<i_layout_item> aItem)
+    i_layout_item& layout::add_at(layout_item_index aPosition, std::shared_ptr<i_layout_item> aItem)
     {
         if (aItem->has_parent_layout() && !aItem->is_proxy())
         {
@@ -223,7 +223,7 @@ namespace neogfx
         return *aItem;
     }
 
-    void layout::remove_at(item_index aIndex)
+    void layout::remove_at(layout_item_index aIndex)
     {
         remove(std::next(iItems.begin(), aIndex));
     }
@@ -266,23 +266,23 @@ namespace neogfx
         aDestination.invalidate();
     }
 
-    layout::item_index layout::count() const
+    layout_item_index layout::count() const
     {
-        return static_cast<item_index>(iItems.size());
+        return static_cast<layout_item_index>(iItems.size());
     }
 
-    layout::optional_item_index layout::find(const i_layout_item& aItem) const
+    optional_layout_item_index layout::find(const i_layout_item& aItem) const
     {
         for (auto i = iItems.begin(); i != iItems.end(); ++i)
         {
             auto const& item = *i;
             if (&item.subject() == &aItem)
-                return static_cast<item_index>(std::distance(iItems.begin(), i));
+                return static_cast<layout_item_index>(std::distance(iItems.begin(), i));
         }
-        return optional_item_index{};
+        return optional_layout_item_index{};
     }
 
-    bool layout::is_widget_at(item_index aIndex) const
+    bool layout::is_widget_at(layout_item_index aIndex) const
     {
         if (aIndex >= iItems.size())
             throw bad_item_index();
@@ -290,7 +290,7 @@ namespace neogfx
         return item->is_widget();
     }
 
-    const i_layout_item& layout::item_at(item_index aIndex) const
+    const i_layout_item& layout::item_at(layout_item_index aIndex) const
     {
         if (aIndex >= iItems.size())
             throw bad_item_index();
@@ -298,12 +298,12 @@ namespace neogfx
         return item->subject();
     }
 
-    i_layout_item& layout::item_at(item_index aIndex)
+    i_layout_item& layout::item_at(layout_item_index aIndex)
     {
         return const_cast<i_layout_item&>(to_const(*this).item_at(aIndex));
     }
 
-    const i_widget& layout::get_widget_at(item_index aIndex) const
+    const i_widget& layout::get_widget_at(layout_item_index aIndex) const
     {
         if (aIndex >= iItems.size())
             throw bad_item_index();
@@ -313,12 +313,12 @@ namespace neogfx
         throw not_a_widget();
     }
 
-    i_widget& layout::get_widget_at(item_index aIndex)
+    i_widget& layout::get_widget_at(layout_item_index aIndex)
     {
         return const_cast<i_widget&>(to_const(*this).get_widget_at(aIndex));
     }
 
-    const i_layout& layout::get_layout_at(item_index aIndex) const
+    const i_layout& layout::get_layout_at(layout_item_index aIndex) const
     {
         if (aIndex >= iItems.size())
             throw bad_item_index();
@@ -328,7 +328,7 @@ namespace neogfx
         throw not_a_layout();
     }
 
-    i_layout& layout::get_layout_at(item_index aIndex)
+    i_layout& layout::get_layout_at(layout_item_index aIndex)
     {
         return const_cast<i_layout&>(to_const(*this).get_layout_at(aIndex));
     }
@@ -758,6 +758,8 @@ namespace neogfx
 
     void layout::remove(item_list::iterator aItem)
     {
+        if (debug == this)
+            std::cerr << "layout::remove(" << std::distance(iItems.begin(), aItem) << ")" << std::endl;
         {
             item_list toRemove;
             toRemove.splice(toRemove.begin(), iItems, aItem);

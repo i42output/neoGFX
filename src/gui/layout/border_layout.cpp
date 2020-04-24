@@ -151,7 +151,7 @@ namespace neogfx
         throw not_implemented();
     }
 
-    i_spacer& border_layout::add_spacer_at(item_index)
+    i_spacer& border_layout::add_spacer_at(layout_item_index)
     {
         throw not_implemented();
     }

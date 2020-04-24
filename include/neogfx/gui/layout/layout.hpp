@@ -88,23 +88,23 @@ namespace neogfx
         i_layout_item_proxy& proxy_for_layout() override;
     public:
         i_layout_item& add(i_layout_item& aItem) override;
-        i_layout_item& add_at(item_index aPosition, i_layout_item& aItem) override;
+        i_layout_item& add_at(layout_item_index aPosition, i_layout_item& aItem) override;
         i_layout_item& add(std::shared_ptr<i_layout_item> aItem) override;
-        i_layout_item& add_at(item_index aPosition, std::shared_ptr<i_layout_item> aItem) override;
-        void remove_at(item_index aIndex) override;
+        i_layout_item& add_at(layout_item_index aPosition, std::shared_ptr<i_layout_item> aItem) override;
+        void remove_at(layout_item_index aIndex) override;
         bool remove(i_layout_item& aItem) override;
         void remove_all() override;
         void move_all_to(i_layout& aDestination) override;
-        item_index count() const override;
-        optional_item_index find(const i_layout_item& aItem) const override;
-        bool is_widget_at(item_index aIndex) const override;
-        const i_layout_item& item_at(item_index aIndex) const override;
-        i_layout_item& item_at(item_index aIndex) override;
+        layout_item_index count() const override;
+        optional_layout_item_index find(const i_layout_item& aItem) const override;
+        bool is_widget_at(layout_item_index aIndex) const override;
+        const i_layout_item& item_at(layout_item_index aIndex) const override;
+        i_layout_item& item_at(layout_item_index aIndex) override;
         using i_layout::get_widget_at;
-        const i_widget& get_widget_at(item_index aIndex) const override;
-        i_widget& get_widget_at(item_index aIndex) override;
-        const i_layout& get_layout_at(item_index aIndex) const override;
-        i_layout& get_layout_at(item_index aIndex) override;
+        const i_widget& get_widget_at(layout_item_index aIndex) const override;
+        i_widget& get_widget_at(layout_item_index aIndex) override;
+        const i_layout& get_layout_at(layout_item_index aIndex) const override;
+        i_layout& get_layout_at(layout_item_index aIndex) override;
         const i_layout_item_proxy& find_proxy(const i_layout_item& aItem) const override;
         i_layout_item_proxy& find_proxy(i_layout_item& aItem) override;
     public:

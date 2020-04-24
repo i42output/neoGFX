@@ -143,7 +143,7 @@ namespace neogfx
         return *s;
     }
 
-    i_spacer& grid_layout::add_spacer_at(item_index aPosition)
+    i_spacer& grid_layout::add_spacer_at(layout_item_index aPosition)
     {
         auto s = std::make_shared<spacer>(expansion_policy::ExpandHorizontally | expansion_policy::ExpandVertically);
         cell_coordinates oldCursor = iCursor;

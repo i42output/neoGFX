@@ -55,7 +55,7 @@ namespace neogfx
         return *s;
     }
 
-    i_spacer& horizontal_layout::add_spacer_at(item_index aPosition)
+    i_spacer& horizontal_layout::add_spacer_at(layout_item_index aPosition)
     {
         auto s = std::make_shared<horizontal_spacer>();
         add_at(aPosition, s);

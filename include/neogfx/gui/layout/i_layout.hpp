@@ -28,6 +28,9 @@ namespace neogfx
     class i_widget;
     class i_spacer;
 
+    typedef uint32_t layout_item_index;
+    typedef std::optional<layout_item_index> optional_layout_item_index;
+
     class i_layout : public i_layout_item
     {
     public:
@@ -37,8 +40,6 @@ namespace neogfx
         static i_layout* debug;
     public:
         typedef i_layout abstract_type;
-        typedef uint32_t item_index;
-        typedef std::optional<item_index> optional_item_index;
     protected:
         class item;
     public:
@@ -50,24 +51,24 @@ namespace neogfx
         virtual ~i_layout() = default;
     public:    
         virtual i_layout_item& add(i_layout_item& aItem) = 0;
-        virtual i_layout_item& add_at(item_index aPosition, i_layout_item& aItem) = 0;
+        virtual i_layout_item& add_at(layout_item_index aPosition, i_layout_item& aItem) = 0;
         virtual i_layout_item& add(std::shared_ptr<i_layout_item> aItem) = 0;
-        virtual i_layout_item& add_at(item_index aPosition, std::shared_ptr<i_layout_item> aItem) = 0;
+        virtual i_layout_item& add_at(layout_item_index aPosition, std::shared_ptr<i_layout_item> aItem) = 0;
         virtual i_spacer& add_spacer() = 0;
-        virtual i_spacer& add_spacer_at(item_index aPosition) = 0;
-        virtual void remove_at(item_index aIndex) = 0;
+        virtual i_spacer& add_spacer_at(layout_item_index aPosition) = 0;
+        virtual void remove_at(layout_item_index aIndex) = 0;
         virtual bool remove(i_layout_item& aItem) = 0;
         virtual void remove_all() = 0;
         virtual void move_all_to(i_layout& aDestination) = 0;
-        virtual item_index count() const = 0;
-        virtual optional_item_index find(const i_layout_item& aItem) const = 0;
-        virtual bool is_widget_at(item_index aIndex) const = 0;
-        virtual const i_layout_item& item_at(item_index aIndex) const = 0;
-        virtual i_layout_item& item_at(item_index aIndex) = 0;
-        virtual const i_widget& get_widget_at(item_index aIndex) const = 0;
-        virtual i_widget& get_widget_at(item_index aIndex) = 0;
-        virtual const i_layout& get_layout_at(item_index aIndex) const = 0;
-        virtual i_layout& get_layout_at(item_index aIndex) = 0;
+        virtual layout_item_index count() const = 0;
+        virtual optional_layout_item_index find(const i_layout_item& aItem) const = 0;
+        virtual bool is_widget_at(layout_item_index aIndex) const = 0;
+        virtual const i_layout_item& item_at(layout_item_index aIndex) const = 0;
+        virtual i_layout_item& item_at(layout_item_index aIndex) = 0;
+        virtual const i_widget& get_widget_at(layout_item_index aIndex) const = 0;
+        virtual i_widget& get_widget_at(layout_item_index aIndex) = 0;
+        virtual const i_layout& get_layout_at(layout_item_index aIndex) const = 0;
+        virtual i_layout& get_layout_at(layout_item_index aIndex) = 0;
         virtual const i_layout_item_proxy& find_proxy(const i_layout_item& aItem) const = 0;
         virtual i_layout_item_proxy& find_proxy(i_layout_item& aItem) = 0;
     public:
@@ -96,7 +97,7 @@ namespace neogfx
             return static_cast<ItemType&>(add(static_cast<i_layout_item&>(aItem)));
         }
         template <typename ItemType>
-        ItemType& add_at(item_index aPosition, ItemType&& aItem)
+        ItemType& add_at(layout_item_index aPosition, ItemType&& aItem)
         {
             return static_cast<ItemType&>(add_at(aPosition, static_cast<i_layout_item&>(aItem)));
         }
@@ -106,7 +107,7 @@ namespace neogfx
             return static_cast<ItemType&>(add(std::static_pointer_cast<i_layout_item>(aItem)));
         }
         template <typename ItemType>
-        ItemType& add_at(item_index aPosition, std::shared_ptr<ItemType> aItem)
+        ItemType& add_at(layout_item_index aPosition, std::shared_ptr<ItemType> aItem)
         {
             return static_cast<ItemType&>(add_at(aPosition, std::static_pointer_cast<i_layout_item>(aItem)));
         }
@@ -118,7 +119,7 @@ namespace neogfx
             return *newItem;
         }
         template <typename ItemType, typename... Args>
-        ItemType& emplace_at(item_index aPosition, Args&&... args)
+        ItemType& emplace_at(layout_item_index aPosition, Args&&... args)
         {
             auto newItem = std::make_shared<ItemType>(std::forward<Args>(args)...);
             add(newItem);
@@ -128,30 +129,43 @@ namespace neogfx
             return *newItem;
         }
         template <typename ItemType>
-        ItemType& replace_item_at(item_index aPosition, ItemType&& aItem)
+        ItemType& replace_item_at(layout_item_index aPosition, ItemType&& aItem)
         {
             if (aPosition < count())
                 remove_at(aPosition);
             return static_cast<ItemType&>(add_at(aPosition, aItem));
         }
         template <typename ItemType>
-        ItemType& replace_item_at(item_index aPosition, std::shared_ptr<ItemType> aItem)
+        ItemType& replace_item_at(layout_item_index aPosition, std::shared_ptr<ItemType> aItem)
         {
             if (aPosition < count())
                 remove_at(aPosition);
             return static_cast<ItemType&>(add_at(aPosition, std::static_pointer_cast<i_layout_item>(aItem)));
         }
         template <typename WidgetT>
-        const WidgetT& get_widget_at(item_index aIndex) const
+        const WidgetT& get_widget_at(layout_item_index aIndex) const
         {
             return static_cast<const WidgetT&>(get_widget_at(aIndex));
         }
         template <typename WidgetT>
-        WidgetT& get_widget_at(item_index aIndex)
+        WidgetT& get_widget_at(layout_item_index aIndex)
         {
             return static_cast<WidgetT&>(get_widget_at(aIndex));
         }
     };
+
+    inline size calculate_relative_weight(const i_layout& aLayout, const i_layout_item& aItem)
+    {
+        size totalSize;
+        for (layout_item_index itemIndex = 0; itemIndex < aLayout.count(); ++itemIndex)
+            totalSize += aLayout.item_at(itemIndex).extents();
+        auto result = aItem.extents() / totalSize;
+        if (std::isnan(result.cx))
+            result.cx = 1.0;
+        if (std::isnan(result.cy))
+            result.cy = 1.0;
+        return result;
+    }
 
     class global_layout_state
     {

@@ -39,7 +39,7 @@ namespace neogfx
         flow_layout(i_layout& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
     public:
         i_spacer& add_spacer() override;
-        i_spacer& add_spacer_at(item_index aPosition) override;
+        i_spacer& add_spacer_at(layout_item_index aPosition) override;
     public:
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;

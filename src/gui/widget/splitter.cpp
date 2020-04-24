@@ -26,50 +26,27 @@
 namespace neogfx
 {
     splitter::splitter(splitter_type aType) :
-        iType(aType)
+        iType{ aType }
     {
-        set_margins(neogfx::margins(0.0));
-        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
-            set_layout(std::make_shared<horizontal_layout>());
-        else
-            set_layout(std::make_shared<vertical_layout>());
-        layout().set_margins(neogfx::margins(0.0));
+        init();
     }
 
     splitter::splitter(i_widget& aParent, splitter_type aType) : 
-        widget(aParent), 
-        iType(aType)
+        widget{ aParent },
+        iType{ aType }
     {
-        set_margins(neogfx::margins(0.0));
-        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
-            set_layout(std::make_shared<horizontal_layout>());
-        else
-            set_layout(std::make_shared<vertical_layout>());
-        layout().set_margins(neogfx::margins(0.0));
+        init();
     }
 
     splitter::splitter(i_layout& aLayout, splitter_type aType) :
-        widget(aLayout), 
-        iType(aType)
+        widget{ aLayout },
+        iType{ aType }
     {
-        set_margins(neogfx::margins(0.0));
-        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
-            set_layout(std::make_shared<horizontal_layout>());
-        else
-            set_layout(std::make_shared<vertical_layout>());
-        layout().set_margins(neogfx::margins(0.0));
+        init();
     }
 
     splitter::~splitter()
     {
-    }
-
-    i_widget& splitter::get_widget_at(const point& aPosition)
-    {
-        auto s = separator_at(aPosition);
-        if (s != std::nullopt)
-            return *this;
-        return widget::get_widget_at(aPosition);
     }
 
     neogfx::size_policy splitter::size_policy() const
@@ -80,6 +57,14 @@ namespace neogfx
             return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
         else
             return neogfx::size_policy{size_constraint::Minimum, size_constraint::Expanding};
+    }
+
+    i_widget& splitter::get_widget_at(const point& aPosition)
+    {
+        auto s = separator_at(aPosition);
+        if (s != std::nullopt)
+            return *this;
+        return widget::get_widget_at(aPosition);
     }
 
     void splitter::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -193,10 +178,26 @@ namespace neogfx
 
     void splitter::panes_resized()
     {
+        for (layout_item_index itemIndex = 0; itemIndex < layout().count(); ++itemIndex)
+        {
+            auto& item = layout().item_at(itemIndex);
+            item.set_weight(calculate_relative_weight(layout(), item), false);
+            item.set_fixed_size({}, false);
+        }
     }
 
     void splitter::reset_pane_sizes_requested(const std::optional<uint32_t>&)
     {
+    }
+
+    void splitter::init()
+    {
+        set_margins(neogfx::margins(0.0));
+        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+            set_layout(std::make_shared<horizontal_layout>());
+        else
+            set_layout(std::make_shared<vertical_layout>());
+        layout().set_margins(neogfx::margins(0.0));
     }
 
     std::optional<splitter::separator_type> splitter::separator_at(const point& aPosition) const

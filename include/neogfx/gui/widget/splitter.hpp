@@ -52,9 +52,9 @@ namespace neogfx
         splitter(i_layout& aLayout, splitter_type aType = splitter_type::Horizontal);
         ~splitter();
     public:
-        i_widget& get_widget_at(const point& aPosition) override;
-    public:
         neogfx::size_policy size_policy() const override;
+    public:
+        i_widget& get_widget_at(const point& aPosition) override;
     public:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
@@ -67,6 +67,7 @@ namespace neogfx
         virtual void panes_resized();
         virtual void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = std::optional<uint32_t>());
     private:
+        void init();
         std::optional<separator_type> separator_at(const point& aPosition) const;
     private:
         splitter_type iType;
