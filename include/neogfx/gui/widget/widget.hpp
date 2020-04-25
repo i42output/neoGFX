@@ -135,7 +135,6 @@ namespace neogfx
     public:
         bool is_widget() const override;
         const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
     public:
         rect element_rect(skin_element aElement) const override;
         // i_widget
@@ -153,12 +152,14 @@ namespace neogfx
         void resized() override;
         const i_widget& get_widget_at(const point& aPosition) const override;
         i_widget& get_widget_at(const point& aPosition) override;
+        widget_part part(const point& aPosition) const override;
         widget_part hit_test(const point& aPosition) const override;
         // i_layout_item
     public:
         bool is_layout() const override;
         const i_layout& as_layout() const override;
         i_layout& as_layout() override;
+        i_widget& as_widget() override;
     public:
         bool has_parent_layout() const override;
         const i_layout& parent_layout() const override;

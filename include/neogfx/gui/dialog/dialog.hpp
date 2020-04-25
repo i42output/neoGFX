@@ -69,14 +69,14 @@ namespace neogfx
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     public:
-        const i_layout& client_layout() const override;
-        i_layout& client_layout() override;
-        virtual const i_layout& button_box_layout() const;
-        virtual i_layout& button_box_layout();
+        using window::has_layout;   
+        using window::layout;
+        bool has_layout(standard_layout aStandardLayout) const override;
+        const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const override;
+        i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None)  override;
     private:
         void init();
     private:
-        vertical_layout iClientLayout;
         vertical_layout iButtonBoxLayout;
         std::optional<dialog_button_box> iButtonBox;
         std::optional<dialog_result> iResult;

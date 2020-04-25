@@ -20,48 +20,18 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <string>
 #include <neolib/timer.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 #include <neogfx/gui/widget/i_dockable.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
-#include <neogfx/gui/widget/label.hpp>
-#include <neogfx/gui/widget/push_button.hpp>
-#include <neogfx/gui/layout/horizontal_layout.hpp>
-#include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/decorated.hpp>
 
 namespace neogfx
 {
-    class dockable_title_bar : public widget
+    class dockable : public decorated<framed_widget, reference_counted<i_dockable>>
     {
-    public:
-        dockable_title_bar(i_dockable& aDockable);
-    protected:
-        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
-    protected:
-        bool transparent_background() const override;
-    protected:
-        color background_color() const override;
-    protected:
-        neogfx::focus_policy focus_policy() const override;
-    private:
-        void update_textures();
-    private:
-        i_dockable& iDockable;
-        neolib::callback_timer iUpdater;
-        horizontal_layout iLayout;
-        label iTitle;
-        horizontal_spacer iSpacer;
-        push_button iPinButton;
-        push_button iUnpinButton;
-        push_button iCloseButton;
-        sink iSink;
-        mutable std::optional<std::pair<color, texture>> iPinTexture;
-        mutable std::optional<std::pair<color, texture>> iUnpinTexture;
-        mutable std::optional<std::pair<color, texture>> iCloseTexture;
-    };
-
-    class dockable : public framed_widget, public reference_counted<i_dockable>
-    {
+        typedef decorated<framed_widget, reference_counted<i_dockable>> base_type;
     public:
         define_declared_event(Docked, docked, i_dock&)
         define_declared_event(Undocked, undocked, i_dock&)
@@ -75,8 +45,6 @@ namespace neogfx
         void dock(i_dock& aDock) override;
         void undock() override;
     public:
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
         const i_widget& docked_widget() const override;
         i_widget& docked_widget() override;
     protected:
@@ -85,7 +53,6 @@ namespace neogfx
         neolib::string iTitle;
         dock_area iAcceptableDocks;
         vertical_layout iLayout;
-        dockable_title_bar iTitleBar;
         std::shared_ptr<i_widget> iDockedWidget;
         i_dock* iDock;
     };
@@ -95,9 +62,8 @@ namespace neogfx
     {
         return dockable{ std::make_shared<WidgetType>(std::forward<Args>(aArgs)...), aTitle, aAcceptableDocks };
     }
-
     template <typename WidgetType, typename... Args>
-    inline std::shared_ptr<i_dockable> make_shared_dockable(const std::string& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
+    static std::shared_ptr<i_dockable> make_shared_dockable(const std::string& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
     {
         return std::make_shared<dockable>(std::make_shared<WidgetType>(std::forward<Args>(aArgs)...), aTitle, aAcceptableDocks);
     }

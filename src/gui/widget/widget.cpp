@@ -812,7 +812,7 @@ namespace neogfx
         return const_cast<i_widget&>(to_const(*this).get_widget_at(aPosition));
     }
 
-    widget_part widget::hit_test(const point& aPosition) const
+    widget_part widget::part(const point& aPosition) const
     {
         if (client_rect().contains(aPosition))
             return widget_part::Client;
@@ -820,6 +820,11 @@ namespace neogfx
             return widget_part::NonClient;
         else
             return widget_part::Nowhere;
+    }
+
+    widget_part widget::hit_test(const point& aPosition) const
+    {
+        return part(aPosition);
     }
 
     bool widget::has_size_policy() const

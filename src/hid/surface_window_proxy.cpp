@@ -580,21 +580,7 @@ namespace neogfx
         const i_widget& w = widget_for_mouse_event(aPosition, true);
         if (w.effectively_disabled())
             return widget_part::NowhereError;
-        auto result = w.hit_test(aPosition - w.origin());
-        if (w.is_root() && w.root().is_nested())
-        {
-            switch (result)
-            {
-            case widget_part::Client:
-            case widget_part::Nowhere:
-            case widget_part::NowhereError:
-                break;
-            default:
-                result |= widget_part::Nested;
-                break;
-            }
-        }
-        return result;
+        return w.hit_test(aPosition - w.origin());
     }
 
     rect surface_window_proxy::native_window_widget_part_rect(widget_part aWidgetPart) const

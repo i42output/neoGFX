@@ -53,9 +53,9 @@ namespace neogfx
         const i_layout& item_layout() const;
         i_layout& item_layout();
         template <typename LayoutT, typename... Args>
-        LayoutT& with_item_layout(Args... args)
+        LayoutT& with_item_layout(Args&&... args)
         {
-            set_item_layout(std::make_shared<LayoutT>(args...));
+            set_item_layout(std::make_shared<LayoutT>(std::forward<Args>(args)...));
             return static_cast<LayoutT&>(item_layout());
         }
     public:

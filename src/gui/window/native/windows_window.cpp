@@ -83,47 +83,47 @@ namespace neogfx
         {
             switch (aWidgetPart)
             {
-            case widget_part::NonClientTitleBar:
-            case widget_part::NonClientGrab:
+            case widget_part::TitleBar:
+            case widget_part::Grab:
                 return HTCAPTION;
-            case widget_part::NonClientBorder:
+            case widget_part::Border:
                 return HTBORDER;
-            case widget_part::NonClientBorderLeft:
+            case widget_part::BorderLeft:
                 return HTLEFT;
-            case widget_part::NonClientBorderTopLeft:
+            case widget_part::BorderTopLeft:
                 return HTTOPLEFT;
-            case widget_part::NonClientBorderTop:
+            case widget_part::BorderTop:
                 return HTTOP;
-            case widget_part::NonClientBorderTopRight:
+            case widget_part::BorderTopRight:
                 return HTTOPRIGHT;
-            case widget_part::NonClientBorderRight:
+            case widget_part::BorderRight:
                 return HTRIGHT;
-            case widget_part::NonClientBorderBottomRight:
+            case widget_part::BorderBottomRight:
                 return HTBOTTOMRIGHT;
-            case widget_part::NonClientBorderBottom:
+            case widget_part::BorderBottom:
                 return HTBOTTOM;
-            case widget_part::NonClientBorderBottomLeft:
+            case widget_part::BorderBottomLeft:
                 return HTBOTTOMLEFT;
-            case widget_part::NonClientGrowBox:
+            case widget_part::GrowBox:
                 return HTGROWBOX;
-            case widget_part::NonClientCloseButton:
+            case widget_part::CloseButton:
                 return HTCLOSE;
-            case widget_part::NonClientMaximizeButton:
+            case widget_part::MaximizeButton:
                 return HTMAXBUTTON;
-            case widget_part::NonClientMinimizeButton:
+            case widget_part::MinimizeButton:
                 return HTMINBUTTON;
-            case widget_part::NonClientRestoreButton:
+            case widget_part::RestoreButton:
                 return HTMAXBUTTON;
-            case widget_part::NonClientMenu:
+            case widget_part::Menu:
                 return HTMENU;
-            case widget_part::NonClientSystemMenu:
+            case widget_part::SystemMenu:
                 return HTSYSMENU;
             case widget_part::Nowhere:
                 return HTNOWHERE;
             case widget_part::NowhereError:
                 return HTERROR;
-            case widget_part::NonClientVerticalScrollbar:
-            case widget_part::NonClientHorizontalScrollbar:
+            case widget_part::VerticalScrollbar:
+            case widget_part::HorizontalScrollbar:
             case widget_part::Client:
             case widget_part::NonClient:
             case widget_part::NonClientOther:
@@ -985,19 +985,19 @@ namespace neogfx
                         result = wndproc(hwnd, msg, wparam, lparam);
                         break;
                     case HTSYSMENU:
-                        self.iClickedWidgetPart = widget_part::NonClientSystemMenu;
+                        self.iClickedWidgetPart = widget_part::SystemMenu;
                         result = 0;
                         break;
                     case HTMINBUTTON:
-                        self.iClickedWidgetPart = widget_part::NonClientMinimizeButton;
+                        self.iClickedWidgetPart = widget_part::MinimizeButton;
                         result = 0;
                         break;
                     case HTMAXBUTTON:
-                        self.iClickedWidgetPart = widget_part::NonClientMaximizeButton;
+                        self.iClickedWidgetPart = widget_part::MaximizeButton;
                         result = 0;
                         break;
                     case HTCLOSE:
-                        self.iClickedWidgetPart = widget_part::NonClientCloseButton;
+                        self.iClickedWidgetPart = widget_part::CloseButton;
                         result = 0;
                         break;
                     default:
@@ -1016,7 +1016,7 @@ namespace neogfx
                     switch (wparam)
                     {
                     case HTCAPTION:
-                        if (msg == WM_NCRBUTTONUP && self.iClickedWidgetPart == widget_part::NonClientTitleBar)
+                        if (msg == WM_NCRBUTTONUP && self.iClickedWidgetPart == widget_part::TitleBar)
                         {
                             self.iSystemMenuOpen = true;
                             auto cmd = TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN | TPM_RETURNCMD, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam), 0, hwnd, NULL);
@@ -1027,10 +1027,10 @@ namespace neogfx
                         result = 0;
                         break;
                     case HTSYSMENU:
-                        if (self.iClickedWidgetPart == widget_part::NonClientSystemMenu)
+                        if (self.iClickedWidgetPart == widget_part::SystemMenu)
                         {
                             self.iSystemMenuOpen = true;
-                            basic_rect<int> rectTitleBar = self.surface_window().native_window_widget_part_rect(widget_part::NonClientTitleBar) + self.surface_position();
+                            basic_rect<int> rectTitleBar = self.surface_window().native_window_widget_part_rect(widget_part::TitleBar) + self.surface_position();
                             auto cmd = TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN | TPM_RETURNCMD, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
                             if (cmd != 0)
                                 PostMessage(hwnd, WM_SYSCOMMAND, cmd, lparam);
@@ -1041,17 +1041,17 @@ namespace neogfx
                         result = 0;
                         break;
                     case HTMINBUTTON:
-                        if (self.iClickedWidgetPart == widget_part::NonClientMinimizeButton)
+                        if (self.iClickedWidgetPart == widget_part::MinimizeButton)
                             PostMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, lparam);
                         result = 0;
                         break;
                     case HTMAXBUTTON:
-                        if (self.iClickedWidgetPart == widget_part::NonClientMaximizeButton)
+                        if (self.iClickedWidgetPart == widget_part::MaximizeButton)
                             PostMessage(hwnd, WM_SYSCOMMAND, IsMaximized(hwnd) ? SC_RESTORE : SC_MAXIMIZE, lparam);
                         result = 0;
                         break;
                     case HTCLOSE:
-                        if (self.iClickedWidgetPart == widget_part::NonClientCloseButton)
+                        if (self.iClickedWidgetPart == widget_part::CloseButton)
                             PostMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, lparam);
                         result = 0;
                         break;

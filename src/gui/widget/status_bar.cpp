@@ -111,7 +111,7 @@ namespace neogfx
 
     widget_part status_bar::size_grip::hit_test(const point&) const
     {
-        return widget_part::NonClientBorderBottomRight;
+        return widget_part::BorderBottomRight;
     }
 
     bool status_bar::size_grip::ignore_non_client_mouse_events() const

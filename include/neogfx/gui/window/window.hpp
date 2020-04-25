@@ -168,20 +168,11 @@ namespace neogfx
     public:
         rect widget_part_rect(widget_part aWidgetPart) const override;
     public:
-        const i_layout& non_client_layout() const override;
-        i_layout& non_client_layout() override;
-        const i_layout& title_bar_layout() const override;
-        i_layout& title_bar_layout() override;
-        const i_layout& menu_layout() const override;
-        i_layout& menu_layout() override;
-        const i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) const override;
-        i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) override;
-        const i_layout& dock_layout(dock_area aDockArea = dock_area::Left) const override;
-        i_layout& dock_layout(dock_area aDockArea = dock_area::Left) override;
-        const i_layout& client_layout() const override;
-        i_layout& client_layout() override;
-        const i_layout& status_bar_layout() const override;
-        i_layout& status_bar_layout() override;
+        using scrollable_widget::has_layout;
+        using scrollable_widget::layout;
+        bool has_layout(standard_layout aStandardLayout) const override;
+        const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const override;
+        i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) override;
     public:
         const i_widget& client_widget() const override;
         i_widget& client_widget() override;
@@ -202,6 +193,7 @@ namespace neogfx
         void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) override;
         void dismiss_children(const i_widget* aClickedWidget = nullptr) override;
     public:
+        bool is_widget() const override;
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     private:

@@ -29,13 +29,14 @@ namespace neogfx
     class i_widget;
     class i_layout_item_proxy;
 
+    struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::not_a_layout") {} };
+    struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::not_a_widget") {} };
+    struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::no_parent_layout") {} };
+    struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::no_layout_owner") {} };
+    struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
+
     class i_layout_item : public i_geometry, public i_anchorable_object
     {
-    public:
-        struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::i_layout_item::not_a_layout") {} };
-        struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::i_layout_item::not_a_widget") {} };
-        struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::i_layout_item::no_parent_layout") {} };
-        struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::i_layout_item::no_layout_owner") {} };
     public:
         virtual ~i_layout_item() = default;
     public:

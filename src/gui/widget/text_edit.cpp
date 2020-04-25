@@ -300,7 +300,7 @@ namespace neogfx
         }
         scoped_scissor scissor{ aGraphicsContext, clipRect };
         if (iDefaultStyle.background_color() != neolib::none)
-            aGraphicsContext.fill_rect(client_rect(true), to_brush(iDefaultStyle.background_color()));
+            aGraphicsContext.fill_rect(client_rect(), to_brush(iDefaultStyle.background_color()));
         coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < columns(); ++columnIndex)
         {

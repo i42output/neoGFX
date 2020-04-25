@@ -664,7 +664,8 @@ namespace neogfx
             selection_model().set_presentation_model(*aPresentationModel);
         if (view_created())
             view().set_presentation_model(aPresentationModel);
-        managing_layout().layout_items(true);
+        if (has_managing_layout())
+            managing_layout().layout_items(true);
         update();
     }
 

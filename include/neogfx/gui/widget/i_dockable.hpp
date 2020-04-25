@@ -21,14 +21,14 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/i_enum.hpp>
-#include <neogfx/gui/widget/i_skinnable_item.hpp>
+#include <neogfx/gui/widget/i_tool.hpp>
 
 namespace neogfx
 {
     class i_widget;
     class i_dock;
 
-    class i_dockable : public virtual i_skinnable_item, public i_reference_counted
+    class i_dockable : public i_tool, public i_reference_counted
     {
     public:
         declare_event(docked, i_dock&)
@@ -38,15 +38,11 @@ namespace neogfx
     public:
         virtual ~i_dockable() = default;
     public:
-        virtual const neolib::i_string& title() const = 0;
-    public:
         virtual bool can_dock(const i_dock& aDock) const = 0;
         virtual bool is_docked() const = 0;
         virtual void dock(i_dock& aDock) = 0;
         virtual void undock() = 0;
     public:
-        virtual const i_widget& as_widget() const = 0;
-        virtual i_widget& as_widget() = 0;
         virtual const i_widget& docked_widget() const = 0;
         virtual i_widget& docked_widget() = 0;
     };

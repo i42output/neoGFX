@@ -271,6 +271,14 @@ namespace neogfx
         return static_cast<layout_item_index>(iItems.size());
     }
 
+    layout_item_index layout::index_of(const i_layout_item& aItem) const
+    {
+        auto result = find(aItem);
+        if (result)
+            return *result;
+        throw layout_item_not_found();
+    }
+
     optional_layout_item_index layout::find(const i_layout_item& aItem) const
     {
         for (auto i = iItems.begin(); i != iItems.end(); ++i)

@@ -25,7 +25,7 @@
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
-#include <neogfx/gui/layout/layout_bits.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 
@@ -36,9 +36,8 @@ namespace neogfx
     class i_nested_window;
     class i_nest;
     class i_widget;
-    class i_layout;
 
-    class i_window
+    class i_window : public i_standard_layout_container
     {
     public:
         declare_event(window_event, neogfx::window_event&)
@@ -139,21 +138,6 @@ namespace neogfx
         virtual point mouse_position() const = 0;
     public:
         virtual rect widget_part_rect(widget_part aWidgetPart) const = 0;
-    public:
-        virtual const i_layout& non_client_layout() const = 0;
-        virtual i_layout& non_client_layout() = 0;
-        virtual const i_layout& title_bar_layout() const = 0;
-        virtual i_layout& title_bar_layout() = 0;
-        virtual const i_layout& menu_layout() const = 0;
-        virtual i_layout& menu_layout() = 0;
-        virtual const i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) const = 0;
-        virtual i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) = 0;
-        virtual const i_layout& dock_layout(dock_area aDockArea = dock_area::Left) const =0;
-        virtual i_layout& dock_layout(dock_area aDockArea = dock_area::Left) = 0;
-        virtual const i_layout& client_layout() const = 0;
-        virtual i_layout& client_layout() = 0;
-        virtual const i_layout& status_bar_layout() const = 0;
-        virtual i_layout& status_bar_layout() = 0;
     public:
         virtual const i_widget& client_widget() const = 0;
         virtual i_widget& client_widget() = 0;

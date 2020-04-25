@@ -22,11 +22,10 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/lifetime.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include "layout_bits.hpp"
-#include "grid_layout.hpp"
-#include "horizontal_layout.hpp"
-#include "vertical_layout.hpp"
-#include "stack_layout.hpp"
+#include <neogfx/gui/layout/grid_layout.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/stack_layout.hpp>
 
 namespace neogfx
 {

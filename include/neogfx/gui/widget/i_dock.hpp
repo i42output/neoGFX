@@ -22,10 +22,11 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/i_vector.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
-#include <neogfx/gui/widget/i_dockable.hpp>
 
 namespace neogfx
 {
+    class i_dockable;
+
     enum class dock_area : uint32_t
     {
         None        = 0x00000000,

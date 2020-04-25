@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
+#include <neogfx/gui/widget/i_dock.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
 
 namespace neogfx
@@ -30,6 +31,128 @@ namespace neogfx
 
     typedef uint32_t layout_item_index;
     typedef std::optional<layout_item_index> optional_layout_item_index;
+
+    enum class layout_position : uint32_t
+    {
+        None    = 0x00000000,
+        Top     = 0x00000001,
+        Left    = 0x00000002,
+        Centre  = 0x00000004,
+        Right   = 0x00000008,
+        Bottom  = 0x00000010
+    };
+
+    enum class standard_layout : uint32_t
+    {
+        Default         = 0x00000000,
+        Client          = 0x00000001,
+        NonClient       = 0x00000002,
+        TitleBar        = 0x00000003,
+        Menu            = 0x00000004,
+        Toolbar         = 0x00000005,
+        Dock            = 0x00000006,
+        StatusBar       = 0x00000007,
+        ButtonBox       = 0x00000009
+    };
+
+    class i_layout;
+
+    struct standard_layout_not_found : std::logic_error { standard_layout_not_found() : std::logic_error{ "neogfx::standard_layout_not_found" } {} };
+
+    class i_standard_layout_container
+    {
+    public:
+        virtual ~i_standard_layout_container() = default;
+    public:
+        virtual bool is_widget() const = 0;
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
+    public:
+        virtual bool has_layout(standard_layout aStandardLayout) const = 0;
+        virtual const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const = 0;
+        virtual i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) = 0;
+    public:
+        const i_layout& non_client_layout() const
+        {
+            return layout(standard_layout::NonClient);
+        }
+        i_layout& non_client_layout()
+        {
+            return layout(standard_layout::NonClient);
+        }
+        const i_layout& title_bar_layout() const
+        {
+            return layout(standard_layout::TitleBar);
+        }
+        i_layout& title_bar_layout()
+        {
+            return layout(standard_layout::TitleBar);
+        }
+        const i_layout& menu_layout() const
+        {
+            return layout(standard_layout::Menu);
+        }
+        i_layout& menu_layout()
+        {
+            return layout(standard_layout::Menu);
+        }
+        const i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) const
+        {
+            return layout(standard_layout::Toolbar, aPosition);
+        }
+        i_layout& toolbar_layout(layout_position aPosition = layout_position::Top)
+        {
+            return layout(standard_layout::Toolbar, aPosition);
+        }
+        const i_layout& dock_layout(dock_area aDockArea = dock_area::Left) const
+        {
+            return layout(standard_layout::Dock, to_position(aDockArea));
+        }
+        i_layout& dock_layout(dock_area aDockArea = dock_area::Left)
+        {
+            return layout(standard_layout::Dock, to_position(aDockArea));
+        }
+        const i_layout& client_layout() const
+        {
+            return layout(standard_layout::Client);
+        }
+        i_layout& client_layout()
+        {
+            return layout(standard_layout::Client);
+        }
+        const i_layout& button_box_layout() const
+        {
+            return layout(standard_layout::ButtonBox);
+        }
+        i_layout& button_box_layout()
+        {
+            return layout(standard_layout::ButtonBox);
+        }
+        const i_layout& status_bar_layout() const
+        {
+            return layout(standard_layout::StatusBar);
+        }
+        i_layout& status_bar_layout()
+        {
+            return layout(standard_layout::StatusBar);
+        }
+    public:
+        static layout_position to_position(dock_area aDockArea)
+        {
+            switch (aDockArea)
+            {
+            case dock_area::Top:
+                return layout_position::Top;
+            case dock_area::Bottom:
+                return layout_position::Bottom;
+            case dock_area::Left:
+            default:
+                return layout_position::Left;
+            case dock_area::Right:
+                return layout_position::Right;
+            }
+        }
+    };
 
     class i_layout : public i_layout_item
     {
@@ -61,6 +184,7 @@ namespace neogfx
         virtual void remove_all() = 0;
         virtual void move_all_to(i_layout& aDestination) = 0;
         virtual layout_item_index count() const = 0;
+        virtual layout_item_index index_of(const i_layout_item& aItem) const = 0;
         virtual optional_layout_item_index find(const i_layout_item& aItem) const = 0;
         virtual bool is_widget_at(layout_item_index aIndex) const = 0;
         virtual const i_layout_item& item_at(layout_item_index aIndex) const = 0;

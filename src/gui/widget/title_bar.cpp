@@ -25,9 +25,8 @@
 
 namespace neogfx
 {
-    title_bar::title_bar(i_window& aWindow, const std::string& aTitle) :
-        widget{ aWindow.as_widget() },
-        iWindow{ aWindow },
+    title_bar::title_bar(i_standard_layout_container& aContainer, const std::string& aTitle) :
+        widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, service<i_app>().default_window_icon() },
         iTitle{ iLayout, aTitle },
@@ -40,9 +39,8 @@ namespace neogfx
         init();
     }
 
-    title_bar::title_bar(i_window& aWindow, const i_texture& aIcon, const std::string& aTitle) :
-        widget{ aWindow.as_widget() },
-        iWindow{ aWindow },
+    title_bar::title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle) :
+        widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, aIcon },
         iTitle{ iLayout, aTitle },
@@ -55,54 +53,8 @@ namespace neogfx
         init();
     }
 
-    title_bar::title_bar(i_window& aWindow, const i_image& aIcon, const std::string& aTitle) :
-        widget{ aWindow.as_widget() },
-        iWindow{ aWindow },
-        iLayout{ *this },
-        iIcon{ iLayout, aIcon },
-        iTitle{ iLayout, aTitle },
-        iSpacer{ iLayout },
-        iMinimizeButton{ iLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iLayout, push_button_style::TitleBar },
-        iRestoreButton{ iLayout, push_button_style::TitleBar },
-        iCloseButton{ iLayout, push_button_style::TitleBar }
-    {
-        init();
-    }
-
-    title_bar::title_bar(i_window& aWindow, i_layout& aLayout, const std::string& aTitle) :
-        widget{ aLayout },
-        iWindow{ aWindow },
-        iLayout{ *this },
-        iIcon{ iLayout, service<i_app>().default_window_icon() },
-        iTitle{ iLayout, aTitle },
-        iSpacer{ iLayout },
-        iMinimizeButton{ iLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iLayout, push_button_style::TitleBar },
-        iRestoreButton{ iLayout, push_button_style::TitleBar },
-        iCloseButton{ iLayout, push_button_style::TitleBar }
-    {
-        init();
-    }
-
-    title_bar::title_bar(i_window& aWindow, i_layout& aLayout, const i_texture& aIcon, const std::string& aTitle) :
-        widget{ aLayout },
-        iWindow{ aWindow },
-        iLayout{ *this },
-        iIcon{ iLayout, aIcon },
-        iTitle{ iLayout, aTitle },
-        iSpacer{ iLayout },
-        iMinimizeButton{ iLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iLayout, push_button_style::TitleBar },
-        iRestoreButton{ iLayout, push_button_style::TitleBar },
-        iCloseButton{ iLayout, push_button_style::TitleBar }
-    {
-        init();
-    }
-
-    title_bar::title_bar(i_window& aWindow, i_layout& aLayout, const i_image& aIcon, const std::string& aTitle) :
-        widget{ aLayout },
-        iWindow{ aWindow },
+    title_bar::title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle) :
+        widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, aIcon },
         iTitle{ iLayout, aTitle },
@@ -142,7 +94,7 @@ namespace neogfx
 
     widget_part title_bar::hit_test(const point&) const
     {
-        return widget_part::NonClientTitleBar;
+        return widget_part::TitleBar;
     }
 
     void title_bar::init()
@@ -177,22 +129,22 @@ namespace neogfx
         });
         auto update_widgets = [this]()
         {
-            bool isEnabled = iWindow.window_enabled();
-            bool isActive = iWindow.is_active();
-            bool isIconic = iWindow.is_iconic();
-            bool isMaximized = iWindow.is_maximized();
-            bool isRestored = iWindow.is_restored();
+            bool isEnabled = root().window_enabled();
+            bool isActive = root().is_active();
+            bool isIconic = root().is_iconic();
+            bool isMaximized = root().is_maximized();
+            bool isRestored = root().is_restored();
             icon().enable(isActive);
             title().enable(isActive);
             iMinimizeButton.enable(!isIconic && isEnabled);
             iMaximizeButton.enable(!isMaximized && isEnabled);
             iRestoreButton.enable(!isRestored && isEnabled);
-            iCloseButton.enable(iWindow.can_close());
+            iCloseButton.enable(root().can_close());
             bool layoutChanged = false;
-            layoutChanged = iMinimizeButton.show(!isIconic && (iWindow.style() & window_style::MinimizeBox) == window_style::MinimizeBox) || layoutChanged;
-            layoutChanged = iMaximizeButton.show(!isMaximized && (iWindow.style() & window_style::MaximizeBox) == window_style::MaximizeBox) || layoutChanged;
-            layoutChanged = iRestoreButton.show(!isRestored && (iWindow.style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid) || layoutChanged;
-            layoutChanged = iCloseButton.show((iWindow.style() & window_style::Close) != window_style::Invalid) || layoutChanged;
+            layoutChanged = iMinimizeButton.show(!isIconic && (root().style() & window_style::MinimizeBox) == window_style::MinimizeBox) || layoutChanged;
+            layoutChanged = iMaximizeButton.show(!isMaximized && (root().style() & window_style::MaximizeBox) == window_style::MaximizeBox) || layoutChanged;
+            layoutChanged = iRestoreButton.show(!isRestored && (root().style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid) || layoutChanged;
+            layoutChanged = iCloseButton.show((root().style() & window_style::Close) != window_style::Invalid) || layoutChanged;
             if (layoutChanged)
             {
                 managing_layout().layout_items(true);
@@ -203,7 +155,7 @@ namespace neogfx
         {
             update_widgets();
         });
-        iSink += iWindow.window_event([this, update_widgets](neogfx::window_event& e)
+        iSink += root().window_event([this, update_widgets](neogfx::window_event& e)
         {
             switch (e.type())
             {

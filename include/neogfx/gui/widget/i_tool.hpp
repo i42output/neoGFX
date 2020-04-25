@@ -1,7 +1,7 @@
-// layout_bits.hpp
+// i_tool.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,15 +20,20 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_string.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/widget/i_skinnable_item.hpp>
 
 namespace neogfx
 {
-    enum class layout_position
+    class i_tool : public virtual i_standard_layout_container, public virtual i_skinnable_item
     {
-        Top,
-        Left,
-        Centre,
-        Right,
-        Bottom
+    public:
+        virtual ~i_tool() = default;
+    public:
+        using i_standard_layout_container::is_widget;
+        using i_standard_layout_container::as_widget;
+    public:
+        virtual const neolib::i_string& title() const = 0;
     };
 }

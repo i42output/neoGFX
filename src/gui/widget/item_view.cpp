@@ -304,6 +304,7 @@ namespace neogfx
                             {
                                 return true;
                             }
+
                             const i_widget& as_widget() const override
                             {
                                 return *widget;
@@ -336,6 +337,7 @@ namespace neogfx
                             {
                                 return true;
                             }
+
                             const i_widget& as_widget() const override
                             {
                                 return *widget;

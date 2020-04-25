@@ -116,9 +116,9 @@ namespace neogfx
     widget_part scrollable_widget::hit_test(const point& aPosition) const
     {
         if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
-            return widget_part::NonClientVerticalScrollbar;
+            return widget_part::VerticalScrollbar;
         else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + origin()) != scrollbar_element::None)
-            return widget_part::NonClientHorizontalScrollbar;
+            return widget_part::HorizontalScrollbar;
         else
             return widget::hit_test(aPosition);
     }

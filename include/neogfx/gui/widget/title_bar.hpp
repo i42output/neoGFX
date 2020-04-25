@@ -55,12 +55,9 @@ namespace neogfx
             TextureClose
         };
     public:
-        title_bar(i_window& aWindow, const std::string& aTitle = std::string{});
-        title_bar(i_window& aWindow, const i_texture& aIcon, const std::string& aTitle = std::string{});
-        title_bar(i_window& aWindow, const i_image& aIcon, const std::string& aTitle = std::string{});
-        title_bar(i_window& aWindow, i_layout& aLayout, const std::string& aTitle = std::string{});
-        title_bar(i_window& aWindow, i_layout& aLayout, const i_texture& aIcon, const std::string& aTitle = std::string{});
-        title_bar(i_window& aWindow, i_layout& aLayout, const i_image& aIcon, const std::string& aTitle = std::string{});
+        title_bar(i_standard_layout_container& aContainer, const std::string& aTitle = std::string{});
+        title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle = std::string{});
+        title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle = std::string{});
     public:
         const image_widget& icon() const;
         image_widget& icon();
@@ -74,24 +71,23 @@ namespace neogfx
         void init();
         void update_textures();
     private:
-        i_window& iWindow;
         horizontal_layout iLayout;
-        non_client_item<image_widget, widget_part::NonClientSystemMenu> iIcon;
-        non_client_item<text_widget, widget_part::NonClientTitleBar> iTitle;
+        non_client_item<image_widget, widget_part::SystemMenu> iIcon;
+        non_client_item<text_widget, widget_part::TitleBar> iTitle;
         horizontal_spacer iSpacer;
-        non_client_item<push_button, widget_part::NonClientMinimizeButton> iMinimizeButton;
-        non_client_item<push_button, widget_part::NonClientMaximizeButton> iMaximizeButton;
-        non_client_item<push_button, widget_part::NonClientMaximizeButton> iRestoreButton;
-        non_client_item<push_button, widget_part::NonClientCloseButton> iCloseButton;
+        non_client_item<push_button, widget_part::MinimizeButton> iMinimizeButton;
+        non_client_item<push_button, widget_part::MaximizeButton> iMaximizeButton;
+        non_client_item<push_button, widget_part::MaximizeButton> iRestoreButton;
+        non_client_item<push_button, widget_part::CloseButton> iCloseButton;
         sink iSink;
         mutable std::optional<std::pair<color, texture>> iTextures[4];
     };
 
     template <>
-    inline widget_part title_bar::non_client_item<image_widget, widget_part::NonClientSystemMenu>::hit_test(const point&) const
+    inline widget_part title_bar::non_client_item<image_widget, widget_part::SystemMenu>::hit_test(const point&) const
     {
-        if ((static_cast<const title_bar&>(parent()).iWindow.style() & window_style::SystemMenu) == window_style::SystemMenu)
-            return widget_part::NonClientSystemMenu;
-        return widget_part::NonClientTitleBar;
+        if ((static_cast<const title_bar&>(parent()).root().style() & window_style::SystemMenu) == window_style::SystemMenu)
+            return widget_part::SystemMenu;
+        return widget_part::TitleBar;
     }
 }

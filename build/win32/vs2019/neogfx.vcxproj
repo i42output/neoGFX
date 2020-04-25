@@ -437,6 +437,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\decorated.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\dock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\dockable.hpp" />
@@ -474,6 +475,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_text_document.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tool.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\line_edit.hpp" />
@@ -505,6 +507,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\tool_title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tree_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget_bits.hpp" />
@@ -718,6 +721,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\toolbar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tool_title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tree_view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />

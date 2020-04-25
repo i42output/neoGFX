@@ -96,6 +96,7 @@ namespace neogfx
         void remove_all() override;
         void move_all_to(i_layout& aDestination) override;
         layout_item_index count() const override;
+        layout_item_index index_of(const i_layout_item& aItem) const override;
         optional_layout_item_index find(const i_layout_item& aItem) const override;
         bool is_widget_at(layout_item_index aIndex) const override;
         const i_layout_item& item_at(layout_item_index aIndex) const override;

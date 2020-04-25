@@ -588,7 +588,7 @@ namespace neogfx
     {
         auto result = scrollable_widget::hit_test(aPosition);
         if (result == widget_part::Client)
-            result = widget_part::NonClientGrab;
+            result = widget_part::Grab;
         return result;
     }
 
@@ -940,7 +940,7 @@ namespace neogfx
         update_modality(false);
 
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
-            iTitleBar.emplace(*this, title_bar_layout(), service<i_app>().default_window_icon(), title_text());
+            iTitleBar.emplace(*this, service<i_app>().default_window_icon(), title_text());
 
         set_margins({});
         iNonClientLayout.set_margins(neogfx::margins{});
@@ -1014,7 +1014,7 @@ namespace neogfx
     {
         switch (aWidgetPart)
         {
-        case widget_part::NonClientTitleBar:
+        case widget_part::TitleBar:
             if (iTitleBar != std::nullopt)
                 return to_client_coordinates(iTitleBar->non_client_rect());
             else
@@ -1034,85 +1034,58 @@ namespace neogfx
         return *iClientWidget;
     }
 
-    const i_layout& window::non_client_layout() const
+    bool window::has_layout(standard_layout aStandardLayout) const
     {
-        return iNonClientLayout;
-    }
-
-    i_layout& window::non_client_layout()
-    {
-        return iNonClientLayout;
-    }
-
-    const i_layout& window::title_bar_layout() const
-    {
-        return iTitleBarLayout;
-    }
-
-    i_layout& window::title_bar_layout()
-    {
-        return iTitleBarLayout;
-    }
-
-    const i_layout& window::menu_layout() const
-    {
-        return iMenuLayout;
-    }
-
-    i_layout& window::menu_layout()
-    {
-        return iMenuLayout;
-    }
-
-    const i_layout& window::toolbar_layout(layout_position aPosition) const
-    {
-        return iToolbarLayout.part(aPosition);
-    }
-
-    i_layout& window::toolbar_layout(layout_position aPosition)
-    {
-        return iToolbarLayout.part(aPosition);
-    }
-
-    const i_layout& window::dock_layout(dock_area aDockArea) const
-    {
-        switch (aDockArea)
+        switch (aStandardLayout)
         {
-        case dock_area::Top:
-            return iDockLayout.part(layout_position::Top);
-        case dock_area::Bottom:
-            return iDockLayout.part(layout_position::Bottom);
-        case dock_area::Left:
+        case standard_layout::Client:
+        case standard_layout::NonClient:
+        case standard_layout::TitleBar:
+        case standard_layout::Menu:
+        case standard_layout::Toolbar:
+        case standard_layout::Dock:
+        case standard_layout::StatusBar:
+            return true;
+        case standard_layout::Default:
+            return has_layout();
         default:
-            return iDockLayout.part(layout_position::Left);
-        case dock_area::Right:
-            return iDockLayout.part(layout_position::Right);
+            return false;
         }
     }
 
-    i_layout& window::dock_layout(dock_area aDockArea)
+    const i_layout& window::layout(standard_layout aStandardLayout, layout_position aPosition) const
     {
-        return const_cast<i_layout&>(to_const(*this).dock_layout(aDockArea));
+        switch (aStandardLayout)
+        {
+        case standard_layout::Client:
+            return iClientLayout;
+        case standard_layout::NonClient:
+            return iNonClientLayout;
+        case standard_layout::TitleBar:
+            return iTitleBarLayout;
+        case standard_layout::Menu:
+            return iMenuLayout;
+        case standard_layout::Toolbar:
+            return iToolbarLayout.part(aPosition);
+        case standard_layout::Dock:
+            return iDockLayout.part(aPosition);
+        case standard_layout::StatusBar:
+            return iStatusBarLayout;
+        case standard_layout::Default:
+            return layout();
+        default:
+            throw standard_layout_not_found();
+        }
     }
 
-    const i_layout& window::client_layout() const
+    i_layout& window::layout(standard_layout aStandardLayout, layout_position aPosition)
     {
-        return iClientLayout;
+        return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
     }
 
-    i_layout& window::client_layout()
+    bool window::is_widget() const
     {
-        return iClientLayout;
-    }
-
-    const i_layout& window::status_bar_layout() const
-    {
-        return iStatusBarLayout;
-    }
-
-    i_layout& window::status_bar_layout()
-    {
-        return iStatusBarLayout;
+        return true;
     }
 
     const i_widget& window::as_widget() const

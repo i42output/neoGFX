@@ -26,31 +26,30 @@ namespace neogfx
     enum class widget_part : uint32_t
     {
         Client,
-        NonClientTitleBar,
-        NonClientGrab,
         NonClient,
-        NonClientBorder,
-        NonClientBorderLeft,
-        NonClientBorderTopLeft,
-        NonClientBorderTop,
-        NonClientBorderTopRight,
-        NonClientBorderRight,
-        NonClientBorderBottomRight,
-        NonClientBorderBottom,
-        NonClientBorderBottomLeft,
-        NonClientGrowBox,
-        NonClientCloseButton,
-        NonClientMaximizeButton,
-        NonClientMinimizeButton,
-        NonClientRestoreButton,
-        NonClientMenu,
-        NonClientSystemMenu,
-        NonClientVerticalScrollbar,
-        NonClientHorizontalScrollbar,
         NonClientOther,
+        TitleBar,
+        Grab,
+        Border,
+        BorderLeft,
+        BorderTopLeft,
+        BorderTop,
+        BorderTopRight,
+        BorderRight,
+        BorderBottomRight,
+        BorderBottom,
+        BorderBottomLeft,
+        GrowBox,
+        CloseButton,
+        MaximizeButton,
+        MinimizeButton,
+        RestoreButton,
+        Menu,
+        SystemMenu,
+        VerticalScrollbar,
+        HorizontalScrollbar,
         Nowhere,
-        NowhereError,
-        Nested = 0x10000000
+        NowhereError
     };
 
     inline constexpr widget_part operator|(widget_part aLhs, widget_part aRhs)
@@ -78,12 +77,12 @@ namespace neogfx
         switch (aWidgetPart)
         {
         case widget_part::Client:
-        case widget_part::NonClientVerticalScrollbar:
-        case widget_part::NonClientHorizontalScrollbar:
-        case widget_part::NonClientCloseButton:
-        case widget_part::NonClientMaximizeButton:
-        case widget_part::NonClientMinimizeButton:
-        case widget_part::NonClientRestoreButton: 
+        case widget_part::VerticalScrollbar:
+        case widget_part::HorizontalScrollbar:
+        case widget_part::CloseButton:
+        case widget_part::MaximizeButton:
+        case widget_part::MinimizeButton:
+        case widget_part::RestoreButton: 
             return true;
         default:
             return false;
@@ -144,6 +143,7 @@ namespace neogfx
         MouseEvent,
         Other
     };
+
     inline focus_policy operator|(focus_policy aLhs, focus_policy aRhs)
     {
         return static_cast<focus_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));

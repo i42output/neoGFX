@@ -142,7 +142,7 @@ namespace neogfx
 
     widget_part menu_bar::hit_test(const point&) const
     {
-        return widget_part::NonClientMenu;
+        return widget_part::Menu;
     }
 
     void menu_bar::init()

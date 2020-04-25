@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/dock.hpp>
+#include <neogfx/gui/widget/i_dockable.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 
