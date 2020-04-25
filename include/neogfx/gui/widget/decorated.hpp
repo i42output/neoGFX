@@ -20,12 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/widget_bits.hpp>
-#include <neogfx/gui/widget/title_bar.hpp>
-#include <neogfx/gui/widget/tool_title_bar.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
+#include <neogfx/gui/widget/widget_bits.hpp>
+#include <neogfx/gui/widget/normal_title_bar.hpp>
+#include <neogfx/gui/widget/tool_title_bar.hpp>
+#include <neogfx/gui/widget/i_title_bar.hpp>
 
 namespace neogfx
 {
@@ -115,6 +116,44 @@ namespace neogfx
             return iDecoration;
         }
     public:
+        const i_title_bar& title_bar() const
+        {
+            return *iTitleBar;
+        }
+        i_title_bar& title_bar()
+        {
+            return *iTitleBar;
+        }
+    public:
+        void set_client(i_widget& aClient)
+        {
+            set_client(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, & aClient });
+        }
+        void set_client(std::shared_ptr<i_widget> aClient)
+        {
+            iClient = aClient;
+            if (!iClientLayout)
+            {
+                if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
+                    iClientLayout = std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &dock_layout(layout_position::Centre) };
+                else
+                {
+                    iClientLayout = std::make_shared<vertical_layout>();
+                    layout_item_index clientLayoutIndex = non_client_layout().count();
+                    if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
+                        clientLayoutIndex = non_client_layout().index_of(status_bar_layout());
+                    non_client_layout().add_at(clientLayoutIndex, iClientLayout);
+                }
+            }
+            client_layout().remove_all();
+            client_layout().add(iClient);
+        }
+        template <typename TitleBar, typename... Args>
+        std::shared_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
+        {
+            return std::make_shared<TitleBar>(*this, std::forward<Args>(aArgs)...);
+        }
+    public:
         bool is_widget() const override
         {
             return true;
@@ -175,7 +214,7 @@ namespace neogfx
             case standard_layout::Default:
                 return widget_type::has_layout();
             case standard_layout::Client:
-                return iClient && iClient->has_layout();
+                return !!iClientLayout;
             case standard_layout::NonClient:
                 return !!iNonClientLayout;
             case standard_layout::TitleBar:
@@ -201,7 +240,7 @@ namespace neogfx
             case standard_layout::Default:
                 return widget_type::layout();
             case standard_layout::Client:
-                return iClient->layout();
+                return *iClientLayout;
             case standard_layout::NonClient:
                 return *iNonClientLayout;
             case standard_layout::TitleBar:
@@ -222,33 +261,29 @@ namespace neogfx
         {
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
-    public:
-        template <typename TitleBar, typename... Args>
-        std::shared_ptr<i_widget> create_title_bar(Args&&... aArgs)
-        {
-            return std::make_shared<TitleBar>(*this, std::forward<Args>(aArgs)...);
-        }
     private:
         void init()
         {
-            iNonClientLayout.emplace();
+            iNonClientLayout.emplace(*this);
+            non_client_layout().set_margins(neogfx::margins{});
+            non_client_layout().set_spacing(size{});
             if ((decoration() & neogfx::decoration::TitleBar) == neogfx::decoration::TitleBar)
             {
-                iTitleBarLayout.emplace(*iNonClientLayout);
+                iTitleBarLayout.emplace(non_client_layout());
                 if ((decoration_style() & neogfx::decoration_style::Tool) == neogfx::decoration_style::None)
-                    iTitleBar = create_title_bar<title_bar>();
+                    iTitleBar = create_title_bar<normal_title_bar>();
                 else
                     iTitleBar = create_title_bar<tool_title_bar>();
             }
             // todo: create widgets for the following decorations
             if ((decoration() & neogfx::decoration::Menu) == neogfx::decoration::Menu)
-                iMenuLayout.emplace(*iNonClientLayout);
+                iMenuLayout.emplace(non_client_layout());
             if ((decoration() & neogfx::decoration::Toolbar) == neogfx::decoration::Toolbar)
-                iToolbarLayout.emplace(*iNonClientLayout);
+                iToolbarLayout.emplace(non_client_layout());
             if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
-                iDockLayout.emplace(*iNonClientLayout);
+                iDockLayout.emplace(non_client_layout());
             if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
-                iStatusBarLayout.emplace(*iNonClientLayout);
+                iStatusBarLayout.emplace(non_client_layout());
             // todo: make neogfx::window derive from this class
         }
     private:
@@ -270,7 +305,8 @@ namespace neogfx
         std::optional<border_layout> iToolbarLayout;
         std::optional<border_layout> iDockLayout;
         std::optional<vertical_layout> iStatusBarLayout;
-        std::shared_ptr<i_widget> iTitleBar;
+        std::shared_ptr<i_title_bar> iTitleBar;
+        std::shared_ptr<i_layout> iClientLayout;
         std::shared_ptr<i_widget> iClient;
     };
 }

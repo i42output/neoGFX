@@ -22,20 +22,16 @@
 
 namespace neogfx
 {
-    dockable::dockable(const std::shared_ptr<i_widget>& aDockableWidget, const std::string& aTitle, dock_area aAcceptableDocks) :
+    dockable::dockable(std::shared_ptr<i_widget> aDockableWidget, const std::string& aTitle, dock_area aAcceptableDocks) :
         base_type{ neogfx::decoration_style::Tool },
         iTitle{ aTitle }, 
         iAcceptableDocks {aAcceptableDocks }, 
-        iLayout{ *this },
         iDockedWidget{ aDockableWidget },
         iDock{ nullptr }
     {
+        title_bar().set_title(aTitle);
+        set_client(docked_widget());
         set_margins(neogfx::margins{});
-        set_size_policy(size_constraint::Expanding);
-        layout().set_margins(neogfx::margins{});
-        layout().set_size_policy(size_constraint::Expanding);
-        layout().add(*aDockableWidget);
-        docked_widget().set_size_policy(size_constraint::Expanding);
     }
 
     const neolib::string& dockable::title() const

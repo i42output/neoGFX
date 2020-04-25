@@ -820,7 +820,7 @@ namespace neogfx
         {
             iTitleText = aTitleText;
             if (iTitleBar != std::nullopt)
-                iTitleBar->title().set_text(iTitleText);
+                iTitleBar->set_title(iTitleText);
             if (has_native_window())
                 native_window().set_title_text(aTitleText);
         }

@@ -36,7 +36,7 @@ namespace neogfx
         define_declared_event(Docked, docked, i_dock&)
         define_declared_event(Undocked, undocked, i_dock&)
     public:
-        dockable(const std::shared_ptr<i_widget>& aDockableWidget, const std::string& aTitle = "", dock_area aAcceptableDocks = dock_area::Any);
+        dockable(std::shared_ptr<i_widget> aDockableWidget, const std::string& aTitle = "", dock_area aAcceptableDocks = dock_area::Any);
     public:
         const neolib::string& title() const override;
     public:
@@ -52,7 +52,6 @@ namespace neogfx
     private:
         neolib::string iTitle;
         dock_area iAcceptableDocks;
-        vertical_layout iLayout;
         std::shared_ptr<i_widget> iDockedWidget;
         i_dock* iDock;
     };

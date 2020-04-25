@@ -64,6 +64,16 @@ namespace neogfx
         update_textures();
     }
 
+    const std::string& tool_title_bar::title() const
+    {
+        return iTitle.text();
+    }
+
+    void tool_title_bar::set_title(const std::string& aTitle)
+    {
+        iTitle.set_text(aTitle);
+    }
+
     size tool_title_bar::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size())

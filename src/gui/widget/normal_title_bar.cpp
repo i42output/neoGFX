@@ -1,4 +1,4 @@
-// title_bar.cpp
+// normal_title_bar.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -21,11 +21,11 @@
 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
-#include <neogfx/gui/widget/title_bar.hpp>
+#include <neogfx/gui/widget/normal_title_bar.hpp>
 
 namespace neogfx
 {
-    title_bar::title_bar(i_standard_layout_container& aContainer, const std::string& aTitle) :
+    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const std::string& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, service<i_app>().default_window_icon() },
@@ -39,7 +39,7 @@ namespace neogfx
         init();
     }
 
-    title_bar::title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle) :
+    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, aIcon },
@@ -53,7 +53,7 @@ namespace neogfx
         init();
     }
 
-    title_bar::title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle) :
+    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, aIcon },
@@ -67,47 +67,57 @@ namespace neogfx
         init();
     }
 
-    const image_widget& title_bar::icon() const
+    const std::string& normal_title_bar::title() const
+    {
+        return iTitle.text();
+    }
+
+    void normal_title_bar::set_title(const std::string& aTitle)
+    {
+        iTitle.set_text(aTitle);
+    }
+
+    const image_widget& normal_title_bar::icon_widget() const
     {
         return iIcon;
     }
 
-    image_widget& title_bar::icon()
+    image_widget& normal_title_bar::icon_widget()
     {
         return iIcon;
     }
 
-    const text_widget& title_bar::title() const
+    const text_widget& normal_title_bar::title_widget() const
     {
         return iTitle;
     }
 
-    text_widget& title_bar::title()
+    text_widget& normal_title_bar::title_widget()
     {
         return iTitle;
     }
 
-    neogfx::size_policy title_bar::size_policy() const
+    neogfx::size_policy normal_title_bar::size_policy() const
     {
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
-    widget_part title_bar::hit_test(const point&) const
+    widget_part normal_title_bar::hit_test(const point&) const
     {
         return widget_part::TitleBar;
     }
 
-    void title_bar::init()
+    void normal_title_bar::init()
     {
         set_margins(neogfx::margins{});
         iLayout.set_margins(neogfx::margins{ 4.0, 4.0, 4.0, 4.0 });
         iLayout.set_spacing(size{ 8.0 });
-        icon().set_ignore_mouse_events(false);
+        icon_widget().set_ignore_mouse_events(false);
         size iconSize{ 24.0_dip };
-        if (icon().image().is_empty())
-            icon().set_fixed_size(iconSize);
+        if (icon_widget().image().is_empty())
+            icon_widget().set_fixed_size(iconSize);
         else
-            icon().set_fixed_size(iconSize.min(icon().image().extents()));
+            icon_widget().set_fixed_size(iconSize.min(icon_widget().image().extents()));
         iMinimizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iMaximizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iRestoreButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
@@ -115,10 +125,10 @@ namespace neogfx
         iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
         {
             size iconSize{ 24.0_dip };
-            if (icon().image().is_empty())
-                icon().set_fixed_size(iconSize);
+            if (icon_widget().image().is_empty())
+                icon_widget().set_fixed_size(iconSize);
             else
-                icon().set_fixed_size(iconSize.min(icon().image().extents()));
+                icon_widget().set_fixed_size(iconSize.min(icon_widget().image().extents()));
             update_textures();
             managing_layout().layout_items(true);
             update(true);
@@ -134,8 +144,8 @@ namespace neogfx
             bool isIconic = root().is_iconic();
             bool isMaximized = root().is_maximized();
             bool isRestored = root().is_restored();
-            icon().enable(isActive);
-            title().enable(isActive);
+            icon_widget().enable(isActive);
+            title_widget().enable(isActive);
             iMinimizeButton.enable(!isIconic && isEnabled);
             iMaximizeButton.enable(!isMaximized && isEnabled);
             iRestoreButton.enable(!isRestored && isEnabled);
@@ -176,7 +186,7 @@ namespace neogfx
         update_widgets();
     }
 
-    void title_bar::update_textures()
+    void normal_title_bar::update_textures()
     {
         auto ink = service<i_app>().current_style().palette().color(color_role::Text);
         auto paper = background_color();
@@ -370,10 +380,10 @@ namespace neogfx
                 ink,
                 !high_dpi() ? 
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
                         sMinimizeTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[HighDpiTextureMinimize]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[HighDpiTextureMinimize]::" + ink.to_string(),
                         sMinimizeHighDpiTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
         }
         if (iTextures[TextureMaximize] == std::nullopt || iTextures[TextureMaximize]->first != ink)
@@ -382,10 +392,10 @@ namespace neogfx
                 ink,
                 !high_dpi() ?
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
                         sMaximizeTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[HighDpiTextureMaximize]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[HighDpiTextureMaximize]::" + ink.to_string(),
                         sMaximizeHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
         }
         if (iTextures[TextureRestore] == std::nullopt || iTextures[TextureRestore]->first != ink)
@@ -394,10 +404,10 @@ namespace neogfx
                 ink,
                 !high_dpi() ?
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[TextureRestore]::" + ink.to_string(),
                         sRestoreTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[HighDpiTextureRestore]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[HighDpiTextureRestore]::" + ink.to_string(),
                         sRestoreHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
         }
         if (iTextures[TextureClose] == std::nullopt || iTextures[TextureClose]->first != ink)
@@ -406,10 +416,10 @@ namespace neogfx
                 ink,
                 !high_dpi() ?
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[TextureClose]::" + ink.to_string(),
                         sCloseTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0x80) } } } :
                     neogfx::image{
-                        "neogfx::title_bar::iTextures[HighDpiTextureClose]::" + ink.to_string(),
+                        "neogfx::normal_title_bar::iTextures[HighDpiTextureClose]::" + ink.to_string(),
                         sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
         }
         iMinimizeButton.set_image(iTextures[TextureMinimize]->second);

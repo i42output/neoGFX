@@ -22,7 +22,7 @@
 #include <string>
 #include <neogfx/gui/widget/i_nested_window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
-#include <neogfx/gui/widget/title_bar.hpp>
+#include <neogfx/gui/widget/normal_title_bar.hpp>
 
 namespace neogfx
 {

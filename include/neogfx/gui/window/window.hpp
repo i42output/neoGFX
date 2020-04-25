@@ -27,7 +27,7 @@
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
-#include <neogfx/gui/widget/title_bar.hpp>
+#include <neogfx/gui/widget/normal_title_bar.hpp>
 
 namespace neogfx
 {
@@ -43,7 +43,7 @@ namespace neogfx
     private:
         class nested_details;
         class client;
-        typedef std::optional<title_bar> optional_title_bar;
+        typedef std::optional<normal_title_bar> optional_title_bar;
     public:
         struct fullscreen_window_cannot_nest : std::logic_error { fullscreen_window_cannot_nest() : std::logic_error("neogfx::window::fullscreen_window_cannot_nest") {} };
         struct parentless_window_cannot_nest : std::logic_error { parentless_window_cannot_nest() : std::logic_error("neogfx::window::parentless_window_cannot_nest") {} };

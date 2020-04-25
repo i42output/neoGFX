@@ -1,7 +1,7 @@
-// title_bar.hpp
+// normal_title_bar.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -25,10 +25,11 @@
 #include <neogfx/gui/widget/image_widget.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/gui/widget/i_title_bar.hpp>
 
 namespace neogfx
 {
-    class title_bar : public widget
+    class normal_title_bar : public widget, public i_title_bar
     {
     private:
         template <typename WidgetType, widget_part WidgetPart>
@@ -55,14 +56,17 @@ namespace neogfx
             TextureClose
         };
     public:
-        title_bar(i_standard_layout_container& aContainer, const std::string& aTitle = std::string{});
-        title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle = std::string{});
-        title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle = std::string{});
+        normal_title_bar(i_standard_layout_container& aContainer, const std::string& aTitle = std::string{});
+        normal_title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle = std::string{});
+        normal_title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle = std::string{});
     public:
-        const image_widget& icon() const;
-        image_widget& icon();
-        const text_widget& title() const;
-        text_widget& title();
+        const std::string& title() const override;
+        void set_title(const std::string& aTitle) override;
+    public:
+        const image_widget& icon_widget() const;
+        image_widget& icon_widget();
+        const text_widget& title_widget() const;
+        text_widget& title_widget();
     public:
         neogfx::size_policy size_policy() const override;
     public:
@@ -84,9 +88,9 @@ namespace neogfx
     };
 
     template <>
-    inline widget_part title_bar::non_client_item<image_widget, widget_part::SystemMenu>::hit_test(const point&) const
+    inline widget_part normal_title_bar::non_client_item<image_widget, widget_part::SystemMenu>::hit_test(const point&) const
     {
-        if ((static_cast<const title_bar&>(parent()).root().style() & window_style::SystemMenu) == window_style::SystemMenu)
+        if ((static_cast<const normal_title_bar&>(parent()).root().style() & window_style::SystemMenu) == window_style::SystemMenu)
             return widget_part::SystemMenu;
         return widget_part::TitleBar;
     }

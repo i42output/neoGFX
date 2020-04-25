@@ -23,18 +23,22 @@
 #include <neolib/timer.hpp>
 #include <neogfx/core/color.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/i_tool.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
-#include <neogfx/gui/layout/horizontal_layout.hpp>
-#include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/i_title_bar.hpp>
 
 namespace neogfx
 {
-    class tool_title_bar : public widget
+    class tool_title_bar : public widget, public i_title_bar
     {
     public:
         tool_title_bar(i_standard_layout_container& aContainer, const std::string& aTitle = std::string{});
+    public:
+        const std::string& title() const override;
+        void set_title(const std::string& aTitle) override;
     protected:
         size minimum_size(const optional_size& aAvailableSpace = {}) const override;
     protected:

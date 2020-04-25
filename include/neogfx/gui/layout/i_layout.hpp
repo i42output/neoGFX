@@ -104,6 +104,14 @@ namespace neogfx
         {
             return layout(standard_layout::Toolbar, aPosition);
         }
+        const i_layout& dock_layout(layout_position aPosition = layout_position::Left) const
+        {
+            return layout(standard_layout::Dock, aPosition);
+        }
+        i_layout& dock_layout(layout_position aPosition = layout_position::Left)
+        {
+            return layout(standard_layout::Dock, aPosition);
+        }
         const i_layout& dock_layout(dock_area aDockArea = dock_area::Left) const
         {
             return layout(standard_layout::Dock, to_position(aDockArea));
