@@ -116,6 +116,7 @@ namespace neogfx
         iFontManager = std::nullopt;
         iTextureManager = std::nullopt;
         iShaderPrograms.clear();
+        iDefaultShaderProgram.reset();
         opengl_buffer_cleanup();
     }
 
