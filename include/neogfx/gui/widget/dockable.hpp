@@ -42,6 +42,8 @@ namespace neogfx
     public:
         bool can_dock(const i_dock& aDock) const override;
         bool is_docked() const override;
+        const i_dock& which_dock() const override;
+        i_dock& which_dock() override;
         void dock(i_dock& aDock) override;
         void undock() override;
     public:

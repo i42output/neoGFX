@@ -152,8 +152,8 @@ namespace neogfx
             if (oldSize != minimum_size())
             {
                 TextGeometryChanged.trigger();
-                if (has_managing_layout())
-                    managing_layout().layout_items();
+                if (has_layout_manager())
+                    layout_manager().layout_items();
             }
             update();
         }
@@ -168,8 +168,8 @@ namespace neogfx
             iSizeHintExtent = std::nullopt;
             if (has_parent_layout())
                 parent_layout().invalidate();
-            if (oldSize != minimum_size() && has_managing_layout())
-                managing_layout().layout_items();
+            if (oldSize != minimum_size() && has_layout_manager())
+                layout_manager().layout_items();
         }
     }
 

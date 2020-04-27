@@ -226,8 +226,8 @@ namespace neogfx
         if (oldSize != minimum_size() || oldTextureSize != image().extents())
         {
             ImageGeometryChanged.trigger();
-            if (has_managing_layout())
-                managing_layout().layout_items(true);
+            if (has_layout_manager())
+                layout_manager().layout_items(true);
         }
         update();
     }

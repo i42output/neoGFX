@@ -23,11 +23,13 @@
 #include <neolib/vector.hpp>
 #include <neogfx/gui/widget/splitter.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
+#include <neogfx/gui/widget/decorated.hpp>
 
 namespace neogfx
 {
-    class dock : public splitter, public i_dock
+    class dock : public decorated<splitter, i_dock>
     {
+        typedef decorated<splitter, i_dock> base_type;
     public:
         using item = ref_ptr<i_dockable>;
         using item_list = neolib::vector<item>;
@@ -46,6 +48,10 @@ namespace neogfx
         void remove(const abstract_item& aItem) override;
     private:
         void update_layout();
+    protected:
+        neogfx::size_policy size_policy() const override;
+    protected:
+        bool part_active(widget_part aPart) const override;
     protected:
         bool transparent_background() const override;
         color background_color() const override;

@@ -28,8 +28,6 @@
 
 namespace neogfx
 {
-    i_layout* i_layout::debug;
-
     template size layout::do_minimum_size<layout::column_major<horizontal_layout>>(const optional_size& aAvailableSpace) const;
     template size layout::do_maximum_size<layout::column_major<horizontal_layout>>(const optional_size& aAvailableSpace) const;
     template void layout::do_layout_items<layout::column_major<horizontal_layout>>(const point& aPosition, const size& aSize);
@@ -556,9 +554,9 @@ namespace neogfx
         {
             if (i.is_spacer())
                 continue;
-            if (i.size_policy().horizontal_size_policy() == size_constraint::Expanding)
+            if (i.effective_size_policy().horizontal_size_policy() == size_constraint::Expanding)
                 result.set_horizontal_size_policy(size_constraint::Expanding);
-            if (i.size_policy().vertical_size_policy() == size_constraint::Expanding)
+            if (i.effective_size_policy().vertical_size_policy() == size_constraint::Expanding)
                 result.set_vertical_size_policy(size_constraint::Expanding);
         }
         return result;
@@ -766,7 +764,7 @@ namespace neogfx
 
     void layout::remove(item_list::iterator aItem)
     {
-        if (debug == this)
+        if (debug() == this)
             std::cerr << "layout::remove(" << std::distance(iItems.begin(), aItem) << ")" << std::endl;
         {
             item_list toRemove;

@@ -174,7 +174,15 @@ namespace neogfx
     {
         scoped_layout_items layoutItems;
         validate();
+        set_position(aPosition);
+        set_extents(aSize);
         iRows.layout_items(aPosition, aSize);
+    }
+
+    void border_layout::fix_weightings()
+    {
+        iRows.fix_weightings();
+        iMiddle.fix_weightings();
     }
 
     size border_layout::minimum_size(const optional_size& aAvailableSpace) const
@@ -211,9 +219,9 @@ namespace neogfx
         iRows.set_size_policy(neogfx::size_policy{ size_constraint::Expanding });
         iTop.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMiddle.set_size_policy(size_constraint::Expanding);
-        iLeft.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+        iLeft.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
         iCentre.set_size_policy(size_constraint::Expanding);
-        iRight.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+        iRight.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
         iBottom.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
 
         set_alive();

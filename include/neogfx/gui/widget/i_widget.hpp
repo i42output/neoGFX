@@ -51,8 +51,6 @@ namespace neogfx
         declare_event(keyboard_event, const neogfx::keyboard_event&)
         declare_event(focus_event, neogfx::focus_event)
     public:
-        static i_widget* debug;
-    public:
         typedef i_widget abstract_type;
         typedef std::vector<std::shared_ptr<i_widget>> widget_list;
     protected:
@@ -111,9 +109,9 @@ namespace neogfx
         virtual const i_layout& layout() const = 0;
         virtual i_layout& layout() = 0;
         virtual bool can_defer_layout() const = 0;
-        virtual bool has_managing_layout() const = 0;
-        virtual const i_widget& managing_layout() const = 0;
-        virtual i_widget& managing_layout() = 0;
+        virtual bool has_layout_manager() const = 0;
+        virtual const i_widget& layout_manager() const = 0;
+        virtual i_widget& layout_manager() = 0;
         virtual bool is_managing_layout() const = 0;
         virtual bool has_parent_layout() const = 0;
         virtual const i_layout& parent_layout() const = 0;
@@ -138,6 +136,7 @@ namespace neogfx
         virtual void resized() = 0;
         virtual const i_widget& get_widget_at(const point& aPosition) const = 0;
         virtual i_widget& get_widget_at(const point& aPosition) = 0;
+        virtual bool part_active(widget_part aPart) const = 0;
         virtual widget_part part(const point& aPosition) const = 0;
         virtual widget_part hit_test(const point& aPosition) const = 0;
     public:

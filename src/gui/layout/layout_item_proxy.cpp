@@ -196,6 +196,11 @@ namespace neogfx
         subject().layout_as(adjustedPosition, adjustedSize);
     }
 
+    void layout_item_proxy::fix_weightings()
+    {
+        subject().fix_weightings();
+    }
+
     bool layout_item_proxy::high_dpi() const
     {
         return subject().high_dpi();
@@ -292,9 +297,9 @@ namespace neogfx
                 minSize = subject().minimum_size(aAvailableSpace);
             else
                 minSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
-            if (size_policy().maintain_aspect_ratio())
+            if (effective_size_policy().maintain_aspect_ratio())
             {
-                auto const& aspectRatio = size_policy().aspect_ratio();
+                auto const& aspectRatio = effective_size_policy().aspect_ratio();
                 if (aspectRatio.cx < aspectRatio.cy)
                 {
                     if (minSize.cx < minSize.cy)

@@ -70,7 +70,7 @@ namespace neogfx
     void splitter::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (aButton == mouse_button::Left)
+        if (aButton == mouse_button::Left && capturing())
         {
             auto s = separator_at(aPosition);
             if (s != std::nullopt)
@@ -178,12 +178,7 @@ namespace neogfx
 
     void splitter::panes_resized()
     {
-        for (layout_item_index itemIndex = 0; itemIndex < layout().count(); ++itemIndex)
-        {
-            auto& item = layout().item_at(itemIndex);
-            item.set_weight(calculate_relative_weight(layout(), item), false);
-            item.set_fixed_size({}, false);
-        }
+        fix_weightings();
     }
 
     void splitter::reset_pane_sizes_requested(const std::optional<uint32_t>&)

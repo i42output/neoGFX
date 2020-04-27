@@ -92,9 +92,9 @@ namespace neogfx
         const i_layout& layout() const override;
         i_layout& layout() override;
         bool can_defer_layout() const override;
-        bool has_managing_layout() const override;
-        const i_widget& managing_layout() const override;
-        i_widget& managing_layout() override;
+        bool has_layout_manager() const override;
+        const i_widget& layout_manager() const override;
+        i_widget& layout_manager() override;
         bool is_managing_layout() const override;
         void layout_items(bool aDefer = false) override;
         void layout_items_started() override;
@@ -152,6 +152,7 @@ namespace neogfx
         void resized() override;
         const i_widget& get_widget_at(const point& aPosition) const override;
         i_widget& get_widget_at(const point& aPosition) override;
+        bool part_active(widget_part aPart) const override;
         widget_part part(const point& aPosition) const override;
         widget_part hit_test(const point& aPosition) const override;
         // i_layout_item

@@ -42,8 +42,6 @@ namespace neogfx
         }
     };
 
-    i_widget* widget::debug;
-
     widget::widget() :
         iSingular{ false },
         iParent{ nullptr },
@@ -212,8 +210,8 @@ namespace neogfx
 
     void widget::parent_changed()
     {
-        if (!is_root() && has_managing_layout())
-            managing_layout().layout_items(true);
+        if (!is_root() && has_layout_manager())
+            layout_manager().layout_items(true);
     }
 
     bool widget::adding_child() const
@@ -455,7 +453,7 @@ namespace neogfx
         return false;
     }
 
-    bool widget::has_managing_layout() const
+    bool widget::has_layout_manager() const
     {
         const i_widget* w = this;
         while (w->has_parent())
@@ -467,7 +465,7 @@ namespace neogfx
         return false;
     }
 
-    const i_widget& widget::managing_layout() const
+    const i_widget& widget::layout_manager() const
     {
         const i_widget* w = this;
         while (w->has_parent())
@@ -479,9 +477,9 @@ namespace neogfx
         throw no_managing_layout();
     }
 
-    i_widget& widget::managing_layout()
+    i_widget& widget::layout_manager()
     {
-        return const_cast<i_widget&>(to_const(*this).managing_layout());
+        return const_cast<i_widget&>(to_const(*this).layout_manager());
     }
 
     bool widget::is_managing_layout() const
@@ -650,7 +648,7 @@ namespace neogfx
                 });
             }
         }
-        else if (has_managing_layout())
+        else if (has_layout_manager())
         {
             throw widget_cannot_defer_layout();
         }
@@ -812,6 +810,11 @@ namespace neogfx
         return const_cast<i_widget&>(to_const(*this).get_widget_at(aPosition));
     }
 
+    bool widget::part_active(widget_part aPart) const
+    {
+        return true;
+    }
+
     widget_part widget::part(const point& aPosition) const
     {
         if (client_rect().contains(aPosition))
@@ -824,7 +827,7 @@ namespace neogfx
 
     widget_part widget::hit_test(const point& aPosition) const
     {
-        return part(aPosition);
+        return widget::part(aPosition);
     }
 
     bool widget::has_size_policy() const
@@ -845,8 +848,8 @@ namespace neogfx
         if (SizePolicy != aSizePolicy)
         {
             SizePolicy = aSizePolicy;
-            if (aUpdateLayout && has_managing_layout())
-                managing_layout().layout_items(true);
+            if (aUpdateLayout && has_layout_manager())
+                layout_manager().layout_items(true);
         }
     }
 
@@ -867,8 +870,8 @@ namespace neogfx
         if (Weight != aWeight)
         {
             Weight.assign(aWeight, aUpdateLayout);
-            if (aUpdateLayout && has_managing_layout())
-                managing_layout().layout_items(true);
+            if (aUpdateLayout && has_layout_manager())
+                layout_manager().layout_items(true);
         }
     }
 
@@ -879,7 +882,7 @@ namespace neogfx
 
     size widget::minimum_size(const optional_size& aAvailableSpace) const
     {
-        if (debug == this)
+        if (debug() == this)
             std::cerr << "widget::minimum_size(...)" << std::endl;
         if (has_fixed_size())
             return fixed_size();
@@ -904,8 +907,8 @@ namespace neogfx
         if (MinimumSize != newMinimumSize)
         {
             MinimumSize.assign(newMinimumSize, aUpdateLayout);
-            if (aUpdateLayout && has_managing_layout())
-                managing_layout().layout_items(true);
+            if (aUpdateLayout && has_layout_manager())
+                layout_manager().layout_items(true);
         }
     }
 
@@ -916,7 +919,7 @@ namespace neogfx
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
-        if (debug == this)
+        if (debug() == this)
             std::cerr << "widget::maximum_size(...)" << std::endl;
         if (has_fixed_size())
             return fixed_size();
@@ -943,8 +946,8 @@ namespace neogfx
         if (MaximumSize != newMaximumSize)
         {
             MaximumSize.assign(newMaximumSize, aUpdateLayout);
-            if (aUpdateLayout && has_managing_layout())
-                managing_layout().layout_items(true);
+            if (aUpdateLayout && has_layout_manager())
+                layout_manager().layout_items(true);
         }
     }
 
@@ -966,8 +969,8 @@ namespace neogfx
         if (FixedSize != newFixedSize)
         {
             FixedSize.assign(newFixedSize, aUpdateLayout);
-            if (aUpdateLayout && has_managing_layout())
-                managing_layout().layout_items(true);
+            if (aUpdateLayout && has_layout_manager())
+                layout_manager().layout_items(true);
         }
     }
 
@@ -991,14 +994,14 @@ namespace neogfx
         if (Margins != newMargins)
         {
             Margins = newMargins;
-            if (aUpdateLayout && has_managing_layout())
-                managing_layout().layout_items(true);
+            if (aUpdateLayout && has_layout_manager())
+                layout_manager().layout_items(true);
         }
     }
 
     void widget::layout_as(const point& aPosition, const size& aSize)
     {
-        if (debug == this)
+        if (debug() == this)
             std::cerr << "widget::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
         move(aPosition);
         if (extents() != aSize)
@@ -1064,7 +1067,7 @@ namespace neogfx
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
-        if (debug == this)
+        if (debug() == this)
             std::cerr << "widget::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 
         aGraphicsContext.set_extents(extents());
@@ -1222,8 +1225,8 @@ namespace neogfx
         if (Font != aFont)
         {
             Font = aFont;
-            if (has_managing_layout())
-                managing_layout().layout_items(true);
+            if (has_layout_manager())
+                layout_manager().layout_items(true);
             update();
         }
     }
@@ -1536,6 +1539,31 @@ namespace neogfx
 
     neogfx::mouse_cursor widget::mouse_cursor() const
     {
+        auto const partUnderMouse = part(root().mouse_position() - origin());
+        if (part_active(partUnderMouse))
+            switch (partUnderMouse)
+            {
+            case widget_part::Grab:
+                return mouse_system_cursor::Hand;
+            case widget_part::BorderLeft:
+                return mouse_system_cursor::SizeWE;
+            case widget_part::BorderTopLeft:
+                return mouse_system_cursor::SizeNWSE;
+            case widget_part::BorderTop:
+                return mouse_system_cursor::SizeNS;
+            case widget_part::BorderTopRight:
+                return mouse_system_cursor::SizeNESW;
+            case widget_part::BorderRight:
+                return mouse_system_cursor::SizeWE;
+            case widget_part::BorderBottomRight:
+                return mouse_system_cursor::SizeNWSE;
+            case widget_part::BorderBottom:
+                return mouse_system_cursor::SizeNS;
+            case widget_part::BorderBottomLeft:
+                return mouse_system_cursor::SizeNESW;
+            case widget_part::GrowBox:
+                return mouse_system_cursor::SizeNWSE;
+            }
         if (has_parent())
             return parent().mouse_cursor();
         return mouse_system_cursor::Arrow;

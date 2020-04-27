@@ -101,12 +101,14 @@ namespace neogfx
     {
         if (!enabled())
             return;
-        if (debug == this)
+        if (debug() == this)
             std::cerr << "stack_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
         if (has_layout_owner())
             layout_owner().layout_items_started();
         scoped_layout_items layoutItems;
         validate();
+        set_position(aPosition);
+        set_extents(aSize);
         for (auto& item : *this)
         {
             if (!item.visible())

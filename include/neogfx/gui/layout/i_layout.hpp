@@ -168,8 +168,6 @@ namespace neogfx
         declare_event(layout_completed)
         declare_event(alignment_changed)
     public:
-        static i_layout* debug;
-    public:
         typedef i_layout abstract_type;
     protected:
         class item;

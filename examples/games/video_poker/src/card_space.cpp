@@ -130,7 +130,7 @@ namespace video_poker
         iHoldButton{ iVerticalLayout, "HOLD\n CANCEL " },
         iCard{ nullptr }
     {
-        set_size_policy(neogfx::size_constraint::ExpandingPixelPerfect);
+        set_size_policy(neogfx::size_constraint::ExpandingUniform);
         iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
         set_ignore_mouse_events(true);
         iHoldButton.set_size_policy(neogfx::size_constraint::Minimum);

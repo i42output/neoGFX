@@ -24,8 +24,8 @@ namespace neogfx
 {
     dockable::dockable(std::shared_ptr<i_widget> aDockableWidget, const std::string& aTitle, dock_area aAcceptableDocks) :
         base_type{ neogfx::decoration_style::Tool },
-        iTitle{ aTitle }, 
-        iAcceptableDocks {aAcceptableDocks }, 
+        iTitle{ aTitle },
+        iAcceptableDocks{ aAcceptableDocks },
         iDockedWidget{ aDockableWidget },
         iDock{ nullptr }
     {
@@ -47,6 +47,20 @@ namespace neogfx
     bool dockable::is_docked() const
     {
         return iDock != nullptr;
+    }
+
+    const i_dock& dockable::which_dock() const
+    {
+        if (is_docked())
+            return *iDock;
+        throw not_docked();
+    }
+
+    i_dock& dockable::which_dock()
+    {
+        if (is_docked())
+            return *iDock;
+        throw not_docked();
     }
 
     void dockable::dock(i_dock& aDock)

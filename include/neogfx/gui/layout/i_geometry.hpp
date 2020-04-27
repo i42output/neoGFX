@@ -31,7 +31,8 @@ namespace neogfx
         Minimum,
         Maximum,
         Expanding,
-        ExpandingPixelPerfect, // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
+        MinimumExpanding, // minimum unless a weight is defined
+        ExpandingUniform, // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
         Manual
     };
 
@@ -72,7 +73,7 @@ const neolib::enum_enumerators_t<neogfx::size_constraint> neolib::enum_enumerato
     declare_enum_string(neogfx::size_constraint, Minimum)
     declare_enum_string(neogfx::size_constraint, Maximum)
     declare_enum_string(neogfx::size_constraint, Expanding)
-    declare_enum_string(neogfx::size_constraint, ExpandingPixelPerfect)
+    declare_enum_string(neogfx::size_constraint, ExpandingUniform)
     declare_enum_string(neogfx::size_constraint, Manual)
 };
 
@@ -133,17 +134,17 @@ namespace neogfx
             return !(*this == aRhs);
         }
     public:
-        size_constraint horizontal_size_policy(bool aIgnorePixelPerfect = true) const
+        size_constraint horizontal_size_policy(bool aIgnoreUniformity = true) const
         {
-            if (iHorizontalConstraint != size_constraint::ExpandingPixelPerfect)
+            if (iHorizontalConstraint != size_constraint::ExpandingUniform)
                 return iHorizontalConstraint;
-            return aIgnorePixelPerfect ? size_constraint::Expanding : size_constraint::ExpandingPixelPerfect;
+            return aIgnoreUniformity ? size_constraint::Expanding : size_constraint::ExpandingUniform;
         }
-        size_constraint vertical_size_policy(bool aIgnorePixelPerfect = true) const
+        size_constraint vertical_size_policy(bool aIgnoreUniformity = true) const
         {
-            if (iVerticalConstraint != size_constraint::ExpandingPixelPerfect)
+            if (iVerticalConstraint != size_constraint::ExpandingUniform)
                 return iVerticalConstraint;
-            return aIgnorePixelPerfect ? size_constraint::Expanding : size_constraint::ExpandingPixelPerfect;
+            return aIgnoreUniformity ? size_constraint::Expanding : size_constraint::ExpandingUniform;
         }
         void set_size_policy(size_constraint aConstraint)
         {
@@ -222,19 +223,28 @@ namespace neogfx
         virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) = 0;
         // helpers
     public:
-        void set_size_policy(neogfx::size_constraint aConstraint, bool aUpdateLayout = true)
+        neogfx::size_policy effective_size_policy() const
+        {
+            auto effectivePolicy = size_policy();
+            if (effectivePolicy.horizontal_size_policy() == size_constraint::MinimumExpanding)
+                effectivePolicy.set_horizontal_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            if (effectivePolicy.vertical_size_policy() == size_constraint::MinimumExpanding)
+                effectivePolicy.set_vertical_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            return effectivePolicy;
+        }
+        void set_size_policy(size_constraint aConstraint, bool aUpdateLayout = true)
         {
             set_size_policy(neogfx::size_policy{ aConstraint }, aUpdateLayout);
         }
-        void set_size_policy(neogfx::size_constraint aConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
+        void set_size_policy(size_constraint aConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
         {
             set_size_policy(neogfx::size_policy{ aConstraint, aAspectRatio }, aUpdateLayout);
         }
-        void set_size_policy(neogfx::size_constraint aHorizontalConstraint, neogfx::size_constraint aVerticalConstraint, bool aUpdateLayout = true)
+        void set_size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, bool aUpdateLayout = true)
         {
             set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint }, aUpdateLayout);
         }
-        void set_size_policy(neogfx::size_constraint aHorizontalConstraint, neogfx::size_constraint aVerticalConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
+        void set_size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
         {
             set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint, aAspectRatio }, aUpdateLayout);
         }

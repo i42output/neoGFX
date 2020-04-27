@@ -390,8 +390,8 @@ namespace neogfx
             if (aSelectedState)
                 iContainer.selecting_tab(*this);
             iSelectedState = aSelectedState;
-            if (has_managing_layout())
-                managing_layout().layout_items(true);
+            if (has_layout_manager())
+                layout_manager().layout_items(true);
             update();
             if (is_selected())
                 Selected.trigger();

@@ -28,16 +28,16 @@
 namespace neogfx
 {
     dock::dock(i_widget& aParent, dock_area aArea) :
-        splitter{ aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
+        base_type{ neogfx::decoration_style::Dock, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
     {
-        set_margins(neogfx::margins{});
+        set_margins(neogfx::margins{ 1.5_mm });
         update_layout();
     }
 
     dock::dock(i_layout& aLayout, dock_area aArea) :
-        splitter{ aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
+        base_type{ neogfx::decoration_style::Dock, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
     {
-        set_margins(neogfx::margins{});
+        set_margins(neogfx::margins{ 1.5_mm });
         update_layout();
     }
 
@@ -85,10 +85,37 @@ namespace neogfx
 
     void dock::update_layout()
     {
-        // todo: update splitter layout
-        layout().set_margins(neogfx::margins{ 1.5_mm });
-        layout().set_spacing(neogfx::size{ 1.5_mm });
-        layout().set_size_policy(neogfx::size_constraint::Expanding);
+        layout().set_margins(neogfx::margins{});
+        layout().set_spacing(size{ margins().left, margins().top });
+    }
+
+    neogfx::size_policy dock::size_policy() const
+    {
+        if (has_size_policy() || !has_weight())
+            return base_type::size_policy();
+        return size_constraint::Expanding;
+    }
+
+    bool dock::part_active(widget_part aPart) const
+    {
+        switch (aPart)
+        {
+        case widget_part::BorderLeft:
+            return area() == dock_area::Right;
+        case widget_part::BorderTop:
+            return area() == dock_area::Bottom;
+        case widget_part::BorderRight:
+            return area() == dock_area::Left;
+        case widget_part::BorderBottom:
+            return area() == dock_area::Top;
+        case widget_part::Border:
+        case widget_part::BorderTopLeft:
+        case widget_part::BorderTopRight:
+        case widget_part::BorderBottomRight:
+        case widget_part::BorderBottomLeft:
+            return false;
+        }
+        return base_type::part_active(aPart);
     }
 
     bool dock::transparent_background() const

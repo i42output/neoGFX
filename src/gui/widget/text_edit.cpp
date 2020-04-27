@@ -1414,8 +1414,8 @@ namespace neogfx
         {
             iSizeHint = aHint;
             iHintedSize = std::nullopt;
-            if (has_managing_layout())
-                managing_layout().layout_items(true);
+            if (has_layout_manager())
+                layout_manager().layout_items(true);
             update();
         }
     }

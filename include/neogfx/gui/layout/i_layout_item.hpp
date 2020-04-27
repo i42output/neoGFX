@@ -34,9 +34,16 @@ namespace neogfx
     struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::no_parent_layout") {} };
     struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::no_layout_owner") {} };
     struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
+    struct ancestor_layout_type_not_found : std::logic_error { ancestor_layout_type_not_found() : std::logic_error{ "neogfx::ancestor_layout_type_not_found" } {} };
 
     class i_layout_item : public i_geometry, public i_anchorable_object
     {
+    public:
+        static i_layout_item*& debug()
+        {
+            static i_layout_item* sDebug = nullptr;
+            return sDebug;
+        }
     public:
         virtual ~i_layout_item() = default;
     public:
@@ -61,6 +68,21 @@ namespace neogfx
     public:
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
+        virtual void fix_weightings() = 0;
+    public:
         virtual bool visible() const = 0;
+    public:
+        template <typename LayoutType>
+        LayoutType& ancestor_layout()
+        {
+            if (has_parent_layout())
+            {
+                // todo: not happy with this method (dynamic_cast)...
+                if (dynamic_cast<LayoutType*>(&parent_layout()) != nullptr)
+                    return static_cast<LayoutType&>(parent_layout());
+                return parent_layout().template ancestor_layout<LayoutType>();
+            }
+            throw ancestor_layout_type_not_found();
+        }
     };
 }

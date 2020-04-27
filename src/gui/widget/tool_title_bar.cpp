@@ -52,7 +52,7 @@ namespace neogfx
         iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
         {
             update_textures();
-            managing_layout().layout_items(true);
+            layout_manager().layout_items(true);
             update(true);
         });
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)

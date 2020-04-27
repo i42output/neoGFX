@@ -38,6 +38,23 @@ namespace neogfx
         typedef abstract_type property_context_type;
         // implementation
     public:
+        void fix_weightings() override
+        {
+            auto& self = static_cast<i_layout_item&>(*this);
+            auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
+            if (base_type::debug() == this)
+                std::cout << typeid(*this).name() << "::fix_weightings(): ";
+            for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+            {
+                auto& item = layout.item_at(itemIndex);
+                item.set_weight(calculate_relative_weight(layout, item), false);
+                if (base_type::debug() == this)
+                    std::cout << "(" << typeid(item).name() << ")" << item.extents() << ":" << item.weight() << ", ";
+                item.set_fixed_size({}, false);
+            }
+            if (base_type::debug() == this)
+                std::cout << std::endl;
+        }
         void anchor_to(i_anchorable_object& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);

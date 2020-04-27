@@ -95,6 +95,8 @@ namespace neogfx
     public:
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
+        void fix_weightings() override;
+    public:
         const i_layout_item& subject() const override;
         i_layout_item& subject() override;
         std::shared_ptr<i_layout_item> subject_ptr() override;
