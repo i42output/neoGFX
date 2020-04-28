@@ -30,6 +30,12 @@
     <ClCompile Include="x64\Tools\GeneratedFiles\DesignStudio.res.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\project.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\project_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\resources\win32\resource.h">
@@ -38,13 +44,25 @@
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\widget.hpp">
+    <ClInclude Include="..\..\..\include\DesignStudio\project.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\DesignStudio.hpp">
+    <ClInclude Include="..\..\..\include\DesignStudio\symbol.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\symbol.hpp">
+    <ClInclude Include="..\..\..\include\DesignStudio\widget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DesignStudio\DesignStudio.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DesignStudio\i_project.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DesignStudio\project_manager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DesignStudio\i_project_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

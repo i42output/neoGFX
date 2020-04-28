@@ -73,15 +73,28 @@ namespace neogfx
         virtual bool visible() const = 0;
     public:
         template <typename LayoutType>
-        LayoutType& ancestor_layout()
+        bool has_ancestor_layout() const
+        {
+            return find_ancestor_layout<LayoutType>() != nullptr;
+        }
+        template <typename LayoutType>
+        LayoutType* find_ancestor_layout()
         {
             if (has_parent_layout())
             {
-                // todo: not happy with this method (dynamic_cast)...
-                if (dynamic_cast<LayoutType*>(&parent_layout()) != nullptr)
-                    return static_cast<LayoutType&>(parent_layout());
-                return parent_layout().template ancestor_layout<LayoutType>();
+                auto existing = dynamic_cast<LayoutType*>(&parent_layout());
+                if (existing != nullptr)
+                    return existing;
+                return parent_layout().template find_ancestor_layout<LayoutType>();
             }
+            return nullptr;
+        }
+        template <typename LayoutType>
+        LayoutType& ancestor_layout()
+        {
+            auto existing = find_ancestor_layout<LayoutType>();
+            if (existing != nullptr)
+                return *existing;
             throw ancestor_layout_type_not_found();
         }
     };

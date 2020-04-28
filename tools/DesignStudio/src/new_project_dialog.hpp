@@ -19,13 +19,13 @@
 
 #pragma once
 
-#include "DesignStudio.hpp"
+#include <DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
-#include "symbol.hpp"
+#include <DesignStudio/symbol.hpp>
 
 namespace design_studio
 {
@@ -99,6 +99,15 @@ namespace design_studio
                     iNamespace.set_focus();
                 }
             });
+        }
+    public:
+        const std::string& name() const
+        {
+            return iName.text();
+        }
+        const std::string& namespace_() const
+        {
+            return iNamespace.text();
         }
     private:
         naming_convention iNamingConvention;

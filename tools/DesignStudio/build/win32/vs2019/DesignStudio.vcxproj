@@ -96,7 +96,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include;$(ProjectDir)\..\..\..\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -120,7 +120,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include;$(ProjectDir)\..\..\..\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -146,7 +146,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include;$(ProjectDir)\..\..\..\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -172,7 +172,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include;$(ProjectDir)\..\..\..\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -192,6 +192,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\project.cpp" />
+    <ClCompile Include="..\..\..\src\project_manager.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
@@ -209,11 +211,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\DesignStudio.hpp" />
+    <ClInclude Include="..\..\..\include\DesignStudio\DesignStudio.hpp" />
+    <ClInclude Include="..\..\..\include\DesignStudio\i_project.hpp" />
+    <ClInclude Include="..\..\..\include\DesignStudio\i_project_manager.hpp" />
+    <ClInclude Include="..\..\..\include\DesignStudio\project.hpp" />
+    <ClInclude Include="..\..\..\include\DesignStudio\project_manager.hpp" />
+    <ClInclude Include="..\..\..\include\DesignStudio\symbol.hpp" />
+    <ClInclude Include="..\..\..\include\DesignStudio\widget.hpp" />
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
-    <ClInclude Include="..\..\..\src\symbol.hpp" />
-    <ClInclude Include="..\..\..\src\widget.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\resources\win32\DesignStudio.rc" />

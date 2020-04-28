@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "DesignStudio.hpp"
+#include <DesignStudio/DesignStudio.hpp>
 #include <neolib/string_utils.hpp>
-#include "symbol.hpp"
+#include <DesignStudio/symbol.hpp>
 
 namespace design_studio
 {

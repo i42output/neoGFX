@@ -426,6 +426,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\stack_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\vertical_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\view\model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\view_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\i_view_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\i_model.hpp" />

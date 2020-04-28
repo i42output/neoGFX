@@ -86,7 +86,7 @@ namespace neogfx
     void dock::update_layout()
     {
         layout().set_margins(neogfx::margins{});
-        layout().set_spacing(size{ margins().left, margins().top });
+        layout().set_spacing(margins().top_left().to_vec2());
     }
 
     neogfx::size_policy dock::size_policy() const

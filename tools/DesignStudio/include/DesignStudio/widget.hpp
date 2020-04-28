@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "DesignStudio.hpp"
+#include <DesignStudio/DesignStudio.hpp>
 
 namespace design_studio
 {

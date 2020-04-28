@@ -25,3 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ng = neogfx;
 using namespace ng::unit_literals;
 
+namespace design_studio
+{
+}
+
+namespace ds = design_studio;

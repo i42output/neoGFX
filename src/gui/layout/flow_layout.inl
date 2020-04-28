@@ -148,8 +148,8 @@ namespace neogfx
         set_position(aPosition);
         set_extents(aSize);
         size availableSpace = aSize;
-        availableSpace.cx -= (margins().left + margins().right);
-        availableSpace.cy -= (margins().top + margins().bottom);
+        availableSpace.cx -= margins().size().cx;
+        availableSpace.cy -= margins().size().cy;
         point pos;
         bool previousNonZeroSize = false;
         typename AxisPolicy::minor_layout rows(*this);

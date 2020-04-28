@@ -237,8 +237,8 @@ namespace neogfx
                 continue;
             result.cx += column_minimum_size(column, availableSpaceForChildren);
         }
-        result.cx += (margins().left + margins().right);
-        result.cy += (margins().top + margins().bottom);
+        result.cx += margins().size().cx;
+        result.cy += margins().size().cy;
         if (result.cx != size::max_dimension() && visibleColumns> 0)
             result.cx += (spacing().cx * (visibleColumns - 1));
         if (result.cy != size::max_dimension() && visibleRows > 0)
@@ -273,9 +273,9 @@ namespace neogfx
                 result.cx += columnMaxSize;
         }
         if (result.cx != size::max_dimension())
-            result.cx += (margins().left + margins().right);
+            result.cx += margins().size().cx;
         if (result.cy != size::max_dimension())
-            result.cy += (margins().top + margins().bottom);
+            result.cy += margins().size().cy;
         if (result.cx != size::max_dimension() && visible_columns() > 0)
             result.cx += (spacing().cx * (visible_columns() - 1));
         if (result.cy != size::max_dimension() && visible_rows() > 0)
@@ -334,10 +334,10 @@ namespace neogfx
         for (auto& r : iRows)
             while (r->count() < iDimensions.cx)
                 r->add_spacer();
-        point availablePos = aPosition + point{ margins().left, margins().top };
+        point availablePos = aPosition + margins().top_left();
         size availableSize = aSize;
-        availableSize.cx -= (margins().left + margins().right);
-        availableSize.cy -= (margins().top + margins().bottom);
+        availableSize.cx -= margins().size().cx;
+        availableSize.cy -= margins().size().cy;
         iRowLayout.layout_items(availablePos, availableSize);
         std::vector<dimension> maxRowHeight(iDimensions.cy);
         std::vector<dimension> maxColWidth(iDimensions.cx);

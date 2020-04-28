@@ -325,33 +325,35 @@ namespace neogfx
                 auto const delta = aPosition - iTracking->trackFrom;
                 auto const currentSize = widget_type::extents();
                 widget_type::set_fixed_size({}, false);
+                optional_size newSize;
                 switch (iTracking->part)
                 {
                 case widget_part::BorderLeft:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy });
                     break;
                 case widget_part::BorderTopLeft:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy - delta.dy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTop:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx, currentSize.cy - delta.dy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx, currentSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTopRight:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy - delta.dy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy - delta.dy });
                     break;
                 case widget_part::BorderRight:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy });
                     break;
                 case widget_part::BorderBottomRight:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy + delta.dy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottom:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx, currentSize.cy + delta.dy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx, currentSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottomLeft:
-                    widget_type::set_fixed_size(widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy + delta.dy }));
+                    newSize = widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy + delta.dy });
                     break;
                 }
+                widget_type::set_fixed_size(newSize, false);
                 if (has_layout_manager())
                 {
                     layout_manager().layout_items();

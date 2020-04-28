@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DesignStudio.hpp"
+#include <DesignStudio/DesignStudio.hpp>
 #include <fstream>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -34,8 +34,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/core/css.hpp>
+#include <DesignStudio/project_manager.hpp>
+#include <DesignStudio/project.hpp>
 #include "new_project_dialog.hpp"
-
 
 int main(int argc, char* argv[])
 {
@@ -55,6 +56,9 @@ int main(int argc, char* argv[])
         objects.dock(rightDock);
         properties.dock(rightDock);
 
+        leftDock.hide();
+        rightDock.hide();
+
         ng::i_layout& mainLayout = mainWindow.client_layout();
         mainLayout.set_margins(ng::margins{});
         mainLayout.set_spacing(ng::size{});
@@ -63,15 +67,6 @@ int main(int argc, char* argv[])
 
         auto& fileMenu = app.add_standard_menu(mainMenu, ng::standard_menu::File);
         auto& editMenu = app.add_standard_menu(mainMenu, ng::standard_menu::Edit);
-
-        app.action_file_new().triggered([&]()
-        {
-            design_studio::new_project_dialog dialog{ mainWindow };
-            if (dialog.exec() == ng::dialog_result::Accepted)
-            {
-                // todo
-            }
-        });
 
         ng::toolbar toolbar{ mainWindow.toolbar_layout() };
         toolbar.set_button_image_extents(ng::size{ 16.0_dip, 16.0_dip });
@@ -107,7 +102,35 @@ int main(int argc, char* argv[])
                 ng::color::White.with_alpha(32));
         });
 
-//        ng::css css{"test.css"};
+        ds::project_manager pm;
+
+        auto project_updated = [&](ds::i_project& aProject)
+        {
+            if (pm.project_active())
+            {
+                leftDock.show();
+                rightDock.show();
+            }
+            else
+            {
+                leftDock.hide();
+                rightDock.hide();
+            }
+        };
+
+        ng::sink sink;
+        sink += pm.ProjectAdded(project_updated);
+        sink += pm.ProjectRemoved(project_updated);
+        sink += pm.ProjectActivated(project_updated);
+
+        app.action_file_new().triggered([&]()
+        {
+            ds::new_project_dialog dialog{ mainWindow };
+            if (dialog.exec() == ng::dialog_result::Accepted)
+                pm.create_project(dialog.name(), dialog.namespace_());
+        });
+
+        //        ng::css css{"test.css"};
 
         return app.exec();
     }

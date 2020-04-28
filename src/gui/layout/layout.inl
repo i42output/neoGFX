@@ -245,8 +245,8 @@ namespace neogfx
             return;
         uint32_t itemsVisible = items_visible();
         size availableSize = aSize;
-        availableSize.cx -= (margins().left + margins().right);
-        availableSize.cy -= (margins().top + margins().bottom);
+        availableSize.cx -= margins().size().cx;
+        availableSize.cy -= margins().size().cy;
         auto itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), availableSize);
         auto spaces = (iAlwaysUseSpacing ? itemsVisibleIncludingSpacers : itemsVisible) - itemsZeroSized;
         if (spaces > 1)
@@ -326,9 +326,7 @@ namespace neogfx
             bitsLeft = static_cast<int32_t>(leftover - weightedAmount);
         neolib::bresenham_counter<int32_t> bits(bitsLeft, itemsUsingLeftover);
         uint32_t previousBit = 0;
-        point nextPos = aPosition;
-        nextPos.x += margins().left;
-        nextPos.y += margins().top;
+        point nextPos = aPosition + margins().top_left();
         for (auto& item : *this)
         {
             if (!item.visible() && !ignore_visibility())
