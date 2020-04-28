@@ -45,9 +45,9 @@ namespace design_studio
         throw no_active_project();
     }
 
-    void project_manager::activatate_project(const i_project& aProject)
+    void project_manager::activate_project(const i_project& aProject)
     {
-        if (!iActiveProject || &*iActiveProject != &aProject)
+        if (!project_active() || &active_project() != &aProject)
         {
             auto previouslyActive = iActiveProject;
             iActiveProject = *find_project(aProject);
@@ -57,12 +57,24 @@ namespace design_studio
         }
     }
 
+    void project_manager::deactivate_project()
+    {
+        if (project_active())
+        {
+            auto previouslyActive = iActiveProject;
+            iActiveProject = nullptr;
+            ProjectDeactivated.trigger(*previouslyActive);
+        }
+        else
+            throw no_active_project();
+    }
+
     i_project& project_manager::create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace)
     {
         auto newProject = ng::make_ref<project>(aProjectName.to_std_string(), aProjectNamespace.to_std_string());
         iProjects.push_back(newProject);
         ProjectAdded.trigger(*newProject);
-        activatate_project(*newProject);
+        activate_project(*newProject);
         return *newProject;
     }
 
@@ -71,6 +83,13 @@ namespace design_studio
         auto removing = find_project(aProject);
         auto removingRef = *removing;
         iProjects.container().erase(removing);
+        if (project_active() && &active_project() == &aProject)
+        {
+            if (!iProjects.empty())
+                activate_project(*iProjects.container().back());
+            else
+                deactivate_project();
+        }
         ProjectRemoved.trigger(*removingRef);
     }
 

@@ -41,7 +41,8 @@ namespace design_studio
     public:
         bool project_active() const override;
         i_project& active_project() const override;
-        void activatate_project(const i_project& aProject) override;
+        void activate_project(const i_project& aProject) override;
+        void deactivate_project() override;
         i_project& create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace) override;
         void close_project(const i_project& aProject) override;
     public:

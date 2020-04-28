@@ -104,24 +104,22 @@ int main(int argc, char* argv[])
 
         ds::project_manager pm;
 
-        auto project_updated = [&](ds::i_project& aProject)
+        auto update_ui = [&]()
         {
-            if (pm.project_active())
-            {
-                leftDock.show();
-                rightDock.show();
-            }
-            else
-            {
-                leftDock.hide();
-                rightDock.hide();
-            }
+            app.actionFileClose.enable(pm.project_active());
+            leftDock.show(pm.project_active());
+            rightDock.show(pm.project_active());
         };
+
+        update_ui();
+
+        auto project_updated = [&](ds::i_project&) { update_ui(); };
 
         ng::sink sink;
         sink += pm.ProjectAdded(project_updated);
         sink += pm.ProjectRemoved(project_updated);
         sink += pm.ProjectActivated(project_updated);
+        sink += app.actionFileClose.triggered([&]() { if (pm.project_active()) pm.close_project(pm.active_project()); });
 
         app.action_file_new().triggered([&]()
         {

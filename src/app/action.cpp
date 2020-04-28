@@ -196,15 +196,16 @@ namespace neogfx
         return iShortcut;
     }
 
-    action& action::enable()
+    action& action::set_enabled(bool aEnabled)
     {
-        set_enabled(true);
-        return *this;
-    }
-
-    action& action::disable()
-    {
-        set_enabled(false);
+        if (iEnabled != aEnabled)
+        {
+            iEnabled = aEnabled;
+            if (is_enabled())
+                Enabled.trigger();
+            else
+                Disabled.trigger();
+        }
         return *this;
     }
 
@@ -218,15 +219,16 @@ namespace neogfx
         return *this;
     }
 
-    action& action::check()
+    action& action::set_checked(bool aChecked)
     {
-        set_checked(true);
-        return *this;
-    }
-
-    action& action::uncheck()
-    {
-        set_checked(false);
+        if (iChecked != aChecked)
+        {
+            iChecked = aChecked;
+            if (is_checked())
+                Checked.trigger();
+            else
+                Unchecked.trigger();
+        }
         return *this;
     }
 
@@ -368,28 +370,5 @@ namespace neogfx
     {
         return set_shortcut(key_sequence{ aShortcut });
     }
-
-    void action::set_enabled(bool aEnabled)
-    {
-        if (iEnabled != aEnabled)
-        {
-            iEnabled = aEnabled;
-            if (is_enabled())
-                Enabled.trigger();
-            else
-                Disabled.trigger();
-        }
-    }
-
-    void action::set_checked(bool aChecked)
-    {
-        if (iChecked != aChecked)
-        {
-            iChecked = aChecked;
-            if (is_checked())
-                Checked.trigger();
-            else
-                Unchecked.trigger();
-        }
-    }
 }
+ 

@@ -63,11 +63,9 @@ namespace neogfx
         const i_texture& image() const override;
         const i_texture& checked_image() const override;
         const optional_key_sequence& shortcut() const override;
-        action& enable() override;
-        action& disable() override;
+        action& set_enabled(bool aEnabled) override;
         action& set_checkable(bool aCheckable) override;
-        action& check() override;
-        action& uncheck() override;
+        action& set_checked(bool aChecked) override;
         action& set_group(uint32_t aGroup) override;
         action& set_separator(bool aIsSeparator) override;
         action& set_text(const optional_text& aText = optional_text()) override;
@@ -83,9 +81,6 @@ namespace neogfx
         action& set_checked_image(const i_texture& aTexture) override;
         action& set_shortcut(const optional_key_sequence& aShortcut) override;
         action& set_shortcut(const std::string& aShortcut) override;
-    protected:
-        virtual void set_enabled(bool aEnabled);
-        virtual void set_checked(bool aChecked);
     private:
         bool iEnabled;
         bool iCheckable;

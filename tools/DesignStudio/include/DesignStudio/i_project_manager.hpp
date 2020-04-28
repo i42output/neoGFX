@@ -42,7 +42,8 @@ namespace design_studio
     public:
         virtual bool project_active() const = 0;
         virtual i_project& active_project() const = 0;
-        virtual void activatate_project(const i_project& aProject) = 0;
+        virtual void activate_project(const i_project& aProject) = 0;
+        virtual void deactivate_project() = 0;
         virtual i_project& create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace) = 0;
         virtual void close_project(const i_project& aProject) = 0;
         // helpers
