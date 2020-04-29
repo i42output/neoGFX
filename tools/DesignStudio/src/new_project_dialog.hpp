@@ -42,19 +42,23 @@ namespace design_studio
             dialog{ aParent, "New Project"_t, ng::window_style::Modal | ng::window_style::TitleBar | ng::window_style::Close },
             iNamingConvention{ naming_convention::NeoGfx },
             iLayout0{ client_layout() }, iLayout01{ iLayout0 }, iLayout1{ iLayout01 }, iLayout2{ iLayout01 }, 
-            iType{ iLayout1, "Project Type"_t }, iDefaults{ iLayout2, "Project Defaults"_t },
+            iType{ iLayout1, "Project Type"_t }, iDefaults{ iLayout2, "Project Details"_t },
             iNewApp{ iType.item_layout(), "Blank app"_t },
             iNewMVCApp{ iType.item_layout(), "MVC (model-view-controller) app"_t },
             iNewDialogApp{ iType.item_layout(), "Dialog app"_t },
             iNew2DGame{ iType.item_layout(), "2D game"_t },
             iNew25DGame{ iType.item_layout(), "2.5D (isometric) game"_t },
             iNew3DGame{ iType.item_layout(), "3D game"_t },
-            iLayout3{ iDefaults.item_layout() },
-            iNameLabel{ iLayout3, "Name:"_t },
-            iName{ iLayout3 },
-            iLayout4{ iDefaults.item_layout() },
-            iNamespaceLabel{ iLayout4, "Namespace:"_t },
-            iNamespace{ iLayout4 },
+            iNameLayout{ iDefaults.item_layout() },
+            iNameLabel{ iNameLayout, "Name:"_t },
+            iName{ iNameLayout },
+            iLocationLayout{ iDefaults.item_layout() },
+            iLocationLabel{ iLocationLayout , "Location:"_t },
+            iLocation{ iLocationLayout },
+            iLocationBrowse{ iLocationLayout, ng::image{ ":/neogfx/resources/icons.zip#openfolder.png" } },
+            iNamespaceLayout{ iDefaults.item_layout() },
+            iNamespaceLabel{ iNamespaceLayout, "Namespace:"_t },
+            iNamespace{ iNamespaceLayout },
             iSourceCode{ iDefaults.item_layout(), "Source Code Naming Convention"_t },
             iLowerCaseWithUnderscores{ iSourceCode.item_layout(), "Lower case with underscores"_t },
             iMixedCaseWithUnderscores{ iSourceCode.item_layout(), "Mixed case with underscores"_t },
@@ -71,6 +75,7 @@ namespace design_studio
             iNew3DGame.enable(false);
             iName.set_size_hint(ng::size_hint{ "Medium sized project name" });
             iName.set_focus();
+            iLocationBrowse.image_widget().set_fixed_size( ng::size{ 16.0_dip });
             iNamespace.set_size_hint(ng::size_hint{ "Medium sized namespace name" });
             centre_on_parent();
             auto updateNamespace = [this]()
@@ -123,10 +128,14 @@ namespace design_studio
         ng::radio_button iNew25DGame;
         ng::radio_button iNew3DGame;
         ng::group_box iDefaults;
-        ng::horizontal_layout iLayout3;
+        ng::horizontal_layout iNameLayout;
         ng::label iNameLabel;
         ng::line_edit iName;
-        ng::horizontal_layout iLayout4;
+        ng::horizontal_layout iLocationLayout;
+        ng::label iLocationLabel;
+        ng::line_edit iLocation;
+        ng::push_button iLocationBrowse;
+        ng::horizontal_layout iNamespaceLayout;
         ng::label iNamespaceLabel;
         ng::line_edit iNamespace;
         ng::group_box iSourceCode;

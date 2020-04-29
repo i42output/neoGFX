@@ -68,9 +68,9 @@ public:
         base_type{ aModel, aSortable },
         iCellImages{ {
             ng::image{ ":/test/resources/icon.png" }, 
-            ng::image{ ":/closed/resources/caw_toolbar.naa#contacts.png" },
-            ng::image{ ":/closed/resources/caw_toolbar.naa#favourite.png" },
-            ng::image{ ":/closed/resources/caw_toolbar.naa#folder.png" },
+            ng::image{ ":/closed/resources/caw_toolbar.zip#contacts.png" },
+            ng::image{ ":/closed/resources/caw_toolbar.zip#favourite.png" },
+            ng::image{ ":/closed/resources/caw_toolbar.zip#folder.png" },
             {}
         } }
     {
@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
                 int n = menuPrng(100);
                 for (int k = 1; k < n; ++k)
                 {
-                    sm2.add_action(app.add_action("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.naa#favourite.png"));
+                    sm2.add_action(app.add_action("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.zip#favourite.png"));
                 }
             }
         }

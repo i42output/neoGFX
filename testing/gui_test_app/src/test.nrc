@@ -22,7 +22,7 @@
             action: {
                 id: actionGameControllerCalibration
                 text: "Game Controller Calibration"
-                image: ":/neogfx/resources/icons.naa#gamecontroller.png"
+                image: ":/neogfx/resources/icons.zip#gamecontroller.png"
             }
             action: {
                 id: actionGoldenrodStyle
@@ -32,38 +32,38 @@
             action: {
                 id: actionContacts
                 text: "&Contacts..."
-                image: ":/closed/resources/caw_toolbar.naa#contacts.png"
+                image: ":/closed/resources/caw_toolbar.zip#contacts.png"
                 shortcut: "Alt+C"
             }
             action: {
                 id: actionAddFavourite
                 text: "Add Favourite..."
-                image: ":/closed/resources/caw_toolbar.naa#add_favourite.png"
+                image: ":/closed/resources/caw_toolbar.zip#add_favourite.png"
             }
             action: {
                 id: actionOrganizeFavourites
                 text: "Organize Favourites..."
-                image: ":/closed/resources/caw_toolbar.naa#organize_favourites.png"
+                image: ":/closed/resources/caw_toolbar.zip#organize_favourites.png"
                 shortcut: "Alt+C"
             }
             action: {
                 id: actionArcadeMode
                 text: "Toggle Arcade mode"
-                image: ":/closed/resources/caw_toolbar.naa#arcade_mode_off.png"
+                image: ":/closed/resources/caw_toolbar.zip#arcade_mode_off.png"
                 checkable: true
-                checked_image: ":/closed/resources/caw_toolbar.naa#arcade_mode_on.png"
+                checked_image: ":/closed/resources/caw_toolbar.zip#arcade_mode_on.png"
             }
             action: {
                 id: actionMute
                 text: "Mute/&Unmute Sound"
-                image: ":/closed/resources/caw_toolbar.naa#mute.png"
+                image: ":/closed/resources/caw_toolbar.zip#mute.png"
                 checkable: true
-                checked_image: ":/closed/resources/caw_toolbar.naa#unmute.png"
+                checked_image: ":/closed/resources/caw_toolbar.zip#unmute.png"
             }
             action: {
                 id: actionPasteAndGo
                 text: "Paste and Go"
-                image: ":/closed/resources/caw_toolbar.naa#paste_and_go.png"
+                image: ":/closed/resources/caw_toolbar.zip#paste_and_go.png"
                 shortcut: "Ctrl+Shift+V"
             }
             window: {
@@ -107,31 +107,31 @@
                         action: actionAddFavourite
                         action: actionOrganizeFavourites
                         action: separator
-                        action: { text: "Alice" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                        action: { text: "Bob" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                        action: { text: "Carlos" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                        action: { text: "Dave" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                        action: { text: "Alice" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
+                        action: { text: "Bob" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
+                        action: { text: "Carlos" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
+                        action: { text: "Dave" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
                         menu: {
                             title: "Silent Running Drones"
-                            image: ":/closed/resources/caw_toolbar.naa#folder.png"
-                            action: { text: "Dewey" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                            action: { text: "Huey" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
-                            action: { text: "Louie" image: ":/closed/resources/caw_toolbar.naa#favourite.png" }
+                            image: ":/closed/resources/caw_toolbar.zip#folder.png"
+                            action: { text: "Dewey" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
+                            action: { text: "Huey" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
+                            action: { text: "Louie" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
                         }
                         menu: {
                             title: "DC (TM) Characters"
-                            image: ":/closed/resources/caw_toolbar.naa#folder.png"
+                            image: ":/closed/resources/caw_toolbar.zip#folder.png"
                         }
                         menu: {
                             title: "Marvel (TM) Characters"
-                            image: ":/closed/resources/caw_toolbar.naa#folder.png"
+                            image: ":/closed/resources/caw_toolbar.zip#folder.png"
                         }
                         action: separator
                     }
                     action: actionContacts
                     action: actionArcadeMode
                     action: actionMute
-                    action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons.naa#eyedropper.png" }
+                    action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons.zip#eyedropper.png" }
                     menu: {
                         id: menuTest
                         title: "&Test"
@@ -185,9 +185,9 @@
                     action: actionContacts
                     action: actionAddFavourite
                     action: actionOrganizeFavourites
-                    action: { text: "Keywords..." image: ":/closed/resources/caw_toolbar.naa#keyword.png" }
+                    action: { text: "Keywords..." image: ":/closed/resources/caw_toolbar.zip#keyword.png" }
                     action: actionArcadeMode
-                    action: { id: actionManagePlugins text: "Manage Plugins..." image: ":/closed/resources/caw_toolbar.naa#manage_plugins.png" }
+                    action: { id: actionManagePlugins text: "Manage Plugins..." image: ":/closed/resources/caw_toolbar.zip#manage_plugins.png" }
                     action: actionMute
                     action: separator
                     action: appTest.actionCut
@@ -195,7 +195,7 @@
                     action: appTest.actionPaste
                     action: actionPasteAndGo
                     action: separator
-                    action: { id: actionCheckForUpdates text: "Check for Updates..." image: ":/closed/resources/caw_toolbar.naa#setup.png" }
+                    action: { id: actionCheckForUpdates text: "Check for Updates..." image: ":/closed/resources/caw_toolbar.zip#setup.png" }
                 }
                 tab_page_container: {
                     id: tabPages
@@ -453,17 +453,17 @@
                                         push_button: {
                                             id: themeColor
                                             text: "theme"
-                                            image: ":/closed/resources/caw_toolbar.naa#colour.png"
+                                            image: ":/closed/resources/caw_toolbar.zip#colour.png"
                                         }
                                         push_button: {
                                             id: themeFont
                                             text: "font"
-                                            image: ":/closed/resources/caw_toolbar.naa#font.png"
+                                            image: ":/closed/resources/caw_toolbar.zip#font.png"
                                         }
                                         push_button: {
                                             id: editColor
                                             text: "edit"
-                                            image: ":/closed/resources/caw_toolbar.naa#colour.png"
+                                            image: ":/closed/resources/caw_toolbar.zip#colour.png"
                                         }
                                     }
                                     widget: {
@@ -549,7 +549,7 @@
                                     id: radioMessageBoxIconInformation
                                     text: "Information"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.naa#information.png"
+                                        uri: ":/neogfx/resources/icons.zip#information.png"
                                         size: 24dip
                                     }
                                 }
@@ -557,7 +557,7 @@
                                     id: radioMessageBoxIconQuestion
                                     text: "Question"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.naa#question.png"
+                                        uri: ":/neogfx/resources/icons.zip#question.png"
                                         size: 24dip
                                     }
                                 }
@@ -565,7 +565,7 @@
                                     id: radioMessageBoxIconWarning
                                     text: "Warning"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.naa#warning.png"
+                                        uri: ":/neogfx/resources/icons.zip#warning.png"
                                         size: 24dip
                                     }
                                 }
@@ -573,7 +573,7 @@
                                     id: radioMessageBoxIconStop
                                     text: "Stop"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.naa#stop.png"
+                                        uri: ":/neogfx/resources/icons.zip#stop.png"
                                         size: 24dip
                                     }
                                 }
@@ -581,7 +581,7 @@
                                     id: radioMessageBoxIconError
                                     text: "Error"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.naa#error.png"
+                                        uri: ":/neogfx/resources/icons.zip#error.png"
                                         size: 24dip
                                     }
                                 }
@@ -589,7 +589,7 @@
                                     id: radioMessageBoxIconCritical
                                     text: "Critical"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.naa#critical.png"
+                                        uri: ":/neogfx/resources/icons.zip#critical.png"
                                         size: 24dip
                                     }
                                 }

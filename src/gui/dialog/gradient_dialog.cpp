@@ -169,7 +169,7 @@ namespace neogfx
         iSelectorGroupBox{ iLayout3 },
         iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },
         iLayout3_1{ iSelectorGroupBox.item_layout() },
-        iImportGradient{ iLayout3_1, image{ ":/neogfx/resources/icons.naa#open.png" } },
+        iImportGradient{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#open.png" } },
         iLayout3_2{ iLayout3, alignment::Top },
         iDirectionGroupBox{ iLayout3_2, "Direction"_t },
         iDirectionHorizontalRadioButton{ iDirectionGroupBox.item_layout(), "Horizontal"_t },

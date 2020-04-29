@@ -3,6 +3,6 @@
 
     resource: {
         ref: icons
-        file: resources/icons.naa
+        file: resources/icons.zip
     }
 }

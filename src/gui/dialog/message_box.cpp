@@ -58,84 +58,84 @@ namespace neogfx
 
     standard_button message_box::information(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#information.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.zip#information.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::information(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#information.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.zip#information.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::question(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#question.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.zip#question.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::question(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#question.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.zip#question.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::warning(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.zip#warning.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.zip#warning.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::stop(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#stop.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.zip#stop.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#stop.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.zip#stop.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::error(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#error.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.zip#error.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::error(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#error.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.zip#error.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::critical(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#critical.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aTitle, image{ ":/neogfx/resources/icons.zip#critical.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
     standard_button message_box::critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
     {
-        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#critical.png" }, aText, aDetailedText, aButtons };
+        message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.zip#critical.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
