@@ -27,6 +27,8 @@ namespace design_studio
     class i_project : public ng::i_model, public ng::i_reference_counted
     {
     public:
+        typedef i_project abstract_type;
+    public:
         virtual const ng::i_string& name() const = 0;
         virtual const ng::i_string& namespace_() const = 0;
     };

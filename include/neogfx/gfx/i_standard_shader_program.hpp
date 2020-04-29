@@ -31,6 +31,8 @@ namespace neogfx
 
     class i_standard_shader_program : public i_shader_program
     {
+    public:
+        typedef i_standard_shader_program abstract_type;
         // operations
     public:
         virtual const i_gradient_shader& gradient_shader() const = 0;

@@ -120,6 +120,8 @@ namespace neogfx
     class i_game_controller : public i_hid_device
     {
     public:
+        typedef i_game_controller abstract_type;
+    public:
         declare_event(button_pressed, game_controller_button, key_modifiers_e)
         declare_event(button_released, game_controller_button, key_modifiers_e)
         declare_event(button_repeat, game_controller_button, key_modifiers_e)

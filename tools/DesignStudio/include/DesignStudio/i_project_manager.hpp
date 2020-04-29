@@ -37,9 +37,12 @@ namespace design_studio
         struct project_not_found : std::logic_error { project_not_found() : std::logic_error{ "design_studio::i_project_manager::project_not_found" } {} };
         struct no_active_project : std::logic_error { no_active_project() : std::logic_error{ "design_studio::i_project_manager::no_active_project" } {} };
     public:
+        using project_list = neolib::i_vector<ng::i_ref_ptr<i_project>>;
+    public:
         virtual ~i_project_manager() = default;
         // interface
     public:
+        virtual const project_list& projects() const = 0;
         virtual bool project_active() const = 0;
         virtual i_project& active_project() const = 0;
         virtual void activate_project(const i_project& aProject) = 0;

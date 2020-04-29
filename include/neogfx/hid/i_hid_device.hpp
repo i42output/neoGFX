@@ -65,6 +65,8 @@ namespace neogfx
     class i_hid_device : public i_reference_counted
     {
     public:
+        typedef i_hid_device abstract_type;
+    public:
         declare_event(enabled)
         declare_event(disabled)
     public:

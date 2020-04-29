@@ -48,10 +48,9 @@ namespace neogfx
 
     class i_shader_program : public i_reference_counted
     {
-        typedef i_shader_program self_type;
         // types
     public:
-        typedef self_type abstract_type;
+        typedef i_shader_program abstract_type;
     public:
         typedef neolib::i_ref_ptr<i_shader> i_shader_t;
         typedef neolib::i_vector<i_shader_t> i_shaders_t;

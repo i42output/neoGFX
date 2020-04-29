@@ -636,6 +636,8 @@ namespace neogfx
     class i_keyboard : public i_hid_device
     {
     public:
+        typedef i_keyboard abstract_type;
+    public:
         declare_event(key_pressed, scan_code_e, key_code_e, key_modifiers_e)
         declare_event(key_released, scan_code_e, key_code_e, key_modifiers_e)
         declare_event(text_input, const std::string&)

@@ -36,16 +36,14 @@ namespace neogfx
 
     class i_fragment_shader : public i_shader
     {
-        typedef i_fragment_shader self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_fragment_shader abstract_type;
     };
 
     class i_gradient_shader : public i_fragment_shader
     {
-        typedef i_gradient_shader self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_gradient_shader abstract_type;
     public:
         virtual void clear_gradient() = 0;
         virtual void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) = 0; // todo: use abstract gradient and rect types when available
@@ -54,9 +52,8 @@ namespace neogfx
 
     class i_texture_shader : public i_fragment_shader
     {
-        typedef i_texture_shader self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_texture_shader abstract_type;
     public:
         virtual void clear_texture() = 0;
         virtual void set_texture(const i_texture& aTexture) = 0;
@@ -65,9 +62,8 @@ namespace neogfx
 
     class i_glyph_shader : public i_fragment_shader
     {
-        typedef i_texture_shader self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_glyph_shader abstract_type;
     public:
         virtual void clear_glyph() = 0;
         virtual void set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph) = 0;
@@ -75,9 +71,8 @@ namespace neogfx
 
     class i_stipple_shader : public i_fragment_shader
     {
-        typedef i_stipple_shader self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_stipple_shader abstract_type;
     public:
         virtual bool stipple_active() const = 0;
         virtual void clear_stipple() = 0;

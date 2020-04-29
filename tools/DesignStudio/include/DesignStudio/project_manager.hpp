@@ -39,6 +39,7 @@ namespace design_studio
         project_manager();
         ~project_manager();
     public:
+        const project_list& projects() const override;
         bool project_active() const override;
         i_project& active_project() const override;
         void activate_project(const i_project& aProject) override;

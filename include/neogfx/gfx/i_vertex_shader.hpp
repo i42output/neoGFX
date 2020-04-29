@@ -39,9 +39,8 @@ namespace neogfx
 
     class i_vertex_shader : public i_shader
     {
-        typedef i_vertex_shader self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_vertex_shader abstract_type;
     public:
         typedef neolib::i_map<i_string, abstract_t<shader_variable>*> attribute_map;
     public:

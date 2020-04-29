@@ -141,6 +141,8 @@ namespace neogfx
     class i_mouse : public i_hid_device
     {
     public:
+        typedef i_mouse abstract_type;
+    public:
         declare_event(button_pressed, mouse_button)
         declare_event(button_released, mouse_button)
     public:

@@ -106,7 +106,10 @@ int main(int argc, char* argv[])
 
         auto update_ui = [&]()
         {
+            app.actionFileNew.enable(pm.projects().empty());
+            app.actionFileOpen.enable(pm.projects().empty());
             app.actionFileClose.enable(pm.project_active());
+            app.actionFileSave.enable(pm.project_active() && pm.active_project().dirty());
             leftDock.show(pm.project_active());
             rightDock.show(pm.project_active());
         };
@@ -125,7 +128,7 @@ int main(int argc, char* argv[])
         {
             ds::new_project_dialog dialog{ mainWindow };
             if (dialog.exec() == ng::dialog_result::Accepted)
-                pm.create_project(dialog.name(), dialog.namespace_());
+                pm.create_project(dialog.name(), dialog.namespace_()).set_dirty();
         });
 
         //        ng::css css{"test.css"};

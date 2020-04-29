@@ -33,6 +33,11 @@ namespace design_studio
             close_project(*iProjects.back());
     }
 
+    const project_manager::project_list& project_manager::projects() const
+    {
+        return iProjects;
+    }
+
     bool project_manager::project_active() const
     {
         return !!iActiveProject;

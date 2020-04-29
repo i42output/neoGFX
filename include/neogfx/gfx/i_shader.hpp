@@ -159,6 +159,8 @@ namespace neogfx
     class i_shader_uniform
     {
     public:
+        typedef i_shader_uniform abstract_type;
+    public:
         virtual shader_uniform_id id() const = 0;
         virtual const i_string& name() const = 0;
         virtual bool has_location() const = 0;
@@ -328,6 +330,8 @@ namespace neogfx
     class i_shader_variable
     {
     public:
+        typedef i_shader_variable abstract_type;
+    public:
         virtual const i_string& name() const = 0;
         virtual shader_variable_location location() const = 0;
         virtual const i_enum_t<shader_variable_qualifier>& qualifier() const = 0;
@@ -419,9 +423,9 @@ namespace neogfx
 
     class i_shader : public i_reference_counted
     {
-        typedef i_shader self_type;
     public:
-        typedef self_type asbtract_type;
+        typedef i_shader abstract_type;
+    public:
         typedef abstract_t<shader_value_type> value_type;
         typedef neolib::i_vector<i_shader_uniform> uniform_list;
         typedef neolib::i_set<i_shader_variable> variable_list;

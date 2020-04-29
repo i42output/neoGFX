@@ -36,6 +36,8 @@ namespace neogfx
         declare_event(docked, i_dock&)
         declare_event(undocked, i_dock&)
     public:
+        typedef i_dockable abstract_type;
+    public:
         virtual ~i_dockable() = default;
     public:
         virtual bool can_dock(const i_dock& aDock) const = 0;
