@@ -192,6 +192,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\new_project_dialog.cpp" />
     <ClCompile Include="..\..\..\src\project.cpp" />
     <ClCompile Include="..\..\..\src\project_manager.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.res.cpp">

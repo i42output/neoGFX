@@ -18,12 +18,22 @@
 */
 
 #include <neogfx/app/file_dialog.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <neolib/string_utils.hpp>
 #include <neogfx/app/modal_task.hpp>
 #include "native/3rdparty/tinyfiledialogs.h"
 
 namespace neogfx
 {
+    inline optional_file_path convert_path(const optional_file_path& aPath)
+    {
+#ifdef _WIN32
+        if (aPath)
+            return boost::replace_all_copy(*aPath, "/", "\\");
+#endif
+        return aPath;
+    }
+
     inline std::vector<const char*> convert_patterns(filter_patterns const& aPatterns)
     {
         std::vector<char const*> result;
@@ -37,7 +47,7 @@ namespace neogfx
         auto const patterns = convert_patterns(aSpec.filterPatterns);
         auto result = tinyfd_saveFileDialog(
             aSpec.title ? aSpec.title->c_str() : nullptr,
-            aSpec.defaultPathAndFile ? aSpec.defaultPathAndFile->c_str() : nullptr,
+            aSpec.defaultPathAndFile ? convert_path(aSpec.defaultPathAndFile)->c_str() : nullptr,
             static_cast<int>(patterns.size()),
             !patterns.empty() ? &patterns[0] : nullptr,
             aSpec.filterPatternDescription ? aSpec.filterPatternDescription->c_str() : nullptr);
@@ -49,7 +59,7 @@ namespace neogfx
         auto const patterns = convert_patterns(aSpec.filterPatterns);
         auto const result = tinyfd_openFileDialog(
             aSpec.title ? aSpec.title->c_str() : nullptr,
-            aSpec.defaultPathAndFile ? aSpec.defaultPathAndFile->c_str() : nullptr,
+            aSpec.defaultPathAndFile ? convert_path(aSpec.defaultPathAndFile)->c_str() : nullptr,
             static_cast<int>(patterns.size()),
             !patterns.empty() ? &patterns[0] : nullptr,
             aSpec.filterPatternDescription ? aSpec.filterPatternDescription->c_str() : nullptr,
@@ -61,7 +71,7 @@ namespace neogfx
     {
         auto result = tinyfd_selectFolderDialog(
             aTitle ? aTitle->c_str() : nullptr,
-            aDefaultPath ? aDefaultPath->c_str() : nullptr);
+            aDefaultPath ? convert_path(aDefaultPath)->c_str() : nullptr);
         return result ? file_path{ result } : optional_file_path{};
     }
 
