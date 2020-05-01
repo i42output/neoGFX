@@ -50,6 +50,6 @@ namespace neogfx
         // implementation
     protected:
         // task
-        void run() override;
+        void run(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     };
 }

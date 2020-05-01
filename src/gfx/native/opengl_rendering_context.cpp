@@ -1069,7 +1069,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        iRenderingEngine.want_game_mode();
+        iRenderingEngine.want_turbo_mode();
         aEcs.component<game::rigid_body>().take_snapshot();
         auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
         auto const& rigidBodies = rigidBodiesSnapshot.data();

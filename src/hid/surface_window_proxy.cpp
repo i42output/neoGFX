@@ -234,7 +234,7 @@ namespace neogfx
     void surface_window_proxy::render_surface()
     {
         if (has_native_surface())
-            native_surface().render();
+            native_surface().render(true);
     }
 
     void surface_window_proxy::pause_rendering()

@@ -164,8 +164,7 @@ namespace neogfx
             switch (windowEvent.type())
             {
             case window_event_type::Paint:
-                invalidate(rect{ surface_size() });
-                render(true);
+                render();
                 break;
             case window_event_type::Close:
                 close();
@@ -173,7 +172,7 @@ namespace neogfx
             case window_event_type::Resizing:
                 surface_window().native_window_resized();
                 invalidate(rect{ surface_size() });
-                render(true);
+                render();
                 break;
             case window_event_type::Resized:
                 surface_window().native_window_resized();

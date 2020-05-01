@@ -882,8 +882,76 @@
                         }
                     }
                     tab_page: {
-                        id: pageCircles
-                        tab_text: "Circles"
+                        id: pageInstancing
+                        tab_text: "Instancing"
+                        vertical_layout: {
+                            spacer: {}
+                            horizontal_layout: {
+                                group_box: {
+                                    id: groupRenderingScheme
+                                    text: "Rendering Scheme"
+                                    radio_button: {
+                                        id: radioImmediateBatching
+                                        text: "Immediate (Batching)"
+                                    }
+                                    radio_button: {
+                                        id: radioEcsBatching
+                                        text: "ECS (Batching)"
+                                    }
+                                    radio_button: {
+                                        id: radioEcsInstancing
+                                        text: "ECS (Instancing)"
+                                    }
+                                }
+                                group_box: {
+                                    id: groupMeshShape
+                                    text: "Mesh Shape"
+                                    radio_button: {
+                                        id: radioQuad
+                                        text: "Quad"
+                                    }
+                                    radio_button: {
+                                        id: radioCircle
+                                        text: "Circle"
+                                    }
+                                    check_box: {
+                                        id: checkOutline
+                                        text: "Outline"
+                                    }
+                                    check_box: {
+                                        id: checkFill
+                                        text: "Fill"
+                                    }
+                                    horizontal_layout: {
+                                        label: {
+                                            text: "Size:"
+                                        }
+                                        slider: {
+                                            id: sliderShapeSize
+                                            orientation: Horizontal
+                                            minimum: 1
+                                            maximum: 1024
+                                            step: 1
+                                            value: 32
+                                        }
+                                    }
+                                    horizontal_layout: {
+                                        label: {
+                                            text: "Count:"
+                                        }
+                                        slider: {
+                                            id: sliderShapeCount
+                                            orientation: Horizontal
+                                            minimum: 1
+                                            maximum: 10000
+                                            step: 50
+                                            value: 50
+                                        }
+                                    }
+                                }
+                            }
+                            spacer: {}
+                        }
                     }
                     tab_page: {
                         id: pageFoo

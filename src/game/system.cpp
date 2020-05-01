@@ -88,7 +88,7 @@ namespace neogfx::game
 
     void system::yield()
     {
-        if (service<i_rendering_engine>().game_mode())
+        if (service<i_rendering_engine>().turbo_mode())
             neolib::thread::yield();
         else
             neolib::thread::sleep(1);

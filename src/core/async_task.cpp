@@ -28,11 +28,11 @@ namespace neogfx
     {
     }
 
-    void async_task::run()
+    void async_task::run(neolib::yield_type aYieldType)
     {
         try
         {
-            neolib::async_task::run();
+            neolib::async_task::run(aYieldType);
         }
         catch (std::exception& e)
         {

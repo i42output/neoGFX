@@ -329,12 +329,12 @@ namespace neogfx
         return didSome;
     }
 
-    void opengl_renderer::want_game_mode()
+    void opengl_renderer::want_turbo_mode()
     {
         iLastGameRenderTime = neolib::thread::program_elapsed_ms();
     }
 
-    bool opengl_renderer::game_mode() const
+    bool opengl_renderer::turbo_mode() const
     {
         return neolib::thread::program_elapsed_ms() - iLastGameRenderTime < 5000u;
     }

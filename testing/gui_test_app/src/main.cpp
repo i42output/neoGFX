@@ -310,7 +310,7 @@ int main(int argc, char* argv[])
                 }
             }
             if (ui.actionArcadeMode.is_checked())
-                ng::service<ng::i_rendering_engine>().want_game_mode();
+                ng::service<ng::i_rendering_engine>().want_turbo_mode();
         }, 100 };
 
         ui.actionPasteAndGo.triggered([&app]()
@@ -1026,7 +1026,7 @@ int main(int argc, char* argv[])
 
         ui.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
-            ng::service<ng::i_rendering_engine>().want_game_mode();
+            ng::service<ng::i_rendering_engine>().want_turbo_mode();
             aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
@@ -1072,48 +1072,93 @@ int main(int argc, char* argv[])
             test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_dip, texColor[3], "Render\nTo\nScreen");
         });
 
-        neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
-        {
-            aTimer.set_duration(ui.pageDrawing.can_update() ? 0 : 100);
-            aTimer.again();
-            ui.pageDrawing.update();
-        }, 100 };
-
         ui.buttonStyle1.clicked([&ui]()
         {
             ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::optional_font(), ng::gradient(ng::color::Red, ng::color::White, ng::gradient_direction::Horizontal), ng::color_or_gradient() });
         });
+
         ui.buttonStyle2.clicked([&ui]()
         {
             ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::color::White });
         });
 
-        ui.pageCircles.painting([&ui, &random_color](ng::i_graphics_context& aGc)
+        ui.radioCircle.check();
+        ui.checkOutline.check();
+        ui.checkFill.check();
+        ui.radioEcsBatching.disable();
+        ui.radioEcsInstancing.disable();
+
+        ng::font infoFont{ "SnareDrum Two NBP", "Regular", 40.0 };
+
+        ui.pageInstancing.painting([&](ng::i_graphics_context& aGc)
         {
             neolib::basic_random<ng::coordinate> prng;
-            for (int i = 0; i < 100; ++i)
+            for (int32_t i = 0; i < ui.sliderShapeCount.value(); ++i)
             {
-                switch (static_cast<int>(prng(2)))
+                if (ui.checkOutline.is_checked() && ui.checkFill.is_unchecked())
                 {
-                case 0:
-                    aGc.draw_circle(
-                        ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().extents().cy - 1) }, prng(255),
-                        ng::pen{ random_color(), prng(1, 3) });
-                    break;
-                case 1:
-                    aGc.draw_circle(
-                        ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().cy - 1) }, prng(255),
-                        ng::pen{ random_color(), prng(1, 3) },
-                        random_color().with_alpha(random_color().red()));
-                    break;
-                case 2:
-                    aGc.fill_circle(
-                        ng::point{ prng(ui.pageCircles.client_rect().cx - 1), prng(ui.pageCircles.client_rect().cy - 1) }, prng(255),
-                        random_color().with_alpha(random_color().red()));
-                    break;
+                    if (ui.radioCircle.is_checked())
+                        aGc.draw_circle(
+                            ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ui.sliderShapeSize.value(),
+                            ng::pen{ random_color(), 2.0 });
+                    else
+                        aGc.draw_rect(
+                            ng::rect{ ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                            ng::pen{ random_color(), 2.0 });
+                }
+                else if (ui.checkOutline.is_checked() && ui.checkFill.is_checked())
+                {
+                    if (ui.radioCircle.is_checked())
+                        aGc.draw_circle(
+                            ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
+                            ng::pen{ random_color(), 2.0 },
+                            random_color().with_alpha(random_color().red()));
+                    else
+                        aGc.draw_rect(
+                            ng::rect{ ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                            ng::pen{ random_color(), 2.0 },
+                            random_color().with_alpha(random_color().red()));
+                }
+                else
+                {
+                    if (ui.radioCircle.is_checked())
+                        aGc.fill_circle(
+                            ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
+                            random_color().with_alpha(random_color().red()));
+                    else
+                        aGc.fill_rect(
+                            ng::rect{ ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                            random_color().with_alpha(random_color().red()));
                 }
             }
+            thread_local std::string currentInfoText;
+            thread_local ng::glyph_text infoGlyphText;
+            bool const mouseOver = ui.pageInstancing.client_rect().contains(ui.pageInstancing.root().mouse_position() - ui.pageInstancing.origin());
+            if (mouseOver)
+            {
+                std::ostringstream newInfoText;
+                newInfoText << "Shape count: " << ui.sliderShapeCount.value() << "  Shape size: " << ui.sliderShapeSize.value() << "\nMesh vertex count: " << "???" << "  #gamedev :D";
+                if (currentInfoText != newInfoText.str())
+                {
+                    currentInfoText = newInfoText.str();
+                    infoGlyphText = aGc.to_glyph_text(currentInfoText, infoFont);
+                }
+                aGc.draw_multiline_glyph_text(ng::point{ 32.0, 32.0 }, infoGlyphText, 0.0, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+            }
         });
+
+        neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
+        {
+            if (!window.has_native_window())
+                return;
+            aTimer.set_duration(ui.pageDrawing.can_update() || ui.pageInstancing.can_update() ? 0 : 100);
+            aTimer.again();
+            ui.pageDrawing.update();
+            ui.pageInstancing.update();
+            bool const mouseOver = ui.pageInstancing.client_rect().contains(ui.pageInstancing.root().mouse_position() - ui.pageInstancing.origin());
+            ui.groupRenderingScheme.show(mouseOver);
+            ui.groupMeshShape.show(mouseOver);
+        }, 100 };
 
         return app.exec();
     }

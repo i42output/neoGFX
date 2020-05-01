@@ -57,7 +57,7 @@ namespace neogfx
         boost::program_options::variables_map iOptions;
     };
 
-    class app : public neogfx::async_thread, public i_app, private i_keyboard_handler
+    class app : public async_thread, public i_app, private i_keyboard_handler
     {
     public:
         define_declared_event(ExecutionStarted, execution_started)
@@ -141,6 +141,8 @@ namespace neogfx
         bool process_events() override;
         bool process_events(i_event_processing_context& aContext) override;
         i_event_processing_context& event_processing_context() override;
+    protected:
+        void idle() override;
     private:
         bool do_process_events();
     private:

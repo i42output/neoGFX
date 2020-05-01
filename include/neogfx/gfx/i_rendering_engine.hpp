@@ -131,8 +131,8 @@ namespace neogfx
     public:
         virtual bool process_events() = 0;
     public:
-        virtual void want_game_mode() = 0;
-        virtual bool game_mode() const = 0;
+        virtual void want_turbo_mode() = 0;
+        virtual bool turbo_mode() const = 0;
     public:
         virtual void register_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
         virtual void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;

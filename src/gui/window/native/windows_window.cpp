@@ -470,6 +470,22 @@ namespace neogfx
             return visible() && opengl_window::can_render();
         }
 
+        void window::render(bool aOOBRequest)
+        {
+            if (!can_render())
+                return;
+            if (!aOOBRequest)
+                opengl_window::render(aOOBRequest);
+            else if (has_invalidated_area())
+            {
+                auto const invalidatedArea = invalidated_area().as<LONG>();
+                RECT const rect{ invalidatedArea.left(), invalidatedArea.top(), invalidatedArea.right(), invalidatedArea.bottom() };
+                ::InvalidateRect(iHandle, &rect, true);
+                validate();
+                ::UpdateWindow(iHandle);
+            }
+        }
+
         std::unique_ptr<i_rendering_context> window::create_graphics_context(blending_mode aBlendingMode) const
         {
             return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
@@ -828,10 +844,13 @@ namespace neogfx
             case WM_PAINT:
                 {
                     RECT rect;
-                    if (GetUpdateRect(hwnd, &rect, FALSE)) 
+                    if (::GetUpdateRect(hwnd, &rect, FALSE)) 
                     {
-                        ValidateRect(hwnd, NULL);
-                        self.handle_event(window_event(window_event_type::Paint));
+                        PAINTSTRUCT ps;
+                        ::BeginPaint(self.iHandle, &ps);
+                        self.invalidate(neogfx::rect{ basic_point<LONG>{ ps.rcPaint.left, ps.rcPaint.top }, basic_size<LONG>{ ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top } });
+                        self.handle_event(window_event{ window_event_type::Paint });
+                        ::EndPaint(self.iHandle, &ps);
                     }
                 }
                 result = 0;
@@ -844,7 +863,7 @@ namespace neogfx
                 {
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-                    self.push_event(keyboard_event(keyboard_event_type::SysTextInput, text));
+                    self.push_event(keyboard_event{ keyboard_event_type::SysTextInput, text });
                 }
                 break;
             case WM_UNICHAR:
@@ -859,7 +878,7 @@ namespace neogfx
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
                     if (!text.empty() && (text.size() > 1 || text[0] >= ' ' || std::isspace(text[0])))
-                        self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
+                        self.push_event(keyboard_event{ keyboard_event_type::TextInput, text });
                 }
                 break;
             case WM_KEYDOWN:

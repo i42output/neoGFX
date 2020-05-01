@@ -115,8 +115,8 @@ namespace neogfx
     public:
         bool process_events() override;
     public:
-        void want_game_mode() override;
-        bool game_mode() const override;
+        void want_turbo_mode() override;
+        bool turbo_mode() const override;
     public:
         void register_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
         void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) override;

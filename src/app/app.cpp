@@ -344,7 +344,7 @@ namespace neogfx
             {
                 if (!process_events(iAppContext))
                 {
-                    if (service<i_rendering_engine>().game_mode())
+                    if (service<i_rendering_engine>().turbo_mode())
                         thread::yield();
                     else
                         thread::sleep(1);
@@ -718,6 +718,11 @@ namespace neogfx
     i_event_processing_context& app::event_processing_context()
     {
         return iAppContext;
+    }
+
+    void app::idle()
+    {
+        async_thread::idle();
     }
 
     bool app::do_process_events()

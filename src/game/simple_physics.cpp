@@ -38,9 +38,9 @@ namespace neogfx::game
             start();
         }
     public:
-        void do_work() override
+        void do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
         {
-            async_thread::do_work();
+            async_thread::do_work(aYieldType);
             iOwner.apply();
             iOwner.yield();
         }
