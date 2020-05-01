@@ -1028,9 +1028,9 @@ namespace neogfx
                         lineWidth = 0;
                     }
                 }
-                if (line.first == line.second)
-                    pos.y += font().height();
             }
+            if (line.first == line.second)
+                pos.y += aText.glyph_font().height();
         }
 
         for (auto& line : result.lines)

@@ -1092,6 +1092,13 @@ int main(int argc, char* argv[])
 
         ui.pageInstancing.painting([&](ng::i_graphics_context& aGc)
         {
+            if (ui.radioOff.is_checked())
+            {
+                aGc.draw_multiline_text(ng::point{ 32.0, 32.0 }, 
+                    "WARNING\n\n\nTHIS TEST CAN POTENTIALLY TRIGGER\nSEIZURES FOR PEOPLE WITH\nPHOTOSENSITIVE EPILEPSY\n\nDISCRETION IS ADVISED", 
+                    infoFont, 0.0, ng::text_appearance{ ng::color::Coral, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } }, ng::alignment::Centre);
+                return;
+            }
             neolib::basic_random<ng::coordinate> prng;
             for (int32_t i = 0; i < ui.sliderShapeCount.value(); ++i)
             {
@@ -1151,14 +1158,14 @@ int main(int argc, char* argv[])
         {
             if (!window.has_native_window())
                 return;
-            aTimer.set_duration(ui.pageDrawing.can_update() || ui.pageInstancing.can_update() ? 0 : 100);
+            aTimer.set_duration(ui.pageDrawing.can_update() || ui.pageInstancing.can_update() ? 0u : 1u);
             aTimer.again();
             ui.pageDrawing.update();
             ui.pageInstancing.update();
             bool const mouseOver = ui.pageInstancing.client_rect().contains(ui.pageInstancing.root().mouse_position() - ui.pageInstancing.origin());
             ui.groupRenderingScheme.show(mouseOver);
             ui.groupMeshShape.show(mouseOver);
-        }, 100 };
+        }, 1u };
 
         return app.exec();
     }

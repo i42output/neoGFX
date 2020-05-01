@@ -891,6 +891,10 @@
                                     id: groupRenderingScheme
                                     text: "Rendering Scheme"
                                     radio_button: {
+                                        id: radioOff
+                                        text: "Off"
+                                    }
+                                    radio_button: {
                                         id: radioImmediateBatching
                                         text: "Immediate (Batching)"
                                     }

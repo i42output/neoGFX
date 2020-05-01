@@ -24,6 +24,13 @@
 
 namespace neogfx
 {
+    const font& glyph_font_cache::glyph_font() const
+    {
+        if (!cache().empty())
+            return cache().begin()->second.second;
+        throw cached_font_not_found();
+    }
+
     const font& glyph_font_cache::glyph_font(const glyph& aGlyph) const
     {
         cache_glyph_font(aGlyph.font_id());

@@ -92,6 +92,7 @@ namespace neogfx
     class i_glyph_font_cache
     {
     public:
+        virtual const font& glyph_font() const = 0;
         virtual const font& glyph_font(const glyph& aGlyph) const = 0;
         virtual void cache_glyph_font(font_id aFontId) const = 0;
         virtual void cache_glyph_font(const font& aFont) const = 0;
@@ -371,6 +372,7 @@ namespace neogfx
     public:
         struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_font_cache::cached_font_not_found") {} };
     public:
+        const font& glyph_font() const override;
         const font& glyph_font(const glyph& aGlyph) const override;
         void cache_glyph_font(font_id aFontId) const override;
         void cache_glyph_font(const font& aFont) const override;
