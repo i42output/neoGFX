@@ -855,6 +855,11 @@ namespace neogfx
                 }
                 result = 0;
                 break;
+            case WM_TIMER:
+                ::InvalidateRect(hwnd, NULL, FALSE);
+                ::UpdateWindow(hwnd);
+                result = 0;
+                break;
             case WM_INPUTLANGCHANGE:
                 service<i_keyboard>().update_keymap();
                 break;
@@ -1209,7 +1214,16 @@ namespace neogfx
                     self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
                     self.push_event(window_event{ window_event_type::Resized, *self.iExtents });
                     ::InvalidateRect(hwnd, NULL, FALSE);
+                    ::UpdateWindow(hwnd);
                 }
+                break;
+            case WM_ENTERSIZEMOVE:
+                ::SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+                result = wndproc(hwnd, msg, wparam, lparam);
+                break;
+            case WM_EXITSIZEMOVE:
+                ::KillTimer(hwnd, 1);
+                result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_SIZE:
                 switch (wparam) 
