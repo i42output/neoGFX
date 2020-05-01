@@ -85,6 +85,7 @@ namespace neogfx
             i_native_window& parent() override;
         public:
             bool initialising() const override;
+            void initialisation_complete() override;
             void* handle() const override;
             void* native_handle() const override;
             point surface_position() const override;

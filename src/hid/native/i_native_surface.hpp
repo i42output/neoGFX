@@ -51,6 +51,7 @@ namespace neogfx
         virtual void handle_dpi_changed() = 0;
     public:
         virtual bool initialising() const = 0;
+        virtual void initialisation_complete() = 0;
         virtual void* handle() const = 0;
         virtual void* native_handle() const = 0;
         virtual point surface_position() const = 0;

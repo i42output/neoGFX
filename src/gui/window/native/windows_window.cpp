@@ -169,8 +169,6 @@ namespace neogfx
 
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-            iReady = true;
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
@@ -208,8 +206,6 @@ namespace neogfx
 
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-            iReady = true;
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
@@ -247,8 +243,6 @@ namespace neogfx
 
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-            iReady = true;
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
@@ -286,8 +280,6 @@ namespace neogfx
 
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-            iReady = true;
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
@@ -325,8 +317,6 @@ namespace neogfx
 
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-            iReady = true;
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
@@ -365,8 +355,6 @@ namespace neogfx
 
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-            iReady = true;
         }
 
         window::~window()
@@ -421,6 +409,11 @@ namespace neogfx
         bool window::initialising() const
         {
             return !iReady;
+        }
+
+        void window::initialisation_complete()
+        {
+            iReady = true;
         }
 
         void* window::handle() const
@@ -842,9 +835,10 @@ namespace neogfx
                     result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_PAINT:
+                if (!self.initialising())
                 {
                     RECT rect;
-                    if (::GetUpdateRect(hwnd, &rect, FALSE)) 
+                    if (::GetUpdateRect(hwnd, &rect, FALSE))
                     {
                         PAINTSTRUCT ps;
                         ::BeginPaint(self.iHandle, &ps);
@@ -853,6 +847,8 @@ namespace neogfx
                         ::EndPaint(self.iHandle, &ps);
                     }
                 }
+                else
+                    ::ValidateRect(hwnd, NULL);
                 result = 0;
                 break;
             case WM_TIMER:
@@ -1213,8 +1209,11 @@ namespace neogfx
                     self.iExtents.emplace(rect.right - rect.left, rect.bottom - rect.top);
                     self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
                     self.push_event(window_event{ window_event_type::Resized, *self.iExtents });
-                    ::InvalidateRect(hwnd, NULL, FALSE);
-                    ::UpdateWindow(hwnd);
+                    if (!self.initialising())
+                    {
+                        ::InvalidateRect(hwnd, NULL, FALSE);
+                        ::UpdateWindow(hwnd);
+                    }
                 }
                 break;
             case WM_ENTERSIZEMOVE:

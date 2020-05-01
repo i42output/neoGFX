@@ -980,6 +980,9 @@ namespace neogfx
                     centre_on_parent(false);
             }
         }
+
+        if (has_native_window())
+            native_window().initialisation_complete();
     }
 
     double window::rendering_priority() const
