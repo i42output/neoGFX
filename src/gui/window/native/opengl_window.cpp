@@ -413,6 +413,7 @@ namespace neogfx
 
     void opengl_window::debug_message(const std::string& aMessage)
     {
+        // todo: create a proper logging framework
         if (iDebug)
             std::cerr << aMessage << std::endl;
     }
