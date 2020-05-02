@@ -1147,10 +1147,10 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aFill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), aRect);
 
-        auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::Triangles);
+        auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::TriangleFan);
         
         {
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, vertices.size() };
+            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
 
             for (auto const& v : vertices)
             {
