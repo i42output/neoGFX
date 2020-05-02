@@ -60,6 +60,9 @@ namespace neogfx
             void cleanup() override;
         public:
             bool double_buffering() const override;
+            bool vsync_enabled() const override;
+            void enable_vsync() override;
+            void disable_vsync() override;
             pixel_format_t set_pixel_format(const i_render_target& aTarget) override;
             const i_render_target* active_target() const override;
             void activate_context(const i_render_target& aTarget) override;
@@ -87,6 +90,7 @@ namespace neogfx
         private:
             bool iInitialized;
             bool iDoubleBuffering;
+            bool iVsyncEnabled;
             std::vector<std::shared_ptr<offscreen_window>> iOffscreenWindowPool;
             std::unordered_map<const i_render_target*, std::shared_ptr<offscreen_window>> iOffscreenWindows;
             std::weak_ptr<offscreen_window> iDefaultOffscreenWindow;

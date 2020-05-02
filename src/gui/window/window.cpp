@@ -23,6 +23,7 @@
 #include <neolib/scoped.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
 #include "native/i_native_window.hpp"
@@ -263,14 +264,31 @@ namespace neogfx
         {
             if (is_nested())
                 throw fullscreen_window_cannot_nest();
+            iStyle |= window_style::Fullscreen;
+            iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
             iSurfaceWindow = std::make_unique<surface_window_proxy>(
                 *this,
                 [&](i_surface_window& aProxy) 
-                    { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, *aPlacement.video_mode(), title_text(), aStyle); });
+                    { 
+                        return service<i_rendering_engine>().create_window(
+                            service<i_surface_manager>(), 
+                            aProxy, 
+                            *aPlacement.video_mode(),
+                            title_text(), 
+                            style()); 
+                    });
         }
         else if (!is_nested())
         {
-            switch (aPlacement.state())
+            auto correctedPlacement = aPlacement;
+            // todo: multiple displays
+            if (!has_parent() && service<i_surface_manager>().display().is_fullscreen())
+            {
+                iStyle |= window_style::Fullscreen;
+                iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
+                correctedPlacement = service<i_surface_manager>().display().fullscreen_video_mode();
+            }
+            switch (correctedPlacement.state())
             {
             default:
             case window_state::Normal:
@@ -278,12 +296,12 @@ namespace neogfx
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
                         [&](i_surface_window& aProxy) 
-                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aPlacement.normal_geometry()->top_left(), aPlacement.normal_geometry()->extents(), title_text(), aStyle); });
+                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
                 else
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
                         [&](i_surface_window& aProxy) 
-                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent().surface().native_surface(), aPlacement.normal_geometry()->top_left(), aPlacement.normal_geometry()->extents(), title_text(), aStyle); });
+                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
                 break;
             case window_state::Iconized:
                 // todo
@@ -873,6 +891,11 @@ namespace neogfx
     bool window::is_fullscreen() const
     {
         return has_native_window() && native_window().is_fullscreen();
+    }
+
+    void window::enter_fullscreen(const video_mode& aVideoMode)
+    {
+        native_window().enter_fullscreen(aVideoMode);
     }
 
     point window::window_position() const

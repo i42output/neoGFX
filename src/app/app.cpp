@@ -246,6 +246,9 @@ namespace neogfx
         service<i_hid_devices>().enumerate_devices();
         service<i_keyboard>().grab_keyboard(*this);
 
+        if (program_options().full_screen())
+            service<i_surface_manager>().display().enter_fullscreen(video_mode{ *program_options().full_screen() });
+
         style lightStyle("Light");
         register_style(lightStyle);
         style darkStyle("Dark");

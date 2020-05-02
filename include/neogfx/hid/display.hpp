@@ -23,7 +23,7 @@
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/core/color.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
-#include "i_display.hpp"
+#include <neogfx/hid/i_display.hpp>
 
 namespace neogfx
 {

@@ -34,10 +34,16 @@ namespace neogfx
         public:
             void update_dpi() override;
         public:
+            bool is_fullscreen() const override;
+            const video_mode& fullscreen_video_mode() const override;
+            void enter_fullscreen(const video_mode& aVideoMode) override;
+            void leave_fullscreen() override;
             color read_pixel(const point& aPosition) const override;
         private:
             void* iNativeDisplayHandle;
             void* iNativeDeviceContextHandle;
+            std::optional<DEVMODE> iDesktopDisplaySettings;
+            std::optional<std::pair<video_mode, DEVMODE>> iFullscreenDisplaySettings;
         };
     }
 }

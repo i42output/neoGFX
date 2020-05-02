@@ -24,6 +24,7 @@
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/core/color.hpp>
+#include <neogfx/hid/video_mode.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
 
 namespace neogfx
@@ -54,6 +55,11 @@ namespace neogfx
     {
     public:
         struct failed_to_get_monitor_dpi : std::runtime_error { failed_to_get_monitor_dpi() : std::runtime_error("neogfx::i_display::failed_to_get_monitor_dpi") {} };
+        struct fullscreen_not_active : std::logic_error { fullscreen_not_active() : std::logic_error("neogfx::i_display::fullscreen_not_active: Fullscreen not currently active") {} };
+        struct failed_to_enter_fullscreen : std::runtime_error { failed_to_enter_fullscreen(const std::string& aReason) : 
+            std::runtime_error("neogfx::i_displayy::failed_to_enter_fullscreen: Failed to enter fullscreen, reason: " + aReason) {} };
+        struct failed_to_leave_fullscreen : std::runtime_error { failed_to_leave_fullscreen(const std::string& aReason) :
+            std::runtime_error("neogfx::i_displayy::failed_to_leave_fullscreen: Failed to leave fullscreen, reason: " + aReason) {} };
     public:
         virtual ~i_display() = default;
     public:
@@ -62,6 +68,10 @@ namespace neogfx
         virtual const i_device_metrics& metrics() const = 0;
         virtual void update_dpi() = 0;
     public:
+        virtual bool is_fullscreen() const = 0;
+        virtual const video_mode& fullscreen_video_mode() const = 0;
+        virtual void enter_fullscreen(const video_mode& aVideoMode) = 0;
+        virtual void leave_fullscreen() = 0;
         virtual neogfx::rect rect() const = 0;
         virtual neogfx::rect desktop_rect() const = 0;
         virtual window_placement default_window_placement() const = 0;

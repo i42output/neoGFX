@@ -69,13 +69,21 @@ namespace neogfx
 
         DWORD window::convert_style(window_style aStyle)
         {   
-            DWORD result = 0u;
+            DWORD result = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
             if ((aStyle & window_style::NativeTitleBar) != window_style::NativeTitleBar)
                 result |= WS_POPUP;
             if ((aStyle & window_style::Resize) == window_style::Resize)
                 result |= (WS_THICKFRAME | WS_MAXIMIZEBOX);
             if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
                 result |= WS_POPUP;
+            return result;
+        }
+
+        DWORD window::convert_ex_style(window_style aStyle)
+        {
+            DWORD result = WS_EX_APPWINDOW;
+            if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
+                result |= WS_EX_TOPMOST;
             return result;
         }
 
@@ -150,7 +158,8 @@ namespace neogfx
         {
             sNewWindow = this;
 
-            iHandle = ::CreateWindow(
+            iHandle = ::CreateWindowEx(
+                convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
                 reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
                 convert_style(aStyle),
@@ -167,6 +176,8 @@ namespace neogfx
 
             init();
 
+            enter_fullscreen(aVideoMode);
+                
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
@@ -187,7 +198,8 @@ namespace neogfx
         {
             sNewWindow = this;
 
-            iHandle = ::CreateWindow(
+            iHandle = ::CreateWindowEx(
+                convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
                 reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
                 convert_style(aStyle),
@@ -224,7 +236,8 @@ namespace neogfx
         {
             sNewWindow = this;
 
-            iHandle = ::CreateWindow(
+            iHandle = ::CreateWindowEx(
+                convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
                 reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
                 convert_style(aStyle),
@@ -261,7 +274,8 @@ namespace neogfx
         {
             sNewWindow = this;
 
-            iHandle = ::CreateWindow(
+            iHandle = ::CreateWindowEx(
+                convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
                 reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
                 convert_style(aStyle),
@@ -277,6 +291,8 @@ namespace neogfx
                 throw failed_to_create_window(GetLastErrorText());
 
             init();
+
+            enter_fullscreen(aVideoMode);
 
             if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
@@ -298,7 +314,8 @@ namespace neogfx
         {
             sNewWindow = this;
 
-            iHandle = ::CreateWindow(
+            iHandle = ::CreateWindowEx(
+                convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
                 reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
                 convert_style(aStyle),
@@ -336,7 +353,8 @@ namespace neogfx
         {
             sNewWindow = this;
 
-            iHandle = ::CreateWindow(
+            iHandle = ::CreateWindowEx(
+                convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
                 reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
                 convert_style(aStyle),
@@ -606,6 +624,12 @@ namespace neogfx
         bool window::is_fullscreen() const
         {
             return (iStyle & window_style::Fullscreen) == window_style::Fullscreen;
+        }
+
+        void window::enter_fullscreen(const video_mode& aVideoMode)
+        {
+            service<i_surface_manager>().display(surface_window()).enter_fullscreen(aVideoMode);
+            iStyle |= window_style::Fullscreen;
         }
 
         bool window::enabled() const
@@ -1391,7 +1415,9 @@ namespace neogfx
         void window::display()
         {
             if (rendering_engine().double_buffering())
+            {
                 ::SwapBuffers(static_cast<HDC>(iHdc));
+            }
             else
                 glCheck(glDrawBuffer(GL_FRONT));
         }

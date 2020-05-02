@@ -72,6 +72,53 @@ namespace neogfx
             iPixelDensityDpi = basic_size<UINT>(dpiX, dpiY);
         }
 
+        bool display::is_fullscreen() const
+        {
+            return !!iFullscreenDisplaySettings;
+        }
+
+        const video_mode& display::fullscreen_video_mode() const
+        {
+            if (is_fullscreen())
+                return iFullscreenDisplaySettings->first;
+            throw fullscreen_not_active();
+        }
+
+        void display::enter_fullscreen(const video_mode& aVideoMode)
+        {
+            DEVMODE Mode = {};
+            // todo: multiple monitors
+            if (!::EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &Mode))
+                throw failed_to_enter_fullscreen{ "enum display settings" };
+            if (!is_fullscreen())
+                iDesktopDisplaySettings = Mode;
+            Mode.dmBitsPerPel = aVideoMode.bits_per_pixel();
+            Mode.dmPelsWidth = aVideoMode.resolution().cx;
+            Mode.dmPelsHeight = aVideoMode.resolution().cy;
+            Mode.dmSize = sizeof(Mode);
+            Mode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
+            if (is_fullscreen() && 
+                iFullscreenDisplaySettings->second.dmBitsPerPel == Mode.dmBitsPerPel && 
+                iFullscreenDisplaySettings->second.dmPelsWidth == Mode.dmPelsWidth &&
+                iFullscreenDisplaySettings->second.dmPelsHeight == Mode.dmPelsHeight)
+                return;
+            auto result = ::ChangeDisplaySettings(&Mode, CDS_FULLSCREEN);
+            if (result != DISP_CHANGE_SUCCESSFUL)
+                throw failed_to_enter_fullscreen{ "change display settings, code: " + std::to_string(result) };
+            iFullscreenDisplaySettings = { video_mode{Mode.dmPelsWidth, Mode.dmPelsHeight, Mode.dmBitsPerPel }, Mode };
+        }
+
+        void display::leave_fullscreen()
+        {
+            if (!is_fullscreen())
+                throw fullscreen_not_active();
+            auto result = ::ChangeDisplaySettings(&*iDesktopDisplaySettings, 0);
+            if (result != DISP_CHANGE_SUCCESSFUL)
+                throw failed_to_leave_fullscreen{ "change display settings, code: " + std::to_string(result) };
+            iDesktopDisplaySettings = std::nullopt;
+            iFullscreenDisplaySettings = std::nullopt;
+        }
+
         color display::read_pixel(const point& aPosition) const
         {
             auto clr = GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));

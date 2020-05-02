@@ -116,6 +116,7 @@ namespace neogfx
         virtual bool is_restored() const = 0;
         virtual void restore() = 0;
         virtual bool is_fullscreen() const = 0;
+        virtual void enter_fullscreen(const video_mode& aVideoMode) = 0;
         virtual point window_position() const = 0;
         virtual const window_placement& placement() const = 0;
         virtual void set_placement(const window_placement& aPlacement) = 0;

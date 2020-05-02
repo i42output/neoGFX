@@ -31,9 +31,11 @@ namespace neogfx
 {
     namespace native::windows
     {
+        class renderer;
+
         class window : public opengl_window
         {
-            friend class windows_renderer;
+            friend class renderer;
         public:
             struct failed_to_install_window_creation_hook : std::runtime_error {
                 failed_to_install_window_creation_hook(const std::string& aReason) :
@@ -65,6 +67,7 @@ namespace neogfx
             };
         public:
             static DWORD convert_style(window_style aStyle);
+            static DWORD convert_ex_style(window_style aStyle);
         public:
             window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
             window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
@@ -116,6 +119,7 @@ namespace neogfx
             bool is_restored() const override;
             void restore() override;
             bool is_fullscreen() const override;
+            void enter_fullscreen(const video_mode& aVideoMode) override;
             bool enabled() const override;
             void enable(bool aEnable) override;
             bool is_capturing() const override;
@@ -131,7 +135,7 @@ namespace neogfx
             static window* new_window();
             void init();
             margins border_thickness() const;
-        public:
+        private:
             static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
         private:
             virtual void display();

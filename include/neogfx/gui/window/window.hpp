@@ -145,6 +145,7 @@ namespace neogfx
         bool is_restored() const override;
         void restore() override;
         bool is_fullscreen() const override;
+        void enter_fullscreen(const video_mode& aVideoMode) override;
         point window_position() const override;
         const window_placement& placement() const override;
         void set_placement(const window_placement& aPlacement) override;

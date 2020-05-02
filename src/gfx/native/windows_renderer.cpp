@@ -186,6 +186,7 @@ namespace neogfx
             opengl_renderer{ aRenderer },
             iInitialized{ false },
             iDoubleBuffering{ aDoubleBufferedWindows },
+            iVsyncEnabled{ true },
             iContext{ nullptr },
             iCreatingWindow{ 0 }
         {
@@ -216,7 +217,7 @@ namespace neogfx
             if (!iInitialized)
             {
                 WNDCLASS wc;
-                wc.style = CS_OWNDC | CS_DBLCLKS;
+                wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
                 wc.lpfnWndProc = window::WindowProc;
                 wc.cbClsExtra = 0;
                 wc.cbWndExtra = 0;
@@ -254,6 +255,29 @@ namespace neogfx
         bool renderer::double_buffering() const
         {
             return iDoubleBuffering;
+        }
+
+        bool renderer::vsync_enabled() const
+        {
+            return iVsyncEnabled;
+        }
+
+        void renderer::enable_vsync()
+        {
+            if (!iVsyncEnabled)
+            {
+                wglSwapIntervalEXT(1);
+                iVsyncEnabled = true;
+            }
+        }
+
+        void renderer::disable_vsync()
+        {
+            if (iVsyncEnabled)
+            {
+                wglSwapIntervalEXT(0);
+                iVsyncEnabled = false;
+            }
         }
 
         renderer::pixel_format_t renderer::set_pixel_format(const i_render_target& aTarget)
@@ -484,7 +508,8 @@ namespace neogfx
             static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
             if (wglSwapIntervalEXT == NULL)
                 throw failed_to_get_opengl_function(GetLastErrorText());
-            wglSwapIntervalEXT(0);
+
+            disable_vsync();
         }
     }
 }

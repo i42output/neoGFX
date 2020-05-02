@@ -53,6 +53,11 @@ namespace neogfx
         Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow
     };
 
+    inline constexpr window_style operator~(window_style aStyle)
+    {
+        return static_cast<window_style>(~static_cast<uint32_t>(aStyle));
+    }
+
     inline constexpr window_style operator|(window_style aLhs, window_style aRhs)
     {
         return static_cast<window_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));

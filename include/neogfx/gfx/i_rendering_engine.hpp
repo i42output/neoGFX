@@ -78,6 +78,9 @@ namespace neogfx
     public:
         virtual neogfx::renderer renderer() const = 0;
         virtual bool double_buffering() const = 0;
+        virtual bool vsync_enabled() const = 0;
+        virtual void enable_vsync() = 0;
+        virtual void disable_vsync() = 0;
         virtual void initialize() = 0;
         virtual void cleanup() = 0;
         virtual pixel_format_t set_pixel_format(const i_render_target& aTarget) = 0;
