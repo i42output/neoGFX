@@ -131,7 +131,7 @@ namespace neogfx
         uint32_t iFrameRateLimit;
         bool iSubpixelRendering;
         mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
-        uint64_t iLastGameRenderTime;
+        uint64_t iLastTurboChargeTime;
         std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
         ping_pong_buffers_t iPingPongBuffer1s;
         ping_pong_buffers_t iPingPongBuffer2s;

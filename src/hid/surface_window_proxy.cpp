@@ -328,6 +328,11 @@ namespace neogfx
         native_window().set_transparency(aTransparency);
     }
 
+    void surface_window_proxy::debug(bool aEnableDebug)
+    {
+        native_window().debug(aEnableDebug);
+    }
+
     bool surface_window_proxy::has_clicked_widget() const
     {
         return iClickedWidget != nullptr;

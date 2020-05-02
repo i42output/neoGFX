@@ -39,7 +39,8 @@ namespace neogfx
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGui },
         iFrameCounter{ 0 },
         iRendering{ false },
-        iPaused{ 0 }
+        iPaused{ 0 },
+        iDebug{ false }
     {
     }
 
@@ -245,7 +246,10 @@ namespace neogfx
     void opengl_window::render(bool aOOBRequest)
     {
         if (iRendering || rendering_engine().creating_window() || !can_render())
+        {
+            debug_message("can't render");
             return;
+        }
 
         auto const now = std::chrono::high_resolution_clock::now();
 
@@ -253,22 +257,37 @@ namespace neogfx
         {
             if (rendering_engine().frame_rate_limited() && iLastFrameTime != std::nullopt &&
                 std::chrono::duration_cast<std::chrono::milliseconds>(now - *iLastFrameTime).count() < 1000 / (rendering_engine().frame_rate_limit() * (!rendering_engine().use_rendering_priority() ? 1.0 : rendering_priority())))
+            {
+                debug_message("frame rate limited");
                 return;
+            }
 
             if (!surface_window().native_window_ready_to_render())
+            {
+                debug_message("native window not ready");
                 return;
+            }
         }
 
         if (!has_invalidated_area())
+        {
+            debug_message("no invalidated area");
             return;
+        }
 
         if (invalidated_area().cx <= 0.0 || invalidated_area().cy <= 0.0)
         {
+            debug_message("bad invalid area");
             validate();
             return;
         }
 
-        //std::cout << "to render: " << invalidated_area() << std::endl;
+        if (iDebug)
+        {
+            std::ostringstream oss;
+            oss << "to render (frame " << iFrameCounter << "): " << invalidated_area();
+            debug_message(oss.str());
+        }
 
         ++iFrameCounter;
 
@@ -351,6 +370,11 @@ namespace neogfx
         return iRendering;
     }
 
+    void opengl_window::debug(bool aEnableDebug)
+    {
+        iDebug = aEnableDebug;
+    }
+
     bool opengl_window::metrics_available() const
     {
         return true;
@@ -385,5 +409,11 @@ namespace neogfx
     void opengl_window::set_destroyed()
     {
         native_window::set_destroyed();
+    }
+
+    void opengl_window::debug_message(const std::string& aMessage)
+    {
+        if (iDebug)
+            std::cerr << aMessage << std::endl;
     }
 }

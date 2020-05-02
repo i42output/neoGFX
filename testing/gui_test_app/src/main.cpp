@@ -256,6 +256,8 @@ int main(int argc, char* argv[])
 
         ng::window& window = ui.mainWindow;
 
+        window.surface().debug(true);
+
         bool showFps = false;
         bool fullRefresh = false;
         auto fpsFont = window.font().with_size(18);

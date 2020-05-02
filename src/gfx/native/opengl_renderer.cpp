@@ -78,7 +78,7 @@ namespace neogfx
         iLimitFrameRate{ true },
         iFrameRateLimit{ 60u },
         iSubpixelRendering{ false },
-        iLastGameRenderTime{ 0ull }
+        iLastTurboChargeTime{ 0ull }
     {
 #ifdef _WIN32
         SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
@@ -285,7 +285,7 @@ namespace neogfx
 
     bool opengl_renderer::frame_rate_limited() const
     {
-        return iLimitFrameRate; 
+        return iLimitFrameRate && !turbo_mode(); 
     }
 
     void opengl_renderer::enable_frame_rate_limiter(bool aEnable)
@@ -331,12 +331,12 @@ namespace neogfx
 
     void opengl_renderer::want_turbo_mode()
     {
-        iLastGameRenderTime = neolib::thread::program_elapsed_ms();
+        iLastTurboChargeTime = neolib::thread::program_elapsed_ms();
     }
 
     bool opengl_renderer::turbo_mode() const
     {
-        return neolib::thread::program_elapsed_ms() - iLastGameRenderTime < 5000u;
+        return neolib::thread::program_elapsed_ms() - iLastTurboChargeTime < 5000u;
     }
 
     void opengl_renderer::register_frame_counter(i_widget& aWidget, uint32_t aDuration)

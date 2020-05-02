@@ -72,14 +72,18 @@ namespace neogfx
         void resume() override;
         bool is_rendering() const override;
     public:
+        void debug(bool aEnableDebug) override;
+    public:
         bool metrics_available() const override;
         size extents() const override;
     protected:
         i_surface_window& surface_window() const override;
-        virtual void set_destroying();
+        void set_destroying() override;
         void set_destroyed() override;
     private:
         virtual void display() = 0;
+    private:
+        void debug_message(const std::string& aMessage);
     private:
         i_surface_window& iSurfaceWindow;
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;
@@ -96,5 +100,6 @@ namespace neogfx
         std::deque<frame_times> iFpsData;
         bool iRendering;
         uint32_t iPaused;
+        bool iDebug;
     };
 }

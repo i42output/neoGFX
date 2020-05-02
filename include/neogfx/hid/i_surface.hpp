@@ -104,5 +104,7 @@ namespace neogfx
         virtual void set_surface_opacity(double aOpacity) = 0;
         virtual double surface_transparency() const = 0;
         virtual void set_surface_transparency(double aTransparency) = 0;
+    public:
+        virtual void debug(bool aEnableDebug) = 0;
     };
 }
