@@ -29,6 +29,10 @@ namespace neogfx
 {
     class group_box : public widget
     {
+    public:
+        typedef group_box abstract_type; // todo: create i_group_box
+    private:
+        typedef abstract_type property_context_type;
     private:
         typedef std::unique_ptr<neogfx::label> label_ptr;
         typedef std::unique_ptr<neogfx::check_box> check_box_ptr;
@@ -59,19 +63,29 @@ namespace neogfx
             return static_cast<LayoutT&>(item_layout());
         }
     public:
-        virtual neogfx::size_policy size_policy() const;
+        neogfx::size_policy size_policy() const override;
     public:
-        virtual void paint(i_graphics_context& aGraphicsContext) const;
+        void paint(i_graphics_context& aGraphicsContext) const override;
     public:
+        color background_color() const override;
+    public:
+        virtual bool has_border_color() const;
         virtual color border_color() const;
+        virtual void set_border_color(const optional_color& aBorderColor);
+        virtual bool has_fill_color() const;
         virtual color fill_color() const;
-        virtual color background_color() const;
+        virtual void set_fill_color(const optional_color& aFillColor);
+        virtual double fill_opacity() const;
+        virtual void set_fill_opacity(double aFillOpacity);
     private:
         void init();
     private:
         vertical_layout iLayout;
         neolib::variant<label_ptr, check_box_ptr> iTitle;
         std::shared_ptr<i_layout> iItemLayout;
+        define_property(property_category::color, optional_color, BorderColor, border_color)
+        define_property(property_category::color, optional_color, FillColor, fill_color)
+        define_property(property_category::other_appearance, double, FillOpacity, fill_opacity, 1.0)
         sink iSink;
     };
 }

@@ -95,11 +95,11 @@ int main(int argc, char* argv[])
             aGc.draw_texture(
                 ng::point{ (cr.extents() - backgroundTexture1.extents()) / 2.0 },
                 backgroundTexture1,
-                ng::color::White.with_alpha(32));
+                ng::color::White.with_alpha(0.25));
             aGc.draw_texture(
                 ng::rect{ ng::point{ cr.bottom_right() - backgroundTexture2.extents() / 2.0 }, backgroundTexture2.extents() / 2.0 },
                 backgroundTexture2,
-                ng::color::White.with_alpha(32));
+                ng::color::White.with_alpha(0.25));
         });
 
         ds::project_manager pm;

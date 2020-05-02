@@ -29,6 +29,7 @@
 
 namespace neogfx
 {
+    // todo: make this a template with specifiable component value_type
     class color
     {
         // types
@@ -719,13 +720,13 @@ namespace neogfx
         explicit color(const vec4& aValue);
         explicit color(const vec4f& aValue);
         template <typename T>
-        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(0xFF), std::enable_if_t<std::is_integral_v<T>, void*> = 0) :
+        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(0xFF), std::enable_if_t<std::is_integral_v<T>, sfinae> = {}) :
             color{ vec4u32{ static_cast<uint32_t>(aRed), static_cast<uint32_t>(aGreen), static_cast<uint32_t>(aBlue), static_cast<uint32_t>(aAlpha) } } {}
         template <typename T>
-        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(1.0), std::enable_if_t<std::is_same_v<T, double>, void*> = 0) :
+        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(1.0), std::enable_if_t<std::is_same_v<T, double>, sfinae> = {}) :
             color{ vec4{ aRed, aGreen, aBlue, aAlpha } } {}
         template <typename T>
-        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(1.0), std::enable_if_t<std::is_same_v<T, float>, void*> = 0) :
+        color(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(1.0), std::enable_if_t<std::is_same_v<T, float>, sfinae> = {}) :
             color{ vec4f{ aRed, aGreen, aBlue, aAlpha } } {}
         color(const std::string& aTextValue);
         // assignment
@@ -756,11 +757,31 @@ namespace neogfx
         T green() const { return static_cast<T>(green()) / 0xFF; }
         template <typename T>
         T blue() const { return static_cast<T>(blue()) / 0xFF; }
-        color& set_alpha(component aNewValue);
+        template <typename T>
+        color& set_alpha(T aAlpha, std::enable_if_t<std::is_integral_v<T>, sfinae> = {})
+        {
+            *this = color{ red(), green(), blue(), static_cast<component>(aAlpha) };
+            return *this;
+        }
+        template <typename T>
+        color& set_alpha(T aAlpha, std::enable_if_t<std::is_floating_point_v<T>, sfinae> = {})
+        {
+            *this = color{ red<T>(), green<T>(), blue<T>(), aAlpha };
+            return *this;
+        }
         color& set_red(component aNewValue);
         color& set_green(component aNewValue);
         color& set_blue(component aNewValue);
-        color with_alpha(component aNewValue) const;
+        template <typename T>
+        color with_alpha(T aAlpha, std::enable_if_t<std::is_integral_v<T>, sfinae> = {}) const
+        {
+            return color{ red(), green(), blue(), static_cast<component>(aAlpha) };
+        }
+        template <typename T>
+        color with_alpha(T aAlpha, std::enable_if_t<std::is_floating_point_v<T>, sfinae> = {}) const
+        {
+            return color{ red<T>(), green<T>(), blue<T>(), aAlpha };
+        }
         color with_red(component aNewValue) const;
         color with_green(component aNewValue) const;
         color with_blue(component aNewValue) const;
@@ -937,6 +958,16 @@ namespace neogfx
         color color_at(double aPos, double aStart, double aEnd) const;
         color::component alpha_at(double aPos) const;
         color::component alpha_at(double aPos, double aStart, double aEnd) const;
+        template <typename T>
+        gradient with_alpha(T aAlpha, std::enable_if_t<std::is_same_v<T, double>, sfinae> = {})
+        {
+            return with_alpha(static_cast<color::component>(aAlpha * 0xFF));
+        }
+        template <typename T>
+        gradient with_alpha(T aAlpha, std::enable_if_t<std::is_same_v<T, float>, sfinae> = {})
+        {
+            return with_alpha(static_cast<color::component>(aAlpha * 0xFF));
+        }
         gradient with_alpha(color::component aAlpha) const;
         gradient with_combined_alpha(color::component aAlpha) const;
         gradient_direction direction() const;

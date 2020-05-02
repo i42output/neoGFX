@@ -811,7 +811,7 @@ namespace neogfx
     {
         /* todo: faster alternative to this... */
         disable_anti_alias daa{ *this };
-        draw_pixel(aPoint, aColor.with_alpha(0xFF));
+        draw_pixel(aPoint, aColor.with_alpha(1.0));
     }
 
     void opengl_rendering_context::draw_pixel(const point& aPoint, const color& aColor)

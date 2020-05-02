@@ -523,7 +523,7 @@ namespace neogfx
                 return service<i_app>().current_style().palette().color(color_role::WidgetDetailSecondary);
         }
         else
-            return scrollable_widget::frame_color().with_alpha(is_active() ? 0xFF : 0x40);
+            return scrollable_widget::frame_color().with_alpha(is_active() ? 1.0 : 0.25);
     }
 
     bool window::is_root() const

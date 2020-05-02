@@ -110,7 +110,7 @@ namespace neogfx
         {
         case color_role::Theme:
             if (has_color(color_role::Theme))
-                return iThemeColor->with_alpha(0xFF);
+                return iThemeColor->with_alpha(1.0);
             else
                 return neogfx::color{ 0xEF, 0xEB, 0xE7 };
         case color_role::Background:

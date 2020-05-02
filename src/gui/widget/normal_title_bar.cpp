@@ -381,10 +381,10 @@ namespace neogfx
                 !high_dpi() ? 
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
-                        sMinimizeTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
+                        sMinimizeTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } } } :
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[HighDpiTextureMinimize]::" + ink.to_string(),
-                        sMinimizeHighDpiTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
+                        sMinimizeHighDpiTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
         }
         if (iTextures[TextureMaximize] == std::nullopt || iTextures[TextureMaximize]->first != ink)
         {
@@ -393,10 +393,10 @@ namespace neogfx
                 !high_dpi() ?
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
-                        sMaximizeTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
+                        sMaximizeTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } } } :
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[HighDpiTextureMaximize]::" + ink.to_string(),
-                        sMaximizeHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
+                        sMaximizeHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
         }
         if (iTextures[TextureRestore] == std::nullopt || iTextures[TextureRestore]->first != ink)
         {
@@ -405,10 +405,10 @@ namespace neogfx
                 !high_dpi() ?
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[TextureRestore]::" + ink.to_string(),
-                        sRestoreTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
+                        sRestoreTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } } } :
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[HighDpiTextureRestore]::" + ink.to_string(),
-                        sRestoreHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
+                        sRestoreHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
         }
         if (iTextures[TextureClose] == std::nullopt || iTextures[TextureClose]->first != ink)
         {
@@ -417,10 +417,10 @@ namespace neogfx
                 !high_dpi() ?
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[TextureClose]::" + ink.to_string(),
-                        sCloseTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0x80) } } } :
+                        sCloseTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0.5) } } } :
                     neogfx::image{
                         "neogfx::normal_title_bar::iTextures[HighDpiTextureClose]::" + ink.to_string(),
-                        sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
+                        sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
         }
         iMinimizeButton.set_image(iTextures[TextureMinimize]->second);
         iMaximizeButton.set_image(iTextures[TextureMaximize]->second);

@@ -120,10 +120,10 @@ namespace neogfx
                     !high_dpi() ?
                         neogfx::image{
                             "neogfx::tab_button::close_button::iTextures[TextureOff]::" + ink.to_string(),
-                            sTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0x60) }, { "ink2", ink.with_alpha(0x30) } } } :
+                            sTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0.375) }, { "ink2", ink.with_alpha(0.1875) } } } :
                         neogfx::image{
                             "neogfx::tab_button::close_button::iHighDpiTextures[TextureOff]::" + ink.to_string(),
-                            sHighDpiTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0x60) },{ "ink2", ink.with_alpha(0x30) } }, 2.0 });
+                            sHighDpiTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0.375) },{ "ink2", ink.with_alpha(0.1875) } }, 2.0 });
             }
             if (iTextures[TextureOn] == std::nullopt || iTextures[TextureOn]->first != ink)
             {
@@ -132,10 +132,10 @@ namespace neogfx
                     !high_dpi() ?
                         neogfx::image{
                             "neogfx::tab_button::close_button::iTextures[TextureOn]::" + ink.to_string(),
-                            sTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } } } :
+                            sTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0.5) } } } :
                         neogfx::image{
                             "neogfx::tab_button::close_button::iHighDpiTextures[TextureOn]::" + ink.to_string(),
-                            sHighDpiTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } }, 2.0 });
+                            sHighDpiTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0.5) } }, 2.0 });
             }
             if (iTextures[TextureOnOver] == std::nullopt || iTextures[TextureOnOver]->first != ink)
             {
@@ -144,10 +144,10 @@ namespace neogfx
                     !high_dpi() ?
                         neogfx::image{
                             "neogfx::tab_button::close_button::iTextures[TextureOnOver]::" + paper.to_string(),
-                            sTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } } } :
+                            sTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0.5) } } } :
                         neogfx::image{
                             "neogfx::tab_button::close_button::iHighDpiTextures[TextureOnOver]::" + paper.to_string(),
-                            sHighDpiTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } }, 2.0 });
+                            sHighDpiTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0.5) } }, 2.0 });
             }
             iTextureState = Unknown;
             update_appearance();

@@ -269,7 +269,7 @@ namespace neogfx
                 if (cd.exec() == dialog_result::Accepted)
                 {
                     auto const color = cd.selected_color();
-                    stop.second = color.with_alpha(0xFF);
+                    stop.second = color.with_alpha(1.0);
                     if (color.alpha() != 0xFF)
                     {
                         auto as = iSelection.find_alpha_stop(stop.first);
@@ -328,7 +328,7 @@ namespace neogfx
                         if (cd.exec() == dialog_result::Accepted)
                         {
                             auto const color = cd.selected_color();
-                            stop.second = color.with_alpha(0xFF);
+                            stop.second = color.with_alpha(1.0);
                             if (color.alpha() != 0xFF)
                             {
                                 auto as = iSelection.find_alpha_stop(stop.first);

@@ -146,22 +146,7 @@ namespace neogfx
         widget::paint(aGraphicsContext);
         rect lr{ item_layout().position(), item_layout().extents() };
         lr.inflate(size{ 5.0 });
-        aGraphicsContext.fill_rounded_rect(lr, 4.0, border_color());
-        lr.deflate(size{ 1.0 });
-        aGraphicsContext.fill_rounded_rect(lr, 4.0, fill_color());
-    }
-
-    color group_box::border_color() const
-    {
-        if (container_background_color().light())
-            return background_color().darker(24);
-        else
-            return background_color().lighter(24);
-    }
-
-    color group_box::fill_color() const
-    {
-        return container_background_color().light() ? border_color().lighter(24) : border_color().darker(24);
+        aGraphicsContext.draw_rounded_rect(lr, 4.0, pen{ border_color() }, brush{ fill_color() });
     }
 
     color group_box::background_color() const
@@ -170,6 +155,52 @@ namespace neogfx
             return parent().background_color().darker(24);
         else
             return parent().background_color().lighter(24);
+    }
+
+    bool group_box::has_border_color() const
+    {
+        return BorderColor != std::nullopt;
+    }
+
+    color group_box::border_color() const
+    {
+        if (has_border_color())
+            return *BorderColor;
+        else if (container_background_color().light())
+            return background_color().darker(24);
+        else
+            return background_color().lighter(24);
+    }
+
+    void group_box::set_border_color(const optional_color& aBorderColor)
+    {
+        BorderColor = aBorderColor;
+        update();
+    }
+
+    bool group_box::has_fill_color() const
+    {
+        return FillColor != std::nullopt;
+    }
+
+    color group_box::fill_color() const
+    {
+        return (has_fill_color() ? *FillColor : container_background_color().light() ? border_color().lighter(24) : border_color().darker(24)).with_alpha(fill_opacity());
+    }
+
+    void group_box::set_fill_color(const optional_color& aFillColor)
+    {
+        FillColor = aFillColor;
+    }
+
+    double group_box::fill_opacity() const
+    {
+        return FillOpacity;
+    }
+
+    void group_box::set_fill_opacity(double aFillOpacity)
+    {
+        FillOpacity = aFillOpacity;
     }
 
     class group_box_item_layout : public vertical_layout

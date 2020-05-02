@@ -247,12 +247,6 @@ namespace neogfx
         return (iValue >> BlueShift) & 0xFF; 
     }
 
-    color& color::set_alpha(component aNewValue)
-    { 
-        *this = color(red(), green(), blue(), aNewValue); 
-        return *this;
-    }
-
     color& color::set_red(component aNewValue)
     { 
         *this = color(aNewValue, green(), blue(), alpha()); 
@@ -269,11 +263,6 @@ namespace neogfx
     { 
         *this = color(red(), green(), aNewValue, alpha()); 
         return *this;
-    }
-
-    color color::with_alpha(component aNewValue) const
-    {
-        return color(red(), green(), blue(), aNewValue);
     }
 
     color color::with_red(component aNewValue) const

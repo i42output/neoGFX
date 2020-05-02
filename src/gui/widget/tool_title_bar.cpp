@@ -154,10 +154,10 @@ namespace neogfx
                 !high_dpi() ?
                     neogfx::image{
                         "neogfx::tool_title_bar::iCloseTexture::" + ink.to_string(),
-                        sCloseTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0x80) } } } :
+                        sCloseTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0.5) } } } :
                     neogfx::image{
                         "neogfx::tool_title_bar::iCloseHighDpiTexture::" + ink.to_string(),
-                        sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
+                        sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
         }
         iCloseButton.set_image(iCloseTexture->second);
     }

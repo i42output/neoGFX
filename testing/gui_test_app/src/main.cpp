@@ -1082,6 +1082,9 @@ int main(int argc, char* argv[])
             ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::color::White });
         });
 
+        ui.groupRenderingScheme.set_fill_opacity(0.5);
+        ui.groupMeshShape.set_fill_opacity(0.5);
+
         ui.radioCircle.check();
         ui.checkOutline.check();
         ui.checkFill.check();

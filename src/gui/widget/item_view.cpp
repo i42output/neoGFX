@@ -284,7 +284,7 @@ namespace neogfx
                 {
                     scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
                     aGraphicsContext.fill_rect(cellBackgroundRect, cellBackgroundColor->
-                        shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0xC0));
+                        shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0.5 : 0.375).with_alpha(0.875));
                 }
                 else
                 {
