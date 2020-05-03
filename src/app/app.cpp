@@ -31,13 +31,27 @@
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/app/i_clipboard.hpp>
+#include <neogfx/core/power.hpp>
 #include <neogfx/core/i_animator.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
 namespace neogfx
 {
-    template<> async_task& service<async_task>() { return app::instance(); }
-    template<> i_app& service<i_app>() { return app::instance(); }
+    template<> async_task& service<async_task>() 
+    { 
+        return app::instance(); 
+    }
+
+    template<> i_app& service<i_app>() 
+    { 
+        return app::instance(); 
+    }
+
+    template<> i_power& service<i_power>()
+    {
+        static power sPower;
+        return sPower;
+    }
 
     program_options::program_options(int argc, char* argv[])
     {

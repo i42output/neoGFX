@@ -304,9 +304,11 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_property.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_power.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object_type.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\power.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle_array.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\units.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
@@ -616,6 +618,7 @@
     <ClCompile Include="..\..\..\src\core\async_thread.cpp" />
     <ClCompile Include="..\..\..\src\core\color.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
+    <ClCompile Include="..\..\..\src\core\power.cpp" />
     <ClCompile Include="..\..\..\src\core\units.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />

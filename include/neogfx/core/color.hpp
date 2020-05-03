@@ -959,16 +959,16 @@ namespace neogfx
         color::component alpha_at(double aPos) const;
         color::component alpha_at(double aPos, double aStart, double aEnd) const;
         template <typename T>
-        gradient with_alpha(T aAlpha, std::enable_if_t<std::is_same_v<T, double>, sfinae> = {})
-        {
-            return with_alpha(static_cast<color::component>(aAlpha * 0xFF));
-        }
-        template <typename T>
-        gradient with_alpha(T aAlpha, std::enable_if_t<std::is_same_v<T, float>, sfinae> = {})
+        gradient with_alpha(T aAlpha, std::enable_if_t<std::is_floating_point_v<T>, sfinae> = {})
         {
             return with_alpha(static_cast<color::component>(aAlpha * 0xFF));
         }
         gradient with_alpha(color::component aAlpha) const;
+        template <typename T>
+        gradient with_combined_alpha(T aAlpha, std::enable_if_t<std::is_floating_point_v<T>, sfinae> = {})
+        {
+            return with_combined_alpha(static_cast<color::component>(aAlpha * 0xFF));
+        }
         gradient with_combined_alpha(color::component aAlpha) const;
         gradient_direction direction() const;
         void set_direction(gradient_direction aDirection);
