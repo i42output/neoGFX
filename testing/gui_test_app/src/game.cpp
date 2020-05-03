@@ -116,7 +116,7 @@ void create_game(ng::i_layout& aLayout)
             ecs,
             ng::vec3{ prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
             ng::vec2{ prng(64), prng(64) },
-            ng::color{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }.lighter(0x40)
+            ng::color{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }
         }.detach();
         
     // Asteroids...
