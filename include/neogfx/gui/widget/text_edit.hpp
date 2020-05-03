@@ -571,6 +571,8 @@ namespace neogfx
         void refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta);
         void refresh_columns();
         void refresh_lines();
+        bool suppress_animation() const;
+        bool animation_just_suppressed() const;
         void animate();
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
@@ -618,6 +620,7 @@ namespace neogfx
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;
         bool iOutOfMemory;
+        std::optional<std::chrono::steady_clock::time_point> iAnimationStartTime;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)
         define_property(property_category::other, bool, WordWrap, word_wrap, iType == MultiLine)

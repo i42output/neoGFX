@@ -136,6 +136,10 @@ namespace neogfx
     public:
         virtual void want_turbo_mode() = 0;
         virtual bool turbo_mode() const = 0;
+        bool green_mode() const
+        {
+            return !turbo_mode();
+        }
     public:
         virtual void register_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
         virtual void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;

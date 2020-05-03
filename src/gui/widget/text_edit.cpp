@@ -347,6 +347,7 @@ namespace neogfx
     void text_edit::focus_gained(focus_reason aFocusReason)
     {
         scrollable_widget::focus_gained(aFocusReason);
+        iAnimationStartTime = {};
         service<i_clipboard>().activate(*this);
         iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
         if (iType == SingleLine && aFocusReason == focus_reason::Tab)
@@ -421,6 +422,7 @@ namespace neogfx
     void text_edit::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
+        iAnimationStartTime = {};
         if (iDragger != std::nullopt)
             set_cursor_position(aPosition, false);
     }
@@ -1024,6 +1026,7 @@ namespace neogfx
     void text_edit::set_cursor_position(const point& aPosition, bool aMoveAnchor, bool aEnableDragger)
     {
         set_cursor_glyph_position(document_hit_test(aPosition), aMoveAnchor);
+        iAnimationStartTime = {};
         if (aEnableDragger)
         {
             if (!capturing())
@@ -1857,8 +1860,30 @@ namespace neogfx
         }
     }
 
+    bool text_edit::suppress_animation() const
+    {
+        return service<i_rendering_engine>().green_mode() && 
+            iAnimationStartTime && std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - *iAnimationStartTime).count() >= 5;
+    }
+
+    bool text_edit::animation_just_suppressed() const
+    {
+        return service<i_rendering_engine>().green_mode() &&
+            iAnimationStartTime && std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - *iAnimationStartTime).count() < 6;
+    }
+
     void text_edit::animate()
     {
+        if (suppress_animation())
+        {
+            if (animation_just_suppressed() && has_focus())
+                update_cursor();
+            return;
+        }
+
+        if (!iAnimationStartTime)
+            iAnimationStartTime = std::chrono::steady_clock::now();
+
         if (has_focus())
             update_cursor();
     }
@@ -1961,14 +1986,14 @@ namespace neogfx
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-        color::component cursorAlpha = static_cast<color::component>(partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime) * 0xFF);
+        auto const cursorAlpha = suppress_animation() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
         auto cursorColor = cursor().color();
         if (cursorColor == neolib::none && cursor().style() == cursor_style::Standard)
             cursorColor = service<i_app>().current_style().palette().text_color_for_widget(*this);
         if (cursorColor == neolib::none)
         {
             aGraphicsContext.push_logical_operation(logical_operation::Xor);
-            aGraphicsContext.fill_rect(cursor_rect(), color::White * (cursorAlpha / 255.0));
+            aGraphicsContext.fill_rect(cursor_rect(), color::White.with_combined_alpha(cursorAlpha));
             aGraphicsContext.pop_logical_operation();
         }
         else if (std::holds_alternative<color>(cursorColor))
