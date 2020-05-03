@@ -48,7 +48,7 @@
             }
             action: {
                 id: actionArcadeMode
-                text: "Toggle Arcade mode"
+                text: "Toggle Green/Turbo mode"
                 image: ":/closed/resources/caw_toolbar.zip#arcade_mode_off.png"
                 checkable: true
                 checked_image: ":/closed/resources/caw_toolbar.zip#arcade_mode_on.png"
@@ -71,6 +71,10 @@
                 default_size: [ 960dip 832dip ]
                 status_bar: {
                     id: statusBar
+                    label: {
+                        id: labelFPS
+                        text: "FPS: ??? PFPS: ???"
+                    }
                 }
                 menu_bar: {
                     id: menuBar

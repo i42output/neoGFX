@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/thread.hpp>
-#include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/core/i_power.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/system.hpp>
 
@@ -88,9 +88,7 @@ namespace neogfx::game
 
     void system::yield()
     {
-        if (service<i_rendering_engine>().turbo_mode())
-            neolib::thread::yield();
-        else
+        if (service<i_power>().green_mode_active())
             neolib::thread::sleep(1);
     }
 }

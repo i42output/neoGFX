@@ -361,7 +361,7 @@ namespace neogfx
             {
                 if (!process_events(iAppContext))
                 {
-                    if (service<i_rendering_engine>().turbo_mode())
+                    if (service<i_power>().turbo_mode_active())
                         thread::yield();
                     else
                         thread::sleep(1);

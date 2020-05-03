@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <neolib/random.hpp>
+#include <neogfx/core/i_power.hpp>
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_animator.hpp>
 #include <neogfx/hid/i_surface.hpp>
@@ -256,23 +257,8 @@ int main(int argc, char* argv[])
 
         ng::window& window = ui.mainWindow;
 
-        bool showFps = false;
-        bool fullRefresh = false;
-        auto fpsFont = window.font().with_size(18);
-        window.PaintOverlay([&showFps, &window, fpsFont](ng::i_graphics_context& aGc)
-        {
-            if (showFps)
-            {
-                auto const numbers = (boost::format("%1$.2f/%2$.2f") % window.fps() % window.potential_fps()).str();
-                aGc.draw_text(ng::point{ 100, 120 }, (boost::format(" %1% FPS/PFPS ") % numbers).str(), fpsFont, ng::text_appearance{ ng::color::White, ng::color::DarkBlue.darker(0x40), ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } });
-            }
-        });
-
-        window.surface().rendering_finished([&fullRefresh, &window]()
-        {
-            if (fullRefresh)
-                window.update();
-        });
+        ui.actionArcadeMode.checked([&]() { ng::service<ng::i_power>().enable_turbo_mode(); });
+        ui.actionArcadeMode.unchecked([&]() { ng::service<ng::i_power>().disable_turbo_mode(); });
 
         app.actionFileOpen.triggered([&]()
         {
@@ -309,8 +295,6 @@ int main(int argc, char* argv[])
                     ui.actionPasteAndGo.disable();
                 }
             }
-            if (ui.actionArcadeMode.is_checked())
-                ng::service<ng::i_rendering_engine>().want_turbo_mode();
         }, 100 };
 
         ui.actionPasteAndGo.triggered([&app]()
@@ -496,18 +480,17 @@ int main(int argc, char* argv[])
             ui.textField2.hint().set_text("Enter text");
             ui.textField2.input_box().set_password(false);
         });
-        ui.checkGroupBoxCheckable.checked([&showFps, &fullRefresh, &ui]()
+        ui.checkGroupBoxCheckable.checked([&ui]()
         {
-            showFps = true;
             ui.groupBox.set_checkable(true);
-            ui.groupBox.check_box().checked([&fullRefresh]() { fullRefresh = true; });
-            ui.groupBox.check_box().Unchecked([&fullRefresh]() { fullRefresh = false; });
+            ui.labelFPS.show();
         });
-        ui.checkGroupBoxCheckable.Unchecked([&showFps, &ui]()
+        ui.checkGroupBoxCheckable.Unchecked([&ui]()
         {
-            showFps = false;
             ui.groupBox.set_checkable(false);
+            ui.labelFPS.hide();
         });
+        ui.labelFPS.hide();
         ui.checkColumns.checked([&]()
         {
             ui.checkPassword.disable();
@@ -692,9 +675,13 @@ int main(int argc, char* argv[])
 
         neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
         {
-            if (ui.button6.is_singular())
+            if (!window.has_native_surface()) // todo: shouldn't need this check
                 return;
+
             aTimer.again();
+
+            ui.labelFPS.set_text((boost::format("%1$.2f/%2$.2f FPS/PFPS") % window.fps() % window.potential_fps()).str());
+
             if (colorCycle)
             {
                 const double PI = 2.0 * std::acos(0.0);
@@ -1026,7 +1013,6 @@ int main(int argc, char* argv[])
 
         ui.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
-            ng::service<ng::i_rendering_engine>().want_turbo_mode();
             aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });

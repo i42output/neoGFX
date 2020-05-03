@@ -32,6 +32,7 @@
 
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/core/i_power.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
@@ -77,8 +78,7 @@ namespace neogfx
         iRenderer{ aRenderer },
         iLimitFrameRate{ true },
         iFrameRateLimit{ 60u },
-        iSubpixelRendering{ false },
-        iLastTurboChargeTime{ 0ull }
+        iSubpixelRendering{ false }
     {
 #ifdef _WIN32
         SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
@@ -285,7 +285,7 @@ namespace neogfx
 
     bool opengl_renderer::frame_rate_limited() const
     {
-        return iLimitFrameRate && !turbo_mode(); 
+        return iLimitFrameRate && service<i_power>().green_mode_active(); 
     }
 
     void opengl_renderer::enable_frame_rate_limiter(bool aEnable)
@@ -327,16 +327,6 @@ namespace neogfx
             }
         }
         return didSome;
-    }
-
-    void opengl_renderer::want_turbo_mode()
-    {
-        iLastTurboChargeTime = neolib::thread::program_elapsed_ms();
-    }
-
-    bool opengl_renderer::turbo_mode() const
-    {
-        return neolib::thread::program_elapsed_ms() - iLastTurboChargeTime < 5000u;
     }
 
     void opengl_renderer::register_frame_counter(i_widget& aWidget, uint32_t aDuration)

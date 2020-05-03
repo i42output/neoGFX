@@ -28,17 +28,19 @@ namespace neogfx
         iUpdater{ service<async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
-            if (!green_mode_active() && iLastActivityTime && std::chrono::steady_clock::now() - *iLastActivityTime >= activity_timeout())
-            {
-                iLastActivityTime = {};
-                iGreenModeActive = true;
-                GreenModeEntered.trigger();
-            }
+            if (is_green_mode_enabled() && std::chrono::steady_clock::now() - iLastActivityTime >= activity_timeout())
+                set_active_mode(power_mode::Green);
         }, 1000u },
+        iActiveMode{ power_mode::Normal },
         iActivityTimeout{ 5 },
         iGreenModeEnabled{ true },
-        iGreenModeActive{ false }
+        iLastActivityTime{ std::chrono::steady_clock::now() }
     {
+    }
+
+    power_mode power::active_mode() const
+    {
+        return iActiveMode;
     }
 
     void power::register_activity()
@@ -46,10 +48,7 @@ namespace neogfx
         iLastActivityTime = std::chrono::steady_clock::now();
         ActivityRegistered.trigger();
         if (green_mode_active())
-        {
-            iGreenModeActive = false;
-            GreenModeLeft.trigger();
-        }
+            set_active_mode(power_mode::Normal);
     }
 
     std::chrono::seconds power::activity_timeout() const
@@ -60,11 +59,6 @@ namespace neogfx
     void power::set_activity_timeout(std::chrono::seconds aTimeout)
     {
         iActivityTimeout = aTimeout;
-    }
-
-    bool power::green_mode_active() const
-    {
-        return iGreenModeActive;
     }
 
     bool power::is_green_mode_enabled() const
@@ -79,7 +73,7 @@ namespace neogfx
             iGreenModeEnabled = true;
             GreenModeEnabled.trigger();
             TurboModeDisabled.trigger();
-            TurboModeLeft.trigger();
+            set_active_mode(power_mode::Normal);
         }
     }
 
@@ -90,11 +84,37 @@ namespace neogfx
             iGreenModeEnabled = false;
             GreenModeDisabled.trigger();
             TurboModeEnabled.trigger();
-            if (green_mode_active())
+            set_active_mode(power_mode::Turbo);
+        }
+    }
+
+    void power::set_active_mode(power_mode aMode)
+    {
+        if (iActiveMode != aMode)
+        {
+            auto const previousMode = iActiveMode;
+            iActiveMode = aMode;
+            switch (active_mode())
             {
-                iGreenModeActive = false;
-                GreenModeLeft.trigger();
+            case power_mode::Green:
+                GreenModeEntered.trigger();
+                break;
+            case power_mode::Normal:
+                break;
+            case power_mode::Turbo:
                 TurboModeEntered.trigger();
+                break;
+            }
+            switch (previousMode)
+            {
+            case power_mode::Green:
+                GreenModeLeft.trigger();
+                break;
+            case power_mode::Normal:
+                break;
+            case power_mode::Turbo:
+                TurboModeLeft.trigger();
+                break;
             }
         }
     }

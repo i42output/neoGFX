@@ -52,12 +52,13 @@ namespace neogfx::nrc
     class i_ui_element : public neolib::i_reference_counted
     {
     public:
-        struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::nrc::i_ui_element::no_parent" } {} };
-        struct wrong_type : std::logic_error { wrong_type() : std::logic_error{ "neogfx::nrc::i_ui_element::wrong_type" } {} };
-    public:
+        typedef i_ui_element abstract_type;
         typedef neolib::i_vector<neolib::i_ref_ptr<i_ui_element>> children_t;
         typedef i_ui_element_parser::data_t data_t;
         typedef i_ui_element_parser::array_data_t array_data_t;
+    public:
+        struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::nrc::i_ui_element::no_parent" } {} };
+        struct wrong_type : std::logic_error { wrong_type() : std::logic_error{ "neogfx::nrc::i_ui_element::wrong_type" } {} };
     public:
         virtual ~i_ui_element() = default;
     public:

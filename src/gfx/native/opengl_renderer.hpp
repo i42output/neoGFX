@@ -115,9 +115,6 @@ namespace neogfx
     public:
         bool process_events() override;
     public:
-        void want_turbo_mode() override;
-        bool turbo_mode() const override;
-    public:
         void register_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
         void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
         uint32_t frame_counter(uint32_t aDuration) const override;
@@ -131,7 +128,6 @@ namespace neogfx
         uint32_t iFrameRateLimit;
         bool iSubpixelRendering;
         mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
-        uint64_t iLastTurboChargeTime;
         std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
         ping_pong_buffers_t iPingPongBuffer1s;
         ping_pong_buffers_t iPingPongBuffer2s;

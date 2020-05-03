@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <neogfx/core/i_power.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
@@ -1069,7 +1070,6 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        iRenderingEngine.want_turbo_mode();
         aEcs.component<game::rigid_body>().take_snapshot();
         auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
         auto const& rigidBodies = rigidBodiesSnapshot.data();

@@ -32,12 +32,13 @@ namespace neogfx::nrc
 
     class i_ui_element_library : public neolib::i_reference_counted
     {
+        // types
+    public:
+        typedef i_ui_element_library abstract_type;
+        typedef neolib::i_set<neolib::i_string> elements_t;
         // exceptions
     public:
         struct unknown_element_type : std::logic_error { unknown_element_type() : std::logic_error{ "neogfx::nrc::i_ui_element_library::unknown_element_type" } {} };
-        // types
-    public:
-        typedef neolib::i_set<neolib::i_string> elements_t;
         // meta
     public:
         virtual bool handles_element(const neolib::i_string& aElementType) const = 0;

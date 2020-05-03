@@ -42,18 +42,22 @@ namespace neogfx
     public:
         power();
     public:
+        power_mode active_mode() const override;
+    public:
         void register_activity() override;
         std::chrono::seconds activity_timeout() const override;
         void set_activity_timeout(std::chrono::seconds aTimeout) override;
-        bool green_mode_active() const override;
+    public:
         bool is_green_mode_enabled() const override;
         void enable_green_mode() override;
         void disable_green_mode() override;
     private:
+        void set_active_mode(power_mode aMode);
+    private:
         neolib::callback_timer iUpdater;
-        std::chrono::seconds iActivityTimeout;
+        power_mode iActiveMode;
         bool iGreenModeEnabled;
-        bool iGreenModeActive;
-        std::optional<std::chrono::steady_clock::time_point> iLastActivityTime;
+        std::chrono::seconds iActivityTimeout;
+        std::chrono::steady_clock::time_point iLastActivityTime;
     };
 }

@@ -98,6 +98,8 @@ namespace neogfx
         void add_permanent_widget(std::shared_ptr<i_widget> aWidget);
         void add_permanent_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget);
     public:
+        i_layout& normal_layout();
+        i_layout& permanent_layout();
         label& message_widget();
         label& idle_widget();
     protected:

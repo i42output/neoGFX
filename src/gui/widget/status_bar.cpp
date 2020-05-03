@@ -221,6 +221,16 @@ namespace neogfx
         iPermanentWidgetLayout.add_at(aPosition, aWidget);
     }
 
+    i_layout& status_bar::normal_layout()
+    {
+        return iNormalWidgetLayout;
+    }
+
+    i_layout& status_bar::permanent_layout()
+    {
+        return iPermanentWidgetLayout;
+    }
+
     label& status_bar::message_widget()
     {
         return iMessageWidget;

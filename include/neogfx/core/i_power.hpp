@@ -25,6 +25,13 @@
 
 namespace neogfx
 {
+    enum class power_mode
+    {
+        Green,
+        Normal,
+        Turbo
+    };
+
     class i_power
     {
     public:
@@ -40,17 +47,23 @@ namespace neogfx
     public:
         virtual ~i_power() = default;
     public:
+        virtual power_mode active_mode() const = 0;
+    public:
         virtual void register_activity() = 0;
         virtual std::chrono::seconds activity_timeout() const = 0;
         virtual void set_activity_timeout(std::chrono::seconds aTimeout) = 0;
-        virtual bool green_mode_active() const = 0;
+    public:
         virtual bool is_green_mode_enabled() const = 0;
         virtual void enable_green_mode() = 0;
         virtual void disable_green_mode() = 0;
     public:
+        bool green_mode_active() const
+        {
+            return active_mode() == power_mode::Green;
+        }
         bool turbo_mode_active() const
         {
-            return !green_mode_active();
+            return active_mode() == power_mode::Turbo;
         }
         bool is_turbo_mode_enabled() const
         {

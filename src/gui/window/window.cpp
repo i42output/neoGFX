@@ -645,13 +645,13 @@ namespace neogfx
                 aGraphicsContext.fill_rounded_rect(shadowRect, 4.0_dip, color::Yellow);
             }
         }
-        scrollable_widget::render(aGraphicsContext);
         aGraphicsContext.set_extents(extents());
         aGraphicsContext.set_origin(origin());
-        PaintOverlay.trigger(aGraphicsContext);
+        scrollable_widget::render(aGraphicsContext);
         if (is_nest())
             for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
                 as_nest().nested_window(nw).as_window().as_widget().render(aGraphicsContext);
+        PaintOverlay.trigger(aGraphicsContext);
     }
 
     void window::paint(i_graphics_context& aGraphicsContext) const
