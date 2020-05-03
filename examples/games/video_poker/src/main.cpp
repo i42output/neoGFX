@@ -1,9 +1,11 @@
 ﻿#include <neolib/neolib.hpp>
 #include <neogfx/app/app.hpp>
+#include <neogfx/core/i_power.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/game/canvas.hpp>
+#include <neogfx/game/clock.hpp>
 #include <video_poker/poker.hpp>
 #include <video_poker/table.hpp>
 
@@ -20,7 +22,7 @@ int main(int argc, char* argv[])
         app.change_style("Light").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
-        ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(false);
+        ng::service<ng::i_power>().enable_turbo_mode();
 
         std::optional<ng::window> windowObject;
         if (!app.program_options().full_screen())
@@ -33,6 +35,8 @@ int main(int argc, char* argv[])
         ng::game::canvas canvas{ window.client_layout() };
         canvas.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
         ng::vertical_layout canvasLayout{ canvas };
+
+        canvas.ecs().shared_component<ng::game::clock>().component_data().begin()->second.timeStep = ng::game::chrono::to_flicks(0.01).count();
         
         video_poker::table table{ canvasLayout, canvas };
 
