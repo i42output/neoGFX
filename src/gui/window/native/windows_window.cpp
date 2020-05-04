@@ -70,12 +70,10 @@ namespace neogfx
         DWORD window::convert_style(window_style aStyle)
         {   
             DWORD result = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-            if ((aStyle & window_style::NativeTitleBar) != window_style::NativeTitleBar)
+            if ((aStyle & (window_style::NativeTitleBar | window_style::Fullscreen | window_style::Popup)) != window_style::Invalid)
                 result |= WS_POPUP;
             if ((aStyle & window_style::Resize) == window_style::Resize)
                 result |= (WS_THICKFRAME | WS_MAXIMIZEBOX);
-            if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
-                result |= WS_POPUP;
             return result;
         }
 
@@ -84,6 +82,8 @@ namespace neogfx
             DWORD result = WS_EX_APPWINDOW;
             if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
                 result |= WS_EX_TOPMOST;
+            if ((aStyle & window_style::Tool) == window_style::Tool)
+                result |= WS_EX_TOOLWINDOW;
             return result;
         }
 

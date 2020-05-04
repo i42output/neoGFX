@@ -36,7 +36,8 @@ namespace neogfx
             window_style::RequiresOwnerFocus | 
             window_style::HideOnOwnerClick | 
             window_style::InitiallyHidden | 
-            window_style::DropShadow;
+            window_style::DropShadow |
+            window_style::Popup;
     public:
         struct no_menu : std::logic_error { no_menu() : std::logic_error("neogfx::popup_menu::no_menu") {} };
     public:

@@ -39,6 +39,9 @@ namespace neogfx
         Nested =               0x00000100,    // The window is not a native desktop window but a part of an existing one
         Fullscreen =           0x00000200,    // The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
         Main =                 0x00000400,    // The window is a main window so may go fullscreen or change video mode
+        Dialog =               0x00000800,
+        Popup =                0x00001000,    // The window is a popup (e.g. menu)
+        Tool =                 0x00002000,    // The window shouldn't appear on the operating system taskbar
         Modal =                0x00010000,
         ApplicationModal =     0x00020000,
         NoActivate =           0x00040000,
