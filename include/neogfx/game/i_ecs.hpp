@@ -60,6 +60,8 @@ namespace neogfx::game
     class i_ecs : public i_object
     {
     public:
+        declare_event(systems_paused)
+        declare_event(systems_resumed)
         declare_event(entity_created, entity_id)
         declare_event(entity_destroyed, entity_id)
         declare_event(handle_updated, handle_id)

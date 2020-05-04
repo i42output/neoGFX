@@ -5,7 +5,7 @@
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/game/canvas.hpp>
-#include <neogfx/game/clock.hpp>
+#include <neogfx/game/game_world.hpp>
 #include <video_poker/poker.hpp>
 #include <video_poker/table.hpp>
 
@@ -33,11 +33,10 @@ int main(int argc, char* argv[])
         auto& window = *windowObject;
 
         ng::game::canvas canvas{ window.client_layout() };
+        canvas.ecs().system<ng::game::game_world>().set_time_step(0.01);
         canvas.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
         ng::vertical_layout canvasLayout{ canvas };
 
-        canvas.ecs().shared_component<ng::game::clock>().component_data().begin()->second.timeStep = ng::game::chrono::to_flicks(0.01).count();
-        
         video_poker::table table{ canvasLayout, canvas };
 
         return app.exec();

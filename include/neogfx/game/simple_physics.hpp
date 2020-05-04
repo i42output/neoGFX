@@ -57,6 +57,5 @@ namespace neogfx::game
         };
     private:
         std::unique_ptr<thread> iThread;
-        bool iUniversalGravitationEnabled;
     };
 }

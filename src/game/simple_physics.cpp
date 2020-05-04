@@ -50,7 +50,7 @@ namespace neogfx::game
 
 
     simple_physics::simple_physics(game::i_ecs& aEcs) :
-        system{ aEcs }, iUniversalGravitationEnabled{ false }
+        system{ aEcs }
     {
         if (!ecs().system_registered<time>())
             ecs().register_system<time>();
@@ -144,16 +144,16 @@ namespace neogfx::game
 
     bool simple_physics::universal_gravitation_enabled() const
     {
-        return iUniversalGravitationEnabled;
+        return ecs().system<game_world>().universal_gravitation_enabled();
     }
 
     void simple_physics::enable_universal_gravitation()
     {
-        iUniversalGravitationEnabled = true;
+        return ecs().system<game_world>().enable_universal_gravitation();
     }
 
     void simple_physics::disable_universal_gravitation()
     {
-        iUniversalGravitationEnabled = false;
+        return ecs().system<game_world>().disable_universal_gravitation();
     }
 }

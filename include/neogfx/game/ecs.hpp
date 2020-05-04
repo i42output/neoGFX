@@ -29,6 +29,8 @@ namespace neogfx::game
     class ecs : public object<i_ecs>
     {
     public:
+        define_declared_event(SystemsPaused, systems_paused)
+        define_declared_event(SystemsResumed, systems_resumed)
         define_declared_event(EntityCreated, entity_created, entity_id)
         define_declared_event(EntityDestroyed, entity_destroyed, entity_id)
         define_declared_event(HandleUpdated, handle_updated, handle_id)

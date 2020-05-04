@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 #include <neolib/random.hpp>
 #include <neolib/singleton.hpp>
+#include <neogfx/core/i_power.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -107,6 +108,9 @@ void create_game(ng::i_layout& aLayout)
 
     // Get ECS associated with canvas...
     auto& ecs = canvas.ecs();
+
+    ecs.systems_paused([&]() { ng::service<ng::i_power>().enable_green_mode(); });
+    ecs.systems_resumed([&]() { ng::service<ng::i_power>().enable_turbo_mode(); });
 
     // Background...
     neolib::basic_random<ng::scalar> prng;

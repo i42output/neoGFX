@@ -38,6 +38,7 @@ namespace neogfx::game
     public:
         void apply() override;
     public:
+        void set_time_step(double aTimeStep_s);
         bool universal_gravitation_enabled() const;
         void enable_universal_gravitation();
         void disable_universal_gravitation();
@@ -55,5 +56,7 @@ namespace neogfx::game
                 return sName;
             }
         };
+    private:
+        bool iUniversalGravitationEnabled;
     };
 }

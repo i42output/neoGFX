@@ -260,6 +260,9 @@ int main(int argc, char* argv[])
         ui.actionArcadeMode.checked([&]() { ng::service<ng::i_power>().enable_turbo_mode(); });
         ui.actionArcadeMode.unchecked([&]() { ng::service<ng::i_power>().disable_turbo_mode(); });
 
+        ng::service<ng::i_power>().turbo_mode_entered([&]() { ui.actionArcadeMode.check(); });
+        ng::service<ng::i_power>().turbo_mode_left([&]() { ui.actionArcadeMode.uncheck(); });
+
         app.actionFileOpen.triggered([&]()
         {
             auto textFile = ng::open_file_dialog(window, ng::file_dialog_spec{ "Edit Text File", {}, { "*.txt" }, "Text Files" });

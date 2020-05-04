@@ -21,12 +21,13 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/thread.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/clock.hpp>
 #include <neogfx/game/game_world.hpp>
 
 namespace neogfx::game
 {
     game_world::game_world(game::i_ecs& aEcs) :
-        system{ aEcs }
+        system{ aEcs }, iUniversalGravitationEnabled{ false }
     {
         ApplyingPhysics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         PhysicsApplied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
@@ -50,4 +51,25 @@ namespace neogfx::game
     {
         // do nothing
     }
+
+    void game_world::set_time_step(double aTimeStep_s)
+    {
+        ecs().shared_component<clock>().component_data().begin()->second.timeStep = chrono::to_flicks(aTimeStep_s).count();
+    }
+
+    bool game_world::universal_gravitation_enabled() const
+    {
+        return iUniversalGravitationEnabled;
+    }
+
+    void game_world::enable_universal_gravitation()
+    {
+        iUniversalGravitationEnabled = true;
+    }
+
+    void game_world::disable_universal_gravitation()
+    {
+        iUniversalGravitationEnabled = false;
+    }
+
 }

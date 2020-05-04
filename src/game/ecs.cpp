@@ -260,6 +260,7 @@ namespace neogfx::game
         for (auto& s : systems())
             s.second->pause();
         iSystemsPaused = true;
+        SystemsPaused.trigger();
     }
 
     void ecs::resume_all_systems()
@@ -269,6 +270,7 @@ namespace neogfx::game
         for (auto& s : systems())
             s.second->resume();
         iSystemsPaused = false;
+        SystemsResumed.trigger();
     }
 
     bool ecs::archetype_registered(const i_entity_archetype& aArchetype) const
