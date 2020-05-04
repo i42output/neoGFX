@@ -23,7 +23,7 @@
 namespace neogfx
 {
     palette::palette() : 
-        iWidgetDetailSecondaryColor{ color::Goldenrod }
+        iSecondaryAccentColor{ color::Goldenrod }
     {
     }
 
@@ -34,8 +34,8 @@ namespace neogfx
         iTextColor{ aOther.maybe_color(color_role::Text) },
         iSelectionColor{ aOther.maybe_color(color_role::Selection) },
         iHoverColor{ aOther.maybe_color(color_role::Hover) },
-        iWidgetDetailPrimaryColor{ aOther.maybe_color(color_role::WidgetDetailPrimary) },
-        iWidgetDetailSecondaryColor{ aOther.maybe_color(color_role::WidgetDetailSecondary) }
+        iPrimaryAccentColor{ aOther.maybe_color(color_role::PrimaryAccent) },
+        iSecondaryAccentColor{ aOther.maybe_color(color_role::SecondaryAccent) }
     {
     }
 
@@ -54,8 +54,8 @@ namespace neogfx
             iTextColor = aOther.maybe_color(color_role::Text);
             iSelectionColor = aOther.maybe_color(color_role::Selection);
             iHoverColor = aOther.maybe_color(color_role::Hover);
-            iWidgetDetailPrimaryColor = aOther.maybe_color(color_role::WidgetDetailPrimary);
-            iWidgetDetailSecondaryColor = aOther.maybe_color(color_role::WidgetDetailSecondary);
+            iPrimaryAccentColor = aOther.maybe_color(color_role::PrimaryAccent);
+            iSecondaryAccentColor = aOther.maybe_color(color_role::SecondaryAccent);
             Changed.trigger();
         }
         return *this;
@@ -70,8 +70,8 @@ namespace neogfx
             iTextColor == aOther.maybe_color(color_role::Text) &&
             iSelectionColor == aOther.maybe_color(color_role::Selection) &&
             iHoverColor == aOther.maybe_color(color_role::Hover) &&
-            iWidgetDetailPrimaryColor == aOther.maybe_color(color_role::WidgetDetailPrimary) &&
-            iWidgetDetailSecondaryColor == aOther.maybe_color(color_role::WidgetDetailSecondary);
+            iPrimaryAccentColor == aOther.maybe_color(color_role::PrimaryAccent) &&
+            iSecondaryAccentColor == aOther.maybe_color(color_role::SecondaryAccent);
     }
 
     bool palette::operator!=(const i_palette& aOther) const
@@ -95,10 +95,10 @@ namespace neogfx
             return iSelectionColor != std::nullopt;
         case color_role::Hover:
             return iHoverColor != std::nullopt;
-        case color_role::WidgetDetailPrimary:
-            return iWidgetDetailPrimaryColor != std::nullopt;
-        case color_role::WidgetDetailSecondary:
-            return iWidgetDetailSecondaryColor != std::nullopt;
+        case color_role::PrimaryAccent:
+            return iPrimaryAccentColor != std::nullopt;
+        case color_role::SecondaryAccent:
+            return iSecondaryAccentColor != std::nullopt;
         default:
             return false;
         }
@@ -143,14 +143,14 @@ namespace neogfx
                 return *iHoverColor;
             else
                 return color(color_role::Selection).lighter(0x40);
-        case color_role::WidgetDetailPrimary:
-            if (has_color(color_role::WidgetDetailPrimary))
-                return *iWidgetDetailPrimaryColor;
+        case color_role::PrimaryAccent:
+            if (has_color(color_role::PrimaryAccent))
+                return *iPrimaryAccentColor;
             else
                 return color(color_role::Theme).same_lightness_as(color(color_role::Theme).light() ? neogfx::color{ 32, 32, 32 } : neogfx::color{ 224, 224, 224 });
-        case color_role::WidgetDetailSecondary:
-            if (has_color(color_role::WidgetDetailSecondary))
-                return *iWidgetDetailSecondaryColor;
+        case color_role::SecondaryAccent:
+            if (has_color(color_role::SecondaryAccent))
+                return *iSecondaryAccentColor;
             else
                 return color(color_role::Theme).same_lightness_as(color(color_role::Theme).light() ? neogfx::color{ 64, 64, 64 } : neogfx::color{ 192, 192, 192 });
         default:
@@ -174,10 +174,10 @@ namespace neogfx
             return iSelectionColor;
         case color_role::Hover:
             return iHoverColor;
-        case color_role::WidgetDetailPrimary:
-            return iWidgetDetailPrimaryColor;
-        case color_role::WidgetDetailSecondary:
-            return iWidgetDetailSecondaryColor;
+        case color_role::PrimaryAccent:
+            return iPrimaryAccentColor;
+        case color_role::SecondaryAccent:
+            return iSecondaryAccentColor;
         default:
             return iThemeColor;
         }
@@ -206,11 +206,11 @@ namespace neogfx
         case color_role::Hover:
             iHoverColor = aColor;
             break;
-        case color_role::WidgetDetailPrimary:
-            iWidgetDetailPrimaryColor = aColor;
+        case color_role::PrimaryAccent:
+            iPrimaryAccentColor = aColor;
             break;
-        case color_role::WidgetDetailSecondary:
-            iWidgetDetailSecondaryColor = aColor;
+        case color_role::SecondaryAccent:
+            iSecondaryAccentColor = aColor;
             break;
         }
         if (maybe_color(aRole) != oldColor)

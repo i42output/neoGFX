@@ -49,7 +49,7 @@ namespace neogfx
         optional_color iTextColor;
         optional_color iSelectionColor;
         optional_color iHoverColor;
-        optional_color iWidgetDetailPrimaryColor;
-        optional_color iWidgetDetailSecondaryColor;
+        optional_color iPrimaryAccentColor;
+        optional_color iSecondaryAccentColor;
     };
 }

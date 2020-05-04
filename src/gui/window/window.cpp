@@ -538,7 +538,7 @@ namespace neogfx
             if (!is_nested())
                 return service<i_app>().current_style().palette().color(color_role::Selection);
             else
-                return service<i_app>().current_style().palette().color(color_role::WidgetDetailSecondary);
+                return service<i_app>().current_style().palette().color(color_role::SecondaryAccent);
         }
         else
             return scrollable_widget::frame_color().with_alpha(is_active() ? 1.0 : 0.25);

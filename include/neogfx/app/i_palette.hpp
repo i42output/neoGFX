@@ -34,8 +34,8 @@ namespace neogfx
         Text,
         Selection,
         Hover,
-        WidgetDetailPrimary,
-        WidgetDetailSecondary
+        PrimaryAccent,
+        SecondaryAccent
     };
 
     class i_palette

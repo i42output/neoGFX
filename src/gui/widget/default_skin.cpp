@@ -219,11 +219,11 @@ namespace neogfx
         {
             scoped_snap_to_pixel snap{ aGraphicsContext, false };
             /* todo: draw tick image eye candy */
-            aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient), 2.0));
-            aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient), 2.0));
+            aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0));
+            aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0));
         }
         else if (aCheckedState == std::nullopt)
-            aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient));
+            aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));
     }
 
     void default_skin::draw_radio_button(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const
@@ -252,7 +252,7 @@ namespace neogfx
         aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColor.with_combined_alpha(enabledAlphaCoefficient));
         discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
         if (aCheckedState != std::nullopt && *aCheckedState == true)
-            aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().color(color_role::WidgetDetailPrimary).with_combined_alpha(enabledAlphaCoefficient));
+            aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));
     }
 
     void default_skin::draw_tree_expander(i_graphics_context& aGraphicsContext, const i_skinnable_item& aItem, bool aExpandedState) const
