@@ -358,13 +358,13 @@ int main(int argc, char* argv[])
         ui.button1.clicked([&ui]()
         {
             if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentTop)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentBottom | ng::tab_container_style::ResizeToTabs);
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentBottom);
             else if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentBottom)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentLeft | ng::tab_container_style::ResizeToTabs);
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentLeft);
             else if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentLeft)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentRight | ng::tab_container_style::ResizeToTabs);
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentRight);
             else if ((ui.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentRight)
-                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentTop | ng::tab_container_style::ResizeToTabs);
+                ui.tabPages.set_style(ng::tab_container_style::TabAlignmentTop);
         });
         ui.buttonChina.clicked([&window, &ui]() 
         { 
