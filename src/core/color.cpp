@@ -788,6 +788,18 @@ namespace neogfx
         return alpha;
     }
 
+    gradient gradient::reversed() const
+    {
+        auto reversedGradient = *this;
+        std::reverse(reversedGradient.color_stops().begin(), reversedGradient.color_stops().end());
+        std::reverse(reversedGradient.alpha_stops().begin(), reversedGradient.alpha_stops().end());
+        for (auto& s : reversedGradient.color_stops())
+            s.first = 1.0 - s.first;
+        for (auto& s : reversedGradient.alpha_stops())
+            s.first = 1.0 - s.first;
+        return reversedGradient;
+    }
+
     color::component gradient::alpha_at(double aPos, double aStart, double aEnd) const
     {
         return alpha_at(normalized_position(aPos, aStart, aEnd));

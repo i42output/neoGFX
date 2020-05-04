@@ -169,6 +169,7 @@ namespace neogfx
         iSelectorGroupBox{ iLayout3 },
         iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },
         iLayout3_1{ iSelectorGroupBox.item_layout() },
+        iReverseGradient{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#reverse.png" } },
         iImportGradient{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#open.png" } },
         iLayout3_2{ iLayout3, alignment::Top },
         iDirectionGroupBox{ iLayout3_2, "Direction"_t },
@@ -257,6 +258,8 @@ namespace neogfx
         iLayout3.set_margins(neogfx::margins{});
         iLayout3.set_spacing(standardSpacing);
         iLayout5.set_alignment(alignment::Top);
+        iReverseGradient.image_widget().set_fixed_size(size{ 16.0_dip });
+        iReverseGradient.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iImportGradient.image_widget().set_fixed_size(size{ 16.0_dip });
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);
@@ -306,6 +309,11 @@ namespace neogfx
         iGradientSelector.set_fixed_size(size{ 256.0_dip, iGradientSelector.minimum_size().cy });
 
         iGradientSelector.GradientChanged([this]() { update_widgets(); });
+
+        iReverseGradient.Clicked([this]()
+        {
+            set_gradient(gradient().reversed());
+        });
 
         iImportGradient.Clicked([this]()
         {

@@ -958,6 +958,7 @@ namespace neogfx
         color color_at(double aPos, double aStart, double aEnd) const;
         color::component alpha_at(double aPos) const;
         color::component alpha_at(double aPos, double aStart, double aEnd) const;
+        gradient reversed() const;
         template <typename T>
         gradient with_alpha(T aAlpha, std::enable_if_t<std::is_floating_point_v<T>, sfinae> = {})
         {
