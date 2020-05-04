@@ -73,17 +73,25 @@ namespace neogfx
             if ((aStyle & window_style::NativeTitleBar) != window_style::NativeTitleBar)
                 result |= WS_POPUP;
             if ((aStyle & window_style::Resize) == window_style::Resize)
-                result |= (WS_THICKFRAME | WS_MAXIMIZEBOX);
+                result |= (WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
             if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
                 result |= WS_POPUP;
+            if ((aStyle & window_style::SystemMenu) == window_style::SystemMenu)
+                result |= WS_SYSMENU;
             return result;
         }
 
         DWORD window::convert_ex_style(window_style aStyle)
         {
             DWORD result = WS_EX_APPWINDOW;
+            if ((aStyle & window_style::DropShadow) == window_style::DropShadow)
+                result |= WS_EX_TOPMOST;
             if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
                 result |= WS_EX_TOPMOST;
+            if ((aStyle & window_style::NoActivate) == window_style::NoActivate)
+                result |= (WS_EX_NOACTIVATE | WS_EX_TOPMOST);
+            if ((aStyle & window_style::TitleBar) == window_style::TitleBar)
+                result |= WS_EX_WINDOWEDGE;
             return result;
         }
 
@@ -1336,48 +1344,19 @@ namespace neogfx
             std::u16string title;
             auto const titleLength = GetWindowTextLength(iHandle);
             title.resize(titleLength + 1);
-            GetWindowText(iHandle, reinterpret_cast<LPWSTR>(&title[0]), titleLength + 1);
+            ::GetWindowText(iHandle, reinterpret_cast<LPWSTR>(&title[0]), titleLength + 1);
             title.resize(titleLength);
             native_window::set_title_text(neolib::utf16_to_utf8(title));
 
             HWND hwnd = iHandle;
-            SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);
+            ::SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);
+
     //        if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
     //            SetClassLongPtr(hwnd, GCL_STYLE, GetClassLongPtr(hwnd, GCL_STYLE) | CS_DROPSHADOW); // doesn't work well with OpenGL
-            DWORD existingStyle = GetWindowLong(hwnd, GWL_STYLE);
-            DWORD newStyle = existingStyle;
-            if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
-                newStyle |= WS_EX_TOPMOST;
-            if ((iStyle & window_style::NoDecoration) == window_style::NoDecoration || (iStyle & window_style::TitleBar) == window_style::TitleBar)
-            {
-                newStyle |= WS_POPUP;
-                newStyle |= WS_SYSMENU;
-                if ((iStyle & window_style::Resize) == window_style::Resize)
-                {
-                    newStyle |= WS_MINIMIZEBOX;
-                    newStyle |= WS_MAXIMIZEBOX;
-                    newStyle |= WS_THICKFRAME;
-                }
-                else
-                {
-                    newStyle &= ~WS_MINIMIZEBOX;
-                    newStyle &= ~WS_MAXIMIZEBOX;
-                    newStyle &= ~WS_THICKFRAME;
-                }
-            }
-            if (newStyle != existingStyle)
-                SetWindowLong(hwnd, GWL_STYLE, newStyle);
-            DWORD existingExtendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            DWORD newExtendedStyle = existingExtendedStyle;
-            if ((iStyle & window_style::NoActivate) == window_style::NoActivate)
-                newExtendedStyle |= (WS_EX_NOACTIVATE | WS_EX_TOPMOST);
-            if ((iStyle & window_style::TitleBar) == window_style::TitleBar)
-                newExtendedStyle |= WS_EX_WINDOWEDGE;
-            if (newExtendedStyle != existingExtendedStyle)
-                SetWindowLong(hwnd, GWL_EXSTYLE, newExtendedStyle);
+            
             if (iParent != nullptr)
-                SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, static_cast<LONG>(reinterpret_cast<std::intptr_t>(iParent->native_handle())));
-
+                ::SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, static_cast<LONG>(reinterpret_cast<std::intptr_t>(iParent->native_handle())));
+            
             ::SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
         }
 
