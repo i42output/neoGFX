@@ -69,9 +69,7 @@ namespace neogfx
 
         DWORD window::convert_style(window_style aStyle)
         {   
-            DWORD result = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-            if ((aStyle & (window_style::NoDecoration | window_style::NativeTitleBar | window_style::Fullscreen | window_style::Popup)) != window_style::Invalid)
-                result |= WS_POPUP;
+            DWORD result = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
             if ((aStyle & window_style::Resize) == window_style::Resize)
                 result |= (WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
             if ((aStyle & window_style::SystemMenu) == window_style::SystemMenu)
@@ -81,13 +79,11 @@ namespace neogfx
 
         DWORD window::convert_ex_style(window_style aStyle)
         {
-            DWORD result = WS_EX_APPWINDOW;
-            if ((aStyle & window_style::DropShadow) == window_style::DropShadow)
-                result |= WS_EX_TOPMOST;
-            if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
+            DWORD result = 0;
+            if ((aStyle & (window_style::NoActivate | window_style::Fullscreen | window_style::DropShadow)) != window_style::Invalid)
                 result |= WS_EX_TOPMOST;
             if ((aStyle & window_style::NoActivate) == window_style::NoActivate)
-                result |= (WS_EX_NOACTIVATE | WS_EX_TOPMOST);
+                result |= WS_EX_NOACTIVATE;
             if ((aStyle & window_style::TitleBar) == window_style::TitleBar)
                 result |= WS_EX_WINDOWEDGE;
             if ((aStyle & window_style::Tool) == window_style::Tool)
