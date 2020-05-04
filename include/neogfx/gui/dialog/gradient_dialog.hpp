@@ -51,8 +51,9 @@ namespace neogfx
         group_box iSelectorGroupBox;
         gradient_widget iGradientSelector;
         horizontal_layout iLayout3_1;
-        push_button iReverseGradient;
-        push_button iImportGradient;
+        push_button iReverse;
+        push_button iReversePartial;
+        push_button iImport;
         horizontal_layout iLayout3_2;
         group_box iDirectionGroupBox;
         radio_button iDirectionHorizontalRadioButton;

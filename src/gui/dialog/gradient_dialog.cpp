@@ -169,8 +169,9 @@ namespace neogfx
         iSelectorGroupBox{ iLayout3 },
         iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },
         iLayout3_1{ iSelectorGroupBox.item_layout() },
-        iReverseGradient{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#reverse.png" } },
-        iImportGradient{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#open.png" } },
+        iReverse{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#reverse.png" } },
+        iReversePartial{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#reversepartial.png" } },
+        iImport{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#open.png" } },
         iLayout3_2{ iLayout3, alignment::Top },
         iDirectionGroupBox{ iLayout3_2, "Direction"_t },
         iDirectionHorizontalRadioButton{ iDirectionGroupBox.item_layout(), "Horizontal"_t },
@@ -258,9 +259,11 @@ namespace neogfx
         iLayout3.set_margins(neogfx::margins{});
         iLayout3.set_spacing(standardSpacing);
         iLayout5.set_alignment(alignment::Top);
-        iReverseGradient.image_widget().set_fixed_size(size{ 16.0_dip });
-        iReverseGradient.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
-        iImportGradient.image_widget().set_fixed_size(size{ 16.0_dip });
+        iReverse.image_widget().set_fixed_size(size{ 16.0_dip });
+        iReverse.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
+        iReversePartial.image_widget().set_fixed_size(size{ 16.0_dip });
+        iReversePartial.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
+        iImport.image_widget().set_fixed_size(size{ 16.0_dip });
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);
         iSmoothnessSpinBox.set_step(0.1);
@@ -310,12 +313,20 @@ namespace neogfx
 
         iGradientSelector.GradientChanged([this]() { update_widgets(); });
 
-        iReverseGradient.Clicked([this]()
+        iReverse.Clicked([this]()
         {
             set_gradient(gradient().reversed());
         });
 
-        iImportGradient.Clicked([this]()
+        iReversePartial.Clicked([this]()
+        {
+            auto partiallyReversedGradient = gradient();
+            for (auto colorStop = partiallyReversedGradient.color_begin(); colorStop != partiallyReversedGradient.color_end(); ++colorStop)
+                colorStop->second = std::prev(gradient().color_end(), std::distance(partiallyReversedGradient.color_begin(), colorStop) + 1)->second;
+            set_gradient(partiallyReversedGradient);
+        });
+
+        iImport.Clicked([this]()
         {
             auto const imports = open_file_dialog(*this, file_dialog_spec{ "Import Gradients", {}, { "*.ggr" }, "Gradient Files (*.ggr)" }, true);
             if (imports)
