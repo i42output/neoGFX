@@ -220,7 +220,8 @@ namespace neogfx
         iPreviewGroupBox{ iLayout4, "Preview"_t },
         iPreview{ new preview_box{*this} },
         iSpacer4{ iLayout4 },
-        iUpdatingWidgets(false)
+        iUpdatingWidgets{ false },
+        iIgnoreHueSliderChange{ false }
     {
         init();
     }
@@ -267,6 +268,7 @@ namespace neogfx
         iHueSlider.set_minimum(0.0);
         iHueSlider.set_maximum(360.0);
         iHueSlider.set_step(1.0);
+        iHueSlider.disable();
         neogfx::gradient::color_stop_list hues;
         for (uint32_t s = 0; s < neogfx::gradient::MaxStops; ++s)
         {
@@ -322,7 +324,28 @@ namespace neogfx
 
         iGradientSelector.set_fixed_size(size{ 256.0_dip, iGradientSelector.minimum_size().cy });
 
-        iGradientSelector.GradientChanged([this]() { update_widgets(); });
+        auto update_hue_selection = [this]()
+        {
+            neolib::scoped_flag scope{ iIgnoreHueSliderChange };
+            iHueSlider.set_value(iGradientSelector.selected_color_stop()->second.to_hsv().hue());
+            iHueSelection.clear();
+            auto stopIter = iGradientSelector.gradient().color_begin();
+            for (std::size_t stopIndex = 0; stopIndex < iGradientSelector.gradient().color_stop_count(); ++stopIndex, ++stopIter)
+            {
+                auto const& colorStop = *stopIter;
+                auto d = (colorStop.second.to_hsv().hue() - iHueSlider.value());
+                auto const tolerance_deg = 3.0; // todo: make this configurable
+                if (std::abs(d) < tolerance_deg)
+                    iHueSelection.emplace_back(stopIndex, d);
+            }
+        };
+
+        iGradientSelector.GradientChanged([this, update_hue_selection]()
+        { 
+            if (iGradientSelector.selected_color_stop() != iGradientSelector.gradient().color_end())
+                update_hue_selection();
+            update_widgets();
+        });
 
         iReverse.Clicked([this]()
         {
@@ -335,6 +358,37 @@ namespace neogfx
             for (auto colorStop = partiallyReversedGradient.color_begin(); colorStop != partiallyReversedGradient.color_end(); ++colorStop)
                 colorStop->second = std::prev(gradient().color_end(), std::distance(partiallyReversedGradient.color_begin(), colorStop) + 1)->second;
             set_gradient(partiallyReversedGradient);
+        });
+
+        iGradientSelector.ColorStopSelected([this, update_hue_selection]()
+        {
+            iHueSlider.enable();
+            update_hue_selection();
+        });
+
+        iGradientSelector.ColorStopDeselected([this]()
+        {
+            iHueSlider.disable();
+            iHueSelection.clear();
+        });
+
+        iHueSlider.ValueChanged([this]()
+        {
+            if (iIgnoreHueSliderChange)
+                return;
+            neolib::scoped_flag scope{ iIgnoreHueSliderChange };
+            auto newGradient = iGradientSelector.gradient();
+            for (auto const& hs : iHueSelection)
+            {
+                auto& colorStop = *std::next(newGradient.color_begin(), hs.first);
+                auto newColor = colorStop.second.to_hsv();
+                newColor.set_hue(iHueSlider.value() + hs.second);
+                colorStop.second = newColor.to_rgb();
+            }
+            thread_local decltype(iHueSelection) hueSelectionCopy;
+            hueSelectionCopy = iHueSelection;
+            iGradientSelector.set_gradient(newGradient);
+            iHueSelection = hueSelectionCopy;
         });
 
         iImport.Clicked([this]()

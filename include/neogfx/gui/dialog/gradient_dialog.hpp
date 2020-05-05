@@ -103,5 +103,7 @@ namespace neogfx
         std::shared_ptr<i_widget> iPreview;
         vertical_spacer iSpacer4;
         bool iUpdatingWidgets;
+        bool iIgnoreHueSliderChange;
+        std::vector<std::pair<std::size_t, double>> iHueSelection;
     };
 }
