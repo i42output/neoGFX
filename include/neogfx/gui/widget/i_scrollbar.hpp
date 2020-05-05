@@ -103,7 +103,7 @@ namespace neogfx
         virtual void unlock() = 0;
     public:
         virtual dimension width() const = 0;
-        virtual void render(i_graphics_context& aGraphicsContext) const = 0;
+        virtual void render(i_graphics_context& aGc) const = 0;
     public:
         virtual rect element_geometry(scrollbar_element aElement) const = 0;
         virtual scrollbar_element element_at(const point& aPosition) const = 0;

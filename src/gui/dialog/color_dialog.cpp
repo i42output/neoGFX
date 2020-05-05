@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0_dip);
+    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0_dip);
 
     color_dialog::color_box::color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor) :
         framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColor(aColor), iCustomColor(aCustomColor)
@@ -46,18 +46,18 @@ namespace neogfx
         return minimum_size();
     }
 
-    void color_dialog::color_box::paint(i_graphics_context& aGraphicsContext) const
+    void color_dialog::color_box::paint(i_graphics_context& aGc) const
     {
-        framed_widget::paint(aGraphicsContext);
-        draw_alpha_background(aGraphicsContext, client_rect(false));
+        framed_widget::paint(aGc);
+        draw_alpha_background(aGc, client_rect(false));
         const optional_color& fillColor = (iCustomColor == std::nullopt ? iColor : **iCustomColor);
         if (fillColor != std::nullopt)
-            aGraphicsContext.fill_rect(client_rect(false), *fillColor);
+            aGc.fill_rect(client_rect(false), *fillColor);
         if (iCustomColor != std::nullopt && iOwner.current_custom_color() == *iCustomColor)
         {
             auto radius = client_rect(false).width() * 0.5 * 0.666;
-            aGraphicsContext.fill_circle(client_rect(false).centre(), radius, color::White);
-            aGraphicsContext.fill_circle(client_rect(false).centre(), radius - 1.0_dip, color::Black);
+            aGc.fill_circle(client_rect(false).centre(), radius, color::White);
+            aGc.fill_circle(client_rect(false).centre(), radius - 1.0_dip, color::Black);
         }
     }
 
@@ -261,13 +261,13 @@ namespace neogfx
         update_cursors();
     }
 
-    void color_dialog::x_picker::paint(i_graphics_context& aGraphicsContext) const
+    void color_dialog::x_picker::paint(i_graphics_context& aGc) const
     {
-        framed_widget::paint(aGraphicsContext);
+        framed_widget::paint(aGc);
         scoped_units su{ *this, units::Pixels };
         rect cr = client_rect(false);
         if (iOwner.current_channel() == ChannelAlpha)
-            draw_alpha_background(aGraphicsContext, cr);
+            draw_alpha_background(aGc, cr);
         for (uint32_t y = 0; y < cr.height(); ++y)
         {
             rect line{ cr.top_left() + point{ 0.0, static_cast<coordinate>(y) }, size{ cr.width(), 1.0 } };
@@ -287,7 +287,7 @@ namespace neogfx
                 rgb = static_variant_cast<color>(r);
             if (iOwner.current_channel() != ChannelAlpha)
                 rgb.set_alpha(255);
-            aGraphicsContext.fill_rect(line, rgb);
+            aGc.fill_rect(line, rgb);
         }
     }
 
@@ -473,9 +473,9 @@ namespace neogfx
         return minimum_size();
     }
 
-    void color_dialog::yz_picker::paint(i_graphics_context& aGraphicsContext) const
+    void color_dialog::yz_picker::paint(i_graphics_context& aGc) const
     {
-        framed_widget::paint(aGraphicsContext);
+        framed_widget::paint(aGc);
         rect cr = client_rect(false);
         if (iUpdateTexture)
         {
@@ -494,10 +494,10 @@ namespace neogfx
             }
             iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
         }
-        aGraphicsContext.draw_texture(rect{ cr.top_left(), size{ 256.0_dip, 256.0_dip } }, iTexture);
+        aGc.draw_texture(rect{ cr.top_left(), size{ 256.0_dip, 256.0_dip } }, iTexture);
         point cursor = dip(current_cursor_position());
-        aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iOwner.selected_color());
-        aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iOwner.selected_color().light(0x80) ? color::Black : color::White });
+        aGc.fill_circle(cr.top_left() + cursor, 4.0, iOwner.selected_color());
+        aGc.draw_circle(cr.top_left() + cursor, 4.0, pen{ iOwner.selected_color().light(0x80) ? color::Black : color::White });
     }
 
     void color_dialog::yz_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -683,19 +683,19 @@ namespace neogfx
         return minimum_size();
     }
 
-    void color_dialog::color_selection::paint(i_graphics_context& aGraphicsContext) const
+    void color_dialog::color_selection::paint(i_graphics_context& aGc) const
     {
-        framed_widget::paint(aGraphicsContext);
+        framed_widget::paint(aGc);
         scoped_units su{ *this, units::Pixels };
         rect cr = client_rect(false);
-        draw_alpha_background(aGraphicsContext, cr);
+        draw_alpha_background(aGc, cr);
         rect top = cr;
         rect bottom = top;
         top.cy = top.cy / 2.0;
         bottom.y = top.bottom();
         bottom.cy = bottom.cy / 2.0;
-        aGraphicsContext.fill_rect(top, iOwner.selected_color());
-        aGraphicsContext.fill_rect(bottom, iOwner.current_color());
+        aGc.fill_rect(top, iOwner.selected_color());
+        aGc.fill_rect(bottom, iOwner.current_color());
     }
 
     color_dialog::color_dialog(const color& aCurrentColor) :

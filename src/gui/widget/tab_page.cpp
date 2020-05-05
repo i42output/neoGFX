@@ -74,7 +74,7 @@ namespace neogfx
         return false;
     }
 
-    void tab_page::paint_non_client_after(i_graphics_context& aGraphicsContext) const
+    void tab_page::paint_non_client_after(i_graphics_context& aGc) const
     {
         if (iTab.is_selected())
         {
@@ -85,9 +85,9 @@ namespace neogfx
                 {
                     auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(non_client_rect()));
                     hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
-                    aGraphicsContext.fill_rect(hole, inner_frame_color());
+                    aGc.fill_rect(hole, inner_frame_color());
                     hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
-                    aGraphicsContext.fill_rect(hole, background_color());
+                    aGc.fill_rect(hole, background_color());
                 }
                 break;
             case tab_container_style::TabAlignmentLeft:
@@ -95,14 +95,14 @@ namespace neogfx
                 {
                     auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ effective_frame_width(), -effective_frame_width() / 2.0 }).intersection(non_client_rect()));
                     hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ 0.0, effective_frame_width() / 2.0 })));
-                    aGraphicsContext.fill_rect(hole, inner_frame_color());
+                    aGc.fill_rect(hole, inner_frame_color());
                     hole.deflate(size{ 0.0, effective_frame_width() / 2.0 });
-                    aGraphicsContext.fill_rect(hole, background_color());
+                    aGc.fill_rect(hole, background_color());
                 }
                 break;
             }
         }
-        scrollable_widget::paint_non_client_after(aGraphicsContext);
+        scrollable_widget::paint_non_client_after(aGc);
     }
 
     color tab_page::background_color() const

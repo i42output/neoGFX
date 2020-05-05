@@ -82,7 +82,7 @@ namespace neogfx
         return to_units(*this, scoped_units::current_units(), result);
     }
 
-    void image_widget::paint(i_graphics_context& aGraphicsContext) const
+    void image_widget::paint(i_graphics_context& aGc) const
     {
         if (iTexture.is_empty())
             return;
@@ -199,7 +199,7 @@ namespace neogfx
             placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
             break;
         }
-        aGraphicsContext.draw_texture(placementRect, iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor ? shader_effect::Colorize : shader_effect::None);
+        aGc.draw_texture(placementRect, iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor ? shader_effect::Colorize : shader_effect::None);
     }
 
     const texture& image_widget::image() const

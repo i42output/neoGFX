@@ -53,6 +53,7 @@ namespace neogfx
         horizontal_layout iLayout3_1;
         push_button iReverse;
         push_button iReversePartial;
+        double_slider iHueSlider;
         push_button iImport;
         horizontal_layout iLayout3_2;
         group_box iDirectionGroupBox;

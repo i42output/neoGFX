@@ -51,7 +51,7 @@ namespace neogfx
     public:
         rect element_rect(skin_element aElement) const override;
     protected:
-        void paint(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGc) const override;
     protected:
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;

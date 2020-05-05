@@ -50,6 +50,11 @@ namespace neogfx
     {
     }
 
+    void slider_impl::set_bar_color(const optional_color_or_gradient& aBarColor)
+    {
+        iBarColor = aBarColor;
+    }
+
     size slider_impl::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size())
@@ -57,14 +62,14 @@ namespace neogfx
         return iOrientation == slider_orientation::Horizontal ? size{ 96_dip, 22_dip } : size{ 22_dip, 96_dip };
     }
 
-    void slider_impl::paint(i_graphics_context& aGraphicsContext) const
+    void slider_impl::paint(i_graphics_context& aGc) const
     {
         scoped_units su{ *this, units::Pixels };
         rect rectBarBox = bar_box();
         color ink = background_color().shade(0x80);
-        aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink);
+        aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : ink));
         rectBarBox.inflate(size{ 1.0, 1.0 });
-        aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink.mid(background_color()));
+        aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : ink.mid(background_color())));
         rectBarBox.deflate(size{ 1.0, 1.0 });
         point selection = normalized_value_to_position(normalized_value());
         rect selectionRect = rectBarBox;
@@ -75,8 +80,11 @@ namespace neogfx
             selectionRect.cy = selectionRect.bottom() - selection.y;
             selectionRect.y = selection.y;
         }
-        if (normalized_value() > 0.0)
-            aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, service<i_app>().current_style().palette().color(color_role::Selection));
+        {
+            scoped_scissor ss{ aGc, selectionRect };
+            if (normalized_value() > 0.0)
+                aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : service<i_app>().current_style().palette().color(color_role::Selection)));
+        }
         rect rectIndicator = indicator_box();
         color indicatorColor = foreground_color();
         if (iDragOffset != std::nullopt)
@@ -88,8 +96,8 @@ namespace neogfx
         }
         color indicatorBorderColor = indicatorColor.darker(0x40);
         indicatorColor.lighten(0x40);
-        aGraphicsContext.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0, indicatorBorderColor);
-        aGraphicsContext.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
+        aGc.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0, indicatorBorderColor);
+        aGc.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
     }
 
     void slider_impl::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -104,6 +112,7 @@ namespace neogfx
                     set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
                 else
                     set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
+                update();
             }
             else
                 set_normalized_value(normalized_value_from_position(aPosition));

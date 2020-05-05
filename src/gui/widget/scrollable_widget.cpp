@@ -123,24 +123,24 @@ namespace neogfx
             return widget::hit_test(aPosition);
     }
 
-    void scrollable_widget::paint_non_client_after(i_graphics_context& aGraphicsContext) const
+    void scrollable_widget::paint_non_client_after(i_graphics_context& aGc) const
     {
-        framed_widget::paint_non_client_after(aGraphicsContext);
+        framed_widget::paint_non_client_after(aGc);
         if (vertical_scrollbar().visible())
-            vertical_scrollbar().render(aGraphicsContext);
+            vertical_scrollbar().render(aGc);
         if (horizontal_scrollbar().visible())
-            horizontal_scrollbar().render(aGraphicsContext);
+            horizontal_scrollbar().render(aGc);
         if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == scrollbar_style::Normal)
         {
-            point oldOrigin = aGraphicsContext.origin();
-            aGraphicsContext.set_origin(point(0.0, 0.0));
+            point oldOrigin = aGc.origin();
+            aGc.set_origin(point(0.0, 0.0));
             auto scrollbarColor = background_color();
-            aGraphicsContext.fill_rect(
+            aGc.fill_rect(
                 rect{
                     point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(iVerticalScrollbar).bottom() },
                     size{ scrollbar_geometry(iVerticalScrollbar).width(), scrollbar_geometry(horizontal_scrollbar()).height() } },
                 scrollbarColor.shade(0x40));
-            aGraphicsContext.set_origin(oldOrigin);
+            aGc.set_origin(oldOrigin);
         }
     }
 

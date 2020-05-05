@@ -129,7 +129,7 @@ namespace neogfx::game
                 return sFieldNames[aFieldIndex];
             }
             static constexpr bool has_updater = true;
-            static void update(const text_mesh& aData, i_ecs& aEcs, const i_graphics_context& aGraphicsContext, entity_id aEntity)
+            static void update(const text_mesh& aData, i_ecs& aEcs, const i_graphics_context& aGc, entity_id aEntity)
             {
                 auto& mf = aEcs.component<mesh_filter>().has_entity_record(aEntity) ?
                     aEcs.component<mesh_filter>().entity_record(aEntity) :
@@ -139,7 +139,7 @@ namespace neogfx::game
                     aEcs.component<mesh_renderer>().populate(aEntity, mesh_renderer{});
                 mf.mesh = mesh{};
                 mr.patches = patches{};
-                auto glyphText = aGraphicsContext.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font.ptr->id.cookie()), aData.extents.x, aData.alignment);
+                auto glyphText = aGc.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font.ptr->id.cookie()), aData.extents.x, aData.alignment);
                 for (auto const& line : glyphText.lines)
                 {
                     auto mesh_line = [&](const point& aOffset, const material& aMaterial) 
@@ -154,7 +154,7 @@ namespace neogfx::game
                                 auto const& glyphTexture = glyph.glyph_texture(glyphText.glyphText);
                                 vec3 glyphOrigin(
                                     pos.x + glyphTexture.placement().x,
-                                    aGraphicsContext.logical_coordinates().is_game_orientation() ?
+                                    aGc.logical_coordinates().is_game_orientation() ?
                                         pos.y + (glyphTexture.placement().y + -glyphFont.descender()) :
                                         pos.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
                                     0.0);
@@ -198,7 +198,7 @@ namespace neogfx::game
                 return sArchetype;
             }
         public:
-            text(i_ecs& aEcs, const i_graphics_context& aGraphicsContext, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
+            text(i_ecs& aEcs, const i_graphics_context& aGc, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
             text(const text& aOther);
         };
     }

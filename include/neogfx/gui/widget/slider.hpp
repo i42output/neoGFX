@@ -51,9 +51,11 @@ namespace neogfx
         slider_impl(i_layout& aLayout, slider_orientation aOrientation = slider_orientation::Horizontal);
         ~slider_impl();
     public:
+        void set_bar_color(const optional_color_or_gradient& aBarColor);
+    public:
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
     public:
-        virtual void paint(i_graphics_context& aGraphicsContext) const;
+        virtual void paint(i_graphics_context& aGc) const;
     public:
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
         virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
@@ -72,6 +74,7 @@ namespace neogfx
         point normalized_value_to_position(double aValue) const;
     private:
         slider_orientation iOrientation;
+        optional_color_or_gradient iBarColor;
         double iNormalizedValue;
         optional_point iDragOffset;
     };

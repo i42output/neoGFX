@@ -113,14 +113,14 @@ namespace neogfx
         }
     }
 
-    void radio_button::paint(i_graphics_context& aGraphicsContext) const
+    void radio_button::paint(i_graphics_context& aGc) const
     {
         if (has_focus())
         {
             rect focusRect = label().client_rect() + label().position();
-            aGraphicsContext.draw_focus_rect(focusRect);
+            aGc.draw_focus_rect(focusRect);
         }
-        service<i_skin_manager>().active_skin().draw_radio_button(aGraphicsContext, *this, checked_state());
+        service<i_skin_manager>().active_skin().draw_radio_button(aGc, *this, checked_state());
     }
 
     void radio_button::mouse_entered(const point& aPosition)

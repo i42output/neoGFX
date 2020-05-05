@@ -66,7 +66,7 @@ namespace neogfx
         void unlock() override;
     public:
         dimension width() const override;
-        void render(i_graphics_context& aGraphicsContext) const override;
+        void render(i_graphics_context& aGc) const override;
     public:
         rect element_geometry(scrollbar_element aElement) const override;
         scrollbar_element element_at(const point& aPosition) const override;

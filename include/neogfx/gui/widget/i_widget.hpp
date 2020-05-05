@@ -145,11 +145,11 @@ namespace neogfx
         virtual rect update_rect() const = 0;
         virtual rect default_clip_rect(bool aIncludeNonClient = false) const = 0;
         virtual bool ready_to_render() const = 0;
-        virtual void render(i_graphics_context& aGraphicsContext) const = 0;
+        virtual void render(i_graphics_context& aGc) const = 0;
         virtual bool transparent_background() const = 0;
-        virtual void paint_non_client(i_graphics_context& aGraphicsContext) const = 0;
-        virtual void paint_non_client_after(i_graphics_context& aGraphicsContext) const = 0;
-        virtual void paint(i_graphics_context& aGraphicsContext) const = 0;
+        virtual void paint_non_client(i_graphics_context& aGc) const = 0;
+        virtual void paint_non_client_after(i_graphics_context& aGc) const = 0;
+        virtual void paint(i_graphics_context& aGc) const = 0;
     public:
         virtual double opacity() const = 0;
         virtual void set_opacity(double aOpacity) = 0;

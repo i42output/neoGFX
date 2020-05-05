@@ -42,7 +42,7 @@ namespace neogfx
         virtual neogfx::size_policy size_policy() const;
         virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
     public:
-        virtual void paint(i_graphics_context& aGraphicsContext) const;
+        virtual void paint(i_graphics_context& aGc) const;
     public:
         const texture& image() const;
         void set_image(const std::string& aImageUri);

@@ -52,20 +52,20 @@ namespace neogfx
             update_appearance();
         }
     protected:
-        void paint(i_graphics_context& aGraphicsContext) const
+        void paint(i_graphics_context& aGc) const
         {
             scoped_units su{ *this, units::Pixels };
             if (entered())
             {
                 double radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
-                aGraphicsContext.fill_circle(
+                aGc.fill_circle(
                     to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().centre())), radius, service<i_app>().current_style().palette().color(color_role::Text));
             }
             if (has_focus())
             {
                 rect focusRect = to_client_coordinates(image_widget().to_window_coordinates(rect{ image_widget().client_rect().centre() - image().extents() / 2.0, image().extents() }));
                 focusRect.inflate(2.0, 2.0);
-                aGraphicsContext.draw_focus_rect(focusRect);
+                aGc.draw_focus_rect(focusRect);
             }
         }
     private:

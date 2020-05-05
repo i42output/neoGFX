@@ -82,7 +82,7 @@ namespace neogfx
         }
     }
 
-    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
+    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
     class gradient_dialog::preview_box : public framed_widget
     {
@@ -171,6 +171,7 @@ namespace neogfx
         iLayout3_1{ iSelectorGroupBox.item_layout() },
         iReverse{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#reverse.png" } },
         iReversePartial{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#reversepartial.png" } },
+        iHueSlider{ iLayout3_1 },
         iImport{ iLayout3_1, image{ ":/neogfx/resources/icons.zip#open.png" } },
         iLayout3_2{ iLayout3, alignment::Top },
         iDirectionGroupBox{ iLayout3_2, "Direction"_t },
@@ -263,6 +264,16 @@ namespace neogfx
         iReverse.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iReversePartial.image_widget().set_fixed_size(size{ 16.0_dip });
         iReversePartial.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
+        iHueSlider.set_minimum(0.0);
+        iHueSlider.set_maximum(360.0);
+        iHueSlider.set_step(1.0);
+        neogfx::gradient::color_stop_list hues;
+        for (uint32_t s = 0; s < neogfx::gradient::MaxStops; ++s)
+        {
+            double const pos = s / static_cast<double>((neogfx::gradient::MaxStops - 1));
+            hues.emplace_back(pos, color::from_hsv(pos * 360.0, 1.0, 1.0));
+        }
+        iHueSlider.set_bar_color(neogfx::gradient{ hues, gradient_direction::Horizontal });
         iImport.image_widget().set_fixed_size(size{ 16.0_dip });
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);

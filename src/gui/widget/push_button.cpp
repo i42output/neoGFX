@@ -160,20 +160,20 @@ namespace neogfx
         return button::maximum_size(aAvailableSpace);
     }
 
-    void push_button::paint_non_client(i_graphics_context& aGraphicsContext) const
+    void push_button::paint_non_client(i_graphics_context& aGc) const
     {
-        button::paint_non_client(aGraphicsContext);
+        button::paint_non_client(aGc);
         if ((iStyle == push_button_style::Toolbar || iStyle == push_button_style::TitleBar) && enabled() && (entered() || capturing()))
         {
             color background = (capturing() && entered() ? 
                 service<i_app>().current_style().palette().color(color_role::Selection) : 
                 background_color().shade(0x40));
             background.set_alpha(0x80);
-            aGraphicsContext.fill_rect(client_rect(), background);
+            aGc.fill_rect(client_rect(), background);
         }
     }
 
-    void push_button::paint(i_graphics_context& aGraphicsContext) const
+    void push_button::paint(i_graphics_context& aGc) const
     {
         color faceColor = animation_color();
         color borderColor = border_mid_color().darker(0x40);
@@ -188,9 +188,9 @@ namespace neogfx
         case push_button_style::Tab:
         case push_button_style::DropList:
         case push_button_style::SpinBox:
-            aGraphicsContext.fill_path(outline, borderColor);
+            aGc.fill_path(outline, borderColor);
             outline.deflate(penWidth, penWidth);
-            aGraphicsContext.fill_path(outline, innerBorderColor);
+            aGc.fill_path(outline, innerBorderColor);
             outline.deflate(penWidth, penWidth);
             break;
         }
@@ -210,7 +210,7 @@ namespace neogfx
                 const double transitionStart = 0.5 - transitionHeight / 2.0 +
                     (!capturing() ? 0.0 : (rasterize(1.0_mm) / outline.bounding_rect().height()));
                 const double transitionEnd = transitionStart + transitionHeight;
-                aGraphicsContext.fill_path(outline,
+                aGc.fill_path(outline,
                     gradient{ gradient::color_stop_list{
                         gradient::color_stop{ 0.0, colorStart },
                         gradient::color_stop{ transitionStart, colorEnd.to_hsl().lighter(colorOffset * 0.6).to_rgb() },
@@ -218,7 +218,7 @@ namespace neogfx
                         gradient::color_stop{ 1.0, colorEnd } } });
             }
             else
-                aGraphicsContext.fill_path(outline, faceColor);
+                aGc.fill_path(outline, faceColor);
             break;
         case push_button_style::Normal:
         case push_button_style::ButtonBox:
@@ -227,16 +227,16 @@ namespace neogfx
         case push_button_style::DropList:
         case push_button_style::SpinBox:
             if (!spot_color())
-                aGraphicsContext.fill_path(outline, gradient{ colorStart, colorEnd });
+                aGc.fill_path(outline, gradient{ colorStart, colorEnd });
             else
-                aGraphicsContext.fill_path(outline, faceColor);
+                aGc.fill_path(outline, faceColor);
             break;
         }
         if (has_focus())
         {
             rect focusRect = outline.bounding_rect();
             focusRect.deflate(2.0, 2.0);
-            aGraphicsContext.draw_focus_rect(focusRect);
+            aGc.draw_focus_rect(focusRect);
         }
     }
 

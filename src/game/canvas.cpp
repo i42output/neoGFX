@@ -111,15 +111,15 @@ namespace neogfx::game
         return neogfx::logical_coordinate_system::AutomaticGame;
     }
 
-    void canvas::paint(i_graphics_context& aGraphicsContext) const
+    void canvas::paint(i_graphics_context& aGc) const
     {    
         if (ecs().component_registered<mesh_renderer>())
         {
-            aGraphicsContext.clear_depth_buffer();
+            aGc.clear_depth_buffer();
             component_scoped_lock<mesh_renderer> lgMeshRenderer{ ecs() };
-            RenderingEntities.trigger(aGraphicsContext);
-            aGraphicsContext.draw_entities(ecs());
-            EntitiesRendered.trigger(aGraphicsContext);
+            RenderingEntities.trigger(aGc);
+            aGc.draw_entities(ecs());
+            EntitiesRendered.trigger(aGc);
         }
     }
 

@@ -1055,7 +1055,7 @@ namespace neogfx
         return iLayoutTimer == nullptr;
     }
 
-    void widget::render(i_graphics_context& aGraphicsContext) const
+    void widget::render(i_graphics_context& aGc) const
     {
         if (effectively_hidden())
             return;
@@ -1070,46 +1070,46 @@ namespace neogfx
         if (debug() == this)
             std::cerr << "widget::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 
-        aGraphicsContext.set_extents(extents());
-        aGraphicsContext.set_origin(origin());
+        aGc.set_extents(extents());
+        aGc.set_origin(origin());
 
-        scoped_snap_to_pixel snap{ aGraphicsContext };
-        scoped_opacity sc{ aGraphicsContext, opacity() };
+        scoped_snap_to_pixel snap{ aGc };
+        scoped_opacity sc{ aGc, opacity() };
 
         {
-            scoped_scissor scissor(aGraphicsContext, nonClientClipRect);
-            paint_non_client(aGraphicsContext);
+            scoped_scissor scissor(aGc, nonClientClipRect);
+            paint_non_client(aGc);
         }
 
         {
             const rect clipRect = default_clip_rect().intersection(updateRect);
 
-            aGraphicsContext.set_extents(client_rect().extents());
-            aGraphicsContext.set_origin(origin());
+            aGc.set_extents(client_rect().extents());
+            aGc.set_origin(origin());
 
-            scoped_scissor scissor(aGraphicsContext, clipRect);
-            scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
+            scoped_scissor scissor(aGc, clipRect);
+            scoped_coordinate_system scs(aGc, origin(), extents(), logical_coordinate_system());
 
-            Painting.trigger(aGraphicsContext);
-            paint(aGraphicsContext);
-            Painted.trigger(aGraphicsContext);
+            Painting.trigger(aGc);
+            paint(aGc);
+            Painted.trigger(aGc);
 
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
                 auto const& child = *i;
                 rect intersection = clipRect.intersection(to_client_coordinates(child->non_client_rect()));
                 if (!intersection.empty())
-                    child->render(aGraphicsContext);
+                    child->render(aGc);
             }
 
-            ChildrenPainted.trigger(aGraphicsContext);
+            ChildrenPainted.trigger(aGc);
         }
 
-        aGraphicsContext.set_extents(extents());
-        aGraphicsContext.set_origin(origin());
+        aGc.set_extents(extents());
+        aGc.set_origin(origin());
         {
-            scoped_scissor scissor(aGraphicsContext, nonClientClipRect);
-            paint_non_client_after(aGraphicsContext);
+            scoped_scissor scissor(aGc, nonClientClipRect);
+            paint_non_client_after(aGc);
         }
     }
 
@@ -1118,10 +1118,10 @@ namespace neogfx
         return !is_root();
     }
 
-    void widget::paint_non_client(i_graphics_context& aGraphicsContext) const
+    void widget::paint_non_client(i_graphics_context& aGc) const
     {
         if (has_background_color() || !transparent_background())
-            aGraphicsContext.fill_rect(update_rect(), background_color());
+            aGc.fill_rect(update_rect(), background_color());
     }
 
     void widget::paint_non_client_after(i_graphics_context&) const

@@ -92,14 +92,14 @@ namespace neogfx
         }
     }
 
-    void check_box::paint(i_graphics_context& aGraphicsContext) const
+    void check_box::paint(i_graphics_context& aGc) const
     {
         if (has_focus())
         {
             rect const focusRect = label().client_rect() + label().position();
-            aGraphicsContext.draw_focus_rect(focusRect);
+            aGc.draw_focus_rect(focusRect);
         }
-        service<i_skin_manager>().active_skin().draw_check_box(aGraphicsContext, *this, checked_state());
+        service<i_skin_manager>().active_skin().draw_check_box(aGc, *this, checked_state());
     }
 
     void check_box::mouse_entered(const point& aPosition)

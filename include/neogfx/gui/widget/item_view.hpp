@@ -102,8 +102,8 @@ namespace neogfx
         virtual rect item_display_rect() const = 0;
         virtual size total_item_area(const i_units_context& aUnitsContext) const = 0;
         virtual dimension column_width(uint32_t aColumn) const = 0;
-        std::pair<item_model_index::value_type, coordinate> first_visible_item(i_graphics_context& aGraphicsContext) const;
-        std::pair<item_model_index::value_type, coordinate> last_visible_item(i_graphics_context& aGraphicsContext) const;
+        std::pair<item_model_index::value_type, coordinate> first_visible_item(i_graphics_context& aGc) const;
+        std::pair<item_model_index::value_type, coordinate> last_visible_item(i_graphics_context& aGc) const;
     protected:
         void layout_items_completed() override;
     protected:
@@ -111,7 +111,7 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override;
     protected:
-        void paint(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGc) const override;
     protected:
         void capture_released() override;
         neogfx::focus_policy focus_policy() const override;
@@ -155,7 +155,7 @@ namespace neogfx
     public:
         rect row_rect(const item_presentation_model_index& aItemIndex) const;
         rect cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart = cell_part::Foreground) const;
-        rect cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGraphicsContext, cell_part aPart = cell_part::Foreground) const;
+        rect cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGc, cell_part aPart = cell_part::Foreground) const;
         optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
     private:
         void init();

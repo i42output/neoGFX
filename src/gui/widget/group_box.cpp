@@ -141,12 +141,12 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    void group_box::paint(i_graphics_context& aGraphicsContext) const
+    void group_box::paint(i_graphics_context& aGc) const
     {
-        widget::paint(aGraphicsContext);
+        widget::paint(aGc);
         rect lr{ item_layout().position(), item_layout().extents() };
         lr.inflate(size{ 5.0 });
-        aGraphicsContext.draw_rounded_rect(lr, 4.0, pen{ border_color() }, brush{ fill_color() });
+        aGc.draw_rounded_rect(lr, 4.0, pen{ border_color() }, brush{ fill_color() });
     }
 
     color group_box::background_color() const

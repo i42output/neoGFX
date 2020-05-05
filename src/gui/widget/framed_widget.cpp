@@ -77,9 +77,9 @@ namespace neogfx
         return false;
     }
 
-    void framed_widget::paint_non_client(i_graphics_context& aGraphicsContext) const
+    void framed_widget::paint_non_client(i_graphics_context& aGc) const
     {
-        widget::paint_non_client(aGraphicsContext);
+        widget::paint_non_client(aGc);
         switch (iStyle)
         {
         case frame_style::NoFrame:
@@ -92,15 +92,15 @@ namespace neogfx
             break;
         case frame_style::SolidFrame:
         case frame_style::WindowFrame:
-            aGraphicsContext.draw_rect(rect{ point{ 0.0, 0.0 }, non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
+            aGc.draw_rect(rect{ point{ 0.0, 0.0 }, non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
             break;
         case frame_style::ContainerFrame:
             {
                 rect rectBorder{ point{ 0.0, 0.0 }, non_client_rect().extents() };
                 rectBorder.deflate(line_width(), line_width());
-                aGraphicsContext.draw_rect(rectBorder, pen(inner_frame_color(), line_width()));
+                aGc.draw_rect(rectBorder, pen(inner_frame_color(), line_width()));
                 rectBorder.inflate(line_width(), line_width());
-                aGraphicsContext.draw_rect(rectBorder, pen(frame_color(), line_width()));
+                aGc.draw_rect(rectBorder, pen(frame_color(), line_width()));
             }
             break;
         case frame_style::DoubleFrame:
@@ -116,9 +116,9 @@ namespace neogfx
         }
     }
 
-    void framed_widget::paint(i_graphics_context& aGraphicsContext) const
+    void framed_widget::paint(i_graphics_context& aGc) const
     {
-        widget::paint(aGraphicsContext);
+        widget::paint(aGc);
     }
 
     void framed_widget::set_frame_style(frame_style aStyle)

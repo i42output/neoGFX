@@ -220,14 +220,14 @@ namespace neogfx
         iDefaultTransitionDuration = aTransitionDuration;
     }
 
-    std::pair<item_presentation_model_index::value_type, coordinate> item_view::first_visible_item(i_graphics_context& aGraphicsContext) const
+    std::pair<item_presentation_model_index::value_type, coordinate> item_view::first_visible_item(i_graphics_context& aGc) const
     {
-        return presentation_model().item_at(vertical_scrollbar().position(), aGraphicsContext);
+        return presentation_model().item_at(vertical_scrollbar().position(), aGc);
     }
 
-    std::pair<item_presentation_model_index::value_type, coordinate> item_view::last_visible_item(i_graphics_context& aGraphicsContext) const
+    std::pair<item_presentation_model_index::value_type, coordinate> item_view::last_visible_item(i_graphics_context& aGc) const
     {
-        return presentation_model().item_at(vertical_scrollbar().position() + item_display_rect().height(), aGraphicsContext);
+        return presentation_model().item_at(vertical_scrollbar().position() + item_display_rect().height(), aGc);
     }
 
     void item_view::layout_items_completed()
@@ -256,10 +256,10 @@ namespace neogfx
         return size_constraint::Expanding;
     }
 
-    void item_view::paint(i_graphics_context& aGraphicsContext) const
+    void item_view::paint(i_graphics_context& aGc) const
     {
-        scrollable_widget::paint(aGraphicsContext);
-        auto first = first_visible_item(aGraphicsContext);
+        scrollable_widget::paint(aGc);
+        auto first = first_visible_item(aGc);
         bool finished = false;
         rect clipRect = default_clip_rect().intersection(item_display_rect());
         for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !finished; ++row)
@@ -269,7 +269,7 @@ namespace neogfx
             {
                 auto const itemIndex = item_presentation_model_index{ row, col };
                 bool const currentCell = selection_model().has_current_index() && selection_model().current_index() == itemIndex;
-                rect cellRect = cell_rect(itemIndex, aGraphicsContext);
+                rect cellRect = cell_rect(itemIndex, aGc);
                 if (cellRect.y > clipRect.bottom())
                     continue;
                 finished = false;
@@ -279,20 +279,20 @@ namespace neogfx
                 optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Text);
                 if (textColor == std::nullopt)
                     textColor = service<i_app>().current_style().palette().color(color_role::Text);
-                rect cellBackgroundRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Background);
+                rect cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
                 if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
                 {
-                    scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
-                    aGraphicsContext.fill_rect(cellBackgroundRect, cellBackgroundColor->
+                    scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
+                    aGc.fill_rect(cellBackgroundRect, cellBackgroundColor->
                         shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0.875));
                 }
                 else
                 {
-                    scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
-                    aGraphicsContext.fill_rect(cellBackgroundRect, *cellBackgroundColor);
+                    scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
+                    aGc.fill_rect(cellBackgroundRect, *cellBackgroundColor);
                 }
                 {
-                    scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
+                    scoped_scissor scissor(aGc, clipRect.intersection(cellRect));
                     if (model().is_tree() && model().has_children(presentation_model().to_item_model_index(itemIndex)))
                     {
                         thread_local struct : i_skinnable_item
@@ -323,8 +323,8 @@ namespace neogfx
                             }
                         } skinnableItem = {};
                         skinnableItem.widget = this;
-                        skinnableItem.treeExpanderRect = cell_rect(itemIndex, aGraphicsContext, cell_part::TreeExpander);
-                        service<i_skin_manager>().active_skin().draw_tree_expander(aGraphicsContext, skinnableItem, presentation_model().cell_meta(itemIndex).expanded);
+                        skinnableItem.treeExpanderRect = cell_rect(itemIndex, aGc, cell_part::TreeExpander);
+                        service<i_skin_manager>().active_skin().draw_tree_expander(aGc, skinnableItem, presentation_model().cell_meta(itemIndex).expanded);
                     }
                     if (presentation_model().cell_checkable(itemIndex))
                     {
@@ -356,22 +356,22 @@ namespace neogfx
                             }
                         } skinnableItem = {};
                         skinnableItem.widget = this;
-                        skinnableItem.checkBoxRect = cell_rect(itemIndex, aGraphicsContext, cell_part::CheckBox);
-                        service<i_skin_manager>().active_skin().draw_check_box(aGraphicsContext, skinnableItem, presentation_model().cell_meta(itemIndex).checked);
+                        skinnableItem.checkBoxRect = cell_rect(itemIndex, aGc, cell_part::CheckBox);
+                        service<i_skin_manager>().active_skin().draw_check_box(aGc, skinnableItem, presentation_model().cell_meta(itemIndex).checked);
                     }
                     auto const& cellImage = presentation_model().cell_image(itemIndex);
                     if (cellImage != std::nullopt)
-                        aGraphicsContext.draw_texture(cell_rect(itemIndex, aGraphicsContext, cell_part::Image), *cellImage);
-                    auto cellTextRect = cell_rect(itemIndex, aGraphicsContext, cell_part::Text);
-                    auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGraphicsContext);
-                    aGraphicsContext.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
+                        aGc.draw_texture(cell_rect(itemIndex, aGc, cell_part::Image), *cellImage);
+                    auto cellTextRect = cell_rect(itemIndex, aGc, cell_part::Text);
+                    auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGc);
+                    aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
                 }
                 if (currentCell)
                 {
-                    scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
-                    aGraphicsContext.draw_rect(cellBackgroundRect, pen{ selection_model().current_index() == editing() ? *textColor : *cellBackgroundColor });
+                    scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
+                    aGc.draw_rect(cellBackgroundRect, pen{ selection_model().current_index() == editing() ? *textColor : *cellBackgroundColor });
                     if (selection_model().current_index() != editing() && has_focus())
-                        aGraphicsContext.draw_focus_rect(cellBackgroundRect);
+                        aGc.draw_focus_rect(cellBackgroundRect);
                 }
             }
         }
@@ -1133,7 +1133,7 @@ namespace neogfx
         }
     }
         
-    rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGraphicsContext, cell_part aPart) const
+    rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGc, cell_part aPart) const
     {
         switch (aPart)
         {
@@ -1142,25 +1142,25 @@ namespace neogfx
             return cell_rect(aItemIndex, aPart);
         case cell_part::CheckBox:
             {
-                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
+                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (!cellCheckBoxSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
                 cellRect.extents() = *cellCheckBoxSize;
-                cellRect.x += presentation_model().indent(aItemIndex, aGraphicsContext);
+                cellRect.x += presentation_model().indent(aItemIndex, aGc);
                 return cellRect;
             }
             break;
         case cell_part::TreeExpander:
             {
-                auto const& cellTreeExpanderSize = presentation_model().cell_tree_expander_size(aItemIndex, aGraphicsContext);
+                auto const& cellTreeExpanderSize = presentation_model().cell_tree_expander_size(aItemIndex, aGc);
                 if (!cellTreeExpanderSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellTreeExpanderSize->cy) / 2.0) });
                 cellRect.extents() = *cellTreeExpanderSize;
-                cellRect.x += presentation_model().indent(aItemIndex, aGraphicsContext) - presentation_model().cell_tree_expander_size(aItemIndex, aGraphicsContext)->cx;
+                cellRect.x += presentation_model().indent(aItemIndex, aGc) - presentation_model().cell_tree_expander_size(aItemIndex, aGc)->cx;
                 return cellRect;
             }
             break;
@@ -1172,10 +1172,10 @@ namespace neogfx
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellImageSize->cy) / 2.0) });
                 cellRect.extents() = *cellImageSize;
-                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
+                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
-                    cellRect.x += (cellCheckBoxSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx);
-                cellRect.x += presentation_model().indent(aItemIndex, aGraphicsContext);
+                    cellRect.x += (cellCheckBoxSize->cx + presentation_model().cell_spacing(aGc).cx);
+                cellRect.x += presentation_model().indent(aItemIndex, aGc);
                 return cellRect;
             }
             break;
@@ -1183,17 +1183,17 @@ namespace neogfx
             {
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.deflate(presentation_model().cell_margins(*this));
-                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGraphicsContext);
+                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
-                    cellRect.indent(point{ cellCheckBoxSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx, 0.0 });
+                    cellRect.indent(point{ cellCheckBoxSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
                 auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
                 if (cellImageSize)
-                    cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGraphicsContext).cx, 0.0 });
-                auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGraphicsContext);
+                    cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
+                auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGc);
                 auto const textHeight = std::max(glyphText.extents().cy,
                     (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());
                 cellRect.indent(point{ 0.0, (cellRect.height() - textHeight) / 2.0 });
-                cellRect.x += presentation_model().indent(aItemIndex, aGraphicsContext);
+                cellRect.x += presentation_model().indent(aItemIndex, aGc);
                 return cellRect;
             }
         }

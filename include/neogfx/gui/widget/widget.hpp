@@ -183,11 +183,11 @@ namespace neogfx
         rect update_rect() const override;
         rect default_clip_rect(bool aIncludeNonClient = false) const override;
         bool ready_to_render() const override;
-        void render(i_graphics_context& aGraphicsContext) const override;
+        void render(i_graphics_context& aGc) const override;
         bool transparent_background() const override;
-        void paint_non_client(i_graphics_context& aGraphicsContext) const override;
-        void paint(i_graphics_context& aGraphicsContext) const override;
-        void paint_non_client_after(i_graphics_context& aGraphicsContext) const override;
+        void paint_non_client(i_graphics_context& aGc) const override;
+        void paint(i_graphics_context& aGc) const override;
+        void paint_non_client_after(i_graphics_context& aGc) const override;
     public:
         double opacity() const override;
         void set_opacity(double aOpacity) override;

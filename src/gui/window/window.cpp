@@ -628,10 +628,10 @@ namespace neogfx
         return true;
     }
 
-    void window::render(i_graphics_context& aGraphicsContext) const
+    void window::render(i_graphics_context& aGc) const
     {
-        aGraphicsContext.set_extents(extents());
-        aGraphicsContext.set_origin(origin());
+        aGc.set_extents(extents());
+        aGc.set_origin(origin());
         if ((style() & window_style::DropShadow) == window_style::DropShadow)
         {
             if (!is_nested())
@@ -642,21 +642,21 @@ namespace neogfx
             {
                 rect shadowRect = to_client_coordinates(non_client_rect());
                 shadowRect.position() += point{ 4.0_dip, 4.0_dip };
-                aGraphicsContext.fill_rounded_rect(shadowRect, 4.0_dip, color::Yellow);
+                aGc.fill_rounded_rect(shadowRect, 4.0_dip, color::Yellow);
             }
         }
-        aGraphicsContext.set_extents(extents());
-        aGraphicsContext.set_origin(origin());
-        scrollable_widget::render(aGraphicsContext);
+        aGc.set_extents(extents());
+        aGc.set_origin(origin());
+        scrollable_widget::render(aGc);
         if (is_nest())
             for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
-                as_nest().nested_window(nw).as_window().as_widget().render(aGraphicsContext);
-        PaintOverlay.trigger(aGraphicsContext);
+                as_nest().nested_window(nw).as_window().as_widget().render(aGc);
+        PaintOverlay.trigger(aGc);
     }
 
-    void window::paint(i_graphics_context& aGraphicsContext) const
+    void window::paint(i_graphics_context& aGc) const
     {
-        scrollable_widget::paint(aGraphicsContext);
+        scrollable_widget::paint(aGc);
     }
 
     color window::background_color() const

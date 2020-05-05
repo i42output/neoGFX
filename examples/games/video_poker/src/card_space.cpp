@@ -52,12 +52,12 @@ namespace video_poker
         return rasterize(minimum_size(aAvailableSpace) * 2.0);
     }
         
-    void card_widget::paint(neogfx::i_graphics_context& aGraphicsContext) const
+    void card_widget::paint(neogfx::i_graphics_context& aGc) const
     {
         auto rect = client_rect();
-        aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::color::DarkGreen);
+        aGc.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::color::DarkGreen);
         rect.deflate(neogfx::size{ 4.0 });
-        aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, background_color());
+        aGc.fill_rounded_rect(rect, rect.cx / 10.0, background_color());
     }
 
     bool card_widget::has_card() const

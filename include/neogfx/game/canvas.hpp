@@ -45,7 +45,7 @@ namespace neogfx::game
         game::i_ecs& ecs() const;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
-        void paint(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGc) const override;
     public:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
     private:

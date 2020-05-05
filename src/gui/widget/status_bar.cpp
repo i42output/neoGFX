@@ -45,16 +45,16 @@ namespace neogfx
         return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + margins().size();
     }
 
-    void status_bar::separator::paint(i_graphics_context& aGraphicsContext) const
+    void status_bar::separator::paint(i_graphics_context& aGc) const
     {
         scoped_units su{ *this, units::Pixels };
         rect line = client_rect(false);
         line.deflate(size{ 0.0_dip, 2.0_dip });
         line.cx = 1.0;
         color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));
-        aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0.5));
+        aGc.fill_rect(line, ink.darker(0x40).with_alpha(0.5));
         ++line.x;
-        aGraphicsContext.fill_rect(line, ink.lighter(0x40).with_alpha(0.5));
+        aGc.fill_rect(line, ink.lighter(0x40).with_alpha(0.5));
     }
 
     status_bar::keyboard_lock_status::keyboard_lock_status(i_layout& aLayout) :

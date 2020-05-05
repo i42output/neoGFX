@@ -74,7 +74,7 @@ namespace neogfx
         return result;
     }
 
-    void menu_item_widget::paint_non_client(i_graphics_context& aGraphicsContext) const
+    void menu_item_widget::paint_non_client(i_graphics_context& aGc) const
     {
         if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())))
         {
@@ -88,15 +88,15 @@ namespace neogfx
             else if (fillColor.similar_intensity(background_color(), 0.05))
                 fillColor = fillColor.shade(0x20);
             fillColor.set_alpha(0xC0);
-            aGraphicsContext.fill_rect(client_rect(), fillColor);
+            aGc.fill_rect(client_rect(), fillColor);
         }
     }
 
-    void menu_item_widget::paint(i_graphics_context& aGraphicsContext) const
+    void menu_item_widget::paint(i_graphics_context& aGc) const
     {
         if (menu_item().type() != menu_item_type::Action || !menu_item().action().is_separator())
         {
-            widget::paint(aGraphicsContext);
+            widget::paint(aGc);
             if (menu_item().type() == menu_item_type::SubMenu && menu().type() == menu_type::Popup)
             {
                 bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
@@ -150,7 +150,7 @@ namespace neogfx
                         image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });
                 }
                 rect rect = client_rect(false);
-                aGraphicsContext.draw_texture(
+                aGc.draw_texture(
                     point{ rect.right() - dpi_scale(iGap) + std::floor((dpi_scale(iGap) - iSubMenuArrow->second.extents().cx) / 2.0), std::floor((rect.height() - iSubMenuArrow->second.extents().cy) / 2.0) },
                     iSubMenuArrow->second);
             }
@@ -167,7 +167,7 @@ namespace neogfx
             if (ink.similar_intensity(background_color(), 0.05))
                 ink = ink.shade(0x20);
             ink.set_alpha(0x40);
-            aGraphicsContext.fill_rect(line, ink);
+            aGc.fill_rect(line, ink);
         }
     }
 

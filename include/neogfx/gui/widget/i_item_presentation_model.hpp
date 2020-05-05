@@ -218,9 +218,9 @@ namespace neogfx
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
         virtual uint32_t columns(const item_presentation_model_index& aIndex) const = 0;
-        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGraphicsContext, bool aIncludeMargins = true) const = 0;
+        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludeMargins = true) const = 0;
         virtual const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
-        virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGraphicsContext) const = 0;
+        virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc) const = 0;
         virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, const std::string& aHeadingText) = 0;
         virtual item_cell_flags column_flags(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_flags(item_presentation_model_index::column_type aColumnIndex, item_cell_flags aFlags) = 0;
@@ -263,12 +263,12 @@ namespace neogfx
         virtual optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const = 0;
         virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
         virtual optional_size cell_image_size(const item_presentation_model_index& aIndex) const = 0;
-        virtual optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
-        virtual optional_size cell_tree_expander_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
+        virtual optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
+        virtual optional_size cell_tree_expander_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
         virtual optional_texture cell_image(const item_presentation_model_index& aIndex) const = 0;
-        virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
-        virtual size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
-        virtual dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const = 0;
+        virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
+        virtual size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
+        virtual dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
     public:
         virtual bool sortable() const = 0;
         virtual optional_sort sorting_by() const = 0;

@@ -205,12 +205,12 @@ namespace neogfx
     };
 
     template <typename Iter>
-    inline void draw_glyph_text_normal(const i_graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
+    inline void draw_glyph_text_normal(const i_graphics_context& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aGraphicsContext.draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aAppearance);
+            aGc.draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aAppearance);
             pos.x += iterGlyph->advance().cx;
         }
     }
@@ -239,32 +239,32 @@ namespace neogfx
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow_pass_3(const i_graphics_context& aGraphicsContext, const i_graphics_context::ping_pong_buffers_t& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
+    inline void draw_glyph_text_glow_pass_3(const i_graphics_context& aGc, const i_graphics_context::ping_pong_buffers_t& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
     {
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
         rect const effectRect{ point{}, effectExtents };
         rect const outputRect{ point{ aPoint } -effectOffset, effectExtents };
-        aGraphicsContext.blit(outputRect, *aPingPongBuffers.second, effectRect);
+        aGc.blit(outputRect, *aPingPongBuffers.second, effectRect);
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow(const i_graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
+    inline void draw_glyph_text_glow(const i_graphics_context& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
     {
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
-        auto pingPongBuffers = aGraphicsContext.ping_pong_buffers(effectExtents);
+        auto pingPongBuffers = aGc.ping_pong_buffers(effectExtents);
         draw_glyph_text_glow_pass_1(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowColor, aGlowSize);
         draw_glyph_text_glow_pass_2(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
-        draw_glyph_text_glow_pass_3(aGraphicsContext, pingPongBuffers, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
+        draw_glyph_text_glow_pass_3(aGc, pingPongBuffers, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
     }
 
     template <typename Iter>
-    inline void draw_glyph_text(const i_graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
+    inline void draw_glyph_text(const i_graphics_context& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
         if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Glow)
-            draw_glyph_text_glow(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
-        draw_glyph_text_normal(aGraphicsContext, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance);
+            draw_glyph_text_glow(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
+        draw_glyph_text_normal(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance);
     }
 
     class scoped_mnemonics

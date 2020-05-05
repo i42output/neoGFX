@@ -285,22 +285,22 @@ namespace neogfx
         return result;
     }
 
-    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
+    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
-    void text_edit::paint(i_graphics_context& aGraphicsContext) const
+    void text_edit::paint(i_graphics_context& aGc) const
     {
-        scrollable_widget::paint(aGraphicsContext);
+        scrollable_widget::paint(aGc);
         rect clipRect = default_clip_rect().intersection(client_rect(false));
         if (default_style().text_effect())
             clipRect.inflate(size{ default_style().text_effect()->width() });
         if (iOutOfMemory)
         {
-            draw_alpha_background(aGraphicsContext, clipRect);
+            draw_alpha_background(aGc, clipRect);
             return;
         }
-        scoped_scissor scissor{ aGraphicsContext, clipRect };
+        scoped_scissor scissor{ aGc, clipRect };
         if (iDefaultStyle.background_color() != neolib::none)
-            aGraphicsContext.fill_rect(client_rect(), to_brush(iDefaultStyle.background_color()));
+            aGc.fill_rect(client_rect(), to_brush(iDefaultStyle.background_color()));
         coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < columns(); ++columnIndex)
         {
@@ -308,7 +308,7 @@ namespace neogfx
             auto columnClipRect = clipRect.intersection(column_rect(columnIndex, true));
             if (column_style(columnIndex).text_effect())
                 columnClipRect.inflate(size{ column_style(columnIndex).text_effect()->width() });
-            scoped_scissor scissor2{ aGraphicsContext, columnClipRect };
+            scoped_scissor scissor2{ aGc, columnClipRect };
             auto const& columnRectSansMargins = column_rect(columnIndex);
             auto const& lines = column.lines();
             auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, vertical_scrollbar().position(), {} },
@@ -328,15 +328,15 @@ namespace neogfx
                 auto textDirection = glyph_text_direction(paintLine->lineStart.second, paintLine->lineEnd.second);
                 if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                     ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
-                    linePos.x += aGraphicsContext.from_device_units(size{ columnRectSansMargins.width() - paintLine->extents.cx, 0.0 }).cx;
+                    linePos.x += aGc.from_device_units(size{ columnRectSansMargins.width() - paintLine->extents.cx, 0.0 }).cx;
                 else if ((Alignment & alignment::Horizontal) == alignment::Centre)
-                    linePos.x += std::ceil((aGraphicsContext.from_device_units(size{ columnRectSansMargins.width() - paintLine->extents.cx, 0.0 }).cx) / 2.0);
-                draw_glyphs(aGraphicsContext, linePos, column, paintLine);
+                    linePos.x += std::ceil((aGc.from_device_units(size{ columnRectSansMargins.width() - paintLine->extents.cx, 0.0 }).cx) / 2.0);
+                draw_glyphs(aGc, linePos, column, paintLine);
             }
             x += column.width();
         }
         if (has_focus())
-            draw_cursor(aGraphicsContext);
+            draw_cursor(aGc);
     }
 
     const font& text_edit::font() const
@@ -1910,7 +1910,7 @@ namespace neogfx
         return result;
     }
 
-    void text_edit::draw_glyphs(const i_graphics_context& aGraphicsContext, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
+    void text_edit::draw_glyphs(const i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
     {
         auto lineStart = aLine->lineStart.second;
         auto lineEnd = aLine->lineEnd.second;
@@ -1949,7 +1949,7 @@ namespace neogfx
                         style.text_effect() };
                 if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)
                 {
-                    aGraphicsContext.draw_glyph_text(textPos, tGlyphText, *textAppearance);
+                    aGc.draw_glyph_text(textPos, tGlyphText, *textAppearance);
                     tGlyphText = glyph_text{};
                     textPos = glyphPos;
                 }
@@ -1960,13 +1960,13 @@ namespace neogfx
             }
             if (!tGlyphText.empty())
             {
-                aGraphicsContext.draw_glyph_text(textPos, tGlyphText, *textAppearance);
+                aGc.draw_glyph_text(textPos, tGlyphText, *textAppearance);
                 tGlyphText = glyph_text{};
             }
         }
     }
 
-    void text_edit::draw_cursor(const i_graphics_context& aGraphicsContext) const
+    void text_edit::draw_cursor(const i_graphics_context& aGc) const
     {
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
@@ -1977,17 +1977,17 @@ namespace neogfx
             cursorColor = service<i_app>().current_style().palette().text_color_for_widget(*this);
         if (cursorColor == neolib::none)
         {
-            aGraphicsContext.push_logical_operation(logical_operation::Xor);
-            aGraphicsContext.fill_rect(cursor_rect(), color::White.with_combined_alpha(cursorAlpha));
-            aGraphicsContext.pop_logical_operation();
+            aGc.push_logical_operation(logical_operation::Xor);
+            aGc.fill_rect(cursor_rect(), color::White.with_combined_alpha(cursorAlpha));
+            aGc.pop_logical_operation();
         }
         else if (std::holds_alternative<color>(cursorColor))
         {
-            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const color&>(cursorColor).with_combined_alpha(cursorAlpha));
+            aGc.fill_rect(cursor_rect(), static_variant_cast<const color&>(cursorColor).with_combined_alpha(cursorAlpha));
         }
         else if (std::holds_alternative<gradient>(cursorColor))
         {
-            aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColor).with_combined_alpha(cursorAlpha));
+            aGc.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColor).with_combined_alpha(cursorAlpha));
         }
     }
 

@@ -73,9 +73,9 @@ namespace neogfx
         }
     }
 
-    void text_widget::paint(i_graphics_context& aGraphicsContext) const
+    void text_widget::paint(i_graphics_context& aGc) const
     {
-        scoped_mnemonics sm(aGraphicsContext, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT));
+        scoped_mnemonics sm(aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT));
         size textSize = text_extent();
         point textPosition;
         switch (iAlignment & neogfx::alignment::Horizontal)
@@ -113,9 +113,9 @@ namespace neogfx
         if (appearance.effect() != std::nullopt)
             textPosition += size{ appearance.effect()->width() };
         if (multi_line())
-            aGraphicsContext.draw_multiline_glyph_text(textPosition, glyph_text(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal);
+            aGc.draw_multiline_glyph_text(textPosition, glyph_text(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal);
         else
-            aGraphicsContext.draw_glyph_text(textPosition, glyph_text(), appearance);
+            aGc.draw_glyph_text(textPosition, glyph_text(), appearance);
     }
 
     void text_widget::set_font(const optional_font& aFont)

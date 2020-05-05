@@ -43,15 +43,15 @@ namespace neogfx
         static const dimension CONTROL_HEIGHT = BAR_HEIGHT + STOP_HEIGHT * 2;
     }
 
-    void draw_alpha_background(i_graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
+    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
     {
-        scoped_scissor scissor(aGraphicsContext, aRect);
+        scoped_scissor scissor(aGc, aRect);
         for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
         {
             bool alt = ((static_cast<int32_t>(x / aAlphaPatternSize) % 2) == 1);
             for (coordinate y = 0; y < aRect.height(); y += aAlphaPatternSize)
             {
-                aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ aAlphaPatternSize, aAlphaPatternSize } }, alt ? color{ 160, 160, 160 } : color{ 255, 255, 255 });
+                aGc.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ aAlphaPatternSize, aAlphaPatternSize } }, alt ? color{ 160, 160, 160 } : color{ 255, 255, 255 });
                 alt = !alt;
             }
         }
@@ -95,13 +95,13 @@ namespace neogfx
                 centre_on_parent();
             }
         private:
-            virtual void paint_non_client(i_graphics_context& aGraphicsContext) const
+            virtual void paint_non_client(i_graphics_context& aGc) const
             {
-                dialog::paint_non_client(aGraphicsContext);
+                dialog::paint_non_client(aGc);
                 rect backgroundRect{ window::client_widget().position(), window::client_widget().extents() };
-                scoped_scissor scissor(aGraphicsContext, update_rect());
-                draw_alpha_background(aGraphicsContext, backgroundRect, dip(ALPHA_PATTERN_SIZE));
-                aGraphicsContext.fill_rect(backgroundRect, background_color().with_alpha(selected_alpha()));
+                scoped_scissor scissor(aGc, update_rect());
+                draw_alpha_background(aGc, backgroundRect, dip(ALPHA_PATTERN_SIZE));
+                aGc.fill_rect(backgroundRect, background_color().with_alpha(selected_alpha()));
             }
         private:
             vertical_layout iLayout;
@@ -149,8 +149,8 @@ namespace neogfx
         if (iSelection != aGradient)
         {
             iSelection = aGradient;
-            iCurrentColorStop = std::nullopt;
-            iCurrentAlphaStop = std::nullopt;
+            set_current_color_stop(std::nullopt);
+            set_current_alpha_stop(std::nullopt);
             update();
             GradientChanged.trigger();
         }
@@ -166,6 +166,20 @@ namespace neogfx
         return iCustomColors;
     }
 
+    gradient::color_stop_list::const_iterator gradient_widget::selected_color_stop() const
+    {
+        if (iCurrentColorStop)
+            return *iCurrentColorStop;
+        return gradient().color_end();
+    }
+
+    gradient::alpha_stop_list::const_iterator gradient_widget::selected_alpha_stop() const
+    {
+        if (iCurrentAlphaStop)
+            return *iCurrentAlphaStop;
+        return gradient().alpha_end();
+    }
+
     size_policy gradient_widget::size_policy() const
     {
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
@@ -178,27 +192,27 @@ namespace neogfx
         return size{ dip(CONTROL_HEIGHT) * 3, dip(CONTROL_HEIGHT) };
     }
 
-    void gradient_widget::paint(i_graphics_context& aGraphicsContext) const
+    void gradient_widget::paint(i_graphics_context& aGc) const
     {
         scoped_units su{ *this, units::Pixels };
         rect rectContents = contents_rect();
         color frameColor = background_color().shade(0x60);
-        draw_alpha_background(aGraphicsContext, rectContents, dip(ALPHA_PATTERN_SIZE));
+        draw_alpha_background(aGc, rectContents, dip(ALPHA_PATTERN_SIZE));
         neogfx::gradient selection = iSelection;
         selection.set_direction(gradient_direction::Horizontal);
-        aGraphicsContext.fill_rect(rectContents, selection);
+        aGc.fill_rect(rectContents, selection);
         rectContents.inflate(size{ dip(BORDER_THICKNESS) });
-        aGraphicsContext.draw_rect(rectContents, pen(frameColor.mid(background_color()), dip(BORDER_THICKNESS)));
+        aGc.draw_rect(rectContents, pen(frameColor.mid(background_color()), dip(BORDER_THICKNESS)));
         rectContents.inflate(size{ dip(BORDER_THICKNESS) });
-        aGraphicsContext.draw_rect(rectContents, pen(frameColor, dip(BORDER_THICKNESS)));
+        aGc.draw_rect(rectContents, pen(frameColor, dip(BORDER_THICKNESS)));
         for (gradient::color_stop_list::const_iterator i = iSelection.color_begin(); i != iSelection.color_end(); ++i)
-            draw_color_stop(aGraphicsContext, *i);
+            draw_color_stop(aGc, *i);
         for (gradient::alpha_stop_list::const_iterator i = iSelection.alpha_begin(); i != iSelection.alpha_end(); ++i)
-            draw_alpha_stop(aGraphicsContext, *i);
+            draw_alpha_stop(aGc, *i);
         if (iCurrentColorStop != std::nullopt)
-            draw_color_stop(aGraphicsContext, **iCurrentColorStop);
+            draw_color_stop(aGc, **iCurrentColorStop);
         if (iCurrentAlphaStop != std::nullopt)
-            draw_alpha_stop(aGraphicsContext, **iCurrentAlphaStop);
+            draw_alpha_stop(aGc, **iCurrentAlphaStop);
     }
 
     void gradient_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -221,15 +235,15 @@ namespace neogfx
                 auto stopIter = stop_at(aPosition);
                 if (std::holds_alternative<gradient::color_stop_list::iterator>(stopIter))
                 {
-                    iCurrentColorStop = static_variant_cast<gradient::color_stop_list::iterator>(stopIter);
-                    iCurrentAlphaStop = std::nullopt;
+                    set_current_color_stop(static_variant_cast<gradient::color_stop_list::iterator>(stopIter));
+                    set_current_alpha_stop(std::nullopt);
                     iTracking = true;
                     update();
                 }
                 else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
                 {
-                    iCurrentAlphaStop = static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
-                    iCurrentColorStop = std::nullopt;
+                    set_current_alpha_stop(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
+                    set_current_color_stop(std::nullopt);
                     iTracking = true;
                     update();
                 }
@@ -237,15 +251,15 @@ namespace neogfx
                 {
                     if (aPosition.y < contents_rect().top())
                     {
-                        iCurrentAlphaStop = iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-                        iCurrentColorStop = std::nullopt;
+                        set_current_alpha_stop(iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
+                        set_current_color_stop(std::nullopt);
                         update();
                         GradientChanged.trigger();
                     }
                     else if (aPosition.y >= contents_rect().bottom())
                     {
-                        iCurrentColorStop = iSelection.insert_color_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-                        iCurrentAlphaStop = std::nullopt;
+                        set_current_color_stop(iSelection.insert_color_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
+                        set_current_alpha_stop(std::nullopt);
                         update();
                         GradientChanged.trigger();
                     }
@@ -353,7 +367,7 @@ namespace neogfx
                         double p1 = (iter->first + (prev)->first) / 2.0;
                         double p2 = (iter->first + (next)->first) / 2.0;
                         color c = iter->second;
-                        iCurrentColorStop = std::nullopt;
+                        set_current_color_stop(std::nullopt);
                         if (iter != prev && iter != next)
                             iSelection.erase_stop(iter);
                         if (iter != prev)
@@ -366,7 +380,7 @@ namespace neogfx
                     auto deleteStopAction = std::make_shared<action>("Delete stop"_t);
                     deleteStopAction->Triggered([this, iter]()
                     {
-                        iCurrentColorStop = std::nullopt;
+                        set_current_color_stop(std::nullopt);
                         iSelection.erase_stop(iter);
                         update();
                         GradientChanged.trigger();
@@ -400,7 +414,7 @@ namespace neogfx
                     deleteStopAction->Triggered([this, stopIter]()
                     {
                         if (iCurrentAlphaStop != std::nullopt && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))
-                            iCurrentAlphaStop = std::nullopt;
+                            set_current_alpha_stop(std::nullopt);
                         iSelection.erase_stop(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
                         update();
                         GradientChanged.trigger();
@@ -519,6 +533,30 @@ namespace neogfx
         return stop_iterator{};
     }
 
+    void gradient_widget::set_current_color_stop(const std::optional<gradient::color_stop_list::iterator>& aStop)
+    {
+        if (iCurrentColorStop != aStop)
+        {
+            iCurrentColorStop = aStop;
+            if (iCurrentColorStop)
+                ColorStopSelected.trigger();
+            else
+                ColorStopDeselected.trigger();
+        }
+    }
+
+    void gradient_widget::set_current_alpha_stop(const std::optional<gradient::alpha_stop_list::iterator>& aStop)
+    {
+        if (iCurrentAlphaStop != aStop)
+        {
+            iCurrentAlphaStop = aStop;
+            if (iCurrentAlphaStop)
+                AlphaStopSelected.trigger();
+            else
+                AlphaStopDeselected.trigger();
+        }
+    }
+
     rect gradient_widget::color_stop_rect(const neogfx::gradient::color_stop& aColorStop) const
     {
         rect result = contents_rect();
@@ -539,10 +577,10 @@ namespace neogfx
         return result;
     }
 
-    void gradient_widget::draw_color_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::color_stop& aColorStop) const
+    void gradient_widget::draw_color_stop(i_graphics_context& aGc, const neogfx::gradient::color_stop& aColorStop) const
     {
         rect r = color_stop_rect(aColorStop);
-        draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, dip(SMALL_ALPHA_PATTERN_SIZE));
+        draw_alpha_background(aGc, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, dip(SMALL_ALPHA_PATTERN_SIZE));
         const char* stopGlpyhPattern =
         {
             "[11,17]"
@@ -631,13 +669,13 @@ namespace neogfx
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
             stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
-        aGraphicsContext.draw_texture(r.top_left(), stopGlyphTexture->second);
+        aGc.draw_texture(r.top_left(), stopGlyphTexture->second);
     }
 
-    void gradient_widget::draw_alpha_stop(i_graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const
+    void gradient_widget::draw_alpha_stop(i_graphics_context& aGc, const neogfx::gradient::alpha_stop& aAlphaStop) const
     {
         rect r = alpha_stop_rect(aAlphaStop);
-        draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 2.0 }, dpi_select(size{ 7.0, 7.0 }, size{ 18.0, 18.0 }) }, dip(SMALL_ALPHA_PATTERN_SIZE));
+        draw_alpha_background(aGc, rect{ r.top_left() + point{ 2.0, 2.0 }, dpi_select(size{ 7.0, 7.0 }, size{ 18.0, 18.0 }) }, dip(SMALL_ALPHA_PATTERN_SIZE));
         const char* stopGlpyhPattern =
         {
             "[11,17]"
@@ -726,6 +764,6 @@ namespace neogfx
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
             stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
-        aGraphicsContext.draw_texture(r.top_left(), stopGlyphTexture->second);
+        aGc.draw_texture(r.top_left(), stopGlyphTexture->second);
     }
 }

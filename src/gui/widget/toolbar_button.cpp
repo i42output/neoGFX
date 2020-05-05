@@ -105,10 +105,10 @@ namespace neogfx
         return size::max_size();
     }
 
-    void toolbar_button::paint(i_graphics_context& aGraphicsContext) const
+    void toolbar_button::paint(i_graphics_context& aGc) const
     {
         if (!action().is_separator())
-            push_button::paint(aGraphicsContext);
+            push_button::paint(aGc);
         else
         {
             scoped_units su(*this, units::Pixels);
@@ -116,9 +116,9 @@ namespace neogfx
             line.deflate(0, std::floor(client_rect().height() / 6.0));
             line.cx = 1.0;
             color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));
-            aGraphicsContext.fill_rect(line, ink.darker(0x40));
+            aGc.fill_rect(line, ink.darker(0x40));
             ++line.x;
-            aGraphicsContext.fill_rect(line, ink.lighter(0x40));
+            aGc.fill_rect(line, ink.lighter(0x40));
         }
     }
 

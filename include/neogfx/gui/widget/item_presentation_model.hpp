@@ -192,20 +192,20 @@ namespace neogfx
         {
             return static_cast<uint32_t>(row(aIndex).cells.size());
         }
-        dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGraphicsContext, bool aIncludeMargins = true) const override
+        dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludeMargins = true) const override
         {
             if (iColumns.size() < aColumnIndex + 1u)
                 return 0.0;
             auto& columnWidth = column(aColumnIndex).width;
             if (columnWidth != std::nullopt)
-                return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
+                return *columnWidth + (aIncludeMargins ? cell_margins(aGc).size().cx : 0.0);
             columnWidth = 0.0;
             for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
             {
-                auto const cellWidth = cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx;
+                auto const cellWidth = cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGc).cx;
                 columnWidth = std::max(*columnWidth, cellWidth);
             }
-            return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
+            return *columnWidth + (aIncludeMargins ? cell_margins(aGc).size().cx : 0.0);
         }
         const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
         {
@@ -214,7 +214,7 @@ namespace neogfx
             else
                 return item_model().column_name(model_column(aColumnIndex));
         }
-        size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGraphicsContext) const override
+        size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc) const override
         {
             if (column(aColumnIndex).headingFont != font{})
             {
@@ -222,12 +222,12 @@ namespace neogfx
                 column(aColumnIndex).headingExtents = std::nullopt;
             }
             if (column(aColumnIndex).headingExtents != std::nullopt)
-                return units_converter(aGraphicsContext).from_device_units(*column(aColumnIndex).headingExtents);
-            size columnHeadingExtents = aGraphicsContext.multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
-            column(aColumnIndex).headingExtents = units_converter(aGraphicsContext).to_device_units(columnHeadingExtents);
+                return units_converter(aGc).from_device_units(*column(aColumnIndex).headingExtents);
+            size columnHeadingExtents = aGc.multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
+            column(aColumnIndex).headingExtents = units_converter(aGc).to_device_units(columnHeadingExtents);
             column(aColumnIndex).headingExtents->cx = std::ceil(column(aColumnIndex).headingExtents->cx);
             column(aColumnIndex).headingExtents->cy = std::ceil(column(aColumnIndex).headingExtents->cy);
-            return units_converter(aGraphicsContext).from_device_units(*column(aColumnIndex).headingExtents);
+            return units_converter(aGc).from_device_units(*column(aColumnIndex).headingExtents);
         }
         void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, const std::string& aHeadingText) override
         {
@@ -660,70 +660,70 @@ namespace neogfx
                 return cell_image(aIndex)->extents();
             return {};
         }
-        optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const override
         {
             if (cell_checkable(aIndex))
             {
                 auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : * cell_font(aIndex));
-                dimension const length = units_converter(aGraphicsContext).from_device_units(cellFont.height() * (2.0 / 3.0));
+                dimension const length = units_converter(aGc).from_device_units(cellFont.height() * (2.0 / 3.0));
                 auto const checkBoxSize = service<i_skin_manager>().active_skin().preferred_size(skin_element::CheckBox, size{ length });
                 return checkBoxSize;
             }
             return {};
         }
-        optional_size cell_tree_expander_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        optional_size cell_tree_expander_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const override
         {
             if constexpr (container_traits::is_flat)
                 return {};
             else
-                return size{ item_height(aIndex, aGraphicsContext) };
+                return size{ item_height(aIndex, aGc) };
         }
         optional_texture cell_image(const item_presentation_model_index&) const override
         {
             return optional_texture{};
         }
-        neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const override
         {
             optional_font cellFont = cell_font(aIndex);
             if (cell_meta(aIndex).text != std::nullopt)
                 return *cell_meta(aIndex).text;
-            cell_meta(aIndex).text = aGraphicsContext.to_glyph_text(cell_to_string(aIndex), cellFont == std::nullopt ? default_font() : *cellFont);
+            cell_meta(aIndex).text = aGc.to_glyph_text(cell_to_string(aIndex), cellFont == std::nullopt ? default_font() : *cellFont);
             return *cell_meta(aIndex).text;
         }
-        size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const override
         {
-            auto oldItemHeight = item_height(aIndex, aGraphicsContext);
+            auto oldItemHeight = item_height(aIndex, aGc);
             auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : *cell_font(aIndex));
             auto& cellMeta = cell_meta(aIndex);
             if (cellMeta.extents != std::nullopt)
-                return units_converter(aGraphicsContext).from_device_units(*cellMeta.extents);
-            size cellExtents = cell_glyph_text(aIndex, aGraphicsContext).extents();
+                return units_converter(aGc).from_device_units(*cellMeta.extents);
+            size cellExtents = cell_glyph_text(aIndex, aGc).extents();
             auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
             if (cell_editable(aIndex) && cellInfo.dataStep != neolib::none)
             {
-                cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
+                cellExtents.cx = std::max(cellExtents.cx, aGc.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
             }
-            cellExtents.cx += indent(aIndex, aGraphicsContext);
-            auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aGraphicsContext);
+            cellExtents.cx += indent(aIndex, aGc);
+            auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aGc);
             if (maybeCheckBoxSize != std::nullopt)
             {
-                cellExtents.cx += (maybeCheckBoxSize->cx + units_converter(aGraphicsContext).to_device_units(cell_spacing(aGraphicsContext)).cx);
+                cellExtents.cx += (maybeCheckBoxSize->cx + units_converter(aGc).to_device_units(cell_spacing(aGc)).cx);
                 cellExtents.cy = std::max(cellExtents.cy, maybeCheckBoxSize->cy);
             }
             auto const& maybeCellImageSize = cell_image_size(aIndex);
             if (maybeCellImageSize != std::nullopt)
             {
-                cellExtents.cx += (maybeCellImageSize->cx + units_converter(aGraphicsContext).to_device_units(cell_spacing(aGraphicsContext)).cx);
+                cellExtents.cx += (maybeCellImageSize->cx + units_converter(aGc).to_device_units(cell_spacing(aGc)).cx);
                 cellExtents.cy = std::max(cellExtents.cy, maybeCellImageSize->cy);
             }
             cellExtents.cy = std::max(cellExtents.cy, cellFont.height());
             cellMeta.extents = cellExtents.ceil();
             if (iTotalHeight != std::nullopt)
-                *iTotalHeight += (item_height(aIndex, aGraphicsContext) - oldItemHeight);
-            return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);
+                *iTotalHeight += (item_height(aIndex, aGc) - oldItemHeight);
+            return units_converter(aGc).from_device_units(*cell_meta(aIndex).extents);
         }
-        dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGraphicsContext) const override
+        dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const override
         {
             if constexpr (container_traits::is_flat)
                 return 0.0;
@@ -734,7 +734,7 @@ namespace neogfx
                 auto baseIter = typename item_model_type::const_base_iterator{ item_model().index_to_iterator(to_item_model_index(aIndex)) };
                 auto treeIter = baseIter.get<typename item_model_type::const_iterator, typename item_model_type::const_iterator,
                     typename item_model_type::iterator, typename item_model_type::const_sibling_iterator, typename item_model_type::sibling_iterator>();
-                return treeIter.depth() * item_height(aIndex, aGraphicsContext) + (aIndex.column() == 0 ? cell_tree_expander_size(aIndex, aGraphicsContext)->cx : 0.0);
+                return treeIter.depth() * item_height(aIndex, aGc) + (aIndex.column() == 0 ? cell_tree_expander_size(aIndex, aGc)->cx : 0.0);
             }
         }
     public:

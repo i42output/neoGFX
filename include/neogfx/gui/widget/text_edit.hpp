@@ -442,7 +442,7 @@ namespace neogfx
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         neogfx::margins margins() const override;
    public:
-        void paint(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGc) const override;
     public:
         const neogfx::font& font() const override;
     public:
@@ -575,8 +575,8 @@ namespace neogfx
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
         style glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const;
-        void draw_glyphs(const i_graphics_context& aGraphicsContext, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
-        void draw_cursor(const i_graphics_context& aGraphicsContext) const;
+        void draw_glyphs(const i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
+        void draw_cursor(const i_graphics_context& aGc) const;
         rect cursor_rect() const;
         static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
     private:

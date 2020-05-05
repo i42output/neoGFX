@@ -55,14 +55,14 @@ using namespace neolib::stdint_suffix;
     }
     auto debugInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane.font().with_size(spritePlane.font().size() * 0.5), ng::text_appearance{ ng::color::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } });
     spritePlane.add_shape(debugInfo);
-    spritePlane.sprites_painted([&spritePlane](ng::i_graphics_context& aGraphicsContext)
+    spritePlane.sprites_painted([&spritePlane](ng::i_graphics_context& aGc)
     {
-        aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane.font().with_style(ng::font_info::Underline), ng::color::White);
+        aGc.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane.font().with_style(ng::font_info::Underline), ng::color::White);
         if (ng::service<ng::i_app>().keyboard().is_key_pressed(ng::ScanCode_C))
-            spritePlane.collision_tree_2d().visit_aabbs([&aGraphicsContext](const neogfx::aabb_2d& aAabb)
+            spritePlane.collision_tree_2d().visit_aabbs([&aGc](const neogfx::aabb_2d& aAabb)
             {
                 ng::rect aabb{ ng::point{ aAabb.min }, ng::point{ aAabb.max } };
-                aGraphicsContext.draw_rect(aabb, ng::pen{ ng::color::Blue });
+                aGc.draw_rect(aabb, ng::pen{ ng::color::Blue });
             });
     });
 

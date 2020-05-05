@@ -60,7 +60,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     public:
-        void paint(i_graphics_context& aGraphicsContext) const override;
+        void paint(i_graphics_context& aGc) const override;
     public:
         void set_font(const optional_font& aFont) override;
     public:

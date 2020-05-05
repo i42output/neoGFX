@@ -214,11 +214,11 @@ namespace neogfx
         return width(style());
     }
 
-    void scrollbar::render(i_graphics_context& aGraphicsContext) const
+    void scrollbar::render(i_graphics_context& aGc) const
     {
         if (style() == scrollbar_style::Invisible)
             return;
-        service<i_skin_manager>().active_skin().draw_scrollbar(aGraphicsContext, *this, *this);
+        service<i_skin_manager>().active_skin().draw_scrollbar(aGc, *this, *this);
     }
 
     rect scrollbar::element_geometry(scrollbar_element aElement) const
