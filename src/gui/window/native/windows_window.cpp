@@ -1350,9 +1350,6 @@ namespace neogfx
     //        if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
     //            SetClassLongPtr(hwnd, GCL_STYLE, GetClassLongPtr(hwnd, GCL_STYLE) | CS_DROPSHADOW); // doesn't work well with OpenGL
             
-            if (iParent != nullptr)
-                ::SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, static_cast<LONG>(reinterpret_cast<std::intptr_t>(iParent->native_handle())));
-            
             ::SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
         }
 

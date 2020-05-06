@@ -282,7 +282,7 @@ namespace neogfx
         {
             auto correctedPlacement = aPlacement;
             // todo: multiple displays
-            if (!has_parent() && service<i_surface_manager>().display().is_fullscreen())
+            if (!has_parent_window(false) && service<i_surface_manager>().display().is_fullscreen())
             {
                 iStyle |= window_style::Fullscreen;
                 iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
@@ -292,7 +292,7 @@ namespace neogfx
             {
             default:
             case window_state::Normal:
-                if (!has_parent())
+                if (!has_parent_window(false))
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
                         [&](i_surface_window& aProxy) 
@@ -301,7 +301,7 @@ namespace neogfx
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
                         [&](i_surface_window& aProxy) 
-                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
+                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent_window().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
                 break;
             case window_state::Iconized:
                 // todo
