@@ -315,7 +315,12 @@ int main(int argc, char* argv[])
                 int n = menuPrng(100);
                 for (int k = 1; k < n; ++k)
                 {
-                    sm2.add_action(app.add_action("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.zip#favourite.png"));
+                    auto& action = app.add_action("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.zip#favourite.png");
+                    sm2.add_action(action);
+                    action.triggered([&]()
+                    {
+                        ui.textEdit.set_text(action.text());
+                    });
                 }
             }
         }
