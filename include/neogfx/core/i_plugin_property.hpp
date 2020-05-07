@@ -51,8 +51,6 @@ namespace neogfx
         public:
             virtual ~i_property() = default;
         public:
-            virtual neolib::i_lifetime& as_lifetime() = 0;
-        public:
             virtual const std::string& name() const = 0;
             virtual const std::type_info& type() const = 0;
             virtual const std::type_info& category() const = 0;

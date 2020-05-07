@@ -22,20 +22,20 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
-#include <neogfx/gui/layout/anchorable_object.hpp>
+#include <neogfx/gui/layout/anchorable.hpp>
 
 namespace neogfx
 {
     template <typename Base>
-    class layout_item : public anchorable_object<Base>
+    class layout_item : public anchorable<Base>
     {
         typedef layout_item<Base> self_type;
-        typedef anchorable_object<Base> base_type;
+        typedef anchorable<Base> base_type;
         // types
     public:
         typedef i_layout_item abstract_type;
     private:
-        typedef abstract_type property_context_type;
+        typedef self_type property_context_type;
         // implementation
     public:
         void fix_weightings() override
@@ -55,7 +55,7 @@ namespace neogfx
             if (base_type::debug() == this)
                 std::cout << std::endl;
         }
-        void anchor_to(i_anchorable_object& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
+        void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
             auto& self = static_cast<i_layout_item&>(*this);

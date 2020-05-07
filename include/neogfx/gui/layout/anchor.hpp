@@ -22,7 +22,8 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/optional.hpp>
 #include <neogfx/core/property.hpp>
-#include <neogfx/gui/layout/i_anchorable_object.hpp>
+#include <neogfx/core/object.hpp>
+#include <neogfx/gui/layout/i_anchorable.hpp>
 #include <neogfx/gui/layout/i_anchor.hpp>
 
 namespace neogfx
@@ -42,7 +43,7 @@ namespace neogfx
         typedef std::pair<constraint, std::shared_ptr<i_anchor>> constraint_entry_t;
         typedef std::vector<constraint_entry_t> constraint_entries_t;
     public:
-        anchor(i_anchorable_object& aOwner, i_property& aProperty) :
+        anchor(i_anchorable& aOwner, i_property& aProperty) :
             iOwner{ aOwner }, iProperty{ aProperty }
         {
             iOwner.anchors()[name()] = this;
@@ -135,7 +136,7 @@ namespace neogfx
             return result;
         }
     private:
-        i_anchorable_object& iOwner;
+        i_anchorable& iOwner;
         i_property& iProperty;
         constraint_entries_t iConstraints;
     };

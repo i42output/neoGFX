@@ -51,6 +51,7 @@ namespace neogfx
             }
         }, 10 }
     {
+        set_alive();
     }
 
     native_window::~native_window()
@@ -124,7 +125,7 @@ namespace neogfx
 
     void native_window::handle_event(const native_event& aEvent)
     {
-        neolib::destroyed_flag destroyed{ *this };
+        destroyed_flag destroyed{ *this };
         neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
         iCurrentEvent = aEvent;
         handle_event();
@@ -148,7 +149,7 @@ namespace neogfx
 
     void native_window::handle_event()
     {
-        neolib::destroyed_flag destroyed{ *this };
+        destroyed_flag destroyed{ *this };
         neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
         if (!Filter.trigger(iCurrentEvent))
         {

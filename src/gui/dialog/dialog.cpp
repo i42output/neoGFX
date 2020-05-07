@@ -172,7 +172,7 @@ namespace neogfx
 
     dialog_result dialog::exec()
     {
-        neolib::destroyed_flag destroyed{ surface().as_lifetime() };
+        destroyed_flag destroyed{ surface() };
         event_processing_context epc(service<async_task>(), "neogfx::dialog");
         while (iResult == std::nullopt)
         {

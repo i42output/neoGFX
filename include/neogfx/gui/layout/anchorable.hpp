@@ -1,4 +1,4 @@
-// anchorable_object.hpp
+// anchorable.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -20,16 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/object.hpp>
-#include <neogfx/gui/layout/i_anchorable_object.hpp>
+#include <neogfx/gui/layout/i_anchorable.hpp>
 
 namespace neogfx
 {
     template <typename Base>
-    class anchorable_object : public object<Base>
+    class anchorable : public Base
     {
-        typedef anchorable_object<Base> self_type;
-        typedef object<Base> base_type;
+        typedef anchorable<Base> self_type;
+        typedef Base base_type;
         // types
     public:
         using typename base_type::abstract_type;
@@ -37,7 +36,7 @@ namespace neogfx
         // operations
     public:
         using base_type::anchor_to;
-        void anchor_to(i_anchorable_object& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
+        void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             auto lhsAnchor = anchors().find(aLhsAnchor);
             auto rhsAnchor = aRhs.anchors().find(aRhsAnchor);

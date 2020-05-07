@@ -20,7 +20,6 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/lifetime.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -29,7 +28,7 @@
 
 namespace neogfx
 {
-    class border_layout : public layout, protected virtual neolib::lifetime
+    class border_layout : public layout
     {
     public:
         struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::border_layout::not_implemented") {} };

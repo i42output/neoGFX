@@ -142,7 +142,7 @@ namespace neogfx
     property_transition::property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled) :
         transition{ aAnimator, aEasingFunction, aDuration, aEnabled }, 
         iProperty{ aProperty }, 
-        iPropertyDestroyed{ aProperty.as_lifetime() }, 
+        iPropertyDestroyed{ aProperty }, 
         iFrom{ aProperty.get_as_variant() }, 
         iTo{ aProperty.get_as_variant() }, 
         iUpdatingProperty{ false },

@@ -28,16 +28,19 @@ namespace neogfx
     layout_item_proxy::layout_item_proxy(i_layout_item& aItem) :
         layout_item_proxy{ std::shared_ptr<i_layout_item>{ std::shared_ptr<i_layout_item>{}, &aItem } } 
     {
+        set_alive();
     }
 
     layout_item_proxy::layout_item_proxy(std::shared_ptr<i_layout_item> aItem) :
         iSubject{ aItem }, iSubjectIsProxy{ aItem->is_proxy() }, iMinimumSize{ static_cast<uint32_t>(-1), {} }, iMaximumSize{ static_cast<uint32_t>(-1), {} }
     {
+        set_alive();
     }
 
     layout_item_proxy::layout_item_proxy(const layout_item_proxy& aOther) :
         iSubject{ aOther.iSubject }, iSubjectIsProxy{ aOther.iSubject->is_proxy() }, iMinimumSize{ static_cast<uint32_t>(-1), {} }, iMaximumSize{ static_cast<uint32_t>(-1), {} }
     {
+        set_alive();
     }
 
     layout_item_proxy::~layout_item_proxy()
@@ -63,7 +66,7 @@ namespace neogfx
         return iSubject;
     }
 
-    void layout_item_proxy::anchor_to(i_anchorable_object& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction)
+    void layout_item_proxy::anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction)
     {
         subject().anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
     }

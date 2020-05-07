@@ -22,7 +22,6 @@
 #include <neogfx/neogfx.hpp>
 #include <map>
 #include <neogfx/core/event.hpp>
-#include <neogfx/core/i_object.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_entity_archetype.hpp>
 #include <neogfx/game/component.hpp>
@@ -57,7 +56,7 @@ namespace neogfx::game
         return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    class i_ecs : public i_object
+    class i_ecs
     {
     public:
         declare_event(systems_paused)

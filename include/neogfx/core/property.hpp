@@ -80,28 +80,24 @@ namespace neogfx
             parent_type& iParent;
         };
     public:
-        property(i_object& aOwner, const std::string& aName) : iOwner{ aOwner }, iName { aName }, iValue{}
+        property(i_property_owner& aOwner, const std::string& aName) : iOwner{ aOwner }, iName { aName }, iValue{}
         {
             aOwner.properties().register_property(*this);
         }
-        property(i_object& aOwner, const std::string& aName, calculator_function_type aCalculator) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{}
+        property(i_property_owner& aOwner, const std::string& aName, calculator_function_type aCalculator) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{}
         {
             aOwner.properties().register_property(*this);
         }
-        property(i_object& aOwner, const std::string& aName, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iValue { aValue }
+        property(i_property_owner& aOwner, const std::string& aName, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iValue { aValue }
         {
             aOwner.properties().register_property(*this);
         }
-        property(i_object& aOwner, const std::string& aName, calculator_function_type aCalculator, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{ aValue }
+        property(i_property_owner& aOwner, const std::string& aName, calculator_function_type aCalculator, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{ aValue }
         {
             aOwner.properties().register_property(*this);
         }
     public:
-        neolib::i_lifetime& as_lifetime() override
-        {
-            return *this;
-        }
-        i_object& owner() const override
+        i_property_owner& owner() const override
         {
             return iOwner;
         }
@@ -260,7 +256,7 @@ namespace neogfx
         {
             if (iValue != aValue)
             {
-                neolib::destroyed_flag destroyed{ *this };
+                destroyed_flag destroyed{ *this };
                 PropertyChanged.pre_trigger();
                 if (destroyed)
                     return *this;
@@ -299,7 +295,7 @@ namespace neogfx
             return *this;
         }
     private:
-        i_object& iOwner;
+        i_property_owner& iOwner;
         string iName;
         calculator_function_type iCalculator;
         mutable value_type iValue;

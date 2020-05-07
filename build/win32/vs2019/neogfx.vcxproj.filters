@@ -801,12 +801,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchorable_object.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable_object.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1024,6 +1018,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\power.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchorable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

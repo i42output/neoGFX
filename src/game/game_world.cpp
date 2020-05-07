@@ -21,6 +21,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/thread.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/time.hpp>
 #include <neogfx/game/clock.hpp>
 #include <neogfx/game/game_world.hpp>
 
@@ -54,6 +55,7 @@ namespace neogfx::game
 
     void game_world::set_time_step(double aTimeStep_s)
     {
+        ecs().system<time>();
         ecs().shared_component<clock>().component_data().begin()->second.timeStep = chrono::to_flicks(aTimeStep_s).count();
     }
 

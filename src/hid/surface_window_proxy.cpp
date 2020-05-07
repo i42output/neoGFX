@@ -38,8 +38,9 @@ namespace neogfx
         iCapturingWidget{ nullptr },
         iClickedWidget{ nullptr }
     {
-        iNativeSurfaceDestroyed.emplace(iNativeWindow->as_lifetime());
+        iNativeSurfaceDestroyed.emplace(*iNativeWindow);
         service<i_surface_manager>().add_surface(*this);
+        set_alive();
     }
 
     surface_window_proxy::~surface_window_proxy()
@@ -645,8 +646,8 @@ namespace neogfx
                 w = &w->parent();
                 if (!can_consume(check))
                     return true;
-                destroyed_flag parentDestroyed{ w->as_lifetime() };
-                destroyed_flag destroyed{ check.as_lifetime() };
+                destroyed_flag parentDestroyed{ *w };
+                destroyed_flag destroyed{ check };
                 if (!check.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event())))
                     return false;
                 if (destroyed)

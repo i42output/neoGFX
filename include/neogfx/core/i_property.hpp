@@ -25,8 +25,7 @@
 #include <neolib/plugin_variant.hpp>
 #include <neolib/variant.hpp>
 #include <neolib/i_enum.hpp>
-#include <neolib/i_lifetime.hpp>
-#include <neogfx/core/i_object.hpp>
+#include <neogfx/core/i_properties.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/color.hpp>
@@ -122,8 +121,21 @@ namespace neogfx
     class i_property_delegate
     {
     public:
+        virtual ~i_property_delegate() = default;
+    public:
         virtual const property_variant& get(const i_property& aProperty) const = 0;
         virtual void set(const i_property& aProperty) const = 0;
+    };
+
+    class i_property_owner
+    {
+    public:
+        virtual ~i_property_owner() = default;
+    public:
+        virtual void property_changed(i_property& aProperty) = 0;
+    public:
+        virtual const i_properties& properties() const = 0;
+        virtual i_properties& properties() = 0;
     };
 
     class i_property
@@ -141,8 +153,7 @@ namespace neogfx
         virtual ~i_property() = default;
         // object
     public:
-        virtual neolib::i_lifetime& as_lifetime() = 0;
-        virtual i_object& owner() const = 0;
+        virtual i_property_owner& owner() const = 0;
         // operations
     public:
         virtual const i_string& name() const = 0;
@@ -177,7 +188,7 @@ namespace neogfx
         {
             // why? because we have to type-erase to support plugins and std::function can't be passed across a plugin boundary.
             auto const calculator = *reinterpret_cast<Callable const*>(calculator_function());
-            if constexpr(std::is_convertible_v<const Context&, const i_object&>)
+            if constexpr(std::is_convertible_v<const Context&, const i_property_owner&>)
                 return (static_cast<const Context&>(owner()).*calculator)(std::forward<Args>(aArgs)...);
             else
                 return (dynamic_cast<const Context&>(owner()).*calculator)(std::forward<Args>(aArgs)...);

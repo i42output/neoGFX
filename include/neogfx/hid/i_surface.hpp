@@ -21,7 +21,6 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
-#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
@@ -46,7 +45,7 @@ namespace neogfx
 
     typedef window_style surface_style;
 
-    class i_surface : public i_object, public i_device_metrics
+    class i_surface : public i_device_metrics
     {
     public:
         declare_event(dpi_changed)

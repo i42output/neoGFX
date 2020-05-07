@@ -20,7 +20,6 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/i_object.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
@@ -32,7 +31,7 @@ namespace neogfx
     class i_rendering_context;
     class i_widget;
 
-    class i_native_surface : public i_object, public i_render_target
+    class i_native_surface : public i_render_target
     {
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };

@@ -842,6 +842,7 @@ namespace neogfx
                     reset_meta();
             });
             reset_sort();
+            set_alive();
         }
         void execute_sort(bool aForce = false)
         {

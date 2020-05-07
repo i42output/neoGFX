@@ -217,6 +217,8 @@ namespace neogfx::game
             register_component<entity_info>();
             register_system<time>();
         }
+
+        set_alive();
     }
 
     ecs::~ecs()

@@ -31,12 +31,12 @@
 
 namespace neogfx
 {
-    class scrollbar : public object<>, public i_scrollbar, public i_skinnable_item
+    class scrollbar : public object<i_scrollbar, i_skinnable_item>
     {
     public:
         typedef i_scrollbar abstract_type;
     private:
-        typedef abstract_type property_context_type;
+        typedef scrollbar property_context_type;
     public:
         struct no_transition : std::logic_error { no_transition() : std::logic_error{ "neogfx::scrollbar::no_transition" } {} };
     public:

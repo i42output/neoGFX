@@ -25,7 +25,6 @@
 #include <neolib/variant.hpp>
 #include <neolib/generic_iterator.hpp>
 
-#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 
@@ -235,7 +234,7 @@ namespace neogfx
 
     typedef std::optional<item_cell_info> optional_item_cell_info;
 
-    class i_item_model : public i_object
+    class i_item_model
     {
     public:
         declare_event(column_info_changed, item_model_index::column_type)

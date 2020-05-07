@@ -50,6 +50,7 @@ namespace neogfx
             iSorting{ false },
             iFiltering{ false }
         {
+            set_alive();
         }
         basic_item_selection_model(i_item_presentation_model& aModel, item_selection_mode aMode = item_selection_mode::SingleSelection) :
             iModel{ nullptr },
@@ -58,6 +59,7 @@ namespace neogfx
             iFiltering{ false }
         {
             set_presentation_model(aModel);
+            set_alive();
         }
         ~basic_item_selection_model()
         {
@@ -135,7 +137,7 @@ namespace neogfx
                     set_current_index(item_presentation_model_index{ 0u, 0u });
                 iSavedModelIndex = std::nullopt;
             });
-            iSink += presentation_model().destroying([this]()
+            iSink += neogfx::destroying(presentation_model(), [this]()
             {
                 auto oldModel = iModel;
                 iModel = nullptr;

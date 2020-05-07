@@ -89,7 +89,7 @@ namespace neogfx
             iModelSink += model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
             iModelSink += model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
             iModelSink += model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
-            iModelSink += model().destroying([this]() { iModel = nullptr; });
+            iModelSink += neogfx::destroying(model(), [this]() { iModel = nullptr; });
             if (has_presentation_model())
                 presentation_model().set_item_model(*aModel, false);
         }
@@ -197,7 +197,7 @@ namespace neogfx
             iSelectionModelSink += selection_model().mode_changed([this](item_selection_mode aNewMode) { mode_changed(aNewMode); });
             iSelectionModelSink += selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) { current_index_changed(aCurrentIndex, aPreviousIndex); });
             iSelectionModelSink += selection_model().selection_changed([this](const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) { selection_changed(aCurrentSelection, aPreviousSelection); });
-            iSelectionModelSink += selection_model().destroyed([this]() { iSelectionModel = nullptr; });
+            iSelectionModelSink += neogfx::destroyed(selection_model(), [this]() { iSelectionModel = nullptr; });
         }
         selection_model_changed();
         update_scrollbar_visibility();

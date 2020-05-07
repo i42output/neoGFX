@@ -70,8 +70,8 @@ namespace neogfx
     {
         if (iSurface != nullptr)
         {
-            iSurfaceDestroyed.emplace(iSurface->as_lifetime());
-            iWindowDestroyed.emplace(aWindow.as_widget().as_lifetime());
+            iSurfaceDestroyed.emplace(*iSurface);
+            iWindowDestroyed.emplace(aWindow.as_widget());
             iSurface->pause_rendering();
         }
     }
@@ -945,7 +945,7 @@ namespace neogfx
 
     void window::init()
     {
-        iSurfaceDestroyed.emplace(surface().native_surface().as_lifetime());
+        iSurfaceDestroyed.emplace(surface().native_surface());
 
         if (is_fullscreen() || (service<i_app>().program_options().nest() && &ultimate_ancestor() == this))
         {

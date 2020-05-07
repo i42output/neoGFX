@@ -53,14 +53,14 @@ namespace neogfx
         header_view& iParent;
     };
 
-    class header_view::updater : private neolib::callback_timer
+    class header_view::updater : public neolib::callback_timer
     {
     public:
         updater(header_view& aParent) :
             neolib::callback_timer{ service<async_task>(), [this, &aParent](neolib::callback_timer&)
             {
-                neolib::destroyed_flag destroyed{ *this };
-                neolib::destroyed_flag surfaceDestroyed{ aParent.surface().as_lifetime() };
+                destroyed_flag destroyed{ *this };
+                destroyed_flag surfaceDestroyed{ aParent.surface() };
                 if (destroyed || surfaceDestroyed)
                     return;
                 for (auto& sw : aParent.iSectionWidths)
@@ -162,7 +162,7 @@ namespace neogfx
     void header_view::set_model(std::shared_ptr<i_item_model> aModel)
     {
         iModel = aModel;
-        model().destroying([this]() { iModel = nullptr; });
+        neogfx::destroying(model(), [this]() { iModel = nullptr; });
         if (has_presentation_model())
         {
             iSectionWidths.resize(presentation_model().columns());
@@ -211,7 +211,7 @@ namespace neogfx
             presentation_model().items_sorted([this]() { items_sorted(); });
             presentation_model().items_filtering([this]() { items_filtering(); });
             presentation_model().items_filtered([this]() { items_filtered(); });
-            presentation_model().destroying([this]() { iPresentationModel = nullptr; });
+            neogfx::destroying(presentation_model(), [this]() { iPresentationModel = nullptr; });
             if (has_model())
                 presentation_model().set_item_model(model());
         }

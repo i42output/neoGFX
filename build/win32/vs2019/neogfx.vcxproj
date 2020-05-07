@@ -120,6 +120,7 @@
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +149,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -178,6 +180,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -208,6 +211,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -238,6 +242,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -408,13 +413,13 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\gradient_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\message_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchor.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchorable_object.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchorable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\border_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\flow_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\grid_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\horizontal_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchor.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable_object.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchors.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item.hpp" />

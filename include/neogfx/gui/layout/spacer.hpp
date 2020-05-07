@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/object.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 
@@ -27,7 +28,7 @@ namespace neogfx
 {
     class i_layout;
 
-    class spacer : public layout_item<i_spacer>
+    class spacer : public layout_item<object<i_spacer>>
     {
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };

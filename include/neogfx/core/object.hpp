@@ -29,13 +29,17 @@
 
 namespace neogfx
 {
-    template <typename Base = i_object>
-    class object : public Base, public i_properties, protected virtual neolib::lifetime
+    template <typename... Bases>
+    class object : public neolib::lifetime, public i_object, public i_properties, public Bases...
     {
     public:
         define_declared_event(Destroying, destroying);
         define_declared_event(Destroyed, destroyed);
     public:
+        object(neolib::lifetime_state aState = neolib::lifetime_state::Creating) :
+            neolib::lifetime{ aState }
+        {
+        }
         ~object()
         {
             set_destroyed();
@@ -64,13 +68,7 @@ namespace neogfx
                 neolib::lifetime::set_destroyed();
             }
         }
-    public:
         // i_object
-    public:
-        neolib::i_lifetime& as_lifetime() override
-        {
-            return *this;
-        }
     public:
         void property_changed(i_property&) override
         {

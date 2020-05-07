@@ -27,37 +27,37 @@
 namespace neogfx
 {
     grid_layout::grid_layout(neogfx::alignment aAlignment) :
-        layout{ aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }
+        layout{ aAlignment }, iRowLayout{ *this, aAlignment }
     {
         init();
     }
 
     grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
-        layout{ aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iDimensions{ aColumns, aRows }, iRowLayout{ *this, aAlignment }
+        layout{ aAlignment }, iDimensions{ aColumns, aRows }, iRowLayout{ *this, aAlignment }
     {
         init();
     }
 
     grid_layout::grid_layout(i_widget& aParent, neogfx::alignment aAlignment) :
-        layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }
+        layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
     {
         init();
     }
 
     grid_layout::grid_layout(i_layout& aParent, neogfx::alignment aAlignment) :
-        layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }
+        layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
     {
         init();
     }
 
     grid_layout::grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
-        layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iDimensions{ aColumns, aRows }, iRowLayout{ *this, aAlignment }
+        layout{ aParent, aAlignment }, iDimensions{ aColumns, aRows }, iRowLayout{ *this, aAlignment }
     {
         init();
     }
 
     grid_layout::grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
-        layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iDimensions(aColumns, aRows), iRowLayout{ *this, aAlignment }
+        layout{ aParent, aAlignment }, iDimensions(aColumns, aRows), iRowLayout{ *this, aAlignment }
     {
         init();
     }

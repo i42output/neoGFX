@@ -43,6 +43,7 @@ namespace neogfx
             update_reason_e updateReason = (aFrom < aTo ? ScrolledDown : ScrolledUp);
             iContainer.scrollbar_updated(*this, updateReason);
         });
+        set_alive();
     }
 
     scrollbar::~scrollbar()

@@ -52,6 +52,7 @@ namespace neogfx
         iLayoutInProgress{ 0 }
     {
         Position.Changed([this](const point&) { moved(); });
+        set_alive();
     }
     
     widget::widget(i_widget& aParent) :
@@ -65,6 +66,7 @@ namespace neogfx
     {
         Position.Changed([this](const point&) { moved(); });
         aParent.add(*this);
+        set_alive();
     }
 
     widget::widget(i_layout& aLayout) :
@@ -78,6 +80,7 @@ namespace neogfx
     {
         Position.Changed([this](const point&) { moved(); });
         aLayout.add(*this);
+        set_alive();
     }
 
     widget::~widget()

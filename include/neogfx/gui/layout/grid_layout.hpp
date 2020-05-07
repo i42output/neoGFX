@@ -22,14 +22,13 @@
 #include <neogfx/neogfx.hpp>
 #include <map>
 #include <boost/pool/pool_alloc.hpp>
-#include <neolib/lifetime.hpp>
 #include "layout.hpp"
 #include "vertical_layout.hpp"
 #include "horizontal_layout.hpp"
 
 namespace neogfx
 {
-    class grid_layout : public layout, protected virtual neolib::lifetime
+    class grid_layout : public layout
     {
     public:
         struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };

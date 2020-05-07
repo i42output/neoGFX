@@ -29,6 +29,7 @@ namespace neogfx
         iParentLayout{ nullptr }, 
         iExpansionPolicy{ aExpansionPolicy }
     {
+        set_alive();
     }
 
     spacer::spacer(i_layout& aParentLayout, neogfx::expansion_policy aExpansionPolicy) :
@@ -36,6 +37,7 @@ namespace neogfx
         iExpansionPolicy{ aExpansionPolicy }
     {
         aParentLayout.add(*this);
+        set_alive();
     }
 
     spacer::~spacer()

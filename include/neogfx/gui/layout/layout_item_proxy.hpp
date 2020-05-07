@@ -36,7 +36,7 @@ namespace neogfx
         layout_item_proxy(const layout_item_proxy& aOther);
         ~layout_item_proxy();
     public:
-        void anchor_to(i_anchorable_object& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
+        void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
         const anchor_map_type& anchors() const override;
         anchor_map_type& anchors() override;
     public:

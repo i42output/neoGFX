@@ -28,7 +28,7 @@
 
 namespace neogfx
 {
-    class widget : public layout_item<i_widget>
+    class widget : public layout_item<object<i_widget>>
     {
     public:
         define_declared_event(VisibilityChanged, visibility_changed)
@@ -45,7 +45,7 @@ namespace neogfx
     public:
         typedef i_widget abstract_type;
     private:
-        typedef abstract_type property_context_type;
+        typedef widget property_context_type;
     public:
         widget();
         widget(const widget&) = delete;

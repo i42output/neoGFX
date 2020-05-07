@@ -23,19 +23,19 @@
 #include <list>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/variant.hpp>
-#include <neolib/lifetime.hpp>
+#include <neogfx/core/object.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/layout_item_proxy.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
-#include <neogfx/gui/layout/anchorable_object.hpp>
+#include <neogfx/gui/layout/anchorable.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 
 namespace neogfx
 {
     class i_spacer;
 
-    class layout : public layout_item<i_layout>
+    class layout : public layout_item<object<i_layout>>
     {
     public:
         define_declared_event(LayoutCompleted, layout_completed)

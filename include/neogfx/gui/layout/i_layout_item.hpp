@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
-#include <neogfx/gui/layout/i_anchorable_object.hpp>
+#include <neogfx/gui/layout/i_anchorable.hpp>
 
 namespace neogfx
 {
@@ -36,7 +36,7 @@ namespace neogfx
     struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
     struct ancestor_layout_type_not_found : std::logic_error { ancestor_layout_type_not_found() : std::logic_error{ "neogfx::ancestor_layout_type_not_found" } {} };
 
-    class i_layout_item : public i_geometry, public i_anchorable_object
+    class i_layout_item : public i_geometry, public i_anchorable
     {
     public:
         static i_layout_item*& debug()

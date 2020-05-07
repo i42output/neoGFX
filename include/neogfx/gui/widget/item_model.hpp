@@ -241,6 +241,7 @@ namespace neogfx
     public:
         basic_item_model()
         {
+            base_type::set_alive();
         }
         ~basic_item_model()
         {

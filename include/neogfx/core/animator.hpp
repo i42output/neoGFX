@@ -83,11 +83,11 @@ namespace neogfx
         void filter_event(const neolib::i_event& aEvent) override;
     private:
         i_property& iProperty;
-        neolib::destroyed_flag iPropertyDestroyed;
+        destroyed_flag iPropertyDestroyed;
         property_variant iFrom;
         property_variant iTo;
         bool iUpdatingProperty;
-        neolib::destroyed_flag iEventQueueDestroyed;
+        destroyed_flag iEventQueueDestroyed;
     };
 
     class animator : public i_animator

@@ -29,10 +29,8 @@ namespace neogfx
 {
     class group_box : public widget
     {
-    public:
-        typedef group_box abstract_type; // todo: create i_group_box
     private:
-        typedef abstract_type property_context_type;
+        typedef group_box property_context_type;
     private:
         typedef std::unique_ptr<neogfx::label> label_ptr;
         typedef std::unique_ptr<neogfx::check_box> check_box_ptr;
