@@ -27,29 +27,27 @@
 namespace neogfx::game
 {
     canvas::canvas() : 
-        iEcs{ std::make_shared<game::ecs>() },
         iEcsPaused{ false }
     {
         init();
     }
 
     canvas::canvas(game::i_ecs& aEcs) :
-        iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs },
         iEcsPaused{ false }
     {
         init();
+        set_ecs(aEcs);
     }
 
     canvas::canvas(std::shared_ptr<game::i_ecs> aEcs) :
-        iEcs{ aEcs },
         iEcsPaused{ false }
     {
         init();
+        set_ecs(aEcs);
     }
 
     canvas::canvas(i_widget& aParent) :
         widget{ aParent }, 
-        iEcs{ std::make_shared<game::ecs>() },
         iEcsPaused{ false }
     {
         init();
@@ -57,23 +55,22 @@ namespace neogfx::game
 
     canvas::canvas(i_widget& aParent, game::i_ecs& aEcs) :
         widget{ aParent },
-        iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs },
         iEcsPaused{ false }
     {
         init();
+        set_ecs(aEcs);
     }
 
     canvas::canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs) :
         widget{ aParent },
-        iEcs{ aEcs },
         iEcsPaused{ false }
     {
         init();
+        set_ecs(aEcs);
     }
 
     canvas::canvas(i_layout& aLayout) :
         widget{ aLayout }, 
-        iEcs{ std::make_shared<game::ecs>() },
         iEcsPaused{ false }
     {
         init();
@@ -81,29 +78,55 @@ namespace neogfx::game
 
     canvas::canvas(i_layout& aLayout, game::i_ecs& aEcs) :
         widget{ aLayout },
-        iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs },
         iEcsPaused{ false }
     {
         init();
+        set_ecs(aEcs);
     }
 
     canvas::canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs) :
         widget{ aLayout },
-        iEcs{ aEcs },
         iEcsPaused{ false }
     {
         init();
+        set_ecs(aEcs);
     }
 
     canvas::~canvas()
     {
     }
 
-    game::i_ecs& canvas::ecs() const
+    bool canvas::have_ecs() const
     {
-        return *iEcs;
+        return iEcs != nullptr;
     }
 
+    game::i_ecs& canvas::ecs() const
+    {
+        if (have_ecs())
+            return *iEcs;
+        throw no_ecs();
+    }
+
+    void canvas::set_ecs(game::i_ecs& aEcs)
+    {
+        set_ecs(std::shared_ptr<game::i_ecs>{ std::shared_ptr<game::i_ecs>{}, &aEcs });
+    }
+
+    void canvas::set_ecs(const std::shared_ptr<game::i_ecs>& aEcs)
+    {
+        iSink.clear();
+        iEcs = aEcs;
+        if (have_ecs())
+        {
+            iEcsPaused = ecs().all_systems_paused();
+            iSink += ecs().system<game_world>().PhysicsApplied([this](step_time)
+            {
+                update();
+            });
+        }
+    }
+        
     logical_coordinate_system canvas::logical_coordinate_system() const
     {
         if (widget::has_logical_coordinate_system())
@@ -113,10 +136,10 @@ namespace neogfx::game
 
     void canvas::paint(i_graphics_context& aGc) const
     {    
-        if (ecs().component_registered<mesh_renderer>())
+        if (have_ecs() && ecs().component_registered<mesh_renderer>())
         {
             aGc.clear_depth_buffer();
-            component_scoped_lock<mesh_renderer> lgMeshRenderer{ ecs() };
+            scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
             RenderingEntities.trigger(aGc);
             aGc.draw_entities(ecs());
             EntitiesRendered.trigger(aGc);
@@ -136,6 +159,8 @@ namespace neogfx::game
         iUpdater.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
+            if (!have_ecs())
+                return;
             if (!iEcsPaused && effectively_hidden())
             {
                 ecs().pause_all_systems();
@@ -147,10 +172,5 @@ namespace neogfx::game
                 iEcsPaused = false;
             }
         }, 1000u);
-
-        iSink += ecs().system<game_world>().PhysicsApplied([this](step_time)
-        {
-            update();
-        });
     }
 }

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <list>
 #include <boost/pool/pool_alloc.hpp>
+#include <neolib/allocator.hpp>
 #include <neolib/variant.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/units.hpp>

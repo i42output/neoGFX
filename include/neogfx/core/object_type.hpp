@@ -71,6 +71,7 @@ namespace neogfx
         TabPageContainer                = 0x0000000000000030 | Widget,
         TabPage                         = 0x0000000000000031 | Widget,
         GroupBox                        = 0x0000000000000040 | Widget | HasLabel,
+        Canvas                          = 0x0000000000000090 | Widget,
         PushButton                      = 0x0000000000000100 | Button,
         CheckBox                        = 0x0000000000000101 | Button,
         RadioButton                     = 0x0000000000000102 | Button,

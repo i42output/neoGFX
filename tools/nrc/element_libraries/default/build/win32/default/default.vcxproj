@@ -205,6 +205,7 @@
     <ClInclude Include="..\..\..\src\action.hpp" />
     <ClInclude Include="..\..\..\src\app.hpp" />
     <ClInclude Include="..\..\..\src\button.hpp" />
+    <ClInclude Include="..\..\..\src\canvas.hpp" />
     <ClInclude Include="..\..\..\src\drop_list.hpp" />
     <ClInclude Include="..\..\..\src\gradient_widget.hpp" />
     <ClInclude Include="..\..\..\src\group_box.hpp" />

@@ -17,6 +17,12 @@
 #include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/gui/dialog/game_controller_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
+#include <neogfx/game/ecs.hpp>
+#include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/game_world.hpp>
+#include <neogfx/game/simple_physics.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
 
 #include "test.ui.hpp"
 
@@ -1076,18 +1082,74 @@ int main(int argc, char* argv[])
             ui.textEditEditor.set_default_style(ng::text_edit::style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::color::White });
         });
 
+        ui.canvasInstancing.set_logical_coordinate_system(ng::logical_coordinate_system::AutomaticGui);
+
         ui.groupRenderingScheme.set_fill_opacity(0.5);
         ui.groupMeshShape.set_fill_opacity(0.5);
 
         ui.radioCircle.check();
         ui.checkOutline.check();
         ui.checkFill.check();
-        ui.radioEcsBatching.disable();
         ui.radioEcsInstancing.disable();
 
         ng::font infoFont{ "SnareDrum Two NBP", "Regular", 40.0 };
 
-        ui.pageInstancing.painting([&](ng::i_graphics_context& aGc)
+        neolib::basic_random<ng::coordinate> prngInstancing;
+        std::optional<ng::game::ecs> ecs;
+        ng::sink sink;
+
+        auto update_ecs_entities = [&ecs, &ui, &prngInstancing](ng::game::step_time aPhysicsStepTime)
+        {
+            for (auto entity : ecs->component<ng::game::mesh_renderer>().entities())
+            {
+                auto& filter = ecs->component<ng::game::mesh_filter>().entity_record(entity);
+                if (!filter.transformation)
+                    filter.transformation = ng::mat44::identity();
+                (*filter.transformation)[3][0] = prngInstancing(ui.pageInstancing.client_rect().cx - 1);
+                (*filter.transformation)[3][1] = prngInstancing(ui.pageInstancing.client_rect().cy - 1);
+            }
+        };
+
+        auto configure_ecs = [&]()
+        {
+            sink.clear();
+            if (ui.radioImmediateBatching.is_checked())
+            {
+                ui.canvasInstancing.set_ecs({});
+                ecs = std::nullopt;
+            }
+            else
+            {
+                ecs.emplace(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused);
+                ecs->system<ng::game::simple_physics>();
+                ecs->component<ng::game::rigid_body>(); // not using any rigid bodies but we want physics thread to run
+                sink += ~~~~ecs->system<ng::game::game_world>().ApplyingPhysics(update_ecs_entities);
+                for (int32_t i = 0; i < ui.sliderShapeCount.value(); ++i)
+                {
+                    auto r = ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } };
+                    ng::game::shape::rectangle
+                    {
+                        *ecs,
+                        ng::vec3{},
+                        ng::vec2{ r.cx, r.cy },
+                        random_color().with_alpha(random_color().red())
+                    }.detach();
+                }
+                ui.canvasInstancing.set_ecs(*ecs);
+                ecs->resume_all_systems();
+            }
+        };
+
+        ui.radioImmediateBatching.Toggled([&]() { configure_ecs(); });
+        ui.radioEcsBatching.Toggled([&]() { configure_ecs(); });
+        ui.radioEcsInstancing.Toggled([&]() { configure_ecs(); });
+        ui.sliderShapeCount.ValueChanged([&]() { configure_ecs(); });
+        ui.sliderShapeSize.ValueChanged([&]() { configure_ecs(); });
+        ui.checkOutline.Toggled([&]() { configure_ecs(); });
+        ui.checkFill.Toggled([&]() { configure_ecs(); });
+        ui.radioCircle.Toggled([&]() { configure_ecs(); });
+
+        ui.canvasInstancing.painting([&](ng::i_graphics_context& aGc)
         {
             if (ui.radioOff.is_checked())
             {
@@ -1096,43 +1158,45 @@ int main(int argc, char* argv[])
                     infoFont, 0.0, ng::text_appearance{ ng::color::Coral, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } }, ng::alignment::Centre);
                 return;
             }
-            neolib::basic_random<ng::coordinate> prng;
-            for (int32_t i = 0; i < ui.sliderShapeCount.value(); ++i)
+            if (!ecs)
             {
-                if (ui.checkOutline.is_checked() && ui.checkFill.is_unchecked())
+                for (int32_t i = 0; i < ui.sliderShapeCount.value(); ++i)
                 {
-                    if (ui.radioCircle.is_checked())
-                        aGc.draw_circle(
-                            ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ui.sliderShapeSize.value(),
-                            ng::pen{ random_color(), 2.0 });
+                    if (ui.checkOutline.is_checked() && ui.checkFill.is_unchecked())
+                    {
+                        if (ui.radioCircle.is_checked())
+                            aGc.draw_circle(
+                                ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ui.sliderShapeSize.value(),
+                                ng::pen{ random_color(), 2.0 });
+                        else
+                            aGc.draw_rect(
+                                ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                                ng::pen{ random_color(), 2.0 });
+                    }
+                    else if (ui.checkOutline.is_checked() && ui.checkFill.is_checked())
+                    {
+                        if (ui.radioCircle.is_checked())
+                            aGc.draw_circle(
+                                ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
+                                ng::pen{ random_color(), 2.0 },
+                                random_color().with_alpha(random_color().red()));
+                        else
+                            aGc.draw_rect(
+                                ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                                ng::pen{ random_color(), 2.0 },
+                                random_color().with_alpha(random_color().red()));
+                    }
                     else
-                        aGc.draw_rect(
-                            ng::rect{ ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
-                            ng::pen{ random_color(), 2.0 });
-                }
-                else if (ui.checkOutline.is_checked() && ui.checkFill.is_checked())
-                {
-                    if (ui.radioCircle.is_checked())
-                        aGc.draw_circle(
-                            ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
-                            ng::pen{ random_color(), 2.0 },
-                            random_color().with_alpha(random_color().red()));
-                    else
-                        aGc.draw_rect(
-                            ng::rect{ ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
-                            ng::pen{ random_color(), 2.0 },
-                            random_color().with_alpha(random_color().red()));
-                }
-                else
-                {
-                    if (ui.radioCircle.is_checked())
-                        aGc.fill_circle(
-                            ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
-                            random_color().with_alpha(random_color().red()));
-                    else
-                        aGc.fill_rect(
-                            ng::rect{ ng::point{ prng(ui.pageInstancing.client_rect().cx - 1), prng(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
-                            random_color().with_alpha(random_color().red()));
+                    {
+                        if (ui.radioCircle.is_checked())
+                            aGc.fill_circle(
+                                ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
+                                random_color().with_alpha(random_color().red()));
+                        else
+                            aGc.fill_rect(
+                                ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                                random_color().with_alpha(random_color().red()));
+                    }
                 }
             }
             thread_local std::string currentInfoText;
@@ -1155,11 +1219,12 @@ int main(int argc, char* argv[])
         {
             if (!window.has_native_window())
                 return;
-            aTimer.set_duration(ui.pageDrawing.can_update() || ui.pageInstancing.can_update() ? 0u : 1u);
+            aTimer.set_duration(ui.pageDrawing.can_update() || (!ecs && ui.canvasInstancing.can_update()) ? 0u : 1u);
             aTimer.again();
             ui.pageDrawing.update();
-            ui.pageInstancing.update();
-            bool const mouseOver = ui.pageInstancing.client_rect().contains(ui.pageInstancing.root().mouse_position() - ui.pageInstancing.origin());
+            if (!ecs)
+                ui.canvasInstancing.update();
+            bool const mouseOver = ui.canvasInstancing.client_rect().contains(ui.canvasInstancing.root().mouse_position() - ui.canvasInstancing.origin());
             ui.groupRenderingScheme.show(mouseOver);
             ui.groupMeshShape.show(mouseOver);
         }, 1u };

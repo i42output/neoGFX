@@ -22,8 +22,6 @@ int main(int argc, char* argv[])
         app.change_style("Light").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
-        ng::service<ng::i_power>().enable_turbo_mode();
-
         std::optional<ng::window> windowObject;
         if (!app.program_options().full_screen())
             windowObject.emplace(ng::size{ 1280_dip, 720_dip });
@@ -32,7 +30,7 @@ int main(int argc, char* argv[])
 
         auto& window = *windowObject;
 
-        ng::game::canvas canvas{ window.client_layout() };
+        ng::game::canvas canvas{ window.client_layout(), std::make_shared<ng::game::ecs>() };
         canvas.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
         ng::vertical_layout canvasLayout{ canvas };
 

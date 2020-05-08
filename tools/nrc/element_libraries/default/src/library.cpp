@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "status_bar.hpp"
 #include "tab_page_container.hpp"
 #include "tab_page.hpp"
+#include "canvas.hpp"
 #include "button.hpp"
 #include "label.hpp"
 #include "text_edit.hpp"
@@ -71,6 +72,7 @@ namespace neogfx::nrc
             { "status_bar", ui_element_type::LayoutItem },
             { "tab_page_container", ui_element_type::LayoutItem },
             { "tab_page", ui_element_type::LayoutItem },
+            { "canvas", ui_element_type::LayoutItem },
             { "push_button", ui_element_type::LayoutItem },
             { "check_box", ui_element_type::LayoutItem },
             { "radio_button", ui_element_type::LayoutItem },
@@ -147,6 +149,7 @@ namespace neogfx::nrc
             { "toolbar", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParser, aParent }; } },
             { "tab_page_container", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new tab_page_container{ aParser, aParent }; } },
             { "tab_page", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new tab_page{ aParser, aParent }; } },
+            { "canvas", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new canvas{ aParser, aParent }; } },
             { "push_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new push_button{ aParser, aParent }; } },
             { "check_box", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new check_box{ aParser, aParent }; } },
             { "radio_button", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new radio_button{ aParser, aParent }; } },

@@ -37,6 +37,8 @@ namespace neogfx::game
         system(game::i_ecs& aEcs, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
             iEcs{ aEcs }, iComponents{ aFirstComponent, aLastComponent }, iPaused{ 0u }
         {
+            if (ecs().all_systems_paused())
+                pause();
         }
         system(const system& aOther);
         system(system&& aOther);

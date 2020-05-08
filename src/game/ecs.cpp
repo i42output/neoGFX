@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/i_power.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/time.hpp>
@@ -210,13 +211,16 @@ namespace neogfx::game
                 }
             }, 1, true
         },
-        iSystemsPaused{ false }
+        iSystemsPaused{ (flags() & ecs_flags::CreatePaused) == ecs_flags::CreatePaused }
     {
         if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
         {
             register_component<entity_info>();
             register_system<time>();
         }
+
+        if ((flags() & ecs_flags::Turbo) == ecs_flags::Turbo)
+            service<i_power>().enable_turbo_mode();
 
         set_alive();
     }
@@ -263,6 +267,8 @@ namespace neogfx::game
             s.second->pause();
         iSystemsPaused = true;
         SystemsPaused.trigger();
+        if ((flags() & ecs_flags::Turbo) == ecs_flags::Turbo)
+            service<i_power>().enable_green_mode();
     }
 
     void ecs::resume_all_systems()
@@ -273,6 +279,8 @@ namespace neogfx::game
             s.second->resume();
         iSystemsPaused = false;
         SystemsResumed.trigger();
+        if ((flags() & ecs_flags::Turbo) == ecs_flags::Turbo)
+            service<i_power>().enable_turbo_mode();
     }
 
     bool ecs::archetype_registered(const i_entity_archetype& aArchetype) const

@@ -101,16 +101,12 @@ namespace archetypes
 
 void create_game(ng::i_layout& aLayout)
 {
-    // Canvas to render game world on...
-    auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>());
+    // Create an ECS and canvas to render game world on...
+    auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>(std::make_shared<ng::game::ecs>()));
     canvas.set_font(ng::font{ canvas.font(), ng::font_style::Bold, 16 });
     canvas.set_background_color(ng::color::Black);
 
-    // Get ECS associated with canvas...
     auto& ecs = canvas.ecs();
-
-    ecs.systems_paused([&]() { ng::service<ng::i_power>().enable_green_mode(); });
-    ecs.systems_resumed([&]() { ng::service<ng::i_power>().enable_turbo_mode(); });
 
     // Background...
     neolib::basic_random<ng::scalar> prng;
@@ -324,7 +320,7 @@ void create_game(ng::i_layout& aLayout)
         {
             auto newPos = ng::point{ e.position() - canvas.origin() };
             newPos.y = canvas.extents().cy - newPos.y;
-            ng::game::component_scoped_lock<ng::game::rigid_body> lock{ canvas.ecs() };
+            ng::game::scoped_component_lock<ng::game::rigid_body> lock{ canvas.ecs() };
             canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
         }
     });

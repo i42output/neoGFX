@@ -31,6 +31,8 @@ namespace neogfx::game
         define_event(EntitiesRendered, entities_rendered, i_graphics_context&)
         define_event(EntityClicked, entity_clicked, entity_id)
     public:
+        struct no_ecs : std::logic_error { no_ecs() : std::logic_error{ "neogfx::game::canvas::no_ecs" } {} };
+    public:
         canvas();
         canvas(game::i_ecs& aEcs);
         canvas(std::shared_ptr<game::i_ecs> aEcs);
@@ -42,7 +44,10 @@ namespace neogfx::game
         canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs);
         ~canvas();
     public:
+        bool have_ecs() const;
         game::i_ecs& ecs() const;
+        void set_ecs(game::i_ecs& aEcs);
+        void set_ecs(const std::shared_ptr<game::i_ecs>& aEcs);
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
         void paint(i_graphics_context& aGc) const override;

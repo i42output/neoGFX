@@ -54,6 +54,7 @@ namespace neogfx::game
     {
         if (!ecs().system_registered<time>())
             ecs().register_system<time>();
+        ecs().system<time>();
         if (!ecs().shared_component_registered<physics>())
             ecs().register_shared_component<physics>();
         if (ecs().shared_component<physics>().component_data().empty())
@@ -92,7 +93,7 @@ namespace neogfx::game
         while (worldClock.time <= now)
         {
             yield();
-            component_scoped_lock<rigid_body> lgRigidBodies{ ecs() };
+            scoped_component_lock<rigid_body> lgRigidBodies{ ecs() };
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)

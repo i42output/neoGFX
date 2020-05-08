@@ -32,8 +32,12 @@ namespace neogfx::game
 {
     enum class ecs_flags : uint32_t
     {
-        None = 0x0000,
-        PopulateEntityInfo = 0x0001
+        None                = 0x0000,
+        PopulateEntityInfo  = 0x0001,
+        Turbo               = 0x0002,
+        CreatePaused        = 0x0004,
+
+        Default             = PopulateEntityInfo | Turbo
     };
 
     inline constexpr ecs_flags operator|(ecs_flags aLhs, ecs_flags aRhs)
@@ -306,10 +310,10 @@ namespace neogfx::game
     };
 
     template <typename Data>
-    class component_scoped_lock
+    class scoped_component_lock
     {
     public:
-        component_scoped_lock(const i_ecs& aEcs) :
+        scoped_component_lock(const i_ecs& aEcs) :
             iLockGuard{ aEcs.component<Data>().mutex() }
         {
         }
