@@ -92,7 +92,7 @@ namespace neogfx::game
         typedef id_t handle_id;
         typedef void* handle_t;
     public:
-        virtual std::recursive_mutex& mutex() const = 0; // todo: use a polymorphic mutex
+        virtual neolib::recursive_spinlock& mutex() const = 0; // todo: use a polymorphic mutex
     public:
         virtual ecs_flags flags() const = 0;
         virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
@@ -308,7 +308,7 @@ namespace neogfx::game
         {
         }
     private:
-        std::scoped_lock<std::recursive_mutex> iLockGuard;
+        std::scoped_lock<neolib::recursive_spinlock> iLockGuard;
     };
 
     template <typename Data>
@@ -320,6 +320,6 @@ namespace neogfx::game
         {
         }
     private:
-        std::scoped_lock<std::recursive_mutex> iLockGuard;
+        std::scoped_lock<neolib::recursive_spinlock> iLockGuard;
     };
 }

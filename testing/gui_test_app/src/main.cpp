@@ -1113,7 +1113,7 @@ int main(int argc, char* argv[])
         auto configure_ecs = [&]()
         {
             sink.clear();
-            if (ui.radioImmediateBatching.is_checked())
+            if (ui.radioImmediateBatching.is_checked() || ui.radioOff.is_checked())
             {
                 ui.canvasInstancing.set_ecs({});
                 ecs = std::nullopt;
@@ -1140,6 +1140,7 @@ int main(int argc, char* argv[])
             }
         };
 
+        ui.radioOff.Toggled([&]() { configure_ecs(); });
         ui.radioImmediateBatching.Toggled([&]() { configure_ecs(); });
         ui.radioEcsBatching.Toggled([&]() { configure_ecs(); });
         ui.radioEcsInstancing.Toggled([&]() { configure_ecs(); });

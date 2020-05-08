@@ -231,7 +231,7 @@ namespace neogfx::game
             system.second->terminate();
     }
 
-    std::recursive_mutex& ecs::mutex() const
+    neolib::recursive_spinlock& ecs::mutex() const
     {
         return iMutex;
     }
