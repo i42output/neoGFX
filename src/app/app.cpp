@@ -63,6 +63,7 @@ namespace neogfx
             ("vulkan", "use Vulkan renderer")
             ("directx", "use DirectX (ANGLE) renderer")
             ("software", "use software renderer")
+            ("turbo", "use turbo mode")
             ("double", "enable window double buffering");
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), iOptions);
         if (options().count("vulkan") + options().count("directx") + options().count("software") > 1)
@@ -117,6 +118,11 @@ namespace neogfx
     bool program_options::double_buffering() const
     {
         return options().count("double") == 1;
+    }
+
+    bool program_options::turbo() const
+    {
+        return options().count("turbo") == 1;
     }
 
     bool program_options::nest() const
@@ -262,6 +268,9 @@ namespace neogfx
 
         if (program_options().full_screen())
             service<i_surface_manager>().display().enter_fullscreen(video_mode{ *program_options().full_screen() });
+
+        if (program_options().turbo())
+            service<i_power>().enable_turbo_mode();
 
         style lightStyle("Light");
         register_style(lightStyle);

@@ -52,6 +52,7 @@ namespace neogfx
         neogfx::renderer renderer() const override;
         std::optional<size_u32> full_screen() const override;
         bool double_buffering() const override;
+        bool turbo() const override;
         bool nest() const override;
     private:
         boost::program_options::variables_map iOptions;

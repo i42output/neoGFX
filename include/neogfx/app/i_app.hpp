@@ -59,6 +59,7 @@ namespace neogfx
         virtual neogfx::renderer renderer() const = 0;
         virtual std::optional<size_u32> full_screen() const = 0;
         virtual bool double_buffering() const = 0;
+        virtual bool turbo() const = 0;
         virtual bool nest() const = 0;
     };
 
