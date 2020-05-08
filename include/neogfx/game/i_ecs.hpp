@@ -92,6 +92,8 @@ namespace neogfx::game
         typedef id_t handle_id;
         typedef void* handle_t;
     public:
+        virtual std::recursive_mutex& mutex() const = 0; // todo: use a polymorphic mutex
+    public:
         virtual ecs_flags flags() const = 0;
         virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
         virtual void destroy_entity(entity_id aEntityId) = 0;

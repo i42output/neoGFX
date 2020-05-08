@@ -231,6 +231,11 @@ namespace neogfx::game
             system.second->terminate();
     }
 
+    std::recursive_mutex& ecs::mutex() const
+    {
+        return iMutex;
+    }
+
     ecs_flags ecs::flags() const
     {
         return iFlags;

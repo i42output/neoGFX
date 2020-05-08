@@ -130,7 +130,7 @@ namespace neogfx::game
     public:
         std::recursive_mutex& mutex() const
         {
-            return iMutex;
+            return ecs().mutex();
         }
     public:
         bool is_data_optional() const override
@@ -176,7 +176,6 @@ namespace neogfx::game
         }
     private:
         game::i_ecs& iEcs;
-        mutable std::recursive_mutex iMutex;
         component_data_t iComponentData;
     };
 

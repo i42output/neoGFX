@@ -40,6 +40,8 @@ namespace neogfx::game
         ecs(ecs_flags aCreationFlags = ecs_flags::Default);
         ~ecs();
     public:
+        std::recursive_mutex& mutex() const override;
+    public:
         ecs_flags flags() const override;
         entity_id create_entity(const entity_archetype_id& aArchetypeId) override;
         void destroy_entity(entity_id aEntityId) override;
@@ -114,6 +116,7 @@ namespace neogfx::game
         using i_ecs::system_registered;
         using i_ecs::register_system;
     private:
+        mutable std::recursive_mutex iMutex;
         ecs_flags iFlags;
         archetype_registry_t iArchetypeRegistry;
         component_factories_t iComponentFactories;

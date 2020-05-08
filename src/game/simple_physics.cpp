@@ -93,8 +93,8 @@ namespace neogfx::game
         while (worldClock.time <= now)
         {
             yield();
-            scoped_component_lock<rigid_body> lgRigidBodies{ ecs() };
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
+            scoped_component_lock<rigid_body> lgRigidBodies{ ecs() };
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
                 rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
