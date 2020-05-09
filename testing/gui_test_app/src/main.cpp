@@ -278,7 +278,19 @@ int main(int argc, char* argv[])
                 ui.textEdit.set_plain_text(std::string{ std::istreambuf_iterator<char>{file}, {} });
             }
         });
+
+        ui.actionShowStatusBar.set_checked(true);
+
+        ui.actionShowStatusBar.checked([&]()
+        {
+            ui.statusBar.show();
+        });
         
+        ui.actionShowStatusBar.unchecked([&]()
+        {
+            ui.statusBar.hide();
+        });
+
         app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
         {
             ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, ng::color::LightGoldenrod);

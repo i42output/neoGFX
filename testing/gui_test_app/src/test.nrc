@@ -20,6 +20,11 @@
             name: "neoGFX Test App (Pre-Release)"
             default_window_icon: ":/test/resources/icon.png"
             action: {
+                id: actionShowStatusBar
+                text: "Show/Hide Status Bar"
+                checkable: true
+            }
+            action: {
                 id: actionGameControllerCalibration
                 text: "Game Controller Calibration"
                 image: ":/neogfx/resources/icons.zip#gamecontroller.png"
@@ -104,6 +109,7 @@
                     }
                     menu: {
                         title: "&View"
+                        action: actionShowStatusBar
                     }
                     menu: {
                         id: menuFavourites
