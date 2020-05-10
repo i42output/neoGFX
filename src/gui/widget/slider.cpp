@@ -25,7 +25,8 @@ namespace neogfx
 {
     slider_impl::slider_impl(slider_orientation aOrientation) :
         iOrientation(aOrientation),
-        iNormalizedValue{ 0.0 }
+        iNormalizedValue{ 0.0 }, 
+        iHandlingEvent{ false }
     {
         init();
     }
@@ -33,7 +34,8 @@ namespace neogfx
     slider_impl::slider_impl(i_widget& aParent, slider_orientation aOrientation) :
         widget(aParent),
         iOrientation(aOrientation),
-        iNormalizedValue{ 0.0 }
+        iNormalizedValue{ 0.0 },
+        iHandlingEvent{ false }
     {
         init();
     }
@@ -41,7 +43,8 @@ namespace neogfx
     slider_impl::slider_impl(i_layout& aLayout, slider_orientation aOrientation) :
         widget(aLayout),
         iOrientation(aOrientation),
-        iNormalizedValue{ 0.0 }
+        iNormalizedValue{ 0.0 },
+        iHandlingEvent{ false }
     {
         init();
     }
@@ -105,17 +108,18 @@ namespace neogfx
         widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
+            neolib::scoped_flag sf{ iHandlingEvent };
             if (indicator_box().contains(aPosition))
             {
                 iDragOffset = aPosition - indicator_box().centre();
                 if (iOrientation == slider_orientation::Horizontal)
-                    set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }), true);
+                    set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
                 else
-                    set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }), true);
+                    set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
                 update();
             }
             else
-                set_normalized_value(normalized_value_from_position(aPosition), true);
+                set_normalized_value(normalized_value_from_position(aPosition));
         }
     }
 
@@ -123,7 +127,10 @@ namespace neogfx
     {
         widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
-            set_normalized_value(0.5, true);
+        {
+            neolib::scoped_flag sf{ iHandlingEvent };
+            set_normalized_value(0.5);
+        }
     }
 
     void slider_impl::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -139,7 +146,10 @@ namespace neogfx
     void slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
-            set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))), true);
+        {
+            neolib::scoped_flag sf{ iHandlingEvent };
+            set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))));
+        }
         else
             widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
@@ -149,14 +159,15 @@ namespace neogfx
         widget::mouse_moved(aPosition, aKeyModifiers);
         if (iDragOffset != std::nullopt)
         {
+            neolib::scoped_flag sf{ iHandlingEvent };
             if (iOrientation == slider_orientation::Horizontal)
-                set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }), true);
+                set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
             else
-                set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }), true);
+                set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
         }
     }
 
-    void slider_impl::set_normalized_value(double aValue, bool)
+    void slider_impl::set_normalized_value(double aValue)
     {
         aValue = std::max(0.0, std::min(1.0, aValue));
         if (iNormalizedValue != aValue)
@@ -164,6 +175,11 @@ namespace neogfx
             iNormalizedValue = aValue;
             update();
         }
+    }
+
+    bool slider_impl::handling_event() const
+    {
+        return iHandlingEvent;
     }
 
     void slider_impl::init()

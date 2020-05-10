@@ -65,7 +65,9 @@ namespace neogfx
     public:
         virtual double normalized_step_value() const = 0;
         virtual double normalized_value() const = 0;
-        virtual void set_normalized_value(double aValue, bool aFromEvent = false);
+        virtual void set_normalized_value(double aValue);
+    protected:
+        bool handling_event() const;
     private:
         void init();
         rect bar_box() const;
@@ -77,6 +79,7 @@ namespace neogfx
         optional_color_or_gradient iBarColor;
         double iNormalizedValue;
         optional_point iDragOffset;
+        bool iHandlingEvent;
     };
 
     template <typename T>
@@ -96,11 +99,11 @@ namespace neogfx
         value_type step() const;
         void set_step(value_type aStep);
         value_type value() const;
-        void set_value(value_type aValue, bool aFromEvent = false);
+        void set_value(value_type aValue);
     public:
         virtual double normalized_step_value() const;
         virtual double normalized_value() const;
-        virtual void set_normalized_value(double aValue, bool aFromEvent = false);
+        virtual void set_normalized_value(double aValue);
     private:
         value_type iMinimum;
         value_type iMaximum;

@@ -91,14 +91,14 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void basic_slider<T>::set_value(value_type aValue, bool aFromEvent)
+    inline void basic_slider<T>::set_value(value_type aValue)
     {
         if (iValue != aValue)
         {
             iValue = aValue;
             if (!iSettingNormalizedValue)
-                slider_impl::set_normalized_value(normalized_value(), aFromEvent);
-            if (!aFromEvent)
+                slider_impl::set_normalized_value(normalized_value());
+            if (!handling_event())
                 ValueChanged.sync_trigger();
             else
                 ValueChanged.trigger();
@@ -124,7 +124,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void basic_slider<T>::set_normalized_value(double aValue, bool aFromEvent)
+    inline void basic_slider<T>::set_normalized_value(double aValue)
     {
         double const stepValue = normalized_step_value();
         double steps = 0.0;
@@ -142,8 +142,7 @@ namespace neogfx
             else if (denormalized > 0.0)
                 denormalized = std::ceil(denormalized - 0.5);
         }
-        set_value(static_cast<value_type>(denormalized), aFromEvent);
-        slider_impl::set_normalized_value(aValue, aFromEvent);
-        iSettingNormalizedValue = false;
+        set_value(static_cast<value_type>(denormalized));
+        slider_impl::set_normalized_value(aValue);
     }
 }
