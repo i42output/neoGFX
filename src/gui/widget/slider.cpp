@@ -109,13 +109,13 @@ namespace neogfx
             {
                 iDragOffset = aPosition - indicator_box().centre();
                 if (iOrientation == slider_orientation::Horizontal)
-                    set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
+                    set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }), true);
                 else
-                    set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
+                    set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }), true);
                 update();
             }
             else
-                set_normalized_value(normalized_value_from_position(aPosition));
+                set_normalized_value(normalized_value_from_position(aPosition), true);
         }
     }
 
@@ -123,7 +123,7 @@ namespace neogfx
     {
         widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
-            set_normalized_value(0.5);
+            set_normalized_value(0.5, true);
     }
 
     void slider_impl::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -139,7 +139,7 @@ namespace neogfx
     void slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
-            set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))));
+            set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))), true);
         else
             widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
@@ -150,13 +150,13 @@ namespace neogfx
         if (iDragOffset != std::nullopt)
         {
             if (iOrientation == slider_orientation::Horizontal)
-                set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
+                set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }), true);
             else
-                set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
+                set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }), true);
         }
     }
 
-    void slider_impl::set_normalized_value(double aValue)
+    void slider_impl::set_normalized_value(double aValue, bool)
     {
         aValue = std::max(0.0, std::min(1.0, aValue));
         if (iNormalizedValue != aValue)
@@ -176,15 +176,6 @@ namespace neogfx
             set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         else
             set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
-
-        auto step_up = [this]()
-        {
-            set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())));
-        };
-        auto step_down = [this]()
-        {
-            set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())));
-        };
     }
 
     rect slider_impl::bar_box() const
