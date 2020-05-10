@@ -866,7 +866,7 @@ namespace neogfx
         iChannelLayout.set_margins(neogfx::margins{});
         iChannelLayout.set_spacing(standardSpacing / 2.0);
         iScreenPicker.set_size_policy(size_constraint::Minimum);
-        iSink += iScreenPicker.AsyncClicked([&, this]()
+        iSink += iScreenPicker.Clicked([&, this]()
         {
             iScreenPickerActive = true;
             surface().as_surface_window().set_capture(*this);

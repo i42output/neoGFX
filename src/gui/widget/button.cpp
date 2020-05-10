@@ -291,7 +291,6 @@ namespace neogfx
     {
         destroyed_flag destroyed{ *this };
         Clicked.trigger();
-        AsyncClicked.async_trigger();
         if (!destroyed && iCheckable != button_checkable::NotCheckable)
             toggle();
     }
@@ -341,8 +340,15 @@ namespace neogfx
 
     void button::init()
     {
+        Pressed.set_trigger_type(event_trigger_type::Asynchronous);
         Clicked.set_trigger_type(event_trigger_type::Asynchronous);
         DoubleClicked.set_trigger_type(event_trigger_type::Asynchronous);
+        RightClicked.set_trigger_type(event_trigger_type::Asynchronous);
+        Released.set_trigger_type(event_trigger_type::Asynchronous);
+        Toggled.set_trigger_type(event_trigger_type::Asynchronous);
+        Checked.set_trigger_type(event_trigger_type::Asynchronous);
+        Unchecked.set_trigger_type(event_trigger_type::Asynchronous);
+        Indeterminate.set_trigger_type(event_trigger_type::Asynchronous);
 
         layout().set_margins(neogfx::margins(0.0));
         iLabel.set_size_policy(size_constraint::Expanding);

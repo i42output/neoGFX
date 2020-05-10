@@ -52,7 +52,6 @@ namespace neogfx
     public:
         declare_event(pressed)
         declare_event(clicked)
-        declare_event(async_clicked)
         declare_event(double_clicked)
         declare_event(right_clicked)
         declare_event(released)

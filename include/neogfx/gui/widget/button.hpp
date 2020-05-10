@@ -34,7 +34,6 @@ namespace neogfx
     public:
         define_declared_event(Pressed, pressed)
         define_declared_event(Clicked, clicked)
-        define_declared_event(AsyncClicked, async_clicked)
         define_declared_event(DoubleClicked, double_clicked)
         define_declared_event(RightClicked, right_clicked)
         define_declared_event(Released, released)

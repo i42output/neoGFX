@@ -1130,7 +1130,7 @@ int main(int argc, char* argv[])
                 ui.canvasInstancing.set_ecs({});
                 ecs = std::nullopt;
             }
-            else
+            else if (ui.radioEcsBatching.is_checked() || ui.radioEcsInstancing.is_checked())
             {
                 ecs.emplace(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused);
                 ecs->system<ng::game::simple_physics>();
