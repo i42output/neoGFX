@@ -1269,6 +1269,22 @@ namespace neogfx
                 return mat44{ { std::cos(az), std::sin(az), 0.0, 0.0 },{ -std::sin(az), std::cos(az), 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 },{0.0, 0.0, 0.0, 1.0} };
             }
         }
+
+        inline mat44& apply_translation(mat44& aMatrix, const vec3& aTranslation)
+        {
+            aMatrix[3][0] += aTranslation.x;
+            aMatrix[3][1] += aTranslation.y;
+            aMatrix[3][2] += aTranslation.z;
+            return aMatrix;
+        }
+
+        inline mat44& apply_scaling(mat44& aMatrix, const vec3& aScaling)
+        {
+            aMatrix[0][0] *= aScaling.x;
+            aMatrix[1][1] *= aScaling.y;
+            aMatrix[2][2] *= aScaling.z;
+            return aMatrix;
+        }
     }
 
     using namespace math;

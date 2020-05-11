@@ -30,6 +30,7 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/text_mesh.hpp>
+#include <neogfx/game/animation_filter.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include <neogfx/game/entity_info.hpp>
 #include "../../hid/native/i_native_surface.hpp"
@@ -1082,13 +1083,19 @@ namespace neogfx
             if (aEcs.component<game::entity_info>().entity_record(entity).debug)
                 std::cerr << "Rendering debug entity..." << std::endl;
             #endif
-            if (aEcs.component<game::mesh_filter>().has_entity_record(entity))
-                drawables.emplace_back(
-                    aEcs.component<game::mesh_filter>().entity_record(entity), 
-                    aEcs.component<game::mesh_renderer>().entity_record(entity),
-                    rigidBodies.has_entity_record(entity) ? 
-                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity(),
-                    entity);
+            auto const& meshFilter = aEcs.component<game::mesh_filter>().has_entity_record(entity) ?
+                aEcs.component<game::mesh_filter>().entity_record(entity) :
+                game::current_animation_frame(aEcs.component<game::animation_filter>().entity_record(entity));
+            auto const& transformation = rigidBodies.has_entity_record(entity) ?
+                to_transformation_matrix(rigidBodies.entity_record(entity)) :
+                aEcs.component<game::animation_filter>().has_entity_record(entity) ?
+                    to_transformation_matrix(aEcs.component<game::animation_filter>().entity_record(entity)) : 
+                    mat44::identity();
+            drawables.emplace_back(
+                meshFilter,
+                aEcs.component<game::mesh_renderer>().entity_record(entity),
+                transformation,
+                entity);
         }
         draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), aTransformation);
         for (auto const& d : drawables)

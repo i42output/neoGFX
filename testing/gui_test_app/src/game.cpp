@@ -148,7 +148,11 @@ void create_game(ng::i_layout& aLayout)
     {
         ecs.shared_component<ng::game::animation>().populate("explosion", ng::game::regular_sprite_sheet_to_animation(explosionMaterial, ng::vec2u32{ 4u, 3u }, 0.1))
     };
-    auto explosion = ecs.create_entity(archetypes::explosion, explosionMaterial, explosionAnimation);
+
+    auto testExplosion = ecs.create_entity(archetypes::explosion, explosionMaterial, explosionAnimation);
+    auto& testExplosionFilter = ecs.component<ng::game::animation_filter>().entity_record(testExplosion);
+    testExplosionFilter.transformation = ng::mat44::identity();
+    ng::apply_translation(ng::apply_scaling(*testExplosionFilter.transformation, ng::vec3{ 64.0, 64.0, 1.0 }), ng::vec3{ 64.0, 64.0, 0.0 });
         
     // Spaceship...
     const char* spaceshipImage
