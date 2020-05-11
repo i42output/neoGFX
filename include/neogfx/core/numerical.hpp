@@ -385,20 +385,24 @@ namespace neogfx
         typedef vector3f vec3f;
         typedef vector4f vec4f;
 
-        typedef basic_vector<int32_t, 1> vector1i32;
-        typedef basic_vector<int32_t, 2> vector2i32;
-        typedef basic_vector<int32_t, 3> vector3i32;
-        typedef basic_vector<int32_t, 4> vector4i32;
+        typedef int32_t i32;
+
+        typedef basic_vector<i32, 1> vector1i32;
+        typedef basic_vector<i32, 2> vector2i32;
+        typedef basic_vector<i32, 3> vector3i32;
+        typedef basic_vector<i32, 4> vector4i32;
 
         typedef vector1i32 vec1i32;
         typedef vector2i32 vec2i32;
         typedef vector3i32 vec3i32;
         typedef vector4i32 vec4i32;
 
-        typedef basic_vector<uint32_t, 1> vector1u32;
-        typedef basic_vector<uint32_t, 2> vector2u32;
-        typedef basic_vector<uint32_t, 3> vector3u32;
-        typedef basic_vector<uint32_t, 4> vector4u32;
+        typedef uint32_t u32;
+
+        typedef basic_vector<u32, 1> vector1u32;
+        typedef basic_vector<u32, 2> vector2u32;
+        typedef basic_vector<u32, 3> vector3u32;
+        typedef basic_vector<u32, 4> vector4u32;
 
         typedef vector1u32 vec1u32;
         typedef vector2u32 vec2u32;

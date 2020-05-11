@@ -342,7 +342,7 @@ namespace neogfx::game
         {
             return do_populate(aEntity, aData);
         }
-        void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) override
+        const void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) override
         {
             if ((aComponentData == nullptr && !is_data_optional()) || aComponentDataSize != sizeof(data_type))
                 throw invalid_data();
@@ -456,7 +456,21 @@ namespace neogfx::game
     struct shared
     {
         typedef typename detail::crack_component_data<shared<Data>>::mapped_type mapped_type;
+
         const mapped_type* ptr;
+
+        shared() :
+            ptr{ nullptr }
+        {
+        }
+        shared(const mapped_type* aData) :
+            ptr{ aData }
+        {
+        }
+        shared(const mapped_type& aData) :
+            ptr { &aData }
+        {
+        }
     };
 
     template <typename Data>
@@ -509,30 +523,30 @@ namespace neogfx::game
             return component_data()[aName];
         }
     public:
-        mapped_type& populate(const std::string& aName, const mapped_type& aData)
+        shared<mapped_type> populate(const std::string& aName, const mapped_type& aData)
         {
             base_type::component_data()[aName] = aData;
             auto& result = base_type::component_data()[aName];
             if constexpr (mapped_type::meta::has_updater)
                 mapped_type::meta::update(result, ecs(), null_entity);
-            return result;
+            return shared<mapped_type> { &result };
         }
-        mapped_type& populate(const std::string& aName, mapped_type&& aData)
+        shared<mapped_type> populate(const std::string& aName, mapped_type&& aData)
         {
             base_type::component_data()[aName] = std::move(aData);
             auto& result = base_type::component_data()[aName];
             if constexpr (mapped_type::meta::has_updater)
                 mapped_type::meta::update(result, ecs(), null_entity);
-            return result;
+            return shared<mapped_type> { &result };
         }
-        void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) override
+        const void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) override
         {
             if ((aComponentData == nullptr && !is_data_optional()) || aComponentDataSize != sizeof(mapped_type))
                 throw invalid_data();
             if (aComponentData != nullptr)
-                return &populate(aName, *static_cast<const mapped_type*>(aComponentData));
+                return populate(aName, *static_cast<const mapped_type*>(aComponentData)).ptr;
             else
-                return &populate(aName, mapped_type{}); // empty optional
+                return populate(aName, mapped_type{}).ptr; // empty optional
         }
     };
 }

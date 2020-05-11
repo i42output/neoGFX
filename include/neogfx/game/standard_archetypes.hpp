@@ -26,6 +26,7 @@
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/animation_filter.hpp>
 
 namespace neogfx::game
 {
@@ -42,4 +43,29 @@ namespace neogfx::game
         }
     };
 
+    class animated_sprite_archetype : public renderable_entity_archetype
+    {
+    public:
+        animated_sprite_archetype(const entity_archetype_id& aId, const std::string& aName) :
+            renderable_entity_archetype{ aId, aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::animation_filter::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+        {
+        }
+        animated_sprite_archetype(const std::string& aName) :
+            renderable_entity_archetype{ aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::animation_filter::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+        {
+        }
+    };
+
+    class animation_archetype : public renderable_entity_archetype
+    {
+    public:
+        animation_archetype(const entity_archetype_id& aId, const std::string& aName) :
+            renderable_entity_archetype{ aId, aName, { game::mesh_renderer::meta::id(), game::animation_filter::meta::id() } }
+        {
+        }
+        animation_archetype(const std::string& aName) :
+            renderable_entity_archetype{ aName, { game::mesh_renderer::meta::id(), game::animation_filter::meta::id() } }
+        {
+        }
+    };
 }

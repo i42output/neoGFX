@@ -325,6 +325,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\animation_filter.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\broadphase_collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\clock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\color.hpp" />

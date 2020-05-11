@@ -46,9 +46,9 @@ namespace neogfx::game
     class i_shared_component : public i_component_base
     {
     public:
-        virtual void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) = 0;
+        virtual const void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) = 0;
         template <typename ComponentData>
-        void* populate(const std::string& aName, ComponentData&& aComponentData)
+        const void* populate(const std::string& aName, ComponentData&& aComponentData)
         {
             return populate(aName, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
         }
@@ -60,9 +60,9 @@ namespace neogfx::game
         virtual bool has_entity_record(entity_id aEntity) const = 0;
         virtual void destroy_entity_record(entity_id aEntity) = 0;
     public:
-        virtual void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) = 0;
+        virtual const void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) = 0;
         template <typename ComponentData>
-        void* populate(entity_id aEntity, ComponentData&& aComponentData)
+        const void* populate(entity_id aEntity, ComponentData&& aComponentData)
         {
             return populate(aEntity, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
         }

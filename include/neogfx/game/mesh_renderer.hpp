@@ -75,6 +75,9 @@ namespace neogfx::game
                     return material::meta::id();
                 case 1:
                     return patch::meta::id();
+                case 2:
+                case 3:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }

@@ -29,9 +29,9 @@ namespace neogfx::game
 {
     struct mesh
     {
-        neogfx::vertices vertices;
+        vertices vertices;
         vertices_2d uv;
-        game::faces faces;
+        faces faces;
 
         struct meta : i_component_data::meta
         {
@@ -124,15 +124,15 @@ namespace neogfx::game
         return bounding_rect(aMesh.vertices);
     }
 
-    inline game::faces default_faces(uint32_t aVertexCount, uint32_t aOffset = 0u)
+    inline faces default_faces(uint32_t aVertexCount, uint32_t aOffset = 0u)
     {
-        game::faces faces;
+        faces faces;
         for (uint32_t i = aOffset; i < aVertexCount + aOffset; i += 3u)
             faces.push_back(face{ i, i + 1u, i + 2u });
         return faces;
     }
 
-    inline game::faces default_faces(const vertices& aVertices, uint32_t aOffset = 0u)
+    inline faces default_faces(const vertices& aVertices, uint32_t aOffset = 0u)
     {
         return default_faces(static_cast<uint32_t>(aVertices.size()), aOffset);
     }

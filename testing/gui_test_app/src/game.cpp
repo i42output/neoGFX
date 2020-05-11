@@ -21,6 +21,7 @@
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/collider.hpp>
 #include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/animation_filter.hpp>
 #include <neogfx/game/broadphase_collider.hpp>
 
 namespace ng = neogfx;
@@ -78,17 +79,6 @@ using namespace neolib::stdint_suffix;
             "Collision tree (quadtree) update type: " + (spritePlane.dynamic_update_enabled() ? "dynamic" : "full") + "\n" +
             "Physics update time: " + boost::str(boost::format("%.6f") % spritePlane.update_time()) + " s");
     });
-
-    spritePlane.mouse_event([&spritePlane, &spaceshipSprite](const neogfx::mouse_event& e)
-    {
-        if ((e.type() == neogfx::mouse_event_type::ButtonClicked || 
-            e.type() == neogfx::mouse_event_type::Moved) && (e.mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left)
-        {
-            auto newPos = ng::point{ e.position() - spritePlane.origin() };
-            newPos.y = spritePlane.extents().cy - newPos.y;
-            spaceshipSprite.set_position(newPos.to_vec3());
-        }
-    });
 }
 */
 
@@ -97,6 +87,7 @@ namespace archetypes
     ng::game::sprite_archetype const spaceship{ "Spaceship" };
     ng::game::sprite_archetype const asteroid{ "Asteroid" };
     ng::game::sprite_archetype const missile{ "Missile" };
+    ng::game::animation_archetype const explosion{ "Explosion" };
 }
 
 void create_game(ng::i_layout& aLayout)
@@ -112,13 +103,13 @@ void create_game(ng::i_layout& aLayout)
     neolib::basic_random<ng::scalar> prng;
     for (int i = 0; i < 1000; ++i)
         ng::game::shape::rectangle
-        {
-            ecs,
-            ng::vec3{ prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
-            ng::vec2{ prng(64), prng(64) },
-            ng::color{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }
-        }.detach();
-        
+    {
+        ecs,
+        ng::vec3{ prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
+        ng::vec2{ prng(64), prng(64) },
+        ng::color{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }
+    }.detach();
+
     // Asteroids...
     auto make_asteroid_mesh = [&]()
     {
@@ -135,19 +126,30 @@ void create_game(ng::i_layout& aLayout)
 
     for (int i = 0; i < 75; ++i)
         auto asteroid = ecs.create_entity(
-            archetypes::asteroid, 
+            archetypes::asteroid,
             ng::game::material{ ng::to_ecs_component(ng::color::from_hsl(prng(360), 1.0, 0.75)) },
             make_asteroid_mesh(),
             ng::game::rigid_body
-            { 
-                ng::vec3{ prng(800), prng(800), 0.0 }, 1.0, 
-                ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(prng(360.0)) }) * ng::vec3{ prng(20.0), 0.0, 0.0 }, 
-                {}, 
-                {}, 
-                ng::vec3{ 0.0, 0.0, ng::to_rad(prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) } 
+            {
+                ng::vec3{ prng(800), prng(800), 0.0 }, 1.0,
+                ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(prng(360.0)) }) * ng::vec3{ prng(20.0), 0.0, 0.0 },
+                {},
+                {},
+                ng::vec3{ 0.0, 0.0, ng::to_rad(prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
             },
             ng::game::broadphase_collider{ 0x2ull });
 
+    auto const explosionMaterial = ng::game::material
+    {
+        {}, {},
+        ecs.shared_component<ng::game::texture>().populate("explosion", ng::to_ecs_component(ng::image{ ":/test/resources/explosion.png" })) 
+    };
+    auto const explosionAnimation = ng::game::animation_filter
+    {
+        ecs.shared_component<ng::game::animation>().populate("explosion", ng::game::regular_sprite_sheet_to_animation(explosionMaterial, ng::vec2u32{ 4u, 3u }, 0.1))
+    };
+    auto explosion = ecs.create_entity(archetypes::explosion, explosionMaterial, explosionAnimation);
+        
     // Spaceship...
     const char* spaceshipImage
     {
@@ -324,5 +326,4 @@ void create_game(ng::i_layout& aLayout)
             canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
         }
     });
-
 }

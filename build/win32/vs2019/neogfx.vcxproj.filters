@@ -1026,6 +1026,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\anchorable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\animation_filter.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">

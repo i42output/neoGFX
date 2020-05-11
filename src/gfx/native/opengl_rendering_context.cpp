@@ -1082,12 +1082,13 @@ namespace neogfx
             if (aEcs.component<game::entity_info>().entity_record(entity).debug)
                 std::cerr << "Rendering debug entity..." << std::endl;
             #endif
-            drawables.emplace_back(
-                aEcs.component<game::mesh_filter>().entity_record(entity), 
-                aEcs.component<game::mesh_renderer>().entity_record(entity),
-                rigidBodies.has_entity_record(entity) ? 
-                    to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity(),
-                entity);
+            if (aEcs.component<game::mesh_filter>().has_entity_record(entity))
+                drawables.emplace_back(
+                    aEcs.component<game::mesh_filter>().entity_record(entity), 
+                    aEcs.component<game::mesh_renderer>().entity_record(entity),
+                    rigidBodies.has_entity_record(entity) ? 
+                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity(),
+                    entity);
         }
         draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), aTransformation);
         for (auto const& d : drawables)
