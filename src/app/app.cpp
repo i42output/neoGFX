@@ -1,4 +1,4 @@
-// cpp
+// app.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -32,7 +32,7 @@
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/core/power.hpp>
-#include <neogfx/core/i_animator.hpp>
+#include <neogfx/core/i_transition_animator.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
 namespace neogfx

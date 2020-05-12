@@ -93,7 +93,7 @@ namespace archetypes
 void create_game(ng::i_layout& aLayout)
 {
     // Create an ECS and canvas to render game world on...
-    auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>(std::make_shared<ng::game::ecs>()));
+    auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>(std::make_shared<ng::game::ecs>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused)));
     canvas.set_font(ng::font{ canvas.font(), ng::font_style::Bold, 16 });
     canvas.set_background_color(ng::color::Black);
 
@@ -146,14 +146,19 @@ void create_game(ng::i_layout& aLayout)
     };
     auto const explosionAnimation = ng::game::animation_filter
     {
-        ecs.shared_component<ng::game::animation>().populate("explosion", ng::game::regular_sprite_sheet_to_animation(explosionMaterial, ng::vec2u32{ 4u, 3u }, 0.1))
+        ecs.shared_component<ng::game::animation>().populate("explosion", ng::game::regular_sprite_sheet_to_animation(explosionMaterial, ng::vec2u32{ 4u, 4u }, 0.05))
     };
 
-    auto testExplosion = ecs.create_entity(archetypes::explosion, explosionMaterial, explosionAnimation);
-    auto& testExplosionFilter = ecs.component<ng::game::animation_filter>().entity_record(testExplosion);
-    testExplosionFilter.transformation = ng::mat44::identity();
-    ng::apply_translation(ng::apply_scaling(*testExplosionFilter.transformation, ng::vec3{ 64.0, 64.0, 1.0 }), ng::vec3{ 64.0, 64.0, 0.0 });
-        
+    for (int i = 0; i < 32; ++i)
+    {
+        auto testExplosion = ecs.create_entity(archetypes::explosion, explosionMaterial, explosionAnimation);
+        auto& testExplosionFilter = ecs.component<ng::game::animation_filter>().entity_record(testExplosion);
+        testExplosionFilter.transformation = ng::mat44::identity();
+        testExplosionFilter.currentFrame = static_cast<uint32_t>(prng(16));
+        auto const explosionSize = prng(64.0) + 32.0;
+        ng::apply_translation(ng::apply_scaling(*testExplosionFilter.transformation, ng::vec3{ explosionSize, explosionSize, 1.0 }), ng::vec3{ prng(800), prng(800), 0.0 });
+    }
+
     // Spaceship...
     const char* spaceshipImage
     {
@@ -330,4 +335,6 @@ void create_game(ng::i_layout& aLayout)
             canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
         }
     });
+
+    ecs.resume_all_systems();
 }

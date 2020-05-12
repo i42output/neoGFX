@@ -22,6 +22,7 @@
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/animator.hpp>
 #include <neogfx/game/game_world.hpp>
 
 namespace neogfx::game
@@ -120,6 +121,7 @@ namespace neogfx::game
         if (have_ecs())
         {
             iEcsPaused = ecs().all_systems_paused();
+            ecs().system<animator>();
             iSink += ecs().system<game_world>().PhysicsApplied([this](step_time)
             {
                 update();

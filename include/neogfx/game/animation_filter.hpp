@@ -32,6 +32,7 @@ namespace neogfx::game
         std::optional<animation> animation;
         std::optional<mat44> transformation;
         u32 currentFrame;
+        std::optional<i64> currentFrameStartTime; // ECS internal
 
         struct meta : i_component_data::meta
         {

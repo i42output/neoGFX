@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
+#include <neogfx/core/numerical.hpp>
 #include <neogfx/game/i_component_data.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 
@@ -30,7 +31,7 @@ namespace neogfx::game
     struct entity_info
     {
         neolib::uuid archetypeId;
-        int64_t creationTime;
+        i64 creationTime;
         #ifndef NDEBUG
         bool debug = false;
         #endif

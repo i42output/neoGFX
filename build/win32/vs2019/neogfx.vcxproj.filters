@@ -771,12 +771,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\i_animator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\animator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\event_processing_context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1028,6 +1022,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\animation_filter.hpp">
       <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\animator.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\i_transition_animator.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1339,9 +1342,6 @@
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\animator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1517,6 +1517,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\power.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\animator.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\transition_animator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

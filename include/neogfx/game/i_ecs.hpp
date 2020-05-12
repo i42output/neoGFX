@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <map>
+#include <neolib/i_mutex.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_entity_archetype.hpp>
@@ -92,7 +93,7 @@ namespace neogfx::game
         typedef id_t handle_id;
         typedef void* handle_t;
     public:
-        virtual neolib::recursive_spinlock& mutex() const = 0; // todo: use a polymorphic mutex
+        virtual neolib::i_lockable& mutex() const = 0;
     public:
         virtual ecs_flags flags() const = 0;
         virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
@@ -308,7 +309,7 @@ namespace neogfx::game
         {
         }
     private:
-        std::scoped_lock<neolib::recursive_spinlock> iLockGuard;
+        std::scoped_lock<neolib::i_lockable> iLockGuard;
     };
 
     template <typename Data>
@@ -320,6 +321,6 @@ namespace neogfx::game
         {
         }
     private:
-        std::scoped_lock<neolib::recursive_spinlock> iLockGuard;
+        std::scoped_lock<neolib::i_lockable> iLockGuard;
     };
 }

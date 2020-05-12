@@ -1,4 +1,4 @@
-// i_animator.hpp
+// transition_animator.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/timer.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/core/i_animator.hpp>
+#include <neogfx/core/i_transition_animator.hpp>
 
 namespace neogfx
 {

@@ -1,4 +1,4 @@
-// animator.cpp
+// transition_animator.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/scoped.hpp>
-#include <neogfx/core/animator.hpp>
+#include <neogfx/core/transition_animator.hpp>
 
 namespace neogfx
 {

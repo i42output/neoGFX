@@ -29,8 +29,8 @@ namespace neogfx::game
 {
     struct clock
     {
-        int64_t time;
-        int64_t timeStep;
+        i64 time;
+        i64 timeStep;
 
         struct meta : i_component_data::meta
         {

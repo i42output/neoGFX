@@ -142,13 +142,13 @@ namespace neogfx::game
  
     inline animation regular_sprite_sheet_to_animation(const vec2u32& aSpriteSheetExtents, const vec2u32& aCells, const vec2u32& aCellIndexTopLeft, const vec2u32& aCellIndexBottomRight, scalar aDefaultDuration = 0.0)
     {
-        auto const uvCellExtents = aSpriteSheetExtents.as<scalar>().hadamard_product((1.0 / aCells.as<scalar>()));
+        vec2 const uvCellExtents{ 1.0 / aCells.as<scalar>().x, 1.0 / aCells.as<scalar>().y };
         animation results;
         for (u32 y = aCellIndexTopLeft.y; y <= aCellIndexBottomRight.y; ++y)
         {
             for (u32 x = aCellIndexTopLeft.x; x <= aCellIndexBottomRight.x; ++x)
             {
-                vec2 const uvOffset{ x * uvCellExtents.x, y * uvCellExtents.y };
+                vec2 const uvOffset{ x * uvCellExtents.x, 1.0 - (y + 1) * uvCellExtents.y };
                 results.frames.push_back(
                     animation_frame
                     {
@@ -160,7 +160,7 @@ namespace neogfx::game
                             {
                                 { vec3{ -1.0, -1.0, 0.0 }, vec3{ 1.0, -1.0, 0.0 }, vec3{ 1.0, 1.0, 0.0 }, vec3{ -1.0, 1.0, 0.0 } },
                                 { uvOffset, uvOffset + vec2{ uvCellExtents.x, 0.0 }, uvOffset + vec2{ uvCellExtents.x, uvCellExtents.y }, uvOffset + vec2{ 0.0, uvCellExtents.y } },
-                                { face{ 0u, 1u, 2u }, face{ 0u, 1u, 3u } }
+                                { face{ 3u, 2u, 0u }, face{ 2u, 1u, 0u } }
                             }
                         }
                     });

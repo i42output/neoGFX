@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_mutex.hpp>
 #include <neolib/string.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component_data.hpp>
@@ -34,6 +35,8 @@ namespace neogfx::game
     public:
         virtual game::i_ecs& ecs() const = 0;
         virtual const component_id& id() const = 0;
+    public:
+        virtual neolib::i_lockable& mutex() const = 0;
     public:
         virtual bool is_data_optional() const = 0;
         virtual const i_string& name() const = 0;

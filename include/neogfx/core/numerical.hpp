@@ -386,6 +386,7 @@ namespace neogfx
         typedef vector4f vec4f;
 
         typedef int32_t i32;
+        typedef int64_t i64;
 
         typedef basic_vector<i32, 1> vector1i32;
         typedef basic_vector<i32, 2> vector2i32;
@@ -398,6 +399,7 @@ namespace neogfx
         typedef vector4i32 vec4i32;
 
         typedef uint32_t u32;
+        typedef uint32_t u64;
 
         typedef basic_vector<u32, 1> vector1u32;
         typedef basic_vector<u32, 2> vector2u32;

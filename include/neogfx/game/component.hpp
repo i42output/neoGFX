@@ -128,7 +128,7 @@ namespace neogfx::game
             return data_meta_type::id();
         }
     public:
-        neolib::recursive_spinlock& mutex() const
+        neolib::i_lockable& mutex() const override
         {
             return ecs().mutex();
         }
@@ -204,18 +204,18 @@ namespace neogfx::game
             scoped_snapshot(self_type& aOwner) :
                 iOwner{ aOwner }
             {
-                std::scoped_lock<neolib::recursive_spinlock> lock{ iOwner.mutex() };
+                std::scoped_lock<neolib::i_lockable> lock{ iOwner.mutex() };
                 ++iOwner.iUsingSnapshot;
             }
             scoped_snapshot(const scoped_snapshot& aOther) :
                 iOwner{ aOther.iOwner }
             {
-                std::scoped_lock<neolib::recursive_spinlock> lock{ iOwner.mutex() };
+                std::scoped_lock<neolib::i_lockable> lock{ iOwner.mutex() };
                 ++iOwner.iUsingSnapshot;
             }
             ~scoped_snapshot()
             {
-                std::scoped_lock<neolib::recursive_spinlock> lock{ iOwner.mutex() };
+                std::scoped_lock<neolib::i_lockable> lock{ iOwner.mutex() };
                 --iOwner.iUsingSnapshot;
             }
         public:
@@ -324,7 +324,7 @@ namespace neogfx::game
             free_indices().push_back(reverseIndex);
             if (have_snapshot())
             {
-                std::scoped_lock<neolib::recursive_spinlock> lock{ mutex() };
+                std::scoped_lock<neolib::i_lockable> lock{ mutex() };
                 if (have_snapshot())
                 {
                     auto ss = snapshot();
@@ -358,7 +358,7 @@ namespace neogfx::game
         }
         void take_snapshot()
         {
-            std::scoped_lock<neolib::recursive_spinlock> lock{ mutex() };
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             if (!iUsingSnapshot)
             {
                 if (iSnapshot == nullptr)
@@ -370,7 +370,7 @@ namespace neogfx::game
         }
         scoped_snapshot snapshot()
         {
-            std::scoped_lock<neolib::recursive_spinlock> lock{ mutex() };
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             return scoped_snapshot{ *this };
         }
         template <typename Compare>

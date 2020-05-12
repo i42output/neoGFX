@@ -24,7 +24,7 @@
 #include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
-#include <neogfx/core/i_animator.hpp>
+#include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/i_scrollbar.hpp>

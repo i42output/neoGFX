@@ -293,7 +293,7 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_sample.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\animator.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_thread.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\color.hpp" />
@@ -304,7 +304,7 @@
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\html.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\i_animator.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_properties.hpp" />
@@ -326,6 +326,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation_filter.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\broadphase_collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\clock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\color.hpp" />
@@ -619,7 +620,7 @@
     <ClCompile Include="..\..\..\src\audio\audio_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_track.cpp" />
-    <ClCompile Include="..\..\..\src\core\animator.cpp" />
+    <ClCompile Include="..\..\..\src\core\transition_animator.cpp" />
     <ClCompile Include="..\..\..\src\core\async_task.cpp" />
     <ClCompile Include="..\..\..\src\core\async_thread.cpp" />
     <ClCompile Include="..\..\..\src\core\color.cpp" />
@@ -629,6 +630,7 @@
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />
+    <ClCompile Include="..\..\..\src\game\animator.cpp" />
     <ClCompile Include="..\..\..\src\game\ecs.cpp" />
     <ClCompile Include="..\..\..\src\game\entity.cpp" />
     <ClCompile Include="..\..\..\src\game\entity_archetype.cpp" />

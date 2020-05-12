@@ -5,7 +5,7 @@
 #include <neolib/random.hpp>
 #include <neogfx/core/i_power.hpp>
 #include <neogfx/core/easing.hpp>
-#include <neogfx/core/i_animator.hpp>
+#include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gfx/graphics_context.hpp>

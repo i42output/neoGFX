@@ -84,17 +84,17 @@ namespace neogfx::game
             return;
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return;
-        auto& worldClock = ecs().shared_component<clock>().component_data().begin()->second;
-        auto& physicalConstants = ecs().shared_component<physics>().component_data().begin()->second;
-        auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
+        auto& worldClock = ecs().shared_component<clock>()[0];
+        auto const& physicalConstants = ecs().shared_component<physics>()[0];
+        auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
             *physicalConstants.uniformGravity : vec3{};
-        auto now = ecs().system<time>().system_time();
+        auto const now = ecs().system<time>().system_time();
         auto& rigidBodies = ecs().component<rigid_body>();
         while (worldClock.time <= now)
         {
             yield();
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
-            scoped_component_lock<rigid_body> lgRigidBodies{ ecs() };
+            std::optional<scoped_component_lock<rigid_body>> lockRigidBodies{ ecs() };
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
                 rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -131,8 +131,9 @@ namespace neogfx::game
                 rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
+            lockRigidBodies.reset();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
-            shared_component_scoped_lock<clock> lgClock{ ecs() };
+            shared_component_scoped_lock<clock> lockClock{ ecs() };
             worldClock.time += worldClock.timeStep;
         }
     }

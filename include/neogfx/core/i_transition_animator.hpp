@@ -1,4 +1,4 @@
-// i_animator.hpp
+// i_transition_animator.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
