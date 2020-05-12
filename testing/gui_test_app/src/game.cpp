@@ -200,8 +200,6 @@ void create_game(ng::i_layout& aLayout)
         },
         ng::game::broadphase_collider{ 0x1ull });
 
-    //ecs.component<ng::game::entity_info>().entity_record(spaceship).debug = true;
-
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     // Some information text...
     canvas.EntitiesRendered([&, clockFont](ng::i_graphics_context& gc)
@@ -335,6 +333,4 @@ void create_game(ng::i_layout& aLayout)
             canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
         }
     });
-
-    ecs.resume_all_systems();
 }

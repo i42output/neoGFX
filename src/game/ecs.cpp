@@ -219,7 +219,7 @@ namespace neogfx::game
             register_system<time>();
         }
 
-        if ((flags() & ecs_flags::Turbo) == ecs_flags::Turbo)
+        if ((flags() & ecs_flags::Turbo) == ecs_flags::Turbo && !all_systems_paused())
             service<i_power>().enable_turbo_mode();
 
         set_alive();
