@@ -344,6 +344,13 @@ namespace neogfx
         return default_style().font() != std::nullopt ? *default_style().font() : scrollable_widget::font();
     }
 
+    void text_edit::set_font(const optional_font& aFont)
+    {
+        widget::set_font(aFont);
+        if (!default_style().font())
+            refresh_paragraph(iText.begin(), 0);
+    }
+
     void text_edit::focus_gained(focus_reason aFocusReason)
     {
         scrollable_widget::focus_gained(aFocusReason);

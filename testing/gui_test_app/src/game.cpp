@@ -139,19 +139,11 @@ void create_game(ng::i_layout& aLayout)
             },
             ng::game::broadphase_collider{ 0x2ull });
 
-    auto const explosionMaterial = ng::game::material
-    {
-        {}, {},
-        ecs.shared_component<ng::game::texture>().populate("explosion", ng::to_ecs_component(ng::image{ ":/test/resources/explosion.png" })) 
-    };
-    auto const explosionAnimation = ng::game::animation_filter
-    {
-        ecs.shared_component<ng::game::animation>().populate("explosion", ng::game::regular_sprite_sheet_to_animation(explosionMaterial, ng::vec2u32{ 4u, 4u }, 0.05))
-    };
+    auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", ng::vec2u32{ 4u, 4u }, 0.05);
 
     for (int i = 0; i < 32; ++i)
     {
-        auto testExplosion = ecs.create_entity(archetypes::explosion, explosionMaterial, explosionAnimation);
+        auto testExplosion = ecs.create_entity(archetypes::explosion, explosionAnimation.material, explosionAnimation.filter);
         auto& testExplosionFilter = ecs.component<ng::game::animation_filter>().entity_record(testExplosion);
         testExplosionFilter.transformation = ng::mat44::identity();
         testExplosionFilter.currentFrame = static_cast<uint32_t>(prng(16));

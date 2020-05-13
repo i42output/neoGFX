@@ -661,11 +661,17 @@ int main(int argc, char* argv[])
             *sCustomColors = colorPicker.custom_colors();
         });
 
-        ui.themeFont.clicked([&window]()
+        ui.themeFont.clicked([&]()
         {
-            ng::font_dialog fontPicker(window, ng::service<ng::i_app>().current_style().font_info());
+            bool const changeEditFont = ui.textEdit.has_focus();
+            ng::font_dialog fontPicker(window, changeEditFont ? ui.textEdit.font() : ng::service<ng::i_app>().current_style().font_info());
             if (fontPicker.exec() == ng::dialog_result::Accepted)
-                ng::service<ng::i_app>().current_style().set_font_info(fontPicker.selected_font());
+            {
+                if (changeEditFont)
+                    ui.textEdit.set_font(fontPicker.selected_font());
+                else
+                    ng::service<ng::i_app>().current_style().set_font_info(fontPicker.selected_font());
+            }
         });
 
         ui.editColor.clicked([&]()

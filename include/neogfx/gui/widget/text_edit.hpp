@@ -444,6 +444,7 @@ namespace neogfx
         void paint(i_graphics_context& aGc) const override;
     public:
         const neogfx::font& font() const override;
+        void set_font(const optional_font& aFont) override;
     public:
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
