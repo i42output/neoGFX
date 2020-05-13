@@ -1152,10 +1152,10 @@ int main(int argc, char* argv[])
             }
         };
 
-        ui.radioOff.Toggled([&]() { configure_ecs(); });
-        ui.radioImmediateBatching.Toggled([&]() { configure_ecs(); });
-        ui.radioEcsBatching.Toggled([&]() { configure_ecs(); });
-        ui.radioEcsInstancing.Toggled([&]() { configure_ecs(); });
+        ui.radioOff.Checked([&]() { configure_ecs(); });
+        ui.radioImmediateBatching.Checked([&]() { configure_ecs(); });
+        ui.radioEcsBatching.Checked([&]() { configure_ecs(); });
+        ui.radioEcsInstancing.Checked([&]() { configure_ecs(); });
         ui.sliderShapeCount.ValueChanged([&]() { configure_ecs(); });
         ui.sliderShapeSize.ValueChanged([&]() { configure_ecs(); });
         ui.checkOutline.Toggled([&]() { configure_ecs(); });
