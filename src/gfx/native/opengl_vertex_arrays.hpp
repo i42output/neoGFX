@@ -47,7 +47,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
-                if (!room_for(aNeed))
+                if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
             use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
@@ -61,7 +61,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
-                if (!room_for(aNeed))
+                if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
             use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
@@ -75,7 +75,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
-                if (!room_for(aNeed))
+                if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
             use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
@@ -89,7 +89,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
-                if (!room_for(aNeed))
+                if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
             ~use_vertex_arrays()
@@ -189,6 +189,18 @@ namespace neogfx
             bool room_for(std::size_t aAmount) const
             {
                 return room() >= aAmount;
+            }
+            bool grow_to(std::size_t aAmount)
+            {
+                try
+                {
+                    vertices().reserve(static_cast<std::size_t>(aAmount * 1.5));
+                    return true;
+                }
+                catch (...)
+                {
+                    return false;
+                }
             }
             void execute()
             {

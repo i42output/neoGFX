@@ -109,6 +109,7 @@ namespace neogfx
             template <typename... Arguments>
             explicit basic_vector(value_type&& value, Arguments&&... aArguments) : base_type{ {std::move(value), std::forward<Arguments>(aArguments)...} } {}
             explicit basic_vector(const array_type& v) : base_type{ v } {}
+            basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::uninitialized_copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); }
             template <typename V, typename A, uint32_t S, uint32_t... Indexes>
             basic_vector(const swizzle<V, A, S, Indexes...>& aSwizzle) : self_type{ ~aSwizzle } {}
             basic_vector(const self_type& other) : base_type{ other.v } {}
@@ -119,7 +120,7 @@ namespace neogfx
             basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if_t<Size2 < Size, SFINAE> = 0) : base_type{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
             self_type& operator=(const self_type& other) { v = other.v; return *this; }
             self_type& operator=(self_type&& other) { v = std::move(other.v); return *this; }
-            self_type& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
+            self_type& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
         public:
             static uint32_t size() { return Size; }
             value_type operator[](uint32_t aIndex) const { return v[aIndex]; }

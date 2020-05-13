@@ -105,8 +105,8 @@ void create_game(ng::i_layout& aLayout)
         ng::game::shape::rectangle
     {
         ecs,
-        ng::vec3{ prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
-        ng::vec2{ prng(64), prng(64) },
+        { prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
+        { prng(64), prng(64) },
         ng::color{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }
     }.detach();
 
@@ -131,15 +131,15 @@ void create_game(ng::i_layout& aLayout)
             make_asteroid_mesh(),
             ng::game::rigid_body
             {
-                ng::vec3{ prng(800), prng(800), 0.0 }, 1.0,
+                { prng(800), prng(800), 0.0 }, 1.0,
                 ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(prng(360.0)) }) * ng::vec3{ prng(20.0), 0.0, 0.0 },
                 {},
                 {},
-                ng::vec3{ 0.0, 0.0, ng::to_rad(prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
+                { 0.0, 0.0, ng::to_rad(prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
             },
             ng::game::broadphase_collider{ 0x2ull });
 
-    auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", ng::vec2u32{ 4u, 4u }, 0.05);
+    auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
 
     for (int i = 0; i < 32; ++i)
     {
@@ -148,7 +148,7 @@ void create_game(ng::i_layout& aLayout)
         testExplosionFilter.transformation = ng::mat44::identity();
         testExplosionFilter.currentFrame = static_cast<uint32_t>(prng(16));
         auto const explosionSize = prng(64.0) + 32.0;
-        ng::apply_translation(ng::apply_scaling(*testExplosionFilter.transformation, ng::vec3{ explosionSize, explosionSize, 1.0 }), ng::vec3{ prng(800), prng(800), 0.0 });
+        ng::apply_translation(ng::apply_scaling(*testExplosionFilter.transformation, { explosionSize, explosionSize, 1.0 }), { prng(800), prng(800), 0.0 });
     }
 
     // Spaceship...
@@ -188,7 +188,7 @@ void create_game(ng::i_layout& aLayout)
         },
         ng::game::rigid_body
         {
-            ng::vec3{ 400.0, 18.0, 0.1 }, 1.0
+            { 400.0, 18.0, 0.1 }, 1.0
         },
         ng::game::broadphase_collider{ 0x1ull });
 
