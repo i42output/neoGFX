@@ -122,7 +122,7 @@ namespace neogfx::game
         {
             iEcsPaused = ecs().all_systems_paused();
             ecs().system<animator>();
-            iSink += ecs().system<game_world>().PhysicsApplied([this](step_time)
+            iSink += !ecs().system<game_world>().PhysicsApplied([this](step_time)
             {
                 update();
             });
