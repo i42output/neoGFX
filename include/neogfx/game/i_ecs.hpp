@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <map>
+#include <unordered_map>
 #include <neolib/i_mutex.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/ecs_ids.hpp>
@@ -82,13 +82,13 @@ namespace neogfx::game
         typedef std::function<std::unique_ptr<i_shared_component>()> shared_component_factory;
         typedef std::function<std::unique_ptr<i_system>()> system_factory;
     protected:
-        typedef std::map<entity_archetype_id, std::shared_ptr<const i_entity_archetype>> archetype_registry_t;
-        typedef std::map<component_id, component_factory> component_factories_t;
-        typedef std::map<component_id, std::unique_ptr<i_component>> components_t;
-        typedef std::map<component_id, shared_component_factory> shared_component_factories_t;
-        typedef std::map<component_id, std::unique_ptr<i_shared_component>> shared_components_t;
-        typedef std::map<system_id, system_factory> system_factories_t;
-        typedef std::map<system_id, std::unique_ptr<i_system>> systems_t;
+        typedef std::unordered_map<entity_archetype_id, std::shared_ptr<const i_entity_archetype>> archetype_registry_t;
+        typedef std::unordered_map<component_id, component_factory> component_factories_t;
+        typedef std::unordered_map<component_id, std::unique_ptr<i_component>> components_t;
+        typedef std::unordered_map<component_id, shared_component_factory> shared_component_factories_t;
+        typedef std::unordered_map<component_id, std::unique_ptr<i_shared_component>> shared_components_t;
+        typedef std::unordered_map<system_id, system_factory> system_factories_t;
+        typedef std::unordered_map<system_id, std::unique_ptr<i_system>> systems_t;
     public:
         typedef id_t handle_id;
         typedef void* handle_t;
