@@ -32,6 +32,8 @@ using namespace boost::multiprecision;
 #include <neogfx/app/i18n.hpp>
 #include <neogfx/core/async_task.hpp>
 
+#define USE_AVX
+
 namespace neogfx
 {
     using namespace neolib::stdint_suffix;
