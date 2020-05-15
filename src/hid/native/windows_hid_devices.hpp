@@ -1,6 +1,6 @@
 // windows_hid_devices.hpp
 /*
-  neogfx C++ GUI Library
+  neogfx C++ App/Game Engine
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify

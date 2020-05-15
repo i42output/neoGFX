@@ -961,7 +961,7 @@
                                                     id: sliderShapeCount
                                                     orientation: Horizontal
                                                     minimum: 1
-                                                    maximum: 10000
+                                                    maximum: 100000
                                                     step: 50
                                                     value: 50
                                                 }

@@ -1,5 +1,5 @@
 ﻿/*
-neogfx C++ GUI Library - Examples - Games - Video Poker
+neogfx C++ App/Game Engine - Examples - Games - Video Poker
 Copyright(C) 2017 Leigh Johnston
 
 This program is free software: you can redistribute it and / or modify

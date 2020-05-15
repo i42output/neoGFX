@@ -1,8 +1,8 @@
 // i_keyboard.hpp
 // Parts of this source file based on Simple DirectMedia Layer, Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 /*
-  neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
+  neogfx C++ App/Game Engine
+  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by

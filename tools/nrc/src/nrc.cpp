@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         "nrc neoGFX resource compiler",
         "i42 Software",
         neolib::version{ 1, 0, 0, 0 },
-        "Copyright (c) 2019 Leigh Johnston",
+        "Copyright (c) 2019, 2020 Leigh Johnston",
         {}, {}, {}, ".nel"
     };
     neolib::application app{ appInfo };
