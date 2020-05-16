@@ -36,7 +36,7 @@ namespace neogfx::game
         const system_id& id() const override;
         const i_string& name() const override;
     public:
-        void apply() override;
+        bool apply() override;
     public:
         void set_time_step(double aTimeStep_s);
         bool universal_gravitation_enabled() const;

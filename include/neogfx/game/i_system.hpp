@@ -40,7 +40,7 @@ namespace neogfx::game
         virtual const i_component& component(component_id aComponentId) const = 0;
         virtual const i_component& component(component_id aComponentId) = 0;
     public:
-        virtual void apply() = 0;
+        virtual bool apply() = 0;
         virtual bool paused() const = 0;
         virtual void pause() = 0;
         virtual void resume() = 0;

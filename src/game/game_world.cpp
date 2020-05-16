@@ -48,9 +48,10 @@ namespace neogfx::game
         return meta::name();
     }
 
-    void game_world::apply()
+    bool game_world::apply()
     {
         // do nothing
+        return true;
     }
 
     void game_world::set_time_step(double aTimeStep_s)

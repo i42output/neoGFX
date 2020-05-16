@@ -38,11 +38,12 @@ namespace neogfx::game
             start();
         }
     public:
-        void do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
+        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
         {
-            async_thread::do_work(aYieldType);
-            iOwner.apply();
+            bool didWork = async_thread::do_work(aYieldType);
+            didWork = iOwner.apply() || didWork;
             iOwner.yield();
+            return didWork;
         }
     private:
         animator& iOwner;
@@ -72,14 +73,14 @@ namespace neogfx::game
         return meta::name();
     }
 
-    void animator::apply()
+    bool animator::apply()
     {
         if (!ecs().component_instantiated<animation_filter>())
-            return;
+            return false;
         if (paused())
-            return;
+            return false;
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
-            return;
+            return false;
 
         scoped_component_lock<animation_filter> lockAnimationFilters{ ecs() };
 
@@ -97,6 +98,8 @@ namespace neogfx::game
                 filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
             }
         }
+
+        return true;
     }
 
     void animator::terminate()

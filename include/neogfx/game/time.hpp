@@ -33,7 +33,7 @@ namespace neogfx::game
         const system_id& id() const override;
         const i_string& name() const override;
     public:
-        void apply() override;
+        bool apply() override;
     public:
         step_time system_time() const;
         step_time world_time() const;

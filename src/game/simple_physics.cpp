@@ -38,11 +38,12 @@ namespace neogfx::game
             start();
         }
     public:
-        void do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
+        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
         {
-            async_thread::do_work(aYieldType);
-            iOwner.apply();
+            bool didWork = async_thread::do_work(aYieldType);
+            didWork = iOwner.apply() || didWork;
             iOwner.yield();
+            return didWork;
         }
     private:
         simple_physics& iOwner;
@@ -76,22 +77,24 @@ namespace neogfx::game
         return meta::name();
     }
 
-    void simple_physics::apply()
+    bool simple_physics::apply()
     {
         if (!ecs().component_instantiated<rigid_body>())
-            return;
+            return false;
         if (paused())
-            return;
+            return false;
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
-            return;
+            return false;
         auto& worldClock = ecs().shared_component<clock>()[0];
         auto const& physicalConstants = ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
             *physicalConstants.uniformGravity : vec3{};
         auto const now = ecs().system<time>().system_time();
         auto& rigidBodies = ecs().component<rigid_body>();
+        bool didWork = false;
         while (worldClock.time <= now)
         {
+            didWork = true;
             yield();
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
             std::optional<scoped_component_lock<rigid_body>> lockRigidBodies{ ecs() };
@@ -136,6 +139,7 @@ namespace neogfx::game
             shared_component_scoped_lock<clock> lockClock{ ecs() };
             worldClock.time += worldClock.timeStep;
         }
+        return didWork;
     }
 
     void simple_physics::terminate()

@@ -47,8 +47,9 @@ namespace neogfx::game
         return meta::name();
     }
 
-    void time::apply()
+    bool time::apply()
     {
+        return true;
     }
 
     step_time time::system_time() const

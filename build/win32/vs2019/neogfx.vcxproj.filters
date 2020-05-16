@@ -1035,6 +1035,9 @@
     <ClInclude Include="..\..\..\include\neogfx\core\simd.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\neolib\include\neolib\timer_object.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
