@@ -1118,9 +1118,9 @@ int main(int argc, char* argv[])
 
         auto update_ecs_entities = [&ecs, &ui, &prngInstancing](ng::game::step_time aPhysicsStepTime)
         {
-            for (auto entity : ecs->component<ng::game::mesh_renderer>().entities())
+            auto& meshFilter = ecs->component<ng::game::mesh_filter>();
+            for (auto& filter : meshFilter.component_data())
             {
-                auto& filter = ecs->component<ng::game::mesh_filter>().entity_record(entity);
                 if (!filter.transformation)
                     filter.transformation = ng::mat44::identity();
                 (*filter.transformation)[3][0] = prngInstancing(ui.pageInstancing.client_rect().cx - 1);

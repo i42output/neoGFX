@@ -44,10 +44,11 @@ namespace neogfx
     rect framed_widget::client_rect(bool aIncludeMargins) const
     {
         rect cr = widget::client_rect(aIncludeMargins);
-        cr.x += effective_frame_width();
-        cr.y += effective_frame_width();
-        cr.cx -= effective_frame_width() * 2.0;
-        cr.cy -= effective_frame_width() * 2.0;
+        auto const effectiveFrameWidth = effective_frame_width();
+        cr.x += effectiveFrameWidth;
+        cr.y += effectiveFrameWidth;
+        cr.cx -= effectiveFrameWidth * 2.0;
+        cr.cy -= effectiveFrameWidth * 2.0;
         return cr;
     }
 
