@@ -148,6 +148,13 @@ namespace neogfx::game
         iLayers.resize(aLayers, true);
     }
 
+    bool canvas::layer_visible(int32_t aLayer) const
+    {
+        if (aLayer >= iLayers.size())
+            throw invalid_layer();
+        return iLayers[aLayer];
+    }
+
     void canvas::show_layer(int32_t aLayer)
     {
         if (aLayer >= iLayers.size())
@@ -215,6 +222,8 @@ namespace neogfx::game
                 scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
                 for (int32_t layer = 1; layer < layers(); ++layer)
                 {
+                    if (!layer_visible(layer))
+                        continue;
                     RenderingEntities.trigger(aGc, layer);
                     aGc.draw_entities(ecs(), layer);
                     EntitiesRendered.trigger(aGc, layer);

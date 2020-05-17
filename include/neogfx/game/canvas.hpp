@@ -51,6 +51,7 @@ namespace neogfx::game
         void set_ecs(const std::shared_ptr<game::i_ecs>& aEcs);
         int32_t layers();
         void set_layers(int32_t aLayers);
+        bool layer_visible(int32_t aLayer) const;
         void show_layer(int32_t aLayer);
         void hide_layer(int32_t aLayer);
     public:

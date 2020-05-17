@@ -1186,7 +1186,7 @@ int main(int argc, char* argv[])
         ui.checkFill.Toggled([&]() { configure_ecs(); });
         ui.radioCircle.Toggled([&]() { configure_ecs(); });
 
-        ui.canvasInstancing.painted([&](ng::i_graphics_context& aGc)
+        ui.canvasInstancing.PaintingChildren([&](ng::i_graphics_context& aGc)
         {
             if (ui.radioOff.is_checked())
             {
