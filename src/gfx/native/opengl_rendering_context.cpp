@@ -1075,6 +1075,9 @@ namespace neogfx
         auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
         auto const& rigidBodies = rigidBodiesSnapshot.data();
         thread_local std::vector<mesh_drawable> drawables;
+        game::scoped_component_lock<game::mesh_renderer> lock1{ aEcs };
+        game::scoped_component_lock<game::mesh_filter> lock2{ aEcs };
+        game::scoped_component_lock<game::animation_filter> lock3{ aEcs };
         for (auto entity : aEcs.component<game::mesh_renderer>().entities())
         {
             if (entity == game::null_entity)

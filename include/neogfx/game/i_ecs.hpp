@@ -22,11 +22,12 @@
 #include <neogfx/neogfx.hpp>
 #include <unordered_map>
 #include <neolib/i_mutex.hpp>
+#include <neolib/thread_pool.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_entity_archetype.hpp>
-#include <neogfx/game/component.hpp>
-#include <neogfx/game/system.hpp>
+#include <neogfx/game/i_component.hpp>
+#include <neogfx/game/i_system.hpp>
 #include <neogfx/game/chrono.hpp>
 
 namespace neogfx::game
@@ -94,10 +95,11 @@ namespace neogfx::game
         typedef void* handle_t;
     public:
         virtual neolib::i_lockable& mutex() const = 0;
+        virtual neolib::thread_pool& thread_pool() const = 0; // todo: polymorphic threadpool
     public:
         virtual ecs_flags flags() const = 0;
         virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
-        virtual void destroy_entity(entity_id aEntityId) = 0;
+        virtual void destroy_entity(entity_id aEntityId, bool aNotify = true) = 0;
     public:
         virtual bool all_systems_paused() const = 0;
         virtual void pause_all_systems() = 0;
@@ -317,6 +319,10 @@ namespace neogfx::game
     {
     public:
         scoped_component_lock(const i_ecs& aEcs) :
+            iLockGuard{ aEcs.component<Data>().mutex() }
+        {
+        }
+        scoped_component_lock(i_ecs& aEcs) :
             iLockGuard{ aEcs.component<Data>().mutex() }
         {
         }

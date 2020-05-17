@@ -227,6 +227,8 @@ namespace neogfx::game
 
     ecs::~ecs()
     {
+        if (iThreadPool)
+            iThreadPool->stop();
         for (auto& system : systems())
             system.second->terminate();
     }
@@ -234,6 +236,14 @@ namespace neogfx::game
     neolib::recursive_spinlock& ecs::mutex() const
     {
         return iMutex;
+    }
+
+    neolib::thread_pool& ecs::thread_pool() const
+    {
+        std::scoped_lock<neolib::i_lockable> lock{ mutex() };
+        if (!iThreadPool)
+            iThreadPool.emplace();
+        return *iThreadPool;
     }
 
     ecs_flags ecs::flags() const
@@ -250,9 +260,10 @@ namespace neogfx::game
         return entityId;
     }
     
-    void ecs::destroy_entity(entity_id aEntityId)
+    void ecs::destroy_entity(entity_id aEntityId, bool aNotify)
     {
-        EntityDestroyed.trigger(aEntityId);
+        if (aNotify)
+            EntityDestroyed.trigger(aEntityId);
         for (auto& component : iComponents)
             if (component.second->has_entity_record(aEntityId))
                 component.second->destroy_entity_record(aEntityId);

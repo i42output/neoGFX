@@ -23,6 +23,8 @@
 #include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/game/i_ecs.hpp>
+#include <neogfx/game/component.hpp>
+#include <neogfx/game/system.hpp>
 
 namespace neogfx::game
 {
@@ -41,10 +43,11 @@ namespace neogfx::game
         ~ecs();
     public:
         neolib::recursive_spinlock& mutex() const override;
+        neolib::thread_pool& thread_pool() const override;
     public:
         ecs_flags flags() const override;
         entity_id create_entity(const entity_archetype_id& aArchetypeId) override;
-        void destroy_entity(entity_id aEntityId) override;
+        void destroy_entity(entity_id aEntityId, bool aNotify = true) override;
     public:
         bool all_systems_paused() const override;
         void pause_all_systems() override;
@@ -117,6 +120,7 @@ namespace neogfx::game
         using i_ecs::register_system;
     private:
         mutable neolib::recursive_spinlock iMutex;
+        mutable std::optional<neolib::thread_pool> iThreadPool;
         ecs_flags iFlags;
         archetype_registry_t iArchetypeRegistry;
         component_factories_t iComponentFactories;

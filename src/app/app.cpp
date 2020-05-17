@@ -248,6 +248,8 @@ namespace neogfx
         actionDelete{ "Delete"_t },
         actionSelectAll{ "Select All"_t }
     {
+        neolib::event_mutex().set_multi_threaded_spinlock();
+
         actionFileNew.set_shortcut("Ctrl+Shift+N");
         actionFileOpen.set_shortcut("Ctrl+Shift+O");
         actionFileClose.set_shortcut("Ctrl+F4");

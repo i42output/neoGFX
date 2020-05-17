@@ -37,6 +37,7 @@ namespace neogfx
     namespace math
     {
         #define USE_AVX
+        #define USE_EMM
 
         using namespace boost::math::constants;
 

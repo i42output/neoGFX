@@ -23,8 +23,9 @@
 #include <unordered_map>
 #include <string>
 #include <neolib/intrusive_sort.hpp>
+#include <neolib/thread_pool.hpp>
 #include <neogfx/game/ecs_ids.hpp>
-#include <neogfx/game/i_component.hpp>
+#include <neogfx/game/i_ecs.hpp>
 
 namespace neogfx::game
 {
@@ -130,7 +131,7 @@ namespace neogfx::game
     public:
         neolib::i_lockable& mutex() const override
         {
-            return ecs().mutex();
+            return iMutex;
         }
     public:
         bool is_data_optional() const override
@@ -174,7 +175,15 @@ namespace neogfx::game
         {
             return *std::next(component_data().begin(), aIndex);
         }
+    public:
+        template <typename Callable>
+        void parallel_apply(const Callable& aCallable, std::size_t aMinimumParallelismCount = 256)
+        {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
+            neolib::parallel_apply(ecs().thread_pool(), component_data(), aCallable, aMinimumParallelismCount);
+        }
     private:
+        mutable neolib::recursive_spinlock iMutex;
         game::i_ecs& iEcs;
         component_data_t iComponentData;
     };
@@ -195,7 +204,6 @@ namespace neogfx::game
         typedef std::vector<entity_id> component_data_entities_t;
         typedef typename component_data_t::size_type reverse_index_t;
         typedef std::vector<reverse_index_t> reverse_indices_t;
-        typedef std::vector<reverse_index_t> free_indices_t;
     public:
         typedef std::unique_ptr<self_type> snapshot_ptr;
         class scoped_snapshot
@@ -238,7 +246,6 @@ namespace neogfx::game
         static_component(const self_type& aOther) :
             base_type{ aOther },
             iEntities{ aOther.iEntities },
-            iFreeIndices{ aOther.iFreeIndices },
             iReverseIndices{ aOther.iReverseIndices },
             iHaveSnapshot{ false },
             iUsingSnapshot{ 0u }
@@ -249,7 +256,6 @@ namespace neogfx::game
         {
             base_type::operator=(aRhs);
             iEntities = aRhs.iEntities;    
-            iFreeIndices = aRhs.iFreeIndices;
             iReverseIndices = aRhs.iReverseIndices;
             return *this;
         }
@@ -293,16 +299,19 @@ namespace neogfx::game
         }
         reverse_index_t reverse_index(entity_id aEntity) const
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             if (reverse_indices().size() > aEntity)
                 return reverse_indices()[aEntity];
             return invalid;
         }
         bool has_entity_record(entity_id aEntity) const override
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             return reverse_index(aEntity) != invalid;
         }
         const data_type& entity_record(entity_id aEntity) const
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             auto reverseIndex = reverse_index(aEntity);
             if (reverseIndex == invalid)
                    throw entity_record_not_found();
@@ -310,40 +319,42 @@ namespace neogfx::game
         }
         value_type& entity_record(entity_id aEntity)
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             return const_cast<value_type&>(to_const(*this).entity_record(aEntity));
         }
         void destroy_entity_record(entity_id aEntity) override
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             auto reverseIndex = reverse_index(aEntity);
             if (reverseIndex == invalid)
                 throw entity_record_not_found();
             if constexpr (data_meta_type::has_handles)
                 data_meta_type::free_handles(base_type::component_data()[reverseIndex], ecs());
-            entities()[reverseIndex] = null_entity;
+            std::swap(base_type::component_data()[reverseIndex], base_type::component_data().back());
+            base_type::component_data().pop_back();
+            std::swap(entities()[reverseIndex], entities().back());
+            entities().pop_back();
+            reverse_indices()[entities()[reverseIndex]] = reverseIndex;
             reverse_indices()[aEntity] = invalid;
-            free_indices().push_back(reverseIndex);
             if (have_snapshot())
             {
-                std::scoped_lock<neolib::i_lockable> lock{ mutex() };
-                if (have_snapshot())
-                {
-                    auto ss = snapshot();
-                    ss.data().destroy_entity_record(aEntity);
-                }
+                auto ss = snapshot();
+                ss.data().destroy_entity_record(aEntity);
             }
-
-            // todo: sort/remove component data of dead entities
         }
         value_type& populate(entity_id aEntity, const value_type& aData)
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             return do_populate(aEntity, aData);
         }
         value_type& populate(entity_id aEntity, value_type&& aData)
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             return do_populate(aEntity, aData);
         }
         const void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) override
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             if ((aComponentData == nullptr && !is_data_optional()) || aComponentDataSize != sizeof(data_type))
                 throw invalid_data();
             if (aComponentData != nullptr)
@@ -376,6 +387,7 @@ namespace neogfx::game
         template <typename Compare>
         void sort(Compare aComparator)
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             neolib::intrusive_sort(base_type::component_data().begin(), base_type::component_data().end(),
                 [this](auto lhs, auto rhs) 
                 { 
@@ -392,36 +404,23 @@ namespace neogfx::game
                 }, aComparator);
         }
     private:
-        free_indices_t& free_indices()
-        {
-            return iFreeIndices;
-        }
         template <typename T>
         value_type& do_populate(entity_id aEntity, T&& aComponentData)
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             if (has_entity_record(aEntity))
                 return do_update(aEntity, aComponentData);
             reverse_index_t reverseIndex = invalid;
-            if (!free_indices().empty())
+            reverseIndex = base_type::component_data().size();
+            base_type::component_data().push_back(std::forward<T>(aComponentData));
+            try
             {
-                reverseIndex = free_indices().back();
-                free_indices().pop_back();
-                base_type::component_data()[reverseIndex] = std::forward<T>(aComponentData);
-                entities()[reverseIndex] = aEntity;
+                entities().push_back(aEntity);
             }
-            else
+            catch (...)
             {
-                reverseIndex = base_type::component_data().size();
-                base_type::component_data().push_back(std::forward<T>(aComponentData));
-                try
-                {
-                    entities().push_back(aEntity);
-                }
-                catch (...)
-                {
-                    base_type::component_data().pop_back();
-                    throw;
-                }
+                base_type::component_data().pop_back();
+                throw;
             }
             try
             {
@@ -439,13 +438,13 @@ namespace neogfx::game
         template <typename T>
         value_type& do_update(entity_id aEntity, T&& aComponentData)
         {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             auto& record = entity_record(aEntity);
             record = aComponentData;
             return record;
         }
     private:
         component_data_entities_t iEntities;
-        free_indices_t iFreeIndices;
         reverse_indices_t iReverseIndices;
         mutable std::atomic<bool> iHaveSnapshot;
         mutable std::atomic<uint32_t> iUsingSnapshot;

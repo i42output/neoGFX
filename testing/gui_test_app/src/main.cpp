@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <neolib/random.hpp>
+#include <neolib/thread_pool.hpp>
 #include <neogfx/core/i_power.hpp>
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
@@ -1112,49 +1113,66 @@ int main(int argc, char* argv[])
 
         ng::font infoFont{ "SnareDrum Two NBP", "Regular", 40.0 };
 
-        neolib::basic_random<ng::coordinate> prngInstancing;
         std::optional<ng::game::ecs> ecs;
         ng::sink sink;
 
-        auto update_ecs_entities = [&ecs, &ui, &prngInstancing](ng::game::step_time aPhysicsStepTime)
+        ng::rect instancingRect;
+
+        auto entity_transformation = [&](ng::game::mesh_filter& aFilter)
         {
-            auto& meshFilter = ecs->component<ng::game::mesh_filter>();
-            for (auto& filter : meshFilter.component_data())
-            {
-                if (!filter.transformation)
-                    filter.transformation = ng::mat44::identity();
-                (*filter.transformation)[3][0] = prngInstancing(ui.pageInstancing.client_rect().cx - 1);
-                (*filter.transformation)[3][1] = prngInstancing(ui.pageInstancing.client_rect().cy - 1);
-            }
+            thread_local auto seed = ( ng::simd_srand(std::this_thread::get_id()), 42);
+            if (!aFilter.transformation)
+                aFilter.transformation = ng::mat44::identity();
+            (*aFilter.transformation)[3][0] = ng::simd_rand(instancingRect.cx - 1);
+            (*aFilter.transformation)[3][1] = ng::simd_rand(instancingRect.cy - 1);
+        };
+
+        auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
+        {
+            instancingRect = ui.pageInstancing.client_rect();
+            ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
         };
 
         auto configure_ecs = [&]()
         {
             sink.clear();
-            if (ui.radioImmediateBatching.is_checked() || ui.radioOff.is_checked())
+            bool needEcs = ui.radioEcsBatching.is_checked() || ui.radioEcsInstancing.is_checked();
+            if (!needEcs)
             {
                 ui.canvasInstancing.set_ecs({});
                 ecs = std::nullopt;
             }
-            else if (ui.radioEcsBatching.is_checked() || ui.radioEcsInstancing.is_checked())
+            else
             {
-                ecs.emplace(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused);
-                ecs->system<ng::game::simple_physics>();
-                ecs->component<ng::game::rigid_body>(); // not using any rigid bodies but we want physics thread to run
-                sink += ~~~~ecs->system<ng::game::game_world>().ApplyingPhysics(update_ecs_entities);
-                for (int32_t i = 0; i < ui.sliderShapeCount.value(); ++i)
+                if (!ecs)
                 {
-                    auto r = ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } };
-                    ng::game::shape::rectangle
-                    {
-                        *ecs,
-                        ng::vec3{},
-                        ng::vec2{ r.cx, r.cy },
-                        random_color().with_alpha(random_color().red())
-                    }.detach();
+                    ecs.emplace(ng::game::ecs_flags::Default);
+                    ecs->system<ng::game::simple_physics>();
+                    ecs->component<ng::game::rigid_body>(); // not using any rigid bodies but we want physics thread to run
+                    sink += ~~~~ecs->system<ng::game::game_world>().ApplyingPhysics(update_ecs_entities);
+                    ui.canvasInstancing.set_ecs(*ecs);
                 }
-                ui.canvasInstancing.set_ecs(*ecs);
-                ecs->resume_all_systems();
+                auto const meshesWanted = ui.sliderShapeCount.value();
+                ng::game::scoped_component_lock<ng::game::mesh_filter> lock{ *ecs };
+                auto& meshFilterComponent = ecs->component<ng::game::mesh_filter>();
+                auto& meshFilters = meshFilterComponent.component_data();
+                auto const& instancingRect = ui.pageInstancing.client_rect();
+                while (meshFilters.size() != meshesWanted)
+                {
+                    if (meshFilters.size() < meshesWanted)
+                    {
+                        auto r = ng::rect{ ng::point{ ng::simd_rand(instancingRect.cx - 1), ng::simd_rand(instancingRect.cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } };
+                        ng::game::shape::rectangle
+                        {
+                            *ecs,
+                            ng::vec3{},
+                            ng::vec2{ r.cx, r.cy },
+                            random_color().with_alpha(random_color().red())
+                        }.detach();
+                    }
+                    else
+                        ecs->destroy_entity(meshFilterComponent.entities()[0]);
+                }
             }
         };
 
@@ -1185,23 +1203,23 @@ int main(int argc, char* argv[])
                     {
                         if (ui.radioCircle.is_checked())
                             aGc.draw_circle(
-                                ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ui.sliderShapeSize.value(),
+                                ng::point{ ng::simd_rand(ui.pageInstancing.client_rect().cx - 1), ng::simd_rand(ui.pageInstancing.client_rect().extents().cy - 1) }, ui.sliderShapeSize.value(),
                                 ng::pen{ random_color(), 2.0 });
                         else
                             aGc.draw_rect(
-                                ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                                ng::rect{ ng::point{ ng::simd_rand(ui.pageInstancing.client_rect().cx - 1), ng::simd_rand(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
                                 ng::pen{ random_color(), 2.0 });
                     }
                     else if (ui.checkOutline.is_checked() && ui.checkFill.is_checked())
                     {
                         if (ui.radioCircle.is_checked())
                             aGc.draw_circle(
-                                ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
+                                ng::point{ ng::simd_rand(ui.pageInstancing.client_rect().cx - 1), ng::simd_rand(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
                                 ng::pen{ random_color(), 2.0 },
                                 random_color().with_alpha(random_color().red()));
                         else
                             aGc.draw_rect(
-                                ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                                ng::rect{ ng::point{ ng::simd_rand(ui.pageInstancing.client_rect().cx - 1), ng::simd_rand(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
                                 ng::pen{ random_color(), 2.0 },
                                 random_color().with_alpha(random_color().red()));
                     }
@@ -1209,11 +1227,11 @@ int main(int argc, char* argv[])
                     {
                         if (ui.radioCircle.is_checked())
                             aGc.fill_circle(
-                                ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
+                                ng::point{ ng::simd_rand(ui.pageInstancing.client_rect().cx - 1), ng::simd_rand(ui.pageInstancing.client_rect().cy - 1) }, ui.sliderShapeSize.value(),
                                 random_color().with_alpha(random_color().red()));
                         else
                             aGc.fill_rect(
-                                ng::rect{ ng::point{ prngInstancing(ui.pageInstancing.client_rect().cx - 1), prngInstancing(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
+                                ng::rect{ ng::point{ ng::simd_rand(ui.pageInstancing.client_rect().cx - 1), ng::simd_rand(ui.pageInstancing.client_rect().extents().cy - 1) }, ng::size_i32{ ui.sliderShapeSize.value() } },
                                 random_color().with_alpha(random_color().red()));
                     }
                 }

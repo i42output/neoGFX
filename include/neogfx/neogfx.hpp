@@ -33,6 +33,7 @@ using namespace boost::multiprecision;
 #include <neogfx/core/async_task.hpp>
 
 #define USE_AVX
+#define USE_EMM
 
 namespace neogfx
 {
