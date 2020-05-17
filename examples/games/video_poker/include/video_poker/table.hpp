@@ -44,12 +44,12 @@ namespace video_poker
 
     class outcome;
 
-    class table : public neogfx::widget, public i_table, private i_card_textures
+    class table : public neogfx::game::canvas, public i_table, private i_card_textures
     {
     private:
         typedef std::shared_ptr<card_space> card_space_pointer;
     public:
-        table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas);
+        table(neogfx::i_layout& aLayout);
         ~table();
     public:
         table_state state() const override;
@@ -72,7 +72,6 @@ namespace video_poker
         credit_t iStake;
         std::optional<deck> iDeck;
         std::optional<hand> iHand;
-        neogfx::game::canvas& iCanvas;
         neogfx::vertical_layout iMainLayout;
         neogfx::label iLabelTitle;
         neogfx::vertical_spacer iSpacer1;

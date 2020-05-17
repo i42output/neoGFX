@@ -59,9 +59,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample Applications", "Sample Applications", "{C7965989-2489-4488-B051-402A0C5CBAC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{868646AC-5EF7-41F6-9E93-B3922AD9D569}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\..\examples\games\video_poker\src\table.cpp = ..\..\..\examples\games\video_poker\src\table.cpp
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{F86EC911-A86E-4AEF-AAE2-F18C151B3A61}"
 EndProject

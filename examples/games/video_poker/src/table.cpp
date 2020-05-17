@@ -65,23 +65,22 @@ namespace video_poker
         }
     };
     
-    table::table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas) :
-        neogfx::widget{ aLayout },
+    table::table(neogfx::i_layout& aLayout) :
+        neogfx::game::canvas{ aLayout, std::make_shared<neogfx::game::ecs>() },
         iState{ table_state::TakeBet },
         iCredits{ STARTING_CREDITS },
         iStake{ 0 },
-        iCanvas{ aCanvas },
         iMainLayout{ *this, neogfx::alignment::Centre },
         iLabelTitle{ iMainLayout, "VIDEO POKER" },
         iSpacer1{ iMainLayout },
         iSpacesLayout{ iMainLayout },
         iSpacer2{ iSpacesLayout },
         iSpaces{
-            std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
-            std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
-            std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
-            std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
-            std::make_shared<card_space>(iSpacesLayout, iCanvas, *this) },
+            std::make_shared<card_space>(iSpacesLayout, *this, *this),
+            std::make_shared<card_space>(iSpacesLayout, *this, *this),
+            std::make_shared<card_space>(iSpacesLayout, *this, *this),
+            std::make_shared<card_space>(iSpacesLayout, *this, *this),
+            std::make_shared<card_space>(iSpacesLayout, *this, *this) },
         iSpacer3{ iSpacesLayout },
         iSpacer4{ iMainLayout },
         iGambleLayout{ iMainLayout },
@@ -97,6 +96,8 @@ namespace video_poker
         iLabelStake{ iInfoBarLayout, "Stake: " },
         iLabelStakeValue{ iInfoBarLayout, "" }
     {
+        set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
+
         set_ignore_mouse_events(true);
         iMainLayout.set_spacing(neogfx::size{ 16.0 });
         iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
@@ -155,7 +156,7 @@ namespace video_poker
         update_widgets();
 
         // Instantiate physics...
-        aCanvas.ecs().system<neogfx::game::simple_physics>();
+        ecs().system<neogfx::game::simple_physics>();
     }
 
     table::~table()
@@ -240,7 +241,7 @@ namespace video_poker
     void table::win(credit_t aWinnings)
     {
         iOutcome = std::make_unique<outcome>(
-            iCanvas, 
+            *this, 
             to_string(video_poker::to_poker_hand(*iHand)) + neogfx::to_string(u8"\nWIN £") + boost::lexical_cast<std::string>(aWinnings) + "!",
             neogfx::color::Goldenrod.with_lightness(0.8));
         iCredits += aWinnings;
@@ -249,7 +250,7 @@ namespace video_poker
     void table::no_win()
     {
         iOutcome = std::make_unique<outcome>(
-            iCanvas,
+            *this,
             "No Win",
             neogfx::color::Blue.with_lightness(0.8));
     }

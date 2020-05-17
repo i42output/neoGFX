@@ -30,11 +30,7 @@ int main(int argc, char* argv[])
 
         auto& window = *windowObject;
 
-        ng::game::canvas canvas{ window.client_layout(), std::make_shared<ng::game::ecs>() };
-        canvas.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
-        ng::vertical_layout canvasLayout{ canvas };
-
-        video_poker::table table{ canvasLayout, canvas };
+        video_poker::table table{ window.client_layout() };
 
         return app.exec();
     }
