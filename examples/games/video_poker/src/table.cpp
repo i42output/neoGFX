@@ -59,9 +59,10 @@ namespace video_poker
                 neogfx::text_appearance{aColor, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black } },
                 neogfx::alignment::Centre}
         {
+            aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).layer = 1;
             aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).destroyOnFustrumCull = true;
             auto const& boundingBox = neogfx::game::bounding_rect(*aCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(id()).mesh);
-            aCanvas.ecs().populate(id(), neogfx::game::rigid_body{ neogfx::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 1.0 }, 1.0, neogfx::vec3{ 0.0, aCanvas.dpi_scale(-300.0), 0.0 } });
+            aCanvas.ecs().populate(id(), neogfx::game::rigid_body{ neogfx::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 0.9 }, 1.0, neogfx::vec3{ 0.0, aCanvas.dpi_scale(-300.0), 0.0 } });
         }
     };
     
@@ -97,6 +98,8 @@ namespace video_poker
         iLabelStakeValue{ iInfoBarLayout, "" }
     {
         set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
+
+        set_layers(2);
 
         set_ignore_mouse_events(true);
         iMainLayout.set_spacing(neogfx::size{ 16.0 });

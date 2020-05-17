@@ -28,12 +28,14 @@
 namespace neogfx::game
 {
     canvas::canvas() : 
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
     }
 
     canvas::canvas(game::i_ecs& aEcs) :
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -41,6 +43,7 @@ namespace neogfx::game
     }
 
     canvas::canvas(std::shared_ptr<game::i_ecs> aEcs) :
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -49,6 +52,7 @@ namespace neogfx::game
 
     canvas::canvas(i_widget& aParent) :
         widget{ aParent }, 
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -56,6 +60,7 @@ namespace neogfx::game
 
     canvas::canvas(i_widget& aParent, game::i_ecs& aEcs) :
         widget{ aParent },
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -64,6 +69,7 @@ namespace neogfx::game
 
     canvas::canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs) :
         widget{ aParent },
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -72,6 +78,7 @@ namespace neogfx::game
 
     canvas::canvas(i_layout& aLayout) :
         widget{ aLayout }, 
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -79,6 +86,7 @@ namespace neogfx::game
 
     canvas::canvas(i_layout& aLayout, game::i_ecs& aEcs) :
         widget{ aLayout },
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -87,6 +95,7 @@ namespace neogfx::game
 
     canvas::canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs) :
         widget{ aLayout },
+        iLayers{ true },
         iEcsPaused{ false }
     {
         init();
@@ -128,24 +137,36 @@ namespace neogfx::game
             });
         }
     }
+
+    int32_t canvas::layers()
+    {
+        return static_cast<int32_t>(iLayers.size());
+    }
+
+    void canvas::set_layers(int32_t aLayers)
+    {
+        iLayers.resize(aLayers, true);
+    }
+
+    void canvas::show_layer(int32_t aLayer)
+    {
+        if (aLayer >= iLayers.size())
+            throw invalid_layer();
+        iLayers[aLayer] = true;
+    }
+
+    void canvas::hide_layer(int32_t aLayer)
+    {
+        if (aLayer >= iLayers.size())
+            throw invalid_layer();
+        iLayers[aLayer] = false;
+    }
         
     logical_coordinate_system canvas::logical_coordinate_system() const
     {
         if (widget::has_logical_coordinate_system())
             return widget::logical_coordinate_system();
         return neogfx::logical_coordinate_system::AutomaticGame;
-    }
-
-    void canvas::paint(i_graphics_context& aGc) const
-    {    
-        if (have_ecs() && ecs().component_registered<mesh_renderer>())
-        {
-            aGc.clear_depth_buffer();
-            scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
-            RenderingEntities.trigger(aGc);
-            aGc.draw_entities(ecs());
-            EntitiesRendered.trigger(aGc);
-        }
     }
 
     void canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)
@@ -174,5 +195,31 @@ namespace neogfx::game
                 iEcsPaused = false;
             }
         }, 1000u);
+
+        Painting([this](i_graphics_context& aGc)
+        {
+            if (have_ecs() && ecs().component_registered<mesh_renderer>())
+            {
+                aGc.clear_depth_buffer();
+                scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
+                RenderingEntities.trigger(aGc, 0);
+                aGc.draw_entities(ecs());
+                EntitiesRendered.trigger(aGc, 0);
+            }
+        });
+
+        Painted([this](i_graphics_context& aGc)
+        {
+            if (have_ecs() && ecs().component_registered<mesh_renderer>())
+            {
+                scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
+                for (int32_t layer = 1; layer < layers(); ++layer)
+                {
+                    RenderingEntities.trigger(aGc, layer);
+                    aGc.draw_entities(ecs(), layer);
+                    EntitiesRendered.trigger(aGc, layer);
+                }
+            }
+        });
     }
 }

@@ -105,7 +105,7 @@ namespace video_poker
                 { extents().cx, 0.0, 0.0, 0.0 },
                 { 0.0, extents().cy * kBridgeCardSize.cx / kBridgeCardSize.cy, 0.0, 0.0 },
                 { 0.0, 0.0, 1.0, 0.0 },
-                { xy.x, xy.y, 0.9, 1.0 } };
+                { xy.x, xy.y, 0.8, 1.0 } };
             iCanvas.update();
         }
     }

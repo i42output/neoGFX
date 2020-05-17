@@ -1094,8 +1094,10 @@ namespace neogfx
             scoped_coordinate_system scs(aGc, origin(), extents(), logical_coordinate_system());
 
             Painting.trigger(aGc);
+
             paint(aGc);
-            Painted.trigger(aGc);
+
+            PaintingChildren.trigger(aGc);
 
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
@@ -1105,7 +1107,10 @@ namespace neogfx
                     child->render(aGc);
             }
 
-            ChildrenPainted.trigger(aGc);
+            aGc.set_extents(client_rect().extents());
+            aGc.set_origin(origin());
+
+            Painted.trigger(aGc);
         }
 
         aGc.set_extents(extents());

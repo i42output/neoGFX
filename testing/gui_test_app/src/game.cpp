@@ -194,7 +194,7 @@ void create_game(ng::i_layout& aLayout)
 
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     // Some information text...
-    canvas.EntitiesRendered([&, clockFont](ng::i_graphics_context& gc)
+    canvas.EntitiesRendered([&, clockFont](ng::i_graphics_context& gc, int32_t)
     {
         std::ostringstream text;
         auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);

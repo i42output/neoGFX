@@ -27,11 +27,12 @@ namespace neogfx::game
     class canvas : public widget
     {
     public:
-        define_event(RenderingEntities, rendering_entities, i_graphics_context&)
-        define_event(EntitiesRendered, entities_rendered, i_graphics_context&)
+        define_event(RenderingEntities, rendering_entities, i_graphics_context&, int32_t)
+        define_event(EntitiesRendered, entities_rendered, i_graphics_context&, int32_t)
         define_event(EntityClicked, entity_clicked, entity_id)
     public:
         struct no_ecs : std::logic_error { no_ecs() : std::logic_error{ "neogfx::game::canvas::no_ecs" } {} };
+        struct invalid_layer : std::logic_error { invalid_layer() : std::logic_error{ "neogfx::game::canvas::invalid_layer" } {} };
     public:
         canvas();
         canvas(game::i_ecs& aEcs);
@@ -48,15 +49,19 @@ namespace neogfx::game
         game::i_ecs& ecs() const;
         void set_ecs(game::i_ecs& aEcs);
         void set_ecs(const std::shared_ptr<game::i_ecs>& aEcs);
+        int32_t layers();
+        void set_layers(int32_t aLayers);
+        void show_layer(int32_t aLayer);
+        void hide_layer(int32_t aLayer);
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
-        void paint(i_graphics_context& aGc) const override;
     public:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
     private:
         void init();
     private:
         std::shared_ptr<game::i_ecs> iEcs;
+        std::vector<bool> iLayers;
         sink iSink;
         std::optional<neolib::callback_timer> iUpdater;
         bool iEcsPaused;

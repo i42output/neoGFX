@@ -544,7 +544,7 @@ namespace neogfx
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_entities&>(*op);
-                    draw_entities(args.ecs, args.transformation);
+                    draw_entities(args.ecs, args.layer, args.transformation);
                 }
                 break;
             case graphics_operation::operation_type::FillRect:
@@ -1065,46 +1065,73 @@ namespace neogfx
                 vec4f{} });
     }
 
-    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
+    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        aEcs.component<game::rigid_body>().take_snapshot();
-        auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
-        auto const& rigidBodies = rigidBodiesSnapshot.data();
-        thread_local std::vector<mesh_drawable> drawables;
-        game::scoped_component_lock<game::mesh_renderer> lock1{ aEcs };
-        game::scoped_component_lock<game::mesh_filter> lock2{ aEcs };
-        game::scoped_component_lock<game::animation_filter> lock3{ aEcs };
-        for (auto entity : aEcs.component<game::mesh_renderer>().entities())
+        thread_local std::vector<std::vector<mesh_drawable>> drawables;
+        thread_local int32_t maxLayer = 0;
+        thread_local std::optional<game::scoped_component_lock<game::mesh_renderer>> lock1;
+        thread_local std::optional<game::scoped_component_lock<game::mesh_filter>> lock2;
+        thread_local std::optional<game::scoped_component_lock<game::animation_filter>> lock3;
+        thread_local std::optional<game::scoped_component_lock<game::rigid_body>> lock4;
+
+        if (drawables.size() <= aLayer)
+            drawables.resize(aLayer + 1);
+
+        if (aLayer == 0)
         {
-            if (entity == game::null_entity)
-                continue; // todo: sort/remove and/or create skipping iterator
-            #ifndef NDEBUG
-            if (aEcs.component<game::entity_info>().entity_record(entity).debug)
-                std::cerr << "Rendering debug entity..." << std::endl;
-            #endif
-            auto const& meshFilter = aEcs.component<game::mesh_filter>().has_entity_record(entity) ?
-                aEcs.component<game::mesh_filter>().entity_record(entity) :
-                game::current_animation_frame(aEcs.component<game::animation_filter>().entity_record(entity));
-            auto const& transformation = rigidBodies.has_entity_record(entity) ?
-                to_transformation_matrix(rigidBodies.entity_record(entity)) :
-                aEcs.component<game::animation_filter>().has_entity_record(entity) ?
-                    to_transformation_matrix(aEcs.component<game::animation_filter>().entity_record(entity)) : 
+            lock1.emplace(aEcs);
+            lock2.emplace(aEcs);
+            lock3.emplace(aEcs);
+            lock4.emplace(aEcs);
+            for (auto& d : drawables)
+                d.clear();
+            aEcs.component<game::rigid_body>().take_snapshot();
+            auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
+            auto const& rigidBodies = rigidBodiesSnapshot.data();
+            for (auto entity : aEcs.component<game::mesh_renderer>().entities())
+            {
+#ifndef NDEBUG
+                if (aEcs.component<game::entity_info>().entity_record(entity).debug)
+                    std::cerr << "Rendering debug entity..." << std::endl;
+#endif
+                auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
+                maxLayer = std::max(maxLayer, meshRenderer.layer);
+                if (drawables.size() <= maxLayer)
+                    drawables.resize(maxLayer + 1);
+                auto const& meshFilter = aEcs.component<game::mesh_filter>().has_entity_record(entity) ?
+                    aEcs.component<game::mesh_filter>().entity_record(entity) :
+                    game::current_animation_frame(aEcs.component<game::animation_filter>().entity_record(entity));
+                auto const& transformation = rigidBodies.has_entity_record(entity) ?
+                    to_transformation_matrix(rigidBodies.entity_record(entity)) :
+                    aEcs.component<game::animation_filter>().has_entity_record(entity) ?
+                    to_transformation_matrix(aEcs.component<game::animation_filter>().entity_record(entity)) :
                     mat44::identity();
-            drawables.emplace_back(
-                meshFilter,
-                aEcs.component<game::mesh_renderer>().entity_record(entity),
-                transformation,
-                entity);
+                drawables[meshRenderer.layer].emplace_back(
+                    meshFilter,
+                    meshRenderer,
+                    transformation,
+                    entity);
+            }
+            lock4.reset();
         }
-        draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), aTransformation);
-        for (auto const& d : drawables)
+        if (!drawables[aLayer].empty())
+            draw_meshes(&*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
+        for (auto const& d : drawables[aLayer])
             if (!d.drawn && d.renderer->destroyOnFustrumCull)
                 aEcs.destroy_entity(d.entity);
-        drawables.clear();
+        if (aLayer >= maxLayer)
+        {
+            maxLayer = 0;
+            for (auto& d : drawables)
+                d.clear();
+            lock3.reset();
+            lock2.reset();
+            lock1.reset();
+        }
     }
 
     void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)

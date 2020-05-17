@@ -446,12 +446,13 @@ namespace neogfx
                 aPen });
     }
 
-    void graphics_context::draw_entities(game::i_ecs& aEcs) const
+    void graphics_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer) const
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_entities{ 
                 aEcs, 
+                aLayer,
                 mat44{
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },

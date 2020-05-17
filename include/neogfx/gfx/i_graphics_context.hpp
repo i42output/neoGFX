@@ -137,7 +137,7 @@ namespace neogfx
         virtual void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_path(const path& aPath, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill = brush{}) const = 0;
-        virtual void draw_entities(game::i_ecs& aEcs) const = 0;
+        virtual void draw_entities(game::i_ecs& aEcs, int32_t aLayer = 0) const = 0;
         virtual void draw_focus_rect(const rect& aRect) const = 0;
         virtual void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0) const = 0;
         virtual void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const = 0;
