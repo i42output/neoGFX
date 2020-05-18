@@ -966,6 +966,10 @@
                                                     value: 50
                                                 }
                                             }
+                                            check_box: {
+                                                id: checkThreadPool
+                                                text: "Use Thread Pool"
+                                            }
                                         }
                                     }
                                     spacer: {}

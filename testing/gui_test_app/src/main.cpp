@@ -1127,10 +1127,17 @@ int main(int argc, char* argv[])
             (*aFilter.transformation)[3][1] = ng::simd_rand(instancingRect.cy - 1);
         };
 
+        std::atomic<bool> useThreadPool = false;
+        ui.checkThreadPool.Checked([&]() { useThreadPool = true; });
+        ui.checkThreadPool.Unchecked([&]() { useThreadPool = false; });
+
         auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
         {
             instancingRect = ui.pageInstancing.client_rect();
-            ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
+            if (useThreadPool)
+                ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
+            else
+                ecs->component<ng::game::mesh_filter>().apply(entity_transformation);
         };
 
         auto configure_ecs = [&]()

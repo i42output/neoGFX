@@ -177,7 +177,14 @@ namespace neogfx::game
         }
     public:
         template <typename Callable>
-        void parallel_apply(const Callable& aCallable, std::size_t aMinimumParallelismCount = 256)
+        void apply(const Callable& aCallable)
+        {
+            std::scoped_lock<neolib::i_lockable> lock{ mutex() };
+            for (auto& data : component_data())
+                aCallable(data);
+        }
+        template <typename Callable>
+        void parallel_apply(const Callable& aCallable, std::size_t aMinimumParallelismCount = 0)
         {
             std::scoped_lock<neolib::i_lockable> lock{ mutex() };
             neolib::parallel_apply(ecs().thread_pool(), component_data(), aCallable, aMinimumParallelismCount);
