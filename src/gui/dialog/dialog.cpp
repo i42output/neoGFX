@@ -199,6 +199,8 @@ namespace neogfx
 
     bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
+        if (iButtonBox) // delegate to button box
+            return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
         switch (aScanCode)
         {
         case ScanCode_RETURN:
@@ -242,6 +244,26 @@ namespace neogfx
 
     void dialog::init()
     {
+        iUpdater.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
+        {
+            aTimer.again();
+            if (iButtonBox)
+            {
+                bool canAccept = true;
+                bool canReject = true;
+                TryAccept.trigger(canAccept);
+                TryReject.trigger(canReject);
+                if (canAccept)
+                    iButtonBox->enable_role(button_role::Accept);
+                else
+                    iButtonBox->disable_role(button_role::Accept);
+                if (canReject)
+                    iButtonBox->enable_role(button_role::Reject);
+                else
+                    iButtonBox->disable_role(button_role::Reject);
+            }
+        }, 100);
+
         non_client_layout().add_at(non_client_layout().index_of(status_bar_layout()), iButtonBoxLayout);
         iButtonBoxLayout.set_weight(size{});
         set_standard_layout(service<i_app>().current_style().spacing(), false);

@@ -101,10 +101,14 @@ namespace neogfx
         ~dialog_button_box();
     public:
         standard_button button_with_role(button_role aButtonRole) const;
+        button_role role_of_button(standard_button aStandardButton);
+        void enable_role(button_role aButtonRole);
+        void disable_role(button_role aButtonRole);
         push_button& button(standard_button aStandardButton) const;
         void add_button(standard_button aStandardButton);
         void add_button(standard_button aStandardButton, button_role aButtonRole, const std::string& aButtonText);
         void add_buttons(standard_button aStandardButtons);
+        void set_default_button(standard_button aButton);
         void clear();
         i_layout& option_layout();
     public:
@@ -112,13 +116,16 @@ namespace neogfx
         static button_details standard_button_details(standard_button aStandardButton);
     private:
         void init();
+        bool can_reject() const;
     private:
         static bool similar_role(button_role aButtonRole1, button_role aButtonRole2);
     private:
+        sink iSink;
         horizontal_layout iLayout;
         horizontal_layout iOptionLayout;
         horizontal_spacer iSpacer;
         horizontal_layout iStandardButtonLayout;
         button_list iButtons;
+        std::optional<standard_button> iDefaultButton;
     };
 }

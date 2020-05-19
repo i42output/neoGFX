@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/dialog/dialog_button_box.hpp>
 
 namespace neogfx
@@ -65,6 +66,28 @@ namespace neogfx
             if (similar_role(button.first.second, aButtonRole))
                 return button.first.first;
         return iButtons.begin()->first.first;
+    }
+
+    button_role dialog_button_box::role_of_button(standard_button aStandardButton)
+    {
+        for (auto& button : iButtons)
+            if (button.first.first == aStandardButton)
+                return button.first.second;
+        throw button_not_found();
+    }
+
+    void dialog_button_box::enable_role(button_role aButtonRole)
+    {
+        for (auto& button : iButtons)
+            if (similar_role(aButtonRole, button.first.second))
+                button.second->enable();
+    }
+
+    void dialog_button_box::disable_role(button_role aButtonRole)
+    {
+        for (auto& button : iButtons)
+            if (similar_role(aButtonRole, button.first.second))
+                button.second->disable();
     }
 
     push_button& dialog_button_box::button(standard_button aStandardButton) const
@@ -115,10 +138,16 @@ namespace neogfx
         }
     }
 
+    void dialog_button_box::set_default_button(standard_button aButton)
+    {
+        iDefaultButton = aButton;
+    }
+
     void dialog_button_box::clear()
     {
         iStandardButtonLayout.remove_all();
         iButtons.clear();
+        iDefaultButton = {};
     }
 
     i_layout& dialog_button_box::option_layout()
@@ -174,11 +203,44 @@ namespace neogfx
 
     void dialog_button_box::init()
     {
+        iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifiers_e)
+        {
+            if (root().is_active())
+            {
+                switch (aScanCode)
+                {
+                case ScanCode_RETURN:
+                    if (!root().has_focused_widget() ||
+                        (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeReturnKey)
+                    {
+                        if (!iDefaultButton || similar_role(role_of_button(*iDefaultButton), button_role::Accept))
+                            Accepted.trigger();
+                        else if (similar_role(role_of_button(*iDefaultButton), button_role::Reject))
+                            Rejected.trigger();
+                    }
+                    break;
+                case ScanCode_ESCAPE:
+                    if (can_reject())
+                        Rejected.trigger();
+                    break;
+                default:
+                    break;
+                }
+            }
+        });
         set_margins(neogfx::margins{});
         iLayout.set_margins(neogfx::margins{});
         iOptionLayout.set_margins(neogfx::margins{});
         iOptionLayout.set_size_policy(size_constraint::Minimum);
         iStandardButtonLayout.set_margins(neogfx::margins{});
+    }
+
+    bool dialog_button_box::can_reject() const
+    {
+        for (auto const& b : iButtons)
+            if (similar_role(b.first.second, button_role::Reject))
+                return true;
+        return false;
     }
 
     bool dialog_button_box::similar_role(button_role aButtonRole1, button_role aButtonRole2)

@@ -77,6 +77,7 @@ namespace neogfx
     private:
         void init();
     private:
+        std::optional<neolib::callback_timer> iUpdater;
         vertical_layout iButtonBoxLayout;
         std::optional<dialog_button_box> iButtonBox;
         std::optional<dialog_result> iResult;
