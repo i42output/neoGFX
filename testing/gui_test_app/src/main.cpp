@@ -24,6 +24,7 @@
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/animator.hpp>
 
 #include "test.ui.hpp"
 
@@ -1154,9 +1155,8 @@ int main(int argc, char* argv[])
                 if (!ecs)
                 {
                     ecs.emplace(ng::game::ecs_flags::Default);
-                    ecs->system<ng::game::simple_physics>();
-                    ecs->component<ng::game::rigid_body>(); // not using any rigid bodies but we want physics thread to run
-                    sink += ~~~~ecs->system<ng::game::game_world>().ApplyingPhysics(update_ecs_entities);
+                    ecs->component<ng::game::animation_filter>(); // we want animator thread to run
+                    sink += ~~~~ecs->system<ng::game::animator>().Animate(update_ecs_entities);
                     ui.canvasInstancing.set_ecs(*ecs);
                 }
                 auto const meshesWanted = ui.sliderShapeCount.value();

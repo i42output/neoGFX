@@ -326,6 +326,9 @@ namespace neogfx::game
             iLockGuard{ aEcs.component<Data>().mutex() }
         {
         }
+        ~scoped_component_lock()
+        {
+        }
     private:
         std::scoped_lock<neolib::i_lockable> iLockGuard;
     };

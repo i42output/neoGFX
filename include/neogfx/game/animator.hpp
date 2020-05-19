@@ -27,6 +27,8 @@ namespace neogfx::game
 {
     class animator : public system
     {
+    public:
+        define_event(Animate, animate, step_time)
     private:
         class thread;
     public:

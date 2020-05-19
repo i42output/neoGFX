@@ -53,6 +53,7 @@ namespace neogfx::game
     animator::animator(game::i_ecs& aEcs) :
         system{ aEcs }
     {
+        Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         if (!ecs().system_registered<time>())
             ecs().register_system<time>();
         ecs().system<time>();
@@ -82,17 +83,21 @@ namespace neogfx::game
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
+        auto now = ecs().system<time>().world_time();
+
+        Animate.trigger(now);
+
         scoped_component_lock<animation_filter> lockAnimationFilters{ ecs() };
 
         for (auto entity : ecs().component<animation_filter>().entities())
         {
-            auto const& worldClock = ecs().shared_component<clock>()[0];
             auto const& info = ecs().component<entity_info>().entity_record(entity);
             auto& filter = ecs().component<animation_filter>().entity_record(entity);
             if (!filter.currentFrameStartTime)
                 filter.currentFrameStartTime = info.creationTime;
             auto const& frames = (filter.animation ? filter.animation->frames : filter.sharedAnimation.ptr->frames);
-            while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timeStep) < ecs().system<time>().world_time())
+            auto const& worldClock = ecs().shared_component<clock>()[0];
+            while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timeStep) < now)
             {
                 *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timeStep);
                 filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
