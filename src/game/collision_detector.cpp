@@ -1,18 +1,18 @@
-// animator.cpp
+// collision_detector.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,19 +20,14 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
-#include <neogfx/game/game_world.hpp>
-#include <neogfx/game/clock.hpp>
-#include <neogfx/game/time.hpp>
-#include <neogfx/game/entity_info.hpp>
-#include <neogfx/game/animator.hpp>
-#include <neogfx/game/animation_filter.hpp>
+#include <neogfx/game/collision_detector.hpp>
 
 namespace neogfx::game
 {
-    class animator::thread : public async_thread
+    class collision_detector::thread : public async_thread
     {
     public:
-        thread(animator& aOwner) : async_thread{ "neogfx::game::animator::thread" }, iOwner{ aOwner }
+        thread(collision_detector& aOwner) : async_thread{ "neogfx::game::collision_detector::thread" }, iOwner{ aOwner }
         {
             start();
         }
@@ -45,35 +40,40 @@ namespace neogfx::game
             return didWork;
         }
     private:
-        animator& iOwner;
+        collision_detector& iOwner;
     };
 
 
-    animator::animator(game::i_ecs& aEcs) :
+    collision_detector::collision_detector(game::i_ecs& aEcs) :
         system{ aEcs }
     {
         Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-        if (!ecs().system_registered<game::time>())
-            ecs().register_system<game::time>();
-        ecs().system<game::time>();
+        if (!ecs().system_registered<time>())
+            ecs().register_system<time>();
+        ecs().system<time>();
         iThread = std::make_unique<thread>(*this);
     }
 
-    animator::~animator()
+    collision_detector::~collision_detector()
     {
     }
 
-    const system_id& animator::id() const
+    const system_id& collision_detector::id() const
     {
         return meta::id();
     }
 
-    const i_string& animator::name() const
+    const i_string& collision_detector::name() const
     {
         return meta::name();
     }
 
-    bool animator::apply()
+    std::optional<entity_id> collision_detector::entity_at(const vec3& aPoint) const
+    {
+        return {};
+    }
+
+    bool collision_detector::apply()
     {
         if (!ecs().component_instantiated<animation_filter>())
             return false;
@@ -82,7 +82,7 @@ namespace neogfx::game
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
-        auto now = ecs().system<game::time>().world_time();
+        auto now = ecs().system<time>().world_time();
 
         Animate.trigger(now);
 
@@ -95,7 +95,7 @@ namespace neogfx::game
             if (!filter.currentFrameStartTime)
                 filter.currentFrameStartTime = info.creationTime;
             auto const& frames = (filter.animation ? filter.animation->frames : filter.sharedAnimation.ptr->frames);
-            auto const& worldClock = ecs().shared_component<game::clock>()[0];
+            auto const& worldClock = ecs().shared_component<clock>()[0];
             while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timeStep) < now)
             {
                 *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timeStep);
@@ -106,7 +106,7 @@ namespace neogfx::game
         return true;
     }
 
-    void animator::terminate()
+    void collision_detector::terminate()
     {
         if (!iThread->aborted())
             iThread->abort();

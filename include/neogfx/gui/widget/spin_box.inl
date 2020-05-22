@@ -22,7 +22,7 @@
 #include "spin_box.hpp"
 #include <cmath>
 #include <boost/format.hpp>
-#include <neolib/scoped.hpp>
+#include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>

@@ -1,7 +1,7 @@
 // ecs_ids.hpp
 /*
-  neogfx C++ App/Game Engine
-  Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
+  neolib C++ App/Game Engine
+  Copyright (c)  2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,21 +16,18 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/uuid.hpp>
-#include <neolib/jar.hpp>
+#include <neolib/ecs/ecs_ids.hpp>
 
-namespace neogfx::game
+namespace neogfx
 {
-    typedef neolib::uuid entity_archetype_id;
-    typedef neolib::uuid component_id;
-    typedef neolib::uuid system_id;
-    typedef void* handle_t;
-    typedef neolib::cookie id_t;
-    constexpr id_t null_id = 0;
-    typedef id_t handle_id;
-    typedef id_t entity_id;
-    constexpr entity_id null_entity = 0;
+    using namespace neolib::ecs;
+
+    namespace game
+    {
+        using namespace neolib::ecs;
+    }
 }

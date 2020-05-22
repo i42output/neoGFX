@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/vecarray.hpp>
+#include <neolib/core/vecarray.hpp>
 
 namespace neogfx
 {

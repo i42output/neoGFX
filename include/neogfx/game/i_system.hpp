@@ -1,7 +1,7 @@
 // i_system.hpp
 /*
-  neogfx C++ App/Game Engine
-  Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
+  neolib C++ App/Game Engine
+  Copyright (c)  2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,34 +16,18 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_set.hpp>
-#include <neolib/string.hpp>
-#include <neogfx/game/ecs_ids.hpp>
-#include <neogfx/game/i_component.hpp>
+#include <neolib/ecs/i_system.hpp>
 
-namespace neogfx::game
+namespace neogfx
 {
-    class i_system
+    using namespace neolib::ecs;
+
+    namespace game
     {
-    public:
-        virtual ~i_system() = default;
-    public:
-        virtual const system_id& id() const = 0;
-        virtual const i_string& name() const = 0;
-    public:
-        virtual const neolib::i_set<component_id>& components() const = 0;
-        virtual neolib::i_set<component_id>& components() = 0;
-    public:
-        virtual const i_component& component(component_id aComponentId) const = 0;
-        virtual const i_component& component(component_id aComponentId) = 0;
-    public:
-        virtual bool apply() = 0;
-        virtual bool paused() const = 0;
-        virtual void pause() = 0;
-        virtual void resume() = 0;
-        virtual void terminate() = 0;
-    };
+        using namespace neolib::ecs;
+    }
 }

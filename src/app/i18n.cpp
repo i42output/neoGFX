@@ -19,8 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <string>
-#include <neolib/map.hpp>
-#include <neolib/string.hpp>
+#include <neolib/core/map.hpp>
+#include <neolib/core/string.hpp>
 #include <neogfx/app/i18n.hpp>
 #include <neogfx/app/i_app.hpp>
 

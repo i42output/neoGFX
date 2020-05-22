@@ -20,11 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/vector.hpp>
-#include <neolib/simple_variant.hpp>
-#include <neolib/reference_counted.hpp>
-#include <neolib/i_plugin_manager.hpp>
-#include <neolib/json.hpp>
+#include <neolib/core/vector.hpp>
+#include <neolib/core/reference_counted.hpp>
+#include <neolib/file/json.hpp>
+#include <neolib/plugin/simple_variant.hpp>
+#include <neolib/plugin/i_plugin_manager.hpp>
 
 #include <neogfx/tools/nrc/i_ui_element_parser.hpp>
 #include <neogfx/tools/nrc/i_ui_element_library.hpp>

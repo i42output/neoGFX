@@ -24,11 +24,11 @@
 #include <boost/multiprecision/cpp_int.hpp>
 using namespace boost::multiprecision;
 
-#include <neolib/stdint.hpp>
-#include <neolib/lifetime.hpp>
-#include <neolib/reference_counted.hpp>
-#include <neolib/enum.hpp>
-#include <neolib/string.hpp>
+#include <neolib/core/stdint.hpp>
+#include <neolib/core/lifetime.hpp>
+#include <neolib/core/reference_counted.hpp>
+#include <neolib/core/enum.hpp>
+#include <neolib/core/string.hpp>
 #include <neogfx/app/i18n.hpp>
 #include <neogfx/core/async_task.hpp>
 

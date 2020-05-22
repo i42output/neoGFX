@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <string>
-#include <neolib/lexer.hpp>
+#include <neolib/file/lexer.hpp>
 #include <neogfx/core/html.hpp>
 
 namespace neogfx

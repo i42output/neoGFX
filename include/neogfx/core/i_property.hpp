@@ -21,10 +21,11 @@
 
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
-#include <neolib/any.hpp>
-#include <neolib/plugin_variant.hpp>
-#include <neolib/variant.hpp>
-#include <neolib/i_enum.hpp>
+#include <neolib/core/any.hpp>
+#include <neolib/plugin/plugin_variant.hpp>
+#include <neolib/core/variant.hpp>
+#include <neolib/core/i_enum.hpp>
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_properties.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
@@ -127,7 +128,7 @@ namespace neogfx
         virtual void set(const i_property& aProperty) const = 0;
     };
 
-    class i_property_owner
+    class i_property_owner : public i_object
     {
     public:
         virtual ~i_property_owner() = default;

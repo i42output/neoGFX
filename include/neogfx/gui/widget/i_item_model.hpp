@@ -21,10 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
-
-#include <neolib/variant.hpp>
-#include <neolib/generic_iterator.hpp>
-
+#include <neolib/core/variant.hpp>
+#include <neolib/core/generic_iterator.hpp>
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 

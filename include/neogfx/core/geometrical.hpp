@@ -24,8 +24,8 @@
 #include <type_traits>
 #include <ostream>
 #include <optional>
-#include "numerical.hpp"
-#include "alignment.hpp"
+#include <neogfx/core/numerical.hpp>
+#include <neogfx/core/alignment.hpp>
 
 namespace neogfx
 { 

@@ -22,7 +22,7 @@
 #include <D2d1.h>
 #endif
 #include <numeric>
-#include <neolib/thread.hpp>
+#include <neolib/task/thread.hpp>
 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_window.hpp>

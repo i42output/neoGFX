@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/map.hpp>
-#include <neolib/string.hpp>
+#include <neolib/core/map.hpp>
+#include <neolib/core/string.hpp>
 #include <neogfx/gui/layout/i_anchor.hpp>
 
 namespace neogfx

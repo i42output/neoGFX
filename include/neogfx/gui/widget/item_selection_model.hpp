@@ -20,9 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/scoped.hpp>
-#include <neolib/map.hpp>
-
+#include <neolib/core/scoped.hpp>
+#include <neolib/core/map.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
 #include <neogfx/gui/widget/i_item_selection_model.hpp>
@@ -137,7 +136,7 @@ namespace neogfx
                     set_current_index(item_presentation_model_index{ 0u, 0u });
                 iSavedModelIndex = std::nullopt;
             });
-            iSink += neogfx::destroying(presentation_model(), [this]()
+            iSink += neolib::destroying(presentation_model(), [this]()
             {
                 auto oldModel = iModel;
                 iModel = nullptr;

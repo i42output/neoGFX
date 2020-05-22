@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/plugin_event.hpp>
+#include <neolib/plugin/plugin_event.hpp>
 
 namespace neogfx
 {

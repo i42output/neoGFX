@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/renderable_entity_archetype.hpp>
 #include <neogfx/game/rigid_body.hpp>
-#include <neogfx/game/collider.hpp>
+#include <neogfx/game/box_collider.hpp>
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>

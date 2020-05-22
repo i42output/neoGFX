@@ -20,9 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/quick_string.hpp>
-#include <neolib/variant.hpp>
-#include <neolib/vecarray.hpp>
+#include <neolib/core/quick_string.hpp>
+#include <neolib/core/variant.hpp>
+#include <neolib/core/vecarray.hpp>
 #include "geometrical.hpp"
 #include "hsl_color.hpp"
 #include "hsv_color.hpp"

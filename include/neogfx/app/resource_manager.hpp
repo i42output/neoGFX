@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include "i_resource_manager.hpp"
 
 namespace neogfx

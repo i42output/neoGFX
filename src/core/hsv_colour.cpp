@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/core/string_utils.hpp>
 #include <neogfx/core/color.hpp>
 
 namespace neogfx

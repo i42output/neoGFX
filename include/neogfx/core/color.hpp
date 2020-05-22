@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/core/hsl_color.hpp>

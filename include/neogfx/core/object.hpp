@@ -2,73 +2,45 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #pragma once
 
-#include <neogfx/neogfx.hpp>
-#include <neolib/lifetime.hpp>
-
+#include <neolib/neolib.hpp>
+#include <neolib/core/lifetime.hpp>
+#include <neolib/app/object.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_properties.hpp>
 #include <neogfx/core/i_property.hpp>
 
 namespace neogfx
 {
     template <typename... Bases>
-    class object : public neolib::lifetime, public i_object, public i_properties, public Bases...
+    class object : public neolib::object<i_property_owner, i_properties, Bases...>
     {
+        typedef neolib::object<i_property_owner, i_properties, Bases...> base_type;
     public:
-        define_declared_event(Destroying, destroying);
-        define_declared_event(Destroyed, destroyed);
-    public:
-        object(neolib::lifetime_state aState = neolib::lifetime_state::Creating) :
-            neolib::lifetime{ aState }
-        {
-        }
-        ~object()
-        {
-            set_destroyed();
-        }
+        using base_type::base_type;
         // type
     public:
         neogfx::object_type object_type() const override
         {
             return neogfx::object_type{};
         }
-        // i_lifetime
-    public:
-        void set_destroying() override
-        {
-            if (is_alive())
-            {
-                Destroying.trigger();
-                neolib::lifetime::set_destroying();
-            }
-        }
-        void set_destroyed() override
-        {
-            if (!is_destroyed())
-            {
-                Destroyed.trigger();
-                neolib::lifetime::set_destroyed();
-            }
-        }
-        // i_object
+        // i_property_owner
     public:
         void property_changed(i_property&) override
         {

@@ -39,7 +39,6 @@
 
 namespace neogfx
 {
-
     template <typename T>
     inline T ease_linear(T t)
     {

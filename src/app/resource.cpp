@@ -21,8 +21,8 @@
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include <openssl/sha.h>
-#include <neolib/uri.hpp>
-#include <neolib/zip.hpp>
+#include <neolib/io/uri.hpp>
+#include <neolib/file/zip.hpp>
 #include <neogfx/app/resource.hpp>
 
 namespace neogfx

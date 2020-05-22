@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/jar.hpp>
+#include <neolib/core/jar.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/i_sub_texture.hpp>

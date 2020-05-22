@@ -1,9 +1,9 @@
 ﻿#include <neogfx/neogfx.hpp>
 #include <iomanip>
 #include <boost/format.hpp>
-#include <neolib/random.hpp>
-#include <neolib/singleton.hpp>
-#include <neogfx/core/i_power.hpp>
+#include <neolib/core/random.hpp>
+#include <neolib/core/singleton.hpp>
+#include <neolib/app/i_power.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -19,7 +19,7 @@
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/game/text_mesh.hpp>
-#include <neogfx/game/collider.hpp>
+#include <neogfx/game/box_collider.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/animation_filter.hpp>
 #include <neogfx/game/broadphase_collider.hpp>

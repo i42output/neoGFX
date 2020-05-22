@@ -19,7 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include "widget.hpp"
 #include <neogfx/app/i_resource.hpp>
 #include <neogfx/core/color.hpp>

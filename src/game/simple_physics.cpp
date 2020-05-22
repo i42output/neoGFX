@@ -16,7 +16,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/async_thread.hpp>
@@ -53,9 +52,9 @@ namespace neogfx::game
     simple_physics::simple_physics(game::i_ecs& aEcs) :
         system{ aEcs }
     {
-        if (!ecs().system_registered<time>())
-            ecs().register_system<time>();
-        ecs().system<time>();
+        if (!ecs().system_registered<game::time>())
+            ecs().register_system<game::time>();
+        ecs().system<game::time>();
         if (!ecs().shared_component_registered<physics>())
             ecs().register_shared_component<physics>();
         if (ecs().shared_component<physics>().component_data().empty())
@@ -85,11 +84,11 @@ namespace neogfx::game
             return false;
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
-        auto& worldClock = ecs().shared_component<clock>()[0];
+        auto& worldClock = ecs().shared_component<game::clock>()[0];
         auto const& physicalConstants = ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
             *physicalConstants.uniformGravity : vec3{};
-        auto const now = ecs().system<time>().system_time();
+        auto const now = ecs().system<game::time>().system_time();
         auto& rigidBodies = ecs().component<rigid_body>();
         bool didWork = false;
         while (worldClock.time <= now)
@@ -136,7 +135,7 @@ namespace neogfx::game
             }
             lockRigidBodies.reset();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
-            shared_component_scoped_lock<clock> lockClock{ ecs() };
+            shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time += worldClock.timeStep;
         }
         return didWork;

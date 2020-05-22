@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <neolib/scoped.hpp>
+#include <neolib/core/scoped.hpp>
 
 namespace neogfx
 {

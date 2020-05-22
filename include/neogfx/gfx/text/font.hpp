@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/jar.hpp>
-#include <neolib/variant.hpp>
+#include <neolib/core/jar.hpp>
+#include <neolib/core/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
 
 namespace neogfx

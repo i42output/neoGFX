@@ -23,8 +23,7 @@
 #include <map>
 #include <optional>
 #include <boost/pool/pool_alloc.hpp>
-#include <neolib/timer.hpp>
-
+#include <neolib/task/timer.hpp>
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/event_processing_context.hpp>

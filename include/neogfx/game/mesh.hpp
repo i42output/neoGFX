@@ -19,10 +19,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/uuid.hpp>
+#include <neolib/core/string.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neolib/uuid.hpp>
-#include <neolib/string.hpp>
+#include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/i_component_data.hpp>
 
 namespace neogfx::game

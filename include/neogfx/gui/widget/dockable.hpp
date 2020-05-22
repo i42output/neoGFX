@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <string>
-#include <neolib/timer.hpp>
+#include <neolib/task/timer.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 #include <neogfx/gui/widget/i_dockable.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>

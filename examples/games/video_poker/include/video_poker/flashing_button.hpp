@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neolib/timer.hpp>
+#include <neolib/task/timer.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 

@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
+#include <neogfx/game/ecs.hpp>
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/text_mesh.hpp>

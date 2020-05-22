@@ -16,19 +16,19 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/vecarray.hpp>
-#include <neolib/lifetime.hpp>
 #include <boost/pool/pool_alloc.hpp>
+#include <neolib/core/vecarray.hpp>
+#include <neolib/core/lifetime.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/game/ecs_ids.hpp>
-#include <neogfx/game/broadphase_collider.hpp>
 
 namespace neogfx::game
 {
-    template <std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<aabb_2d>>
+    template <typename Collider, std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<Collider>>
     class aabb_quadtree
     {
     public:
@@ -47,7 +47,7 @@ namespace neogfx::game
             struct object
             {
                 entity_id id;
-                const broadphase_collider_2d* collider;
+                const Collider* collider;
             };
             typedef neolib::vecarray<object, BucketSize, -1> object_list;
             typedef std::array<std::array<aabb_2d, 2>, 2> quadrants;

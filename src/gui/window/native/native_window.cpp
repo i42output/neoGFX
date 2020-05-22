@@ -22,8 +22,7 @@
 #ifdef _WIN32
 #include <D2d1.h>
 #endif
-
-#include <neolib/scoped.hpp>
+#include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>

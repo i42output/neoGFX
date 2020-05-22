@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <neolib/json.hpp>
-#include <neolib/application.hpp>
+#include <neolib/file/json.hpp>
+#include <neolib/app/application.hpp>
 
 #include "resource_parser.hpp"
 #include "ui_parser.hpp"

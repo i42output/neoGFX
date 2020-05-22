@@ -20,9 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/vector.hpp>
-#include <neolib/map.hpp>
-#include <neolib/reference_counted.hpp>
+#include <neolib/core/vector.hpp>
+#include <neolib/core/map.hpp>
+#include <neolib/core/reference_counted.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
 
 namespace neogfx

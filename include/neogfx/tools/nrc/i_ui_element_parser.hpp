@@ -21,12 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
-#include <neolib/i_reference_counted.hpp>
-#include <neolib/optional.hpp>
-#include <neolib/string.hpp>
-#include <neolib/i_vector.hpp>
-#include <neolib/i_enum.hpp>
-#include <neolib/simple_variant.hpp>
+#include <neolib/core/i_reference_counted.hpp>
+#include <neolib/core/optional.hpp>
+#include <neolib/core/string.hpp>
+#include <neolib/core/i_vector.hpp>
+#include <neolib/core/i_enum.hpp>
+#include <neolib/plugin/simple_variant.hpp>
 
 namespace neogfx::nrc
 {

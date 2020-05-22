@@ -1,6 +1,6 @@
 ﻿#include <neolib/neolib.hpp>
+#include <neolib/app/i_power.hpp>
 #include <neogfx/app/app.hpp>
-#include <neogfx/core/i_power.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>

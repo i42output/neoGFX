@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/json.hpp>
+#include <neolib/file/json.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/style.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>

@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <variant>
-#include <neolib/jar.hpp>
+#include <neolib/core/jar.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include "i_texture_manager.hpp"
 

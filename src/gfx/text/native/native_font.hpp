@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <unordered_map>
 #include <tuple>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "i_native_font.hpp"

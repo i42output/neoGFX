@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/vector.hpp>
-#include <neolib/reference_counted.hpp>
+#include <neolib/core/vector.hpp>
+#include <neolib/core/reference_counted.hpp>
 #include <neogfx/hid/i_hid_devices.hpp>
 
 namespace neogfx

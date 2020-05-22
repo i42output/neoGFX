@@ -18,9 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/scoped.hpp>
-#include <neolib/thread.hpp>
-#include <neogfx/core/i_power.hpp>
+#include <neolib/core/scoped.hpp>
+#include <neolib/task/thread.hpp>
+#include <neolib/app/i_power.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
@@ -354,7 +354,7 @@ namespace neogfx
     void text_edit::focus_gained(focus_reason aFocusReason)
     {
         scrollable_widget::focus_gained(aFocusReason);
-        service<i_power>().register_activity();
+        neolib::service<neolib::i_power>().register_activity();
         service<i_clipboard>().activate(*this);
         iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
         if (iType == SingleLine && aFocusReason == focus_reason::Tab)
@@ -429,7 +429,7 @@ namespace neogfx
     void text_edit::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
-        service<i_power>().register_activity();
+        neolib::service<neolib::i_power>().register_activity();
         if (iDragger != std::nullopt)
             set_cursor_position(aPosition, false);
     }
@@ -1033,7 +1033,7 @@ namespace neogfx
     void text_edit::set_cursor_position(const point& aPosition, bool aMoveAnchor, bool aEnableDragger)
     {
         set_cursor_glyph_position(document_hit_test(aPosition), aMoveAnchor);
-        service<i_power>().register_activity();
+        neolib::service<neolib::i_power>().register_activity();
         if (aEnableDragger)
         {
             if (!capturing())
@@ -1461,7 +1461,7 @@ namespace neogfx
 
     void text_edit::init()
     {
-        iSink += service<i_power>().green_mode_entered([this]()
+        iSink += neolib::service<neolib::i_power>().green_mode_entered([this]()
         {
             if (has_focus())
                 update_cursor();
@@ -1874,7 +1874,7 @@ namespace neogfx
 
     void text_edit::animate()
     {
-        if (service<i_power>().green_mode_active())
+        if (neolib::service<neolib::i_power>().green_mode_active())
             return;
         if (has_focus())
             update_cursor();
@@ -1978,7 +1978,7 @@ namespace neogfx
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-        auto const cursorAlpha = service<i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
+        auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
         auto cursorColor = cursor().color();
         if (cursorColor == neolib::none && cursor().style() == cursor_style::Standard)
             cursorColor = service<i_app>().current_style().palette().text_color_for_widget(*this);

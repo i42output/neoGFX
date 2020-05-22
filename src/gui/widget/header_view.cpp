@@ -18,9 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/timer.hpp>
-#include <neolib/lifetime.hpp>
-#include <neolib/thread.hpp>
+#include <neolib/task/timer.hpp>
+#include <neolib/core/lifetime.hpp>
+#include <neolib/task/thread.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/app/event_processing_context.hpp>
@@ -162,7 +162,7 @@ namespace neogfx
     void header_view::set_model(std::shared_ptr<i_item_model> aModel)
     {
         iModel = aModel;
-        neogfx::destroying(model(), [this]() { iModel = nullptr; });
+        neolib::destroying(model(), [this]() { iModel = nullptr; });
         if (has_presentation_model())
         {
             iSectionWidths.resize(presentation_model().columns());
@@ -211,7 +211,7 @@ namespace neogfx
             presentation_model().items_sorted([this]() { items_sorted(); });
             presentation_model().items_filtering([this]() { items_filtering(); });
             presentation_model().items_filtered([this]() { items_filtered(); });
-            neogfx::destroying(presentation_model(), [this]() { iPresentationModel = nullptr; });
+            neolib::destroying(presentation_model(), [this]() { iPresentationModel = nullptr; });
             if (has_model())
                 presentation_model().set_item_model(model());
         }

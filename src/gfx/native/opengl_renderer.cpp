@@ -19,20 +19,16 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/filesystem.hpp>
-
 #ifdef _WIN32
 #include <ShellScalingApi.h>
 #include <D2d1.h>
 #pragma comment(lib, "Shcore.lib")
 #endif
-
-#include <neolib/thread.hpp>
-
+#include <neolib/task/thread.hpp>
+#include <neolib/app/i_power.hpp>
 #include <neogfx/core/numerical.hpp>
-
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
-#include <neogfx/core/i_power.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
@@ -81,7 +77,7 @@ namespace neogfx
         iSubpixelRendering{ false }
     {
 #ifdef _WIN32
-        SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+        ::SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 #endif
     }
 
@@ -285,7 +281,7 @@ namespace neogfx
 
     bool opengl_renderer::frame_rate_limited() const
     {
-        return iLimitFrameRate && service<i_power>().green_mode_active(); 
+        return iLimitFrameRate && neolib::service<neolib::i_power>().green_mode_active(); 
     }
 
     void opengl_renderer::enable_frame_rate_limiter(bool aEnable)

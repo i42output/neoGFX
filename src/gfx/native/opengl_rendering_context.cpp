@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/math/constants/constants.hpp>
-#include <neogfx/core/i_power.hpp>
+#include <neolib/app/i_power.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/text/glyph.hpp>

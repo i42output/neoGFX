@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/core/string_utils.hpp>
 
 namespace neogfx
 {

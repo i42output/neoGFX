@@ -1,7 +1,7 @@
 // i_entity_archetype.hpp
 /*
-  neogfx C++ App/Game Engine
-  Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
+  neolib C++ App/Game Engine
+  Copyright (c)  2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,23 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/set.hpp>
-#include <neolib/allocator.hpp>
-#include <neolib/uuid.hpp>
-#include <neolib/string.hpp>
-#include <neogfx/game/ecs_ids.hpp>
+#include <neolib/ecs/i_entity_archetype.hpp>
 
-namespace neogfx::game
+namespace neogfx
 {
-    class i_ecs;
+    using namespace neolib::ecs;
 
-    class i_entity_archetype
+    namespace game
     {
-    public:
-        virtual const entity_archetype_id& id() const = 0;
-        virtual const i_string& name() const = 0;
-        virtual const neolib::i_set<component_id>& components() const = 0;
-        virtual neolib::i_set<component_id>& components() = 0;
-        virtual void populate_default_components(i_ecs& aEcs, entity_id aEntity) = 0;
-    };
+        using namespace neolib::ecs;
+    }
 }

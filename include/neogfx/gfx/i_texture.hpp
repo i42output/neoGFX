@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/color.hpp>
-#include <neogfx/game/ecs_ids.hpp>
+#include <neogfx/game/i_ecs.hpp>
 
 namespace neogfx
 {

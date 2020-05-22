@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/core/string_utils.hpp>
 #ifdef u8
 #undef u8
 #include <hb.h>

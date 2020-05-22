@@ -36,7 +36,7 @@
 #pragma once
 
 #include <neolib/neolib.hpp>
-#include <neolib/async_task.hpp>
+#include <neolib/task/async_task.hpp>
 
 namespace neogfx
 {

@@ -21,10 +21,10 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/dll.hpp>
-#include <neolib/string.hpp>
-#include <neolib/version.hpp>
-#include <neolib/reference_counted.hpp>
-#include <neolib/i_application.hpp>
+#include <neolib/core/string.hpp>
+#include <neolib/core/reference_counted.hpp>
+#include <neolib/app/version.hpp>
+#include <neolib/app/i_application.hpp>
 #include <neogfx/tools/nrc/i_ui_element_library.hpp>
 
 namespace neogfx::nrc

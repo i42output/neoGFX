@@ -20,12 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
 #include <neogfx/gfx/primitives.hpp>
-#include "mouse.hpp"
+#include <neogfx/hid/mouse.hpp>
 
 namespace neogfx
 {

@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/scoped.hpp>
+#include <neolib/core/scoped.hpp>
 #include <neogfx/core/transition_animator.hpp>
 
 namespace neogfx

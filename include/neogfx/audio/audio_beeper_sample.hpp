@@ -19,7 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include <neogfx/audio/audio_spec.hpp>
 #include <neogfx/audio/i_audio_beeper_sample.hpp>
 

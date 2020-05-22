@@ -18,8 +18,8 @@
 */
 
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
-#include <neolib/string_utils.hpp>
-#include <neolib/thread.hpp>
+#include <neolib/core/string_utils.hpp>
+#include <neolib/task/thread.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/app/file_dialog.hpp>

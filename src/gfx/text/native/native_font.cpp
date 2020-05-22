@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/filesystem.hpp>
-#include <neolib/string_ci.hpp>
+#include <neolib/core/string_ci.hpp>
 #include "native_font.hpp"
 #include "native_font_face.hpp"
 

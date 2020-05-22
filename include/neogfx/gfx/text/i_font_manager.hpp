@@ -20,10 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/jar.hpp>
+#include <neolib/core/jar.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/device_metrics.hpp>
-#include "font.hpp"
+#include <neogfx/gfx/text/font.hpp>
 
 namespace neogfx
 {

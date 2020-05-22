@@ -19,7 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include <neogfx/audio/i_audio_sample.hpp>
 
 namespace neogfx

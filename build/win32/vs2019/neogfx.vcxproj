@@ -109,7 +109,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;DEBUG_HID;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
@@ -138,7 +138,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -169,7 +169,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -200,7 +200,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -231,7 +231,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -294,6 +294,7 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_sample.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\simd.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />
@@ -308,7 +309,6 @@
     <ClInclude Include="..\..\..\include\neogfx\core\html.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_event.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_power.hpp" />
@@ -324,17 +324,17 @@
     <ClInclude Include="..\..\..\include\neogfx\core\property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation_filter.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animator.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\box_collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\broadphase_collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\clock.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\collision_detector.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\component.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\ecs.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\ecs_helpers.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\ecs_ids.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity.hpp" />
@@ -627,23 +627,17 @@
     <ClCompile Include="..\..\..\src\core\async_thread.cpp" />
     <ClCompile Include="..\..\..\src\core\color.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
-    <ClCompile Include="..\..\..\src\core\power.cpp" />
     <ClCompile Include="..\..\..\src\core\units.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\animator.cpp" />
-    <ClCompile Include="..\..\..\src\game\ecs.cpp" />
-    <ClCompile Include="..\..\..\src\game\entity.cpp" />
-    <ClCompile Include="..\..\..\src\game\entity_archetype.cpp" />
     <ClCompile Include="..\..\..\src\game\game_world.cpp" />
     <ClCompile Include="..\..\..\src\game\renderable_entity_archetype.cpp" />
     <ClCompile Include="..\..\..\src\game\simple_physics.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
     <ClCompile Include="..\..\..\src\game\canvas.cpp" />
-    <ClCompile Include="..\..\..\src\game\system.cpp" />
     <ClCompile Include="..\..\..\src\game\text_mesh.cpp" />
-    <ClCompile Include="..\..\..\src\game\time.cpp" />
     <ClCompile Include="..\..\..\src\gfx\fragment_shader.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />

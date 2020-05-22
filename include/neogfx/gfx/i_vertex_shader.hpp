@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_pair.hpp>
+#include <neolib/core/i_pair.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 

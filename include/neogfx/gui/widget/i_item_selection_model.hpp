@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_map.hpp>
+#include <neolib/core/i_map.hpp>
 #include <neogfx/core/i_event.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 

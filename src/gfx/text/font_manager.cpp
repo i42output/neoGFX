@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/core/string_utils.hpp>
 #include <boost/filesystem.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -26,7 +26,7 @@
 #ifdef _WIN32
 #include <Shlobj.h>
 #endif
-#include <neolib/file.hpp>
+#include <neolib/file/file.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>

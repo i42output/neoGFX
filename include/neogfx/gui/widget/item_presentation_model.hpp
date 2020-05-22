@@ -23,11 +23,9 @@
 #include <vector>
 #include <deque>
 #include <boost/algorithm/string.hpp>
-
-#include <neolib/vecarray.hpp>
-#include <neolib/segmented_array.hpp>
-#include <neolib/scoped.hpp>
-
+#include <neolib/core/vecarray.hpp>
+#include <neolib/core/segmented_array.hpp>
+#include <neolib/core/scoped.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>

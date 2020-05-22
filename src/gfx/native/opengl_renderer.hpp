@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <set>
 #include <map>
-#include <neolib/timer.hpp>
+#include <neolib/task/timer.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include <neogfx/gfx/i_standard_shader_program.hpp>

@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/optional.hpp>
-#include <neolib/timer.hpp>
+#include <neolib/core/optional.hpp>
+#include <neolib/task/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
 #include <neogfx/core/i_transition_animator.hpp>

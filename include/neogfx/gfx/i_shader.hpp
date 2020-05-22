@@ -20,13 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/plugin_variant.hpp>
-#include <neolib/vector.hpp>
-#include <neolib/jar.hpp>
-#include <neolib/reference_counted.hpp>
-#include <neolib/i_vector.hpp>
-#include <neolib/i_set.hpp>
-#include <neolib/i_string.hpp>
+#include <neolib/core/vector.hpp>
+#include <neolib/core/jar.hpp>
+#include <neolib/core/reference_counted.hpp>
+#include <neolib/core/i_vector.hpp>
+#include <neolib/core/i_set.hpp>
+#include <neolib/core/i_string.hpp>
+#include <neolib/plugin/plugin_variant.hpp>
 #include <neogfx/core/numerical.hpp>
 
 namespace neogfx

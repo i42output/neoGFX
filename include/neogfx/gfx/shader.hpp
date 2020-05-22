@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/jar.hpp>
-#include <neolib/set.hpp>
+#include <neolib/core/jar.hpp>
+#include <neolib/core/set.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 

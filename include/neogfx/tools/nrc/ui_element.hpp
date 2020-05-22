@@ -22,10 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <algorithm>
 #include <boost/format.hpp>
-#include <neolib/reference_counted.hpp>
-#include <neolib/optional.hpp>
-#include <neolib/vector.hpp>
-#include <neolib/string.hpp>
+#include <neolib/core/reference_counted.hpp>
+#include <neolib/core/optional.hpp>
+#include <neolib/core/vector.hpp>
+#include <neolib/core/string.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>

@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/variant.hpp>
-#include <neolib/timer.hpp>
+#include <neolib/core/variant.hpp>
+#include <neolib/task/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include "i_native_window.hpp"
 

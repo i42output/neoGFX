@@ -1,7 +1,7 @@
-// game_world.hpp
+// collision_detector.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -19,45 +19,47 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/ecs/chrono.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/system.hpp>
+#include <neogfx/game/aabb_quadtree.hpp>
+#include <neogfx/game/aabb_octree.hpp>
+#include <neogfx/game/box_collider.hpp>
+#include <neogfx/game/broadphase_collider.hpp>
 
 namespace neogfx::game
 {
-    class game_world : public system
+    class collision_detector : public system
     {
+    private:
+        class thread;
     public:
-        define_event(ApplyingPhysics, applying_physics, step_time)
-        define_event(PhysicsApplied, physics_applied, step_time)
-    public:
-        game_world(game::i_ecs& aEcs);
-        ~game_world();
+        collision_detector(game::i_ecs& aEcs);
+        ~collision_detector();
     public:
         const system_id& id() const override;
         const i_string& name() const override;
     public:
-        bool apply() override;
+        std::optional<entity_id> entity_at(const vec3& aPoint) const;
     public:
-        void set_time_step(double aTimeStep_s);
-        bool universal_gravitation_enabled() const;
-        void enable_universal_gravitation();
-        void disable_universal_gravitation();
+        bool apply() override;
+        void terminate() override;
     public:
         struct meta
         {
             static const neolib::uuid& id()
             {
-                static const neolib::uuid sId = { 0x60495660, 0x7da9, 0x4016, 0x841, { 0x7f, 0x3a, 0xae, 0x7d, 0x1e, 0x53 } };
+                static const neolib::uuid sId = { 0xdb9c2033, 0xae26, 0x463e, 0x9100,{ 0xd5, 0x41, 0xfe, 0x4a, 0xd, 0xae } };
                 return sId;
             }
             static const i_string& name()
             {
-                static const string sName = "Game";
+                static const string sName = "Collision Detector";
                 return sName;
             }
         };
     private:
-        bool iUniversalGravitationEnabled;
+        std::unique_ptr<thread> iThread;
+        aabb_quadtree<broadphase_collider_2d> iBroadphase2dTree;
+        aabb_octree<broadphase_collider> iBroadphaseTree;
     };
 }

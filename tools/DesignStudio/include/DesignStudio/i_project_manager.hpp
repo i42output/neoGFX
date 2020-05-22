@@ -20,7 +20,7 @@
 #pragma once
 
 #include <DesignStudio/DesignStudio.hpp>
-#include <neolib/i_vector.hpp>
+#include <neolib/core/i_vector.hpp>
 #include <neogfx/core/i_event.hpp>
 #include <DesignStudio/i_project.hpp>
 

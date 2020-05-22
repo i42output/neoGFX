@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_enum.hpp>
+#include <neolib/core/i_enum.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>

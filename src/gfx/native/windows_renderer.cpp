@@ -23,9 +23,7 @@
 #include <strsafe.h>
 #include <GL/glew.h>
 #include <GL/wglew.h>
-
-#include <neolib/scoped.hpp>
-
+#include <neolib/core/scoped.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include "../../gui/window/native/windows_window.hpp"

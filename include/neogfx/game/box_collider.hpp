@@ -1,4 +1,4 @@
-// collider.hpp
+// box_collider.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/uuid.hpp>
-#include <neolib/string.hpp>
+#include <neolib/core/uuid.hpp>
+#include <neolib/core/string.hpp>
 #include <neogfx/game/i_component_data.hpp>
 
 namespace neogfx::game
@@ -41,7 +41,7 @@ namespace neogfx::game
             }
             static const i_string& name()
             {
-                static const string sName = "Collider";
+                static const string sName = "Box Collider";
                 return sName;
             }
             static uint32_t field_count()

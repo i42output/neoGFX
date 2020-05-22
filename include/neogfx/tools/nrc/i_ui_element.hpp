@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/neolib.hpp>
-#include <neolib/i_reference_counted.hpp>
-#include <neolib/i_optional.hpp>
-#include <neolib/i_string.hpp>
-#include <neolib/i_vector.hpp>
+#include <neolib/core/i_reference_counted.hpp>
+#include <neolib/core/i_optional.hpp>
+#include <neolib/core/i_string.hpp>
+#include <neolib/core/i_vector.hpp>
 #include <neogfx/core/object_type.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/app/i_app.hpp>

@@ -22,9 +22,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
-#include <neolib/string_utils.hpp>
-#include <neolib/file.hpp>
-#include <neolib/zip.hpp>
+#include <neolib/core/string_utils.hpp>
+#include <neolib/file/file.hpp>
+#include <neolib/file/zip.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/text/emoji_atlas.hpp>
 

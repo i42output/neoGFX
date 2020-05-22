@@ -19,18 +19,19 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/vecarray.hpp>
-#include <neolib/lifetime.hpp>
+#include <neolib/core/vecarray.hpp>
+#include <neolib/core/lifetime.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <neogfx/core/numerical.hpp>
-#include <neogfx/game/i_collidable_object.hpp>
+#include <neogfx/game/ecs_ids.hpp>
 
 namespace neogfx::game
 {
-    template <std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<i_collidable_object>>
+    template <typename Collider, std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<Collider>>
     class aabb_octree
     {
     public:
+        typedef Collider collider_type;
         typedef Allocator allocator_type;
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
@@ -43,7 +44,12 @@ namespace neogfx::game
         class node : public neolib::lifetime
         {
         private:
-            typedef neolib::vecarray<i_collidable_object*, BucketSize, -1> object_list;
+            struct object
+            {
+                entity_id id;
+                const collider_type* collider;
+            };
+            typedef neolib::vecarray<object, BucketSize, -1> object_list;
             typedef std::array<std::array<std::array<aabb, 2>, 2>, 2> octants;
             typedef std::array<std::array<std::array<aabb_2d, 2>, 2>, 2> octants_2d;
             typedef std::array<std::array<std::array<node*, 2>, 2>, 2> children;

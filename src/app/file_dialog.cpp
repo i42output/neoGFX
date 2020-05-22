@@ -19,7 +19,7 @@
 
 #include <neogfx/app/file_dialog.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/core/string_utils.hpp>
 #include <neogfx/app/modal_task.hpp>
 #include "native/3rdparty/tinyfiledialogs.h"
 

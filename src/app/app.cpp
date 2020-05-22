@@ -21,8 +21,9 @@
 #include <string>
 #include <atomic>
 #include <boost/locale.hpp> 
-#include <neolib/scoped.hpp>
-#include <neolib/string_utils.hpp>
+#include <neolib/core/scoped.hpp>
+#include <neolib/core/string_utils.hpp>
+#include <neolib/app/power.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
@@ -31,26 +32,24 @@
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/app/i_clipboard.hpp>
-#include <neogfx/core/power.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
+template<> neolib::async_task& neolib::service<neolib::async_task>()
+{
+    return neogfx::app::instance();
+}
+
 namespace neogfx
 {
-    template<> async_task& service<async_task>() 
-    { 
-        return app::instance(); 
-    }
-
-    template<> i_app& service<i_app>() 
-    { 
-        return app::instance(); 
-    }
-
-    template<> i_power& service<i_power>()
+    template<> async_task& service<async_task>()
     {
-        static power sPower;
-        return sPower;
+        return app::instance();
+    }
+
+    template<> i_app& service<i_app>()
+    { 
+        return app::instance(); 
     }
 
     program_options::program_options(int argc, char* argv[])
@@ -272,7 +271,7 @@ namespace neogfx
             service<i_surface_manager>().display().enter_fullscreen(video_mode{ *program_options().full_screen() });
 
         if (program_options().turbo())
-            service<i_power>().enable_turbo_mode();
+            neolib::service<neolib::i_power>().enable_turbo_mode();
 
         style lightStyle("Light");
         register_style(lightStyle);
@@ -372,7 +371,7 @@ namespace neogfx
             {
                 if (!process_events(iAppContext))
                 {
-                    if (service<i_power>().turbo_mode_active())
+                    if (neolib::service<neolib::i_power>().turbo_mode_active())
                         thread::yield();
                     else
                         thread::sleep(1);

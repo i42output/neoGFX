@@ -1,10 +1,12 @@
 The "neogfx" C++ GUI library is dependent on the following 3rd party components which must be installed separately:
 
-* Boost (set environment variable "DevDirBoost" to point to directory root of library)
-* OpenSSL (set environment variable "DevDirOpenSSL" to point to directory root of library)
-* zlib (set environment variable "DevDirZlib" to point to directory root of library)
+* Boost (currently assumed to be in /usr/local)
+* OpenSSL (currently assumed to be in /usr/local)
+* zlib (currently assumed to be in /usr/local)
+* neolib (currently assumed to be in /usr/local)
 * Freetype (set environment variable "DevDirFreetype" to point to directory root of library)
 * Glew (set environment variable "DevDirGlew" to point to directory root of library)
 * Harfbuzz (set environment variable "DevDirHarfBuzz" to point to directory root of library)
 * SDL (set environment variable "DevDirSDL" to point to directory root of library)
-* neolib (set environment variable "DevDirNeolib" to point to directory root of library)
+
+Note when neoGFX 1.0 is released it will be provided with CMake build scripts (i.e. the current Visual Studio development projects will be removed).

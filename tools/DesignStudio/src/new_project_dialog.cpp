@@ -18,7 +18,7 @@
 */
 
 #include <DesignStudio/DesignStudio.hpp>
-#include <neolib/file.hpp>
+#include <neolib/file/file.hpp>
 #include <neogfx/app/file_dialog.hpp>
 #include "new_project_dialog.hpp"
 

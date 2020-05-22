@@ -19,7 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_enum.hpp>
+#include <neolib/core/i_enum.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/texture.hpp>

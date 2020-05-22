@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/scoped.hpp>
+#include <neolib/core/scoped.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
 #include <neogfx/gfx/graphics_context.hpp>

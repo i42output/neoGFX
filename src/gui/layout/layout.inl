@@ -19,7 +19,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <neolib/bresenham_counter.hpp>
+#include <neolib/core/bresenham_counter.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 

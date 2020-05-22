@@ -29,8 +29,8 @@
 #include <dinput.h>
 #include <xinput.h>
 #pragma comment(lib, "Xinput.lib")
-#include <neolib/map.hpp>
-#include <neolib/timer.hpp>
+#include <neolib/core/map.hpp>
+#include <neolib/task/timer.hpp>
 #include <neogfx/hid/game_controllers.hpp>
 
 namespace neogfx

@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/i_reference_counted.hpp>
-#include <neolib/uuid.hpp>
+#include <neolib/core/i_reference_counted.hpp>
+#include <neolib/core/uuid.hpp>
 #include <neogfx/core/event.hpp>
 
 namespace neogfx

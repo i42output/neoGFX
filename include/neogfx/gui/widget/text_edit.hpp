@@ -21,15 +21,15 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/pool/pool_alloc.hpp>
-#include <neolib/tag_array.hpp>
-#include <neolib/segmented_array.hpp>
-#include <neolib/indexitor.hpp>
+#include <neolib/core/tag_array.hpp>
+#include <neolib/core/segmented_array.hpp>
+#include <neolib/core/indexitor.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
-#include "scrollable_widget.hpp"
-#include "i_text_document.hpp"
-#include "cursor.hpp"
+#include <neogfx/gui/widget/scrollable_widget.hpp>
+#include <neogfx/gui/widget/i_text_document.hpp>
+#include <neogfx/gui/widget/cursor.hpp>
 
 namespace neogfx
 {

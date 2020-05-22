@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <vector>
-#include <neolib/variant.hpp>
+#include <neolib/core/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/path.hpp>

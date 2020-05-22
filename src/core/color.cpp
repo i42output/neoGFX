@@ -22,8 +22,8 @@
 #include <tuple>
 #include <iomanip>
 #include <boost/lexical_cast.hpp>
-#include <neolib/vecarray.hpp>
-#include <neolib/string_ci.hpp>
+#include <neolib/core/vecarray.hpp>
+#include <neolib/core/string_ci.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/color.hpp>
 
