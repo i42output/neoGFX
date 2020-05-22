@@ -24,12 +24,13 @@
 #include <neogfx/game/aabb_quadtree.hpp>
 #include <neogfx/game/aabb_octree.hpp>
 #include <neogfx/game/box_collider.hpp>
-#include <neogfx/game/broadphase_collider.hpp>
 
 namespace neogfx::game
 {
     class collision_detector : public system
     {
+    public:
+        define_event(Collision, collision, entity_id, entity_id)
     private:
         class thread;
     public:
@@ -59,7 +60,7 @@ namespace neogfx::game
         };
     private:
         std::unique_ptr<thread> iThread;
-        aabb_quadtree<broadphase_collider_2d> iBroadphase2dTree;
-        aabb_octree<broadphase_collider> iBroadphaseTree;
+        aabb_quadtree<box_collider_2d> iBroadphase2dTree;
+        aabb_octree<box_collider> iBroadphaseTree;
     };
 }

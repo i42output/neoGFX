@@ -329,7 +329,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\animation_filter.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\box_collider.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\broadphase_collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\clock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\collision_detector.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\color.hpp" />
@@ -632,6 +631,7 @@
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\animator.cpp" />
+    <ClCompile Include="..\..\..\src\game\collision_detector.cpp" />
     <ClCompile Include="..\..\..\src\game\game_world.cpp" />
     <ClCompile Include="..\..\..\src\game\renderable_entity_archetype.cpp" />
     <ClCompile Include="..\..\..\src\game\simple_physics.cpp" />

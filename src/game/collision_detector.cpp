@@ -21,6 +21,7 @@
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/collision_detector.hpp>
+#include <neogfx/game/box_collider.hpp>
 
 namespace neogfx::game
 {
@@ -47,10 +48,7 @@ namespace neogfx::game
     collision_detector::collision_detector(game::i_ecs& aEcs) :
         system{ aEcs }
     {
-        Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-        if (!ecs().system_registered<time>())
-            ecs().register_system<time>();
-        ecs().system<time>();
+        Collision.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         iThread = std::make_unique<thread>(*this);
     }
 
@@ -75,33 +73,14 @@ namespace neogfx::game
 
     bool collision_detector::apply()
     {
-        if (!ecs().component_instantiated<animation_filter>())
+        if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
             return false;
         if (paused())
             return false;
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
-        auto now = ecs().system<time>().world_time();
-
-        Animate.trigger(now);
-
-        scoped_component_lock<animation_filter> lockAnimationFilters{ ecs() };
-
-        for (auto entity : ecs().component<animation_filter>().entities())
-        {
-            auto const& info = ecs().component<entity_info>().entity_record(entity);
-            auto& filter = ecs().component<animation_filter>().entity_record(entity);
-            if (!filter.currentFrameStartTime)
-                filter.currentFrameStartTime = info.creationTime;
-            auto const& frames = (filter.animation ? filter.animation->frames : filter.sharedAnimation.ptr->frames);
-            auto const& worldClock = ecs().shared_component<clock>()[0];
-            while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timeStep) < now)
-            {
-                *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timeStep);
-                filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
-            }
-        }
+        // todo
 
         return true;
     }

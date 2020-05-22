@@ -22,7 +22,7 @@
 #include <neogfx/game/box_collider.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/animation_filter.hpp>
-#include <neogfx/game/broadphase_collider.hpp>
+#include <neogfx/game/box_collider.hpp>
 
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
@@ -137,7 +137,7 @@ void create_game(ng::i_layout& aLayout)
                 {},
                 { 0.0, 0.0, ng::to_rad(prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
             },
-            ng::game::broadphase_collider{ 0x2ull });
+            ng::game::box_collider{ 0x2ull });
 
     auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
 
@@ -190,7 +190,7 @@ void create_game(ng::i_layout& aLayout)
         {
             { 400.0, 18.0, 0.1 }, 1.0
         },
-        ng::game::broadphase_collider{ 0x1ull });
+        ng::game::box_collider{ 0x1ull });
 
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     // Some information text...
@@ -277,7 +277,7 @@ void create_game(ng::i_layout& aLayout)
                                 {},
                                 spaceshipPhysics.angle + ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }
                             },
-                            ng::game::broadphase_collider{ 0x1ull });
+                            ng::game::box_collider{ 0x1ull });
                         ecs.component<ng::game::mesh_renderer>().entity_record(missile).destroyOnFustrumCull = true;
                     };
                     for (double angle = -30.0; angle <= 30.0; angle += 10.0)
