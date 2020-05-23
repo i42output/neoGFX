@@ -122,21 +122,21 @@ namespace neogfx::game
                 iTree.iDepth = std::max(iTree.iDepth, iDepth);
                 if (is_split())
                 {
-                    if (aabb_intersects(iOctants[0][0][0], aObject.aabb()))
+                    if (aabb_intersects(iOctants[0][0][0], *aObject.collider->currentAabb))
                         child<0, 0, 0>().add_object(aObject);
-                    if (aabb_intersects(iOctants[0][1][0], aObject.aabb()))
+                    if (aabb_intersects(iOctants[0][1][0], *aObject.collider->currentAabb))
                         child<0, 1, 0>().add_object(aObject);
-                    if (aabb_intersects(iOctants[1][0][0], aObject.aabb()))
+                    if (aabb_intersects(iOctants[1][0][0], *aObject.collider->currentAabb))
                         child<1, 0, 0>().add_object(aObject);
-                    if (aabb_intersects(iOctants[1][1][0], aObject.aabb()))
+                    if (aabb_intersects(iOctants[1][1][0], *aObject.collider->currentAabb))
                         child<1, 1, 0>().add_object(aObject);
-                    if (aabb_intersects(iOctants[0][0][1], aObject.aabb()))
+                    if (aabb_intersects(iOctants[0][0][1], *aObject.collider->currentAabb))
                         child<0, 0, 1>().add_object(aObject);
-                    if (aabb_intersects(iOctants[0][1][1], aObject.aabb()))
+                    if (aabb_intersects(iOctants[0][1][1], *aObject.collider->currentAabb))
                         child<0, 1, 1>().add_object(aObject);
-                    if (aabb_intersects(iOctants[1][0][1], aObject.aabb()))
+                    if (aabb_intersects(iOctants[1][0][1], *aObject.collider->currentAabb))
                         child<1, 0, 1>().add_object(aObject);
-                    if (aabb_intersects(iOctants[1][1][1], aObject.aabb()))
+                    if (aabb_intersects(iOctants[1][1][1], *aObject.collider->currentAabb))
                         child<1, 1, 1>().add_object(aObject);
                 }
                 else
@@ -234,7 +234,7 @@ namespace neogfx::game
             {
                 for (auto const& o : objects())
                     if (aabb_intersects(aAabb, *o.collider->currentAabb))
-                        aVisitor(o);
+                        aVisitor(o.id);
                 if (has_child<0, 0, 0>() && aabb_intersects(iOctants[0][0][0], aAabb))
                     child<0, 0, 0>().visit(aAabb, aVisitor);
                 if (has_child<0, 0, 1>() && aabb_intersects(iOctants[0][0][1], aAabb))
@@ -257,7 +257,7 @@ namespace neogfx::game
             {
                 for (auto const& o : objects())
                     if (aabb_intersects(aAabb, neogfx::aabb_2d{ *o.collider->currentAabb }))
-                        aVisitor(o);
+                        aVisitor(o.id);
                 if (has_child<0, 0, 0>() && aabb_intersects(iOctants2d[0][0][0], aAabb))
                     child<0, 0, 0>().visit(aAabb, aVisitor);
                 if (has_child<0, 0, 1>() && aabb_intersects(iOctants2d[0][0][1], aAabb))
@@ -382,21 +382,21 @@ namespace neogfx::game
                 for (auto const& o : objects())
                 {
                     if (aabb_intersects(iOctants[0][0][0], *o.collider->currentAabb))
-                        child<0, 0, 0>().add_object(*o);
+                        child<0, 0, 0>().add_object(o);
                     if (aabb_intersects(iOctants[0][0][1], *o.collider->currentAabb))
-                        child<0, 0, 1>().add_object(*o);
+                        child<0, 0, 1>().add_object(o);
                     if (aabb_intersects(iOctants[0][1][0], *o.collider->currentAabb))
-                        child<0, 1, 0>().add_object(*o);
+                        child<0, 1, 0>().add_object(o);
                     if (aabb_intersects(iOctants[0][1][1], *o.collider->currentAabb))
-                        child<0, 1, 1>().add_object(*o);
+                        child<0, 1, 1>().add_object(o);
                     if (aabb_intersects(iOctants[1][0][0], *o.collider->currentAabb))
-                        child<1, 0, 0>().add_object(*o);
+                        child<1, 0, 0>().add_object(o);
                     if (aabb_intersects(iOctants[1][0][1], *o.collider->currentAabb))
-                        child<1, 0, 1>().add_object(*o);
+                        child<1, 0, 1>().add_object(o);
                     if (aabb_intersects(iOctants[1][1][0], *o.collider->currentAabb))
-                        child<1, 1, 0>().add_object(*o);
+                        child<1, 1, 0>().add_object(o);
                     if (aabb_intersects(iOctants[1][1][1], *o.collider->currentAabb))
-                        child<1, 1, 1>().add_object(*o);
+                        child<1, 1, 1>().add_object(o);
                 }
                 iObjects.clear();
             }
@@ -458,7 +458,7 @@ namespace neogfx::game
             new(&iRootNode) node{ *this, iRootAabb };
             for (auto entity : aEcs.component<collider_type>().entities())
             {
-                auto& collider = ecs().component<collider_type>().entity_record(entity);
+                auto& collider = aEcs.component<collider_type>().entity_record(entity);
                 iRootNode.add_object(entity, collider);
             }
         }
@@ -467,26 +467,26 @@ namespace neogfx::game
             iDepth = 0;
             for (auto entity : aEcs.component<collider_type>().entities())
             {
-                auto& collider = ecs().component<collider_type>().entity_record(entity);
+                auto& collider = aEcs.component<collider_type>().entity_record(entity);
                 iRootNode.update_object(entity, collider);
             }
         }
         template <typename CollisionAction>
-        void collisions(const i_ecs& aEcs, CollisionAction aCollisionAction) const
+        void collisions(i_ecs& aEcs, CollisionAction aCollisionAction) const
         {
             for (auto candidate : aEcs.component<collider_type>().entities())
             {
-                auto& collider = aEcs.component<collider_type>().entity_record(candidate);
+                auto& candidateCollider = aEcs.component<collider_type>().entity_record(candidate);
                 if (++iCollisionUpdateId == 0)
                     iCollisionUpdateId = 1;
-                iRootNode.visit(collider, [this, &collider, &aCollisionAction](entity_id aHit)
+                iRootNode.visit(candidateCollider, [&](entity_id aHit)
                 {
                     if (candidate < aHit)
                     {
-                        auto& hitCollider = ecs().component<collider_type>().entity_record(aHit);
-                        if (hitCollider->collisionEventId != iCollisionUpdateId)
+                        auto& hitCollider = aEcs.component<collider_type>().entity_record(aHit);
+                        if ((candidateCollider.mask & hitCollider.mask) == 0 && hitCollider.collisionEventId != iCollisionUpdateId)
                         {
-                            hitCollider->collisionEventId = iCollisionUpdateId;
+                            hitCollider.collisionEventId = iCollisionUpdateId;
                             aCollisionAction(candidate, aHit);
                         }
                     }

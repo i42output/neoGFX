@@ -83,15 +83,12 @@ namespace neogfx::game
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
-        game::scoped_component_lock<game::mesh_filter> lock1{ ecs() };
-        game::scoped_component_lock<game::rigid_body> lock2{ ecs() };
-
-        auto const& meshFilters = ecs().component<game::mesh_filter>();
-        auto const& rigidBodies = ecs().component<game::rigid_body>();
 
         if (ecs().component_instantiated<box_collider>())
         {
-            game::scoped_component_lock<game::box_collider> lock3{ ecs() };
+            game::scoped_component_lock<game::box_collider, game::mesh_filter, game::rigid_body> lock{ ecs() };
+            auto const& meshFilters = ecs().component<game::mesh_filter>();
+            auto const& rigidBodies = ecs().component<game::rigid_body>();
             auto& boxColliders = ecs().component<game::box_collider>();
             for (auto entity : boxColliders.entities())
             {
@@ -107,11 +104,19 @@ namespace neogfx::game
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
+
+            iBroadphaseTree.full_update(ecs());
+
+            iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
+            {
+            });
         }
 
         if (ecs().component_instantiated<box_collider_2d>())
         {
-            game::scoped_component_lock<game::box_collider_2d> lock3{ ecs() };
+            game::scoped_component_lock<game::box_collider_2d, game::mesh_filter, game::rigid_body> lock{ ecs() };
+            auto const& meshFilters = ecs().component<game::mesh_filter>();
+            auto const& rigidBodies = ecs().component<game::rigid_body>();
             auto& boxColliders2d = ecs().component<game::box_collider_2d>();
             for (auto entity : boxColliders2d.entities())
             {
@@ -127,6 +132,12 @@ namespace neogfx::game
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
+
+            iBroadphase2dTree.full_update(ecs());
+
+            iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
+            {
+            });
         }
 
         return true;

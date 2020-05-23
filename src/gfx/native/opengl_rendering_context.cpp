@@ -1073,20 +1073,13 @@ namespace neogfx
 
         thread_local std::vector<std::vector<mesh_drawable>> drawables;
         thread_local int32_t maxLayer = 0;
-        thread_local std::optional<game::scoped_component_lock<game::mesh_renderer>> lock1;
-        thread_local std::optional<game::scoped_component_lock<game::mesh_filter>> lock2;
-        thread_local std::optional<game::scoped_component_lock<game::animation_filter>> lock3;
-        thread_local std::optional<game::scoped_component_lock<game::rigid_body>> lock4;
+        thread_local std::optional<game::scoped_component_lock<game::mesh_renderer, game::mesh_filter, game::animation_filter, game::rigid_body>> lock;
 
         if (drawables.size() <= aLayer)
             drawables.resize(aLayer + 1);
 
         if (aLayer == 0)
         {
-            lock1.emplace(aEcs);
-            lock2.emplace(aEcs);
-            lock3.emplace(aEcs);
-            lock4.emplace(aEcs);
             for (auto& d : drawables)
                 d.clear();
             aEcs.component<game::rigid_body>().take_snapshot();
@@ -1116,8 +1109,8 @@ namespace neogfx
                     transformation,
                     entity);
             }
-            lock4.reset();
         }
+        lock->unlock<game::rigid_body>();
         if (!drawables[aLayer].empty())
             draw_meshes(&*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
         for (auto const& d : drawables[aLayer])
@@ -1128,9 +1121,7 @@ namespace neogfx
             maxLayer = 0;
             for (auto& d : drawables)
                 d.clear();
-            lock3.reset();
-            lock2.reset();
-            lock1.reset();
+            lock.reset();
         }
     }
 

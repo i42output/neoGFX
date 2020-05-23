@@ -15,6 +15,7 @@
 #include <neogfx/game/standard_archetypes.hpp>
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/time.hpp>
+#include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/sprite.hpp>
@@ -201,6 +202,11 @@ void create_game(ng::i_layout& aLayout)
         text.fill('0');
         text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
         gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+    });
+
+    ~~~~ecs.system<ng::game::collision_detector>().Collision([&](ng::game::entity_id e1, ng::game::entity_id e2)
+    {
+
     });
 
     // Instantiate physics...
