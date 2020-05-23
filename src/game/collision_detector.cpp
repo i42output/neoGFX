@@ -22,6 +22,9 @@
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/box_collider.hpp>
+#include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
 
 namespace neogfx::game
 {
@@ -80,7 +83,51 @@ namespace neogfx::game
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
-        // todo
+        game::scoped_component_lock<game::mesh_filter> lock1{ ecs() };
+        game::scoped_component_lock<game::rigid_body> lock2{ ecs() };
+
+        auto const& meshFilters = ecs().component<game::mesh_filter>();
+        auto const& rigidBodies = ecs().component<game::rigid_body>();
+
+        if (ecs().component_instantiated<box_collider>())
+        {
+            game::scoped_component_lock<game::box_collider> lock3{ ecs() };
+            auto& boxColliders = ecs().component<game::box_collider>();
+            for (auto entity : boxColliders.entities())
+            {
+                // todo: only update collider AABBs if rigid_body changes require it
+                auto const& meshFilter = meshFilters.entity_record(entity);
+                auto const& transformation = rigidBodies.has_entity_record(entity) ?
+                    to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity();
+                auto& collider = boxColliders.entity_record(entity);
+                collider.previousAabb = collider.currentAabb;
+                auto const& untransformed = (meshFilter.mesh != std::nullopt ?
+                    *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
+                collider.currentAabb = to_aabb(untransformed.vertices, transformation);
+                if (!collider.previousAabb)
+                    collider.previousAabb = collider.currentAabb;
+            }
+        }
+
+        if (ecs().component_instantiated<box_collider_2d>())
+        {
+            game::scoped_component_lock<game::box_collider_2d> lock3{ ecs() };
+            auto& boxColliders2d = ecs().component<game::box_collider_2d>();
+            for (auto entity : boxColliders2d.entities())
+            {
+                // todo: only update collider AABBs if rigid_body changes require it
+                auto const& meshFilter = meshFilters.entity_record(entity);
+                auto const& transformation = rigidBodies.has_entity_record(entity) ?
+                    to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity();
+                auto& collider = boxColliders2d.entity_record(entity);
+                collider.previousAabb = collider.currentAabb;
+                auto const& untransformed = (meshFilter.mesh != std::nullopt ?
+                    *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
+                collider.currentAabb = to_aabb_2d(untransformed.vertices, transformation);
+                if (!collider.previousAabb)
+                    collider.previousAabb = collider.currentAabb;
+            }
+        }
 
         return true;
     }

@@ -29,8 +29,8 @@ namespace neogfx::game
     struct box_collider
     {
         uint64_t mask;
-        vec3 origin;
-        vec3 size;
+        std::optional<vec3> origin;
+        std::optional<vec3> size;
         std::optional<aabb> previousAabb;
         std::optional<aabb> currentAabb;
         uint32_t collisionEventId;
@@ -59,10 +59,10 @@ namespace neogfx::game
                     return component_data_field_type::Uint64;
                 case 1:
                 case 2:
-                    return component_data_field_type::Vec3;
+                    return component_data_field_type::Vec3 | component_data_field_type::Optional;
                 case 3:
                 case 4:
-                    return component_data_field_type::Aabb | component_data_field_type::Internal;
+                    return component_data_field_type::Aabb | component_data_field_type::Optional | component_data_field_type::Internal;
                 case 5:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:
@@ -88,8 +88,8 @@ namespace neogfx::game
     struct box_collider_2d
     {
         uint64_t mask;
-        vec2 origin;
-        vec2 size;
+        std::optional<vec2> origin;
+        std::optional<vec2> size;
         std::optional<aabb_2d> previousAabb;
         std::optional<aabb_2d> currentAabb;
         uint32_t collisionEventId;
@@ -118,10 +118,10 @@ namespace neogfx::game
                     return component_data_field_type::Uint64;
                 case 1:
                 case 2:
-                    return component_data_field_type::Vec3;
+                    return component_data_field_type::Vec2 | component_data_field_type::Optional;
                 case 3:
                 case 4:
-                    return component_data_field_type::Aabb2d | component_data_field_type::Internal;
+                    return component_data_field_type::Aabb2d | component_data_field_type::Optional | component_data_field_type::Internal;
                 case 5:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:

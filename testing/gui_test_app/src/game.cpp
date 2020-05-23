@@ -264,7 +264,7 @@ void create_game(ng::i_layout& aLayout)
                     sExtraFire = false;
                     auto make_missile = [&](double angle)
                     {
-                        auto tm = ng::to_transformation_matrix(spaceshipPhysics, false);
+                        auto tm = ng::game::to_transformation_matrix(spaceshipPhysics, false);
                         auto missile = ecs.create_entity(
                             archetypes::missile,
                             ng::to_ecs_component(ng::rect{ ng::size{ 3.0, 3.0} }.with_centred_origin()),

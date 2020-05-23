@@ -82,35 +82,34 @@ namespace neogfx::game
         return mesh{ aLhs * aRhs.vertices, aRhs.uv, aRhs.faces };
     }
 
-    inline rect bounding_rect(const vertices& aVertices)
+    inline rect bounding_rect(const vertices& aVertices, const mat44& aTransformation = mat44::identity())
     {
         if (aVertices.empty())
             return rect{};
-        point topLeft{ aVertices[0].x, aVertices[0].y };
-        point bottomRight = topLeft;
+        point topLeft{ aTransformation * aVertices[0] };
+        point bottomRight;
         for (auto const& v : aVertices)
         {
-            topLeft.x = std::min<coordinate>(topLeft.x, v.x);
-            topLeft.y = std::min<coordinate>(topLeft.y, v.y);
-            bottomRight.x = std::max<coordinate>(bottomRight.x, v.x);
-            bottomRight.y = std::max<coordinate>(bottomRight.y, v.y);
+            auto const tv = aTransformation * v;
+            topLeft.x = std::min<coordinate>(topLeft.x, tv.x);
+            topLeft.y = std::min<coordinate>(topLeft.y, tv.y);
+            bottomRight.x = std::max<coordinate>(bottomRight.x, tv.x);
+            bottomRight.y = std::max<coordinate>(bottomRight.y, tv.y);
         }
         return rect{ topLeft, bottomRight };
     }
 
-    inline rect bounding_rect(const vertices& aVertices, const faces& aFaces, vertices::size_type aOffset = 0)
+    inline rect bounding_rect(const vertices& aVertices, const faces& aFaces, const mat44& aTransformation = mat44::identity(), vertices::size_type aOffset = 0)
     {
         if (aVertices.empty())
             return rect{};
-        point topLeft{ 
-            aVertices[static_cast<vertices::size_type>(aFaces[0][0]) + aOffset].x, 
-            aVertices[static_cast<vertices::size_type>(aFaces[0][0]) + aOffset].y };
+        point topLeft{ aTransformation * aVertices[static_cast<vertices::size_type>(aFaces[0][static_cast<uint32_t>(0)]) + aOffset] };
         point bottomRight = topLeft;
         for (auto const& f : aFaces)
         {
             for (faces::size_type fv = 0; fv < 3; ++fv)
             {
-                auto const& v = aVertices[static_cast<vertices::size_type>(f[static_cast<uint32_t>(fv)]) + aOffset];
+                auto const& v = aTransformation * aVertices[static_cast<vertices::size_type>(f[static_cast<uint32_t>(fv)]) + aOffset];
                 topLeft.x = std::min<coordinate>(topLeft.x, v.x);
                 topLeft.y = std::min<coordinate>(topLeft.y, v.y);
                 bottomRight.x = std::max<coordinate>(bottomRight.x, v.x);
@@ -120,7 +119,7 @@ namespace neogfx::game
         return rect{ topLeft, bottomRight };
     }
 
-    inline rect bounding_rect(const mesh& aMesh)
+    inline rect bounding_rect(const mesh& aMesh, const mat44& aTransformation = mat44::identity())
     {
         return bounding_rect(aMesh.vertices);
     }

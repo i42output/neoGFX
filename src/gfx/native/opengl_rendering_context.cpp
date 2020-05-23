@@ -1662,7 +1662,7 @@ namespace neogfx
 
             auto calc_bounding_rect = [&aPatch](const patch_drawable::item& aItem) -> rect
             {
-                return game::bounding_rect(aPatch.xyz, *aItem.faces, aItem.offsetVertices);
+                return game::bounding_rect(aPatch.xyz, *aItem.faces, mat44::identity(), aItem.offsetVertices);
             };
 
             auto calc_sampling = [&aPatch, &calc_bounding_rect](const patch_drawable::item& aItem) -> texture_sampling
@@ -1670,9 +1670,7 @@ namespace neogfx
                 if (!aItem.has_texture())
                     return texture_sampling::Normal;
                 auto const& texture = *service<i_texture_manager>().find_texture(aItem.texture().id.cookie());
-                auto sampling =
-                    (aItem.texture().sampling != std::nullopt ?
-                        *aItem.texture().sampling : texture.sampling());
+                auto sampling = (aItem.texture().sampling != std::nullopt ? *aItem.texture().sampling : texture.sampling());
                 if (sampling == texture_sampling::Scaled)
                 {
                     auto const extents = size_u32{ texture.extents() };

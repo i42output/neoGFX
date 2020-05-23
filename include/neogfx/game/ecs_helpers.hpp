@@ -34,27 +34,6 @@
 
 namespace neogfx
 {
-    inline mat44 to_transformation_matrix(const game::rigid_body& aRigidBody, bool aIncludeTranslation = true)
-    {
-        scalar az = aRigidBody.angle.z;
-        // todo: following rotation is 2D, make it 3D...
-        return aIncludeTranslation ? 
-            mat44
-            {
-                { std::cos(az), std::sin(az), 0.0, 0.0 },
-                { -std::sin(az), std::cos(az), 0.0, 0.0 },
-                { 0.0, 0.0, 1.0, 0.0 },
-                { aRigidBody.position.x, aRigidBody.position.y, aRigidBody.position.z, 1.0 } 
-            } : 
-            mat44
-            {
-                { std::cos(az), std::sin(az), 0.0, 0.0 },
-                { -std::sin(az), std::cos(az), 0.0, 0.0 },
-                { 0.0, 0.0, 1.0, 0.0 },
-                { 0.0, 0.0, 0.0, 1.0 }
-            };
-    }
-
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline game::mesh to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, scalar aZpos = 0.0, uint32_t aOffset = 0)
     {

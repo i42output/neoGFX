@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_SCL_SECURE_NO_WARNINGS;NDEBUG;DEFAULT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirNeogfx)\include;/usr/local/include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -129,8 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_SCL_SECURE_NO_WARNINGS;NDEBUG;DEFAULT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -157,7 +156,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_SCL_SECURE_NO_WARNINGS;NDEBUG;DEFAULT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirNeogfx)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -183,7 +182,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_SCL_SECURE_NO_WARNINGS;_DEBUG;DEFAULT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirNeogfx)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
