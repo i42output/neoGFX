@@ -1091,11 +1091,14 @@ namespace neogfx
             aGc.set_origin(origin());
 
             scoped_scissor scissor(aGc, clipRect);
-            scoped_coordinate_system scs(aGc, origin(), extents(), logical_coordinate_system());
+
+            scoped_coordinate_system scs1(aGc, origin(), extents(), logical_coordinate_system());
 
             Painting.trigger(aGc);
 
             paint(aGc);
+
+            scoped_coordinate_system scs2(aGc, origin(), extents(), logical_coordinate_system());
 
             PaintingChildren.trigger(aGc);
 
@@ -1109,6 +1112,8 @@ namespace neogfx
 
             aGc.set_extents(client_rect().extents());
             aGc.set_origin(origin());
+
+            scoped_coordinate_system scs3(aGc, origin(), extents(), logical_coordinate_system());
 
             Painted.trigger(aGc);
         }

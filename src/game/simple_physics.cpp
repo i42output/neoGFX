@@ -22,10 +22,12 @@
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/clock.hpp>
+#include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/physics.hpp>
 #include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
@@ -96,7 +98,7 @@ namespace neogfx::game
             didWork = true;
             yield();
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
-            std::optional<scoped_component_lock<rigid_body>> lockRigidBodies{ ecs() };
+            std::optional<game::scoped_component_lock<game::box_collider, game::box_collider_2d, game::mesh_filter, game::rigid_body>> lock{ ecs() };
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
                 rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -133,7 +135,9 @@ namespace neogfx::game
                 rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
-            lockRigidBodies.reset();
+            if (ecs().system_instantiated<collision_detector>())
+                ecs().system<collision_detector>().update_colliders();
+            lock.reset();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time += worldClock.timeStep;

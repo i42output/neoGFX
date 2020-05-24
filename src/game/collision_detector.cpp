@@ -83,7 +83,37 @@ namespace neogfx::game
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
+        if (ecs().component_instantiated<box_collider>())
+        {
+            game::scoped_component_lock<game::box_collider> lock{ ecs() };
+            iBroadphaseTree.full_update(ecs());
+            iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
+            {
+                Collision.trigger(e1, e2);
+            });
+        }
 
+        if (ecs().component_instantiated<box_collider_2d>())
+        {
+            game::scoped_component_lock<game::box_collider_2d> lock{ ecs() };
+            iBroadphase2dTree.full_update(ecs());
+            iBroadphase2dTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
+            {
+                Collision.trigger(e1, e2);
+            });
+        }
+
+        return true;
+    }
+
+    void collision_detector::terminate()
+    {
+        if (!iThread->aborted())
+            iThread->abort();
+    }
+
+    void collision_detector::update_colliders()
+    {
         if (ecs().component_instantiated<box_collider>())
         {
             game::scoped_component_lock<game::box_collider, game::mesh_filter, game::rigid_body> lock{ ecs() };
@@ -104,13 +134,6 @@ namespace neogfx::game
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
-
-            iBroadphaseTree.full_update(ecs());
-
-            iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
-            {
-                Collision.trigger(e1, e2);
-            });
         }
 
         if (ecs().component_instantiated<box_collider_2d>())
@@ -133,21 +156,6 @@ namespace neogfx::game
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
-
-            iBroadphase2dTree.full_update(ecs());
-
-            iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
-            {
-                Collision.trigger(e1, e2);
-            });
         }
-
-        return true;
-    }
-
-    void collision_detector::terminate()
-    {
-        if (!iThread->aborted())
-            iThread->abort();
     }
 }

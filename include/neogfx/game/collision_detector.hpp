@@ -45,6 +45,8 @@ namespace neogfx::game
         bool apply() override;
         void terminate() override;
     public:
+        void update_colliders();
+    public:
         struct meta
         {
             static const neolib::uuid& id()
