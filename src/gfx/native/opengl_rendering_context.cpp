@@ -1082,8 +1082,10 @@ namespace neogfx
         {
             for (auto& d : drawables)
                 d.clear();
+            lock.emplace(aEcs);
             aEcs.component<game::rigid_body>().take_snapshot();
             auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
+            lock->mutex<game::rigid_body>().unlock();
             auto const& rigidBodies = rigidBodiesSnapshot.data();
             for (auto entity : aEcs.component<game::mesh_renderer>().entities())
             {
@@ -1110,7 +1112,6 @@ namespace neogfx
                     entity);
             }
         }
-        lock->unlock<game::rigid_body>();
         if (!drawables[aLayer].empty())
             draw_meshes(&*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
         for (auto const& d : drawables[aLayer])

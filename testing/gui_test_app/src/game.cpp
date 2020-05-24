@@ -204,10 +204,10 @@ void create_game(ng::i_layout& aLayout)
         gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
     });
 
-    ~~~~ecs.system<ng::game::collision_detector>().Collision([&](ng::game::entity_id e1, ng::game::entity_id e2)
+ /*   ~~~~ecs.system<ng::game::collision_detector>().Collision([&](ng::game::entity_id e1, ng::game::entity_id e2)
     {
-
-    });
+        std::cout << "collision!" << std::endl;
+    }); */
 
     // Instantiate physics...
     ecs.system<ng::game::simple_physics>();

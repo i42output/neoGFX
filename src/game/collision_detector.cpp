@@ -109,6 +109,7 @@ namespace neogfx::game
 
             iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
             {
+                Collision.trigger(e1, e2);
             });
         }
 
@@ -137,6 +138,7 @@ namespace neogfx::game
 
             iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
             {
+                Collision.trigger(e1, e2);
             });
         }
 
