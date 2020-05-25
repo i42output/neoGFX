@@ -21,15 +21,18 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/system.hpp>
+#include <neogfx/game/box_collider.hpp>
+#include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/rigid_body.hpp>
 
 namespace neogfx::game
 {
-    class simple_physics : public system
+    class simple_physics : public game::system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>
     {
     private:
         class thread;
     public:
-        simple_physics(game::i_ecs& aEcs);
+        simple_physics(i_ecs& aEcs);
         ~simple_physics();
     public:
         const system_id& id() const override;

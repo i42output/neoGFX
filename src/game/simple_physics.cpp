@@ -20,21 +20,20 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/clock.hpp>
 #include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/physics.hpp>
-#include <neogfx/game/rigid_body.hpp>
-#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
     class simple_physics::thread : public async_thread
     {
     public:
-        thread(simple_physics& aOwner) : async_thread{ "neogfx::game::simple_physics::thread" }, iOwner{ aOwner }
+        thread(simple_physics& aOwner) : async_thread{ "neogfx::simple_physics::thread" }, iOwner{ aOwner }
         {
             start();
         }
@@ -51,8 +50,8 @@ namespace neogfx::game
     };
 
 
-    simple_physics::simple_physics(game::i_ecs& aEcs) :
-        system{ aEcs }
+    simple_physics::simple_physics(i_ecs& aEcs) :
+        system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>{ aEcs }
     {
         if (!ecs().system_registered<game::time>())
             ecs().register_system<game::time>();
@@ -98,7 +97,7 @@ namespace neogfx::game
             didWork = true;
             yield();
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
-            std::optional<game::scoped_component_lock<game::box_collider, game::box_collider_2d, game::mesh_filter, game::rigid_body>> lock{ ecs() };
+            std::optional<scoped_component_lock<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
                 rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -108,7 +107,8 @@ namespace neogfx::game
             for (auto& rigidBody1 : rigidBodies.component_data())
             {
                 auto entity1 = rigidBodies.entity(rigidBody1);
-                if (entity1 == null_entity)
+                auto const& entity1Info = ecs().component<entity_info>().entity_record(entity1);
+                if (entity1Info.destroyed)
                     continue; // todo: add support for skip iterators
                 vec3 totalForce = rigidBody1.mass * uniformGravity;
                 if (useUniversalGravitation)
@@ -117,7 +117,8 @@ namespace neogfx::game
                     {
                         auto& rigidBody2 = *iterRigidBody2;
                         auto entity2 = rigidBodies.entity(rigidBody2);
-                        if (entity2 == null_entity)
+                        auto const& entity2Info = ecs().component<entity_info>().entity_record(entity2);
+                        if (entity2Info.destroyed)
                             continue; // todo: add support for skip iterators
                         vec3 distance = rigidBody1.position - rigidBody2.position;
                         if (distance.magnitude() > 0.0) // avoid division by zero or rigidBody1 == rigidBody2

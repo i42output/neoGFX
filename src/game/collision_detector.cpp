@@ -20,10 +20,8 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/collision_detector.hpp>
-#include <neogfx/game/box_collider.hpp>
-#include <neogfx/game/mesh_filter.hpp>
-#include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 
 namespace neogfx::game
@@ -31,7 +29,7 @@ namespace neogfx::game
     class collision_detector::thread : public async_thread
     {
     public:
-        thread(collision_detector& aOwner) : async_thread{ "neogfx::game::collision_detector::thread" }, iOwner{ aOwner }
+        thread(collision_detector& aOwner) : async_thread{ "neogfx::collision_detector::thread" }, iOwner{ aOwner }
         {
             start();
         }
@@ -47,9 +45,10 @@ namespace neogfx::game
         collision_detector& iOwner;
     };
 
-
-    collision_detector::collision_detector(game::i_ecs& aEcs) :
-        system{ aEcs }
+    collision_detector::collision_detector(i_ecs& aEcs) :
+        system<entity_info, box_collider, box_collider_2d>{ aEcs },
+        iBroadphaseTree{ aEcs },
+        iBroadphase2dTree{ aEcs }
     {
         Collision.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         iThread = std::make_unique<thread>(*this);
@@ -76,18 +75,21 @@ namespace neogfx::game
 
     bool collision_detector::apply()
     {
-        if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
+        bool expectCollidersUpdated = true;
+        if (!iCollidersUpdated.compare_exchange_strong(expectCollidersUpdated, false))
             return false;
-        if (paused())
+        else if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
             return false;
-        if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
+        else if (paused())
+            return false;
+        else if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
         if (ecs().component_instantiated<box_collider>())
         {
-            game::scoped_component_lock<game::box_collider> lock{ ecs() };
-            iBroadphaseTree.full_update(ecs());
-            iBroadphaseTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
+            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
+            iBroadphaseTree.full_update();
+            iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
             {
                 Collision.trigger(e1, e2);
             });
@@ -95,9 +97,9 @@ namespace neogfx::game
 
         if (ecs().component_instantiated<box_collider_2d>())
         {
-            game::scoped_component_lock<game::box_collider_2d> lock{ ecs() };
-            iBroadphase2dTree.full_update(ecs());
-            iBroadphase2dTree.collisions(ecs(), [this](entity_id e1, entity_id e2)
+            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
+            iBroadphase2dTree.full_update();
+            iBroadphase2dTree.collisions([this](entity_id e1, entity_id e2)
             {
                 Collision.trigger(e1, e2);
             });
@@ -116,12 +118,15 @@ namespace neogfx::game
     {
         if (ecs().component_instantiated<box_collider>())
         {
-            game::scoped_component_lock<game::box_collider, game::mesh_filter, game::rigid_body> lock{ ecs() };
-            auto const& meshFilters = ecs().component<game::mesh_filter>();
-            auto const& rigidBodies = ecs().component<game::rigid_body>();
-            auto& boxColliders = ecs().component<game::box_collider>();
+            scoped_component_lock<entity_info, box_collider, mesh_filter, rigid_body> lock{ ecs() };
+            auto const& meshFilters = ecs().component<mesh_filter>();
+            auto const& rigidBodies = ecs().component<rigid_body>();
+            auto& boxColliders = ecs().component<box_collider>();
             for (auto entity : boxColliders.entities())
             {
+                auto const& info = ecs().component<entity_info>().entity_record(entity);
+                if (info.destroyed)
+                    continue; // todo: add support for skip iterators
                 // todo: only update collider AABBs if rigid_body changes require it
                 auto const& meshFilter = meshFilters.entity_record(entity);
                 auto const& transformation = rigidBodies.has_entity_record(entity) ?
@@ -138,10 +143,10 @@ namespace neogfx::game
 
         if (ecs().component_instantiated<box_collider_2d>())
         {
-            game::scoped_component_lock<game::box_collider_2d, game::mesh_filter, game::rigid_body> lock{ ecs() };
-            auto const& meshFilters = ecs().component<game::mesh_filter>();
-            auto const& rigidBodies = ecs().component<game::rigid_body>();
-            auto& boxColliders2d = ecs().component<game::box_collider_2d>();
+            scoped_component_lock<box_collider_2d, mesh_filter, rigid_body> lock{ ecs() };
+            auto const& meshFilters = ecs().component<mesh_filter>();
+            auto const& rigidBodies = ecs().component<rigid_body>();
+            auto& boxColliders2d = ecs().component<box_collider_2d>();
             for (auto entity : boxColliders2d.entities())
             {
                 // todo: only update collider AABBs if rigid_body changes require it
@@ -157,5 +162,7 @@ namespace neogfx::game
                     collider.previousAabb = collider.currentAabb;
             }
         }
+
+        iCollidersUpdated = true;
     }
 }

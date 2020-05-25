@@ -32,6 +32,7 @@ namespace neogfx::game
         std::optional<animation> animation;
         std::optional<mat44> transformation;
         u32 currentFrame;
+        bool autoDestroy;
         std::optional<i64> currentFrameStartTime; // ECS internal
 
         struct meta : i_component_data::meta
@@ -48,7 +49,7 @@ namespace neogfx::game
             }
             static uint32_t field_count()
             {
-                return 4;
+                return 6;
             }
             static component_data_field_type field_type(uint32_t aFieldIndex)
             {
@@ -62,6 +63,10 @@ namespace neogfx::game
                     return component_data_field_type::Mat44 | component_data_field_type::Optional;
                 case 3:
                     return component_data_field_type::Uint32;
+                case 4:
+                    return component_data_field_type::Bool;
+                case 5:
+                    return component_data_field_type::Int64 | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
                 }
@@ -75,6 +80,8 @@ namespace neogfx::game
                     return animation::meta::id();
                 case 2:
                 case 3:
+                case 4:
+                case 5:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -87,7 +94,9 @@ namespace neogfx::game
                     "Shared Animation",
                     "Animation",
                     "Transformation",
-                    "Current Frame"
+                    "Current Frame",
+                    "Auto Destroy",
+                    "Current Frame Start Time"
                 };
                 return sFieldNames[aFieldIndex];
             }

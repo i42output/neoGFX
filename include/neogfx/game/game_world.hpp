@@ -25,7 +25,7 @@
 
 namespace neogfx::game
 {
-    class game_world : public system
+    class game_world : public game::system<>
     {
     public:
         define_event(ApplyingPhysics, applying_physics, step_time)

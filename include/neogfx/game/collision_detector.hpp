@@ -27,14 +27,14 @@
 
 namespace neogfx::game
 {
-    class collision_detector : public system
+    class collision_detector : public game::system<entity_info, box_collider, box_collider_2d>
     {
     public:
         define_event(Collision, collision, entity_id, entity_id)
     private:
         class thread;
     public:
-        collision_detector(game::i_ecs& aEcs);
+        collision_detector(i_ecs& aEcs);
         ~collision_detector();
     public:
         const system_id& id() const override;
@@ -46,6 +46,16 @@ namespace neogfx::game
         void terminate() override;
     public:
         void update_colliders();
+        template <typename Visitor>
+        void visit_aabbs(const Visitor& aVisitor) const
+        {
+            iBroadphaseTree.visit_aabbs(aVisitor);
+        }
+        template <typename Visitor>
+        void visit_aabbs_2d(const Visitor& aVisitor) const
+        {
+            iBroadphase2dTree.visit_aabbs(aVisitor);
+        }
     public:
         struct meta
         {
@@ -62,7 +72,8 @@ namespace neogfx::game
         };
     private:
         std::unique_ptr<thread> iThread;
-        aabb_quadtree<box_collider_2d> iBroadphase2dTree;
         aabb_octree<box_collider> iBroadphaseTree;
+        aabb_quadtree<box_collider_2d> iBroadphase2dTree;
+        std::atomic<bool> iCollidersUpdated = false;
     };
 }

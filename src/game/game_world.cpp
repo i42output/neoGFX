@@ -29,7 +29,7 @@
 namespace neogfx::game
 {
     game_world::game_world(game::i_ecs& aEcs) :
-        system{ aEcs }, iUniversalGravitationEnabled{ false }
+        game::system<>{ aEcs }, iUniversalGravitationEnabled{ false }
     {
         ApplyingPhysics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         PhysicsApplied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);

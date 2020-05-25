@@ -23,17 +23,18 @@
 #include <neolib/ecs/chrono.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/system.hpp>
+#include <neogfx/game/animation_filter.hpp>
 
 namespace neogfx::game
 {
-    class animator : public system
+    class animator : public game::system<entity_info, animation_filter>
     {
     public:
         define_event(Animate, animate, step_time)
     private:
         class thread;
     public:
-        animator(game::i_ecs& aEcs);
+        animator(i_ecs& aEcs);
         ~animator();
     public:
         const system_id& id() const override;

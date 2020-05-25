@@ -1073,7 +1073,7 @@ namespace neogfx
 
         thread_local std::vector<std::vector<mesh_drawable>> drawables;
         thread_local int32_t maxLayer = 0;
-        thread_local std::optional<game::scoped_component_lock<game::mesh_renderer, game::mesh_filter, game::animation_filter, game::rigid_body>> lock;
+        thread_local std::optional<game::scoped_component_lock<game::entity_info, game::mesh_renderer, game::mesh_filter, game::animation_filter, game::rigid_body>> lock;
 
         if (drawables.size() <= aLayer)
             drawables.resize(aLayer + 1);
@@ -1093,6 +1093,9 @@ namespace neogfx
                 if (aEcs.component<game::entity_info>().entity_record(entity).debug)
                     std::cerr << "Rendering debug entity..." << std::endl;
 #endif
+                auto const& info = aEcs.component<game::entity_info>().entity_record(entity);
+                if (info.destroyed)
+                    continue;
                 auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
                 maxLayer = std::max(maxLayer, meshRenderer.layer);
                 if (drawables.size() <= maxLayer)
@@ -1116,7 +1119,7 @@ namespace neogfx
             draw_meshes(&*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
         for (auto const& d : drawables[aLayer])
             if (!d.drawn && d.renderer->destroyOnFustrumCull)
-                aEcs.destroy_entity(d.entity);
+                aEcs.async_destroy_entity(d.entity);
         if (aLayer >= maxLayer)
         {
             maxLayer = 0;

@@ -1,4 +1,5 @@
 ﻿#include <neogfx/neogfx.hpp>
+#include <neogfx/neogfx.hpp>
 #include <iomanip>
 #include <boost/format.hpp>
 #include <neolib/core/random.hpp>
@@ -28,61 +29,6 @@
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
 
-/*void create_game(ng::i_layout& aLayout)
-{
-    spritePlane.enable_z_sorting(true);
-
-    auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } } });
-    score->second.set_value("000000");
-    score->second.set_position(ng::vec3{ 0.0, 0.0, 1.0 });
-    auto positionScore = [&spritePlane, score]()
-    {
-        score->second.set_position(ng::vec3{ spritePlane.extents().cx - score->second.extents().x, spritePlane.extents().cy - score->second.extents().y, 1.0 });
-    };
-    spritePlane.size_changed(positionScore);
-    positionScore();
-    spritePlane.add_shape(score->second);
-    auto shipInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{}, "", ng::font("SnareDrum One NBP", "Regular", 24.0), ng::color::White);
-    shipInfo->set_border(1.0);
-    shipInfo->set_margins(ng::margins(2.0));
-    shipInfo->set_tag_of(spaceshipSprite, ng::vec3{ 18.0, 18.0, 1.0 });
-    spritePlane.add_shape(shipInfo);
-#ifdef NDEBUG
-    for (int i = 0; i < 50; ++i)
-#else
-    for (int i = 0; i < 5; ++i)
-#endif
-    {
-        create_target(spritePlane);
-    }
-    auto debugInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane.font().with_size(spritePlane.font().size() * 0.5), ng::text_appearance{ ng::color::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } });
-    spritePlane.add_shape(debugInfo);
-    spritePlane.sprites_painted([&spritePlane](ng::i_graphics_context& aGc)
-    {
-        aGc.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane.font().with_style(ng::font_info::Underline), ng::color::White);
-        if (ng::service<ng::i_app>().keyboard().is_key_pressed(ng::ScanCode_C))
-            spritePlane.collision_tree_2d().visit_aabbs([&aGc](const neogfx::aabb_2d& aAabb)
-            {
-                ng::rect aabb{ ng::point{ aAabb.min }, ng::point{ aAabb.max } };
-                aGc.draw_rect(aabb, ng::pen{ ng::color::Blue });
-            });
-    });
-
-    auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
-
-
-    ~~~~spritePlane.physics_applied([debugInfo, &spritePlane](ng::canvas::step_time_interval)
-    {
-        debugInfo->set_value(
-            "Objects: " + boost::lexical_cast<std::string>(spritePlane.objects().size()) + "\n" +
-            "Collision tree (quadtree) size: " + boost::lexical_cast<std::string>(spritePlane.collision_tree_2d().count()) + "\n" +
-            "Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane.collision_tree_2d().depth()) + "\n" +
-            "Collision tree (quadtree) update type: " + (spritePlane.dynamic_update_enabled() ? "dynamic" : "full") + "\n" +
-            "Physics update time: " + boost::str(boost::format("%.6f") % spritePlane.update_time()) + " s");
-    });
-}
-*/
-
 namespace archetypes
 {
     ng::game::sprite_archetype const spaceship{ "Spaceship" };
@@ -101,15 +47,23 @@ void create_game(ng::i_layout& aLayout)
 
     auto& ecs = canvas.ecs();
 
+    struct game_state
+    {
+        neolib::basic_random<ng::scalar> prng;
+        uint32_t score = 0u;
+        uint32_t asteroidsDestroyed = 0u;
+        bool showAabbGrid = false;
+    };
+    auto gameState = std::make_shared<game_state>();
+
     // Background...
-    neolib::basic_random<ng::scalar> prng;
     for (int i = 0; i < 1000; ++i)
         ng::game::shape::rectangle
     {
         ecs,
-        { prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
-        { prng(64), prng(64) },
-        ng::color{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }
+        { gameState->prng(800), gameState->prng(800), -1.0 + 0.5 * (gameState->prng(32) / 32.0) },
+        { gameState->prng(64), gameState->prng(64) },
+        ng::color{ ng::vec4{ gameState->prng(0.25), gameState->prng(0.25), gameState->prng(0.25), 1.0 } }
     }.detach();
 
     // Spaceship...
@@ -158,91 +112,150 @@ void create_game(ng::i_layout& aLayout)
         ng::game::box_collider{ 0x1ull });
 
     // Asteroids...
-    auto make_asteroid_mesh = [&](ng::scalar w)
+    auto make_asteroid_mesh = [&ecs, gameState](ng::scalar w)
     {
         ng::game::mesh asteroidMesh;
         asteroidMesh.vertices.push_back(ng::vec3{ 0.0, 0.0, 0.0 });
-        for (ng::scalar angle = 0.0; angle < 360.0; angle += (prng(30.0) + 30.0))
-            asteroidMesh.vertices.push_back(ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }) * ng::vec3{ w + prng(10.0) - 5.0, 0.0, 0.0 });
+        for (ng::scalar angle = 0.0; angle < 360.0; angle += (gameState->prng(30.0) + 30.0))
+            asteroidMesh.vertices.push_back(ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }) * ng::vec3{ w + gameState->prng(10.0) - 5.0, 0.0, 0.0 });
         for (uint32_t i = 1; i < asteroidMesh.vertices.size() - 1; ++i)
             asteroidMesh.faces.push_back(ng::game::face{ 0u, i, i + 1u });
         asteroidMesh.faces.push_back(ng::game::face{ 0u, 1u, static_cast<uint32_t>(asteroidMesh.vertices.size()) - 1u });
         return asteroidMesh;
     };
 
-    auto make_asteroid = [&]()
+    auto make_asteroid = [&ecs, gameState, spaceship, make_asteroid_mesh]()
     {
         ng::vec3 position;
         ng::scalar size;
-        for (;;)
+        do
         {
-            position = ng::vec3{ prng(800), prng(800), 0.0 };
-            size = prng(20.0) + 10.0;
-            if (position - (size * 2) < ecs.component<ng::game::rigid_body>().entity_record(spaceship).position ||
-                position + (size * 2) > ecs.component<ng::game::rigid_body>().entity_record(spaceship).position)
-                break;
-        }
+            position = ng::vec3{ gameState->prng(800), gameState->prng(800), 0.0 };
+            size = gameState->prng(20.0) + 10.0;
+        } while (ng::aabb_intersects(
+            ng::to_aabb(position, size),
+            ng::to_aabb(ecs.component<ng::game::rigid_body>().entity_record(spaceship).position, 36.0 * 3.0)));
         auto asteroid = ecs.create_entity(
             archetypes::asteroid,
             ng::game::mesh_renderer
             {
-                ng::game::material{ ng::to_ecs_component(ng::color::from_hsl(prng(360), 1.0, 0.75)) }, {}, 1
+                ng::game::material{ ng::to_ecs_component(ng::color::from_hsl(gameState->prng(360), 1.0, 0.75)) }, {}, 1
             },
             make_asteroid_mesh(size),
             ng::game::rigid_body
             {
                 position, 1.0,
-                ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(prng(360.0)) }) * ng::vec3{ prng(20.0), 0.0, 0.0 },
+                ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(gameState->prng(360.0)) }) * ng::vec3{ gameState->prng(20.0), 0.0, 0.0 },
                 {},
                 {},
-                { 0.0, 0.0, ng::to_rad(prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
+                { 0.0, 0.0, ng::to_rad(gameState->prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
             },
             ng::game::box_collider{ 0x2ull });
     };
 
     for (int i = 0; i < 75; ++i)
-    {
         make_asteroid();
-    }
 
     auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
 
- /*   for (int i = 0; i < 32; ++i)
+    auto make_explosion = [&ecs, explosionAnimation](const ng::aabb& target)
     {
-        auto testExplosion = ecs.create_entity(archetypes::explosion, explosionAnimation.material, explosionAnimation.filter);
-        auto& testExplosionFilter = ecs.component<ng::game::animation_filter>().entity_record(testExplosion);
-        testExplosionFilter.transformation = ng::mat44::identity();
-        testExplosionFilter.currentFrame = static_cast<uint32_t>(prng(16));
-        auto const explosionSize = prng(64.0) + 32.0;
-        ng::apply_translation(ng::apply_scaling(*testExplosionFilter.transformation, { explosionSize, explosionSize, 1.0 }), { prng(800), prng(800), 0.0 });
-    } */
+        auto explosion = ecs.create_entity(archetypes::explosion, explosionAnimation.material, explosionAnimation.filter);
+        auto& explosionFilter = ecs.component<ng::game::animation_filter>().entity_record(explosion);
+        explosionFilter.transformation = ng::mat44::identity();
+        explosionFilter.autoDestroy = true;
+        ng::apply_translation(ng::apply_scaling(*explosionFilter.transformation, ng::aabb_extents(target)), ng::aabb_origin(target));
+    };
+
+    ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).button_pressed([gameState](ng::game_controller_button aButton, ng::key_modifiers_e)
+    {
+        if (aButton == ng::game_controller_button::Y)
+            gameState->showAabbGrid = !gameState->showAabbGrid;
+    });
 
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
+    ng::font scoreFont{ "SnareDrum Two NBP", "Regular", 60.0 };
     // Some information text...
-    canvas.EntitiesRendered([&, clockFont](ng::i_graphics_context& gc, int32_t layer)
+    canvas.EntitiesRendered([&canvas, &ecs, gameState, clockFont, scoreFont](ng::i_graphics_context& gc, int32_t layer)
     {
         if (layer == 3)
         {
+            if (gameState->showAabbGrid)
+            {
+                ecs.system<ng::game::collision_detector>().visit_aabbs([&gc](const ng::aabb& aabb)
+                {
+                    gc.draw_rect(ng::rect{ ng::point{ aabb.min }, ng::point{ aabb.max } }, ng::pen{ ng::color::Blue });
+                });
+            }
+
             std::ostringstream text;
             auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
             text.fill('0');
             text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
             gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+            text.str({});
+            text.fill('0');
+            text << std::setw(6) << gameState->score;
+            gc.draw_text(ng::point{ canvas.client_rect().right() - 250.0, 0.0}, text.str(), scoreFont, ng::text_appearance{ ng::color::Goldenrod, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
         }
     });
 
-/*    ~~~~ecs.system<ng::game::collision_detector>().Collision([&](ng::game::entity_id e1, ng::game::entity_id e2)
+    ~~~~ecs.system<ng::game::collision_detector>().Collision([&ecs, gameState, make_explosion, spaceship](ng::game::entity_id e1, ng::game::entity_id e2)
     {
-        std::cout << "Collision: " <<
-            "[" << ecs.archetypes()[ecs.component<ng::game::entity_info>().entity_record(e1).archetypeId]->name() << "]" <<
-            " <-> " <<
-            "[" << ecs.archetypes()[ecs.component<ng::game::entity_info>().entity_record(e2).archetypeId]->name() << "]" <<std::endl;
-    }); */
-
+        auto id1 = ecs.component<ng::game::entity_info>().entity_record(e1).archetypeId;
+        auto id2 = ecs.component<ng::game::entity_info>().entity_record(e2).archetypeId;
+        if (id1 == archetypes::missile.id())
+        {
+            if (id2 == archetypes::asteroid.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e2).currentAabb);
+                ++gameState->asteroidsDestroyed;
+                gameState->score += 250;
+            }
+            ecs.async_destroy_entity(e1, false);
+            ecs.async_destroy_entity(e2, false);
+        }
+        else if (id2 == archetypes::missile.id())
+        {
+            if (id1 == archetypes::asteroid.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e1).currentAabb);
+                ++gameState->asteroidsDestroyed;
+                gameState->score += 250;
+            }
+            ecs.async_destroy_entity(e1, false);
+            ecs.async_destroy_entity(e2, false);
+        }
+        else if (id1 == archetypes::explosion.id())
+        {
+            if (id2 == archetypes::asteroid.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e2).currentAabb);
+                ++gameState->asteroidsDestroyed;
+                gameState->score += 500;
+            }
+            ecs.async_destroy_entity(e1, false);
+            if (e2 != spaceship)
+                ecs.async_destroy_entity(e2, false);
+        }
+        else if (id2 == archetypes::explosion.id())
+        {
+            if (id1 == archetypes::asteroid.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e1).currentAabb);
+                ++gameState->asteroidsDestroyed;
+                gameState->score += 500;
+            }
+            ecs.async_destroy_entity(e2, false);
+            if (e1 != spaceship)
+                ecs.async_destroy_entity(e2, false);
+        }
+    });
+    
     // Instantiate physics...
     ecs.system<ng::game::simple_physics>();
 
-    ~~~~ecs.system<ng::game::game_world>().ApplyingPhysics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+    ~~~~ecs.system<ng::game::game_world>().ApplyingPhysics([&ecs, spaceship](ng::game::step_time aPhysicsStepTime)
     {
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
@@ -272,16 +285,16 @@ void create_game(ng::i_layout& aLayout)
             else if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadRight))
                 spaceshipPhysics.spin.z = ng::to_rad(-30.0);
         }
-
-        /*
-                std::ostringstream oss;
-                oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
-                oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
-                shipInfo->set_value(oss.str()); */
     });
 
-    ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+    ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship, make_asteroid](ng::game::step_time aPhysicsStepTime)
     {
+        while (gameState->asteroidsDestroyed && ecs.component<ng::game::animation_filter>().entities().empty())
+        {
+            --gameState->asteroidsDestroyed;
+            make_asteroid();
+        }
+
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
         static bool sExtraFire = false;
@@ -326,29 +339,6 @@ void create_game(ng::i_layout& aLayout)
                 sLastTime_ms = stepTime_ms;
         }
     });
-    /*
-    void collided(i_collidable_object& aOther) override
-    {
-        auto& other = aOther.as_physical_object();
-        iScore.first += 250;
-        std::ostringstream oss;
-        oss << std::setfill('0') << std::setw(6) << iScore.first;
-        iScore.second.set_value(oss.str());
-        static boost::fast_pool_allocator<ng::sprite> alloc;
-        auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
-            alloc, *iExplosion, ng::sprite::animation_info{ { { ng::point{}, ng::size{ 60.0, 60.0 } } }, 12, 0.040, false });
-        explosion->set_collision_mask(0x1ull);
-        static neolib::basic_random<double> r;
-        explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), -0.1 });
-        explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
-        explosion->set_extents(ng::vec3{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
-        iWorld.add_sprite(explosion);
-        kill();
-        other.kill();
-        if (other.collision_mask() != 0x4ull)
-            create_target(iWorld);
-    }
-*/
 
     canvas.Mouse([&canvas, spaceship](const neogfx::mouse_event& e)
     {

@@ -50,7 +50,7 @@ namespace neogfx::game
 
 
     animator::animator(game::i_ecs& aEcs) :
-        system{ aEcs }
+        system<entity_info, animation_filter>{ aEcs }
     {
         Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         if (!ecs().system_registered<game::time>())
@@ -86,11 +86,13 @@ namespace neogfx::game
 
         Animate.trigger(now);
 
-        scoped_component_lock<animation_filter> lockAnimationFilters{ ecs() };
+        scoped_component_lock<entity_info, animation_filter> lockAnimationFilters{ ecs() };
 
         for (auto entity : ecs().component<animation_filter>().entities())
         {
             auto const& info = ecs().component<entity_info>().entity_record(entity);
+            if (info.destroyed)
+                continue;
             auto& filter = ecs().component<animation_filter>().entity_record(entity);
             if (!filter.currentFrameStartTime)
                 filter.currentFrameStartTime = info.creationTime;
@@ -100,9 +102,13 @@ namespace neogfx::game
             {
                 *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timeStep);
                 filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
+                if (filter.currentFrame == 0 && filter.autoDestroy)
+                {
+                    ecs().async_destroy_entity(entity, false);
+                    break;
+                }
             }
         }
-
         return true;
     }
 

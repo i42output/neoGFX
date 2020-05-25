@@ -714,7 +714,9 @@ int main(int argc, char* argv[])
 
             aTimer.again();
 
-            ui.labelFPS.set_text((boost::format("%1$.2f/%2$.2f FPS/PFPS") % window.fps() % window.potential_fps()).str());
+            std::ostringstream oss;
+            oss << window.fps() << "/" << window.potential_fps() << " FPS/PFPS";
+            ui.labelFPS.set_text(oss.str());
 
             if (colorCycle)
             {
