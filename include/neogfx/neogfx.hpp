@@ -50,6 +50,8 @@ namespace neogfx
     using neolib::reference_counted;
     using neolib::i_ref_ptr;
     using neolib::ref_ptr;
+    using neolib::i_weak_ref_ptr;
+    using neolib::weak_ref_ptr;
     using neolib::make_ref;
 
     using neolib::to_abstract;

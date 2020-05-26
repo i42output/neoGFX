@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/reference_counted.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/text/font.hpp>
@@ -27,8 +28,11 @@
 
 namespace neogfx
 {
-    class i_native_font
+    class i_native_font : public neolib::i_reference_counted
     {
+        // types
+    public:
+        typedef i_native_font abstract_type;
         // construction
     public:
         virtual ~i_native_font() = default;
@@ -39,12 +43,8 @@ namespace neogfx
         virtual uint32_t style_count() const = 0;
         virtual font_style style(uint32_t aStyleIndex) const = 0;
         virtual const std::string& style_name(uint32_t aStyleIndex) const = 0;
-        virtual i_native_font_face& create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        // reference counting
-    public:
-        virtual void add_ref(i_native_font_face& aFace) = 0;
-        virtual void release(i_native_font_face& aFace) = 0;
+        virtual void create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
+        virtual void create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
         // helpers
     public:
         font_style min_style() const
@@ -60,6 +60,18 @@ namespace neogfx
             for (auto si = 1u; si < style_count(); ++si)
                 minWeight = std::min(minWeight, font::weight_from_style_name(style_name(si)));
             return minWeight;
+        }
+        ref_ptr<i_native_font_face> create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+        {
+            ref_ptr<i_native_font_face> result;
+            create_face(aStyle, aSize, aDevice, result);
+            return result;
+        }
+        ref_ptr<i_native_font_face> create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+        {
+            ref_ptr<i_native_font_face> result;
+            create_face(aStyleName, aSize, aDevice, result);
+            return result;
         }
     };
 }

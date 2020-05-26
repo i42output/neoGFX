@@ -25,6 +25,7 @@
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/animator.hpp>
+#include <neogfx/game/game_world.hpp>
 #include <neogfx/game/animation_filter.hpp>
 
 namespace neogfx::game
@@ -77,11 +78,24 @@ namespace neogfx::game
     {
         if (!ecs().component_instantiated<animation_filter>())
             return false;
-        if (paused())
+        else if (paused())
             return false;
-        if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
+        else if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
+        update_animations();
+
+        return true;
+    }
+
+    void animator::terminate()
+    {
+        if (!iThread->aborted())
+            iThread->abort();
+    }
+
+    void animator::update_animations()
+    {
         auto now = ecs().system<game::time>().world_time();
 
         Animate.trigger(now);
@@ -109,12 +123,5 @@ namespace neogfx::game
                 }
             }
         }
-        return true;
-    }
-
-    void animator::terminate()
-    {
-        if (!iThread->aborted())
-            iThread->abort();
     }
 }

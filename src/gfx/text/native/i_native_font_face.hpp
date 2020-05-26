@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/i_reference_counted.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/font.hpp>
 
@@ -30,12 +31,13 @@ namespace neogfx
     class glyph;
     class i_glyph_texture;
 
-    class i_native_font_face
+    class i_native_font_face : public neolib::i_reference_counted
     {
     public:
         struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::i_native_font_face::no_fallback_font") {} };
         struct bad_fixed_size_index : std::logic_error { bad_fixed_size_index() : std::logic_error("neogfx::i_native_font_face::bad_fixed_size_index") {} };
     public:
+        typedef i_native_font_face abstract_type;
         typedef uint32_t glyph_index_t;
     public:
         virtual ~i_native_font_face() = default;
@@ -65,8 +67,5 @@ namespace neogfx
         virtual void* aux_handle() const = 0;
         virtual glyph_index_t glyph_index(char32_t aCodePoint) const = 0;
         virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const = 0;
-    public:
-        virtual void add_ref() = 0;
-        virtual void release() = 0;
     };
 }

@@ -58,7 +58,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Id;
+                    return component_data_field_type::SmallId;
                 case 1:
                 case 2:
                     return component_data_field_type::String;

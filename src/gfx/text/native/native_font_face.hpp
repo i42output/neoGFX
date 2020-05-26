@@ -36,6 +36,7 @@
 #include <hb-ft.h>
 #endif
 #include "..\..\native\opengl.hpp"
+#include <neolib/core/reference_counted.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/text/font.hpp>
@@ -68,7 +69,7 @@ namespace neogfx
 {
     class i_rendering_engine;
 
-    class native_font_face : public i_native_font_face
+    class native_font_face : public neolib::reference_counted<i_native_font_face>
     {
     private:
         typedef std::unordered_map<glyph_index_t, neogfx::glyph_texture> glyph_map;
@@ -125,9 +126,6 @@ namespace neogfx
         void* aux_handle() const override;
         glyph_index_t glyph_index(char32_t aCodePoint) const override;
         i_glyph_texture& glyph_texture(const glyph& aGlyph) const override;
-    public:
-        void add_ref() override;
-        void release() override;
     private:
         void set_metrics();
     private:
@@ -139,7 +137,7 @@ namespace neogfx
         neogfx::size iPixelDensityDpi;
         FT_Face iHandle;
         mutable std::unique_ptr<hb_handle> iAuxHandle;
-        mutable std::shared_ptr<i_native_font_face> iFallbackFont;
+        mutable ref_ptr<i_native_font_face> iFallbackFont;
         mutable glyph_map iGlyphs;
         bool iHasKerning;
         mutable kerning_table iKerningTable;

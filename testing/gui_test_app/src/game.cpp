@@ -24,7 +24,6 @@
 #include <neogfx/game/box_collider.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/animation_filter.hpp>
-#include <neogfx/game/box_collider.hpp>
 
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
@@ -53,6 +52,7 @@ void create_game(ng::i_layout& aLayout)
         uint32_t score = 0u;
         uint32_t asteroidsDestroyed = 0u;
         bool showAabbGrid = false;
+        bool showMetrics = false;
     };
     auto gameState = std::make_shared<game_state>();
 
@@ -109,7 +109,7 @@ void create_game(ng::i_layout& aLayout)
         {
             { 400.0, 18.0, 0.0 }, 1.0
         },
-        ng::game::box_collider{ 0x1ull });
+        ng::game::box_collider_2d{ 0x1ull });
 
     // Asteroids...
     auto make_asteroid_mesh = [&ecs, gameState](ng::scalar w)
@@ -150,7 +150,7 @@ void create_game(ng::i_layout& aLayout)
                 {},
                 { 0.0, 0.0, ng::to_rad(gameState->prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
             },
-            ng::game::box_collider{ 0x2ull });
+            ng::game::box_collider_2d{ 0x2ull });
     };
 
     for (int i = 0; i < 75; ++i)
@@ -158,7 +158,7 @@ void create_game(ng::i_layout& aLayout)
 
     auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
 
-    auto make_explosion = [&ecs, explosionAnimation](const ng::aabb& target)
+    auto make_explosion = [&ecs, explosionAnimation](const ng::aabb_2d& target)
     {
         auto explosion = ecs.create_entity(archetypes::explosion, explosionAnimation.material, explosionAnimation.filter);
         auto& explosionFilter = ecs.component<ng::game::animation_filter>().entity_record(explosion);
@@ -171,21 +171,36 @@ void create_game(ng::i_layout& aLayout)
     {
         if (aButton == ng::game_controller_button::Y)
             gameState->showAabbGrid = !gameState->showAabbGrid;
+        if (aButton == ng::game_controller_button::X)
+            gameState->showMetrics = !gameState->showMetrics;
     });
 
+    ng::font debugFont{ "SnareDrum Two NBP", "Regular", 30.0 };
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     ng::font scoreFont{ "SnareDrum Two NBP", "Regular", 60.0 };
     // Some information text...
-    canvas.EntitiesRendered([&canvas, &ecs, gameState, clockFont, scoreFont](ng::i_graphics_context& gc, int32_t layer)
+    canvas.EntitiesRendered([&canvas, &ecs, gameState, debugFont, clockFont, scoreFont](ng::i_graphics_context& gc, int32_t layer)
     {
         if (layer == 3)
         {
             if (gameState->showAabbGrid)
             {
-                ecs.system<ng::game::collision_detector>().visit_aabbs([&gc](const ng::aabb& aabb)
+                ecs.system<ng::game::collision_detector>().visit_aabbs_2d([&gc](const ng::aabb_2d& aabb)
                 {
                     gc.draw_rect(ng::rect{ ng::point{ aabb.min }, ng::point{ aabb.max } }, ng::pen{ ng::color::Blue });
                 });
+            }
+
+            if (gameState->showMetrics)
+            {
+                gc.draw_multiline_text(ng::point{ 64.0, 128.0 }, 
+                    "Rigid body count: " + boost::lexical_cast<std::string>(ecs.component<ng::game::rigid_body>().entities().size()) + "\n" +
+                    "Collision tree (quadtree) nodes: " + boost::lexical_cast<std::string>(ecs.system<ng::game::collision_detector>().broadphase_2d_tree().count()) + "\n" +
+                    "Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(ecs.system<ng::game::collision_detector>().broadphase_2d_tree().depth()) + "\n"
+//                    "Collision tree (quadtree) update type: " + (spritePlane.dynamic_update_enabled() ? "dynamic" : "full") + "\n"
+                    , 
+                    debugFont,
+                    ng::text_appearance{ ng::color::PowderBlue, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
             }
 
             std::ostringstream text;
@@ -208,7 +223,7 @@ void create_game(ng::i_layout& aLayout)
         {
             if (id2 == archetypes::asteroid.id())
             {
-                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e2).currentAabb);
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e2).currentAabb);
                 ++gameState->asteroidsDestroyed;
                 gameState->score += 250;
             }
@@ -219,7 +234,7 @@ void create_game(ng::i_layout& aLayout)
         {
             if (id1 == archetypes::asteroid.id())
             {
-                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e1).currentAabb);
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e1).currentAabb);
                 ++gameState->asteroidsDestroyed;
                 gameState->score += 250;
             }
@@ -230,7 +245,7 @@ void create_game(ng::i_layout& aLayout)
         {
             if (id2 == archetypes::asteroid.id())
             {
-                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e2).currentAabb);
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e2).currentAabb);
                 ++gameState->asteroidsDestroyed;
                 gameState->score += 500;
             }
@@ -242,7 +257,7 @@ void create_game(ng::i_layout& aLayout)
         {
             if (id1 == archetypes::asteroid.id())
             {
-                make_explosion(*ecs.component<ng::game::box_collider>().entity_record(e1).currentAabb);
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e1).currentAabb);
                 ++gameState->asteroidsDestroyed;
                 gameState->score += 500;
             }
@@ -255,10 +270,17 @@ void create_game(ng::i_layout& aLayout)
     // Instantiate physics...
     ecs.system<ng::game::simple_physics>();
 
-    ~~~~ecs.system<ng::game::game_world>().ApplyingPhysics([&ecs, spaceship](ng::game::step_time aPhysicsStepTime)
+    ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship, make_asteroid](ng::game::step_time aPhysicsStepTime)
     {
+        while (gameState->asteroidsDestroyed && ecs.component<ng::game::animation_filter>().entities().empty())
+        {
+            --gameState->asteroidsDestroyed;
+            make_asteroid();
+        }
+
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
+
         spaceshipPhysics.acceleration =
             ng::vec3
         {
@@ -278,25 +300,14 @@ void create_game(ng::i_layout& aLayout)
             auto const& controller = ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One);
             spaceshipPhysics.acceleration += ng::vec3{ 16.0, 16.0, 0.0 }.hadamard_product(ng::vec3{ controller.left_thumb_position() });
             spaceshipPhysics.acceleration += ng::vec3{ 0.0,
-                controller.is_button_pressed(ng::game_controller_button::DirectionalPadUp) ? 16.0 : 
+                controller.is_button_pressed(ng::game_controller_button::DirectionalPadUp) ? 16.0 :
                     controller.is_button_pressed(ng::game_controller_button::DirectionalPadDown) ? -16.0 : 0.0 };
             if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadLeft))
                 spaceshipPhysics.spin.z = ng::to_rad(30.0);
             else if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadRight))
                 spaceshipPhysics.spin.z = ng::to_rad(-30.0);
         }
-    });
 
-    ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship, make_asteroid](ng::game::step_time aPhysicsStepTime)
-    {
-        while (gameState->asteroidsDestroyed && ecs.component<ng::game::animation_filter>().entities().empty())
-        {
-            --gameState->asteroidsDestroyed;
-            make_asteroid();
-        }
-
-        auto const& keyboard = ng::service<ng::i_keyboard>();
-        auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
         static bool sExtraFire = false;
         bool const fireMissile = sExtraFire || keyboard.is_key_pressed(ng::ScanCode_SPACE) ||
             (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One) &&
@@ -326,7 +337,7 @@ void create_game(ng::i_layout& aLayout)
                                 {},
                                 spaceshipPhysics.angle + ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }
                             },
-                            ng::game::box_collider{ 0x1ull });
+                            ng::game::box_collider_2d{ 0x1ull });
                         ecs.component<ng::game::mesh_renderer>().entity_record(missile).destroyOnFustrumCull = true;
                     };
                     for (double angle = -30.0; angle <= 30.0; angle += 10.0)

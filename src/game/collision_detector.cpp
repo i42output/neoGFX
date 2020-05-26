@@ -165,4 +165,14 @@ namespace neogfx::game
 
         iCollidersUpdated = true;
     }
+
+    const aabb_octree<box_collider>& collision_detector::broadphase_tree() const
+    {
+        return iBroadphaseTree;
+    }
+
+    const aabb_quadtree<box_collider_2d>& collision_detector::broadphase_2d_tree() const
+    {
+        return iBroadphase2dTree;
+    }
 }

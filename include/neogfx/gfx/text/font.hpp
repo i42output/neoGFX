@@ -142,7 +142,6 @@ namespace neogfx
     public:
         struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::font::no_fallback_font") {} };
         // types
-    public:
     private:
         class instance;
         // construction
@@ -163,12 +162,10 @@ namespace neogfx
         ~font();
         font& operator=(const font& aOther);
     private:
-        font(std::shared_ptr<i_native_font_face> aNativeFontFace);
-        font(std::shared_ptr<i_native_font_face> aNativeFontFace, font_style aStyle);
+        font(i_native_font_face& aNativeFontFace);
+        font(i_native_font_face& aNativeFontFace, font_style aStyle);
     public:
         font_id id() const;
-    private:
-        long use_count() const;
     public:
         bool has_fallback() const;
         font fallback() const;
@@ -194,7 +191,6 @@ namespace neogfx
         bool operator<(const font& aRhs) const;
     public:
         i_native_font_face& native_font_face() const;
-        std::shared_ptr<i_native_font_face> native_font_face_ptr() const;
         // attributes
     private:
         mutable std::shared_ptr<instance> iInstance;

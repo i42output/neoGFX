@@ -402,16 +402,6 @@ namespace neogfx
         return glyphTexture;
     }
 
-    void native_font_face::add_ref()
-    {
-        native_font().add_ref(*this);
-    }
-
-    void native_font_face::release()
-    {
-        native_font().release(*this);
-    }
-
     void native_font_face::set_metrics()
     {
         if (!is_bitmap_font())

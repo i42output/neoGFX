@@ -30,7 +30,7 @@
 
 namespace neogfx
 {
-    class native_font : public i_native_font
+    class native_font : public reference_counted<i_native_font>
     {
     public:
         typedef std::string filename_type;
@@ -38,8 +38,7 @@ namespace neogfx
     private:
         typedef neolib::variant<filename_type, memory_block_type> source_type;
         typedef std::map<std::pair<font_style, std::string>, FT_Long> style_map;
-        typedef std::map<std::tuple<FT_Long, font::point_size, size>, std::shared_ptr<i_native_font_face>> face_map;
-        typedef std::unordered_map<i_native_font_face*, uint32_t> usage_map;
+        typedef std::map<std::tuple<FT_Long, font::point_size, size>, ref_ptr<i_native_font_face>> face_map;
     public:
         struct failed_to_load_font : std::runtime_error { failed_to_load_font() : std::runtime_error("neogfx::native_font::failed_to_load_font") {} };
         struct no_matching_style_found : std::runtime_error { no_matching_style_found() : std::runtime_error("neogfx::native_font::no_matching_style_found") {} };
@@ -53,16 +52,13 @@ namespace neogfx
         uint32_t style_count() const override;
         font_style style(uint32_t aStyleIndex) const override;
         const std::string& style_name(uint32_t aStyleIndex) const override;
-        i_native_font_face& create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
-        i_native_font_face& create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
-    public:
-        void add_ref(i_native_font_face& aFace) override;
-        void release(i_native_font_face& aFace) override;
+        void create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
+        void create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
     private:
         void register_face(FT_Long aFaceIndex);
         FT_Face open_face(FT_Long aFaceIndex);
         void close_face(FT_Face aFace);
-        i_native_font_face& create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice);
+        ref_ptr<i_native_font_face> create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice);
     private:
         FT_Library iFontLib;
         source_type iSource;
@@ -71,6 +67,5 @@ namespace neogfx
         FT_Long iFaceCount;
         style_map iStyleMap;
         face_map iFaces;
-        usage_map iFaceUsage;
     };
 }

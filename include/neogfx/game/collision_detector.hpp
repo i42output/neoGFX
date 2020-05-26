@@ -57,6 +57,9 @@ namespace neogfx::game
             iBroadphase2dTree.visit_aabbs(aVisitor);
         }
     public:
+        const aabb_octree<box_collider>& broadphase_tree() const;
+        const aabb_quadtree<box_collider_2d>& broadphase_2d_tree() const;
+    public:
         struct meta
         {
             static const neolib::uuid& id()
