@@ -23,6 +23,7 @@
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/animator.hpp>
+#include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/game_world.hpp>
 
 namespace neogfx::game
@@ -179,11 +180,16 @@ namespace neogfx::game
         return neogfx::logical_coordinate_system::AutomaticGame;
     }
 
-    void canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)
+    void canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        if (aButton == mouse_button::Left)
+        widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        if (aButton == mouse_button::Left && EntityClicked.has_subscribers())
         {
-            // todo
+            ecs().system<collision_detector>().update_colliders();
+            ecs().system<collision_detector>().update_trees();
+            auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
+            if (hit)
+                EntityClicked.trigger(*hit);
         }
     }
 

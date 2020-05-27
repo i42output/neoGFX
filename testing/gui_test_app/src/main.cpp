@@ -993,7 +993,15 @@ int main(int argc, char* argv[])
         }
         ng::image smallHash(":/test/resources/channel.png");
 
-        create_game(ui.layoutGame);
+        bool gameCreated = false;
+        ui.pageGame.VisibilityChanged([&]()
+        {
+            if (ui.pageGame.visible() && !gameCreated)
+            {
+                create_game(ui.layoutGame);
+                gameCreated = true;
+            }
+        });
 
         neolib::basic_random<uint8_t> rngColor;
         auto random_color = [&]()

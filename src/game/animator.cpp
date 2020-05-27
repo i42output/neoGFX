@@ -54,8 +54,6 @@ namespace neogfx::game
         system<entity_info, animation_filter>{ aEcs }
     {
         Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-        if (!ecs().system_registered<game::time>())
-            ecs().register_system<game::time>();
         ecs().system<game::time>();
         iThread = std::make_unique<thread>(*this);
     }

@@ -114,7 +114,7 @@ namespace neogames
             // We could have a separate texture for each of the 52 cards but instead we build the
             // card mesh up here using texture atlas textures.
 
-            static const neogfx::game::sprite_archetype cardArchetype{ "Card" };
+            static const neogfx::game::sprite_2d_archetype cardArchetype{ "Card" };
 
             // Card background shape...
             auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, neogfx::mesh_type::Triangles, 20);
@@ -142,7 +142,7 @@ namespace neogames
             for (auto const& r : faceTextureRects)
                 neogfx::add_patch(mesh, meshRenderer, r.first, 0.0, aCardTextures.face_texture(aCard), r.second ? uvRotate180 : neogfx::mat33::identity());
 
-            return aEcs.create_entity(cardArchetype, neogfx::game::mesh_filter{ {}, mesh, {} }, meshRenderer);
+            return aEcs.create_entity(cardArchetype, neogfx::game::box_collider_2d{}, neogfx::game::mesh_filter{ {}, mesh, {} }, meshRenderer);
         }
     }
 }

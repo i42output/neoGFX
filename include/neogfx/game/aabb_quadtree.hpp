@@ -380,7 +380,7 @@ namespace neogfx::game
             }
         }
         template <typename ResultContainer>
-        void pick(const vec2& aPoint, ResultContainer& aResult, std::function<bool(reference, const vec2& aPoint)> aColliderPredicate = [](reference, const vec2&) { return true; }) const
+        void pick(const vec2& aPoint, ResultContainer& aResult, std::function<bool(entity_id aMatch, const vec2& aPoint)> aColliderPredicate = [](entity_id, const vec2&) { return true; }) const
         {
             iRootNode.visit(aPoint, [&](entity_id aMatch)
             {

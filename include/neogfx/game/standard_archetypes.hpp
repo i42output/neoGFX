@@ -43,6 +43,19 @@ namespace neogfx::game
         }
     };
 
+    class sprite_2d_archetype : public renderable_entity_archetype
+    {
+    public:
+        sprite_2d_archetype(const entity_archetype_id& aId, const std::string& aName) :
+            renderable_entity_archetype{ aId, aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::mesh_filter::meta::id(), game::rigid_body::meta::id(), box_collider_2d::meta::id() } }
+        {
+        }
+        sprite_2d_archetype(const std::string& aName) :
+            renderable_entity_archetype{ aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::mesh_filter::meta::id(), game::rigid_body::meta::id(), box_collider_2d::meta::id() } }
+        {
+        }
+    };
+
     class animated_sprite_archetype : public renderable_entity_archetype
     {
     public:
@@ -52,6 +65,19 @@ namespace neogfx::game
         }
         animated_sprite_archetype(const std::string& aName) :
             renderable_entity_archetype{ aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::animation_filter::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+        {
+        }
+    };
+
+    class animated_sprite_2d_archetype : public renderable_entity_archetype
+    {
+    public:
+        animated_sprite_2d_archetype(const entity_archetype_id& aId, const std::string& aName) :
+            renderable_entity_archetype{ aId, aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::animation_filter::meta::id(), game::rigid_body::meta::id(), box_collider_2d::meta::id() } }
+        {
+        }
+        animated_sprite_2d_archetype(const std::string& aName) :
+            renderable_entity_archetype{ aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::animation_filter::meta::id(), game::rigid_body::meta::id(), box_collider_2d::meta::id() } }
         {
         }
     };

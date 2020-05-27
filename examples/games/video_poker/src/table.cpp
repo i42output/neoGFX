@@ -102,7 +102,6 @@ namespace video_poker
 
         set_layers(2);
 
-        set_ignore_mouse_events(true);
         iMainLayout.set_spacing(neogfx::size{ 16.0 });
         iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
         auto shiny_text = [](const neogfx::color& aColor)

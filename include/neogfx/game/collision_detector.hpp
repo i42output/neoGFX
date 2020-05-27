@@ -45,6 +45,7 @@ namespace neogfx::game
         bool apply() override;
         void terminate() override;
     public:
+        void update_trees();
         void update_colliders();
         template <typename Visitor>
         void visit_aabbs(const Visitor& aVisitor) const

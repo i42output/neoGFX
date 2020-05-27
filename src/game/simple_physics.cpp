@@ -53,8 +53,6 @@ namespace neogfx::game
     simple_physics::simple_physics(i_ecs& aEcs) :
         system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>{ aEcs }
     {
-        if (!ecs().system_registered<game::time>())
-            ecs().register_system<game::time>();
         ecs().system<game::time>();
         if (!ecs().shared_component_registered<physics>())
             ecs().register_shared_component<physics>();
