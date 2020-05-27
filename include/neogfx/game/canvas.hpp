@@ -30,6 +30,7 @@ namespace neogfx::game
         define_event(RenderingEntities, rendering_entities, i_graphics_context&, int32_t)
         define_event(EntitiesRendered, entities_rendered, i_graphics_context&, int32_t)
         define_event(EntityClicked, entity_clicked, entity_id)
+        define_event(EntityDoubleClicked, entity_double_clicked, entity_id)
     public:
         struct no_ecs : std::logic_error { no_ecs() : std::logic_error{ "neogfx::game::canvas::no_ecs" } {} };
         struct invalid_layer : std::logic_error { invalid_layer() : std::logic_error{ "neogfx::game::canvas::invalid_layer" } {} };
@@ -58,6 +59,7 @@ namespace neogfx::game
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
     public:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
     private:
         void init();
     private:

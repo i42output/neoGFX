@@ -193,6 +193,24 @@ namespace neogfx::game
         }
     }
 
+    void canvas::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    {
+        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        if (aButton == mouse_button::Left && (EntityClicked.has_subscribers() || EntityDoubleClicked.has_subscribers()))
+        {
+            ecs().system<collision_detector>().update_colliders();
+            ecs().system<collision_detector>().update_trees();
+            auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
+            if (hit)
+            {
+                if (EntityDoubleClicked.has_subscribers())
+                    EntityDoubleClicked.trigger(*hit);
+                else
+                    EntityClicked.trigger(*hit);
+            }
+        }
+    }
+
     void canvas::init()
     {
         iUpdater.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
