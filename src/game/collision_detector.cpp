@@ -104,6 +104,10 @@ namespace neogfx::game
             return false;
         else if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
+        
+        start_update();
+
+        bool didWork = false;
 
         if (ecs().component_instantiated<box_collider>())
         {
@@ -113,6 +117,7 @@ namespace neogfx::game
             {
                 Collision.trigger(e1, e2);
             });
+            didWork = true;
         }
 
         if (ecs().component_instantiated<box_collider_2d>())
@@ -123,9 +128,12 @@ namespace neogfx::game
             {
                 Collision.trigger(e1, e2);
             });
+            didWork = true;
         }
 
-        return true;
+        end_update();
+
+        return didWork;
     }
 
     void collision_detector::terminate()

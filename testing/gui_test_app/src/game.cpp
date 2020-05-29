@@ -53,6 +53,7 @@ void create_game(ng::i_layout& aLayout)
         uint32_t asteroidsDestroyed = 0u;
         bool showAabbGrid = false;
         bool showMetrics = false;
+        bool timeUpdates = false;
     };
     auto gameState = std::make_shared<game_state>();
 
@@ -167,12 +168,18 @@ void create_game(ng::i_layout& aLayout)
         ng::apply_translation(ng::apply_scaling(*explosionFilter.transformation, ng::aabb_extents(target)), ng::aabb_origin(target));
     };
 
-    ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).button_pressed([gameState](ng::game_controller_button aButton, ng::key_modifiers_e)
+    ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).button_pressed([&ecs, gameState](ng::game_controller_button aButton, ng::key_modifiers_e)
     {
         if (aButton == ng::game_controller_button::Y)
             gameState->showAabbGrid = !gameState->showAabbGrid;
         if (aButton == ng::game_controller_button::X)
             gameState->showMetrics = !gameState->showMetrics;
+        if (aButton == ng::game_controller_button::B)
+        {
+            gameState->timeUpdates = !gameState->timeUpdates;
+            ecs.system<ng::game::simple_physics>().set_debug(gameState->timeUpdates);
+            ecs.system<ng::game::collision_detector>().set_debug(gameState->timeUpdates);
+        }
     });
 
     ng::font debugFont{ "SnareDrum Two NBP", "Regular", 30.0 };
@@ -193,13 +200,19 @@ void create_game(ng::i_layout& aLayout)
 
             if (gameState->showMetrics)
             {
-                gc.draw_multiline_text(ng::point{ 64.0, 128.0 }, 
-                    "Rigid body count: " + boost::lexical_cast<std::string>(ecs.component<ng::game::rigid_body>().entities().size()) + "\n" +
-                    "Collision tree (quadtree) nodes: " + boost::lexical_cast<std::string>(ecs.system<ng::game::collision_detector>().broadphase_2d_tree().count()) + "\n" +
-                    "Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(ecs.system<ng::game::collision_detector>().broadphase_2d_tree().depth()) + "\n"
-//                    "Collision tree (quadtree) update type: " + (spritePlane.dynamic_update_enabled() ? "dynamic" : "full") + "\n"
-                    , 
-                    debugFont,
+                std::ostringstream debugText;
+                debugText << "Rigid body count: " << ecs.component<ng::game::rigid_body>().entities().size() << "\n";
+                if (gameState->timeUpdates)
+                {
+                    debugText << "Physics Update Time (0): " << std::setprecision(6) << ecs.system<ng::game::simple_physics>().update_time(0).count() / 1000.0 << " ms\n";
+                    debugText << "Physics Update Time (1): " << std::setprecision(6) << ecs.system<ng::game::simple_physics>().update_time(1).count() / 1000.0 << " ms\n";
+                    debugText << "Physics Update Time (2): " << std::setprecision(6) << ecs.system<ng::game::simple_physics>().update_time(2).count() / 1000.0 << " ms\n";
+                    debugText << "Collision Detector Update Time: " << std::setprecision(6) << ecs.system<ng::game::collision_detector>().update_time().count() / 1000.0 << " ms\n";
+                }
+                debugText << "Collision tree (quadtree) nodes: " << ecs.system<ng::game::collision_detector>().broadphase_2d_tree().count() << "\n";
+                debugText << "Collision tree (quadtree) depth: " << ecs.system<ng::game::collision_detector>().broadphase_2d_tree().depth() << "\n";
+                // debugText << "Collision tree (quadtree) update type: " << (spritePlane.dynamic_update_enabled() ? "dynamic" : "full") << "\n";
+                gc.draw_multiline_text(ng::point{ 64.0, 128.0 }, debugText.str(), debugFont,
                     ng::text_appearance{ ng::color::PowderBlue, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
             }
 

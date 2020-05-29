@@ -83,6 +83,9 @@ namespace neogfx::game
             return false;
         if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
+
+        start_update();
+
         auto& worldClock = ecs().shared_component<game::clock>()[0];
         auto const& physicalConstants = ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
@@ -90,11 +93,15 @@ namespace neogfx::game
         auto const now = ecs().system<game::time>().system_time();
         auto& rigidBodies = ecs().component<rigid_body>();
         bool didWork = false;
+        i64 const maxStepTime = 10 * worldClock.timeStep; // todo: dynamic
+        i64 currentStepTime = worldClock.timeStep;
         while (worldClock.time <= now)
         {
+            start_update(1);
             didWork = true;
             yield();
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
+            start_update(2);
             std::optional<scoped_component_lock<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
@@ -129,18 +136,24 @@ namespace neogfx::game
                 auto v0 = rigidBody1.velocity;
                 auto p0 = rigidBody1.position;
                 auto a0 = rigidBody1.angle;
-                auto elapsedTime = from_step_time(worldClock.timeStep);
+                auto elapsedTime = from_step_time(currentStepTime);
                 rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3{ elapsedTime, elapsedTime, elapsedTime });
                 rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
+            end_update(2);
             if (ecs().system_instantiated<collision_detector>())
                 ecs().system<collision_detector>().update_colliders();
             lock.reset();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
-            worldClock.time += worldClock.timeStep;
+            worldClock.time += std::min(currentStepTime, maxStepTime);
+            currentStepTime += worldClock.timeStep;
+            end_update(1);
         }
+
+        end_update();
+
         return didWork;
     }
 
