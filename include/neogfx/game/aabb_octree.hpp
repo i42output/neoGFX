@@ -478,6 +478,8 @@ namespace neogfx::game
                     iCollisionUpdateId = 1;
                 iRootNode.visit(candidateCollider, [&](entity_id aHit)
                 {
+                    if (candidateInfo.destroyed)
+                        return;
                     if (candidate < aHit)
                     {
                         auto const& hitInfo = iEcs.component<entity_info>().entity_record(aHit);

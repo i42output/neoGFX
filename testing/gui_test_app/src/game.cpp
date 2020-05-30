@@ -50,7 +50,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     {
         neolib::basic_random<ng::scalar> prng;
         uint32_t score = 0u;
-        uint32_t asteroidsDestroyed = 0u;
+        std::atomic<uint32_t> asteroidsDestroyed = 0u;
         bool autoFire = false;
         bool showAabbGrid = false;
         bool showMetrics = false;
