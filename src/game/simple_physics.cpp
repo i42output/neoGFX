@@ -86,6 +86,8 @@ namespace neogfx::game
 
         start_update();
 
+        std::optional<scoped_component_lock<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
+
         auto& worldClock = ecs().shared_component<game::clock>()[0];
         auto const& physicalConstants = ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
@@ -95,14 +97,20 @@ namespace neogfx::game
         bool didWork = false;
         auto currentTimeStep = worldClock.timeStep;
         auto nextTime = worldClock.time + currentTimeStep;
+        auto startTime = std::chrono::high_resolution_clock::now();
         while (worldClock.time <= now)
         {
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime) > std::chrono::milliseconds{ 1 })
+            {
+                lock.reset();
+                lock.emplace(ecs());
+                startTime = std::chrono::high_resolution_clock::now();
+            }
             start_update(1);
             didWork = true;
             yield();
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
             start_update(2);
-            std::optional<scoped_component_lock<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
                 rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -144,7 +152,6 @@ namespace neogfx::game
             end_update(2);
             if (ecs().system_instantiated<collision_detector>())
                 ecs().system<collision_detector>().run_cycle();
-            lock.reset();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time = nextTime;
@@ -152,6 +159,8 @@ namespace neogfx::game
             nextTime += currentTimeStep;
             end_update(1);
         }
+
+        lock.reset();
 
         end_update();
 

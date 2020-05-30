@@ -96,7 +96,7 @@ namespace neogfx::game
 
     bool collision_detector::apply()
     {
-        if (ecs().component_instantiated<simple_physics>())
+        if (ecs().system_registered<simple_physics>())
             return false;
         else if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
             return false;
