@@ -20,9 +20,10 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
-#include <neogfx/game/entity_info.hpp>
-#include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
+#include <neogfx/game/entity_info.hpp>
+#include <neogfx/game/simple_physics.hpp>
+#include <neogfx/game/collision_detector.hpp>
 
 namespace neogfx::game
 {
@@ -95,8 +96,7 @@ namespace neogfx::game
 
     bool collision_detector::apply()
     {
-        bool expectCollidersUpdated = true;
-        if (!iCollidersUpdated.compare_exchange_strong(expectCollidersUpdated, false))
+        if (ecs().component_instantiated<simple_physics>())
             return false;
         else if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
             return false;
@@ -106,34 +106,10 @@ namespace neogfx::game
             return false;
         
         start_update();
-
-        bool didWork = false;
-
-        if (ecs().component_instantiated<box_collider>())
-        {
-            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
-            iBroadphaseTree.full_update();
-            iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
-            {
-                Collision.trigger(e1, e2);
-            });
-            didWork = true;
-        }
-
-        if (ecs().component_instantiated<box_collider_2d>())
-        {
-            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
-            iBroadphase2dTree.full_update();
-            iBroadphase2dTree.collisions([this](entity_id e1, entity_id e2)
-            {
-                Collision.trigger(e1, e2);
-            });
-            didWork = true;
-        }
-
+        run_cycle();
         end_update();
 
-        return didWork;
+        return true;
     }
 
     void collision_detector::terminate()
@@ -142,19 +118,12 @@ namespace neogfx::game
             iThread->abort();
     }
 
-    void collision_detector::update_trees()
+    void collision_detector::run_cycle(bool aDetect)
     {
-        if (ecs().component_instantiated<box_collider>())
-        {
-            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
-            iBroadphaseTree.full_update();
-        }
-
-        if (ecs().component_instantiated<box_collider_2d>())
-        {
-            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
-            iBroadphase2dTree.full_update();
-        }
+        update_colliders();
+        update_trees();
+        if (aDetect)
+            detect_collisions();
     }
 
     void collision_detector::update_colliders()
@@ -210,8 +179,43 @@ namespace neogfx::game
                     collider.previousAabb = collider.currentAabb;
             }
         }
+    }
 
-        iCollidersUpdated = true;
+    void collision_detector::update_trees()
+    {
+        if (ecs().component_instantiated<box_collider>())
+        {
+            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
+            iBroadphaseTree.full_update();
+        }
+
+        if (ecs().component_instantiated<box_collider_2d>())
+        {
+            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
+            iBroadphase2dTree.full_update();
+        }
+    }
+
+    void collision_detector::detect_collisions()
+    {
+        if (ecs().component_instantiated<box_collider>())
+        {
+            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
+            iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
+            {
+                Collision.trigger(e1, e2);
+            });
+        }
+
+        if (ecs().component_instantiated<box_collider_2d>())
+        {
+            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
+            iBroadphase2dTree.full_update();
+            iBroadphase2dTree.collisions([this](entity_id e1, entity_id e2)
+            {
+                Collision.trigger(e1, e2);
+            });
+        }
     }
 
     const aabb_octree<box_collider>& collision_detector::broadphase_tree() const

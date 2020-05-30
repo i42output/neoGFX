@@ -45,8 +45,7 @@ namespace neogfx::game
         bool apply() override;
         void terminate() override;
     public:
-        void update_trees();
-        void update_colliders();
+        void run_cycle(bool aDetect = true);
         template <typename Visitor>
         void visit_aabbs(const Visitor& aVisitor) const
         {
@@ -60,6 +59,10 @@ namespace neogfx::game
     public:
         const aabb_octree<box_collider>& broadphase_tree() const;
         const aabb_quadtree<box_collider_2d>& broadphase_2d_tree() const;
+    private:
+        void update_colliders();
+        void update_trees();
+        void detect_collisions();
     public:
         struct meta
         {
@@ -78,6 +81,5 @@ namespace neogfx::game
         std::unique_ptr<thread> iThread;
         aabb_octree<box_collider> iBroadphaseTree;
         aabb_quadtree<box_collider_2d> iBroadphase2dTree;
-        std::atomic<bool> iCollidersUpdated = false;
     };
 }

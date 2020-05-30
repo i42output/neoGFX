@@ -19,6 +19,7 @@
 #include <neogfx/gui/dialog/game_controller_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/clock.hpp>
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/game_world.hpp>
@@ -212,7 +213,7 @@ private:
     ng::text_edit& iTextEdit;
 };
 
-void create_game(ng::i_layout& aLayout);
+ng::game::i_ecs& create_game(ng::i_layout& aLayout);
 
 void signal_handler(int signal)
 {
@@ -998,7 +999,26 @@ int main(int argc, char* argv[])
         {
             if (ui.pageGame.visible() && !gameCreated)
             {
-                create_game(ui.layoutGame);
+                auto& ecs = create_game(ui.layoutGame);
+                auto& worldClock = ecs.shared_component<ng::game::clock>()[0];
+                ui.spinBoxTimeStep.ValueChanged([&]() { ui.sliderTimeStep.set_value(ui.spinBoxTimeStep.value()); });
+                ui.sliderTimeStep.ValueChanged([&]() 
+                { 
+                    ui.spinBoxTimeStep.set_value(ui.sliderTimeStep.value()); 
+                    worldClock.timeStep = ng::game::chrono::to_flicks(ui.spinBoxTimeStep.value()).count();
+                });
+                ui.spinBoxTimeStepGrowth.ValueChanged([&]() { ui.sliderTimeStepGrowth.set_value(ui.spinBoxTimeStepGrowth.value()); });
+                ui.sliderTimeStepGrowth.ValueChanged([&]() 
+                { 
+                    ui.spinBoxTimeStepGrowth.set_value(ui.sliderTimeStepGrowth.value()); 
+                    worldClock.timeStepGrowth = ui.spinBoxTimeStepGrowth.value();
+                });
+                ui.spinBoxMaximumTimeStep.ValueChanged([&]() { ui.sliderMaximumTimeStep.set_value(ui.spinBoxMaximumTimeStep.value()); });
+                ui.sliderMaximumTimeStep.ValueChanged([&]() 
+                { 
+                    ui.spinBoxMaximumTimeStep.set_value(ui.sliderMaximumTimeStep.value()); 
+                    worldClock.maximumTimeStep = ng::game::chrono::to_flicks(ui.sliderMaximumTimeStep.value()).count();
+                });
                 gameCreated = true;
             }
         });

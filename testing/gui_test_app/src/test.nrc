@@ -850,6 +850,63 @@
                         tab_text: "Game"
                         vertical_layout: {
                             id: layoutGame
+                            horizontal_layout: {
+                                label: {
+                                    text: "Time Step:"
+                                }
+                                double_slider: {
+                                    id: sliderTimeStep
+                                    orientation: Horizontal
+                                    minimum: 0.0001
+                                    maximum: 1.0000
+                                    step: 0.0001
+                                    value: 0.001
+                                }
+                                double_spin_box: {
+                                    id: spinBoxTimeStep
+                                    minimum: 0.0001
+                                    maximum: 1.0000
+                                    step: 0.0001
+                                    value: 0.001
+                                }
+                                label: {
+                                    text: "Time Step Growth:"
+                                }
+                                double_slider: {
+                                    id: sliderTimeStepGrowth
+                                    orientation: Horizontal
+                                    minimum: 1.0
+                                    maximum: 10.0
+                                    step: 0.05
+                                    value: 1.75
+                                }
+                                double_spin_box: {
+                                    id: spinBoxTimeStepGrowth
+                                    minimum: 1.0
+                                    maximum: 10.0
+                                    step: 0.05
+                                    value: 1.75
+                                }
+                                label: {
+                                    text: "Maximum Time Step:"
+                                }
+                                double_slider: {
+                                    id: sliderMaximumTimeStep
+                                    orientation: Horizontal
+                                    minimum: 0.0001
+                                    maximum: 20.0000
+                                    step: 0.0001
+                                    value: 0.001
+                                }
+                                double_spin_box: {
+                                    id: spinBoxMaximumTimeStep
+                                    minimum: 0.0001
+                                    maximum: 20.0000
+                                    step: 0.0001
+                                    value: 0.001
+                                }
+                                spacer : {}
+                            }
                         }
                     }
                     tab_page: {

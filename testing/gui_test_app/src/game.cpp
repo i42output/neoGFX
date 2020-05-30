@@ -36,7 +36,7 @@ namespace archetypes
     ng::game::animation_archetype const explosion{ "Explosion" };
 }
 
-void create_game(ng::i_layout& aLayout)
+ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 {
     // Create an ECS and canvas to render game world on...
     auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>(std::make_shared<ng::game::ecs>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused)));
@@ -51,6 +51,7 @@ void create_game(ng::i_layout& aLayout)
         neolib::basic_random<ng::scalar> prng;
         uint32_t score = 0u;
         uint32_t asteroidsDestroyed = 0u;
+        bool autoFire = false;
         bool showAabbGrid = false;
         bool showMetrics = false;
         bool timeUpdates = false;
@@ -180,6 +181,8 @@ void create_game(ng::i_layout& aLayout)
             ecs.system<ng::game::simple_physics>().set_debug(gameState->timeUpdates);
             ecs.system<ng::game::collision_detector>().set_debug(gameState->timeUpdates);
         }
+        if (aButton == ng::game_controller_button::LeftShoulder)
+            gameState->autoFire = !gameState->autoFire;
     });
 
     ng::font debugFont{ "SnareDrum Two NBP", "Regular", 30.0 };
@@ -283,7 +286,7 @@ void create_game(ng::i_layout& aLayout)
     // Instantiate physics...
     ecs.system<ng::game::simple_physics>();
 
-    ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship, make_asteroid](ng::game::step_time aPhysicsStepTime)
+    ~~~~ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship, make_asteroid](ng::game::step_time aPhysicsStepTime)
     {
         while (gameState->asteroidsDestroyed && ecs.component<ng::game::animation_filter>().entities().empty())
         {
@@ -322,7 +325,7 @@ void create_game(ng::i_layout& aLayout)
         }
 
         static bool sExtraFire = false;
-        bool const fireMissile = sExtraFire || keyboard.is_key_pressed(ng::ScanCode_SPACE) ||
+        bool const fireMissile = sExtraFire || gameState->autoFire || keyboard.is_key_pressed(ng::ScanCode_SPACE) ||
             (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One) &&
                 ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).is_button_pressed(ng::game_controller_button::A));
         if (fireMissile)
@@ -375,4 +378,6 @@ void create_game(ng::i_layout& aLayout)
             canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
         }
     });
+
+    return ecs;
 }

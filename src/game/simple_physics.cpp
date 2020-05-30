@@ -93,9 +93,8 @@ namespace neogfx::game
         auto const now = ecs().system<game::time>().system_time();
         auto& rigidBodies = ecs().component<rigid_body>();
         bool didWork = false;
-        i64 const maxTimeStep = 20 * worldClock.timeStep;
-        scalar const timeStepGrowth = 1.75; // todo: dynamic
-        i64 currentTimeStep = worldClock.timeStep;
+        auto currentTimeStep = worldClock.timeStep;
+        auto nextTime = worldClock.time + currentTimeStep;
         while (worldClock.time <= now)
         {
             start_update(1);
@@ -137,19 +136,20 @@ namespace neogfx::game
                 auto v0 = rigidBody1.velocity;
                 auto p0 = rigidBody1.position;
                 auto a0 = rigidBody1.angle;
-                auto elapsedTime = from_step_time(currentTimeStep);
+                auto elapsedTime = from_step_time(nextTime - worldClock.time);
                 rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3{ elapsedTime, elapsedTime, elapsedTime });
                 rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
             end_update(2);
             if (ecs().system_instantiated<collision_detector>())
-                ecs().system<collision_detector>().update_colliders();
+                ecs().system<collision_detector>().run_cycle();
             lock.reset();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
-            worldClock.time += std::min(currentTimeStep, maxTimeStep);
-            currentTimeStep = static_cast<i64>(currentTimeStep * timeStepGrowth);
+            worldClock.time = nextTime;
+            currentTimeStep = std::min(static_cast<i64>(currentTimeStep * worldClock.timeStepGrowth), std::max(worldClock.timeStep, worldClock.maximumTimeStep));
+            nextTime += currentTimeStep;
             end_update(1);
         }
 
