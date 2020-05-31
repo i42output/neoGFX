@@ -45,6 +45,8 @@ namespace neogfx::game
         void enable_universal_gravitation();
         void disable_universal_gravitation();
     public:
+        void yield_after(std::chrono::duration<double, std::milli> aTime);
+    public:
         struct meta
         {
             static const neolib::uuid& id()
@@ -60,5 +62,6 @@ namespace neogfx::game
         };
     private:
         std::unique_ptr<thread> iThread;
+        std::chrono::duration<double, std::milli> iYieldTime = std::chrono::duration<double, std::milli>{ 1.0 };
     };
 }

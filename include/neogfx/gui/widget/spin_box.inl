@@ -19,13 +19,13 @@
 
 #pragma once
 
-#include "spin_box.hpp"
 #include <cmath>
 #include <boost/format.hpp>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
+#include "spin_box.hpp"
 
 namespace neogfx
 {
@@ -278,6 +278,34 @@ namespace neogfx
     }
 
     template <typename T>
+    void basic_spin_box<T>::update_size_hint()
+    {
+        if (text_box_size_hint())
+            text_box().set_size_hint(*text_box_size_hint());
+        std::string hintText;
+        try 
+        { 
+            std::string tryText;
+            tryText = boost::str(boost::format(iFormat) % minimum());
+            if (tryText.length() > hintText.length())
+                hintText = tryText;
+            tryText = boost::str(boost::format(iFormat) % (minimum() + step()));
+            if (tryText.length() > hintText.length())
+                hintText = tryText;
+            tryText = boost::str(boost::format(iFormat) % maximum());
+            if (tryText.length() > hintText.length())
+                hintText = tryText;
+            tryText = boost::str(boost::format(iFormat) % (maximum() - step()));
+            if (tryText.length() > hintText.length())
+                hintText = tryText;
+        }
+        catch (...) 
+        {
+        }
+        text_box().set_size_hint(size_hint{ hintText });
+    }
+
+    template <typename T>
     void basic_spin_box<T>::update_arrows()
     {
         auto ink = service<i_app>().current_style().palette().color(color_role::Text);
@@ -366,6 +394,7 @@ namespace neogfx
         ConstraintsChanged.trigger();
         if (iValue < minimum())
             set_value(minimum());
+        update_size_hint();
     }
 
     template <typename T>
@@ -381,6 +410,7 @@ namespace neogfx
         ConstraintsChanged.trigger();
         if (iValue > maximum())
             set_value(maximum());
+        update_size_hint();
     }
 
     template <typename T>
@@ -394,6 +424,7 @@ namespace neogfx
     {
         iStep = aStep;
         ConstraintsChanged.trigger();
+        update_size_hint();
     }
 
     template <typename T>
@@ -427,6 +458,19 @@ namespace neogfx
     {
         iFormat = aFormat;
         update();
+    }
+
+    template <typename T>
+    const std::optional<size_hint>& basic_spin_box<T>::text_box_size_hint() const
+    {
+        return iTextBoxSizeHint;
+    }
+
+    template <typename T>
+    void basic_spin_box<T>::set_text_box_size_hint(const std::optional<size_hint>& aSizeHint)
+    {
+        iTextBoxSizeHint = aSizeHint;
+        update_size_hint();
     }
 
     template <typename T>

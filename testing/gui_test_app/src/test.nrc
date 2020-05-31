@@ -894,18 +894,35 @@
                                     id: sliderMaximumTimeStep
                                     orientation: Horizontal
                                     minimum: 0.0001
-                                    maximum: 20.0000
+                                    maximum: 1.0000
                                     step: 0.0001
                                     value: 0.001
                                 }
                                 double_spin_box: {
                                     id: spinBoxMaximumTimeStep
                                     minimum: 0.0001
-                                    maximum: 20.0000
+                                    maximum: 1.0000
                                     step: 0.0001
                                     value: 0.001
                                 }
-                                spacer : {}
+                                label: {
+                                    text: "Yield After (ms):"
+                                }
+                                double_slider: {
+                                    id: sliderYieldAfter
+                                    orientation: Horizontal
+                                    minimum: 0.1
+                                    maximum: 100.0
+                                    step: 0.1
+                                    value: 1.0
+                                }
+                                double_spin_box: {
+                                    id: spinBoxYieldAfter
+                                    minimum: 0.1
+                                    maximum: 100.0
+                                    step: 0.1
+                                    value: 1.0
+                                }
                             }
                         }
                     }

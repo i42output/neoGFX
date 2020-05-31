@@ -1019,6 +1019,12 @@ int main(int argc, char* argv[])
                     ui.spinBoxMaximumTimeStep.set_value(ui.sliderMaximumTimeStep.value()); 
                     worldClock.maximumTimeStep = ng::game::chrono::to_flicks(ui.sliderMaximumTimeStep.value()).count();
                 });
+                ui.spinBoxYieldAfter.ValueChanged([&]() { ui.sliderYieldAfter.set_value(ui.spinBoxYieldAfter.value()); });
+                ui.sliderYieldAfter.ValueChanged([&]()
+                {
+                    ui.spinBoxYieldAfter.set_value(ui.sliderYieldAfter.value());
+                    ecs.system<ng::game::simple_physics>().yield_after(std::chrono::duration<double, std::milli>{ui.sliderYieldAfter.value() });
+                });
                 gameCreated = true;
             }
         });

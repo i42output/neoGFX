@@ -100,15 +100,15 @@ namespace neogfx::game
         auto startTime = std::chrono::high_resolution_clock::now();
         while (worldClock.time <= now)
         {
-            if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime) > std::chrono::milliseconds{ 1 })
+            if (std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(std::chrono::high_resolution_clock::now() - startTime) > iYieldTime)
             {
                 lock.reset();
+                yield();
                 lock.emplace(ecs());
                 startTime = std::chrono::high_resolution_clock::now();
             }
             start_update(1);
             didWork = true;
-            yield();
             ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
             start_update(2);
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
@@ -186,5 +186,10 @@ namespace neogfx::game
     void simple_physics::disable_universal_gravitation()
     {
         return ecs().system<game_world>().disable_universal_gravitation();
+    }
+
+    void simple_physics::yield_after(std::chrono::duration<double, std::milli> aTime)
+    {
+        iYieldTime = aTime;
     }
 }

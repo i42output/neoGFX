@@ -62,6 +62,8 @@ namespace neogfx
         void set_value(value_type aValue, bool aNotify = true);
         const std::string& format() const;
         void set_format(const std::string& aFormat);
+        const std::optional<size_hint>& text_box_size_hint() const;
+        void set_text_box_size_hint(const std::optional<size_hint>& aSizeHint);
     public:
         const std::string& valid_text_characters() const;
         std::string value_to_string() const;
@@ -77,6 +79,7 @@ namespace neogfx
         void do_step(step_direction aDirection, uint32_t aAmount = 1);
         std::optional<value_type> string_to_value(const std::string& aString) const;
         void init();
+        void update_size_hint();
         void update_arrows();
     private:
         sink iSink;
@@ -95,6 +98,7 @@ namespace neogfx
         value_type iStep;
         value_type iValue;
         std::string iFormat;
+        std::optional<size_hint> iTextBoxSizeHint;
         bool iDontSetText = false;
     };
 }

@@ -552,6 +552,7 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\video_mode.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\window_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\neogfx.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\support\file\gfx\gltf.hpp" />
     <ClInclude Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.h" />
     <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp" />
     <ClInclude Include="..\..\..\src\app\native\windows_basic_services.hpp" />

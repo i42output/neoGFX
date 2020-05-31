@@ -374,7 +374,7 @@ namespace neogfx
                     if (neolib::service<neolib::i_power>().turbo_mode_active())
                         thread::yield();
                     else
-                        thread::sleep(1);
+                        thread::sleep(std::chrono::milliseconds{ 1 });
                 }
             }
             return *iQuitResultCode;

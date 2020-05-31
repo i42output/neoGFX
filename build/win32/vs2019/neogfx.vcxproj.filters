@@ -1035,6 +1035,9 @@
     <ClInclude Include="..\..\..\include\neogfx\game\box_collider.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\support\file\gfx\gltf.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
