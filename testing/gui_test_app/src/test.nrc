@@ -362,18 +362,21 @@
                                         id: layoutSpinners2
                                         double_spin_box: {
                                             id: spinBox1
+                                            size_policy: [Expanding Minimum]
                                             minimum: -100.0
                                             maximum: 100.0
                                             step: 0.1
                                         }
                                         double_slider: {
                                             id: slider1
+                                            size_policy: [Expanding Minimum]
                                             minimum: -100.0
                                             maximum: 100.0
                                             step: 0.1
                                         }
                                         double_spin_box: {
                                             id: spinBox2
+                                            size_policy: [Expanding Minimum]
                                             minimum: -10
                                             maximum: 20
                                             step: 0.5
