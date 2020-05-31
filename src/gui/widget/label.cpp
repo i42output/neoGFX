@@ -379,7 +379,6 @@ namespace neogfx
     {
         layout().remove_all();
         iCentreSpacer = nullptr;
-
         switch (effective_placement())
         {
         case label_placement::TextHorizontal:

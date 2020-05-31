@@ -111,7 +111,7 @@ namespace neogfx
     margins button::margins() const
     {
         neogfx::margins result = widget::margins();
-        if (!has_margins())
+        if (!has_margins() && (label().effective_placement() & label_placement::Text) == label_placement::Text)
         {
             result.left *= 2.0;
             result.right *= 2.0;

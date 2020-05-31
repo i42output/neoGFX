@@ -29,21 +29,38 @@ namespace neogfx
 {
     class i_spacer;
 
-    enum class label_placement
+    enum class label_placement : uint32_t
     {
-        TextHorizontal,
-        TextVertical,
-        ImageHorizontal,
-        ImageVertical,
-        TextImageHorizontal,
-        TextImageVertical,
-        ImageTextHorizontal,
-        ImageTextVertical,
-        TextSpacerImageHorizontal,
-        TextSpacerImageVertical,
-        ImageSpacerTextHorizontal,
-        ImageSpacerTextVertical
+        Text                        = 0x00000001,
+        Image                       = 0x00000002,
+        Spacer                      = 0x00000004,
+        Horizontal                  = 0x00000010,
+        Vertical                    = 0x00000020,
+        TextBeforeImage             = Text | Image | 0x00000100,
+        ImageBeforeText             = Text | Image | 0x00000200,
+        TextHorizontal              = Text | Horizontal,
+        TextVertical                = Text | Vertical,
+        ImageHorizontal             = Image | Horizontal,
+        ImageVertical               = Image | Vertical,
+        TextImageHorizontal         = TextBeforeImage | Horizontal,
+        TextImageVertical           = TextBeforeImage | Vertical,
+        ImageTextHorizontal         = ImageBeforeText | Horizontal,
+        ImageTextVertical           = ImageBeforeText | Vertical,
+        TextSpacerImageHorizontal   = TextBeforeImage | Spacer | Horizontal,
+        TextSpacerImageVertical     = TextBeforeImage | Spacer | Vertical,
+        ImageSpacerTextHorizontal   = ImageBeforeText | Spacer | Horizontal,
+        ImageSpacerTextVertical     = ImageBeforeText | Spacer | Vertical
     };
+
+    inline constexpr label_placement operator|(label_placement aLhs, label_placement aRhs)
+    {
+        return static_cast<label_placement>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr label_placement operator&(label_placement aLhs, label_placement aRhs)
+    {
+        return static_cast<label_placement>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
 }
 
 template <>
@@ -102,6 +119,7 @@ namespace neogfx
         void set_image(const texture& aImage);
         label_placement placement() const;
         void set_placement(label_placement aPlacement);
+        label_placement effective_placement() const;
         const neogfx::text_widget& text_widget() const;
         neogfx::text_widget& text_widget();
         const neogfx::image_widget& image_widget() const;
@@ -115,7 +133,6 @@ namespace neogfx
         void unset_buddy();
     private:
         void init();
-        label_placement effective_placement() const;
         void handle_placement_change();
     private:
         sink iSink;

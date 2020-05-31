@@ -28,12 +28,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <video_poker/table.hpp>
 #include <video_poker/poker.hpp>
 
+using namespace neogfx::unit_literals;
+
 namespace video_poker
 {
     using namespace neogames::card_games;
 
-    const credit_t STARTING_CREDITS = 10;
-    const credit_t MAX_BET = 5;
+    const credit_t STARTING_CREDIT = 10;
+    const credit_t MAX_BET = 100;
 
     const std::map<poker_hand, credit_t> PAY_TABLE = 
     {
@@ -70,7 +72,7 @@ namespace video_poker
     table::table(neogfx::i_layout& aLayout) :
         neogfx::game::canvas{ aLayout, std::make_shared<neogfx::game::ecs>() },
         iState{ table_state::TakeBet },
-        iCredits{ STARTING_CREDITS },
+        iCredit{ STARTING_CREDIT },
         iStake{ 0 },
         iMainLayout{ *this, neogfx::alignment::Centre },
         iLabelTitle{ iMainLayout, "VIDEO POKER" },
@@ -86,6 +88,7 @@ namespace video_poker
         iSpacer3{ iSpacesLayout },
         iSpacer4{ iMainLayout },
         iGambleLayout{ iMainLayout },
+        iAddCredit{ iGambleLayout, neogfx::image{":/video_poker/resources/coin.png"} },
         iBetMinus{ iGambleLayout, "BET\n-" },
         iBetPlus{ iGambleLayout, "BET\n+" },
         iBetMax{ iGambleLayout, "MAX\nBET" },
@@ -116,10 +119,14 @@ namespace video_poker
         iSpacer2.set_weight(neogfx::size{ 0.25 });
         iSpacer3.set_weight(neogfx::size{ 0.25 });
         iSpacer4.set_weight(neogfx::size{ 0.1 });
+        iGambleLayout.set_size_policy(neogfx::size_policy{ neogfx::size_constraint::Expanding, neogfx::size_constraint::Minimum });
+        iAddCredit.image_widget().set_minimum_size(neogfx::size{64.0_dip, 64.0_dip});
+        iAddCredit.set_size_policy(neogfx::size_constraint::Expanding, neogfx::size{ 1.0 });
+        iAddCredit.set_weight(neogfx::size{ 0.0 });
         auto set_bet_button_apperance = [](neogfx::push_button& aButton)
         {
-            aButton.set_size_policy(neogfx::size_constraint::Minimum, neogfx::size{ 1.0 });
-            aButton.set_weight(neogfx::size{});
+            aButton.set_size_policy(neogfx::size_constraint::Expanding, neogfx::size{ 1.0 });
+            aButton.set_weight(neogfx::size{ 0.0 });
             aButton.set_foreground_color(neogfx::color::White);
             aButton.text_widget().set_size_hint(neogfx::size_hint{ "MAX\nBET" });
             aButton.text_widget().set_text_color(neogfx::color::Black);
@@ -129,6 +136,7 @@ namespace video_poker
         set_bet_button_apperance(iBetPlus);
         set_bet_button_apperance(iBetMax);
         set_bet_button_apperance(iDeal);
+        neogfx::layout_as_same_size(iAddCredit, iBetMinus);
         iLabelCredits.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
         iLabelCredits.text_widget().set_text_appearance(shiny_text(neogfx::color::Yellow));
         iLabelCreditsValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
@@ -138,6 +146,7 @@ namespace video_poker
         iLabelStakeValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
         iLabelStakeValue.text_widget().set_text_appearance(shiny_text(neogfx::color::White));
 
+        iAddCredit.clicked([this]() { add_credit(STARTING_CREDIT); });
         iBetMinus.clicked([this]() { bet(-1); });
         iBetPlus.clicked([this]() { bet(+1); });
         iBetMax.clicked([this]() { bet(MAX_BET); });
@@ -202,14 +211,20 @@ namespace video_poker
         throw texture_not_found();
     }
 
+    void table::add_credit(credit_t aCredit)
+    {
+        iCredit += aCredit;
+        update_widgets();
+    }
+
     void table::bet(credit_t aBet)
     {
         const credit_t minBet = -iStake;
-        const credit_t maxBet = std::min(iCredits, MAX_BET - iStake);
+        const credit_t maxBet = std::min(iCredit, MAX_BET - iStake);
         aBet = std::max(minBet, std::min(maxBet, aBet));
         if (aBet != 0)
         {
-            iCredits -= aBet;
+            iCredit -= aBet;
             iStake += aBet;
             update_widgets();
         }
@@ -247,7 +262,7 @@ namespace video_poker
             *this, 
             to_string(video_poker::to_poker_hand(*iHand)) + neogfx::to_string(u8"\nWIN £") + boost::lexical_cast<std::string>(aWinnings) + "!",
             neogfx::color::Goldenrod.with_lightness(0.8));
-        iCredits += aWinnings;
+        iCredit += aWinnings;
     }
 
     void table::no_win()
@@ -278,13 +293,13 @@ namespace video_poker
                     iStake = 0;
                     bet(lastStake);
                     /* todo win/lose animation */
-                    change_state(iCredits + iStake > 0 ? table_state::TakeBet : table_state::GameOver);
+                    change_state(iCredit + iStake > 0 ? table_state::TakeBet : table_state::GameOver);
                 }
                 break;
             case table_state::GameOver:
-                if (neogfx::message_box::question(*this, "Out Of Credits - Game Over", "You have run out of credits!\n\nPlay again?", neogfx::standard_button::Yes | neogfx::standard_button::No) == neogfx::standard_button::Yes)
+                if (neogfx::message_box::question(*this, "Out Of Credit - Game Over", "You have run out of credit!\n\nPlay again?", neogfx::standard_button::Yes | neogfx::standard_button::No) == neogfx::standard_button::Yes)
                 {
-                    iCredits = STARTING_CREDITS;
+                    iCredit = STARTING_CREDIT;
                     iHand.emplace();
                     change_state(table_state::TakeBet);
                 }
@@ -300,11 +315,11 @@ namespace video_poker
 
     void table::update_widgets()
     {
-        iLabelCreditsValue.set_text( neogfx::to_string(u8"£") + boost::lexical_cast<std::string>(iCredits));
+        iLabelCreditsValue.set_text( neogfx::to_string(u8"£") + boost::lexical_cast<std::string>(iCredit));
         iLabelStakeValue.set_text( neogfx::to_string(u8"£") + boost::lexical_cast<std::string>(iStake));
         iBetMinus.enable(iState == table_state::TakeBet && iStake > 0);
-        iBetPlus.enable(iState == table_state::TakeBet && iCredits > 0 && iStake < MAX_BET);
-        iBetMax.enable(iState == table_state::TakeBet && iCredits > 0 && iStake < MAX_BET);
+        iBetPlus.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);
+        iBetMax.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);
         iDeal.enable(iState != table_state::DealtSecond && iStake > 0);
     }
 }

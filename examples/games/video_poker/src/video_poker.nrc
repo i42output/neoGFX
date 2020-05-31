@@ -5,6 +5,7 @@
         files: [
             resources/neoGFX.png
             resources/icon.png
+            resources/coin.png
             resources/club.png
             resources/spade.png
             resources/diamond.png

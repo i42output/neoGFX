@@ -60,6 +60,7 @@ namespace video_poker
         const neogfx::i_texture& suit_texture(const card& aCard) const override;
         const neogfx::i_texture& face_texture(const card& aCard) const override;
     private:
+        void add_credit(credit_t aCredit);
         void bet(credit_t aBet);
         void deal();
         void win(credit_t aWinnings);
@@ -68,7 +69,7 @@ namespace video_poker
         void update_widgets();
     private:
         table_state iState;
-        credit_t iCredits;
+        credit_t iCredit;
         credit_t iStake;
         std::optional<deck> iDeck;
         std::optional<hand> iHand;
@@ -81,6 +82,7 @@ namespace video_poker
         neogfx::horizontal_spacer iSpacer3;
         neogfx::vertical_spacer iSpacer4;
         neogfx::horizontal_layout iGambleLayout;
+        neogfx::push_button iAddCredit;
         flashing_button iBetMinus;
         flashing_button iBetPlus;
         flashing_button iBetMax;
