@@ -148,7 +148,9 @@ namespace neogfx::game
                 collider.previousAabb = collider.currentAabb;
                 auto const& untransformed = (meshFilter.mesh != std::nullopt ?
                     *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
-                collider.currentAabb = to_aabb(untransformed.vertices, transformation);
+                if (!collider.untransformedAabb)
+                    collider.untransformedAabb = to_aabb(untransformed.vertices);
+                collider.currentAabb = aabb_transform(*collider.untransformedAabb, transformation);
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
@@ -174,7 +176,9 @@ namespace neogfx::game
                 collider.previousAabb = collider.currentAabb;
                 auto const& untransformed = (meshFilter.mesh != std::nullopt ?
                     *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
-                collider.currentAabb = to_aabb_2d(untransformed.vertices, transformation);
+                if (!collider.untransformedAabb)
+                    collider.untransformedAabb = to_aabb_2d(untransformed.vertices);
+                collider.currentAabb = aabb_transform(*collider.untransformedAabb, transformation);
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }

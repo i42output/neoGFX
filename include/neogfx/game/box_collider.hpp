@@ -29,8 +29,7 @@ namespace neogfx::game
     struct box_collider
     {
         uint64_t mask;
-        std::optional<vec3> origin;
-        std::optional<vec3> size;
+        std::optional<aabb> untransformedAabb;
         std::optional<aabb> previousAabb;
         std::optional<aabb> currentAabb;
         uint32_t collisionEventId;
@@ -49,7 +48,7 @@ namespace neogfx::game
             }
             static uint32_t field_count()
             {
-                return 6;
+                return 5;
             }
             static component_data_field_type field_type(uint32_t aFieldIndex)
             {
@@ -59,11 +58,9 @@ namespace neogfx::game
                     return component_data_field_type::Uint64;
                 case 1:
                 case 2:
-                    return component_data_field_type::Vec3 | component_data_field_type::Optional;
                 case 3:
-                case 4:
                     return component_data_field_type::Aabb | component_data_field_type::Optional | component_data_field_type::Internal;
-                case 5:
+                case 4:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
@@ -74,8 +71,7 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Mask",
-                    "Origin",
-                    "Size",
+                    "AABB (Untransformed)",
                     "AABB (Previous)",
                     "AABB (Current)",
                     "Collision Event Id"
@@ -88,8 +84,7 @@ namespace neogfx::game
     struct box_collider_2d
     {
         uint64_t mask;
-        std::optional<vec2> origin;
-        std::optional<vec2> size;
+        std::optional<aabb_2d> untransformedAabb;
         std::optional<aabb_2d> previousAabb;
         std::optional<aabb_2d> currentAabb;
         uint32_t collisionEventId;
@@ -108,7 +103,7 @@ namespace neogfx::game
             }
             static uint32_t field_count()
             {
-                return 6;
+                return 5;
             }
             static component_data_field_type field_type(uint32_t aFieldIndex)
             {
@@ -118,11 +113,9 @@ namespace neogfx::game
                     return component_data_field_type::Uint64;
                 case 1:
                 case 2:
-                    return component_data_field_type::Vec2 | component_data_field_type::Optional;
                 case 3:
-                case 4:
                     return component_data_field_type::Aabb2d | component_data_field_type::Optional | component_data_field_type::Internal;
-                case 5:
+                case 4:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
@@ -133,8 +126,7 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Mask",
-                    "Origin",
-                    "Size",
+                    "AABB (Untransformed)",
                     "AABB (Previous)",
                     "AABB (Current)",
                     "Collision Event Id"
