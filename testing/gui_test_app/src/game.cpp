@@ -169,21 +169,24 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         ng::apply_translation(ng::apply_scaling(*explosionFilter.transformation, ng::aabb_extents(target)), ng::aabb_origin(target));
     };
 
-    ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).button_pressed([&ecs, gameState](ng::game_controller_button aButton, ng::key_modifiers_e)
+    if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
     {
-        if (aButton == ng::game_controller_button::Y)
-            gameState->showAabbGrid = !gameState->showAabbGrid;
-        if (aButton == ng::game_controller_button::X)
-            gameState->showMetrics = !gameState->showMetrics;
-        if (aButton == ng::game_controller_button::B)
+        ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).button_pressed([&ecs, gameState](ng::game_controller_button aButton, ng::key_modifiers_e)
         {
-            gameState->timeUpdates = !gameState->timeUpdates;
-            ecs.system<ng::game::simple_physics>().set_debug(gameState->timeUpdates);
-            ecs.system<ng::game::collision_detector>().set_debug(gameState->timeUpdates);
-        }
-        if (aButton == ng::game_controller_button::LeftShoulder)
-            gameState->autoFire = !gameState->autoFire;
-    });
+            if (aButton == ng::game_controller_button::Y)
+                gameState->showAabbGrid = !gameState->showAabbGrid;
+            if (aButton == ng::game_controller_button::X)
+                gameState->showMetrics = !gameState->showMetrics;
+            if (aButton == ng::game_controller_button::B)
+            {
+                gameState->timeUpdates = !gameState->timeUpdates;
+                ecs.system<ng::game::simple_physics>().set_debug(gameState->timeUpdates);
+                ecs.system<ng::game::collision_detector>().set_debug(gameState->timeUpdates);
+            }
+            if (aButton == ng::game_controller_button::LeftShoulder)
+                gameState->autoFire = !gameState->autoFire;
+        });
+    }
 
     ng::font debugFont{ "SnareDrum Two NBP", "Regular", 30.0 };
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
