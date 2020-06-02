@@ -1,4 +1,4 @@
-// project.cpp
+// project.hpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
@@ -17,23 +17,25 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
-#include <neogfx/tools/DesignStudio/project.hpp>
+#include <neogfx/gui/view/model.hpp>
+#include <neogfx/tools/DesignStudio/i_project.hpp>
 
 namespace neogfx::DesignStudio
 {
-    project::project(const std::string& aName, const std::string& aNamespace) :
-        iName{ aName }, iNamespace{ aNamespace }
+    class project : public ng::reference_counted<ng::model<i_project>>
     {
-    }
-
-    const ng::i_string& project::name() const
-    {
-        return iName;
-    }
-
-    const ng::i_string& project::namespace_() const
-    {
-        return iNamespace;
-    }
+    public:
+        typedef i_project abstract_type;
+    public:
+        project(const std::string& aName, const std::string& aNamespace);
+    public:
+        const ng::i_string& name() const override;
+        const ng::i_string& namespace_() const override;
+    private:
+        ng::string iName;
+        ng::string iNamespace;
+    };
 }

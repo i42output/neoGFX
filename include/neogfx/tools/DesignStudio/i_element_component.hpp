@@ -1,6 +1,6 @@
-// project.hpp
+// i_element_component.hpp
 /*
-  neogfx C++ App/Game Engine
+  neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
@@ -15,27 +15,24 @@
   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #pragma once
 
-#include <DesignStudio/DesignStudio.hpp>
-#include <neogfx/gui/view/model.hpp>
-#include <DesignStudio/i_project.hpp>
+#include <neogfx/neogfx.hpp>
+#include <neolib/neolib.hpp>
+#include <neolib/core/i_reference_counted.hpp>
+#include <neolib/core/i_string.hpp>
+#include <neolib/core/i_vector.hpp>
+#include <neogfx/core/i_property.hpp>
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
-    class project : public ng::reference_counted<ng::model<i_project>>
+    class i_element_component : public i_property_owner, public i_reference_counted
     {
     public:
-        typedef i_project abstract_type;
+        typedef i_element_component abstract_type;
     public:
-        project(const std::string& aName, const std::string& aNamespace);
-    public:
-        const ng::i_string& name() const override;
-        const ng::i_string& namespace_() const override;
-    private:
-        ng::string iName;
-        ng::string iNamespace;
+        virtual const neolib::i_string& type() const = 0;
     };
 }

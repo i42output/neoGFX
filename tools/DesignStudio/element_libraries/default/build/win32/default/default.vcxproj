@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{49E42449-D0D4-4083-AC36-11851B0D80DE}</ProjectGuid>
+    <ProjectGuid>{78562FD5-5659-4ADD-B6B0-A83A78D3510C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>default</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
@@ -74,22 +74,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\..\..\..\bin\</OutDir>
-    <TargetExt>.nel</TargetExt>
+    <TargetExt>.del</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\..\..\..\bin\</OutDir>
-    <TargetExt>.nel</TargetExt>
+    <TargetExt>.del</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\..\..\..\bin\</OutDir>
-    <TargetExt>.nel</TargetExt>
+    <TargetExt>.del</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\..\..\..\bin\</OutDir>
-    <TargetExt>.nel</TargetExt>
+    <TargetExt>.del</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -202,34 +202,7 @@
     <ClCompile Include="..\..\..\src\plugin.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\action.hpp" />
-    <ClInclude Include="..\..\..\src\app.hpp" />
-    <ClInclude Include="..\..\..\src\button.hpp" />
-    <ClInclude Include="..\..\..\src\canvas.hpp" />
-    <ClInclude Include="..\..\..\src\drop_list.hpp" />
-    <ClInclude Include="..\..\..\src\gradient_widget.hpp" />
-    <ClInclude Include="..\..\..\src\group_box.hpp" />
-    <ClInclude Include="..\..\..\src\image_widget.hpp" />
-    <ClInclude Include="..\..\..\src\label.hpp" />
-    <ClInclude Include="..\..\..\src\layout.hpp" />
     <ClInclude Include="..\..\..\src\library.hpp" />
-    <ClInclude Include="..\..\..\src\line_edit.hpp" />
-    <ClInclude Include="..\..\..\src\menu.hpp" />
-    <ClInclude Include="..\..\..\src\menu_bar.hpp" />
-    <ClInclude Include="..\..\..\src\slider.hpp" />
-    <ClInclude Include="..\..\..\src\spacer.hpp" />
-    <ClInclude Include="..\..\..\src\spin_box.hpp" />
-    <ClInclude Include="..\..\..\src\status_bar.hpp" />
-    <ClInclude Include="..\..\..\src\table_view.hpp" />
-    <ClInclude Include="..\..\..\src\tab_page.hpp" />
-    <ClInclude Include="..\..\..\src\tab_page_container.hpp" />
-    <ClInclude Include="..\..\..\src\text_edit.hpp" />
-    <ClInclude Include="..\..\..\src\text_field.hpp" />
-    <ClInclude Include="..\..\..\src\text_widget.hpp" />
-    <ClInclude Include="..\..\..\src\toolbar.hpp" />
-    <ClInclude Include="..\..\..\src\tree_view.hpp" />
-    <ClInclude Include="..\..\..\src\widget.hpp" />
-    <ClInclude Include="..\..\..\src\window.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

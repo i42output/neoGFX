@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <fstream>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -34,8 +34,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/core/css.hpp>
-#include <DesignStudio/project_manager.hpp>
-#include <DesignStudio/project.hpp>
+#include <neogfx/tools/DesignStudio/project_manager.hpp>
+#include <neogfx/tools/DesignStudio/project.hpp>
 #include "new_project_dialog.hpp"
 
 int main(int argc, char* argv[])

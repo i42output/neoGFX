@@ -20,19 +20,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <map>
+#include <neolib/core/map.hpp>
+#include <neolib/core/i_string.hpp>
 
 namespace neogfx
 {
     class i_property;
 
-    typedef std::map<std::string, i_property*> property_map;
+    typedef neolib::i_map<neolib::i_string, i_property*> property_map;
 
     class i_properties
     {
     public:
         virtual void register_property(i_property& aProperty) = 0;
         virtual const neogfx::property_map& property_map() const = 0;
+    protected:
+        neogfx::property_map& property_map()
+        {
+            return const_cast<neogfx::property_map&>(to_const(*this).property_map());
+        }
         // helpers
     public:
         uint32_t count() const
@@ -41,15 +47,15 @@ namespace neogfx
         }
         std::string name(uint32_t aIndex) const
         {
-            return std::next(property_map().begin(), aIndex)->first;
+            return std::next(property_map().begin(), aIndex)->first().to_std_string();
         }
         const i_property& property(uint32_t aIndex) const
         {
-            return *std::next(property_map().begin(), aIndex)->second;
+            return *std::next(property_map().begin(), aIndex)->second();
         }
         i_property& property(uint32_t aIndex)
         {
-            return *std::next(property_map().begin(), aIndex)->second;
+            return *std::next(property_map().begin(), aIndex)->second();
         }
     };
 }

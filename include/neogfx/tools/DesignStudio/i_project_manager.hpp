@@ -1,6 +1,6 @@
 // i_project_manager.hpp
 /*
-  neogfx C++ App/Game Engine
+  neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
@@ -19,12 +19,12 @@
 
 #pragma once
 
-#include <DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neolib/core/i_vector.hpp>
 #include <neogfx/core/i_event.hpp>
-#include <DesignStudio/i_project.hpp>
+#include <neogfx/tools/DesignStudio/i_project.hpp>
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
     class i_project_manager
     {
@@ -34,8 +34,8 @@ namespace design_studio
         declare_event(project_activated, i_project&)
         declare_event(project_deactivated, i_project&)
     public:
-        struct project_not_found : std::logic_error { project_not_found() : std::logic_error{ "design_studio::i_project_manager::project_not_found" } {} };
-        struct no_active_project : std::logic_error { no_active_project() : std::logic_error{ "design_studio::i_project_manager::no_active_project" } {} };
+        struct project_not_found : std::logic_error { project_not_found() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::project_not_found" } {} };
+        struct no_active_project : std::logic_error { no_active_project() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::no_active_project" } {} };
     public:
         using project_list = neolib::i_vector<ng::i_ref_ptr<i_project>>;
     public:

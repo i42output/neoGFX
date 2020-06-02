@@ -1,6 +1,6 @@
 // project_manager.hpp
 /*
-  neogfx C++ App/Game Engine
+  neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
@@ -19,12 +19,12 @@
 
 #pragma once
 
-#include <DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neolib/core/vector.hpp>
-#include <DesignStudio/i_project_manager.hpp>
-#include <DesignStudio/project.hpp>
+#include <neogfx/tools/DesignStudio/i_project_manager.hpp>
+#include <neogfx/tools/DesignStudio/project.hpp>
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
     class project_manager : public i_project_manager
     {

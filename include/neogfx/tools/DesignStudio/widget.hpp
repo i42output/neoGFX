@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <DesignStudio/DesignStudio.hpp>
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
     class widget_property_model : public ng::item_tree_model
     {

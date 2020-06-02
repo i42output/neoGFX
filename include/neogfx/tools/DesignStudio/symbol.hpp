@@ -1,6 +1,6 @@
 // symbol.hpp
 /*
-  neogfx C++ App/Game Engine
+  neoGFX Design Studio
   Copyright(C) 2016 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
@@ -19,11 +19,11 @@
 
 #pragma once
 
-#include <DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neolib/core/string_utils.hpp>
-#include <DesignStudio/symbol.hpp>
+#include <neogfx/tools/DesignStudio/symbol.hpp>
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
     enum class naming_convention
     {

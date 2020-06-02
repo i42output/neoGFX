@@ -21,6 +21,7 @@
 
 #include <neolib/neolib.hpp>
 #include <neolib/core/lifetime.hpp>
+#include <neolib/core/map.hpp>
 #include <neolib/app/object.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/i_properties.hpp>
@@ -67,6 +68,6 @@ namespace neogfx
         }
         // state
     private:
-        neogfx::property_map iProperties;
+        neolib::map<neolib::string, i_property*> iProperties;
     };
 }

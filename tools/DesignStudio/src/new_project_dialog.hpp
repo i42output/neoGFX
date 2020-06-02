@@ -1,6 +1,6 @@
 // new_project_dialog.hpp
 /*
-  neogfx C++ App/Game Engine
+  neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
@@ -19,15 +19,15 @@
 
 #pragma once
 
-#include <DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
-#include <DesignStudio/symbol.hpp>
+#include <neogfx/tools/DesignStudio/symbol.hpp>
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
     class new_project_dialog : public ng::dialog
     {

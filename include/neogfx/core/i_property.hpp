@@ -141,6 +141,9 @@ namespace neogfx
 
     class i_property
     {
+        // types
+    public:
+        typedef i_property abstract_type;
         // events
     public:
         declare_event(property_changed, const property_variant&)

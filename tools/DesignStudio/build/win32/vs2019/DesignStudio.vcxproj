@@ -216,17 +216,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\DesignStudio\DesignStudio.hpp" />
-    <ClInclude Include="..\..\..\include\DesignStudio\i_project.hpp" />
-    <ClInclude Include="..\..\..\include\DesignStudio\i_project_manager.hpp" />
-    <ClInclude Include="..\..\..\include\DesignStudio\project.hpp" />
-    <ClInclude Include="..\..\..\include\DesignStudio\project_manager.hpp" />
-    <ClInclude Include="..\..\..\include\DesignStudio\symbol.hpp" />
-    <ClInclude Include="..\..\..\include\DesignStudio\widget.hpp" />
-    <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
-    <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="..\..\..\src\resources\win32\DesignStudio.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -244,6 +233,21 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/DesignStudio.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/DesignStudio.res.cpp</Outputs>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\DesignStudio.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_element_component.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_project.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_project_manager.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_element.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_element_library.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\project.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\project_manager.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\symbol.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element_library_plugin.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\widget.hpp" />
+    <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

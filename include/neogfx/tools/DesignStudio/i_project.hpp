@@ -1,6 +1,6 @@
 // i_project.hpp
 /*
-  neogfx C++ App/Game Engine
+  neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
@@ -19,10 +19,10 @@
 
 #pragma once
 
-#include <DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/view/i_model.hpp>
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
     class i_project : public ng::i_model, public ng::i_reference_counted
     {

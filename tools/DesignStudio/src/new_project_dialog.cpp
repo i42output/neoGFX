@@ -1,6 +1,6 @@
 // new_project_dialog.cpp
 /*
-  neogfx C++ App/Game Engine
+  neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
@@ -17,12 +17,12 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neolib/file/file.hpp>
 #include <neogfx/app/file_dialog.hpp>
 #include "new_project_dialog.hpp"
 
-namespace design_studio
+namespace neogfx::DesignStudio
 {
     new_project_dialog::new_project_dialog(i_widget& aParent) :
         dialog{ aParent, "New Project"_t, ng::window_style::Modal | ng::window_style::TitleBar | ng::window_style::Close },
