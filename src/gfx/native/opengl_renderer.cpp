@@ -102,13 +102,15 @@ namespace neogfx
         std::cout << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
         std::cout << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
 
+        allocate_vertex_arrays(nullptr);
         iDefaultShaderProgram = add_shader_program(neolib::make_ref<opengl_shader_program>().as<i_shader_program>()).as<i_standard_shader_program>();
     }
 
     void opengl_renderer::cleanup()
     {
         // We explictly destroy these OpenGL objects here when context should still exist
-        iVertexArrays = std::nullopt;
+        deallocate_vertex_arrays(nullptr);
+        iVertexArrays.clear();
         iFontManager = std::nullopt;
         iTextureManager = std::nullopt;
         iShaderPrograms.clear();
@@ -232,16 +234,52 @@ namespace neogfx
         return *iTextureManager;
     }
 
-    const opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays() const
+    void opengl_renderer::allocate_vertex_arrays(void const* aConsumer)
     {
-        if (iVertexArrays == std::nullopt)
-            iVertexArrays.emplace();
-        return *iVertexArrays;
+        auto existing = iVertexArrays.find(aConsumer);
+        if (existing == iVertexArrays.end())
+            iVertexArrays[aConsumer];
+        else
+            throw consumer_exists();
     }
 
-    opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays()
+    void opengl_renderer::deallocate_vertex_arrays(void const* aConsumer)
     {
-        return const_cast<opengl_standard_vertex_arrays&>(to_const(*this).vertex_arrays());
+        auto existing = iVertexArrays.find(aConsumer);
+        if (existing != iVertexArrays.end())
+        {
+            if (iLastVertexArraysUsed && iLastVertexArraysUsed == existing)
+                iLastVertexArraysUsed = std::nullopt;
+            iVertexArrays.erase(existing);
+        }
+        else
+            throw consumer_not_found();
+    }
+
+    const opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays(void const* aConsumer) const
+    {
+        auto existing = iVertexArrays.find(aConsumer);
+        if (existing != iVertexArrays.end())
+        {
+            if (iLastVertexArraysUsed && iLastVertexArraysUsed != existing)
+            {
+                (**iLastVertexArraysUsed).second.execute();
+                iLastVertexArraysUsed = existing;
+            }
+            return existing->second;
+        }
+        throw consumer_not_found();
+    }
+
+    opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays(void const* aConsumer)
+    {
+        return const_cast<opengl_standard_vertex_arrays&>(to_const(*this).vertex_arrays(aConsumer));
+    }
+
+    void opengl_renderer::execute_vertex_arrays()
+    {
+        for (auto& va : iVertexArrays)
+            va.second.execute();
     }
 
     i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, texture_sampling aSampling)

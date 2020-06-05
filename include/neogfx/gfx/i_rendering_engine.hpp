@@ -60,6 +60,8 @@ namespace neogfx
         struct failed_to_initialize : std::runtime_error { failed_to_initialize() : std::runtime_error("neogfx::i_rendering_engine::failed_to_initialize") {} };
         struct context_exists : std::logic_error { context_exists() : std::logic_error("neogfx::i_rendering_engine::context_exists") {} };
         struct context_not_found : std::logic_error { context_not_found() : std::logic_error("neogfx::i_rendering_engine::context_not_found") {} };
+        struct consumer_exists : std::logic_error { consumer_exists() : std::logic_error("neogfx::i_rendering_engine::consumer_exists") {} };
+        struct consumer_not_found : std::logic_error { consumer_not_found() : std::logic_error("neogfx::i_rendering_engine::consumer_not_found") {} };
         struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(const std::string& aReason) : std::runtime_error("neogfx::i_rendering_engine::failed_to_create_shader_program: " + aReason) {} };
         struct no_shader_program_active : std::logic_error { no_shader_program_active() : std::logic_error("neogfx::i_rendering_engine::no_shader_program_active") {} };
         struct shader_program_not_found : std::logic_error { shader_program_not_found() : std::logic_error("neogfx::i_rendering_engine::shader_program_not_found") {} };
@@ -115,8 +117,11 @@ namespace neogfx
         virtual i_font_manager& font_manager() = 0;
         virtual i_texture_manager& texture_manager() = 0;
     public:
-        virtual const opengl_standard_vertex_arrays& vertex_arrays() const = 0;
-        virtual opengl_standard_vertex_arrays& vertex_arrays() = 0;
+        virtual void allocate_vertex_arrays(void const* aConsumer) = 0;
+        virtual void deallocate_vertex_arrays(void const* aConsumer) = 0;
+        virtual const opengl_standard_vertex_arrays& vertex_arrays(void const* aConsumer) const = 0;
+        virtual opengl_standard_vertex_arrays& vertex_arrays(void const* aConsumer) = 0;
+        virtual void execute_vertex_arrays() = 0;
     public:
         virtual i_texture& ping_pong_buffer1(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
         virtual i_texture& ping_pong_buffer2(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;

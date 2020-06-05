@@ -362,6 +362,10 @@ namespace neogfx
             glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
             glCheck(glDeleteSync(sync));
         }
+        vertex_array& vertices()
+        {
+            return iVertices;
+        }
         std::size_t capacity() const
         {
             return iVertices.capacity();

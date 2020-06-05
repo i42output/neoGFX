@@ -24,6 +24,7 @@
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/clock.hpp>
 #include <neogfx/game/collision_detector.hpp>
+#include <neogfx/game/animator.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/physics.hpp>
@@ -152,6 +153,8 @@ namespace neogfx::game
             end_update(2);
             if (ecs().system_instantiated<collision_detector>())
                 ecs().system<collision_detector>().run_cycle();
+            if (ecs().system_instantiated<animator>())
+                ecs().system<animator>().update_animations();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time = nextTime;

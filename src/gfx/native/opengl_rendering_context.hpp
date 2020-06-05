@@ -22,11 +22,13 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include "opengl.hpp"
 #include "opengl_error.hpp"
 #include "opengl_helpers.hpp"
+#include "use_vertex_arrays.hpp"
 
 namespace neogfx
 {
@@ -101,45 +103,56 @@ namespace neogfx
         };
         struct patch_drawable
         {
-            vertices xyz;
-            vertices_2d uv;
+            struct no_texture : std::logic_error { no_texture() : std::logic_error{ "neogfx::opengl_rendering_context::patch_drawable::no_texture" } {} };
+            static bool has_texture(const game::mesh_renderer& meshRenderer, const game::material& material)
+            {
+                if (material.texture != std::nullopt)
+                    return true;
+                else if (material.sharedTexture != std::nullopt)
+                    return true;
+                else if (meshRenderer.material.texture != std::nullopt)
+                    return true;
+                else if (meshRenderer.material.sharedTexture != std::nullopt)
+                    return true;
+                else
+                    return false;
+            }
+            static game::texture const& texture(const game::mesh_renderer& meshRenderer, const game::material& material)
+            {
+                if (material.texture != std::nullopt)
+                    return *material.texture;
+                else if (material.sharedTexture != std::nullopt)
+                    return *material.sharedTexture->ptr;
+                else if (meshRenderer.material.texture != std::nullopt)
+                    return *meshRenderer.material.texture;
+                else if (meshRenderer.material.sharedTexture != std::nullopt)
+                    return *meshRenderer.material.sharedTexture->ptr;
+                else
+                    throw no_texture();
+            }
+            void const* consumer;
             struct item
             {
-                struct no_texture : std::logic_error { no_texture() : std::logic_error{ "neogfx::opengl_rendering_context::patch_drawable::item::no_texture" } {} };
-                mesh_drawable* mesh;
+                mesh_drawable* meshDrawable;
+                typedef opengl_standard_vertex_arrays::vertex_array vertices;
                 vertices::size_type offsetVertices;
-                vertices_2d::size_type offsetTextureVertices;
                 game::material const* material;
                 game::faces const* faces;
-                item(mesh_drawable& mesh, vertices::size_type offsetVertices, vertices_2d::size_type offsetTextureVertices, game::faces const& faces) :
-                    mesh{ &mesh }, offsetVertices{ offsetVertices }, offsetTextureVertices{ offsetTextureVertices }, material{ &mesh.renderer->material }, faces{ &faces }                {}
-                item(mesh_drawable& mesh, vertices::size_type offsetVertices, vertices_2d::size_type offsetTextureVertices, game::material const& material, game::faces const& faces) :
-                    mesh{ &mesh }, offsetVertices{ offsetVertices }, offsetTextureVertices{ offsetTextureVertices }, material{ &material }, faces{ &faces }                {}
+                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices) :
+                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &meshDrawable.renderer->material }, faces{ nullptr } {}
+                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices, game::faces const& faces) :
+                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &meshDrawable.renderer->material }, faces{ &faces } {}
+                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices, game::material const& material) :
+                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &material }, faces{ nullptr } {}
+                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices, game::material const& material, game::faces const& faces) :
+                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &material }, faces{ &faces } {}
                 bool has_texture() const
                 {
-                    if (material->texture != std::nullopt)
-                        return true;
-                    else if (material->sharedTexture != std::nullopt)
-                        return true;
-                    else if (mesh->renderer->material.texture != std::nullopt)
-                        return true;
-                    else if (mesh->renderer->material.sharedTexture != std::nullopt)
-                        return true;
-                    else
-                        return false;
+                    return patch_drawable::has_texture(*meshDrawable->renderer, *material);
                 }
                 game::texture const& texture() const
                 {
-                    if (material->texture != std::nullopt)
-                        return *material->texture;
-                    else if (material->sharedTexture != std::nullopt)
-                        return *material->sharedTexture->ptr;
-                    else if (mesh->renderer->material.texture != std::nullopt)
-                        return *mesh->renderer->material.texture;
-                    else if (mesh->renderer->material.sharedTexture != std::nullopt)
-                        return *mesh->renderer->material.sharedTexture->ptr;
-                    else
-                        throw no_texture();
+                    return patch_drawable::texture(*meshDrawable->renderer, *material);
                 }
             };
             std::vector<item> items;
@@ -212,8 +225,8 @@ namespace neogfx
         void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
-        void draw_meshes(mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
-        void draw_patch(patch_drawable& aPatch);
+        void draw_meshes(void const* aConsumable, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
+        void draw_patch(std::optional<use_vertex_arrays>& aVertexArrayUsage, patch_drawable& aPatch, const mat44& aTransformation);
     public:
         neogfx::subpixel_format subpixel_format() const override;
     private:

@@ -99,6 +99,24 @@ namespace neogfx::game
         return rect{ topLeft, bottomRight };
     }
 
+    template <typename Container, typename T>
+    inline rect bounding_rect(const Container& aVertices, const basic_matrix<T, 4, 4>& aTransformation = basic_matrix<T, 4, 4>::identity())
+    {
+        if (aVertices.empty())
+            return rect{};
+        point topLeft{ aTransformation * aVertices[0].xyz };
+        point bottomRight;
+        for (auto const& v : aVertices)
+        {
+            auto const tv = aTransformation * v.xyz;
+            topLeft.x = std::min<coordinate>(topLeft.x, tv.x);
+            topLeft.y = std::min<coordinate>(topLeft.y, tv.y);
+            bottomRight.x = std::max<coordinate>(bottomRight.x, tv.x);
+            bottomRight.y = std::max<coordinate>(bottomRight.y, tv.y);
+        }
+        return rect{ topLeft, bottomRight };
+    }
+
     inline rect bounding_rect(const vertices& aVertices, const faces& aFaces, const mat44& aTransformation = mat44::identity(), vertices::size_type aOffset = 0)
     {
         if (aVertices.empty())
@@ -110,6 +128,27 @@ namespace neogfx::game
             for (faces::size_type fv = 0; fv < 3; ++fv)
             {
                 auto const& v = aTransformation * aVertices[static_cast<vertices::size_type>(f[static_cast<uint32_t>(fv)]) + aOffset];
+                topLeft.x = std::min<coordinate>(topLeft.x, v.x);
+                topLeft.y = std::min<coordinate>(topLeft.y, v.y);
+                bottomRight.x = std::max<coordinate>(bottomRight.x, v.x);
+                bottomRight.y = std::max<coordinate>(bottomRight.y, v.y);
+            }
+        }
+        return rect{ topLeft, bottomRight };
+    }
+
+    template <typename Container, typename T>
+    inline rect bounding_rect(const Container& aVertices, const faces& aFaces, const basic_matrix<T, 4, 4>& aTransformation = basic_matrix<T, 4, 4>::identity(), vertices::size_type aOffset = 0)
+    {
+        if (aVertices.empty())
+            return rect{};
+        point topLeft{ aTransformation * aVertices[static_cast<typename Container::size_type>(aFaces[0][static_cast<uint32_t>(0)]) + aOffset].xyz };
+        point bottomRight = topLeft;
+        for (auto const& f : aFaces)
+        {
+            for (faces::size_type fv = 0; fv < 3; ++fv)
+            {
+                auto const& v = aTransformation * aVertices[static_cast<typename Container::size_type>(f[static_cast<uint32_t>(fv)]) + aOffset].xyz;
                 topLeft.x = std::min<coordinate>(topLeft.x, v.x);
                 topLeft.y = std::min<coordinate>(topLeft.y, v.y);
                 bottomRight.x = std::max<coordinate>(bottomRight.x, v.x);

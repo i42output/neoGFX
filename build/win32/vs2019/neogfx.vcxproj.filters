@@ -765,9 +765,6 @@
     <ClInclude Include="..\..\..\include\neogfx\app\i_event_processing_context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_vertex_arrays.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_field.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1037,6 +1034,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\support\file\gfx\gltf.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\use_vertex_arrays.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

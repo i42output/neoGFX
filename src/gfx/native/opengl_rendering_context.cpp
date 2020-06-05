@@ -37,7 +37,6 @@
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
 #include "opengl_rendering_context.hpp"
-#include "opengl_vertex_arrays.hpp"
 
 namespace neogfx
 {
@@ -582,6 +581,7 @@ namespace neogfx
                 draw_glyph(opBatch);
                 break;
             case graphics_operation::operation_type::DrawMesh:
+                // todo: use draw_meshes
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
@@ -843,7 +843,7 @@ namespace neogfx
         vec3_array<6> triangles;
         quads_to_triangles(quad, triangles);
 
-        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -885,7 +885,7 @@ namespace neogfx
         vec3_array<4 * 6> triangles;
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -923,7 +923,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -957,7 +957,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -991,7 +991,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -1022,7 +1022,7 @@ namespace neogfx
                 auto vertices = path_vertices(aPath, subPath, aPen.width(), mode);
 
                 {
-                    use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
+                    use_vertex_arrays vertexArrays{ nullptr, *this, mode, vertices.size() };
                     for (auto const& v : vertices)
                         vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                             vec4f{{
@@ -1053,7 +1053,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v + aPosition, std::holds_alternative<color>(aPen.color()) ?
@@ -1116,7 +1116,7 @@ namespace neogfx
             }
         }
         if (!drawables[aLayer].empty())
-            draw_meshes(&*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
+            draw_meshes(&aEcs, &*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
         for (auto const& d : drawables[aLayer])
             if (!d.drawn && d.renderer->destroyOnFustrumCull)
                 aEcs.async_destroy_entity(d.entity);
@@ -1149,7 +1149,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
         
         {
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
+            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
 
             for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
             {
@@ -1183,7 +1183,7 @@ namespace neogfx
         auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::TriangleFan);
         
         {
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLE_FAN, vertices.size() };
 
             for (auto const& v : vertices)
             {
@@ -1211,7 +1211,8 @@ namespace neogfx
         auto vertices = circle_vertices(aCentre, aRadius, 0.0, mesh_type::TriangleFan);
 
         {
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLE_FAN, vertices.size() };
+
             for (auto const& v : vertices)
             {
                 vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
@@ -1238,7 +1239,8 @@ namespace neogfx
         auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::TriangleFan);
 
         {
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLE_FAN, vertices.size() };
+
             for (auto const& v : vertices)
             {
                 vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
@@ -1270,7 +1272,8 @@ namespace neogfx
                 auto vertices = path_vertices(aPath, subPath, 0.0, mode);
 
                 {
-                    use_vertex_arrays vertexArrays{ *this, mode, vertices.size() };
+                    use_vertex_arrays vertexArrays{ nullptr, *this, mode, vertices.size() };
+
                     for (auto const& v : vertices)
                     {
                         vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
@@ -1313,7 +1316,8 @@ namespace neogfx
         }
 
         {
-            use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES };
+            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES };
+
             for (auto op = aFillShapeOps.first; op != aFillShapeOps.second; ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(*op);
@@ -1366,7 +1370,7 @@ namespace neogfx
             for (std::size_t i = 0; i < meshFilters.size(); ++i)
                 drawables.emplace_back(meshFilters[i], meshRenderers[i]);
             if (!drawables.empty())
-                draw_meshes(&*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
+                draw_meshes(nullptr, &*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
             meshFilters.clear();
             meshRenderers.clear();
             drawables.clear();
@@ -1592,72 +1596,123 @@ namespace neogfx
         mesh_drawable drawable
         {
             aMeshFilter,
-            aMeshRenderer,
-            aMeshFilter.transformation != std::nullopt ?
-                *aMeshFilter.transformation : mat44::identity()
+            aMeshRenderer
         };
-        draw_meshes(&drawable, &drawable + 1, aTransformation);
+        draw_meshes(nullptr, &drawable, &drawable + 1, aTransformation);
     }
 
-    void opengl_rendering_context::draw_meshes(mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
+    void opengl_rendering_context::draw_meshes(void const* aConsumer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
+        auto const logicalCoordinates = logical_coordinates();
+
+        // temporary workaround until implementation complete
+        aConsumer = nullptr;
+
         thread_local patch_drawable patch = {};
-        patch.xyz.clear();
-        patch.uv.clear();
+        patch.consumer = aConsumer;
         patch.items.clear();
 
-        for (auto m = aFirst; m != aLast; ++m)
+        std::size_t vertexCount = 0;
+        for (auto md = aFirst; md != aLast; ++md)
         {
-            auto& mesh = *m;
-            auto const& untransformed = (mesh.filter->mesh != std::nullopt ?
-                *mesh.filter->mesh : *mesh.filter->sharedMesh.ptr).vertices;
-            auto const transformation = aTransformation * (mesh.filter->transformation != std::nullopt ? *mesh.filter->transformation : mat44::identity()) * mesh.transformation;
-            thread_local vec3_list xyz;
-            xyz.clear();
-            std::transform(untransformed.begin(), untransformed.end(), std::back_inserter(xyz), [&transformation](auto const& v)
-            {
-                return transformation * v;
-            });
-            auto const& uv = mesh.filter->mesh != std::nullopt ?
-                mesh.filter->mesh->uv : mesh.filter->sharedMesh.ptr->uv;
-            auto const& faces = mesh.filter->mesh != std::nullopt ?
-                mesh.filter->mesh->faces : mesh.filter->sharedMesh.ptr->faces;
-            auto const& material = mesh.renderer->material;
-
-            auto const offsetVertices = patch.xyz.size();
-            auto const offsetTextureVertices = patch.uv.size();
-            patch.xyz.insert(patch.xyz.end(), xyz.begin(), xyz.end());
-            patch.uv.insert(patch.uv.end(), uv.begin(), uv.end());
-            patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, material, faces);
-
-            for (auto const& meshPatch : mesh.renderer->patches)
-                patch.items.emplace_back(mesh, offsetVertices, offsetTextureVertices, meshPatch.material, meshPatch.faces);
+            auto& meshDrawable = *md;
+            auto& meshFilter = *meshDrawable.filter;
+            auto& meshRenderer = *meshDrawable.renderer;
+            auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
+            auto const& faces = mesh.faces;
+            vertexCount += faces.size();
+            for (auto const& meshPatch : meshRenderer.patches)
+                vertexCount += meshPatch.faces.size();
         }
 
-        draw_patch(patch);
+        auto& vertexArrays = service<i_rendering_engine>().vertex_arrays(aConsumer);
+        auto& vertices = vertexArrays.vertices();
+        if (vertices.capacity() - vertices.size() < vertexCount)
+        {
+            vertexArrays.execute();
+            vertices.clear();
+        }
+
+        for (auto md = aFirst; md != aLast; ++md)
+        {
+            auto& meshDrawable = *md;
+            auto& meshFilter = *meshDrawable.filter;
+            auto& meshRenderer = *meshDrawable.renderer;
+            auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
+            auto const transformation = meshDrawable.transformation * (meshFilter.transformation != std::nullopt ? *meshFilter.transformation : mat44::identity());
+            auto const& faces = mesh.faces;
+            auto const& material = meshRenderer.material;
+            auto add_item = [&](auto const& mesh, auto const& material, auto const& faces)
+            {
+                vec2 textureStorageExtents;
+                vec2 uvFixupCoefficient;
+                vec2 uvFixupOffset;
+                if (patch_drawable::has_texture(meshRenderer, material))
+                {
+                    auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
+                    auto const& texture = *service<i_texture_manager>().find_texture(materialTexture.id.cookie());
+                    textureStorageExtents = texture.storage_extents().to_vec2();
+                    uvFixupCoefficient = materialTexture.extents;
+                    if (materialTexture.type == texture_type::Texture)
+                        uvFixupOffset = vec2{ 1.0, 1.0 };
+                    else if (materialTexture.subTexture == std::nullopt)
+                        uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
+                    else
+                        uvFixupOffset = materialTexture.subTexture->min;
+                }
+                auto const vertexStartIndex = vertices.size();
+                for (auto const& face : faces)
+                {
+                    for (auto faceVertexIndex : face)
+                    {
+                        auto const& xyz = transformation * mesh.vertices[faceVertexIndex];
+                        auto const& rgba = (material.color != std::nullopt ? material.color->rgba.as<float>() : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
+                        auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
+                            (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents) : vec2{});
+                        vertices.emplace_back(xyz, rgba, uv);
+                        if (material.color != std::nullopt )
+                            vertices.back().rgba[3] *= static_cast<float>(iOpacity);
+                        auto const& v = vertices.back().xyz;
+                        if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+                            v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+                            v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
+                            v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
+                            meshDrawable.drawn = true;
+                    }
+                }
+                patch.items.emplace_back(meshDrawable, vertexStartIndex, material, faces);
+            };
+            if (!faces.empty())
+                add_item(mesh, material, faces);
+            for (auto const& meshPatch : meshRenderer.patches)
+                add_item(mesh, meshPatch.material, meshPatch.faces);
+        }
+
+        std::optional<use_vertex_arrays> vertexArraysUsage;
+        draw_patch(vertexArraysUsage, patch, aTransformation);
+        if (vertexArraysUsage)
+            vertexArraysUsage->execute();
     }
 
-    void opengl_rendering_context::draw_patch(patch_drawable& aPatch)
+    void opengl_rendering_context::draw_patch(std::optional<use_vertex_arrays>& aVertexArrayUsage, patch_drawable& aPatch, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto const logicalCoordinates = logical_coordinates();
 
-        auto const& vertices = aPatch.xyz;
-        auto const& textureVertices = aPatch.uv;
+        auto& vertices = service<i_rendering_engine>().vertex_arrays(aPatch.consumer).vertices();
 
         for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
             std::optional<GLint> previousTexture;
 
-            auto const& batchRenderer = *item->mesh->renderer;
+            auto const& batchRenderer = *item->meshDrawable->renderer;
             auto const& batchMaterial = *item->material;
-            vec2 textureStorageExtents;
 
-            auto calc_bounding_rect = [&aPatch](const patch_drawable::item& aItem) -> rect
+            auto calc_bounding_rect = [&vertices, &aPatch](const patch_drawable::item& aItem) -> rect
             {
-                return game::bounding_rect(aPatch.xyz, *aItem.faces, mat44::identity(), aItem.offsetVertices);
+                return game::bounding_rect(vertices, *aItem.faces, mat44f::identity(), aItem.offsetVertices);
             };
 
             auto calc_sampling = [&aPatch, &calc_bounding_rect](const patch_drawable::item& aItem) -> texture_sampling
@@ -1692,8 +1747,6 @@ namespace neogfx
                 {
                     auto const& texture = *service<i_texture_manager>().find_texture(item->texture().id.cookie());
 
-                    textureStorageExtents = texture.storage_extents().to_vec2();
-
                     glCheck(glActiveTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
 
                     previousTexture.emplace(0);
@@ -1716,67 +1769,22 @@ namespace neogfx
                         *batchMaterial.shaderEffect : shader_effect::None);
                     if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
                         enable_sample_shading(1.0);
+
+                    if (aVertexArrayUsage == std::nullopt || !aVertexArrayUsage->with_textures())
+                        aVertexArrayUsage.emplace(aPatch.consumer, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
+                    aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
                 else
+                {
                     rendering_engine().default_shader_program().texture_shader().clear_texture();
 
-                use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, faceCount * 3, batchRenderer.barrier };
-
-                for (; item != next; ++item)
-                {
-                    vec2 uvFixupCoefficient;
-                    vec2 uvFixupOffset;
-
-                    auto const& material = *item->material;
-
-                    if (item->has_texture())
-                    {
-                        auto const& materialTexture = item->texture();
-                        auto const& texture = *service<i_texture_manager>().find_texture(materialTexture.id.cookie());
-                        uvFixupCoefficient = materialTexture.extents;
-                        if (materialTexture.type == texture_type::Texture)
-                            uvFixupOffset = vec2{ 1.0, 1.0 };
-                        else if (materialTexture.subTexture == std::nullopt)
-                            uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
-                        else
-                            uvFixupOffset = materialTexture.subTexture->min;
-                    }
-
-                    auto const offsetVertices = item->offsetVertices;
-                    auto const offsetTextureVertices = item->offsetTextureVertices;
-                    auto const& faces = *item->faces;
-
-                    color colorizationColor{ 0xFF, 0xFF, 0xFF, 0xFF };
-                    if (material.color != std::nullopt)
-                        colorizationColor = material.color->rgba;
-
-                    for (auto const& face : faces)
-                    {
-                        for (auto faceVertexIndex : face)
-                        {
-                            auto const vertexIndexOffset  = faceVertexIndex + offsetVertices;
-                            auto const textureVertexIndexOffset = faceVertexIndex + offsetTextureVertices;
-                            auto const& v = vertices[vertexIndexOffset];
-                            if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                                v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                                v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
-                                v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
-                                item->mesh->drawn = true;
-                            vec2 uv = {};
-                            if (item->has_texture())
-                                uv = (textureVertices[textureVertexIndexOffset].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents);
-                            vertexArrays.emplace_back(
-                                v,
-                                vec4f{ {
-                                    colorizationColor.red<float>(),
-                                    colorizationColor.green<float>(),
-                                    colorizationColor.blue<float>(),
-                                    colorizationColor.alpha<float>() * static_cast<float>(iOpacity)} },
-                                uv);
-                        }
-                    }
+                    if (aVertexArrayUsage == std::nullopt || aVertexArrayUsage->with_textures())
+                        aVertexArrayUsage.emplace(aPatch.consumer, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
+                    aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
-                vertexArrays.draw();
+
+
+                item = next;
             }
 
             if (previousTexture != std::nullopt)

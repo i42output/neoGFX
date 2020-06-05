@@ -335,7 +335,7 @@ namespace neogfx
 
         glCheck(surface_window().native_window_render(invalidated_area()));
 
-        rendering_engine().vertex_arrays().execute();
+        rendering_engine().execute_vertex_arrays();
 
         glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
         glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, iFrameBuffer));

@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/patch.hpp>
+#include <neogfx/game/mesh_render_cache.hpp>
 
 namespace neogfx::game
 {
@@ -36,6 +37,7 @@ namespace neogfx::game
         i32 layer;
         bool destroyOnFustrumCull;
         bool barrier;
+        mutable std::optional<mesh_render_cache> renderCache;
 
         struct meta : i_component_data::meta
         {
@@ -66,6 +68,8 @@ namespace neogfx::game
                 case 3:
                 case 4:
                     return component_data_field_type::Bool;
+                case 5:
+                    return component_data_field_type::ComponentData | component_data_field_type::Optional | component_data_field_type::Cache | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
                 }
@@ -82,6 +86,8 @@ namespace neogfx::game
                 case 3:
                 case 4:
                     return neolib::uuid{};
+                case 5:
+                    return mesh_render_cache::meta::id();
                 default:
                     throw invalid_field_index();
                 }
@@ -94,7 +100,8 @@ namespace neogfx::game
                     "Patches",
                     "Layer",
                     "Destroy On Fustrum Cull",
-                    "Barrier"
+                    "Barrier",
+                    "Render Cache"
                 };
                 return sFieldNames[aFieldIndex];
             }

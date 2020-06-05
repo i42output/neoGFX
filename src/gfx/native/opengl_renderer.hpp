@@ -99,8 +99,11 @@ namespace neogfx
         i_font_manager& font_manager() override;
         i_texture_manager& texture_manager() override;
     public:
-        const opengl_standard_vertex_arrays & vertex_arrays() const override;
-        opengl_standard_vertex_arrays& vertex_arrays() override;
+        void allocate_vertex_arrays(void const* aConsumer) override;
+        void deallocate_vertex_arrays(void const* aConsumer) override;
+        const opengl_standard_vertex_arrays& vertex_arrays(void const* aConsumer) const override;
+        opengl_standard_vertex_arrays& vertex_arrays(void const* aConsumer) override;
+        void execute_vertex_arrays() override;
     public:
         i_texture& ping_pong_buffer1(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
         i_texture& ping_pong_buffer2(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
@@ -127,7 +130,9 @@ namespace neogfx
         bool iLimitFrameRate;
         uint32_t iFrameRateLimit;
         bool iSubpixelRendering;
-        mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
+        typedef std::unordered_map<void const*, opengl_standard_vertex_arrays> vertex_arrays_map;
+        mutable vertex_arrays_map iVertexArrays;
+        mutable std::optional<vertex_arrays_map::iterator> iLastVertexArraysUsed;
         std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
         ping_pong_buffers_t iPingPongBuffer1s;
         ping_pong_buffers_t iPingPongBuffer2s;

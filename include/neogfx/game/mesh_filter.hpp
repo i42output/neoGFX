@@ -32,8 +32,8 @@ namespace neogfx::game
 {
     struct mesh_filter
     {
-        shared<mesh> sharedMesh;
-        std::optional<mesh> mesh;
+        shared<game::mesh> sharedMesh;
+        std::optional<game::mesh> mesh;
         std::optional<mat44> transformation;
 
         struct meta : i_component_data::meta
@@ -85,11 +85,7 @@ namespace neogfx::game
                 {
                     "Shared Mesh",
                     "Mesh",
-                    "Transformation",
-                    "Color",
-                    "Gradient",
-                    "Texture",
-                    "Patches"
+                    "Transformation"
                 };
                 return sFieldNames[aFieldIndex];
             }

@@ -26,6 +26,7 @@
 #include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/animator.hpp>
 #include <neogfx/game/game_world.hpp>
+#include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/animation_filter.hpp>
 
 namespace neogfx::game
@@ -74,6 +75,8 @@ namespace neogfx::game
 
     bool animator::apply()
     {
+        if (ecs().system_registered<simple_physics>())
+            return false;
         if (!ecs().component_instantiated<animation_filter>())
             return false;
         else if (paused())

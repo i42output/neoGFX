@@ -1,4 +1,4 @@
-// opengl_vertex_arrays.cpp
+// use_vertex_arrays.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
@@ -18,6 +18,8 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_rendering_context.hpp>
+#include "opengl_helpers.hpp"
 
 namespace neogfx
 {
@@ -36,9 +38,10 @@ namespace neogfx
             typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
             typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
         public:
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iConsumer{ aConsumer },
                 iParent{ aParent }, 
-                iUse{ aParent.rendering_engine().vertex_arrays() }, 
+                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
                 iMode{ aMode }, 
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) }, 
@@ -50,9 +53,10 @@ namespace neogfx
                 if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-                iParent{ aParent }, 
-                iUse{ aParent.rendering_engine().vertex_arrays() }, 
+            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iConsumer{ aConsumer },
+                iParent{ aParent },
+                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
                 iMode{ aMode }, 
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
@@ -64,9 +68,10 @@ namespace neogfx
                 if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-                iParent{ aParent }, 
-                iUse{ aParent.rendering_engine().vertex_arrays() }, 
+            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iConsumer{ aConsumer },
+                iParent{ aParent },
+                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
                 iMode{ aMode }, 
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
@@ -78,9 +83,10 @@ namespace neogfx
                 if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(opengl_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-                iParent{ aParent }, 
-                iUse{ aParent.rendering_engine().vertex_arrays() }, 
+            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iConsumer{ aConsumer },
+                iParent{ aParent },
+                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
                 iMode{ aMode }, 
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
@@ -97,7 +103,7 @@ namespace neogfx
                 draw();
             }
         public:
-            opengl_rendering_context& parent()
+            i_rendering_context& parent()
             {
                 return iParent;
             }
@@ -120,6 +126,10 @@ namespace neogfx
                 default:
                     return 0;
                 }
+            }
+            bool with_textures() const
+            {
+                return iWithTextures;
             }
         public:
             const_iterator begin() const
@@ -209,23 +219,32 @@ namespace neogfx
                 iUse.vertices().clear();
                 iStart = 0;
             }
-            void draw()
+            struct skip
             {
-                draw(vertices().size() - static_cast<std::size_t>(iStart));
+                std::optional<std::size_t> skipCount;
+            };
+            void draw(const skip& aSkip = {})
+            {
+                draw(vertices().size() - static_cast<std::size_t>(iStart), aSkip);
             }
-            void draw(std::size_t aCount, std::size_t aSkipCount = 1u)
+            void draw(std::size_t aStart, std::size_t aCount, const skip& aSkip = {})
+            {
+                iStart = static_cast<GLint>(aStart);
+                draw(aCount, aSkip);
+            }
+            void draw(std::size_t aCount, const skip& aSkip = {})
             {
                 if (aCount == 0u)
                     return;
-                aSkipCount = std::max<std::size_t>(aSkipCount, 1u);
+                auto skipCount = aSkip.skipCount ? std::max<std::size_t>(*aSkip.skipCount, 1u) : 1u;
                 if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
                     throw invalid_draw_count();
                 if (static_cast<std::size_t>(iStart) == vertices().size())
                     return;
                 if (!iWithTextures)
-                    iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
+                    iParent.rendering_engine().vertex_arrays(iConsumer).instantiate(iParent, iParent.rendering_engine().active_shader_program());
                 else
-                    iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
+                    iParent.rendering_engine().vertex_arrays(iConsumer).instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
                 if (!iUseBarrier && mode() == translated_mode())
                 {
                     glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
@@ -238,7 +257,7 @@ namespace neogfx
                         glCheck(glTextureBarrier());
                     }
                     auto const pvc = primitive_vertex_count();
-                    auto chunk = pvc * aSkipCount;
+                    auto chunk = pvc * skipCount;
                     while (aCount > 0)
                     {
                         auto amount = std::min(chunk, aCount);
@@ -288,7 +307,8 @@ namespace neogfx
                 return iMode;
             }
         private:
-            opengl_rendering_context& iParent;
+            void const* iConsumer;
+            i_rendering_context& iParent;
             opengl_standard_vertex_arrays::use iUse;
             GLenum iMode;
             bool iWithTextures;

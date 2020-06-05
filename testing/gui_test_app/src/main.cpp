@@ -1168,6 +1168,10 @@ int main(int argc, char* argv[])
         ui.checkThreadPool.Checked([&]() { useThreadPool = true; });
         ui.checkThreadPool.Unchecked([&]() { useThreadPool = false; });
 
+        neolib::use_simd() = false;
+        ui.checkUseSimd.Checked([&]() { neolib::use_simd() = true; });
+        ui.checkUseSimd.Unchecked([&]() { neolib::use_simd() = false; });
+
         auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
         {
             instancingRect = ui.pageInstancing.client_rect();
@@ -1195,6 +1199,10 @@ int main(int argc, char* argv[])
                     sink += ~~~~ecs->system<ng::game::animator>().Animate(update_ecs_entities);
                     ui.canvasInstancing.set_ecs(*ecs);
                 }
+                if (ui.checkPauseAnimation.is_checked() && !ecs->system<ng::game::animator>().paused())
+                    ecs->system<ng::game::animator>().pause();
+                else if (!ui.checkPauseAnimation.is_checked() && ecs->system<ng::game::animator>().paused())
+                    ecs->system<ng::game::animator>().resume();
                 auto const meshesWanted = ui.sliderShapeCount.value();
                 ng::game::scoped_component_lock<ng::game::mesh_filter> lock{ *ecs };
                 auto& meshFilterComponent = ecs->component<ng::game::mesh_filter>();
@@ -1228,6 +1236,7 @@ int main(int argc, char* argv[])
         ui.checkOutline.Toggled([&]() { configure_ecs(); });
         ui.checkFill.Toggled([&]() { configure_ecs(); });
         ui.radioCircle.Toggled([&]() { configure_ecs(); });
+        ui.checkPauseAnimation.Toggled([&]() { configure_ecs(); });
 
         ui.canvasInstancing.PaintingChildren([&](ng::i_graphics_context& aGc)
         {
@@ -1299,10 +1308,11 @@ int main(int argc, char* argv[])
         {
             if (!window.has_native_window())
                 return;
-            aTimer.set_duration(ui.pageDrawing.can_update() || (!ecs && ui.canvasInstancing.can_update()) ? 0u : 1u);
+            bool canUpdateCanvas = (!ecs || ecs->system<ng::game::animator>().paused()) && ui.canvasInstancing.can_update();
+            aTimer.set_duration(ui.pageDrawing.can_update() || canUpdateCanvas ? 0u : 1u);
             aTimer.again();
             ui.pageDrawing.update();
-            if (!ecs)
+            if (canUpdateCanvas)
                 ui.canvasInstancing.update();
             bool const mouseOver = ui.canvasInstancing.client_rect().contains(ui.canvasInstancing.root().mouse_position() - ui.canvasInstancing.origin());
             ui.groupRenderingScheme.show(mouseOver);

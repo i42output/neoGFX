@@ -1044,6 +1044,14 @@
                                                 }
                                             }
                                             check_box: {
+                                                id: checkPauseAnimation
+                                                text: "Pause Animation"
+                                            }
+                                            check_box: {
+                                                id: checkUseSimd
+                                                text: "Use SIMD"
+                                            }
+                                            check_box: {
                                                 id: checkThreadPool
                                                 text: "Use Thread Pool"
                                             }
