@@ -46,7 +46,8 @@ namespace neogfx
                 iMode{ aMode }, 
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) }, 
-                iUseBarrier{ aUseBarrier }
+                iUseBarrier{ aUseBarrier },
+                iDrawOnExit{ true }
             {
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
@@ -61,7 +62,8 @@ namespace neogfx
                 iMode{ aMode },
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
-                iUseBarrier{ aUseBarrier }
+                iUseBarrier{ aUseBarrier },
+                iDrawOnExit{ true }
             {
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
@@ -76,7 +78,8 @@ namespace neogfx
                 iMode{ aMode },
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
-                iUseBarrier{ aUseBarrier }
+                iUseBarrier{ aUseBarrier },
+                iDrawOnExit{ true }
             {
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
@@ -91,7 +94,8 @@ namespace neogfx
                 iMode{ aMode },
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
-                iUseBarrier{ aUseBarrier }
+                iUseBarrier{ aUseBarrier },
+                iDrawOnExit{ true }
             {
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
@@ -101,7 +105,8 @@ namespace neogfx
             }
             ~use_vertex_arrays()
             {
-                draw();
+                if (iDrawOnExit)
+                    draw();
             }
         public:
             i_rendering_context& parent()
@@ -235,6 +240,7 @@ namespace neogfx
             }
             void draw(std::size_t aCount, const skip& aSkip = {})
             {
+                iDrawOnExit = false;
                 if (aCount == 0u)
                     return;
                 auto skipCount = aSkip.skipCount ? std::max<std::size_t>(*aSkip.skipCount, 1u) : 1u;
@@ -312,6 +318,7 @@ namespace neogfx
             bool iWithTextures;
             GLint iStart;
             bool iUseBarrier;
+            bool iDrawOnExit;
         };
     }
 }
