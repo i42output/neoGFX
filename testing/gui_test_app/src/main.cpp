@@ -1168,9 +1168,13 @@ int main(int argc, char* argv[])
         ui.checkThreadPool.Checked([&]() { useThreadPool = true; });
         ui.checkThreadPool.Unchecked([&]() { useThreadPool = false; });
 
+#ifdef USE_AVX_DYNAMIC
         neolib::use_simd() = false;
         ui.checkUseSimd.Checked([&]() { neolib::use_simd() = true; });
         ui.checkUseSimd.Unchecked([&]() { neolib::use_simd() = false; });
+#else
+        ui.checkUseSimd.disable();
+#endif
 
         auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
         {

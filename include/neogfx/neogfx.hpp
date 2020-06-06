@@ -32,9 +32,6 @@ using namespace boost::multiprecision;
 #include <neogfx/app/i18n.hpp>
 #include <neogfx/core/async_task.hpp>
 
-#define USE_AVX_DYNAMIC
-#define USE_EMM_DYNAMIC
-
 namespace neogfx
 {
     using namespace neolib::stdint_suffix;
