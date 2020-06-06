@@ -35,7 +35,6 @@ namespace neogfx::game
         material material;
         patches patches;
         i32 layer;
-        bool destroyOnFustrumCull;
         bool barrier;
         mutable std::optional<mesh_render_cache> renderCache;
 
@@ -66,9 +65,8 @@ namespace neogfx::game
                 case 2:
                     return component_data_field_type::Int32;
                 case 3:
-                case 4:
                     return component_data_field_type::Bool;
-                case 5:
+                case 4:
                     return component_data_field_type::ComponentData | component_data_field_type::Optional | component_data_field_type::Cache | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
@@ -84,9 +82,8 @@ namespace neogfx::game
                     return patch::meta::id();
                 case 2:
                 case 3:
-                case 4:
                     return neolib::uuid{};
-                case 5:
+                case 4:
                     return mesh_render_cache::meta::id();
                 default:
                     throw invalid_field_index();
@@ -99,7 +96,6 @@ namespace neogfx::game
                     "Material",
                     "Patches",
                     "Layer",
-                    "Destroy On Fustrum Cull",
                     "Barrier",
                     "Render Cache"
                 };

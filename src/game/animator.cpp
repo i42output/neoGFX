@@ -50,7 +50,6 @@ namespace neogfx::game
         animator& iOwner;
     };
 
-
     animator::animator(game::i_ecs& aEcs) :
         system<entity_info, animation_filter>{ aEcs }
     {

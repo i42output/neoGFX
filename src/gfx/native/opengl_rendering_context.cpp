@@ -1117,9 +1117,6 @@ namespace neogfx
         }
         if (!drawables[aLayer].empty())
             draw_meshes(dynamic_cast<i_vertex_provider&>(aEcs), &*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
-        for (auto const& d : drawables[aLayer])
-            if (!d.drawn && d.renderer->destroyOnFustrumCull)
-                aEcs.async_destroy_entity(d.entity);
         if (aLayer >= maxLayer)
         {
             maxLayer = 0;
@@ -1509,7 +1506,7 @@ namespace neogfx
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
                                             },
-                                            {}, false, subpixelRender });
+                                            {}, subpixelRender });
                                 else
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
@@ -1520,7 +1517,7 @@ namespace neogfx
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
                                             },
-                                            {}, false, subpixelRender });
+                                            {}, subpixelRender });
                                 if (haveGradient)
                                 {
                                     updateGlyphShader = true;
@@ -1669,16 +1666,15 @@ namespace neogfx
                         vertices.emplace_back(xyz, rgba, uv);
                         if (material.color != std::nullopt )
                             vertices.back().rgba[3] *= static_cast<float>(iOpacity);
-                        auto const& v = vertices.back().xyz;
-                        if (v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                            v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
-                            v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
-                            v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
-                            meshDrawable.drawn = true;
                     }
                 }
                 patch.items.emplace_back(meshDrawable, vertexStartIndex, material, faces);
             };
+#ifndef NDEBUG
+            if (meshDrawable.entity != game::null_entity &&
+                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
+                std::cerr << "Adding debug entity drawable..." << std::endl;
+#endif
             if (!faces.empty())
                 add_item(mesh, material, faces);
             for (auto const& meshPatch : meshRenderer.patches)
@@ -1770,6 +1766,13 @@ namespace neogfx
 
                     if (aVertexArrayUsage == std::nullopt || !aVertexArrayUsage->with_textures())
                         aVertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
+
+#ifndef NDEBUG
+                    if (item->meshDrawable->entity != game::null_entity &&
+                        dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
+                        std::cerr << "Drawing debug entity (texture)..." << std::endl;
+#endif
+
                     aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
                 else
@@ -1778,6 +1781,13 @@ namespace neogfx
 
                     if (aVertexArrayUsage == std::nullopt || aVertexArrayUsage->with_textures())
                         aVertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
+
+#ifndef NDEBUG
+                    if (item->meshDrawable->entity != game::null_entity &&
+                        dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
+                        std::cerr << "Drawing debug entity (non-texture)..." << std::endl;
+#endif
+
                     aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
 

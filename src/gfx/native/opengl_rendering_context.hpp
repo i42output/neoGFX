@@ -95,7 +95,6 @@ namespace neogfx
             game::mesh_renderer const* renderer;
             mat44 transformation;
             game::entity_id entity;
-            bool drawn;
             mesh_drawable(
                 game::mesh_filter const& filter, 
                 game::mesh_renderer const& renderer,
@@ -105,8 +104,7 @@ namespace neogfx
                 filter{ &filter },
                 renderer{ &renderer },
                 transformation{ transformation },
-                entity{ entity },
-                drawn{ false }
+                entity{ entity }
             {}
         };
         struct patch_drawable

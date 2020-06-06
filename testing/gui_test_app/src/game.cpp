@@ -10,6 +10,7 @@
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/game/chrono.hpp>
+#include <neogfx/game/clock.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/canvas.hpp>
@@ -357,7 +358,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                                 spaceshipPhysics.angle + ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }
                             },
                             ng::game::box_collider_2d{ 0x1ull });
-                        ecs.component<ng::game::mesh_renderer>().entity_record(missile).destroyOnFustrumCull = true;
+                        ecs.component<ng::game::entity_info>().entity_record(missile).lifeSpan = ng::game::to_step_time(ecs, 10.0);
                     };
                     for (double angle = -30.0; angle <= 30.0; angle += 10.0)
                         make_missile(angle);
