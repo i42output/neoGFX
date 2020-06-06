@@ -843,7 +843,7 @@ namespace neogfx
         vec3_array<6> triangles;
         quads_to_triangles(quad, triangles);
 
-        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -885,7 +885,7 @@ namespace neogfx
         vec3_array<4 * 6> triangles;
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -923,7 +923,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -957,7 +957,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -991,7 +991,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
@@ -1022,7 +1022,7 @@ namespace neogfx
                 auto vertices = path_vertices(aPath, subPath, aPen.width(), mode);
 
                 {
-                    use_vertex_arrays vertexArrays{ nullptr, *this, mode, vertices.size() };
+                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, mode, vertices.size() };
                     for (auto const& v : vertices)
                         vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                             vec4f{{
@@ -1053,7 +1053,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
         for (auto const& v : triangles)
             vertexArrays.push_back({ v + aPosition, std::holds_alternative<color>(aPen.color()) ?
@@ -1116,7 +1116,7 @@ namespace neogfx
             }
         }
         if (!drawables[aLayer].empty())
-            draw_meshes(&aEcs, &*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
+            draw_meshes(dynamic_cast<i_vertex_provider&>(aEcs), &*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
         for (auto const& d : drawables[aLayer])
             if (!d.drawn && d.renderer->destroyOnFustrumCull)
                 aEcs.async_destroy_entity(d.entity);
@@ -1149,7 +1149,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
         
         {
-            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
 
             for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
             {
@@ -1183,7 +1183,7 @@ namespace neogfx
         auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::TriangleFan);
         
         {
-            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
 
             for (auto const& v : vertices)
             {
@@ -1211,7 +1211,7 @@ namespace neogfx
         auto vertices = circle_vertices(aCentre, aRadius, 0.0, mesh_type::TriangleFan);
 
         {
-            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
 
             for (auto const& v : vertices)
             {
@@ -1239,7 +1239,7 @@ namespace neogfx
         auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::TriangleFan);
 
         {
-            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
 
             for (auto const& v : vertices)
             {
@@ -1272,7 +1272,7 @@ namespace neogfx
                 auto vertices = path_vertices(aPath, subPath, 0.0, mode);
 
                 {
-                    use_vertex_arrays vertexArrays{ nullptr, *this, mode, vertices.size() };
+                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, mode, vertices.size() };
 
                     for (auto const& v : vertices)
                     {
@@ -1316,7 +1316,7 @@ namespace neogfx
         }
 
         {
-            use_vertex_arrays vertexArrays{ nullptr, *this, GL_TRIANGLES };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES };
 
             for (auto op = aFillShapeOps.first; op != aFillShapeOps.second; ++op)
             {
@@ -1370,7 +1370,7 @@ namespace neogfx
             for (std::size_t i = 0; i < meshFilters.size(); ++i)
                 drawables.emplace_back(meshFilters[i], meshRenderers[i]);
             if (!drawables.empty())
-                draw_meshes(nullptr, &*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
+                draw_meshes(as_vertex_provider(), &*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
             meshFilters.clear();
             meshRenderers.clear();
             drawables.clear();
@@ -1598,18 +1598,15 @@ namespace neogfx
             aMeshFilter,
             aMeshRenderer
         };
-        draw_meshes(nullptr, &drawable, &drawable + 1, aTransformation);
+        draw_meshes(as_vertex_provider(), &drawable, &drawable + 1, aTransformation);
     }
 
-    void opengl_rendering_context::draw_meshes(void const* aConsumer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
+    void opengl_rendering_context::draw_meshes(i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
         auto const logicalCoordinates = logical_coordinates();
 
-        // temporary workaround until implementation complete
-        aConsumer = nullptr;
-
         thread_local patch_drawable patch = {};
-        patch.consumer = aConsumer;
+        patch.provider = &aVertexProvider;
         patch.items.clear();
 
         std::size_t vertexCount = 0;
@@ -1625,11 +1622,11 @@ namespace neogfx
                 vertexCount += meshPatch.faces.size();
         }
 
-        auto& vertexArrays = service<i_rendering_engine>().vertex_arrays(aConsumer);
-        auto& vertices = vertexArrays.vertices();
+        auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
+        auto& vertices = vertexBuffer.vertices();
         if (vertices.capacity() - vertices.size() < vertexCount)
         {
-            vertexArrays.execute();
+            vertexBuffer.execute();
             vertices.clear();
         }
 
@@ -1701,7 +1698,8 @@ namespace neogfx
 
         auto const logicalCoordinates = logical_coordinates();
 
-        auto& vertices = service<i_rendering_engine>().vertex_arrays(aPatch.consumer).vertices();
+        auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(*aPatch.provider));
+        auto& vertices = vertexBuffer.vertices();
 
         for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
@@ -1771,7 +1769,7 @@ namespace neogfx
                         enable_sample_shading(1.0);
 
                     if (aVertexArrayUsage == std::nullopt || !aVertexArrayUsage->with_textures())
-                        aVertexArrayUsage.emplace(aPatch.consumer, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
+                        aVertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
                     aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
                 else
@@ -1779,10 +1777,9 @@ namespace neogfx
                     rendering_engine().default_shader_program().texture_shader().clear_texture();
 
                     if (aVertexArrayUsage == std::nullopt || aVertexArrayUsage->with_textures())
-                        aVertexArrayUsage.emplace(aPatch.consumer, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
+                        aVertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
                     aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
-
 
                 item = next;
             }

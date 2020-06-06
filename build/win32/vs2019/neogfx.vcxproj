@@ -386,6 +386,8 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_buffer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_provider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
@@ -407,6 +409,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_buffer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\color_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />

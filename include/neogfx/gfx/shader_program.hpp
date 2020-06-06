@@ -53,6 +53,7 @@ namespace neogfx
         ~shader_program();
     public:
         const i_string& name() const override;
+        bool supports(vertex_buffer_type aBufferType) const override;
         bool created() const override;
         void* handle() const override;
         const stages_t& stages() const override;

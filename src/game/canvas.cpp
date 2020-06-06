@@ -105,8 +105,6 @@ namespace neogfx::game
 
     canvas::~canvas()
     {
-        if (have_ecs())
-            service<i_rendering_engine>().deallocate_vertex_arrays(&ecs());
     }
 
     bool canvas::have_ecs() const
@@ -130,13 +128,10 @@ namespace neogfx::game
     {
         if (iEcs == aEcs)
             return;
-        if (have_ecs())
-            service<i_rendering_engine>().deallocate_vertex_arrays(&ecs());
         iSink.clear();
         iEcs = aEcs;
         if (have_ecs())
         {
-            service<i_rendering_engine>().allocate_vertex_arrays(&ecs());
             iEcsPaused = ecs().all_systems_paused();
             iSink += !ecs().system<animator>().Animate([this](step_time)
             {

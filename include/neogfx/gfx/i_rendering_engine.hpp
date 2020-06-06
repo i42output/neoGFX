@@ -27,6 +27,7 @@
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_standard_shader_program.hpp>
+#include <neogfx/gfx/i_vertex_buffer.hpp>
 
 namespace neogfx
 {
@@ -37,9 +38,8 @@ namespace neogfx
     class i_font_manager;
     class i_texture_manager;
     class i_render_target;
-
-
-    class opengl_standard_vertex_arrays; // todo: abstract
+    class i_vertex_buffer;
+    class i_vertex_provider;
 
     enum class renderer
     {
@@ -117,11 +117,11 @@ namespace neogfx
         virtual i_font_manager& font_manager() = 0;
         virtual i_texture_manager& texture_manager() = 0;
     public:
-        virtual void allocate_vertex_arrays(void const* aConsumer) = 0;
-        virtual void deallocate_vertex_arrays(void const* aConsumer) = 0;
-        virtual const opengl_standard_vertex_arrays& vertex_arrays(void const* aConsumer) const = 0;
-        virtual opengl_standard_vertex_arrays& vertex_arrays(void const* aConsumer) = 0;
-        virtual void execute_vertex_arrays() = 0;
+        virtual i_vertex_buffer& allocate_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType = vertex_buffer_type::Default) = 0;
+        virtual void deallocate_vertex_buffer(i_vertex_provider& aProvider) = 0;
+        virtual const i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) const = 0;
+        virtual i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) = 0;
+        virtual void execute_vertex_buffers() = 0;
     public:
         virtual i_texture& ping_pong_buffer1(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
         virtual i_texture& ping_pong_buffer2(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;

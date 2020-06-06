@@ -51,6 +51,16 @@ namespace neogfx
     }
 
     template <typename Base>
+    inline bool shader_program<Base>::supports(vertex_buffer_type aBufferType) const
+    {
+        for (auto& stage : stages().container())
+            for (auto& shader : stage.second().container())
+                if (shader->supports(aBufferType))
+                    return true;
+        return false;
+    }
+
+    template <typename Base>
     inline bool shader_program<Base>::created() const
     {
         return iHandle != std::nullopt;

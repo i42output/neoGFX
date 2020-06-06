@@ -37,6 +37,14 @@ namespace neogfx
     class opengl_rendering_context : public i_rendering_context
     {
     public:
+        class standard_batching : public i_vertex_provider
+        {
+        public:
+            standard_batching()
+            {
+                static auto& sVertexBuffer = service<i_rendering_engine>().allocate_vertex_buffer(*this);
+            }
+        };
         class scoped_anti_alias
         {
         public:
@@ -130,11 +138,11 @@ namespace neogfx
                 else
                     throw no_texture();
             }
-            void const* consumer;
+            i_vertex_provider* provider;
             struct item
             {
                 mesh_drawable* meshDrawable;
-                typedef opengl_standard_vertex_arrays::vertex_array vertices;
+                typedef opengl_vertex_buffer<>::vertex_array vertices;
                 vertices::size_type offsetVertices;
                 game::material const* material;
                 game::faces const* faces;
@@ -225,7 +233,7 @@ namespace neogfx
         void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
-        void draw_meshes(void const* aConsumable, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
+        void draw_meshes(i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_patch(std::optional<use_vertex_arrays>& aVertexArrayUsage, patch_drawable& aPatch, const mat44& aTransformation);
     public:
         neogfx::subpixel_format subpixel_format() const override;
@@ -256,5 +264,11 @@ namespace neogfx
         use_shader_program iUseDefaultShaderProgram;
         optional_vec2 iOffset;
         bool iSnapToPixel;
+    private:
+        static standard_batching& as_vertex_provider()
+        {
+            static standard_batching sProvider;
+            return sProvider;
+        }
     };
 }

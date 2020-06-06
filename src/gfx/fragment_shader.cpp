@@ -355,6 +355,11 @@ namespace neogfx
         uTextureEffect = shader_effect::None;
     }
 
+    bool standard_texture_shader::supports(vertex_buffer_type aBufferType) const
+    {
+        return enabled() && (aBufferType & vertex_buffer_type::UV) != vertex_buffer_type::Invalid;
+    }
+
     void standard_texture_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_texture_shader>::generate_code(aProgram, aLanguage, aOutput);

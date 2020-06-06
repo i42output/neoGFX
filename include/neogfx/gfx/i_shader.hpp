@@ -28,6 +28,7 @@
 #include <neolib/core/i_string.hpp>
 #include <neolib/plugin/plugin_variant.hpp>
 #include <neogfx/core/numerical.hpp>
+#include <neogfx/gfx/i_vertex_buffer.hpp>
 
 namespace neogfx
 {
@@ -434,6 +435,7 @@ namespace neogfx
     public:
         virtual shader_type type() const = 0;
         virtual const i_string& name() const = 0;
+        virtual bool supports(vertex_buffer_type aBufferType) const = 0;
         virtual void* handle(const i_shader_program& aProgram) const = 0;
         virtual bool enabled() const = 0;
         virtual bool disabled() const = 0;
@@ -459,6 +461,7 @@ namespace neogfx
         virtual void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) = 0;
         virtual void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const = 0;
         virtual void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const = 0;
+        // helpers
     public:
         void set_uniform(const i_string& aName, const value_type& aValue)
         {

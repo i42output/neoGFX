@@ -58,6 +58,10 @@ namespace neogfx
             add_out_variable<vec4f>("FragColor"_s, 0u).link(fragColor);
         }
     public:
+        bool supports(vertex_buffer_type aBufferType) const override
+        {
+            return (aBufferType & (vertex_buffer_type::Vertices | vertex_buffer_type::Color)) != vertex_buffer_type::Invalid;
+        }
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
             fragment_shader<Base>::generate_code(aProgram, aLanguage, aOutput);
@@ -137,6 +141,8 @@ namespace neogfx
     {
     public:
         standard_texture_shader(const std::string& aName = "standard_texture_shader");
+    public:
+        bool supports(vertex_buffer_type aBufferType) const override;
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:

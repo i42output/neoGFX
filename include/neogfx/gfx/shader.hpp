@@ -98,6 +98,10 @@ namespace neogfx
         {
             return iName;
         }
+        bool supports(vertex_buffer_type aBufferType) const override
+        {
+            return false;
+        }
         void* handle(const i_shader_program& aProgram) const override
         {
             if (!aProgram.is_first_in_stage(*this))

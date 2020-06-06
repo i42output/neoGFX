@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
+#include <neogfx/gfx/i_vertex_buffer.hpp>
 #include "opengl_helpers.hpp"
 
 namespace neogfx
@@ -34,14 +35,14 @@ namespace neogfx
             struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays::invalid_draw_count") {} };
             struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays::cannot_use_barrier") {} };
         public:
-            typedef opengl_standard_vertex_arrays::vertex_array::value_type value_type;
-            typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
-            typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
+            typedef opengl_vertex_buffer<>::vertex_array::value_type value_type;
+            typedef opengl_vertex_buffer<>::vertex_array::const_iterator const_iterator;
+            typedef opengl_vertex_buffer<>::vertex_array::iterator iterator;
         public:
-            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-                iConsumer{ aConsumer },
+            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iProvider{ aProvider },
                 iParent{ aParent }, 
-                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
+                iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
                 iMode{ aMode }, 
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) }, 
@@ -53,11 +54,11 @@ namespace neogfx
                 if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-                iConsumer{ aConsumer },
+            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iProvider{ aProvider },
                 iParent{ aParent },
-                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
-                iMode{ aMode }, 
+                iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
+                iMode{ aMode },
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
                 iUseBarrier{ aUseBarrier }
@@ -68,11 +69,11 @@ namespace neogfx
                 if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-                iConsumer{ aConsumer },
+            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iProvider{ aProvider },
                 iParent{ aParent },
-                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
-                iMode{ aMode }, 
+                iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
+                iMode{ aMode },
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
                 iUseBarrier{ aUseBarrier }
@@ -83,11 +84,11 @@ namespace neogfx
                 if (!room_for(aNeed) && !grow_to(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(void const* aConsumer, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-                iConsumer{ aConsumer },
+            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+                iProvider{ aProvider },
                 iParent{ aParent },
-                iUse{ aParent.rendering_engine().vertex_arrays(aConsumer) },
-                iMode{ aMode }, 
+                iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
+                iMode{ aMode },
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(iUse.vertices().size()) },
                 iUseBarrier{ aUseBarrier }
@@ -241,10 +242,7 @@ namespace neogfx
                     throw invalid_draw_count();
                 if (static_cast<std::size_t>(iStart) == vertices().size())
                     return;
-                if (!iWithTextures)
-                    iParent.rendering_engine().vertex_arrays(iConsumer).instantiate(iParent, iParent.rendering_engine().active_shader_program());
-                else
-                    iParent.rendering_engine().vertex_arrays(iConsumer).instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
+                iParent.rendering_engine().vertex_buffer(iProvider).attach_shader(iParent, iParent.rendering_engine().active_shader_program());
                 if (!iUseBarrier && mode() == translated_mode())
                 {
                     glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
@@ -284,11 +282,11 @@ namespace neogfx
             {
                 iUse.set_transformation(aTransformation);
             }
-            const opengl_standard_vertex_arrays::vertex_array& vertices() const
+            const opengl_vertex_buffer<>::vertex_array& vertices() const
             {
                 return iUse.vertices();
             }
-            opengl_standard_vertex_arrays::vertex_array& vertices()
+            opengl_vertex_buffer<>::vertex_array& vertices()
             {
                 return iUse.vertices();
             }
@@ -307,9 +305,9 @@ namespace neogfx
                 return iMode;
             }
         private:
-            void const* iConsumer;
+            i_vertex_provider& iProvider;
             i_rendering_context& iParent;
-            opengl_standard_vertex_arrays::use iUse;
+            opengl_vertex_buffer<>::use iUse;
             GLenum iMode;
             bool iWithTextures;
             GLint iStart;

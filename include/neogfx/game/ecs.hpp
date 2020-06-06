@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/ecs/ecs.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/i_vertex_provider.hpp>
 
 namespace neogfx
 {
@@ -28,6 +30,18 @@ namespace neogfx
 
     namespace game
     {
-        using namespace neolib::ecs;
+        class ecs : public neolib::ecs::ecs, public i_vertex_provider
+        {
+            typedef neolib::ecs::ecs base_type;
+        public:
+            ecs(ecs_flags aCreationFlags = ecs_flags::Default) : base_type{ aCreationFlags }
+            {
+                service<i_rendering_engine>().allocate_vertex_buffer(*this, vertex_buffer_type::DefaultECS);
+            }
+            ~ecs()
+            {
+                service<i_rendering_engine>().deallocate_vertex_buffer(*this);
+            }
+        };
     }
 }
