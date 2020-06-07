@@ -168,7 +168,7 @@ namespace neogfx
                 {
                     if ((**buffer).map() == aPointer)
                     {
-                        if (buffer != std::prev(buffers.end()))
+                        if (buffer != std::prev(buffers().end()))
                         {
                             buffers().back()->set_owner((**buffer).owner());
                             buffers().back()->owner().update(*buffers().back());
