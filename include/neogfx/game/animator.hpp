@@ -31,8 +31,6 @@ namespace neogfx::game
     {
     public:
         define_event(Animate, animate, step_time)
-    private:
-        class thread;
     public:
         animator(i_ecs& aEcs);
         ~animator();
@@ -41,7 +39,6 @@ namespace neogfx::game
         const i_string& name() const override;
     public:
         bool apply() override;
-        void terminate() override;
     public:
         void update_animations();
     public:
@@ -58,7 +55,5 @@ namespace neogfx::game
                 return sName;
             }
         };
-    private:
-        std::unique_ptr<thread> iThread;
     };
 }

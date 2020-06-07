@@ -187,7 +187,7 @@ namespace neogfx::game
         widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && EntityClicked.has_subscribers())
         {
-            ecs().system<collision_detector>().run_cycle(false);
+            ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
             auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
             if (hit)
                 EntityClicked.trigger(*hit);
@@ -199,7 +199,7 @@ namespace neogfx::game
         widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && (EntityClicked.has_subscribers() || EntityDoubleClicked.has_subscribers()))
         {
-            ecs().system<collision_detector>().run_cycle(false);
+            ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
             auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
             if (hit)
             {

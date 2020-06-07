@@ -27,32 +27,14 @@
 
 namespace neogfx::game
 {
-    class collision_detector::thread : public async_thread
-    {
-    public:
-        thread(collision_detector& aOwner) : async_thread{ "neogfx::collision_detector::thread" }, iOwner{ aOwner }
-        {
-            start();
-        }
-    public:
-        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
-        {
-            bool didWork = async_thread::do_work(aYieldType);
-            didWork = iOwner.apply() || didWork;
-            iOwner.yield();
-            return didWork;
-        }
-    private:
-        collision_detector& iOwner;
-    };
-
     collision_detector::collision_detector(i_ecs& aEcs) :
         system<entity_info, box_collider, box_collider_2d>{ aEcs },
         iBroadphaseTree{ aEcs },
-        iBroadphase2dTree{ aEcs }
+        iBroadphase2dTree{ aEcs },
+        iCollidersUpdated{ false }
     {
         Collision.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-        iThread = std::make_unique<thread>(*this);
+        start_thread_if();
     }
 
     collision_detector::~collision_detector()
@@ -96,33 +78,28 @@ namespace neogfx::game
 
     bool collision_detector::apply()
     {
-        if (ecs().system_registered<simple_physics>())
-            return false;
-        else if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
-            return false;
-        else if (paused())
-            return false;
-        else if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
+        if (!can_apply())
+            throw cannot_apply();
+        if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
             return false;
         
         start_update();
-        run_cycle();
+        run_cycle(collision_detection_cycle::Detect);
         end_update();
 
         return true;
     }
 
-    void collision_detector::terminate()
+    void collision_detector::run_cycle(collision_detection_cycle aCycle)
     {
-        if (!iThread->aborted())
-            iThread->abort();
-    }
-
-    void collision_detector::run_cycle(bool aDetect)
-    {
-        update_colliders();
-        update_trees();
-        if (aDetect)
+        if ((aCycle & collision_detection_cycle::UpdateColliders) == collision_detection_cycle::UpdateColliders ||
+            ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions && !ecs().system_instantiated<simple_physics>()))
+            update_colliders();
+        if (!iCollidersUpdated)
+            return;
+        if ((aCycle & collision_detection_cycle::UpdateTrees) == collision_detection_cycle::UpdateTrees)
+            update_trees();
+        if ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions)
             detect_collisions();
     }
 
@@ -183,6 +160,8 @@ namespace neogfx::game
                     collider.previousAabb = collider.currentAabb;
             }
         }
+
+        iCollidersUpdated = true;
     }
 
     void collision_detector::update_trees()
@@ -220,6 +199,8 @@ namespace neogfx::game
                 Collision.trigger(e1, e2);
             });
         }
+
+        iCollidersUpdated = false;
     }
 
     const aabb_octree<box_collider>& collision_detector::broadphase_tree() const

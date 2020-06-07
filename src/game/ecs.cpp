@@ -1,4 +1,4 @@
-// ecs.hpp
+// ecs.cpp
 /*
   neolib C++ App/Game Engine
   Copyright (c)  2020 Leigh Johnston.  All Rights Reserved.
@@ -20,21 +20,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/i_vertex_provider.hpp>
-#include <neolib/ecs/ecs.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/game/ecs.hpp>
+#include <neogfx/game/simple_physics.hpp>
+#include <neogfx/game/collision_detector.hpp>
+#include <neogfx/game/animator.hpp>
+#include <neogfx/game/time.hpp>
 
 namespace neogfx
 {
-    using namespace neolib::ecs;
-
     namespace game
     {
-        class ecs : public neolib::ecs::ecs, public i_vertex_provider
+        ecs::ecs(ecs_flags aCreationFlags) : base_type{ aCreationFlags }
         {
-            typedef neolib::ecs::ecs base_type;
-        public:
-            ecs(ecs_flags aCreationFlags = ecs_flags::Default);
-            ~ecs();
-        };
+            service<i_rendering_engine>().allocate_vertex_buffer(*this, vertex_buffer_type::DefaultECS);
+        }
+
+        ecs::~ecs()
+        {
+            service<i_rendering_engine>().deallocate_vertex_buffer(*this);
+        }
     }
 }

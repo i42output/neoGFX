@@ -29,8 +29,6 @@ namespace neogfx::game
 {
     class simple_physics : public game::system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>
     {
-    private:
-        class thread;
     public:
         simple_physics(i_ecs& aEcs);
         ~simple_physics();
@@ -39,7 +37,6 @@ namespace neogfx::game
         const i_string& name() const override;
     public:
         bool apply() override;
-        void terminate() override;
     public:
         bool universal_gravitation_enabled() const;
         void enable_universal_gravitation();
@@ -61,7 +58,6 @@ namespace neogfx::game
             }
         };
     private:
-        std::unique_ptr<thread> iThread;
         std::chrono::duration<double, std::milli> iYieldTime = std::chrono::duration<double, std::milli>{ 1.0 };
     };
 }

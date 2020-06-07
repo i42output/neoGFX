@@ -31,26 +31,6 @@
 
 namespace neogfx::game
 {
-    class simple_physics::thread : public async_thread
-    {
-    public:
-        thread(simple_physics& aOwner) : async_thread{ "neogfx::simple_physics::thread" }, iOwner{ aOwner }
-        {
-            start();
-        }
-    public:
-        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
-        {
-            bool didWork = async_thread::do_work(aYieldType);
-            didWork = iOwner.apply() || didWork;
-            iOwner.yield();
-            return didWork;
-        }
-    private:
-        simple_physics& iOwner;
-    };
-
-
     simple_physics::simple_physics(i_ecs& aEcs) :
         system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>{ aEcs }
     {
@@ -59,7 +39,7 @@ namespace neogfx::game
             ecs().register_shared_component<physics>();
         if (ecs().shared_component<physics>().component_data().empty())
             ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11 });
-        iThread = std::make_unique<thread>(*this);
+        start_thread_if();
     }
 
     simple_physics::~simple_physics()
@@ -78,11 +58,9 @@ namespace neogfx::game
 
     bool simple_physics::apply()
     {
+        if (!can_apply())
+            throw cannot_apply();
         if (!ecs().component_instantiated<rigid_body>())
-            return false;
-        if (paused())
-            return false;
-        if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
         start_update();
@@ -152,9 +130,7 @@ namespace neogfx::game
             }
             end_update(2);
             if (ecs().system_instantiated<collision_detector>())
-                ecs().system<collision_detector>().run_cycle();
-            if (ecs().system_instantiated<animator>())
-                ecs().system<animator>().update_animations();
+                ecs().system<collision_detector>().run_cycle(collision_detection_cycle::UpdateColliders);
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time = nextTime;
@@ -168,12 +144,6 @@ namespace neogfx::game
         end_update();
 
         return didWork;
-    }
-
-    void simple_physics::terminate()
-    {
-        if (!iThread->aborted())
-            iThread->abort();
     }
 
     bool simple_physics::universal_gravitation_enabled() const

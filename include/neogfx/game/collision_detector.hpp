@@ -27,12 +27,33 @@
 
 namespace neogfx::game
 {
+    enum class collision_detection_cycle : uint32_t
+    {
+        None                = 0x00000000,
+
+        UpdateColliders     = 0x00000001,
+        UpdateTrees         = 0x00000002,
+        DetectCollisions    = 0x00000004,
+
+        Default             = UpdateColliders | UpdateTrees | DetectCollisions,
+        Detect              = UpdateTrees | DetectCollisions,
+        Test                = UpdateColliders | UpdateTrees
+    };
+
+    inline constexpr collision_detection_cycle operator|(collision_detection_cycle aLhs, collision_detection_cycle aRhs)
+    {
+        return static_cast<collision_detection_cycle>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr collision_detection_cycle operator&(collision_detection_cycle aLhs, collision_detection_cycle aRhs)
+    {
+        return static_cast<collision_detection_cycle>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
     class collision_detector : public game::system<entity_info, box_collider, box_collider_2d>
     {
     public:
         define_event(Collision, collision, entity_id, entity_id)
-    private:
-        class thread;
     public:
         collision_detector(i_ecs& aEcs);
         ~collision_detector();
@@ -43,9 +64,8 @@ namespace neogfx::game
         std::optional<entity_id> entity_at(const vec3& aPoint) const;
     public:
         bool apply() override;
-        void terminate() override;
     public:
-        void run_cycle(bool aDetect = true);
+        void run_cycle(collision_detection_cycle aCycle = collision_detection_cycle::Default);
         template <typename Visitor>
         void visit_aabbs(const Visitor& aVisitor) const
         {
@@ -78,8 +98,8 @@ namespace neogfx::game
             }
         };
     private:
-        std::unique_ptr<thread> iThread;
         aabb_octree<box_collider> iBroadphaseTree;
         aabb_quadtree<box_collider_2d> iBroadphase2dTree;
+        std::atomic<bool> iCollidersUpdated;
     };
 }

@@ -1198,8 +1198,8 @@ int main(int argc, char* argv[])
             {
                 if (!ecs)
                 {
-                    ecs.emplace(ng::game::ecs_flags::Default);
-                    ecs->component<ng::game::animation_filter>(); // we want animator thread to run
+                    ecs.emplace(ng::game::ecs_flags::Default | ng::game::ecs_flags::NoThreads);
+                    ecs->system<ng::game::animator>().start_thread();
                     sink += ~~~~ecs->system<ng::game::animator>().Animate(update_ecs_entities);
                     ui.canvasInstancing.set_ecs(*ecs);
                 }

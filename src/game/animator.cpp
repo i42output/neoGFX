@@ -31,31 +31,11 @@
 
 namespace neogfx::game
 {
-    class animator::thread : public async_thread
-    {
-    public:
-        thread(animator& aOwner) : async_thread{ "neogfx::game::animator::thread" }, iOwner{ aOwner }
-        {
-            start();
-        }
-    public:
-        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override
-        {
-            bool didWork = async_thread::do_work(aYieldType);
-            didWork = iOwner.apply() || didWork;
-            iOwner.yield();
-            return didWork;
-        }
-    private:
-        animator& iOwner;
-    };
-
     animator::animator(game::i_ecs& aEcs) :
         system<entity_info, animation_filter>{ aEcs }
     {
         Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-        ecs().system<game::time>();
-        iThread = std::make_unique<thread>(*this);
+        start_thread_if();
     }
 
     animator::~animator()
@@ -74,24 +54,14 @@ namespace neogfx::game
 
     bool animator::apply()
     {
-        if (ecs().system_registered<simple_physics>())
-            return false;
+        if (!can_apply())
+            throw cannot_apply();
         if (!ecs().component_instantiated<animation_filter>())
-            return false;
-        else if (paused())
-            return false;
-        else if (!iThread->in()) // ignore ECS apply request (we have our own thread that does this)
             return false;
 
         update_animations();
 
         return true;
-    }
-
-    void animator::terminate()
-    {
-        if (!iThread->aborted())
-            iThread->abort();
     }
 
     void animator::update_animations()

@@ -47,6 +47,9 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 
     auto& ecs = canvas.ecs();
 
+    // Instantiate physics...
+    ecs.system<ng::game::simple_physics>();
+
     struct game_state
     {
         neolib::basic_random<ng::scalar> prng;
@@ -287,9 +290,6 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         }
     });
     
-    // Instantiate physics...
-    ecs.system<ng::game::simple_physics>();
-
     ~~~~ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship, make_asteroid](ng::game::step_time aPhysicsStepTime)
     {
         while (gameState->asteroidsDestroyed && ecs.component<ng::game::animation_filter>().entities().empty())
