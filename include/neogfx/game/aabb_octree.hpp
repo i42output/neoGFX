@@ -114,21 +114,21 @@ namespace neogfx::game
                 iTree.iDepth = std::max(iTree.iDepth, iDepth);
                 if (is_split())
                 {
-                    if (aabb_intersects(iOctants[0][0][0], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[0][0][0], aCollider.currentAabb))
                         child<0, 0, 0>().add_entity(aEntity, aCollider);
-                    if (aabb_intersects(iOctants[0][1][0], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[0][1][0], aCollider.currentAabb))
                         child<0, 1, 0>().add_entity(aEntity, aCollider);
-                    if (aabb_intersects(iOctants[1][0][0], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[1][0][0], aCollider.currentAabb))
                         child<1, 0, 0>().add_entity(aEntity, aCollider);
-                    if (aabb_intersects(iOctants[1][1][0], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[1][1][0], aCollider.currentAabb))
                         child<1, 1, 0>().add_entity(aEntity, aCollider);
-                    if (aabb_intersects(iOctants[0][0][1], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[0][0][1], aCollider.currentAabb))
                         child<0, 0, 1>().add_entity(aEntity, aCollider);
-                    if (aabb_intersects(iOctants[0][1][1], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[0][1][1], aCollider.currentAabb))
                         child<0, 1, 1>().add_entity(aEntity, aCollider);
-                    if (aabb_intersects(iOctants[1][0][1], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[1][0][1], aCollider.currentAabb))
                         child<1, 0, 1>().add_entity(aEntity, aCollider);
-                    if (aabb_intersects(iOctants[1][1][1], *aCollider.currentAabb))
+                    if (aabb_intersects(iOctants[1][1][1], aCollider.currentAabb))
                         child<1, 1, 1>().add_entity(aEntity, aCollider);
                 }
                 else
@@ -140,11 +140,12 @@ namespace neogfx::game
             }
             void remove_entity(entity_id aEntity, const collider_type& aCollider)
             {
-                remove_entity(aEntity, aCollider, aabb_union(*aCollider.previousAabb, *aCollider.currentAabb));
+                if (aCollider.previousAabb && aCollider.currentAabb)
+                    remove_entity(aEntity, aCollider, aabb_union(*aCollider.previousAabb, *aCollider.currentAabb));
             }
             void remove_entity(entity_id aEntity, const collider_type& aCollider, const aabb_2d& aAabb)
             {
-                if (!aabb_intersects(*aCollider.currentAabb, iAabb))
+                if (!aabb_intersects(aCollider.currentAabb, iAabb))
                 {
                     auto existing = std::find(iEntities.begin(), iEntities.end(), aEntity);
                     if (existing != iEntities.end())
@@ -172,8 +173,8 @@ namespace neogfx::game
             void update_entity(entity_id aEntity, const collider_type& aCollider)
             {
                 iTree.iDepth = std::max(iTree.iDepth, iDepth);
-                auto const& currentAabb = *aCollider.currentAabb;
-                auto const& previousAabb = *aCollider.previousAabb;
+                auto const& currentAabb = aCollider.currentAabb;
+                auto const& previousAabb = aCollider.previousAabb;
                 if (currentAabb == previousAabb)
                     return;
                 if (aabb_intersects(currentAabb, iAabb))
@@ -209,7 +210,8 @@ namespace neogfx::game
             template <typename Visitor>
             void visit(const collider_type& aCandidate, const Visitor& aVisitor) const
             {
-                visit(*aCandidate.currentAabb, aVisitor);
+                if (aCandidate.currentAabb)
+                    visit(*aCandidate.currentAabb, aVisitor);
             }
             template <typename Visitor>
             void visit(const vec3& aPoint, const Visitor& aVisitor) const
@@ -225,7 +227,7 @@ namespace neogfx::game
             void visit(const neogfx::aabb& aAabb, const Visitor& aVisitor) const
             {
                 for (auto e : entities())
-                    if (aabb_intersects(aAabb, *iTree.iEcs.component<collider_type>().entity_record(e).currentAabb))
+                    if (aabb_intersects(aAabb, iTree.iEcs.component<collider_type>().entity_record(e).currentAabb))
                         aVisitor(e);
                 if (has_child<0, 0, 0>() && aabb_intersects(iOctants[0][0][0], aAabb))
                     child<0, 0, 0>().visit(aAabb, aVisitor);
@@ -248,7 +250,8 @@ namespace neogfx::game
             void visit(const neogfx::aabb_2d& aAabb, const Visitor& aVisitor) const
             {
                 for (auto e : entities())
-                    if (aabb_intersects(aAabb, aabb_2d{ *iTree.iEcs.component<collider_type>().entity_record(e).currentAabb }))
+                    if (iTree.iEcs.component<collider_type>().entity_record(e).currentAabb &&
+                        aabb_intersects(aAabb, aabb_2d{ *iTree.iEcs.component<collider_type>().entity_record(e).currentAabb }))
                         aVisitor(e);
                 if (has_child<0, 0, 0>() && aabb_intersects(iOctants2d[0][0][0], aAabb))
                     child<0, 0, 0>().visit(aAabb, aVisitor);
@@ -374,21 +377,21 @@ namespace neogfx::game
                 for (auto e : entities())
                 {
                     auto const& collider = iTree.iEcs.component<collider_type>().entity_record(e);
-                    if (aabb_intersects(iOctants[0][0][0], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[0][0][0], collider.currentAabb))
                         child<0, 0, 0>().add_entity(e, collider);
-                    if (aabb_intersects(iOctants[0][0][1], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[0][0][1], collider.currentAabb))
                         child<0, 0, 1>().add_entity(e, collider);
-                    if (aabb_intersects(iOctants[0][1][0], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[0][1][0], collider.currentAabb))
                         child<0, 1, 0>().add_entity(e, collider);
-                    if (aabb_intersects(iOctants[0][1][1], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[0][1][1], collider.currentAabb))
                         child<0, 1, 1>().add_entity(e, collider);
-                    if (aabb_intersects(iOctants[1][0][0], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[1][0][0], collider.currentAabb))
                         child<1, 0, 0>().add_entity(e, collider);
-                    if (aabb_intersects(iOctants[1][0][1], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[1][0][1], collider.currentAabb))
                         child<1, 0, 1>().add_entity(e, collider);
-                    if (aabb_intersects(iOctants[1][1][0], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[1][1][0], collider.currentAabb))
                         child<1, 1, 0>().add_entity(e, collider);
-                    if (aabb_intersects(iOctants[1][1][1], *collider.currentAabb))
+                    if (aabb_intersects(iOctants[1][1][1], collider.currentAabb))
                         child<1, 1, 1>().add_entity(e, collider);
                 }
                 iEntities.clear();
