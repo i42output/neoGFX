@@ -584,8 +584,6 @@ namespace neogfx
     widget_part surface_window_proxy::native_window_hit_test(const point& aPosition) const
     {
         const i_widget& w = widget_for_mouse_event(aPosition, true);
-        if (w.effectively_disabled())
-            return widget_part::NowhereError;
         return w.hit_test(aPosition - w.origin());
     }
 

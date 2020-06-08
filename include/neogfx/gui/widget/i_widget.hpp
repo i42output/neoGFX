@@ -176,7 +176,7 @@ namespace neogfx
         virtual bool disabled() const = 0;
         virtual bool effectively_disabled() const = 0;
         virtual bool enable(bool aEnable) = 0;
-        virtual bool entered() const = 0;
+        virtual bool entered(bool aChildEntered = false) const = 0;
         virtual bool can_capture() const = 0;
         virtual bool capturing() const = 0;
         virtual const optional_point& capture_position() const = 0;

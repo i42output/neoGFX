@@ -214,7 +214,7 @@ namespace neogfx
         bool disabled() const override;
         bool effectively_disabled() const override;
         bool enable(bool aEnable) override;
-        bool entered() const override;
+        bool entered(bool aChildEntered = false) const override;
         bool can_capture() const override;
         bool capturing() const override;
         const optional_point& capture_position() const override;

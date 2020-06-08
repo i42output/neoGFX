@@ -1334,9 +1334,9 @@ namespace neogfx
         return false;
     }
 
-    bool widget::entered() const
+    bool widget::entered(bool aChildEntered) const
     {
-        return has_root() && root().has_entered_widget() && &root().entered_widget() == this;
+        return has_root() && root().has_entered_widget() && (&root().entered_widget() == this || (aChildEntered && root().entered_widget().is_descendent_of(*this)));
     }
 
     bool widget::can_capture() const
