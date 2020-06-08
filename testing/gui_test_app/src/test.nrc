@@ -926,6 +926,10 @@
                                     step: 0.1
                                     value: 1.0
                                 }
+                                check_box: {
+                                    id: checkCollisions
+                                    text: "Collision Detection"
+                                }
                             }
                         }
                     }

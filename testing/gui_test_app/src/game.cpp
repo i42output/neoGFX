@@ -34,7 +34,8 @@ namespace archetypes
     ng::game::sprite_archetype const spaceship{ "Spaceship" };
     ng::game::sprite_archetype const asteroid{ "Asteroid" };
     ng::game::sprite_archetype const missile{ "Missile" };
-    ng::game::animation_archetype const explosion{ "Explosion" };
+    ng::game::animated_sprite_archetype const explosion{ "Explosion" };
+    ng::game::animated_sprite_archetype const missileExplosion{ "MissileExplosion" };
 }
 
 ng::game::i_ecs& create_game(ng::i_layout& aLayout)
@@ -54,7 +55,6 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     {
         neolib::basic_random<ng::scalar> prng;
         uint32_t score = 0u;
-        std::atomic<uint32_t> asteroidsDestroyed = 0u;
         bool autoFire = false;
         bool showAabbGrid = false;
         bool showMetrics = false;
@@ -118,7 +118,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         ng::game::box_collider_2d{ 0x1ull });
 
     // Asteroids...
-    auto make_asteroid_mesh = [&ecs, gameState](ng::scalar w)
+    auto make_asteroid_mesh = [gameState](ng::scalar w)
     {
         ng::game::mesh asteroidMesh;
         asteroidMesh.vertices.push_back(ng::vec3{ 0.0, 0.0, 0.0 });
@@ -141,7 +141,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         } while (ng::aabb_intersects(
             ng::to_aabb(position, size),
             ng::to_aabb(ecs.component<ng::game::rigid_body>().entity_record(spaceship).position, 36.0 * 3.0)));
-        auto asteroid = ecs.create_entity(
+        ecs.async_create_entity(
             archetypes::asteroid,
             ng::game::mesh_renderer
             {
@@ -164,13 +164,24 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 
     auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
 
-    auto make_explosion = [&ecs, explosionAnimation](const ng::aabb_2d& target)
+    auto make_explosion = [&ecs, explosionAnimation](const ng::aabb_2d& target, const ng::vec3& velocity = {}, const ng::optional_color& color = {})
     {
-        auto explosion = ecs.create_entity(archetypes::explosion, explosionAnimation.material, explosionAnimation.filter);
-        auto& explosionFilter = ecs.component<ng::game::animation_filter>().entity_record(explosion);
-        explosionFilter.transformation = ng::mat44::identity();
-        explosionFilter.autoDestroy = true;
-        ng::apply_translation(ng::apply_scaling(*explosionFilter.transformation, ng::aabb_extents(target)), ng::aabb_origin(target));
+        auto material = explosionAnimation.material;
+        if (color)
+        {
+            material.color = ng::game::color{ color->to_vec4() };
+            material.shaderEffect = ng::shader_effect::Colorize;
+        }
+        auto filter = explosionAnimation.filter;
+        filter.transformation = ng::mat44::identity();
+        filter.autoDestroy = true;
+        ng::apply_scaling(*filter.transformation, ng::aabb_extents(target).max(ng::vec2{ 16.0, 16.0 }));
+        ecs.async_create_entity(
+            color ? archetypes::missileExplosion : archetypes::explosion,
+            material,  
+            filter,
+            ng::game::rigid_body{ ng::aabb_origin(target), 1.0, velocity },
+            ng::game::box_collider_2d{ color ? 0x1ull : 0x2ull });
     };
 
     if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
@@ -238,7 +249,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         }
     });
 
-    ~~~~ecs.system<ng::game::collision_detector>().Collision([&ecs, gameState, make_explosion, spaceship](ng::game::entity_id e1, ng::game::entity_id e2)
+    ~~~~ecs.system<ng::game::collision_detector>().Collision([&ecs, gameState, make_explosion, make_asteroid, spaceship](ng::game::entity_id e1, ng::game::entity_id e2)
     {
         auto id1 = ecs.component<ng::game::entity_info>().entity_record(e1).archetypeId;
         auto id2 = ecs.component<ng::game::entity_info>().entity_record(e2).archetypeId;
@@ -247,57 +258,71 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
             if (id2 == archetypes::asteroid.id())
             {
                 make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e2).currentAabb);
-                ++gameState->asteroidsDestroyed;
+                make_asteroid();
                 gameState->score += 250;
+                ecs.async_destroy_entity(e1, false);
+                ecs.async_destroy_entity(e2, false);
             }
-            ecs.async_destroy_entity(e1, false);
-            ecs.async_destroy_entity(e2, false);
+            /*else if (id2 == archetypes::explosion.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e1).currentAabb, ecs.component<ng::game::rigid_body>().entity_record(e1).velocity, ng::color::Orange);
+                gameState->score += 10;
+                ecs.async_destroy_entity(e1, false);
+            }*/
         }
         else if (id2 == archetypes::missile.id())
         {
             if (id1 == archetypes::asteroid.id())
             {
                 make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e1).currentAabb);
-                ++gameState->asteroidsDestroyed;
+                make_asteroid();
                 gameState->score += 250;
+                ecs.async_destroy_entity(e1, false);
+                ecs.async_destroy_entity(e2, false);
             }
-            ecs.async_destroy_entity(e1, false);
-            ecs.async_destroy_entity(e2, false);
+            /*else if (id1 == archetypes::explosion.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e2).currentAabb, ecs.component<ng::game::rigid_body>().entity_record(e2).velocity, ng::color::Orange);
+                gameState->score += 10;
+                ecs.async_destroy_entity(e2, false);
+            }*/
         }
         else if (id1 == archetypes::explosion.id())
         {
             if (id2 == archetypes::asteroid.id())
             {
                 make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e2).currentAabb);
-                ++gameState->asteroidsDestroyed;
+                make_asteroid();
                 gameState->score += 500;
-            }
-            ecs.async_destroy_entity(e1, false);
-            if (e2 != spaceship)
                 ecs.async_destroy_entity(e2, false);
+            }
+            /*else if (id2 == archetypes::missile.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e2).currentAabb, ecs.component<ng::game::rigid_body>().entity_record(e2).velocity, ng::color::Orange);
+                gameState->score += 10;
+                ecs.async_destroy_entity(e2, false);
+            }*/
         }
         else if (id2 == archetypes::explosion.id())
         {
             if (id1 == archetypes::asteroid.id())
             {
                 make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e1).currentAabb);
-                ++gameState->asteroidsDestroyed;
+                make_asteroid();
                 gameState->score += 500;
+                ecs.async_destroy_entity(e1, false);
             }
-            ecs.async_destroy_entity(e2, false);
-            if (e1 != spaceship)
-                ecs.async_destroy_entity(e2, false);
+            /*else if (id1 == archetypes::missile.id())
+            {
+                make_explosion(*ecs.component<ng::game::box_collider_2d>().entity_record(e1).currentAabb, ecs.component<ng::game::rigid_body>().entity_record(e1).velocity, ng::color::Orange);
+                gameState->score += 10;
+                ecs.async_destroy_entity(e1, false);
+            }*/
         }
     });
     
-    ~~~~ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship, make_asteroid](ng::game::step_time aPhysicsStepTime)
+    ~~~~ecs.system<ng::game::game_world>().PhysicsApplied([&ecs, gameState, spaceship](ng::game::step_time aPhysicsStepTime)
     {
-        while (gameState->asteroidsDestroyed && ecs.component<ng::game::animation_filter>().entities().empty())
-        {
-            --gameState->asteroidsDestroyed;
-            make_asteroid();
-        }
-
         auto const& keyboard = ng::service<ng::i_keyboard>();
         auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
 

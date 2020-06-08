@@ -92,6 +92,8 @@ namespace neogfx::game
 
     void collision_detector::run_cycle(collision_detection_cycle aCycle)
     {
+        if (paused())
+            return;
         if ((aCycle & collision_detection_cycle::UpdateColliders) == collision_detection_cycle::UpdateColliders ||
             ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions && !ecs().system_instantiated<simple_physics>()))
             update_colliders();
@@ -107,8 +109,9 @@ namespace neogfx::game
     {
         if (ecs().component_instantiated<box_collider>())
         {
-            scoped_component_lock<entity_info, box_collider, mesh_filter, rigid_body> lock{ ecs() };
+            scoped_component_lock<entity_info, box_collider, mesh_filter, animation_filter, rigid_body> lock{ ecs() };
             auto const& meshFilters = ecs().component<mesh_filter>();
+            auto const& animatedMeshFilters = ecs().component<animation_filter>();
             auto const& rigidBodies = ecs().component<rigid_body>();
             auto& boxColliders = ecs().component<box_collider>();
             for (auto entity : boxColliders.entities())
@@ -117,17 +120,21 @@ namespace neogfx::game
                 if (info.destroyed)
                     continue; // todo: add support for skip iterators
                 // todo: only update collider AABBs if rigid_body changes require it
-                auto const& meshFilter = meshFilters.entity_record(entity);
-                auto const& transformation = rigidBodies.has_entity_record(entity) ?
-                    to_transformation_matrix(rigidBodies.entity_record(entity)) : 
-                    meshFilter.transformation ? *meshFilter.transformation : mat44::identity();
+                auto const& meshFilter = meshFilters.has_entity_record(entity) ?
+                    meshFilters.entity_record(entity) : current_animation_frame(animatedMeshFilters.entity_record(entity));
                 auto& collider = boxColliders.entity_record(entity);
                 collider.previousAabb = collider.currentAabb;
                 auto const& untransformed = (meshFilter.mesh != std::nullopt ?
                     *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
                 if (!collider.untransformedAabb)
                     collider.untransformedAabb = to_aabb(untransformed.vertices);
-                collider.currentAabb = aabb_transform(*collider.untransformedAabb, transformation);
+                collider.currentAabb = aabb_transform(*collider.untransformedAabb,
+                    (animatedMeshFilters.has_entity_record(entity) ?
+                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity()),
+                    (meshFilter.transformation ?
+                        *meshFilter.transformation : mat44::identity()),
+                    (rigidBodies.has_entity_record(entity) ?
+                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity()));
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
@@ -135,8 +142,9 @@ namespace neogfx::game
 
         if (ecs().component_instantiated<box_collider_2d>())
         {
-            scoped_component_lock<entity_info, box_collider_2d, mesh_filter, rigid_body> lock{ ecs() };
+            scoped_component_lock<entity_info, box_collider_2d, mesh_filter, animation_filter, rigid_body> lock{ ecs() };
             auto const& meshFilters = ecs().component<mesh_filter>();
+            auto const& animatedMeshFilters = ecs().component<animation_filter>();
             auto const& rigidBodies = ecs().component<rigid_body>();
             auto& boxColliders2d = ecs().component<box_collider_2d>();
             for (auto entity : boxColliders2d.entities())
@@ -145,17 +153,21 @@ namespace neogfx::game
                 if (info.destroyed)
                     continue; // todo: add support for skip iterators
                 // todo: only update collider AABBs if rigid_body changes require it
-                auto const& meshFilter = meshFilters.entity_record(entity);
-                auto const& transformation = rigidBodies.has_entity_record(entity) ?
-                    to_transformation_matrix(rigidBodies.entity_record(entity)) : 
-                    meshFilter.transformation ? *meshFilter.transformation : mat44::identity();
+                auto const& meshFilter = meshFilters.has_entity_record(entity) ?
+                    meshFilters.entity_record(entity) : current_animation_frame(animatedMeshFilters.entity_record(entity));
                 auto& collider = boxColliders2d.entity_record(entity);
                 collider.previousAabb = collider.currentAabb;
                 auto const& untransformed = (meshFilter.mesh != std::nullopt ?
                     *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
                 if (!collider.untransformedAabb)
                     collider.untransformedAabb = to_aabb_2d(untransformed.vertices);
-                collider.currentAabb = aabb_transform(*collider.untransformedAabb, transformation);
+                collider.currentAabb = aabb_transform(*collider.untransformedAabb, 
+                    (animatedMeshFilters.has_entity_record(entity) ?
+                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity()),
+                    (meshFilter.transformation ?
+                        *meshFilter.transformation : mat44::identity()),
+                    (rigidBodies.has_entity_record(entity) ?
+                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity()));
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }

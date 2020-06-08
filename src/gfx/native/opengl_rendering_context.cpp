@@ -1087,6 +1087,7 @@ namespace neogfx
             auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
             lock->mutex<game::rigid_body>().unlock();
             auto const& rigidBodies = rigidBodiesSnapshot.data();
+            auto const& animatedMeshFilters = aEcs.component<game::animation_filter>();
             for (auto entity : aEcs.component<game::mesh_renderer>().entities())
             {
 #ifndef NDEBUG
@@ -1103,11 +1104,13 @@ namespace neogfx
                 auto const& meshFilter = aEcs.component<game::mesh_filter>().has_entity_record(entity) ?
                     aEcs.component<game::mesh_filter>().entity_record(entity) :
                     game::current_animation_frame(aEcs.component<game::animation_filter>().entity_record(entity));
-                auto const& transformation = rigidBodies.has_entity_record(entity) ?
-                    to_transformation_matrix(rigidBodies.entity_record(entity)) :
-                    aEcs.component<game::animation_filter>().has_entity_record(entity) ?
-                    to_transformation_matrix(aEcs.component<game::animation_filter>().entity_record(entity)) :
-                    mat44::identity();
+                auto const& rigidBodyTransformation = (rigidBodies.has_entity_record(entity) ?
+                    to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity());
+                auto const& meshFilterTransformation = (meshFilter.transformation ?
+                    *meshFilter.transformation : mat44::identity());
+                auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record(entity) ?
+                    to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity());
+                auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
                 drawables[meshRenderer.layer].emplace_back(
                     meshFilter,
                     meshRenderer,
@@ -1633,7 +1636,7 @@ namespace neogfx
             auto& meshFilter = *meshDrawable.filter;
             auto& meshRenderer = *meshDrawable.renderer;
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
-            auto const transformation = meshDrawable.transformation * (meshFilter.transformation != std::nullopt ? *meshFilter.transformation : mat44::identity());
+            auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
             auto add_item = [&](auto const& mesh, auto const& material, auto const& faces)

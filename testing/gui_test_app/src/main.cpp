@@ -24,6 +24,7 @@
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/simple_physics.hpp>
+#include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/animator.hpp>
 
@@ -1024,6 +1025,14 @@ int main(int argc, char* argv[])
                 {
                     ui.spinBoxYieldAfter.set_value(ui.sliderYieldAfter.value());
                     ecs.system<ng::game::simple_physics>().yield_after(std::chrono::duration<double, std::milli>{ui.sliderYieldAfter.value() });
+                });
+                ui.checkCollisions.set_checked(true);
+                ui.checkCollisions.Toggled([&]()
+                {
+                    if (ui.checkCollisions.is_checked())
+                        ecs.system<ng::game::collision_detector>().resume();
+                    else
+                        ecs.system<ng::game::collision_detector>().pause();
                 });
                 gameCreated = true;
             }

@@ -35,7 +35,7 @@ namespace neogfx
         {
             glCheck(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &iPreviousVertexArrayBindingHandle));
             glCheck(glGenVertexArrays(1, &iHandle));
-            glCheck(glBindVertexArray(iHandle));
+            bind();
         }
         ~opengl_vertex_array()
         {
@@ -59,7 +59,9 @@ namespace neogfx
     class opengl_buffer_owner
     {
     public:
+        virtual opengl_buffer<T>* buffer() const = 0;
         virtual void update(opengl_buffer<T>& aBuffer) = 0;
+        virtual void buffer_destroyed(opengl_buffer<T>& aBuffer) = 0;
     };
 
     template <typename T>
@@ -73,14 +75,19 @@ namespace neogfx
         opengl_buffer(std::size_t aSize) :
             iOwner{ nullptr }, iSize { aSize }, iMemory{ nullptr }
         {
-            glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
             glCheck(glGenBuffers(1, &iHandle));
-            glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
+            bind();
             glCheck(glBufferStorage(GL_ARRAY_BUFFER, size() * sizeof(value_type), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT));
         }
         ~opengl_buffer()
         {
-            glCheck(glBindBuffer(GL_ARRAY_BUFFER, iPreviousBindingHandle));
+            if (owner().buffer() != this && owner().buffer() != nullptr)
+                owner().buffer()->bind();
+            else
+            {
+                iHandle = 0;
+                bind();
+            }
             glCheck(glDeleteBuffers(1, &iHandle));
         }
     public:
@@ -91,6 +98,10 @@ namespace neogfx
         GLuint handle() const
         {
             return iHandle;
+        }
+        void bind()
+        {
+            glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
         }
         value_type* map()
         {
@@ -128,7 +139,6 @@ namespace neogfx
     private:
         opengl_buffer_owner<T>* iOwner;
         const std::size_t iSize;
-        GLint iPreviousBindingHandle;
         GLuint iHandle;
         value_type* iMemory;
     };
@@ -358,7 +368,10 @@ namespace neogfx
     public:
         void attach_shader(i_rendering_context& aContext, i_shader_program& aShaderProgram) override
         {
-            iVao.emplace();
+            if (iVao == std::nullopt)
+                iVao.emplace();
+            else
+                iVao->bind();
             iVertexPositionAttribArray.emplace(
                 false,
                 sizeof(vertex),
@@ -369,13 +382,13 @@ namespace neogfx
                 false,
                 sizeof(vertex),
                 vertex::offset::rgba,
-                aShaderProgram, 
+                aShaderProgram,
                 standard_vertex_attribute_name(vertex_buffer_type::Color));
             if (aShaderProgram.supports(vertex_buffer_type::UV))
                 iVertexTextureCoordAttribArray.emplace(
-                    false, 
-                    sizeof(vertex), 
-                    vertex::offset::st, 
+                    false,
+                    sizeof(vertex),
+                    vertex::offset::st,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::UV));
             if (aShaderProgram.vertex_shader().has_standard_vertex_matrices())
@@ -411,6 +424,10 @@ namespace neogfx
             return iVertices.capacity();
         }
     private:
+        opengl_buffer<vertex>* buffer() const override
+        {
+            return iBuffer;
+        }
         void update(opengl_buffer<vertex>& aBuffer) override
         {
             iBuffer = &aBuffer;
@@ -422,6 +439,11 @@ namespace neogfx
                 iVertexColorAttribArray->update(aBuffer);
             if (iVertexTextureCoordAttribArray)
                 iVertexTextureCoordAttribArray->update(aBuffer);
+        }
+        void buffer_destroyed(opengl_buffer<vertex>& aBuffer) override
+        {
+            if (iBuffer == &aBuffer)
+                iBuffer = nullptr;
         }
     private:
         vertex_array iVertices;
