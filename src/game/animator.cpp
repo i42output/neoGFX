@@ -82,9 +82,9 @@ namespace neogfx::game
                 filter.currentFrameStartTime = info.creationTime;
             auto const& frames = (filter.animation ? filter.animation->frames : filter.sharedAnimation.ptr->frames);
             auto const& worldClock = ecs().shared_component<game::clock>()[0];
-            while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timeStep) < now)
+            while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timestep) < now)
             {
-                *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timeStep);
+                *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timestep);
                 filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
                 if (filter.currentFrame == 0 && filter.autoDestroy)
                 {

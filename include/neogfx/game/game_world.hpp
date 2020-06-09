@@ -39,7 +39,7 @@ namespace neogfx::game
     public:
         bool apply() override;
     public:
-        void set_time_step(double aTimeStep_s);
+        void set_time_step(double aTimestep_s);
         bool universal_gravitation_enabled() const;
         void enable_universal_gravitation();
         void disable_universal_gravitation();

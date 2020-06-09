@@ -855,10 +855,10 @@
                             id: layoutGame
                             horizontal_layout: {
                                 label: {
-                                    text: "Time Step:"
+                                    text: "Timestep:"
                                 }
                                 double_slider: {
-                                    id: sliderTimeStep
+                                    id: sliderTimestep
                                     orientation: Horizontal
                                     minimum: 0.0001
                                     maximum: 1.0000
@@ -866,17 +866,17 @@
                                     value: 0.01
                                 }
                                 double_spin_box: {
-                                    id: spinBoxTimeStep
+                                    id: spinBoxTimestep
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001
                                     value: 0.01
                                 }
                                 label: {
-                                    text: "Time Step Growth:"
+                                    text: "Timestep Growth:"
                                 }
                                 double_slider: {
-                                    id: sliderTimeStepGrowth
+                                    id: sliderTimestepGrowth
                                     orientation: Horizontal
                                     minimum: 1.0
                                     maximum: 10.0
@@ -884,17 +884,17 @@
                                     value: 1.75
                                 }
                                 double_spin_box: {
-                                    id: spinBoxTimeStepGrowth
+                                    id: spinBoxTimestepGrowth
                                     minimum: 1.0
                                     maximum: 10.0
                                     step: 0.05
                                     value: 1.75
                                 }
                                 label: {
-                                    text: "Maximum Time Step:"
+                                    text: "Maximum Timestep:"
                                 }
                                 double_slider: {
-                                    id: sliderMaximumTimeStep
+                                    id: sliderMaximumTimestep
                                     orientation: Horizontal
                                     minimum: 0.0001
                                     maximum: 1.0000
@@ -902,7 +902,7 @@
                                     value: 0.01
                                 }
                                 double_spin_box: {
-                                    id: spinBoxMaximumTimeStep
+                                    id: spinBoxMaximumTimestep
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001

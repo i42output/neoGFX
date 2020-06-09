@@ -55,10 +55,10 @@ namespace neogfx::game
         return true;
     }
 
-    void game_world::set_time_step(double aTimeStep_s)
+    void game_world::set_time_step(double aTimestep_s)
     {
         ecs().system<game::time>();
-        ecs().shared_component<game::clock>().component_data().begin()->second.timeStep = chrono::to_flicks(aTimeStep_s).count();
+        ecs().shared_component<game::clock>().component_data().begin()->second.timestep = chrono::to_flicks(aTimestep_s).count();
     }
 
     bool game_world::universal_gravitation_enabled() const

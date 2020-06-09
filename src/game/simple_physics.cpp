@@ -73,8 +73,8 @@ namespace neogfx::game
             *physicalConstants.uniformGravity : vec3{};
         auto& rigidBodies = ecs().component<rigid_body>();
         bool didWork = false;
-        auto currentTimeStep = worldClock.timeStep;
-        auto nextTime = worldClock.time + currentTimeStep;
+        auto currentTimestep = worldClock.timestep;
+        auto nextTime = worldClock.time + currentTimestep;
         auto startTime = std::chrono::high_resolution_clock::now();
         while (worldClock.time <= now)
         {
@@ -136,8 +136,8 @@ namespace neogfx::game
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time = nextTime;
-            currentTimeStep = std::min(static_cast<i64>(currentTimeStep * worldClock.timeStepGrowth), std::max(worldClock.timeStep, worldClock.maximumTimeStep));
-            nextTime += currentTimeStep;
+            currentTimestep = std::min(static_cast<i64>(currentTimestep * worldClock.timestepGrowth), std::max(worldClock.timestep, worldClock.maximumTimestep));
+            nextTime += currentTimestep;
             end_update(1);
         }
 

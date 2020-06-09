@@ -1001,24 +1001,25 @@ int main(int argc, char* argv[])
             if (ui.pageGame.visible() && !gameCreated)
             {
                 auto& ecs = create_game(ui.layoutGame);
+                ecs.system<ng::game::simple_physics>().terminate();
                 auto& worldClock = ecs.shared_component<ng::game::clock>()[0];
-                ui.spinBoxTimeStep.ValueChanged([&]() { ui.sliderTimeStep.set_value(ui.spinBoxTimeStep.value()); });
-                ui.sliderTimeStep.ValueChanged([&]() 
+                ui.spinBoxTimestep.ValueChanged([&]() { ui.sliderTimestep.set_value(ui.spinBoxTimestep.value()); });
+                ui.sliderTimestep.ValueChanged([&]() 
                 { 
-                    ui.spinBoxTimeStep.set_value(ui.sliderTimeStep.value()); 
-                    worldClock.timeStep = ng::game::chrono::to_flicks(ui.spinBoxTimeStep.value()).count();
+                    ui.spinBoxTimestep.set_value(ui.sliderTimestep.value()); 
+                    worldClock.timestep = ng::game::chrono::to_flicks(ui.spinBoxTimestep.value()).count();
                 });
-                ui.spinBoxTimeStepGrowth.ValueChanged([&]() { ui.sliderTimeStepGrowth.set_value(ui.spinBoxTimeStepGrowth.value()); });
-                ui.sliderTimeStepGrowth.ValueChanged([&]() 
+                ui.spinBoxTimestepGrowth.ValueChanged([&]() { ui.sliderTimestepGrowth.set_value(ui.spinBoxTimestepGrowth.value()); });
+                ui.sliderTimestepGrowth.ValueChanged([&]() 
                 { 
-                    ui.spinBoxTimeStepGrowth.set_value(ui.sliderTimeStepGrowth.value()); 
-                    worldClock.timeStepGrowth = ui.spinBoxTimeStepGrowth.value();
+                    ui.spinBoxTimestepGrowth.set_value(ui.sliderTimestepGrowth.value()); 
+                    worldClock.timestepGrowth = ui.spinBoxTimestepGrowth.value();
                 });
-                ui.spinBoxMaximumTimeStep.ValueChanged([&]() { ui.sliderMaximumTimeStep.set_value(ui.spinBoxMaximumTimeStep.value()); });
-                ui.sliderMaximumTimeStep.ValueChanged([&]() 
+                ui.spinBoxMaximumTimestep.ValueChanged([&]() { ui.sliderMaximumTimestep.set_value(ui.spinBoxMaximumTimestep.value()); });
+                ui.sliderMaximumTimestep.ValueChanged([&]() 
                 { 
-                    ui.spinBoxMaximumTimeStep.set_value(ui.sliderMaximumTimeStep.value()); 
-                    worldClock.maximumTimeStep = ng::game::chrono::to_flicks(ui.sliderMaximumTimeStep.value()).count();
+                    ui.spinBoxMaximumTimestep.set_value(ui.sliderMaximumTimestep.value()); 
+                    worldClock.maximumTimestep = ng::game::chrono::to_flicks(ui.sliderMaximumTimestep.value()).count();
                 });
                 ui.spinBoxYieldAfter.ValueChanged([&]() { ui.sliderYieldAfter.set_value(ui.spinBoxYieldAfter.value()); });
                 ui.sliderYieldAfter.ValueChanged([&]()
