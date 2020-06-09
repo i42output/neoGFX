@@ -1624,7 +1624,7 @@ namespace neogfx
 
         auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
         auto& vertices = vertexBuffer.vertices();
-        if (vertices.capacity() - vertices.size() < vertexCount)
+        if (!vertices.room_for(vertexCount))
         {
             vertexBuffer.execute();
             vertices.clear();

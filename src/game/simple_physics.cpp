@@ -34,7 +34,6 @@ namespace neogfx::game
     simple_physics::simple_physics(i_ecs& aEcs) :
         system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>{ aEcs }
     {
-        ecs().system<game::time>();
         if (!ecs().shared_component_registered<physics>())
             ecs().register_shared_component<physics>();
         if (ecs().shared_component<physics>().component_data().empty())
@@ -67,11 +66,11 @@ namespace neogfx::game
 
         std::optional<scoped_component_lock<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
 
+        auto const now = ecs().system<game::time>().system_time();
         auto& worldClock = ecs().shared_component<game::clock>()[0];
         auto const& physicalConstants = ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
             *physicalConstants.uniformGravity : vec3{};
-        auto const now = ecs().system<game::time>().system_time();
         auto& rigidBodies = ecs().component<rigid_body>();
         bool didWork = false;
         auto currentTimeStep = worldClock.timeStep;
@@ -131,6 +130,9 @@ namespace neogfx::game
             end_update(2);
             if (ecs().system_instantiated<collision_detector>())
                 ecs().system<collision_detector>().run_cycle(collision_detection_cycle::UpdateColliders);
+            if (ecs().system_instantiated<animator>())
+                ecs().system<animator>().apply();
+            ecs().system<game::time>().apply();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time = nextTime;

@@ -259,7 +259,11 @@ namespace neogfx
         if (existing != iVertexBuffers.end())
         {
             if (iLastVertexBufferUsed && iLastVertexBufferUsed != existing)
-                (**iLastVertexBufferUsed).second.execute();
+            {
+                auto& currentBuffer = (**iLastVertexBufferUsed).second;
+                currentBuffer.flush();
+                currentBuffer.execute();
+            }
             iLastVertexBufferUsed = existing;
             return existing->second;
         }
@@ -274,7 +278,11 @@ namespace neogfx
     void opengl_renderer::execute_vertex_buffers()
     {
         for (auto& vb : iVertexBuffers)
-            vb.second.execute();
+        {
+            auto& buffer = vb.second;
+            buffer.flush();
+            buffer.execute();
+        }
     }
 
     i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, texture_sampling aSampling)

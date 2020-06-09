@@ -71,7 +71,7 @@ namespace video_poker
     };
     
     table::table(neogfx::i_layout& aLayout) :
-        neogfx::game::canvas{ aLayout, std::make_shared<neogfx::game::ecs>() },
+        neogfx::game::canvas{ aLayout, neogfx::game::make_ecs<neogfx::game::simple_physics>() },
         iState{ table_state::TakeBet },
         iCredit{ STARTING_CREDIT },
         iStake{ 0 },

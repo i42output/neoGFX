@@ -35,6 +35,16 @@ namespace neogfx
         public:
             ecs(ecs_flags aCreationFlags = ecs_flags::Default);
             ~ecs();
+        public:
+            bool run_threaded(const system_id& aSystemId) const override;
         };
+
+        template <typename... Systems>
+        std::shared_ptr<ecs> make_ecs(ecs_flags aCreationFlags = ecs_flags::Default)
+        {
+            auto newEcs = std::make_shared<ecs>(aCreationFlags);
+            (newEcs->system<Systems>(), ...);
+            return newEcs;
+        }
     }
 }

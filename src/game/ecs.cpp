@@ -40,5 +40,15 @@ namespace neogfx
         {
             service<i_rendering_engine>().deallocate_vertex_buffer(*this);
         }
+
+        bool ecs::run_threaded(const system_id& aSystemId) const
+        {
+            if (system_instantiated<simple_physics>())
+            {
+                if (aSystemId == time::meta::id() || aSystemId == animator::meta::id())
+                    return false;
+            }
+            return base_type::run_threaded(aSystemId);
+        }
     }
 }

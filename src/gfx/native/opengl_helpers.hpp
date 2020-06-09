@@ -52,16 +52,10 @@ namespace neogfx
         GLuint iHandle;
     };
 
-    template <typename T>
-    class opengl_buffer;
-        
-    template <typename T>
     class opengl_buffer_owner
     {
     public:
-        virtual opengl_buffer<T>* buffer() const = 0;
-        virtual void update(opengl_buffer<T>& aBuffer) = 0;
-        virtual void buffer_destroyed(opengl_buffer<T>& aBuffer) = 0;
+        virtual void buffer_grown() = 0;
     };
 
     template <typename T>
@@ -69,49 +63,133 @@ namespace neogfx
     {
     public:
         typedef T value_type;
+        typedef value_type const& const_reference;
+        typedef value_type& reference;
+        typedef value_type const* const_pointer;
+        typedef value_type* pointer;
+        typedef const_pointer const_iterator;
+        typedef pointer iterator;
+        typedef std::size_t size_type;
     public:
         struct no_owner : std::logic_error { no_owner() : std::logic_error{ "neogfx::opengl_buffer::no_owner" } {} };
     public:
-        opengl_buffer(std::size_t aSize) :
-            iOwner{ nullptr }, iSize { aSize }, iMemory{ nullptr }
+        opengl_buffer(size_type aCapacity)
         {
-            glCheck(glGenBuffers(1, &iHandle));
-            bind();
-            glCheck(glBufferStorage(GL_ARRAY_BUFFER, size() * sizeof(value_type), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT));
+            if (aCapacity != 0)
+            {
+                glCheck(glCreateBuffers(1, &iBufferName));
+                glCheck(glNamedBufferStorage(iBufferName, aCapacity * sizeof(value_type), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT));
+                iCapacity = aCapacity;
+            }
+        }
+        opengl_buffer(opengl_buffer_owner& aOwner, size_type aCapacity = 0) :
+            opengl_buffer{ aCapacity }
+        {
+            iOwner = &aOwner;
         }
         ~opengl_buffer()
         {
-            if (owner().buffer() != this && owner().buffer() != nullptr)
-                owner().buffer()->bind();
-            else
-            {
-                iHandle = 0;
-                bind();
-            }
-            glCheck(glDeleteBuffers(1, &iHandle));
+            glCheck(glDeleteBuffers(1, &iBufferName));
         }
     public:
-        std::size_t size() const
+        size_type capacity() const
+        {
+            return iCapacity;
+        }
+        bool empty() const
+        {
+            return iSize == 0;
+        }
+        size_type size() const
         {
             return iSize;
         }
+        const_iterator cbegin() const
+        {
+            return map();
+        }
+        const_iterator cend() const
+        {
+            return map() + size();
+        }
+        const_iterator begin() const
+        {
+            return cbegin();
+        }
+        const_iterator end() const
+        {
+            return cend();
+        }
+        iterator begin()
+        {
+            return map();
+        }
+        iterator end()
+        {
+            return map() + size();
+        }
+    public:
+        void reserve(size_type aCapacity)
+        {
+            if (aCapacity > capacity())
+                grow(aCapacity);
+        }
+    public:
+        const_reference operator[](size_type aOffset) const
+        {
+            return *std::next(cbegin(), aOffset);
+        }
+        reference operator[](size_type aOffset)
+        {
+            return *std::next(begin(), aOffset);
+        }
+        const_reference back() const
+        {
+            return *std::prev(cend());
+        }
+        reference back()
+        {
+            return *std::prev(end());
+        }
+        void push_back(const_reference aValue)
+        {
+            need(1);
+            new (map() + iSize) value_type{ aValue };
+            ++iSize;
+        }
+        template <typename... Args>
+        void emplace_back(Args&&... aArgs)
+        {
+            need(1);
+            new (map() + iSize) value_type{ std::forward<Args>(aArgs)... };
+            ++iSize;
+        }
+        void pop_back()
+        {
+            --iSize;
+        }
+        void clear()
+        {
+            iSize = 0;
+        }
+    public:
         GLuint handle() const
         {
-            return iHandle;
+            return iBufferName;
         }
-        void bind()
-        {
-            glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
-        }
-        value_type* map()
+        const_pointer map() const
         {
             if (iMemory == nullptr)
             {
-                glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, size() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_COHERENT_BIT)));
+                glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, capacity() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_COHERENT_BIT)));
             }
             return iMemory;
         }
-        void flush(std::size_t aElements)
+        pointer map()
+        {
+            return const_cast<pointer>(to_const(*this).map());
+        }
+        void flush(size_type aElements)
         {
             if (iMemory != nullptr)
             {
@@ -128,108 +206,41 @@ namespace neogfx
             }
         }
     public:
-        opengl_buffer_owner<T>& owner() const
+        size_type room() const
         {
-            return *iOwner;
+            return capacity() - size();
         }
-        void set_owner(opengl_buffer_owner<T>& aOwner)
+        bool room_for(size_type aExtra) const
         {
-            iOwner = &aOwner;
+            return aExtra <= room();
+        }
+        void need(size_type aExtra)
+        {
+            if (!room_for(aExtra))
+                grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384));
         }
     private:
-        opengl_buffer_owner<T>* iOwner;
-        const std::size_t iSize;
-        GLuint iHandle;
-        value_type* iMemory;
-    };
-
-    template <typename T, typename OriginalType = T>
-    class opengl_buffer_allocator : public std::allocator<T>
-    {
-    public:
-        using typename std::allocator<T>::pointer;
-        using typename std::allocator<T>::size_type;
-        template<class Other>
-        struct rebind
-        {    
-            typedef opengl_buffer_allocator<Other, OriginalType> other;
-        };
-        typedef opengl_buffer<OriginalType> buffer;
-        typedef std::vector<std::unique_ptr<buffer>> buffer_list;
-    public:
-        struct buffer_not_found : std::logic_error { buffer_not_found() : std::logic_error{ "neogfx::opengl_buffer_allocator::buffer_not_found" } {} };
-    public:
-        opengl_buffer_allocator()
+        void grow(size_type aCapacity)
         {
-        }
-        opengl_buffer_allocator(const opengl_buffer_allocator<T, OriginalType>& aOther)
-        {
-        }
-        template <typename T2>
-        opengl_buffer_allocator(const opengl_buffer_allocator<T2, OriginalType>& aOther)
-        {
-        }
-    public:
-        void deallocate(pointer aPointer, size_type aCount)
-        {
-            if constexpr (std::is_same_v<T, OriginalType>)
+            opengl_buffer<T> temp{ aCapacity };
+            if (!empty())
             {
-                for (auto buffer = buffers().begin(); buffer != buffers().end(); ++buffer)
-                {
-                    if ((**buffer).map() == aPointer)
-                    {
-                        if (buffer != std::prev(buffers().end()))
-                        {
-                            buffers().back()->set_owner((**buffer).owner());
-                            buffers().back()->owner().update(*buffers().back());
-                        }
-                        buffers().erase(buffer);
-                        return;
-                    }
-                }
+                map();
+                std::copy(begin(), end(), std::back_inserter(temp));
+                unmap();
             }
-            else
-                return std::allocator<T>::deallocate(aPointer, aCount);
+            std::swap(iBufferName, temp.iBufferName);
+            std::swap(iCapacity, temp.iCapacity);
+            std::swap(iSize, temp.iSize);
+            std::swap(iMemory, temp.iMemory);
+            iOwner->buffer_grown();
         }
-        pointer allocate(size_type aCount)
-        {    
-            if constexpr (std::is_same_v<T, OriginalType>)
-            {
-                buffers().push_back(std::make_unique<opengl_buffer<OriginalType>>(aCount));
-                auto nextOwner = next_owner();
-                next_owner() = nullptr;
-                if (nextOwner)
-                {
-                    buffers().back()->set_owner(*nextOwner);
-                    buffers().back()->owner().update(*buffers().back());
-                }
-                return buffers().back()->map();
-            }
-            else
-                return std::allocator<T>::allocate(aCount);
-        }
-        pointer allocate(size_type aCount, const void *)
-        {
-            return allocate(aCount);
-        }
-    public:
-        static buffer_list& buffers()
-        {
-            static buffer_list sBuffers;
-            return sBuffers;
-        }
-        static buffer& find_buffer(T& aFirstVertex)
-        {
-            for (auto& buffer : buffers())
-                if (buffer.map() == &aFirstVertex)
-                    return buffer;
-            throw buffer_not_found();
-        }
-        static opengl_buffer_owner<OriginalType>*& next_owner()
-        {
-            static opengl_buffer_owner<OriginalType>* sNextOwner;
-            return sNextOwner;
-        }
+    private:
+        GLuint iBufferName = 0;
+        size_type iCapacity = 0;
+        size_type iSize = 0;
+        mutable pointer iMemory = nullptr;
+        opengl_buffer_owner* iOwner = nullptr;
     };
 
     template <typename T>
@@ -260,7 +271,7 @@ namespace neogfx
         {
         }
     public:
-        void update(opengl_buffer<Vertex>& aBuffer)
+        void update(opengl_buffer<vertex_type>& aBuffer)
         {
             GLint previousBindingHandle;
             glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBindingHandle));
@@ -317,14 +328,12 @@ namespace neogfx
     };
 
     template <typename V = standard_vertex>
-    class opengl_vertex_buffer : public vertex_buffer, private opengl_buffer_owner<V>
+    class opengl_vertex_buffer : public vertex_buffer, private opengl_buffer_owner
     {
     public:
-        typedef V vertex;
+        typedef V vertex_type;
     public:
-        // Formally this is being far too clever for one's own good as formally this is UB (Undefined Behaviour)
-        // as I am treating non-POD (vec3) as POD (by mapping it to OpenGL). May need to rethink this...
-        typedef std::vector<vertex, opengl_buffer_allocator<vertex>> vertex_array;
+        typedef opengl_buffer<vertex_type> vertex_array;
         class use
         {
         public:
@@ -337,11 +346,11 @@ namespace neogfx
         public:
             const vertex_array& vertices() const
             {
-                return iParent.iVertices;
+                return iParent.iBuffer;
             }
             vertex_array& vertices()
             {
-                return iParent.iVertices;
+                return iParent.iBuffer;
             }
             const optional_mat44& transformation() const
             {
@@ -356,14 +365,12 @@ namespace neogfx
                 iParent.execute();
             }
         private:
-            opengl_vertex_buffer<V>& iParent;
+            opengl_vertex_buffer<vertex_type>& iParent;
         };
     public:
         opengl_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType) :
-            vertex_buffer{ aProvider, aType }, iBuffer{ nullptr }
+            vertex_buffer{ aProvider, aType }, iBuffer{ *this }
         {
-            opengl_buffer_allocator<vertex>::next_owner() = this;
-            iVertices.reserve(16384);
         }
     public:
         void attach_shader(i_rendering_context& aContext, i_shader_program& aShaderProgram) override
@@ -374,21 +381,21 @@ namespace neogfx
                 iVao->bind();
             iVertexPositionAttribArray.emplace(
                 false,
-                sizeof(vertex),
-                vertex::offset::xyz,
+                sizeof(vertex_type),
+                vertex_type::offset::xyz,
                 aShaderProgram,
                 standard_vertex_attribute_name(vertex_buffer_type::Vertices));
             iVertexColorAttribArray.emplace(
                 false,
-                sizeof(vertex),
-                vertex::offset::rgba,
+                sizeof(vertex_type),
+                vertex_type::offset::rgba,
                 aShaderProgram,
                 standard_vertex_attribute_name(vertex_buffer_type::Color));
             if (aShaderProgram.supports(vertex_buffer_type::UV))
                 iVertexTextureCoordAttribArray.emplace(
                     false,
-                    sizeof(vertex),
-                    vertex::offset::st,
+                    sizeof(vertex_type),
+                    vertex_type::offset::st,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::UV));
             if (aShaderProgram.vertex_shader().has_standard_vertex_matrices())
@@ -397,7 +404,7 @@ namespace neogfx
                 standardMatrices.set_transformation_matrix(iTransformation);
             }
             vertex_buffer::attach_shader(aContext, aShaderProgram);
-            update(*iBuffer);
+            update_attrib_arrays();
         }
         void detach_shader() override
         {
@@ -410,49 +417,45 @@ namespace neogfx
             glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
             glCheck(glDeleteSync(sync));
         }
+        void flush()
+        {
+            flush(vertices().size());
+        }
         void flush(std::size_t aElements)
         {
-            if (iBuffer)
-                iBuffer->flush(aElements);
+            iBuffer.flush(aElements);
         }
         vertex_array& vertices()
         {
-            return iVertices;
+            return iBuffer;
         }
         std::size_t capacity() const
         {
-            return iVertices.capacity();
+            return iBuffer.capacity();
         }
     private:
-        opengl_buffer<vertex>* buffer() const override
+        void buffer_grown() override
         {
-            return iBuffer;
+            update_attrib_arrays();
         }
-        void update(opengl_buffer<vertex>& aBuffer) override
+        void update_attrib_arrays()
         {
-            iBuffer = &aBuffer;
             if (iVao)
                 iVao->bind();
             if (iVertexPositionAttribArray)
-                iVertexPositionAttribArray->update(aBuffer);
+                iVertexPositionAttribArray->update(iBuffer);
             if (iVertexColorAttribArray)
-                iVertexColorAttribArray->update(aBuffer);
+                iVertexColorAttribArray->update(iBuffer);
             if (iVertexTextureCoordAttribArray)
-                iVertexTextureCoordAttribArray->update(aBuffer);
-        }
-        void buffer_destroyed(opengl_buffer<vertex>& aBuffer) override
-        {
-            if (iBuffer == &aBuffer)
-                iBuffer = nullptr;
+                iVertexTextureCoordAttribArray->update(iBuffer);
         }
     private:
-        vertex_array iVertices;
-        opengl_buffer<vertex>* iBuffer;
+        opengl_buffer<vertex_type> iBuffer;
         optional_mat44 iTransformation;
         std::optional<opengl_vertex_array> iVao;
-        std::optional<opengl_vertex_attrib_array<vertex, decltype(vertex::xyz)>> iVertexPositionAttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex, decltype(vertex::rgba)>> iVertexColorAttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex, decltype(vertex::st)>> iVertexTextureCoordAttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::xyz)>> iVertexPositionAttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::rgba)>> iVertexColorAttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::st)>> iVertexTextureCoordAttribArray;
     };
 
     class use_shader_program

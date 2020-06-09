@@ -52,7 +52,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
-                if (!room_for(aNeed) && !grow_to(aNeed))
+                if (!room_for(aNeed) && !need(aNeed))
                     throw not_enough_room();
             }
             use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
@@ -68,7 +68,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
-                if (!room_for(aNeed) && !grow_to(aNeed))
+                if (!room_for(aNeed) && !need(aNeed))
                     throw not_enough_room();
             }
             use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
@@ -84,7 +84,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
-                if (!room_for(aNeed) && !grow_to(aNeed))
+                if (!room_for(aNeed) && !need(aNeed))
                     throw not_enough_room();
             }
             use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
@@ -100,7 +100,7 @@ namespace neogfx
                 if (!room_for(aNeed) || aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
-                if (!room_for(aNeed) && !grow_to(aNeed))
+                if (!room_for(aNeed) && !need(aNeed))
                     throw not_enough_room();
             }
             ~use_vertex_arrays()
@@ -200,17 +200,17 @@ namespace neogfx
         public:
             std::size_t room() const
             {
-                return vertices().capacity() - vertices().size();
+                return vertices().room();
             }
             bool room_for(std::size_t aAmount) const
             {
-                return room() >= aAmount;
+                return vertices().room_for(aAmount);
             }
-            bool grow_to(std::size_t aAmount)
+            bool need(std::size_t aAmount)
             {
                 try
                 {
-                    vertices().reserve(static_cast<std::size_t>(aAmount * 1.5));
+                    vertices().need(aAmount);
                     return true;
                 }
                 catch (...)
