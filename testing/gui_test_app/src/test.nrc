@@ -863,14 +863,14 @@
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001
-                                    value: 0.001
+                                    value: 0.01
                                 }
                                 double_spin_box: {
                                     id: spinBoxTimeStep
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001
-                                    value: 0.001
+                                    value: 0.01
                                 }
                                 label: {
                                     text: "Time Step Growth:"
@@ -899,14 +899,14 @@
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001
-                                    value: 0.001
+                                    value: 0.01
                                 }
                                 double_spin_box: {
                                     id: spinBoxMaximumTimeStep
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001
-                                    value: 0.001
+                                    value: 0.01
                                 }
                                 label: {
                                     text: "Yield After (ms):"
