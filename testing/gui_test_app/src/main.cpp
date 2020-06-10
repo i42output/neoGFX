@@ -996,12 +996,13 @@ int main(int argc, char* argv[])
         ng::image smallHash(":/test/resources/channel.png");
 
         bool gameCreated = false;
+        ng::game::i_ecs* gameEcs = nullptr;
         ui.pageGame.VisibilityChanged([&]()
         {
             if (ui.pageGame.visible() && !gameCreated)
             {
                 auto& ecs = create_game(ui.layoutGame);
-                ecs.system<ng::game::simple_physics>().terminate();
+                gameEcs = &ecs;
                 auto& worldClock = ecs.shared_component<ng::game::clock>()[0];
                 ui.spinBoxTimestep.ValueChanged([&]() { ui.sliderTimestep.set_value(ui.spinBoxTimestep.value()); });
                 ui.sliderTimestep.ValueChanged([&]() 
@@ -1329,6 +1330,13 @@ int main(int argc, char* argv[])
             bool const mouseOver = ui.canvasInstancing.entered(true);
             ui.groupRenderingScheme.show(mouseOver);
             ui.groupMeshShape.show(mouseOver);
+            if (gameEcs)
+            {
+                if (gameEcs->system<ng::game::simple_physics>().can_apply())
+                    gameEcs->system<ng::game::simple_physics>().apply();
+                if (gameEcs->system<ng::game::collision_detector>().can_apply())
+                    gameEcs->system<ng::game::collision_detector>().apply();
+            }
         }, 1u };
 
         return app.exec();

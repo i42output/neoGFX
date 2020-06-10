@@ -24,17 +24,17 @@
 namespace neogfx
 {
     sub_texture::sub_texture(texture_id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents) :
-        iAtlasId(aAtlasId), iAtlasTexture(&aAtlasTexture), iAtlasLocation(aAtlasLocation), iExtents(aExtents)
+        iAtlasId{ aAtlasId }, iAtlasTexture{ &aAtlasTexture }, iAtlasLocation{ aAtlasLocation }, iStorageExtents{ aAtlasTexture.storage_extents() }, iExtents{ aExtents }
     {
     }
 
     sub_texture::sub_texture(const i_sub_texture& aSubTexture) :
-        iAtlasId(aSubTexture.atlas_id()), iAtlasTexture(&aSubTexture.atlas_texture()), iAtlasLocation(aSubTexture.atlas_location()), iExtents(aSubTexture.extents())
+        iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aSubTexture.atlas_location() }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aSubTexture.extents() }
     {
     }
 
     sub_texture::sub_texture(const i_sub_texture& aSubTexture, const rect& aAtlasLocation) :
-        iAtlasId(aSubTexture.atlas_id()), iAtlasTexture(&aSubTexture.atlas_texture()), iAtlasLocation(aAtlasLocation), iExtents(aAtlasLocation.extents())
+        iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aAtlasLocation }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aAtlasLocation.extents() }
     {
     }
 
@@ -103,7 +103,7 @@ namespace neogfx
     {
         if (is_empty())
             return size{};
-        return native_texture()->storage_extents();
+        return iStorageExtents;
     }
 
     void sub_texture::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)

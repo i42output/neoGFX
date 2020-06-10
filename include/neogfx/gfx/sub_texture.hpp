@@ -66,6 +66,7 @@ namespace neogfx
         texture_id iAtlasId;
         i_texture* iAtlasTexture;
         rect iAtlasLocation;
+        size iStorageExtents;
         size iExtents;
     };
 

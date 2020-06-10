@@ -1617,9 +1617,9 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
             auto const& faces = mesh.faces;
-            vertexCount += faces.size();
+            vertexCount += faces.size() * 3;
             for (auto const& meshPatch : meshRenderer.patches)
-                vertexCount += meshPatch.faces.size();
+                vertexCount += meshPatch.faces.size() * 3;
         }
 
         auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
@@ -1639,23 +1639,29 @@ namespace neogfx
             auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
+            vec2 textureStorageExtents;
+            vec2 uvFixupCoefficient;
+            vec2 uvFixupOffset;
+            std::optional<neolib::cookie> textureId;
             auto add_item = [&](auto const& mesh, auto const& material, auto const& faces)
             {
-                vec2 textureStorageExtents;
-                vec2 uvFixupCoefficient;
-                vec2 uvFixupOffset;
                 if (patch_drawable::has_texture(meshRenderer, material))
                 {
                     auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
-                    auto const& texture = *service<i_texture_manager>().find_texture(materialTexture.id.cookie());
-                    textureStorageExtents = texture.storage_extents().to_vec2();
-                    uvFixupCoefficient = materialTexture.extents;
-                    if (materialTexture.type == texture_type::Texture)
-                        uvFixupOffset = vec2{ 1.0, 1.0 };
-                    else if (materialTexture.subTexture == std::nullopt)
-                        uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
-                    else
-                        uvFixupOffset = materialTexture.subTexture->min;
+                    auto nextTextureId = materialTexture.id.cookie();
+                    if (textureId == std::nullopt || *textureId != nextTextureId)
+                    {
+                        textureId = nextTextureId;
+                        auto const& texture = *service<i_texture_manager>().find_texture(nextTextureId);
+                        textureStorageExtents = texture.storage_extents().to_vec2();
+                        uvFixupCoefficient = materialTexture.extents;
+                        if (materialTexture.type == texture_type::Texture)
+                            uvFixupOffset = vec2{ 1.0, 1.0 };
+                        else if (materialTexture.subTexture == std::nullopt)
+                            uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
+                        else
+                            uvFixupOffset = materialTexture.subTexture->min;
+                    }
                 }
                 auto const vertexStartIndex = vertices.size();
                 for (auto const& face : faces)
@@ -1686,8 +1692,6 @@ namespace neogfx
 
         std::optional<use_vertex_arrays> vertexArraysUsage;
         draw_patch(vertexArraysUsage, patch, aTransformation);
-        if (vertexArraysUsage)
-            vertexArraysUsage->execute();
     }
 
     void opengl_rendering_context::draw_patch(std::optional<use_vertex_arrays>& aVertexArrayUsage, patch_drawable& aPatch, const mat44& aTransformation)

@@ -128,9 +128,9 @@ namespace neogfx::game
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
             }
             end_update(2);
-            if (ecs().system_instantiated<collision_detector>())
+            if (ecs().system_instantiated<collision_detector>() && !ecs().system<collision_detector>().paused())
                 ecs().system<collision_detector>().run_cycle(collision_detection_cycle::UpdateColliders);
-            if (ecs().system_instantiated<animator>())
+            if (ecs().system_instantiated<animator>() && ecs().system<animator>().can_apply())
                 ecs().system<animator>().apply();
             ecs().system<game::time>().apply();
             ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
