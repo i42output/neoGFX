@@ -1690,14 +1690,15 @@ namespace neogfx
                 add_item(mesh, meshPatch.material, meshPatch.faces);
         }
 
-        std::optional<use_vertex_arrays> vertexArraysUsage;
-        draw_patch(vertexArraysUsage, patch, aTransformation);
+        draw_patch(patch, aTransformation);
     }
 
-    void opengl_rendering_context::draw_patch(std::optional<use_vertex_arrays>& aVertexArrayUsage, patch_drawable& aPatch, const mat44& aTransformation)
+    void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
         neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        std::optional<use_vertex_arrays> vertexArrayUsage;
 
         auto const logicalCoordinates = logical_coordinates();
 
@@ -1771,8 +1772,8 @@ namespace neogfx
                     if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
                         enable_sample_shading(1.0);
 
-                    if (aVertexArrayUsage == std::nullopt || !aVertexArrayUsage->with_textures())
-                        aVertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
+                    if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
+                        vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
 
 #ifndef NDEBUG
                     if (item->meshDrawable->entity != game::null_entity &&
@@ -1780,14 +1781,14 @@ namespace neogfx
                         std::cerr << "Drawing debug entity (texture)..." << std::endl;
 #endif
 
-                    aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
+                    vertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
                 else
                 {
                     rendering_engine().default_shader_program().texture_shader().clear_texture();
 
-                    if (aVertexArrayUsage == std::nullopt || aVertexArrayUsage->with_textures())
-                        aVertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
+                    if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
+                        vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
 
 #ifndef NDEBUG
                     if (item->meshDrawable->entity != game::null_entity &&
@@ -1795,7 +1796,7 @@ namespace neogfx
                         std::cerr << "Drawing debug entity (non-texture)..." << std::endl;
 #endif
 
-                    aVertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
+                    vertexArrayUsage->draw(item->offsetVertices, faceCount * 3);
                 }
 
                 item = next;

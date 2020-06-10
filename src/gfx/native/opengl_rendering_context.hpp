@@ -232,7 +232,7 @@ namespace neogfx
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
         void draw_meshes(i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
-        void draw_patch(std::optional<use_vertex_arrays>& aVertexArrayUsage, patch_drawable& aPatch, const mat44& aTransformation);
+        void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);
     public:
         neogfx::subpixel_format subpixel_format() const override;
     private:

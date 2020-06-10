@@ -240,9 +240,9 @@ namespace neogfx
             }
             void draw(std::size_t aCount, const skip& aSkip = {})
             {
-                iDrawOnExit = false;
                 if (aCount == 0u)
                     return;
+                iDrawOnExit = false;
                 auto skipCount = aSkip.skipCount ? std::max<std::size_t>(*aSkip.skipCount, 1u) : 1u;
                 if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
                     throw invalid_draw_count();
