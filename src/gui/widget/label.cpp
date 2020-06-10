@@ -336,9 +336,9 @@ namespace neogfx
         handle_placement_change();
         iSink += layout().AlignmentChanged([this]() { handle_placement_change(); });
         iSink += text_widget().VisibilityChanged([this](){ handle_placement_change(); });
-        iSink += text_widget().TextGeometryChanged([this]() { handle_placement_change(); });
+        iSink += text_widget().TextGeometryChanged([this]() { if (text_widget().visible()) handle_placement_change(); });
         iSink += image_widget().VisibilityChanged([this]() { handle_placement_change(); });
-        iSink += image_widget().ImageGeometryChanged([this]() { handle_placement_change(); });
+        iSink += image_widget().ImageGeometryChanged([this]() { if (image_widget().visible()) handle_placement_change(); });
     }
 
     label_placement label::effective_placement() const

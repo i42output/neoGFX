@@ -121,6 +121,9 @@ namespace neogfx::nrc
                     case ui_element_type::Label:
                         iAnonymousId = parent().id() + ".label()";
                         break;
+                    case ui_element_type::TextWidget:
+                        iAnonymousId = parent().id() + ".text_widget()";
+                        break;
                     case ui_element_type::ImageWidget:
                         iAnonymousId = parent().id() + ".image_widget()";
                         break;

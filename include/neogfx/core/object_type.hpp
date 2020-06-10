@@ -51,7 +51,7 @@ namespace neogfx
         HasText                         = 0x0000001000000000,
         HasLabel                        = 0x0000002000000000,
         HasImage                        = 0x0000004000000000,
-        HasColor                       = 0x0000008000000000,
+        HasColor                        = 0x0000008000000000,
 
         Action                          = 0x0000100000000000,
         Widget                          = 0x0000200000000000 | LayoutItem | HasColor,

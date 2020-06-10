@@ -30,10 +30,12 @@ namespace neogfx::nrc
         label(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::Label }
         {
+            add_data_names({ "text_widget", "image_widget" });
         }
         label(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t) :
             ui_element<>{ aParser, aParent, member_element, ui_element_type::Label }
         {
+            add_data_names({ "text_widget", "image_widget" });
         }
     public:
         const neolib::i_string& header() const override

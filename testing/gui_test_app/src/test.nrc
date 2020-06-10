@@ -78,7 +78,9 @@
                     id: statusBar
                     label: {
                         id: labelFPS
-                        text: "FPS: ??? PFPS: ???"
+                        .text_widget: {
+                            size_hint: "0000.0000/0000.0000 FPS/PFSP"
+                        }
                     }
                 }
                 menu_bar: {
@@ -852,7 +854,6 @@
                         id: pageGame
                         tab_text: "Game"
                         vertical_layout: {
-                            id: layoutGame
                             horizontal_layout: {
                                 label: {
                                     text: "Timestep:"
@@ -926,10 +927,15 @@
                                     step: 0.1
                                     value: 1.0
                                 }
+                            }
+                            horizontal_layout: {
                                 check_box: {
                                     id: checkCollisions
                                     text: "Collision Detection"
                                 }
+                            }
+                            vertical_layout: {
+                                id: layoutGame
                             }
                         }
                     }

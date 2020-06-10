@@ -30,6 +30,12 @@ namespace neogfx::nrc
         text_widget(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::TextWidget }
         {
+            add_data_names({ "size_hint" });
+        }
+        text_widget(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t) :
+            ui_element<>{ aParser, aParent, member_element, ui_element_type::TextWidget }
+        {
+            add_data_names({ "size_hint" });
         }
     public:
         const neolib::i_string& header() const override
@@ -40,19 +46,32 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            ui_element<>::parse(aName, aData);
+            if (aName == "size_hint")
+                iSizeHint = size_hint{ aData.get<neolib::i_string>().to_std_string() };
+            else
+                ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            ui_element<>::parse(aName, aData);
+            if (aName == "size_hint")
+            {
+                if (aData.size() == 1)
+                    iSizeHint = size_hint{ aData[0].get<neolib::i_string>().to_std_string() };
+                else if (aData.size() == 2)
+                    iSizeHint = size_hint{ aData[0].get<neolib::i_string>().to_std_string(), aData[1].get<neolib::i_string>().to_std_string() };
+            }
+            else
+                ui_element<>::parse(aName, aData);
         }
     protected:
         void emit() const override
         {
+
         }
         void emit_preamble() const override
         {
-            emit("  text_widget %1%;\n", id());
+            if (!is_member_element())
+                emit("  text_widget %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -63,9 +82,17 @@ namespace neogfx::nrc
         void emit_body() const override
         {
             ui_element<>::emit_body();
+            if (iSizeHint)
+            {
+                if (iSizeHint->secondaryHint.empty())
+                    emit("   %1%.set_size_hint(size_hint{ \"%2%\"_t });\n", id(), iSizeHint->primaryHint);
+                else
+                    emit("   %1%.set_size_hint(size_hint{ \"%2%\"_t, \"%3%\"_t });\n", id(), iSizeHint->primaryHint, iSizeHint->secondaryHint);
+            }
         }
     protected:
         using ui_element<>::emit;
     private:
+        std::optional<size_hint> iSizeHint;
     };
 }

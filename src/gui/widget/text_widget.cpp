@@ -147,13 +147,15 @@ namespace neogfx
             iTextExtent = std::nullopt;
             iGlyphText = neogfx::glyph_text{};
             TextChanged.trigger();
-            if (has_parent_layout())
-                parent_layout().invalidate();
             if (oldSize != minimum_size())
             {
                 TextGeometryChanged.trigger();
-                if (has_layout_manager())
-                    layout_manager().layout_items();
+                if (has_parent_layout() && (visible() || parent_layout().ignore_visibility()))
+                {
+                    parent_layout().invalidate();
+                    if (has_layout_manager())
+                        layout_manager().layout_items();
+                }
             }
             update();
         }
@@ -166,9 +168,10 @@ namespace neogfx
             size oldSize = minimum_size();
             iSizeHint = aSizeHint;
             iSizeHintExtent = std::nullopt;
-            if (has_parent_layout())
+            bool const canLayout = has_parent_layout() && (visible() || !parent_layout().ignore_visibility());
+            if (canLayout)
                 parent_layout().invalidate();
-            if (oldSize != minimum_size() && has_layout_manager())
+            if (oldSize != minimum_size() && canLayout && has_layout_manager())
                 layout_manager().layout_items();
         }
     }
