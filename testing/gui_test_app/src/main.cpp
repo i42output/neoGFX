@@ -1326,10 +1326,13 @@ int main(int argc, char* argv[])
             bool canUpdateCanvas = (!ecs || ecs->system<ng::game::animator>().paused()) && ui.canvasInstancing.can_update();
             aTimer.set_duration(ui.pageDrawing.can_update() || canUpdateCanvas ? 0u : 1u);
             aTimer.again();
+            ui.pageDrawing.update();
             ui.canvasInstancing.update();
             bool const mouseOver = ui.canvasInstancing.entered(true);
             ui.groupRenderingScheme.show(mouseOver);
             ui.groupMeshShape.show(mouseOver);
+            if (ui.groupBox.is_checkable() && ui.groupBox.check_box().is_checked())
+                window.update();
             if (gameEcs)
             {
                 if (gameEcs->system<ng::game::simple_physics>().can_apply())
