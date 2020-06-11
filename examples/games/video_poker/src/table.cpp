@@ -63,6 +63,7 @@ namespace video_poker
                 neogfx::text_appearance{aColor, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black } },
                 neogfx::alignment::Centre}
         {
+            neogfx::game::scoped_component_lock<neogfx::game::mesh_renderer, neogfx::game::entity_info, neogfx::game::rigid_body> lock{ aCanvas.ecs() };
             aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).layer = 1;
             aCanvas.ecs().component<neogfx::game::entity_info>().entity_record(id()).lifeSpan = neogfx::game::to_step_time(aCanvas.ecs(), 10.0);
             auto const& boundingBox = neogfx::game::bounding_rect(*aCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(id()).mesh);
