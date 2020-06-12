@@ -100,7 +100,7 @@ namespace neogfx
     void basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
-            do_step(aDelta.dy > 0.0 ? step_direction::Up : step_direction::Down, static_cast<uint32_t>(std::abs(aDelta.dy)));
+            do_step(aDelta.dy > 0.0 ? step_direction::Up : step_direction::Down);
         else
             framed_widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
