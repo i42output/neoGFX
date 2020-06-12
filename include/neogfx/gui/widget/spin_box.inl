@@ -172,6 +172,7 @@ namespace neogfx
     {
         set_margins(neogfx::margins{});
         iPrimaryLayout.set_margins(neogfx::margins{});
+        iPrimaryLayout.set_spacing(dip(INTERNAL_SPACING));
         iSecondaryLayout.set_margins(neogfx::margins{});
         iSecondaryLayout.set_spacing(size{});
         iStepUpButton.set_margins(neogfx::margins{});

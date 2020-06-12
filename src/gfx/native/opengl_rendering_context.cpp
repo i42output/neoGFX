@@ -1104,18 +1104,22 @@ namespace neogfx
                 auto const& meshFilter = aEcs.component<game::mesh_filter>().has_entity_record(entity) ?
                     aEcs.component<game::mesh_filter>().entity_record(entity) :
                     game::current_animation_frame(aEcs.component<game::animation_filter>().entity_record(entity));
-                auto const& rigidBodyTransformation = (rigidBodies.has_entity_record(entity) ?
-                    to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity());
-                auto const& meshFilterTransformation = (meshFilter.transformation ?
-                    *meshFilter.transformation : mat44::identity());
-                auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record(entity) ?
-                    to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity());
-                auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
                 drawables[meshRenderer.layer].emplace_back(
                     meshFilter,
                     meshRenderer,
-                    transformation,
+                    optional_mat44{},
                     entity);
+                if (meshRenderer.renderCache == std::nullopt || meshRenderer.renderCache->dirty)
+                {
+                    auto const& rigidBodyTransformation = (rigidBodies.has_entity_record(entity) ?
+                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity());
+                    auto const& meshFilterTransformation = (meshFilter.transformation ?
+                        *meshFilter.transformation : mat44::identity());
+                    auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record(entity) ?
+                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity());
+                    auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
+                    drawables[meshRenderer.layer].back().transformation = transformation;
+                }
             }
         }
         if (!drawables[aLayer].empty())
@@ -1668,7 +1672,7 @@ namespace neogfx
                 {
                     for (auto faceVertexIndex : face)
                     {
-                        auto const& xyz = transformation * mesh.vertices[faceVertexIndex];
+                        auto const& xyz = (transformation ? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
                         auto const& rgba = (material.color != std::nullopt ? material.color->rgba.as<float>() : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
                         auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
                             (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents) : vec2{});

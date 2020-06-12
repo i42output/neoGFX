@@ -369,6 +369,7 @@ namespace neogfx
                 if (currentCell)
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
+                    // todo: make the following optional (style-based)
                     aGc.draw_rect(cellBackgroundRect, pen{ selection_model().current_index() == editing() ? *textColor : *cellBackgroundColor });
                     if (selection_model().current_index() != editing() && has_focus())
                         aGc.draw_focus_rect(cellBackgroundRect);

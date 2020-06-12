@@ -28,6 +28,7 @@
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/animation_filter.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
 
 namespace neogfx::game
 {
@@ -70,13 +71,14 @@ namespace neogfx::game
 
         Animate.trigger(now);
 
-        scoped_component_lock<entity_info, animation_filter> lockAnimationFilters{ ecs() };
+        scoped_component_lock<entity_info, mesh_renderer, animation_filter> lockAnimationFilters{ ecs() };
 
         for (auto entity : ecs().component<animation_filter>().entities())
         {
             auto const& info = ecs().component<entity_info>().entity_record(entity);
             if (info.destroyed)
                 continue;
+            auto& renderer = ecs().component<mesh_renderer>().entity_record(entity);
             auto& filter = ecs().component<animation_filter>().entity_record(entity);
             if (!filter.currentFrameStartTime)
                 filter.currentFrameStartTime = info.creationTime;
@@ -91,6 +93,8 @@ namespace neogfx::game
                     ecs().async_destroy_entity(entity, false);
                     break;
                 }
+                else if (renderer.renderCache)
+                    renderer.renderCache->dirty = true;
             }
         }
     }

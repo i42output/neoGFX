@@ -1189,11 +1189,14 @@ int main(int argc, char* argv[])
 
         auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
         {
-            instancingRect = ui.pageInstancing.client_rect();
-            if (useThreadPool)
-                ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
-            else
-                ecs->component<ng::game::mesh_filter>().apply(entity_transformation);
+            if (!ui.checkPauseAnimation.is_checked())
+            {
+                instancingRect = ui.pageInstancing.client_rect();
+                if (useThreadPool)
+                    ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
+                else
+                    ecs->component<ng::game::mesh_filter>().apply(entity_transformation);
+            }
         };
 
         auto configure_ecs = [&]()
@@ -1214,10 +1217,6 @@ int main(int argc, char* argv[])
                     sink += ~~~~ecs->system<ng::game::animator>().Animate(update_ecs_entities);
                     ui.canvasInstancing.set_ecs(*ecs);
                 }
-                if (ui.checkPauseAnimation.is_checked() && !ecs->system<ng::game::animator>().paused())
-                    ecs->system<ng::game::animator>().pause();
-                else if (!ui.checkPauseAnimation.is_checked() && ecs->system<ng::game::animator>().paused())
-                    ecs->system<ng::game::animator>().resume();
                 auto const meshesWanted = ui.sliderShapeCount.value();
                 ng::game::scoped_component_lock<ng::game::mesh_filter> lock{ *ecs };
                 auto& meshFilterComponent = ecs->component<ng::game::mesh_filter>();

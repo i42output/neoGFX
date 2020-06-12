@@ -700,7 +700,7 @@ namespace neogfx
             if (cell_editable(aIndex) && cellInfo.dataStep != neolib::none)
             {
                 cellExtents.cx = std::max(cellExtents.cx, aGc.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
-                cellExtents.cx += dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
+                cellExtents.cx += dip(basic_spin_box<double>::INTERNAL_SPACING.cx + basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
             }
             cellExtents.cx += indent(aIndex, aGc);
             auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aGc);

@@ -25,6 +25,7 @@
 #include <neogfx/game/clock.hpp>
 #include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/animator.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/physics.hpp>
@@ -64,7 +65,7 @@ namespace neogfx::game
 
         start_update();
 
-        std::optional<scoped_component_lock<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
+        std::optional<scoped_component_lock<entity_info, mesh_renderer, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
 
         auto const now = ecs().system<game::time>().system_time();
         auto& worldClock = ecs().shared_component<game::clock>()[0];
@@ -126,6 +127,12 @@ namespace neogfx::game
                 rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3{ elapsedTime, elapsedTime, elapsedTime });
                 rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
+                if ((p0 != rigidBody1.position || a0 != rigidBody1.angle) && ecs().component<mesh_renderer>().has_entity_record(entity1))
+                {
+                    auto& renderer = ecs().component<mesh_renderer>().entity_record(entity1);
+                    if (renderer.renderCache)
+                        renderer.renderCache->dirty = true;
+                }
             }
             end_update(2);
             if (ecs().system_instantiated<collision_detector>() && !ecs().system<collision_detector>().paused())
