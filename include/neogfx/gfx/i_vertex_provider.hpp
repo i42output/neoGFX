@@ -20,13 +20,19 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/game/mesh_render_cache.hpp>
 
 namespace neogfx
 {
-    // todo
     class i_vertex_provider
     {
     public:
+        struct not_cacheable : std::logic_error { not_cacheable() : std::logic_error{ "neogfx::i_vertex_provider::not_cacheable" } {} };
+    public:
         virtual ~i_vertex_provider() = default;
+    public:
+        virtual bool cacheable() const = 0;
+        virtual const game::static_component<game::mesh_render_cache>& cache() const = 0;
+        virtual game::static_component<game::mesh_render_cache>& cache() = 0;
     };
 }

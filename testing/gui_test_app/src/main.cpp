@@ -26,6 +26,7 @@
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_render_cache.hpp>
 #include <neogfx/game/animator.hpp>
 
 #include "test.ui.hpp"
@@ -1173,6 +1174,7 @@ int main(int argc, char* argv[])
                 aFilter.transformation = ng::mat44::identity();
             (*aFilter.transformation)[3][0] = neolib::simd_rand(instancingRect.cx - 1);
             (*aFilter.transformation)[3][1] = neolib::simd_rand(instancingRect.cy - 1);
+            ng::game::set_render_cache_dirty(*ecs, ecs->component<ng::game::mesh_filter>().entity(aFilter));
         };
 
         std::atomic<bool> useThreadPool = false;

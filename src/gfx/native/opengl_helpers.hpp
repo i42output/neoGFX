@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <vector>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
@@ -151,6 +152,20 @@ namespace neogfx
         {
             return *std::prev(end());
         }
+        std::size_t find_space_for(std::size_t aCount)
+        {
+             // todo: optimize
+            for (auto space = iReclaimedSpace.begin(); space != iReclaimedSpace.end(); ++space)
+                if (space->second - space->first >= aCount)
+                {
+                    auto result = space->first;
+                    space->first += aCount;
+                    if (space->first == space->second)
+                        iReclaimedSpace.erase(space);
+                    return result;
+                }
+            return size();
+        }
         void push_back(const_reference aValue)
         {
             need(1);
@@ -219,6 +234,12 @@ namespace neogfx
             if (!room_for(aExtra))
                 grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384));
         }
+    public:
+        void reclaim(std::size_t aStartIndex, std::size_t aEndIndex)
+        {
+            if (aEndIndex != aStartIndex)
+                iReclaimedSpace.push_back(std::make_pair(aStartIndex, aEndIndex));
+        }
     private:
         void grow(size_type aCapacity)
         {
@@ -241,6 +262,7 @@ namespace neogfx
         size_type iSize = 0;
         mutable pointer iMemory = nullptr;
         opengl_buffer_owner* iOwner = nullptr;
+        std::vector<std::pair<std::size_t, std::size_t>> iReclaimedSpace;
     };
 
     template <typename T>
@@ -410,6 +432,12 @@ namespace neogfx
         {
             vertex_buffer::detach_shader();
         }
+    public:
+        void reclaim(std::size_t aStartIndex, std::size_t aEndIndex)
+        {
+            vertices().reclaim(aStartIndex, aEndIndex);
+        }
+    public:
         void execute()
         {
             GLsync sync;

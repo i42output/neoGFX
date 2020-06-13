@@ -22,15 +22,23 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
+#include <neogfx/game/component.hpp>
 #include <neogfx/game/i_component_data.hpp>
 
 namespace neogfx::game
 {
+    enum class cache_state : uint32_t
+    {
+        Invalid = 0x00000000,
+        Dirty   = 0x00000001,
+        Clean   = 0x00000002
+    };
+
     struct mesh_render_cache
     {
-        uint32_t vertexArrayIndexStart;
-        uint32_t vertexArrayIndexEnd;
-        bool dirty;
+        mutable cache_state state;
+        mutable vec2u32 meshVertexArrayIndices;
+        mutable std::vector<vec2u32> patchVertexArrayIndices;
 
         struct meta : i_component_data::meta
         {
@@ -53,10 +61,11 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
+                    return component_data_field_type::Enum | component_data_field_type::Internal;
                 case 1:
-                    return component_data_field_type::Uint32 | component_data_field_type::Internal;
+                    return component_data_field_type::Vec2u32 | component_data_field_type::Internal;
                 case 2:
-                    return component_data_field_type::Bool | component_data_field_type::Internal;
+                    return component_data_field_type::Vec2u32 | component_data_field_type::Array | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
                 }
@@ -65,12 +74,80 @@ namespace neogfx::game
             {
                 static const string sFieldNames[] =
                 {
-                    "Vertex Array Index Start",
-                    "Vertex Array Index End",
-                    "Dirty"
+                    "State",
+                    "Mesh Vertex Array Indices",
+                    "Patch Vertex Array Indices"
                 };
                 return sFieldNames[aFieldIndex];
             }
         };
     };
+
+    inline bool is_render_cache_valid(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    {
+        return aCache.has_entity_record(aEntity) &&
+            aCache.entity_record(aEntity).state != cache_state::Invalid;
+    }
+
+    inline bool is_render_cache_dirty(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    {
+        return aCache.has_entity_record(aEntity) &&
+            aCache.entity_record(aEntity).state == cache_state::Dirty;
+    }
+
+    inline bool is_render_cache_clean(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    {
+        return aCache.has_entity_record(aEntity) &&
+            aCache.entity_record(aEntity).state == cache_state::Clean;
+    }
+
+    inline void set_render_cache_invalid(static_component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    {
+        auto& cache = aCache.entity_record(aEntity, true);
+        cache.state = cache_state::Invalid;
+    }
+
+    inline void set_render_cache_dirty(static_component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    {
+        auto& cache = aCache.entity_record(aEntity, true);
+        if (cache.state == cache_state::Clean)
+            cache.state = cache_state::Dirty;
+    }
+
+    inline void set_render_cache_clean(static_component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    {
+        auto& cache = aCache.entity_record(aEntity, true);
+        if (cache.state == cache_state::Dirty)
+            cache.state = cache_state::Clean;
+    }
+
+    inline bool is_render_cache_valid(i_ecs const& aEcs, entity_id aEntity)
+    {
+        return is_render_cache_valid(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline bool is_render_cache_dirty(i_ecs const& aEcs, entity_id aEntity)
+    {
+        return is_render_cache_dirty(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline bool is_render_cache_clean(i_ecs const& aEcs, entity_id aEntity)
+    {
+        return is_render_cache_clean(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline void set_render_cache_invalid(i_ecs& aEcs, entity_id aEntity)
+    {
+        set_render_cache_invalid(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline void set_render_cache_dirty(i_ecs& aEcs, entity_id aEntity)
+    {
+        set_render_cache_dirty(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline void set_render_cache_clean(i_ecs& aEcs, entity_id aEntity)
+    {
+        set_render_cache_clean(aEcs.component<mesh_render_cache>(), aEntity);
+    }
 }

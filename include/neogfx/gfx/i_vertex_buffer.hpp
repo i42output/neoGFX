@@ -92,5 +92,7 @@ namespace neogfx
         virtual i_shader_program& attached_shader() const = 0;
         virtual void attach_shader(i_rendering_context& aContext, i_shader_program& aShaderProgram) = 0;
         virtual void detach_shader() = 0;
+    public:
+        virtual void reclaim(std::size_t aStartIndex, std::size_t aEndIndex) = 0;
     };
 }

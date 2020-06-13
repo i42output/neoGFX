@@ -117,6 +117,7 @@ namespace neogfx
         virtual i_font_manager& font_manager() = 0;
         virtual i_texture_manager& texture_manager() = 0;
     public:
+        virtual bool vertex_buffer_allocated(i_vertex_provider& aProvider) const = 0;
         virtual i_vertex_buffer& allocate_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType = vertex_buffer_type::Default) = 0;
         virtual void deallocate_vertex_buffer(i_vertex_provider& aProvider) = 0;
         virtual const i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) const = 0;

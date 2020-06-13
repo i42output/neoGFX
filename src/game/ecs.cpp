@@ -26,6 +26,8 @@
 #include <neogfx/game/collision_detector.hpp>
 #include <neogfx/game/animator.hpp>
 #include <neogfx/game/time.hpp>
+#include <neogfx/game/mesh_render_cache.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 
 namespace neogfx
 {
@@ -49,6 +51,34 @@ namespace neogfx
                     return false;
             }
             return base_type::run_threaded(aSystemId);
+        }
+
+        void ecs::destroy_entity(entity_id aEntityId, bool aNotify)
+        {
+            scoped_component_lock<mesh_render_cache> lock{ *this };
+            if (component<mesh_render_cache>().has_entity_record(aEntityId) && service<i_rendering_engine>().vertex_buffer_allocated(*this))
+            {
+                auto const& cacheEntry = component<mesh_render_cache>().entity_record(aEntityId);
+                service<i_rendering_engine>().vertex_buffer(*this).reclaim(cacheEntry.meshVertexArrayIndices[0], cacheEntry.meshVertexArrayIndices[1]);
+                for (auto& indices : cacheEntry.patchVertexArrayIndices)
+                    service<i_rendering_engine>().vertex_buffer(*this).reclaim(indices[0], indices[1]);
+            }
+            base_type::destroy_entity(aEntityId, aNotify);
+        }
+
+        bool ecs::cacheable() const
+        {
+            return true;
+        }
+
+        const game::static_component<game::mesh_render_cache>& ecs::cache() const
+        {
+            return component<game::mesh_render_cache>();
+        }
+
+        game::static_component<game::mesh_render_cache>& ecs::cache()
+        {
+            return component<game::mesh_render_cache>();
         }
     }
 }

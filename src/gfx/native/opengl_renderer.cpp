@@ -231,6 +231,11 @@ namespace neogfx
         return *iTextureManager;
     }
 
+    bool opengl_renderer::vertex_buffer_allocated(i_vertex_provider& aProvider) const
+    {
+        return iVertexBuffers.find(&aProvider) != iVertexBuffers.end();
+    }
+
     i_vertex_buffer& opengl_renderer::allocate_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType)
     {
         auto existing = iVertexBuffers.find(&aProvider);

@@ -23,8 +23,12 @@
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/i_ecs.hpp>
+#include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/animation_filter.hpp>
+#include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_render_cache.hpp>
 #include "opengl.hpp"
 #include "opengl_error.hpp"
 #include "opengl_helpers.hpp"
@@ -43,6 +47,19 @@ namespace neogfx
             standard_batching()
             {
                 static auto& sVertexBuffer = service<i_rendering_engine>().allocate_vertex_buffer(*this);
+            }
+        public:
+            bool cacheable() const override
+            {
+                return false;
+            }
+            const game::static_component<game::mesh_render_cache>& cache() const override
+            {
+                throw not_cacheable();
+            }
+            game::static_component<game::mesh_render_cache>& cache() override
+            {
+                throw not_cacheable();
             }
         };
         class scoped_anti_alias
@@ -141,17 +158,18 @@ namespace neogfx
             {
                 mesh_drawable* meshDrawable;
                 typedef opengl_vertex_buffer<>::vertex_array vertices;
-                vertices::size_type offsetVertices;
+                vertices::size_type vertexArrayIndexStart;
+                vertices::size_type vertexArrayIndexEnd;
                 game::material const* material;
                 game::faces const* faces;
-                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices) :
-                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &meshDrawable.renderer->material }, faces{ nullptr } {}
-                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices, game::faces const& faces) :
-                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &meshDrawable.renderer->material }, faces{ &faces } {}
-                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices, game::material const& material) :
-                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &material }, faces{ nullptr } {}
-                item(mesh_drawable& meshDrawable, vertices::size_type offsetVertices, game::material const& material, game::faces const& faces) :
-                    meshDrawable{ &meshDrawable }, offsetVertices{ offsetVertices }, material{ &material }, faces{ &faces } {}
+                item(mesh_drawable& meshDrawable, vertices::size_type vertexArrayIndexStart, vertices::size_type vertexArrayIndexEnd) :
+                    meshDrawable{ &meshDrawable }, vertexArrayIndexStart{ vertexArrayIndexStart }, vertexArrayIndexEnd{ vertexArrayIndexEnd }, material{ &meshDrawable.renderer->material }, faces{ nullptr } {}
+                item(mesh_drawable& meshDrawable, vertices::size_type vertexArrayIndexStart, vertices::size_type vertexArrayIndexEnd, game::faces const& faces) :
+                    meshDrawable{ &meshDrawable }, vertexArrayIndexStart{ vertexArrayIndexStart }, vertexArrayIndexEnd{ vertexArrayIndexEnd }, material{ &meshDrawable.renderer->material }, faces{ &faces } {}
+                item(mesh_drawable& meshDrawable, vertices::size_type vertexArrayIndexStart, vertices::size_type vertexArrayIndexEnd, game::material const& material) :
+                    meshDrawable{ &meshDrawable }, vertexArrayIndexStart{ vertexArrayIndexStart }, vertexArrayIndexEnd{ vertexArrayIndexEnd }, material{ &material }, faces{ nullptr } {}
+                item(mesh_drawable& meshDrawable, vertices::size_type vertexArrayIndexStart, vertices::size_type vertexArrayIndexEnd, game::material const& material, game::faces const& faces) :
+                    meshDrawable{ &meshDrawable }, vertexArrayIndexStart{ vertexArrayIndexStart }, vertexArrayIndexEnd{ vertexArrayIndexEnd }, material{ &material }, faces{ &faces } {}
                 bool has_texture() const
                 {
                     return patch_drawable::has_texture(*meshDrawable->renderer, *material);
@@ -163,6 +181,8 @@ namespace neogfx
             };
             std::vector<item> items;
         };
+        typedef game::scoped_component_lock<game::entity_info, game::mesh_renderer, game::mesh_render_cache, game::mesh_filter, game::animation_filter, game::rigid_body> ecs_render_lock;
+        typedef std::optional<ecs_render_lock> optional_ecs_render_lock;
     public:
         opengl_rendering_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);
         opengl_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default);
@@ -231,7 +251,7 @@ namespace neogfx
         void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
-        void draw_meshes(i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
+        void draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);
     public:
         neogfx::subpixel_format subpixel_format() const override;

@@ -99,6 +99,7 @@ namespace neogfx
         i_font_manager& font_manager() override;
         i_texture_manager& texture_manager() override;
     public:
+        bool vertex_buffer_allocated(i_vertex_provider& aProvider) const override;
         i_vertex_buffer& allocate_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType = vertex_buffer_type::Default) override;
         void deallocate_vertex_buffer(i_vertex_provider& aProvider) override;
         const i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) const override;

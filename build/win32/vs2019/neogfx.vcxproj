@@ -352,6 +352,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_system.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\mesh_filter.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\mesh_renderer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\mesh_render_cache.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\outline.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\patch.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\physics.hpp" />
