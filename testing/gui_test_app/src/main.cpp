@@ -28,6 +28,7 @@
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_render_cache.hpp>
 #include <neogfx/game/animator.hpp>
+#include <neogfx/game/time.hpp>
 
 #include "test.ui.hpp"
 
@@ -1191,14 +1192,11 @@ int main(int argc, char* argv[])
 
         auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
         {
-            if (!ui.checkPauseAnimation.is_checked())
-            {
-                instancingRect = ui.pageInstancing.client_rect();
-                if (useThreadPool)
-                    ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
-                else
-                    ecs->component<ng::game::mesh_filter>().apply(entity_transformation);
-            }
+            instancingRect = ui.pageInstancing.client_rect();
+            if (useThreadPool)
+                ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
+            else
+                ecs->component<ng::game::mesh_filter>().apply(entity_transformation);
         };
 
         auto configure_ecs = [&]()
@@ -1218,6 +1216,16 @@ int main(int argc, char* argv[])
                     ecs->system<ng::game::animator>().start_thread();
                     sink += ~~~~ecs->system<ng::game::animator>().Animate(update_ecs_entities);
                     ui.canvasInstancing.set_ecs(*ecs);
+                }
+                if (ui.checkPauseAnimation.is_checked() && !ecs->system<ng::game::animator>().paused())
+                {
+                    ecs->system<ng::game::time>().pause();
+                    ecs->system<ng::game::animator>().pause();
+                }
+                else if (!ui.checkPauseAnimation.is_checked() && ecs->system<ng::game::animator>().paused())
+                {
+                    ecs->system<ng::game::time>().resume();
+                    ecs->system<ng::game::animator>().resume();
                 }
                 auto const meshesWanted = ui.sliderShapeCount.value();
                 ng::game::scoped_component_lock<ng::game::mesh_filter> lock{ *ecs };
@@ -1324,7 +1332,7 @@ int main(int argc, char* argv[])
         {
             if (!window.has_native_window())
                 return;
-            bool canUpdateCanvas = (!ecs || ecs->system<ng::game::animator>().paused()) && ui.canvasInstancing.can_update();
+            bool canUpdateCanvas = !ecs && ui.canvasInstancing.can_update();
             aTimer.set_duration(ui.pageDrawing.can_update() || canUpdateCanvas ? 0u : 1u);
             aTimer.again();
             ui.pageDrawing.update();
