@@ -895,6 +895,9 @@ namespace neogfx
                     self.push_event(keyboard_event{ keyboard_event_type::SysTextInput, text });
                 }
                 break;
+            case WM_MENUCHAR:
+                result = MNC_CLOSE << 16;
+                break;
             case WM_UNICHAR:
                 if (wparam == UNICODE_NOCHAR)
                 {
