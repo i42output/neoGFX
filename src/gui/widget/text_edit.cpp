@@ -329,7 +329,7 @@ namespace neogfx
                 if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                     ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
                     linePos.x += aGc.from_device_units(size{ columnRectSansMargins.width() - paintLine->extents.cx, 0.0 }).cx;
-                else if ((Alignment & alignment::Horizontal) == alignment::Centre)
+                else if ((Alignment & alignment::Horizontal) == alignment::Center)
                     linePos.x += std::ceil((aGc.from_device_units(size{ columnRectSansMargins.width() - paintLine->extents.cx, 0.0 }).cx) / 2.0);
                 draw_glyphs(aGc, linePos, column, paintLine);
             }
@@ -1131,7 +1131,7 @@ namespace neogfx
                 if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                     ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
                     alignmentAdjust.dx = columnRectSansMargins.cx - line->extents.cx;
-                else if ((Alignment & alignment::Horizontal) == alignment::Centre)
+                else if ((Alignment & alignment::Horizontal) == alignment::Center)
                     alignmentAdjust.dx = (columnRectSansMargins.cx - line->extents.cx) / 2.0;
                 if (lineStart != lineEnd)
                 {
@@ -1154,7 +1154,7 @@ namespace neogfx
             if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                 ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
                 pos.x = columnRectSansMargins.cx;
-            else if ((Alignment & alignment::Horizontal) == alignment::Centre)
+            else if ((Alignment & alignment::Horizontal) == alignment::Center)
                 pos.x = columnRectSansMargins.cx / 2.0;
             pos.y = lines.back().ypos + lines.back().extents.cy;
         }
@@ -1197,7 +1197,7 @@ namespace neogfx
             if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                 ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
                 alignmentAdjust.dx = columnRectSansMargins.cx - line->extents.cx;
-            else if ((Alignment & alignment::Horizontal) == alignment::Centre)
+            else if ((Alignment & alignment::Horizontal) == alignment::Center)
                 alignmentAdjust.dx = (columnRectSansMargins.cx - line->extents.cx) / 2.0;
             adjustedPosition.x -= alignmentAdjust.dx;
             adjustedPosition = adjustedPosition.max(point{});

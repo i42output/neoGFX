@@ -968,7 +968,7 @@ namespace neogfx
             inputWidget.set_size_policy(size_constraint::Expanding);
             
             auto& inputLabelLayout = inputWidget.label().layout();
-            inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
+            inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
             auto& s1 = inputWidget.layout().add_spacer();
             s1.set_minimum_width(inputLabelLayout.spacing().cx);
             inputWidget.layout().add(iDownArrow);

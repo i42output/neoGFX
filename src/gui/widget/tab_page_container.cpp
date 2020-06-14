@@ -55,7 +55,7 @@ namespace neogfx
 
     stack_layout& tab_page_container::page_layout()
     {
-        return iContainerLayout.centre();
+        return iContainerLayout.center();
     }
 
     tab_container_style tab_page_container::style() const

@@ -158,7 +158,7 @@ namespace neogfx
         rect rectDownButton = aItem.element_rect(skin_element::ScrollbarDownArrow).deflate(margin, margin);
         if (aScrollbar.type() == scrollbar_type::Vertical)
         {
-            coordinate x = std::floor(rectUpButton.centre().x);
+            coordinate x = std::floor(rectUpButton.center().x);
             coordinate w = 1.0;
             for (coordinate y = 0.0; y < rectUpButton.height(); ++y)
             {
@@ -174,7 +174,7 @@ namespace neogfx
         }
         else
         {
-            coordinate y = std::floor(rectUpButton.centre().y);
+            coordinate y = std::floor(rectUpButton.center().y);
             coordinate h = 1.0;
             for (coordinate x = 0.0; x < rectUpButton.width(); ++x)
             {
@@ -237,9 +237,9 @@ namespace neogfx
             borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
         size const scaledPixel{ 1.0_dip, 1.0_dip };
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        aGc.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
+        aGc.draw_circle(discRect.center(), discRect.width() / 2.0, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        aGc.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColor1.mid(widget.background_color()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
+        aGc.draw_circle(discRect.center(), discRect.width() / 2.0, pen{ borderColor1.mid(widget.background_color()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
         discRect.deflate(scaledPixel.cx, scaledPixel.cy);
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(
             widget.background_color().dark() ?
@@ -249,10 +249,10 @@ namespace neogfx
             widget.background_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
         color backgroundFillColor = widget.effectively_enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ? 
             hoverColor : widget.background_color();
-        aGc.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColor.with_combined_alpha(enabledAlphaCoefficient));
+        aGc.fill_circle(discRect.center(), discRect.width() / 2.0, backgroundFillColor.with_combined_alpha(enabledAlphaCoefficient));
         discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
         if (aCheckedState != std::nullopt && *aCheckedState == true)
-            aGc.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));
+            aGc.fill_circle(discRect.center(), discRect.width() / 2.0, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));
     }
 
     void default_skin::draw_tree_expander(i_graphics_context& aGc, const i_skinnable_item& aItem, bool aExpandedState) const
@@ -267,8 +267,8 @@ namespace neogfx
         else
             mesh.vertices = { vec3{ -d1, d1 }, vec3{ d1, -d1 }, vec3{ d1, d1 } };
         if (!aExpandedState)
-            aGc.draw_shape(mesh, expanderRect.centre().to_vec3(), expanderColor);
+            aGc.draw_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
         else
-            aGc.fill_shape(mesh, expanderRect.centre().to_vec3(), expanderColor);
+            aGc.fill_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
     }
 }

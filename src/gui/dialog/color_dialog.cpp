@@ -56,8 +56,8 @@ namespace neogfx
         if (iCustomColor != std::nullopt && iOwner.current_custom_color() == *iCustomColor)
         {
             auto radius = client_rect(false).width() * 0.5 * 0.666;
-            aGc.fill_circle(client_rect(false).centre(), radius, color::White);
-            aGc.fill_circle(client_rect(false).centre(), radius - 1.0_dip, color::Black);
+            aGc.fill_circle(client_rect(false).center(), radius, color::White);
+            aGc.fill_circle(client_rect(false).center(), radius - 1.0_dip, color::Black);
         }
     }
 
@@ -197,7 +197,7 @@ namespace neogfx
     {
         image_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
-            iDragOffset = point{ aPosition - client_rect().centre() };
+            iDragOffset = point{ aPosition - client_rect().center() };
     }
 
     void color_dialog::x_picker::cursor_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -387,8 +387,8 @@ namespace neogfx
 
     void color_dialog::x_picker::update_cursors()
     {
-        iLeftCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_left() + point{ -iLeftCursor.extents().cx - effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
-        iRightCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_right() + point{ effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
+        iLeftCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_left() + point{ -iLeftCursor.extents().cx - effective_frame_width(), -std::floor(iLeftCursor.client_rect().center().y) });
+        iRightCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_right() + point{ effective_frame_width(), -std::floor(iLeftCursor.client_rect().center().y) });
     }
 
     point color_dialog::x_picker::current_cursor_position() const
@@ -714,7 +714,7 @@ namespace neogfx
         iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
         iColorSelection{ *this },
         iScreenPicker{ iRightBottomLayout },
-        iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCentre },
+        iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCenter },
         iBasicColorsGroup{ iLeftLayout, "&Basic colors"_t },
         iBasicColorsGrid{ iBasicColorsGroup.item_layout() },
         iSpacer{ iLeftLayout },
@@ -751,7 +751,7 @@ namespace neogfx
         iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
         iColorSelection{ *this },
         iScreenPicker{ iRightBottomLayout },
-        iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCentre },
+        iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCenter },
         iBasicColorsGroup{ iLeftLayout, "&Basic colors"_t },
         iBasicColorsGrid{ iBasicColorsGroup.item_layout() },
         iSpacer{ iLeftLayout },
@@ -936,7 +936,7 @@ namespace neogfx
 
         update_widgets(*this);
 
-        centre_on_parent();
+        center_on_parent();
     }
 
     color_dialog::mode_e color_dialog::current_mode() const

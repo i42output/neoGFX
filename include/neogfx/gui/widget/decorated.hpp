@@ -142,7 +142,7 @@ namespace neogfx
             if (!iClientLayout)
             {
                 if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
-                    iClientLayout = std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &dock_layout(layout_position::Centre) };
+                    iClientLayout = std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &dock_layout(layout_position::Center) };
                 else
                 {
                     iClientLayout = std::make_shared<vertical_layout>();

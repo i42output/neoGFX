@@ -512,14 +512,14 @@ namespace neogfx
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_circle&>(*op);
-                    draw_circle(args.centre, args.radius, args.pen, args.startAngle);
+                    draw_circle(args.center, args.radius, args.pen, args.startAngle);
                 }
                 break;
             case graphics_operation::operation_type::DrawArc:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_arc&>(*op);
-                    draw_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.pen);
+                    draw_arc(args.center, args.radius, args.startAngle, args.endAngle, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawPath:
@@ -558,14 +558,14 @@ namespace neogfx
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::fill_circle&>(*op);
-                    fill_circle(args.centre, args.radius, args.fill);
+                    fill_circle(args.center, args.radius, args.fill);
                 }
                 break;
             case graphics_operation::operation_type::FillArc:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::fill_arc&>(*op);
-                    fill_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.fill);
+                    fill_arc(args.center, args.radius, args.startAngle, args.endAngle, args.fill);
                 }
                 break;
             case graphics_operation::operation_type::FillPath:
@@ -935,7 +935,7 @@ namespace neogfx
         emit_any_stipple(*this, vertexArrays);
     }
 
-    void opengl_rendering_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
+    void opengl_rendering_context::draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, angle aStartAngle)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
@@ -943,9 +943,9 @@ namespace neogfx
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), 
-                rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
+                rect{ aCenter - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
-        auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, mesh_type::Outline);
+        auto vertices = circle_vertices(aCenter, aRadius, aStartAngle, mesh_type::Outline);
 
         auto lines = line_loop_to_lines(vertices);
         thread_local vec3_list quads;
@@ -969,7 +969,7 @@ namespace neogfx
         emit_any_stipple(*this, vertexArrays);
     }
 
-    void opengl_rendering_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
+    void opengl_rendering_context::draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
@@ -977,9 +977,9 @@ namespace neogfx
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()),
-                rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
+                rect{ aCenter - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 
-        auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline);
+        auto vertices = arc_vertices(aCenter, aRadius, aStartAngle, aEndAngle, aCenter, mesh_type::Outline);
 
         auto lines = line_loop_to_lines(vertices, false);
         thread_local vec3_list quads;
@@ -1197,7 +1197,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
+    void opengl_rendering_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
@@ -1205,9 +1205,9 @@ namespace neogfx
 
         if (std::holds_alternative<gradient>(aFill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
-                rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
+                rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
-        auto vertices = circle_vertices(aCentre, aRadius, 0.0, mesh_type::TriangleFan);
+        auto vertices = circle_vertices(aCenter, aRadius, 0.0, mesh_type::TriangleFan);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
@@ -1225,7 +1225,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
+    void opengl_rendering_context::fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
@@ -1233,9 +1233,9 @@ namespace neogfx
 
         if (std::holds_alternative<gradient>(aFill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
-                rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
+                rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
-        auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::TriangleFan);
+        auto vertices = arc_vertices(aCenter, aRadius, aStartAngle, aEndAngle, aCenter, mesh_type::TriangleFan);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };

@@ -183,7 +183,7 @@ namespace neogfx
         case cardinal::West:
             placementRect.position() = point{ 0.0, (client_rect().height() - placementRect.cy) / 2.0 };
             break;
-        case cardinal::Centre:
+        case cardinal::Center:
             placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, (client_rect().height() - placementRect.cy) / 2.0 };
             break;
         case cardinal::East:

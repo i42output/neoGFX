@@ -1268,7 +1268,7 @@ int main(int argc, char* argv[])
             {
                 aGc.draw_multiline_text(ng::point{ 32.0, 32.0 }, 
                     "WARNING\n\n\nTHIS TEST CAN POTENTIALLY TRIGGER\nSEIZURES FOR PEOPLE WITH\nPHOTOSENSITIVE EPILEPSY\n\nDISCRETION IS ADVISED", 
-                    infoFont, 0.0, ng::text_appearance{ ng::color::Coral, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } }, ng::alignment::Centre);
+                    infoFont, 0.0, ng::text_appearance{ ng::color::Coral, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } }, ng::alignment::Center);
                 return;
             }
             if (!ecs)

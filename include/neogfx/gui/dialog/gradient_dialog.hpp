@@ -92,11 +92,11 @@ namespace neogfx
         double_spin_box iMExponentSpinBox;
         label iNExponent;
         double_spin_box iNExponentSpinBox;
-        group_box iCentreGroupBox;
-        label iXCentre;
-        double_spin_box iXCentreSpinBox;
-        label iYCentre;
-        double_spin_box iYCentreSpinBox;
+        group_box iCenterGroupBox;
+        label iXCenter;
+        double_spin_box iXCenterSpinBox;
+        label iYCenter;
+        double_spin_box iYCenterSpinBox;
         horizontal_spacer iSpacer2;
         vertical_spacer iSpacer3;
         group_box iPreviewGroupBox;

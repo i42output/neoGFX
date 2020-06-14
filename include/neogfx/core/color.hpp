@@ -986,9 +986,9 @@ namespace neogfx
         const optional_vec2& exponents() const;
         void set_exponents(const optional_vec2& aExponents);
         gradient with_exponents(const optional_vec2& aExponents) const;
-        const optional_point& centre() const;
-        void set_centre(const optional_point& aCentre);
-        gradient with_centre(const optional_point& aCentre) const;
+        const optional_point& center() const;
+        void set_center(const optional_point& aCenter);
+        gradient with_center(const optional_point& aCenter) const;
         double smoothness() const;
         void set_smoothness(double aSmoothness);
         gradient with_smoothness(double aSmoothness) const;
@@ -1014,7 +1014,7 @@ namespace neogfx
         gradient_shape iShape;
         gradient_size iSize;
         optional_vec2 iExponents;
-        optional_point iCentre;
+        optional_point iCenter;
         double iSmoothness;
     };
 

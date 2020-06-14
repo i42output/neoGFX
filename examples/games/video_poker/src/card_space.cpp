@@ -97,7 +97,7 @@ namespace video_poker
     {
         if (iCardSprite != neogfx::game::null_entity)
         {
-            auto xy = iCanvas.to_client_coordinates(to_window_coordinates(client_rect().centre()));
+            auto xy = iCanvas.to_client_coordinates(to_window_coordinates(client_rect().center()));
             if (iCard->discarded())
                 xy += neogfx::point{ -8.0, -16.0 };
             auto& meshFilter = iCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(iCardSprite);
@@ -126,7 +126,7 @@ namespace video_poker
         widget{ aLayout },
         iCanvas{ aCanvas },
         iTable{ aTable },
-        iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
+        iVerticalLayout{ *this, neogfx::alignment::Center | neogfx::alignment::VCenter },
         iCardWidget{ iVerticalLayout, aCanvas, aTable.textures() },
         iHoldButton{ iVerticalLayout, "HOLD\n CANCEL " },
         iCard{ nullptr }

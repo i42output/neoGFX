@@ -107,14 +107,14 @@ namespace neogfx
             auto const& cr = client_rect();
             draw_alpha_background(aGc, cr, 16.0_dip);
             aGc.fill_rect(cr, iOwner.gradient());
-            if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().centre() != optional_point{})
+            if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().center() != optional_point{})
             {
-                point const centre{ cr.centre().x + cr.width() / 2.0 * iOwner.gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * iOwner.gradient().centre()->y };
+                point const center{ cr.center().x + cr.width() / 2.0 * iOwner.gradient().center()->x, cr.center().y + cr.height() / 2.0 * iOwner.gradient().center()->y };
                 auto const radius = 6.0_dip;
                 auto const circumference = 2.0 * math::pi<double>() * radius;
-                aGc.draw_circle(centre, radius, pen{ color::White, 1.0_dip });
+                aGc.draw_circle(center, radius, pen{ color::White, 1.0_dip });
                 aGc.line_stipple_on(8.0_dip, 0x5555, circumference * neolib::thread::program_elapsed_ms() / 1000.0);
-                aGc.draw_circle(centre, radius, pen{ color::Black, 1.0_dip });
+                aGc.draw_circle(center, radius, pen{ color::Black, 1.0_dip });
                 aGc.line_stipple_off();
             }
         }
@@ -142,18 +142,18 @@ namespace neogfx
         void select(const point& aPosition)
         {
             auto cr = client_rect(false);
-            point centre{ aPosition.x / cr.width() * 2.0 - 1.0, aPosition.y / cr.height() * 2.0 - 1.0 };
-            centre = centre.max(point{ -1.0, -1.0 }).min(point{ 1.0, 1.0 });
-            iOwner.gradient_selector().set_gradient(iOwner.gradient().with_centre(centre));
+            point center{ aPosition.x / cr.width() * 2.0 - 1.0, aPosition.y / cr.height() * 2.0 - 1.0 };
+            center = center.max(point{ -1.0, -1.0 }).min(point{ 1.0, 1.0 });
+            iOwner.gradient_selector().set_gradient(iOwner.gradient().with_center(center));
         }
     private:
         void animate()
         {
-            if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().centre() != optional_point{})
+            if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().center() != optional_point{})
             {
                 rect cr = client_rect();
-                point centre{ cr.centre().x + cr.width() / 2.0 * iOwner.gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * iOwner.gradient().centre()->y };
-                update(rect{ centre - point{ 10, 10 }, size{ 20, 20 } });
+                point center{ cr.center().x + cr.width() / 2.0 * iOwner.gradient().center()->x, cr.center().y + cr.height() / 2.0 * iOwner.gradient().center()->y };
+                update(rect{ center - point{ 10, 10 }, size{ 20, 20 } });
             }
         }
     private:
@@ -210,11 +210,11 @@ namespace neogfx
         iMExponentSpinBox{ iExponentGroupBox.item_layout() },
         iNExponent{ iExponentGroupBox.item_layout(), "n:"_t },
         iNExponentSpinBox{ iExponentGroupBox.item_layout() },
-        iCentreGroupBox{ iLayout5, "Centre"_t },
-        iXCentre{ iCentreGroupBox.with_item_layout<grid_layout>(2, 2), "X:"_t },
-        iXCentreSpinBox { iCentreGroupBox.item_layout() },
-        iYCentre{ iCentreGroupBox.item_layout(), "Y:"_t },
-        iYCentreSpinBox { iCentreGroupBox.item_layout() },
+        iCenterGroupBox{ iLayout5, "Center"_t },
+        iXCenter{ iCenterGroupBox.with_item_layout<grid_layout>(2, 2), "X:"_t },
+        iXCenterSpinBox { iCenterGroupBox.item_layout() },
+        iYCenter{ iCenterGroupBox.item_layout(), "Y:"_t },
+        iYCenterSpinBox { iCenterGroupBox.item_layout() },
         iSpacer2{ iLayout5 },
         iSpacer3{ iLayout3 },
         iPreviewGroupBox{ iLayout4, "Preview"_t },
@@ -308,19 +308,19 @@ namespace neogfx
         iNExponentSpinBox.set_format("%.2f");
         iNExponentSpinBox.text_box().set_alignment(alignment::Right);
         iNExponentSpinBox.text_box().set_size_hint(size_hint{ "00.00" });
-        iCentreGroupBox.set_checkable(true);
-        iXCentreSpinBox.set_minimum(-1.0);
-        iXCentreSpinBox.set_maximum(1.0);
-        iXCentreSpinBox.set_step(0.001);
-        iXCentreSpinBox.set_format("%.3f");
-        iXCentreSpinBox.text_box().set_alignment(alignment::Right);
-        iXCentreSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
-        iYCentreSpinBox.set_minimum(-1.0);
-        iYCentreSpinBox.set_maximum(1.0);
-        iYCentreSpinBox.set_step(0.001);
-        iYCentreSpinBox.set_format("%.3f");
-        iYCentreSpinBox.text_box().set_alignment(alignment::Right);
-        iYCentreSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
+        iCenterGroupBox.set_checkable(true);
+        iXCenterSpinBox.set_minimum(-1.0);
+        iXCenterSpinBox.set_maximum(1.0);
+        iXCenterSpinBox.set_step(0.001);
+        iXCenterSpinBox.set_format("%.3f");
+        iXCenterSpinBox.text_box().set_alignment(alignment::Right);
+        iXCenterSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
+        iYCenterSpinBox.set_minimum(-1.0);
+        iYCenterSpinBox.set_maximum(1.0);
+        iYCenterSpinBox.set_step(0.001);
+        iYCenterSpinBox.set_format("%.3f");
+        iYCenterSpinBox.text_box().set_alignment(alignment::Right);
+        iYCenterSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
 
         iGradientSelector.set_fixed_size(size{ 256.0_dip, iGradientSelector.minimum_size().cy });
 
@@ -469,11 +469,11 @@ namespace neogfx
             iGradientSelector.set_gradient(gradient().with_exponents(e));
         });
 
-        iCentreGroupBox.check_box().checked([this]() { iGradientSelector.set_gradient(gradient().with_centre(point{})); });
-        iCentreGroupBox.check_box().Unchecked([this]() { iGradientSelector.set_gradient(gradient().with_centre(optional_point{})); });
+        iCenterGroupBox.check_box().checked([this]() { iGradientSelector.set_gradient(gradient().with_center(point{})); });
+        iCenterGroupBox.check_box().Unchecked([this]() { iGradientSelector.set_gradient(gradient().with_center(optional_point{})); });
 
-        iXCentreSpinBox.ValueChanged([this]() { auto c = gradient().centre(); if (c == std::nullopt) c = point{}; c->x = iXCentreSpinBox.value(); iGradientSelector.set_gradient(gradient().with_centre(c)); });
-        iYCentreSpinBox.ValueChanged([this]() { auto c = gradient().centre(); if (c == std::nullopt) c = point{}; c->y = iYCentreSpinBox.value(); iGradientSelector.set_gradient(gradient().with_centre(c)); });
+        iXCenterSpinBox.ValueChanged([this]() { auto c = gradient().center(); if (c == std::nullopt) c = point{}; c->x = iXCenterSpinBox.value(); iGradientSelector.set_gradient(gradient().with_center(c)); });
+        iYCenterSpinBox.ValueChanged([this]() { auto c = gradient().center(); if (c == std::nullopt) c = point{}; c->y = iYCenterSpinBox.value(); iGradientSelector.set_gradient(gradient().with_center(c)); });
 
         iPreview->set_margins(neogfx::margins{});
         iPreview->set_fixed_size(size{ std::ceil(256.0_dip * 16.0 / 9.0), 256.0_dip });
@@ -484,7 +484,7 @@ namespace neogfx
         update_widgets();
 
         layout().invalidate();
-        centre_on_parent();
+        center_on_parent();
     }
 
     void gradient_dialog::update_widgets()
@@ -530,23 +530,23 @@ namespace neogfx
         iMExponentSpinBox.enable(specifyExponents);
         iNExponent.enable(specifyExponents);
         iNExponentSpinBox.enable(specifyExponents);        
-        auto centre = gradient().centre();
-        bool specifyCentre = (centre != std::nullopt);
-        iCentreGroupBox.check_box().set_checked(specifyCentre);
-        if (specifyCentre)
+        auto center = gradient().center();
+        bool specifyCenter = (center != std::nullopt);
+        iCenterGroupBox.check_box().set_checked(specifyCenter);
+        if (specifyCenter)
         {
-            iXCentreSpinBox.set_value(centre->x, false);
-            iYCentreSpinBox.set_value(centre->y, false);
+            iXCenterSpinBox.set_value(center->x, false);
+            iYCenterSpinBox.set_value(center->y, false);
         }
         else
         {
-            iXCentreSpinBox.text_box().set_text("");
-            iYCentreSpinBox.text_box().set_text("");
+            iXCenterSpinBox.text_box().set_text("");
+            iYCenterSpinBox.text_box().set_text("");
         }
-        iXCentre.enable(specifyCentre);
-        iXCentreSpinBox.enable(specifyCentre);
-        iYCentre.enable(specifyCentre);
-        iYCentreSpinBox.enable(specifyCentre);
+        iXCenter.enable(specifyCenter);
+        iXCenterSpinBox.enable(specifyCenter);
+        iYCenter.enable(specifyCenter);
+        iYCenterSpinBox.enable(specifyCenter);
         switch (gradient().direction())
         {
         case gradient_direction::Vertical:
@@ -556,7 +556,7 @@ namespace neogfx
             iSizeGroupBox.hide();
             iShapeGroupBox.hide();
             iExponentGroupBox.hide();
-            iCentreGroupBox.hide();
+            iCenterGroupBox.hide();
             break;
         case gradient_direction::Diagonal:
             iOrientationGroupBox.show();
@@ -564,14 +564,14 @@ namespace neogfx
             iSizeGroupBox.hide();
             iShapeGroupBox.hide();
             iExponentGroupBox.hide();
-            iCentreGroupBox.hide();
+            iCenterGroupBox.hide();
             break;
         case gradient_direction::Radial:
             iOrientationGroupBox.hide();
             iSizeGroupBox.show();
             iShapeGroupBox.show();
             iExponentGroupBox.show(gradient().shape() == gradient_shape::Ellipse);
-            iCentreGroupBox.show();
+            iCenterGroupBox.show();
             break;
         }
         iPreview->update();

@@ -37,7 +37,7 @@ namespace neogfx
         None    = 0x00000000,
         Top     = 0x00000001,
         Left    = 0x00000002,
-        Centre  = 0x00000004,
+        Center  = 0x00000004,
         Right   = 0x00000008,
         Bottom  = 0x00000010
     };

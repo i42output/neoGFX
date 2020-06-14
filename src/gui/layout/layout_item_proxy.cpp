@@ -184,12 +184,12 @@ namespace neogfx
         if (adjustedSize != aSize)
         {
             adjustedPosition += point{
-            (parent_layout().alignment() & alignment::Centre) == alignment::Centre ?
+            (parent_layout().alignment() & alignment::Center) == alignment::Center ?
                 (aSize - adjustedSize).cx / 2.0 :
                 (parent_layout().alignment() & alignment::Right) == alignment::Right ?
                     (aSize - adjustedSize).cx :
                     0.0,
-            (parent_layout().alignment() & alignment::VCentre) == alignment::VCentre ?
+            (parent_layout().alignment() & alignment::VCenter) == alignment::VCenter ?
                 (aSize - adjustedSize).cy / 2.0 :
                 (parent_layout().alignment() & alignment::Bottom) == alignment::Bottom ?
                     (aSize - adjustedSize).cy :

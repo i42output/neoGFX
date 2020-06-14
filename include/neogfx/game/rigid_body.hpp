@@ -34,7 +34,7 @@ namespace neogfx::game
         vec3 acceleration;
         vec3 angle;
         vec3 spin;
-        vec3 centreOfMass;
+        vec3 centerOfMass;
         scalar drag;
 
         struct meta : i_component_data::meta
@@ -83,7 +83,7 @@ namespace neogfx::game
                     "Acceleration",
                     "Angle",
                     "Spin",
-                    "Centre Of Mass",
+                    "Center Of Mass",
                     "Drag"
                 };
                 return sFieldNames[aFieldIndex];

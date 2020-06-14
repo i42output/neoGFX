@@ -59,11 +59,11 @@ namespace neogfx
             {
                 double radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
                 aGc.fill_circle(
-                    to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().centre())), radius, service<i_app>().current_style().palette().color(color_role::Text));
+                    to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().center())), radius, service<i_app>().current_style().palette().color(color_role::Text));
             }
             if (has_focus())
             {
-                rect focusRect = to_client_coordinates(image_widget().to_window_coordinates(rect{ image_widget().client_rect().centre() - image().extents() / 2.0, image().extents() }));
+                rect focusRect = to_client_coordinates(image_widget().to_window_coordinates(rect{ image_widget().client_rect().center() - image().extents() / 2.0, image().extents() }));
                 focusRect.inflate(2.0, 2.0);
                 aGc.draw_focus_rect(focusRect);
             }

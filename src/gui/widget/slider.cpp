@@ -99,8 +99,8 @@ namespace neogfx
         }
         color indicatorBorderColor = indicatorColor.darker(0x40);
         indicatorColor.lighten(0x40);
-        aGc.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0, indicatorBorderColor);
-        aGc.fill_circle(rectIndicator.centre(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
+        aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0, indicatorBorderColor);
+        aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
     }
 
     void slider_impl::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -111,7 +111,7 @@ namespace neogfx
             neolib::scoped_flag sf{ iHandlingEvent };
             if (indicator_box().contains(aPosition))
             {
-                iDragOffset = aPosition - indicator_box().centre();
+                iDragOffset = aPosition - indicator_box().center();
                 if (iOrientation == slider_orientation::Horizontal)
                     set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
                 else
@@ -221,9 +221,9 @@ namespace neogfx
     {
         const rect rectBarBox = bar_box();
         if (iOrientation == slider_orientation::Horizontal)
-            return point{ rectBarBox.x + rectBarBox.cx * aValue, rectBarBox.centre().y };
+            return point{ rectBarBox.x + rectBarBox.cx * aValue, rectBarBox.center().y };
         else
-            return point{ rectBarBox.centre().x, rectBarBox.y + rectBarBox.cy * (1.0 - aValue) };
+            return point{ rectBarBox.center().x, rectBarBox.y + rectBarBox.cy * (1.0 - aValue) };
     }
 }
 

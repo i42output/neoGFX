@@ -28,9 +28,9 @@ namespace neogfx
     class horizontal_layout : public layout
     {
     public:
-        horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-        horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-        horizontal_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCenter);
+        horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
+        horizontal_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
         horizontal_layout(horizontal_layout& aParent);
     public:
         i_spacer& add_spacer() override;

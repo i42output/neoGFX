@@ -244,8 +244,8 @@ namespace neogfx
         iTitleBarLayout{ iNonClientLayout },
         iMenuLayout{ iNonClientLayout },
         iToolbarLayout{ iNonClientLayout },
-        iDockLayout{ iToolbarLayout.centre() },
-        iClientWidget{ std::make_unique<client>(iDockLayout.centre(), aScrollbarStyle) },
+        iDockLayout{ iToolbarLayout.center() },
+        iClientWidget{ std::make_unique<client>(iDockLayout.center(), aScrollbarStyle) },
         iClientLayout{ iClientWidget->layout() },
         iStatusBarLayout{ iNonClientLayout }
     {
@@ -692,7 +692,7 @@ namespace neogfx
         close();
     }
 
-    void window::centre(bool aSetMinimumSize)
+    void window::center(bool aSetMinimumSize)
     {
         layout_items();
         if (aSetMinimumSize)
@@ -701,7 +701,7 @@ namespace neogfx
         window_manager().move_window(*this, (desktopRect.extents() - window_manager().window_rect(*this).extents()) / 2.0);
     }
 
-    void window::centre_on_parent(bool aSetMinimumSize)
+    void window::center_on_parent(bool aSetMinimumSize)
     {
         if (has_parent_window(false))
         {
@@ -723,7 +723,7 @@ namespace neogfx
             window_manager().move_window(*this, position.ceil());
         }
         else
-            centre(aSetMinimumSize);
+            center(aSetMinimumSize);
     }
 
     void window::widget_added(i_widget&)
@@ -976,7 +976,7 @@ namespace neogfx
         iDockLayout.bottom().set_margins(neogfx::margins{});
         iDockLayout.left().set_margins(neogfx::margins{});
         iDockLayout.right().set_margins(neogfx::margins{});
-        iDockLayout.centre().set_margins(neogfx::margins{});
+        iDockLayout.center().set_margins(neogfx::margins{});
         iClientLayout.set_margins(neogfx::margins{});
         iStatusBarLayout.set_margins(neogfx::margins{});
 
@@ -1000,7 +1000,7 @@ namespace neogfx
                 if (placement().position_specified())
                     move(placement().normal_geometry()->top_left());
                 else
-                    centre_on_parent(false);
+                    center_on_parent(false);
             }
         }
 

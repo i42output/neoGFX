@@ -131,8 +131,8 @@ namespace neogfx
                 if (iShape == path_shape::ConvexPolygon)
                 {
                     auto const& boundingRect = bounding_rect(false);
-                    auto const& centre = boundingRect.centre();
-                    result.push_back(xyz{ centre.x + position().x, centre.y + position().y });
+                    auto const& center = boundingRect.center();
+                    result.push_back(xyz{ center.x + position().x, center.y + position().y });
                 }
                 for (auto vi = aPath.begin(); vi != aPath.end(); ++vi)
                 {
@@ -202,15 +202,15 @@ namespace neogfx
         void inflate(const delta_type& aDelta)
         {
             auto const boundingRect = bounding_rect(false);
-            auto const centre = boundingRect.centre();
+            auto const center = boundingRect.center();
             for (auto& segment : iSubPaths)
                 for (auto& point : segment)
                 {
-                    if (point.x < centre.x)
+                    if (point.x < center.x)
                         point.x -= aDelta.dx;
                     else
                         point.x += aDelta.dx;
-                    if (point.y < centre.y)
+                    if (point.y < center.y)
                         point.y -= aDelta.dy;
                     else
                         point.y += aDelta.dy;

@@ -26,9 +26,9 @@ namespace neogfx
     class stack_layout : public layout
     {
     public:
-        stack_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-        stack_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-        stack_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        stack_layout(neogfx::alignment aAlignment = neogfx::alignment::VCenter);
+        stack_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
+        stack_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
     public:
         using layout::add_spacer;
         i_spacer& add_spacer() override;

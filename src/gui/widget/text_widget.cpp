@@ -26,19 +26,19 @@
 namespace neogfx
 {
     text_widget::text_widget(const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{}, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment { neogfx::alignment::Centre | neogfx::alignment::VCentre }
+        widget{}, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment { neogfx::alignment::Center | neogfx::alignment::VCenter }
     {
         init();
     }
 
     text_widget::text_widget(i_widget& aParent, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aParent }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
+        widget{ aParent }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter }
     {
         init();
     }
 
     text_widget::text_widget(i_layout& aLayout, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aLayout }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
+        widget{ aLayout }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter }
     {
         init();
     }
@@ -84,7 +84,7 @@ namespace neogfx
         case neogfx::alignment::Justify:
             textPosition.x = 0.0;
             break;
-        case neogfx::alignment::Centre:
+        case neogfx::alignment::Center:
             textPosition.x = std::floor((client_rect().width() - textSize.cx) / 2.0);
             break;
         case neogfx::alignment::Right:
@@ -98,7 +98,7 @@ namespace neogfx
         case neogfx::alignment::Top:
             textPosition.y = 0.0;
             break;
-        case neogfx::alignment::VCentre:
+        case neogfx::alignment::VCenter:
             textPosition.y = std::floor((client_rect().height() - textSize.cy) / 2.0);
             break;
         case neogfx::alignment::Bottom:

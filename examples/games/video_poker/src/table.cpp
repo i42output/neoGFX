@@ -61,7 +61,7 @@ namespace video_poker
                 aOutcome,
                 neogfx::font{ "Exo 2", "Black", 48.0 },
                 neogfx::text_appearance{aColor, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black } },
-                neogfx::alignment::Centre}
+                neogfx::alignment::Center}
         {
             neogfx::game::scoped_component_lock<neogfx::game::mesh_renderer, neogfx::game::entity_info, neogfx::game::rigid_body> lock{ aCanvas.ecs() };
             aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).layer = 1;
@@ -76,7 +76,7 @@ namespace video_poker
         iState{ table_state::TakeBet },
         iCredit{ STARTING_CREDIT },
         iStake{ 0 },
-        iMainLayout{ *this, neogfx::alignment::Centre },
+        iMainLayout{ *this, neogfx::alignment::Center },
         iLabelTitle{ iMainLayout, "VIDEO POKER" },
         iSpacer1{ iMainLayout },
         iSpacesLayout{ iMainLayout },

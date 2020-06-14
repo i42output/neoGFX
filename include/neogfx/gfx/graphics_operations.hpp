@@ -151,7 +151,7 @@ namespace neogfx
 
         struct draw_circle
         {
-            point centre;
+            point center;
             dimension radius;
             pen pen;
             angle startAngle;
@@ -159,7 +159,7 @@ namespace neogfx
 
         struct draw_arc
         {
-            point centre;
+            point center;
             dimension radius;
             angle startAngle;
             angle endAngle;
@@ -202,14 +202,14 @@ namespace neogfx
 
         struct fill_circle
         {
-            point centre;
+            point center;
             dimension radius;
             brush fill;
         };
 
         struct fill_arc
         {
-            point centre;
+            point center;
             dimension radius;
             angle startAngle;
             angle endAngle;

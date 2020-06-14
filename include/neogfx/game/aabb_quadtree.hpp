@@ -232,11 +232,11 @@ namespace neogfx::game
             {
                 auto const& min = iAabb.min;
                 auto const& max = iAabb.max;
-                auto const& centre = (min + max) / 2.0;
-                iQuadrants[0][0] = aabb_2d{ min, centre };
-                iQuadrants[0][1] = aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
-                iQuadrants[1][0] = aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };
-                iQuadrants[1][1] = aabb_2d{ centre, max };
+                auto const& center = (min + max) / 2.0;
+                iQuadrants[0][0] = aabb_2d{ min, center };
+                iQuadrants[0][1] = aabb_2d{ vec2{ min.x, center.y }, vec2{ center.x, max.y } };
+                iQuadrants[1][0] = aabb_2d{ vec2{ center.x, min.y }, vec2{ max.x, center.y } };
+                iQuadrants[1][1] = aabb_2d{ center, max };
             }
             template <std::size_t X, std::size_t Y>
             node& child() const

@@ -32,7 +32,7 @@ namespace neogfx
         iTop{ iRows, aAlignment },
         iMiddle{ iRows, aAlignment },
         iLeft{ iMiddle, aAlignment },
-        iCentre{ iMiddle, aAlignment },
+        iCenter{ iMiddle, aAlignment },
         iRight{ iMiddle, aAlignment },
         iBottom{ iRows, aAlignment }
     {
@@ -45,7 +45,7 @@ namespace neogfx
         iTop{ iRows, aAlignment },
         iMiddle{ iRows, aAlignment },
         iLeft{ iMiddle, aAlignment },
-        iCentre{ iMiddle, aAlignment },
+        iCenter{ iMiddle, aAlignment },
         iRight{ iMiddle, aAlignment },
         iBottom{ iRows, aAlignment }
     {
@@ -58,7 +58,7 @@ namespace neogfx
         iTop{ iRows, aAlignment },
         iMiddle{ iRows, aAlignment },
         iLeft{ iMiddle, aAlignment },
-        iCentre{ iMiddle, aAlignment },
+        iCenter{ iMiddle, aAlignment },
         iRight{ iMiddle, aAlignment },
         iBottom{ iRows, aAlignment }
     {
@@ -78,14 +78,14 @@ namespace neogfx
             return top();
         case layout_position::Left:
             return left();
-        case layout_position::Centre:
-            return centre();
+        case layout_position::Center:
+            return center();
         case layout_position::Right:
             return right();
         case layout_position::Bottom:
             return bottom();
         }
-        return centre();
+        return center();
     }
 
     i_layout& border_layout::part(layout_position aPosition)
@@ -113,14 +113,14 @@ namespace neogfx
         return iLeft;
     }
 
-    const stack_layout& border_layout::centre() const
+    const stack_layout& border_layout::center() const
     {
-        return iCentre;
+        return iCenter;
     }
 
-    stack_layout& border_layout::centre()
+    stack_layout& border_layout::center()
     {
-        return iCentre;
+        return iCenter;
     }
 
     const vertical_layout& border_layout::right() const
@@ -162,7 +162,7 @@ namespace neogfx
         iTop.invalidate();
         iMiddle.invalidate();
         iLeft.invalidate();
-        iCentre.invalidate();
+        iCenter.invalidate();
         iRight.invalidate();
         iBottom.invalidate();
     }
@@ -199,7 +199,7 @@ namespace neogfx
         iTop.set_margins(neogfx::margins{});
         iMiddle.set_margins(neogfx::margins{});
         iLeft.set_margins(neogfx::margins{});
-        iCentre.set_margins(neogfx::margins{});
+        iCenter.set_margins(neogfx::margins{});
         iRight.set_margins(neogfx::margins{});
         iBottom.set_margins(neogfx::margins{});
 
@@ -208,7 +208,7 @@ namespace neogfx
         iTop.set_spacing(neogfx::size{});
         iMiddle.set_spacing(neogfx::size{});
         iLeft.set_spacing(neogfx::size{});
-        iCentre.set_spacing(neogfx::size{});
+        iCenter.set_spacing(neogfx::size{});
         iRight.set_spacing(neogfx::size{});
         iBottom.set_spacing(neogfx::size{});
 
@@ -217,7 +217,7 @@ namespace neogfx
         iTop.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMiddle.set_size_policy(size_constraint::Expanding);
         iLeft.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
-        iCentre.set_size_policy(size_constraint::Expanding);
+        iCenter.set_size_policy(size_constraint::Expanding);
         iRight.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
         iBottom.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
 

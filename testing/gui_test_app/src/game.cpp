@@ -92,7 +92,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 
     auto spaceship = ecs.create_entity(
         archetypes::spaceship,
-        ng::to_ecs_component(ng::game_rect{ ng::size{ 36.0, 36.0} }.with_centred_origin()),
+        ng::to_ecs_component(ng::game_rect{ ng::size{ 36.0, 36.0} }.with_centerd_origin()),
         ng::game::mesh_renderer{ 
             ng::game::material
             { 
@@ -371,7 +371,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                         auto tm = ng::game::to_transformation_matrix(spaceshipPhysics, false);
                         auto missile = ecs.create_entity(
                             archetypes::missile,
-                            ng::to_ecs_component(ng::rect{ ng::size{ 3.0, 3.0} }.with_centred_origin()),
+                            ng::to_ecs_component(ng::rect{ ng::size{ 3.0, 3.0} }.with_centerd_origin()),
                             ng::game::material{ ng::to_ecs_component(ng::color{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 }), {}, {}, {} },
                             ng::game::rigid_body
                             {

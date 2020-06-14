@@ -493,7 +493,7 @@ namespace neogfx
         iShape{ aOther.iShape },
         iSize{ aOther.iSize },
         iExponents{ aOther.iExponents },
-        iCentre{ aOther.iCentre },
+        iCenter{ aOther.iCenter },
         iSmoothness{ aOther.iSmoothness }
     {
     }
@@ -572,7 +572,7 @@ namespace neogfx
         iShape{ aOther.iShape },
         iSize{ aOther.iSize },
         iExponents{ aOther.iExponents },
-        iCentre{ aOther.iCentre },
+        iCenter{ aOther.iCenter },
         iSmoothness{ aOther.iSmoothness }
     {
     }
@@ -834,7 +834,7 @@ namespace neogfx
         if (iDirection != gradient_direction::Radial)
         {
             iExponents = optional_vec2{};
-            iCentre = optional_point{};
+            iCenter = optional_point{};
         }
     }
 
@@ -915,22 +915,22 @@ namespace neogfx
         return result;
     }
 
-    const optional_point& gradient::centre() const
+    const optional_point& gradient::center() const
     {
-        return iCentre;
+        return iCenter;
     }
 
-    void gradient::set_centre(const optional_point& aCentre)
+    void gradient::set_center(const optional_point& aCenter)
     {
-        iCentre = aCentre;
-        if (iCentre != optional_point{})
-            iCentre = iCentre->min(point{ 1.0, 1.0 }).max(point{ -1.0, -1.0 });
+        iCenter = aCenter;
+        if (iCenter != optional_point{})
+            iCenter = iCenter->min(point{ 1.0, 1.0 }).max(point{ -1.0, -1.0 });
     }
 
-    gradient gradient::with_centre(const optional_point& aCentre) const
+    gradient gradient::with_center(const optional_point& aCenter) const
     {
         gradient result = *this;
-        result.set_centre(aCentre);
+        result.set_center(aCenter);
         return result;
     }
 
@@ -960,7 +960,7 @@ namespace neogfx
             shape() == aOther.shape() &&
             size() == aOther.size() &&
             exponents() == aOther.exponents() &&
-            centre() == aOther.centre() &&
+            center() == aOther.center() &&
             smoothness() == aOther.smoothness();
     }
 
@@ -971,8 +971,8 @@ namespace neogfx
 
     bool gradient::operator<(const gradient& aOther) const
     {
-        return std::tie(iColorStops, iAlphaStops, iDirection, iOrientation, iShape, iSize, iExponents, iCentre, iSmoothness) < 
-            std::tie(aOther.iColorStops, aOther.iAlphaStops, aOther.iDirection, aOther.iOrientation, aOther.iShape, aOther.iSize, aOther.iExponents, aOther.iCentre, aOther.iSmoothness);
+        return std::tie(iColorStops, iAlphaStops, iDirection, iOrientation, iShape, iSize, iExponents, iCenter, iSmoothness) < 
+            std::tie(aOther.iColorStops, aOther.iAlphaStops, aOther.iDirection, aOther.iOrientation, aOther.iShape, aOther.iSize, aOther.iExponents, aOther.iCenter, aOther.iSmoothness);
     }
 
     double gradient::normalized_position(double aPos, double aStart, double aEnd)

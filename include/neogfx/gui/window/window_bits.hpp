@@ -51,7 +51,8 @@ namespace neogfx
         HideOnOwnerClick =     0x00400000,
         HideOnParentClick =    0x00800000,
         InitiallyHidden =      0x01000000,
-        DropShadow =           0x02000000,
+        InitiallyCentered =    0x02000000,    // Center on desktop or parent
+        DropShadow =           0x04000000,
         Weak =                 0x80000000,
         Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow
     };

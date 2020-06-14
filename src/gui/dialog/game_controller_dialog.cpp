@@ -71,6 +71,6 @@ namespace neogfx
         }
         iControllerSelector.accept_selection();
         iTabs.layout().set_ignore_visibility(true);
-        centre_on_parent();
+        center_on_parent();
     }
 }

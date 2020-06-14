@@ -70,5 +70,114 @@
                 }
             }
         }
+        /* new_project: {
+            dialog: {
+                id: newProject
+                name: "New Project"
+                type: Child
+                style: [Model TitleBar Close InitiallyCentered]
+                button_box: [Ok Cancel]
+                default_focus: projectName
+                vertical_layout: {
+                    horizontal_layout: {
+                        vertical_layout: {
+                            group_box: {
+                                text: "Project Type"
+                                radio_button: {
+                                    id: typeBlank
+                                    text: "Blank app"
+                                }
+                                radio_button: {
+                                    id: typeMVC
+                                    text: "MVC (model-view-controller) app"
+                                }
+                                radio_button: {
+                                    id: typeDialog
+                                    text: "Dialog app"
+                                }
+                                radio_button: {
+                                    id: type2DGame
+                                    text: "2D game"
+                                    enabled: false
+                                }
+                                radio_button: {
+                                    id: type25DGame
+                                    text: "2.5D (isometric) game"
+                                    enabled: false
+                                }
+                                radio_button: {
+                                    id: type3DGame
+                                    text: "3D game"
+                                    enabled: false
+                                }
+                            }
+                            vertical_spacer: {}
+                        }
+                        vertical_layout: {
+                            group_box: {
+                                text: "Project Details"
+                                horizontal_layout : {
+                                    label: {
+                                        text: "Name:"
+                                    }
+                                    line_edit: {
+                                        id: projectName
+                                        size_hint: "Medium sized project name"
+                                    }
+                                }
+                                horizontal_layout : {
+                                    label: {
+                                        text: "Location:"
+                                    }
+                                    line_edit: {
+                                        id: projectLocation
+                                    }
+                                    push_button: {
+                                        id: browseProjectLocation
+                                        .image: {
+                                            uri: ":/neogfx/resources/icons.zip#openfolder.png"
+                                            fixed_size: [ 16.0dip 16.0dip ]
+                                        }
+                                    }
+                                }
+                                horizontal_layout : {
+                                    label: {
+                                        text: "Namespace:"
+                                    }
+                                    line_edit: {
+                                        id: projectNamespace
+                                        size_hint: "Medium sized namespace name"
+                                    }
+                                }
+                                group_box: {
+                                    text: "Source Code Naming Convention"
+                                    radio_button: {
+                                        id: namingLowerCaseSnake
+                                        text: "Lower case with underscores"
+                                    }
+                                    radio_button: {
+                                        id: namingMixedCaseSnake
+                                        text: "Mixed case with underscores"
+                                    }
+                                    radio_button: {
+                                        id: namingUpperCamelCase
+                                        text: "Upper camel case"
+                                    }
+                                    radio_button: {
+                                        id: namingLowerCamelCase
+                                        text: "Lower camel case"
+                                    }
+                                    radio_button: {
+                                        id: namingSymbian
+                                        text: "neoGFX (Symbianesque)"
+                                    }
+                                }
+                            }
+                            vertical_spacer: {}
+                        }
+                    }
+                }
+            }
+        } */
     }
 }

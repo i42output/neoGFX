@@ -26,7 +26,7 @@
 namespace neogfx
 {
     push_button::push_button(push_button_style aStyle) :
-        button{ (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -35,7 +35,7 @@ namespace neogfx
     }
 
     push_button::push_button(const std::string& aText, push_button_style aStyle) :
-        button{ aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -44,7 +44,7 @@ namespace neogfx
     }
 
     push_button::push_button(const i_texture& aTexture, push_button_style aStyle) :
-        button{ aTexture, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aTexture, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -53,7 +53,7 @@ namespace neogfx
     }
 
     push_button::push_button(const i_image& aImage, push_button_style aStyle) :
-        button{ aImage, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aImage, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -62,7 +62,7 @@ namespace neogfx
     }
     
     push_button::push_button(i_widget& aParent, push_button_style aStyle) :
-        button{ aParent, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aParent, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -71,7 +71,7 @@ namespace neogfx
     }
 
     push_button::push_button(i_widget& aParent, const std::string& aText, push_button_style aStyle) :
-        button{ aParent, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aParent, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -80,7 +80,7 @@ namespace neogfx
     }
 
     push_button::push_button(i_widget& aParent, const i_texture& aTexture, push_button_style aStyle) :
-        button{ aParent, aTexture, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aParent, aTexture, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -89,7 +89,7 @@ namespace neogfx
     }
 
     push_button::push_button(i_widget& aParent, const i_image& aImage, push_button_style aStyle) :
-        button{ aParent, aImage, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aParent, aImage, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -98,7 +98,7 @@ namespace neogfx
     }
 
     push_button::push_button(i_layout& aLayout, push_button_style aStyle) :
-        button{ aLayout, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aLayout, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -107,7 +107,7 @@ namespace neogfx
     }
 
     push_button::push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle) :
-        button{ aLayout, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aLayout, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -116,7 +116,7 @@ namespace neogfx
     }
 
     push_button::push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle) :
-        button{ aLayout, aTexture, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aLayout, aTexture, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -125,7 +125,7 @@ namespace neogfx
     }
 
     push_button::push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle) :
-        button{ aLayout, aImage, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre },
+        button{ aLayout, aImage, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Center : alignment::Left) | alignment::VCenter },
         iAnimator{ service<async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
@@ -394,7 +394,7 @@ namespace neogfx
             set_margins(neogfx::margins{ 1.0_dip, 2.0_dip });
             layout().set_margins(neogfx::margins{});
             label().set_margins(neogfx::margins{});
-            label().text_widget().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
+            label().text_widget().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
         }
         else if (iStyle == push_button_style::Toolbar)
         {

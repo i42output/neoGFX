@@ -763,7 +763,7 @@ namespace neogfx
             else
                 return other.left() >= left() && other.right() <= right() && other.bottom() >= bottom() && other.top() <= top();
         }
-        point_type centre() const 
+        point_type center() const 
         { 
             if constexpr (gui)
                 return point_type{ left() + static_cast<coordinate_type>(width()) / two, top() + static_cast<coordinate_type>(height()) / two };
@@ -801,7 +801,7 @@ namespace neogfx
             if constexpr (gui)
             {
                 self_type candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
-                if (contains(candidate.centre()) && other.contains(candidate.centre()))
+                if (contains(candidate.center()) && other.contains(candidate.center()))
                     return candidate;
                 else
                     return basic_rect{};
@@ -809,7 +809,7 @@ namespace neogfx
             else
             {
                 self_type candidate{ bottom_left().max(other.bottom_left()), top_right().min(other.top_right()) };
-                if (contains(candidate.centre()) && other.contains(candidate.centre()))
+                if (contains(candidate.center()) && other.contains(candidate.center()))
                     return candidate;
                 else
                     return basic_rect{};
@@ -822,7 +822,7 @@ namespace neogfx
             else
                 return self_type{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
         }
-        self_type with_centred_origin() const
+        self_type with_centerd_origin() const
         {
             return self_type{ point_type{ -extents() / two }, extents() };
         }

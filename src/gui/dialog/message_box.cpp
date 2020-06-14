@@ -283,7 +283,7 @@ namespace neogfx
         icon().set_aspect_ratio(aspect_ratio::KeepExpanding);
         icon().set_fixed_size(size{ 32.0_dip, 32.0_dip });
     
-        centre_on_parent();
+        center_on_parent();
 
         button_box().clicked([this](standard_button aButton)
         {

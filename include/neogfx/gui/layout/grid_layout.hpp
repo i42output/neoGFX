@@ -42,12 +42,12 @@ namespace neogfx
         typedef std::map<cell_coordinates, i_layout_item*, std::less<cell_coordinates>, neolib::fast_pool_allocator<std::pair<const cell_coordinates, i_layout_item*>>> cell_list;
         typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
     public:
-        grid_layout(neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-        grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-        grid_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-        grid_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-        grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-        grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        grid_layout(neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        grid_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        grid_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
         ~grid_layout();
     public:
         cell_coordinate rows() const;

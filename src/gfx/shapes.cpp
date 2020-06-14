@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    vertices arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments)
+    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments)
     {
         vertices result;
         angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
@@ -50,12 +50,12 @@ namespace neogfx
         {
             if (aType == mesh_type::Triangles)
                 result.push_back(xyz{ aOrigin.x, aOrigin.y });
-            result.push_back(xyz{ x + aCentre.x, y + aCentre.y });
+            result.push_back(xyz{ x + aCenter.x, y + aCenter.y });
             coordinate t = x;
             x = c * x - s * y;
             y = s * t + c * y;
             if (aType == mesh_type::Triangles)
-                result.push_back(xyz{ x + aCentre.x, y + aCentre.y });
+                result.push_back(xyz{ x + aCenter.x, y + aCenter.y });
         }
         if (aStartAngle == aEndAngle)
         {
@@ -67,9 +67,9 @@ namespace neogfx
         return result;
     }
 
-    vertices circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
+    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
     {
-        return arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aCentre, aType, aArcSegments);
+        return arc_vertices(aCenter, aRadius, aStartAngle, aStartAngle, aCenter, aType, aArcSegments);
     }
 
     vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments)
@@ -80,28 +80,28 @@ namespace neogfx
             aRadius,
             boost::math::constants::pi<coordinate>(),
             boost::math::constants::pi<coordinate>() * 1.5,
-            aRect.centre(),
+            aRect.center(),
             aType, aArcSegments);
         auto const topRight = arc_vertices(
             aRect.top_right() + point{ -aRadius, aRadius },
             aRadius,
             boost::math::constants::pi<coordinate>() * 1.5,
             boost::math::constants::pi<coordinate>() * 2.0,
-            aRect.centre(),
+            aRect.center(),
             aType, aArcSegments);
         auto const bottomRight = arc_vertices(
             aRect.bottom_right() + point{ -aRadius, -aRadius },
             aRadius,
             0.0,
             boost::math::constants::pi<coordinate>() * 0.5,
-            aRect.centre(),
+            aRect.center(),
             aType, aArcSegments);
         auto const bottomLeft = arc_vertices(
             aRect.bottom_left() + point{ aRadius, -aRadius },
             aRadius,
             boost::math::constants::pi<coordinate>() * 0.5,
             boost::math::constants::pi<coordinate>(),
-            aRect.centre(),
+            aRect.center(),
             aType, aArcSegments);
         std::array<xyz, 8> const remainingCoordinates =
         {
@@ -118,7 +118,7 @@ namespace neogfx
         {
             result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aType == mesh_type::TriangleFan ? 10 : 9));
             if (aType == mesh_type::TriangleFan)
-                result.push_back(xyz{ aRect.centre().x, aRect.centre().y });
+                result.push_back(xyz{ aRect.center().x, aRect.center().y });
             result.insert(result.end(), remainingCoordinates[0]);
             result.insert(result.end(), topLeft.begin(), topLeft.end());
             result.insert(result.end(), remainingCoordinates[1]);
@@ -142,11 +142,11 @@ namespace neogfx
             result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
             for (std::size_t i = 0u; i < remainingCoordinates.size() - 1; ++i)
             {
-                result.insert(result.end(), xyz{ aRect.centre().x, aRect.centre().y });
+                result.insert(result.end(), xyz{ aRect.center().x, aRect.center().y });
                 result.insert(result.end(), remainingCoordinates[i]);
                 result.insert(result.end(), remainingCoordinates[i + 1u]);
             }
-            result.insert(result.end(), xyz{ aRect.centre().x, aRect.centre().y });
+            result.insert(result.end(), xyz{ aRect.center().x, aRect.center().y });
             result.insert(result.end(), remainingCoordinates[7]);
             result.insert(result.end(), remainingCoordinates[0]);
         }

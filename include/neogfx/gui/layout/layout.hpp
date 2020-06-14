@@ -63,9 +63,9 @@ namespace neogfx
         template <typename Layout>
         struct row_major;
     public:
-        layout(neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-        layout(i_widget& aOwner, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-        layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+        layout(neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        layout(i_widget& aOwner, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
         layout(const layout&) = delete;
         ~layout();
     public:

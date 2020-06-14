@@ -50,8 +50,8 @@ namespace neogfx
         typedef Layout layout_type;
         typedef horizontal_layout major_layout;
         typedef vertical_layout minor_layout;
-        static const neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCentre | neogfx::alignment::Bottom;
-        static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Left | neogfx::alignment::Centre | neogfx::alignment::Right;
+        static const neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
+        static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
         static const point::coordinate_type& x(const point& aPoint) { return aPoint.x; }
         static point::coordinate_type& x(point& aPoint) { return aPoint.x; }
         static const point::coordinate_type& y(const point& aPoint) { return aPoint.y; }
@@ -72,8 +72,8 @@ namespace neogfx
         typedef Layout layout_type;
         typedef vertical_layout major_layout;
         typedef horizontal_layout minor_layout;
-        static const neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Centre | neogfx::alignment::Right;
-        static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCentre | neogfx::alignment::Bottom;
+        static const neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
+        static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
         static const point::coordinate_type& x(const point& aPoint) { return aPoint.y; }
         static point::coordinate_type& x(point& aPoint) { return aPoint.y; }
         static const point::coordinate_type& y(const point& aPoint) { return aPoint.x; }
@@ -363,8 +363,8 @@ namespace neogfx
             case alignment::Bottom:
                 AxisPolicy::y(alignmentAdjust) = AxisPolicy::cy(availableSize) - AxisPolicy::cy(s);
                 break;
-            case alignment::Centre:
-            case alignment::VCentre:
+            case alignment::Center:
+            case alignment::VCenter:
                 AxisPolicy::y(alignmentAdjust) = std::ceil((AxisPolicy::cy(availableSize) - AxisPolicy::cy(s)) / 2.0);
                 break;
             }
@@ -394,8 +394,8 @@ namespace neogfx
             case alignment::Bottom:
                 AxisPolicy::cx(adjust) = AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos);
                 break;
-            case alignment::Centre:
-            case alignment::VCentre:
+            case alignment::Center:
+            case alignment::VCenter:
                 AxisPolicy::cx(adjust) = std::floor((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
                 break;
             }

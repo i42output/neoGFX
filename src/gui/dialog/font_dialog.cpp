@@ -257,7 +257,7 @@ namespace neogfx
         for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
             iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
 
-        centre_on_parent();
+        center_on_parent();
 
         update_selected_font(*this);
     }

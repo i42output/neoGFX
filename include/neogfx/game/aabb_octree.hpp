@@ -318,23 +318,23 @@ namespace neogfx::game
             {
                 auto const& min = iAabb.min;
                 auto const& max = iAabb.max;
-                auto const& centre = (min + max) / 2.0;
-                iOctants[0][0][0] = neogfx::aabb{ min, centre };
-                iOctants[0][1][0] = neogfx::aabb{ vec3{ min.x, centre.y, min.z }, vec3{ centre.x, max.y, centre.z } };
-                iOctants[1][0][0] = neogfx::aabb{ vec3{ centre.x, min.y, min.z }, vec3{ max.x, centre.y, centre.z } };
-                iOctants[1][1][0] = neogfx::aabb{ vec3{ centre.x, centre.y, min.z }, vec3{ max.x, max.y, centre.z } };
-                iOctants[0][0][1] = neogfx::aabb{ vec3{ min.x, min.y, centre.z }, vec3{ centre.x, centre.y, max.z } };
-                iOctants[0][1][1] = neogfx::aabb{ vec3{ min.x, centre.y, centre.z }, vec3{ centre.x, max.y, max.z } };
-                iOctants[1][0][1] = neogfx::aabb{ vec3{ centre.x, min.y, centre.z }, vec3{ max.x, centre.y, max.z } };
-                iOctants[1][1][1] = neogfx::aabb{ vec3{ centre.x, centre.y, centre.z }, vec3{ max.x, max.y, max.z } };
-                iOctants2d[0][0][0] = aabb_2d{ ~min.xy, ~centre.xy };
-                iOctants2d[0][1][0] = aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
-                iOctants2d[1][0][0] = aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };
-                iOctants2d[1][1][0] = aabb_2d{ ~centre.xy, ~max.xy };
-                iOctants2d[0][0][1] = aabb_2d{ ~min.xy, ~centre.xy};
-                iOctants2d[0][1][1] = aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
-                iOctants2d[1][0][1] = aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };
-                iOctants2d[1][1][1] = aabb_2d{ ~centre.xy, ~max.xy };
+                auto const& center = (min + max) / 2.0;
+                iOctants[0][0][0] = neogfx::aabb{ min, center };
+                iOctants[0][1][0] = neogfx::aabb{ vec3{ min.x, center.y, min.z }, vec3{ center.x, max.y, center.z } };
+                iOctants[1][0][0] = neogfx::aabb{ vec3{ center.x, min.y, min.z }, vec3{ max.x, center.y, center.z } };
+                iOctants[1][1][0] = neogfx::aabb{ vec3{ center.x, center.y, min.z }, vec3{ max.x, max.y, center.z } };
+                iOctants[0][0][1] = neogfx::aabb{ vec3{ min.x, min.y, center.z }, vec3{ center.x, center.y, max.z } };
+                iOctants[0][1][1] = neogfx::aabb{ vec3{ min.x, center.y, center.z }, vec3{ center.x, max.y, max.z } };
+                iOctants[1][0][1] = neogfx::aabb{ vec3{ center.x, min.y, center.z }, vec3{ max.x, center.y, max.z } };
+                iOctants[1][1][1] = neogfx::aabb{ vec3{ center.x, center.y, center.z }, vec3{ max.x, max.y, max.z } };
+                iOctants2d[0][0][0] = aabb_2d{ ~min.xy, ~center.xy };
+                iOctants2d[0][1][0] = aabb_2d{ vec2{ min.x, center.y }, vec2{ center.x, max.y } };
+                iOctants2d[1][0][0] = aabb_2d{ vec2{ center.x, min.y }, vec2{ max.x, center.y } };
+                iOctants2d[1][1][0] = aabb_2d{ ~center.xy, ~max.xy };
+                iOctants2d[0][0][1] = aabb_2d{ ~min.xy, ~center.xy};
+                iOctants2d[0][1][1] = aabb_2d{ vec2{ min.x, center.y }, vec2{ center.x, max.y } };
+                iOctants2d[1][0][1] = aabb_2d{ vec2{ center.x, min.y }, vec2{ max.x, center.y } };
+                iOctants2d[1][1][1] = aabb_2d{ ~center.xy, ~max.xy };
             }
             template <std::size_t X, std::size_t Y, std::size_t Z>
             node& child() const

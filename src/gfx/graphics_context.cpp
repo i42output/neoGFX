@@ -407,18 +407,18 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen });
     }
 
-    void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const brush& aFill, angle aStartAngle) const
+    void graphics_context::draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill, angle aStartAngle) const
     {
         if (aFill != neolib::none)
-            fill_circle(aCentre, aRadius, aFill);
-        native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCentre) + iOrigin, aRadius, aPen, aStartAngle });
+            fill_circle(aCenter, aRadius, aFill);
+        native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aStartAngle });
     }
 
-    void graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
     {
         if (aFill != neolib::none)
-            fill_arc(aCentre, aRadius, aStartAngle, aEndAngle, aFill);
-        native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen });
+            fill_arc(aCenter, aRadius, aStartAngle, aEndAngle, aFill);
+        native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen });
     }
 
     void graphics_context::draw_path(const path& aPath, const pen& aPen, const brush& aFill) const
@@ -480,14 +480,14 @@ namespace neogfx
         native_context().enqueue(graphics_operation::fill_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aFill });
     }
 
-    void graphics_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill) const
+    void graphics_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const
     {
-        native_context().enqueue(graphics_operation::fill_circle{ to_device_units(aCentre) + iOrigin, aRadius, aFill });
+        native_context().enqueue(graphics_operation::fill_circle{ to_device_units(aCenter) + iOrigin, aRadius, aFill });
     }
 
-    void graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const
+    void graphics_context::fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const
     {
-        native_context().enqueue(graphics_operation::fill_arc{ to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill });
+        native_context().enqueue(graphics_operation::fill_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill });
     }
 
     void graphics_context::fill_path(const path& aPath, const brush& aFill) const
@@ -1039,7 +1039,7 @@ namespace neogfx
             auto const textDirection = glyph_text_direction(result.glyphText.cbegin() + line.begin, result.glyphText.cbegin() + line.end);
             if ((aAlignment == alignment::Left && textDirection == text_direction::RTL) || (aAlignment == alignment::Right && textDirection == text_direction::LTR))
                 line.pos.x += maxLineWidth - from_device_units(size{ line.extents.cx, 0.0 }).cx;
-            else if (aAlignment == alignment::Centre)
+            else if (aAlignment == alignment::Center)
                 line.pos.x += std::ceil((maxLineWidth - from_device_units(size{ line.extents.cx, 0.0 }).cx) / 2);
         }
 

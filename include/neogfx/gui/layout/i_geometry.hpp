@@ -50,7 +50,7 @@ namespace neogfx
         North,
         NorthEast,
         West,
-        Centre,
+        Center,
         East,
         SouthWest,
         South,
@@ -93,7 +93,7 @@ const neolib::enum_enumerators_t<neogfx::cardinal> neolib::enum_enumerators_v<ne
     declare_enum_string(neogfx::cardinal, North)
     declare_enum_string(neogfx::cardinal, NorthEast)
     declare_enum_string(neogfx::cardinal, West)
-    declare_enum_string(neogfx::cardinal, Centre)
+    declare_enum_string(neogfx::cardinal, Center)
     declare_enum_string(neogfx::cardinal, East)
     declare_enum_string(neogfx::cardinal, SouthWest)
     declare_enum_string(neogfx::cardinal, South)

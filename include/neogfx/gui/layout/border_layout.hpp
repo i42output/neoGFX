@@ -33,9 +33,9 @@ namespace neogfx
     public:
         struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::border_layout::not_implemented") {} };
     public:
-        border_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-        border_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
-        border_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+        border_layout(neogfx::alignment aAlignment = neogfx::alignment::VCenter);
+        border_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
+        border_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
         ~border_layout();
     public:
         const i_layout& part(layout_position aPosition) const;
@@ -44,8 +44,8 @@ namespace neogfx
         vertical_layout& top();
         const vertical_layout& left() const;
         vertical_layout& left();
-        const stack_layout& centre() const;
-        stack_layout& centre();
+        const stack_layout& center() const;
+        stack_layout& center();
         const vertical_layout& right() const;
         vertical_layout& right();
         const vertical_layout& bottom() const;
@@ -68,7 +68,7 @@ namespace neogfx
         vertical_layout iTop;
         horizontal_layout iMiddle;
         vertical_layout iLeft;
-        stack_layout iCentre;
+        stack_layout iCenter;
         vertical_layout iRight;
         vertical_layout iBottom;
     };

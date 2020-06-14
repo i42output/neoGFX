@@ -26,18 +26,18 @@ namespace neogfx
 {
     enum class alignment : uint32_t
     {
-        None = 0x0000,
-        Left = 0x0001,
-        Right = 0x0002,
-        Centre = 0x0004,
-        Center = alignment::Centre,
-        Justify = 0x0008,
-        Top = 0x0010,
-        VCentre = 0x0020,
-        VCenter = alignment::VCentre,
-        Bottom = 0x0040,
-        Horizontal = Left | Centre | Right | Justify,
-        Vertical = Top | VCentre | Bottom
+        None        = 0x0000,
+        Left        = 0x0001,
+        Right       = 0x0002,
+        Center      = 0x0004,
+        Centre      = alignment::Center,
+        Justify     = 0x0008,
+        Top         = 0x0010,
+        VCenter     = 0x0020,
+        VCentre     = alignment::VCenter,
+        Bottom      = 0x0040,
+        Horizontal  = Left | Center | Right | Justify,
+        Vertical    = Top | VCenter | Bottom
     };
 }
 
@@ -47,11 +47,9 @@ const neolib::enum_enumerators_t<neogfx::alignment> neolib::enum_enumerators_v<n
     declare_enum_string(neogfx::alignment, None)
     declare_enum_string(neogfx::alignment, Left)
     declare_enum_string(neogfx::alignment, Right)
-    declare_enum_string(neogfx::alignment, Centre)
     declare_enum_string(neogfx::alignment, Center)
     declare_enum_string(neogfx::alignment, Justify)
     declare_enum_string(neogfx::alignment, Top)
-    declare_enum_string(neogfx::alignment, VCentre)
     declare_enum_string(neogfx::alignment, VCenter)
     declare_enum_string(neogfx::alignment, Bottom)
     declare_enum_string(neogfx::alignment, Horizontal) 

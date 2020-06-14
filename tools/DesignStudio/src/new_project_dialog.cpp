@@ -70,7 +70,7 @@ namespace neogfx::DesignStudio
                 iLocation.set_text(*newLocation);
         });
         iNamespace.set_size_hint(ng::size_hint{ "Medium sized namespace name" });
-        centre_on_parent();
+        center_on_parent();
         auto updateNamespace = [this]()
         {
             iNamespace.set_text(to_symbol_name(iName.text(), iNamingConvention, named_entity::Namespace));

@@ -45,18 +45,18 @@ namespace neogfx
     public:
         // button
     public:
-        button(alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_widget& aParent, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_widget& aParent, const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_widget& aParent, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_layout& aLayout, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_layout& aLayout, const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCentre);
-        button(i_layout& aLayout, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCentre);
+        button(alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
         ~button();
         // widget
     public:

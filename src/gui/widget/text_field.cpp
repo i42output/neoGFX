@@ -196,9 +196,9 @@ namespace neogfx
         iInputBoxLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iInputBoxLayout.set_margins(neogfx::margins{});
         iHint.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iHint.set_alignment(alignment::Left | alignment::VCentre);
+        iHint.set_alignment(alignment::Left | alignment::VCenter);
         iHelp.set_margins(neogfx::margins{});
-        iHelp.set_alignment(alignment::Left | alignment::VCentre);
+        iHelp.set_alignment(alignment::Left | alignment::VCenter);
 
         auto size_hint_updater = [this]()
         {

@@ -51,7 +51,7 @@ namespace neogfx
         set_margins(neogfx::margins(0.0));
         layout().set_margins(neogfx::margins(0.0));
         layout().add_spacer();
-        label().text_widget().set_alignment(alignment::Left | alignment::VCentre);
+        label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
     check_box::check_box(i_widget& aParent, const std::string& aText, button_checkable aCheckable) :
@@ -61,7 +61,7 @@ namespace neogfx
         set_margins(neogfx::margins(0.0));
         layout().set_margins(neogfx::margins(0.0));
         layout().add_spacer();
-        label().text_widget().set_alignment(alignment::Left | alignment::VCentre);
+        label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
     check_box::check_box(i_layout& aLayout, const std::string& aText, button_checkable aCheckable) :
@@ -71,7 +71,7 @@ namespace neogfx
         set_margins(neogfx::margins(0.0));
         layout().set_margins(neogfx::margins(0.0));
         layout().add_spacer();
-        label().text_widget().set_alignment(alignment::Left | alignment::VCentre);
+        label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
     size_policy check_box::size_policy() const

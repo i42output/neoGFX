@@ -40,7 +40,7 @@ namespace neogfx
         switch(aType)
         {
         case mesh_type::TriangleFan:
-            aResult.push_back(aRect.centre().to_vec3(aZpos));
+            aResult.push_back(aRect.center().to_vec3(aZpos));
             aResult.push_back(aRect.top_left().to_vec3(aZpos));
             aResult.push_back(aRect.top_right().to_vec3(aZpos));
             aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
@@ -75,7 +75,7 @@ namespace neogfx
         calc_rect_vertices(result, aRect, aType, aZpos);
         return result;
     };
-    vertices arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);
-    vertices circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
+    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);
+    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
     vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments = 0);
 }
