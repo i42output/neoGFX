@@ -33,7 +33,7 @@
 namespace neogfx::game
 {
     animator::animator(game::i_ecs& aEcs) :
-        system<entity_info, animation_filter, mesh_render_cache>{ aEcs }
+        system<entity_info, animation_filter, mesh_renderer, mesh_render_cache>{ aEcs }
     {
         Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         start_thread_if();

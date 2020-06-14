@@ -72,7 +72,7 @@ namespace video_poker
     };
     
     table::table(neogfx::i_layout& aLayout) :
-        neogfx::game::canvas{ aLayout, neogfx::game::make_ecs<neogfx::game::simple_physics>() },
+        neogfx::game::canvas{ aLayout, neogfx::game::make_ecs<neogfx::game::simple_physics>(neogfx::game::ecs_flags::Default | neogfx::game::ecs_flags::CreatePaused) },
         iState{ table_state::TakeBet },
         iCredit{ STARTING_CREDIT },
         iStake{ 0 },
@@ -171,6 +171,10 @@ namespace video_poker
 
         // Instantiate physics...
         ecs().system<neogfx::game::simple_physics>();
+        // Instantiate non-default components...
+        ecs().component<neogfx::game::text_mesh>();
+
+        ecs().resume_all_systems();
     }
 
     table::~table()
