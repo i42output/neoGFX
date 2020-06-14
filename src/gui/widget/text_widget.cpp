@@ -75,7 +75,7 @@ namespace neogfx
 
     void text_widget::paint(i_graphics_context& aGc) const
     {
-        scoped_mnemonics sm(aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT));
+        scoped_mnemonics sm(aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT));
         size textSize = text_extent();
         point textPosition;
         switch (iAlignment & neogfx::alignment::Horizontal)
@@ -251,7 +251,7 @@ namespace neogfx
         else if (!has_surface())
             return size{};
         graphics_context gc{ *this, graphics_context::type::Unattached };
-        scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT) };
+        scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) };
         if (multi_line())
         {
             if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
@@ -279,7 +279,7 @@ namespace neogfx
         else
         {
             graphics_context gc{ *this, graphics_context::type::Unattached };
-            scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT) };
+            scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) };
             if (multi_line())
             {
                 if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
@@ -333,7 +333,7 @@ namespace neogfx
         if (iGlyphText.empty())
         {
             graphics_context gc{ *this, graphics_context::type::Unattached };
-            scoped_mnemonics sm(gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT));
+            scoped_mnemonics sm(gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT));
             iGlyphText = gc.to_glyph_text(iText, font());
         }
         return iGlyphText;

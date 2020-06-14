@@ -761,7 +761,7 @@ namespace neogfx
 
     bool app::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
-        if (aScanCode == ScanCode_LALT || aScanCode == ScanCode_RALT)
+        if (aScanCode == ScanCode_LALT)
             for (auto& m : iMnemonics)
                 m->mnemonic_widget().update();
         bool partialMatches = false;
@@ -796,7 +796,7 @@ namespace neogfx
 
     bool app::key_released(scan_code_e aScanCode, key_code_e, key_modifiers_e)
     {
-        if (aScanCode == ScanCode_LALT || aScanCode == ScanCode_RALT)
+        if (aScanCode == ScanCode_LALT)
             for (auto& m : iMnemonics)
                 m->mnemonic_widget().update();
         return false;
