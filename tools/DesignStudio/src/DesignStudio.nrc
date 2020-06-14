@@ -7,64 +7,66 @@
     }
 
     ui: {
-        app: {
-            id: mainApp
-            name: "neoGFX Design Studio"
-            action: {
-                id: actionShowStatusBar
-                text: "Show/Hide Status Bar"
-                checkable: true
-                checked: true
-            }
-            window: {
-                id: mainWindow
-                default_size: [ 960dip 832dip ]
-                status_bar: {
-                    id: statusBar
+        main: {
+            app: {
+                id: mainApp
+                name: "neoGFX Design Studio"
+                action: {
+                    id: actionShowStatusBar
+                    text: "Show/Hide Status Bar"
+                    checkable: true
+                    checked: true
                 }
-                menu_bar: {
-                    id: menuBar
-                    menu: {
-                        title: "&File"
+                window: {
+                    id: mainWindow
+                    default_size: [ 960dip 832dip ]
+                    status_bar: {
+                        id: statusBar
+                    }
+                    menu_bar: {
+                        id: menuBar
+                        menu: {
+                            title: "&File"
+                            action: mainApp.actionFileNew
+                            action: mainApp.actionFileOpen
+                            action: separator
+                            action: mainApp.actionFileClose
+                            action: separator
+                            action: mainApp.actionFileSave
+                            action: separator
+                            action: mainApp.actionFileExit
+                        }
+                        menu: {
+                            title: "&Edit"
+                            action: mainApp.actionUndo
+                            action: mainApp.actionRedo
+                            action: separator
+                            action: mainApp.actionCut
+                            action: mainApp.actionCopy
+                            action: mainApp.actionPaste
+                            action: mainApp.actionDelete
+                            action: separator
+                            action: mainApp.actionSelectAll
+                        }
+                        menu: {
+                            title: "&View"
+                            action: actionShowStatusBar
+                        }
+                    }
+                    toolbar: {
+                        id: mainToolbar
+                        button_image_extents: [16dip 16dip]
                         action: mainApp.actionFileNew
                         action: mainApp.actionFileOpen
-                        action: separator
-                        action: mainApp.actionFileClose
-                        action: separator
                         action: mainApp.actionFileSave
                         action: separator
-                        action: mainApp.actionFileExit
-                    }
-                    menu: {
-                        title: "&Edit"
                         action: mainApp.actionUndo
                         action: mainApp.actionRedo
                         action: separator
                         action: mainApp.actionCut
                         action: mainApp.actionCopy
                         action: mainApp.actionPaste
-                        action: mainApp.actionDelete
-                        action: separator
-                        action: mainApp.actionSelectAll
                     }
-                    menu: {
-                        title: "&View"
-                        action: actionShowStatusBar
-                    }
-                }
-                toolbar: {
-                    id: mainToolbar
-                    button_image_extents: [16dip 16dip]
-                    action: mainApp.actionFileNew
-                    action: mainApp.actionFileOpen
-                    action: mainApp.actionFileSave
-                    action: separator
-                    action: mainApp.actionUndo
-                    action: mainApp.actionRedo
-                    action: separator
-                    action: mainApp.actionCut
-                    action: mainApp.actionCopy
-                    action: mainApp.actionPaste
                 }
             }
         }

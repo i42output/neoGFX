@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx::nrc
 {
     ui_parser::ui_parser(const boost::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput) :
-        iInputFilename{ aInputFilename }, iRoot{ aRoot }, iOutput{ aOutput }, iNamespace{ aNamespace }, iCurrentNode{ nullptr }, iAnonymousIdCounter{ 0u }
+        iInputFilename{ aInputFilename }, iRoot{ aRoot }, iOutput{ aOutput }, iNamespace{ aNamespace }, iCurrentNode{ nullptr }, iCurrentFragment{ nullptr }, iAnonymousIdCounter{ 0u }
     {
         for (auto const& plugin : aPluginManager.plugins())
         {
@@ -54,20 +54,33 @@ namespace neogfx::nrc
             "{\n"
             " using namespace neogfx;\n"
             " using namespace neogfx::unit_literals;\n"
-            "\n"
-            " struct ui\n"
-            " {\n", headers(), (!aNamespace.empty() ? " " + aNamespace : ""));
+            "\n", headers(), (!aNamespace.empty() ? " " + aNamespace : ""));
 
         for (auto const& element : iRootElements)
-            element->emit();
+        {
+            emit(
+                " struct %1%\n"
+                " {\n",
+                element.first);
+            element.second->emit();
+            emit(
+                " };\n");
+        }
 
-        emit(" };\n"
+        emit(
             "}\n");
     }
 
     const neolib::i_string& ui_parser::element_namespace() const
     {
         return iNamespace;
+    }
+
+    const neolib::i_string& ui_parser::current_fragment() const
+    {
+        thread_local neolib::string result;
+        result = iCurrentFragment->parent().name();
+        return result;
     }
 
     void ui_parser::generate_anonymous_id(neolib::i_string& aNewAnonymousId) const
@@ -200,7 +213,7 @@ namespace neogfx::nrc
     {
         std::set<std::string> result;
         for (auto const& e : iRootElements)
-            next_header(*e, result);
+            next_header(*e.second, result);
         std::string resultString = "#include <neogfx/neogfx.hpp>";
         for (auto const& h : result)
             if (!h.empty())
@@ -244,9 +257,14 @@ namespace neogfx::nrc
         iCurrentNode = &aNode;
         try
         {
-            auto element = create_element(neolib::string{ aNode.name() });
-            iRootElements.push_back(element);
-            parse(aNode, *element);
+            for (auto& fragment : aNode)
+            {
+                iCurrentFragment = &fragment;
+                iCurrentNode = iCurrentFragment;
+                auto element = create_element(neolib::string{ fragment.name() });
+                iRootElements.push_back(std::make_pair(aNode.name(), element));
+                parse(fragment, *element);
+            }
         }
         catch (element_type_not_found& e)
         {

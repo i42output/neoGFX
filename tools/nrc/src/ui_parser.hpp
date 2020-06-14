@@ -41,6 +41,7 @@ namespace neogfx::nrc
         ui_parser(const boost::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
     public:
         const neolib::i_string& element_namespace() const override;
+        const neolib::i_string& current_fragment() const override;
         using base_type::generate_anonymous_id;
         void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const override;
         using i_ui_element_parser::indent;
@@ -71,8 +72,9 @@ namespace neogfx::nrc
         std::ofstream& iOutput;
         std::vector<neolib::ref_ptr<i_ui_element_library>> iLibraries;
         neolib::string iNamespace;
-        std::vector<neolib::ref_ptr<i_ui_element>> iRootElements;
+        std::vector<std::pair<std::string, neolib::ref_ptr<i_ui_element>>> iRootElements;
         mutable const neolib::fjson_value* iCurrentNode;
+        mutable const neolib::fjson_value* iCurrentFragment;
         mutable std::map<std::pair<const neolib::fjson_object*, std::string>, data_t> iDataCache;
         mutable std::map<std::pair<const neolib::fjson_object*, std::string>, array_data_t> iArrayDataCache;
         mutable uint32_t iAnonymousIdCounter;

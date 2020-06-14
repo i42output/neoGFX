@@ -41,7 +41,7 @@ namespace neogfx::nrc
     void parse_ui(const boost::filesystem::path& aInputFilename, neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
     {
         auto const& ui = aItem.as<neolib::fjson_object>();
-        auto ns = aNamespace + (ui.has("namespace") ? "/" + ui.at("namespace").text() : "");
+        auto ns = aNamespace + (ui.has("namespace") ? "_" + ui.at("namespace").text() : "");
         ui_parser uiParser{ aInputFilename, aPluginManager, ns, ui, aOutput };
     }
 }

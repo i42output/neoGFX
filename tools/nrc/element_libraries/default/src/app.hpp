@@ -54,7 +54,7 @@ namespace neogfx::nrc
         {
             emit_preamble();
             emit("\n"
-                "  ui(int argc, char* argv[]) :\n");
+                "  %1%(int argc, char* argv[]) :\n", parser().current_fragment().to_std_string_view());
             emit_ctor();
             emit("  {\n");
             emit_body();

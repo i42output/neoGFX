@@ -41,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
-    DesignStudio::ui ui{ argc, argv };
+    DesignStudio::main ui{ argc, argv };
     auto& app = ui.mainApp;
 
     try
