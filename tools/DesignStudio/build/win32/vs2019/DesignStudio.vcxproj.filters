@@ -95,5 +95,11 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element_library_plugin.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Release\GeneratedFiles\DesignStudio.ui.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="x64\Tools\GeneratedFiles\DesignStudio.ui.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -121,7 +121,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include;D:\code\neogfx\tools\DesignStudio\build\win32\vs2019\x64\Release\GeneratedFiles</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -148,7 +148,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\code\neogfx\tools\DesignStudio\build\win32\vs2019\x64\Tools\GeneratedFiles;$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -248,6 +248,12 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element_library_plugin.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\widget.hpp" />
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\DesignStudio.ui.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="x64\Tools\GeneratedFiles\DesignStudio.ui.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -32,7 +32,7 @@ namespace neogfx::nrc
         toolbar(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::Toolbar }
         {
-            add_data_names({ "action" });
+            add_data_names({ "action", "button_image_extents" });
         }
     public:
         const neolib::i_string& header() const override
@@ -51,10 +51,14 @@ namespace neogfx::nrc
                 else
                     new action_ref{ parser(), *this, reference };
             }
+            else if (aName == "button_image_extents")
+                iButtonImageExtents.emplace(get_scalar<length>(aData));
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
+            if (aName == "button_image_extents")
+                emplace_2<length>("button_image_extents", iButtonImageExtents);
             ui_element<>::parse(aName, aData);
         }
     protected:
@@ -73,10 +77,13 @@ namespace neogfx::nrc
         }
         void emit_body() const override
         {
+            if (iButtonImageExtents)
+                emit("   %1%.set_button_image_extents(size{ %2%, %3% });\n", id(), iButtonImageExtents->cx, iButtonImageExtents->cy);
             ui_element<>::emit_body();
         }
     protected:
         using ui_element<>::emit;
     private:
+        std::optional<basic_size<length>> iButtonImageExtents;
     };
 }

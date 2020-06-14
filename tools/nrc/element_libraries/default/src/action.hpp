@@ -30,12 +30,13 @@ namespace neogfx::nrc
         action(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::Action },
             iCheckable{ aParent.parser().get_optional<bool>("checkable") },
+            iChecked{ aParent.parser().get_optional<bool>("checked") },
             iText{ aParent.parser().get_optional<neolib::string>("text") },
             iImage{ aParent.parser().get_optional<neolib::string>("image") },
             iShortcut{ aParent.parser().get_optional<neolib::string>("shortcut") },
             iCheckedImage{ aParent.parser().get_optional<neolib::string>("checked_image") }
         {
-            add_data_names({ "checkable", "text", "image", "shortcut", "checked_image" });
+            add_data_names({ "checkable", "checked", "text", "image", "shortcut", "checked_image" });
         }
     public:
         const neolib::i_string& header() const override
@@ -84,6 +85,8 @@ namespace neogfx::nrc
         {
             if (iCheckable)
                 emit("   %1%.set_checkable(%2%);\n", id(), *iCheckable);
+            if (iChecked)
+                emit("   %1%.set_checked(%2%);\n", id(), *iChecked);
             if (iImage)
                 emit("   %1%.set_image(\"%2%\");\n", id(), *iImage);
             if (iShortcut)
@@ -96,6 +99,7 @@ namespace neogfx::nrc
         using ui_element<>::emit;
     private:
         std::optional<bool> iCheckable;
+        std::optional<bool> iChecked;
         std::optional<neolib::string> iText;
         std::optional<neolib::string> iImage;
         std::optional<neolib::string> iShortcut;

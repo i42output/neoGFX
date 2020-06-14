@@ -37,16 +37,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include "new_project_dialog.hpp"
+#include "DesignStudio.ui.hpp"
 
 int main(int argc, char* argv[])
 {
-    ng::app app(argc, argv, "neoGFX Design Studio");
+    DesignStudio::ui ui{ argc, argv };
+    auto& app = ui.mainApp;
+
     try
     {
+        ui.actionShowStatusBar.checked([&]() { ui.statusBar.show(); });
+        ui.actionShowStatusBar.unchecked([&]() { ui.statusBar.hide(); });
+
         app.current_style().palette().set_color(ng::color_role::Theme, ng::color{ 48, 48, 48 });
         app.current_style().set_spacing(ng::size{ 4.0 });
 
-        ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect().extents() * ng::size{ 0.5, 0.5 } };
+        auto& mainWindow = ui.mainWindow;
 
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right };
@@ -62,26 +68,6 @@ int main(int argc, char* argv[])
         ng::i_layout& mainLayout = mainWindow.client_layout();
         mainLayout.set_margins(ng::margins{});
         mainLayout.set_spacing(ng::size{});
-
-        ng::menu_bar mainMenu{ mainWindow.menu_layout() };
-
-        auto& fileMenu = app.add_standard_menu(mainMenu, ng::standard_menu::File);
-        auto& editMenu = app.add_standard_menu(mainMenu, ng::standard_menu::Edit);
-
-        ng::toolbar toolbar{ mainWindow.toolbar_layout() };
-        toolbar.set_button_image_extents(ng::size{ 16.0_dip, 16.0_dip });
-        toolbar.add_action(app.action_file_new());
-        toolbar.add_action(app.action_file_open());
-        toolbar.add_action(app.action_file_save());
-        toolbar.add_separator();
-        toolbar.add_action(app.action_undo());
-        toolbar.add_action(app.action_redo());
-        toolbar.add_separator();
-        toolbar.add_action(app.action_cut());
-        toolbar.add_action(app.action_copy());
-        toolbar.add_action(app.action_paste());
-
-        ng::status_bar statusBar{ mainWindow.status_bar_layout() };
 
         ng::horizontal_layout workspaceLayout{ mainLayout };
         ng::view_container workspace{ workspaceLayout };

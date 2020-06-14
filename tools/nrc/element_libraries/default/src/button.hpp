@@ -30,9 +30,11 @@ namespace neogfx::nrc
     {
     public:
         basic_button(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-            ui_element<>{ aParser, aParent, ButtonType }
+            ui_element<>{ aParser, aParent, ButtonType },
+            iCheckable{ aParent.parser().get_optional_enum<button_checkable>("checkable") },
+            iChecked{ aParent.parser().get_optional<bool>("checked") } // todo: tri-state
         {
-            add_data_names({ "checkable" });
+            add_data_names({ "checkable", "checked" });
         }
     public:
         const neolib::i_string& header() const override
@@ -61,8 +63,6 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "checkable")
-                iCheckable = ui_element<>::get_enum<button_checkable>(aData);
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
@@ -98,12 +98,15 @@ namespace neogfx::nrc
         {
             if (iCheckable)
                 emit("   %1%.set_checkable(%2%);\n", id(), enum_to_string("button_checkable", *iCheckable));
+            if (iChecked)
+                emit("   %1%.set_checked(%2%);\n", id(), *iChecked);
             ui_element<>::emit_body();
         }
     protected:
         using ui_element<>::emit;
     private:
         std::optional<button_checkable> iCheckable;
+        std::optional<bool> iChecked; // todo: tri-state
     };
 
     typedef basic_button<ui_element_type::PushButton> push_button;
