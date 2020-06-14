@@ -75,20 +75,32 @@ int main(int argc, char* argv[])
         ng::texture backgroundTexture1{ ng::image{ ":/DesignStudio/resources/neoGFX.png" } };
         ng::texture backgroundTexture2{ ng::image{ ":/DesignStudio/resources/logo_i42.png" } };
 
+        ds::project_manager pm;
+
         workspace.view_stack().Painting([&](ng::i_graphics_context& aGc)
         {
             auto const& cr = workspace.view_stack().client_rect();
-            aGc.draw_texture(
-                ng::point{ (cr.extents() - backgroundTexture1.extents()) / 2.0 },
-                backgroundTexture1,
-                ng::color::White.with_alpha(0.25));
-            aGc.draw_texture(
-                ng::rect{ ng::point{ cr.bottom_right() - backgroundTexture2.extents() / 2.0 }, backgroundTexture2.extents() / 2.0 },
-                backgroundTexture2,
-                ng::color::White.with_alpha(0.25));
+            if (pm.projects().empty())
+            {
+                aGc.draw_texture(
+                    ng::point{ (cr.extents() - backgroundTexture1.extents()) / 2.0 },
+                    backgroundTexture1,
+                    ng::color::White.with_alpha(0.25));
+                aGc.draw_texture(
+                    ng::rect{ ng::point{ cr.bottom_right() - backgroundTexture2.extents() / 2.0 }, backgroundTexture2.extents() / 2.0 },
+                    backgroundTexture2,
+                    ng::color::White.with_alpha(0.25));
+            }
+            else
+            {
+                auto const workspaceGridColor = app.current_style().palette().color(ng::color_role::Foreground).with_alpha(0.25); // todo: make a project setting
+                auto const workspaceGridSize = ng::size{ 20.0_dip, 20.0_dip }; // todo: make a project setting
+                for (ng::scalar x = 0; x < cr.cx; x += workspaceGridSize.cx)
+                    aGc.draw_line(ng::point{ x, 0.0 }, ng::point{ x, cr.bottom() }, workspaceGridColor);
+                for (ng::scalar y = 0; y < cr.cy; y += workspaceGridSize.cy)
+                    aGc.draw_line(ng::point{ 0.0, y }, ng::point{ cr.right(), y }, workspaceGridColor);
+            }
         });
-
-        ds::project_manager pm;
 
         auto update_ui = [&]()
         {
