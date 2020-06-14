@@ -999,7 +999,7 @@ namespace neogfx
             {
                 if (placement().position_specified())
                     move(placement().normal_geometry()->top_left());
-                else
+                else if ((style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
                     center_on_parent(false);
             }
         }

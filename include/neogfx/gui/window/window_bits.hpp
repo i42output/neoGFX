@@ -54,7 +54,7 @@ namespace neogfx
         InitiallyCentered =    0x02000000,    // Center on desktop or parent
         DropShadow =           0x04000000,
         Weak =                 0x80000000,
-        Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow
+        Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow | InitiallyCentered
     };
 
     inline constexpr window_style operator~(window_style aStyle)

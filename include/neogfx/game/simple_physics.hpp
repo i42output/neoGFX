@@ -24,10 +24,11 @@
 #include <neogfx/game/box_collider.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/mesh_render_cache.hpp>
 
 namespace neogfx::game
 {
-    class simple_physics : public game::system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body>
+    class simple_physics : public game::system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body, mesh_render_cache>
     {
     public:
         simple_physics(i_ecs& aEcs);

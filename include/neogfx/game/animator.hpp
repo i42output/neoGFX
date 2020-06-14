@@ -24,10 +24,11 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/system.hpp>
 #include <neogfx/game/animation_filter.hpp>
+#include <neogfx/game/mesh_render_cache.hpp>
 
 namespace neogfx::game
 {
-    class animator : public game::system<entity_info, animation_filter>
+    class animator : public game::system<entity_info, animation_filter, mesh_render_cache>
     {
     public:
         define_event(Animate, animate, step_time)
