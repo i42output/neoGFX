@@ -404,6 +404,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
             newPos.y = canvas.extents().cy - newPos.y;
             ng::game::scoped_component_lock<ng::game::rigid_body> lock{ canvas.ecs() };
             canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
+            ng::game::set_render_cache_dirty(canvas.ecs(), spaceship);
         }
     });
 
