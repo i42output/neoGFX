@@ -64,6 +64,8 @@ namespace neogfx::nrc
     public:
         virtual const i_ui_element_parser& parser() const = 0;
     public:
+        virtual const neolib::i_string& fragment_name() const = 0;
+        virtual const neolib::i_string& type_name() const = 0;
         virtual const neolib::i_string& header() const = 0;
     public:
         virtual bool is_member_element() const = 0;

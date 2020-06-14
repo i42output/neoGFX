@@ -54,6 +54,7 @@ namespace neogfx::nrc
     public:
         virtual const neolib::i_string& element_namespace() const = 0;
         virtual const neolib::i_string& current_fragment() const = 0;
+        virtual const neolib::i_string& current_element() const = 0;
         virtual void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const = 0;
         virtual void indent(int32_t aLevel, neolib::i_string& aResult) const = 0;
         virtual void emit(const neolib::i_string& aText) const = 0;

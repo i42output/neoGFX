@@ -59,9 +59,10 @@ namespace neogfx::nrc
         for (auto const& element : iRootElements)
         {
             emit(
-                " struct %1%\n"
-                " {\n",
-                element.first);
+                " class %1% : public %2%\n"
+                " {\n"
+                " public:\n",
+                element.first, element.second->type_name());
             element.second->emit();
             emit(
                 " };\n");
@@ -80,6 +81,13 @@ namespace neogfx::nrc
     {
         thread_local neolib::string result;
         result = iCurrentFragment->parent().name();
+        return result;
+    }
+
+    const neolib::i_string& ui_parser::current_element() const
+    {
+        thread_local neolib::string result;
+        result = iCurrentNode->name();
         return result;
     }
 

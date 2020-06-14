@@ -54,7 +54,7 @@ namespace neogfx::nrc
         {
             emit_preamble();
             emit("\n"
-                "  %1%(int argc, char* argv[]) :\n", parser().current_fragment().to_std_string_view());
+                "  %1%(int argc, char* argv[]) :\n", fragment_name().to_std_string_view());
             emit_ctor();
             emit("  {\n");
             emit_body();
@@ -62,7 +62,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  app %1%;\n", id());
+            emit("  %1%& %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -70,17 +70,20 @@ namespace neogfx::nrc
             if (iName)
             {
                 if (iDefaultWindowIcon)
-                    emit("   %1%{ argc, argv, \"%2%\", image{ \"%3%\" } }", id(), *iName, *iDefaultWindowIcon);
+                    emit("   %1%{ argc, argv, \"%2%\", image{ \"%3%\" } }", type_name(), *iName, *iDefaultWindowIcon);
                 else
-                    emit("   %1%{ argc, argv, \"%2%\" }", id(), *iName);
+                    emit("   %1%{ argc, argv, \"%2%\" }", type_name(), *iName);
             }
             else
             {
                 if (iDefaultWindowIcon)
-                    emit("   %1%{ argc, argv, \"\", image{ \"%2%\" } }", id(), *iDefaultWindowIcon);
+                    emit("   %1%{ argc, argv, \"\", image{ \"%2%\" } }", type_name(), *iDefaultWindowIcon);
                 else
-                    emit("   %1%{ argc, argv }", id());
+                    emit("   %1%{ argc, argv }", type_name());
             }
+            emit(",\n"
+                "   %1%{ *this }", id());
+
             ui_element<>::emit_ctor();
             emit("\n");
         }

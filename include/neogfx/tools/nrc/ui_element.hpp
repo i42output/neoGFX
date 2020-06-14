@@ -53,29 +53,29 @@ namespace neogfx::nrc
         typedef std::set<std::string> data_names_t;
     public:
         ui_element(const i_ui_element_parser& aParser, ui_element_type aType) :
-            iParser{ aParser }, iParent{ nullptr }, iMemberElement{ false }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
+            iParser{ aParser }, iParent{ nullptr }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
             init();
         }
         ui_element(const i_ui_element_parser& aParser, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
-            iParser{ aParser }, iParent{ nullptr }, iMemberElement{ false }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
+            iParser{ aParser }, iParent{ nullptr }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
             init();
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType) :
-            iParser{ aParser }, iParent{ &aParent }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aParser.get_optional<neolib::string>("id") }, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aParser.get_optional<neolib::string>("id") }, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
-            iParser{ aParser }, iParent{ &aParent }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t, ui_element_type aType) :
-            iParser{ aParser }, iParent{ &aParent }, iMemberElement{ true }, iAnonymousIdCounter{ 0u }, iId{}, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ true }, iAnonymousIdCounter{ 0u }, iId{}, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
@@ -87,6 +87,15 @@ namespace neogfx::nrc
         const i_ui_element_parser& parser() const override
         {
             return iParser;
+        }
+    public:
+        const neolib::i_string& fragment_name() const override
+        {
+            return iFragmentName;
+        }
+        const neolib::i_string& type_name() const override
+        {
+            return iTypeName;
         }
     public:
         bool is_member_element() const override
@@ -450,6 +459,8 @@ namespace neogfx::nrc
     private:
         const i_ui_element_parser& iParser;
         i_ui_element* iParent;
+        neolib::string iFragmentName;
+        neolib::string iTypeName;
         bool iMemberElement;
         data_names_t iDataNames;
         neolib::optional<neolib::string> iId;

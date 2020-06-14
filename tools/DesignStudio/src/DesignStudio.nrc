@@ -19,7 +19,7 @@
                 }
                 window: {
                     id: mainWindow
-                    default_size: [ 960dip 832dip ]
+                    default_size: [ 1280dip 720dip ]
                     status_bar: {
                         id: statusBar
                     }

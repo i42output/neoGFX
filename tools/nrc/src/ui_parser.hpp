@@ -42,6 +42,7 @@ namespace neogfx::nrc
     public:
         const neolib::i_string& element_namespace() const override;
         const neolib::i_string& current_fragment() const override;
+        const neolib::i_string& current_element() const override;
         using base_type::generate_anonymous_id;
         void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const override;
         using i_ui_element_parser::indent;
