@@ -49,13 +49,15 @@ namespace neogfx
         void remove(const abstract_item& aItem) override;
     private:
         void update_layout();
-    protected:
+    public:
         neogfx::size_policy size_policy() const override;
-    protected:
+    public:
         bool part_active(widget_part aPart) const override;
-    protected:
+    public:
         bool transparent_background() const override;
         color background_color() const override;
+    public:
+        bool show(bool aVisible) override;
     private:
         dock_area iArea;
         item_list iItems;

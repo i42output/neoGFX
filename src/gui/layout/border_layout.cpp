@@ -182,6 +182,12 @@ namespace neogfx
         iMiddle.fix_weightings();
     }
 
+    void border_layout::clear_weightings()
+    {
+        iRows.clear_weightings();
+        iMiddle.clear_weightings();
+    }
+
     size border_layout::minimum_size(const optional_size& aAvailableSpace) const
     {
         return iRows.minimum_size(aAvailableSpace);

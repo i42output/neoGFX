@@ -69,6 +69,7 @@ namespace neogfx
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
         virtual void fix_weightings() = 0;
+        virtual void clear_weightings() = 0;
     public:
         virtual bool visible() const = 0;
     public:

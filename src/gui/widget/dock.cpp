@@ -131,4 +131,11 @@ namespace neogfx
             return container_background_color();
     }
 
+    bool dock::show(bool aVisible)
+    {
+        bool result = widget::show(aVisible);
+        if (!visible())
+            parent_layout().parent_layout().clear_weightings(); // todo: multiple docks in the same layout?
+        return result;
+    }
 }

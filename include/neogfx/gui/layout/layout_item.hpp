@@ -55,6 +55,16 @@ namespace neogfx
             if (base_type::debug() == this)
                 std::cout << std::endl;
         }
+        void clear_weightings() override
+        {
+            auto& self = static_cast<i_layout_item&>(*this);
+            auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
+            for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+            {
+                auto& item = layout.item_at(itemIndex);
+                item.set_weight({});
+            }
+        }
         void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
