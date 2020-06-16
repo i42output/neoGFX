@@ -63,6 +63,7 @@ namespace neogfx
         App                             = 0x0000000000000001 | HasActions,
         SurfaceWindow                   = 0x0000000000000002 | Window,
         NestedWindow                    = 0x0000000000000003 | Window,
+        Dialog                          = 0x0000000000000004 | Window,
         TextWidget                      = 0x0000000000000010 | Widget | HasAlignment | HasText,
         ImageWidget                     = 0x0000000000000011 | Widget | HasImage,
         MenuBar                         = 0x0000000000000020 | Widget | Menu,

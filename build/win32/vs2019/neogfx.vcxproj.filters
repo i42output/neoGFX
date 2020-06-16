@@ -558,9 +558,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\border_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_bits.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

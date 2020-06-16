@@ -153,6 +153,17 @@ namespace neogfx::nrc
             return iType;
         }
     public:
+        const i_ui_element& fragment() const override
+        {
+            auto e = static_cast<const i_ui_element*>(this);
+            while (e->has_parent())
+                e = &e->parent();
+            return *e;
+        }
+        i_ui_element& fragment() override
+        {
+            return const_cast<i_ui_element&>(to_const(*this).fragment());
+        }
         bool has_parent() const override
         {
             return iParent != nullptr;
@@ -296,6 +307,37 @@ namespace neogfx::nrc
             else if (aName == "background_color")
                 iBackgroundColor = get_color(aArrayData);
         }
+        void add_element_ref(const neolib::i_string& aRef) override
+        {
+            auto const& fullRef = aRef.to_std_string_view();
+            auto part = fullRef.find_first_of('.');
+            auto ref = fullRef.substr(0, part);
+            auto resolved = parser().find(neolib::string{ ref });
+            if (!resolved || (part == std::string::npos && resolved->fragment_name() != fragment_name()))
+                throw element_not_found(std::string{ ref });
+            if (part != std::string::npos)
+                iRefs.insert(neolib::string{ ref });
+        }
+        const neolib::i_set<neolib::i_string>& element_refs() const override
+        {
+            return iRefs;
+        }
+        const neolib::i_string& generate_ref_ctor_args(bool aArgsAfter = false) const override
+        {
+            std::string temp;
+            for (auto const& ref : iRefs)
+            {
+                if (!temp.empty())
+                    temp += ", ";
+                auto const& e = parser().at(ref);
+                temp += e.fragment_name().to_std_string() + "& " + e.id().to_std_string();
+            }
+            if (aArgsAfter && !temp.empty())
+                temp += ", ";
+            thread_local neolib::string result;
+            result = temp;
+            return result;
+        }
         void emit_preamble() const override
         {
             for (auto const& child : children())
@@ -334,12 +376,12 @@ namespace neogfx::nrc
                 if (margin.left == margin.right && margin.top == margin.bottom)
                 {
                     if (margin.left == margin.top)
-                        emit("   %1%.set_margins(margins{ %2% });\n", id(), margin.left);
+                        emit("   %1%.set_margins(neogfx::margins{ %2% });\n", id(), margin.left);
                     else
-                        emit("   %1%.set_margins(margins{ %2%, %3% });\n", id(), margin.left, margin.top);
+                        emit("   %1%.set_margins(neogfx::margins{ %2%, %3% });\n", id(), margin.left, margin.top);
                 }
                 else 
-                    emit("   %1%.set_margins(margins{ %2%, %3%, %4%, %5% });\n", id(), margin.left, margin.top, margin.right, margin.bottom);
+                    emit("   %1%.set_margins(neogfx::margins{ %2%, %3%, %4%, %5% });\n", id(), margin.left, margin.top, margin.right, margin.bottom);
             }
             if (iEnabled)
                 emit("   %1%.%2%();\n", id(), *iEnabled ? "enable" : "disable");
@@ -441,6 +483,8 @@ namespace neogfx::nrc
     private:
         void init()
         {
+            if (!anonymous())
+                parser().index(id(), *this);
             if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
                 add_data_names({ "enabled", "disabled", "focus_policy" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
@@ -468,6 +512,7 @@ namespace neogfx::nrc
         mutable uint32_t iAnonymousIdCounter;
         ui_element_type iType;
         children_t iChildren;
+        neolib::set<neolib::string> iRefs;
         std::optional<size_policy> iSizePolicy;
         std::optional<alignment> iAlignment;
         std::optional<basic_size<length>> iFixedSize;

@@ -41,18 +41,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
-    DesignStudio::main ui{ argc, argv };
-    auto& app = ui.mainApp;
+    DesignStudio::main_app app{ argc, argv };
 
     try
     {
-        ui.actionShowStatusBar.checked([&]() { ui.statusBar.show(); });
-        ui.actionShowStatusBar.unchecked([&]() { ui.statusBar.hide(); });
+        DesignStudio::main_window mainWindow{ app };
+            
+        app.actionShowStatusBar.checked([&]() { mainWindow.statusBar.show(); });
+        app.actionShowStatusBar.unchecked([&]() { mainWindow.statusBar.hide(); });
 
         app.current_style().palette().set_color(ng::color_role::Theme, ng::color{ 48, 48, 48 });
         app.current_style().set_spacing(ng::size{ 4.0 });
-
-        auto& mainWindow = ui.mainWindow;
 
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right };

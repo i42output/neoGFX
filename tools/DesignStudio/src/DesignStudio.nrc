@@ -7,7 +7,7 @@
     }
 
     ui: {
-        main: {
+        main_app: {
             app: {
                 id: mainApp
                 name: "neoGFX Design Studio"
@@ -17,65 +17,67 @@
                     checkable: true
                     checked: true
                 }
-                window: {
-                    id: mainWindow
-                    default_size: [ 1280dip 720dip ]
-                    status_bar: {
-                        id: statusBar
-                    }
-                    menu_bar: {
-                        id: menuBar
-                        menu: {
-                            title: "&File"
-                            action: mainApp.actionFileNew
-                            action: mainApp.actionFileOpen
-                            action: separator
-                            action: mainApp.actionFileClose
-                            action: separator
-                            action: mainApp.actionFileSave
-                            action: separator
-                            action: mainApp.actionFileExit
-                        }
-                        menu: {
-                            title: "&Edit"
-                            action: mainApp.actionUndo
-                            action: mainApp.actionRedo
-                            action: separator
-                            action: mainApp.actionCut
-                            action: mainApp.actionCopy
-                            action: mainApp.actionPaste
-                            action: mainApp.actionDelete
-                            action: separator
-                            action: mainApp.actionSelectAll
-                        }
-                        menu: {
-                            title: "&View"
-                            action: actionShowStatusBar
-                        }
-                    }
-                    toolbar: {
-                        id: mainToolbar
-                        button_image_extents: [16dip 16dip]
+            }
+        }
+        main_window: {
+            window: {
+                id: mainWindow
+                default_size: [ 1280dip 720dip ]
+                status_bar: {
+                    id: statusBar
+                }
+                menu_bar: {
+                    id: menuBar
+                    menu: {
+                        title: "&File"
                         action: mainApp.actionFileNew
                         action: mainApp.actionFileOpen
+                        action: separator
+                        action: mainApp.actionFileClose
+                        action: separator
                         action: mainApp.actionFileSave
                         action: separator
+                        action: mainApp.actionFileExit
+                    }
+                    menu: {
+                        title: "&Edit"
                         action: mainApp.actionUndo
                         action: mainApp.actionRedo
                         action: separator
                         action: mainApp.actionCut
                         action: mainApp.actionCopy
                         action: mainApp.actionPaste
+                        action: mainApp.actionDelete
+                        action: separator
+                        action: mainApp.actionSelectAll
                     }
+                    menu: {
+                        title: "&View"
+                        action: mainApp.actionShowStatusBar
+                    }
+                }
+                toolbar: {
+                    id: mainToolbar
+                    button_image_extents: [16dip 16dip]
+                    action: mainApp.actionFileNew
+                    action: mainApp.actionFileOpen
+                    action: mainApp.actionFileSave
+                    action: separator
+                    action: mainApp.actionUndo
+                    action: mainApp.actionRedo
+                    action: separator
+                    action: mainApp.actionCut
+                    action: mainApp.actionCopy
+                    action: mainApp.actionPaste
                 }
             }
         }
-        /* new_project: {
+        new_project: {
             dialog: {
                 id: newProject
-                name: "New Project"
+                title: "New Project"
                 type: Child
-                style: [Model TitleBar Close InitiallyCentered]
+                style: [Modal TitleBar Close InitiallyCentered]
                 button_box: [Ok Cancel]
                 default_focus: projectName
                 vertical_layout: {
@@ -136,7 +138,7 @@
                                         id: browseProjectLocation
                                         .image: {
                                             uri: ":/neogfx/resources/icons.zip#openfolder.png"
-                                            fixed_size: [ 16.0dip 16.0dip ]
+                                            size: 16dip
                                         }
                                     }
                                 }
@@ -178,6 +180,6 @@
                     }
                 }
             }
-        } */
+        }
     }
 }

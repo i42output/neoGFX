@@ -27,34 +27,34 @@ namespace neogfx
 {
     enum class window_style : uint32_t
     {
-        Invalid =              0x00000000,
-        NoDecoration =         0x00000001,    // No decoration at all (useful for splash screens, for example); this style cannot be combined with others
-        TitleBar =             0x00000002,    // The window has a titlebar
-        NativeTitleBar =       0x00000004,    // The window has a native titlebar
-        SystemMenu =           0x00000008,
-        MinimizeBox =          0x00000010,
-        MaximizeBox =          0x00000020,
-        Resize =               0x00000040,    // The window can be resized and has a maximize button
-        Close =                0x00000080,    // The window has a close button
-        Nested =               0x00000100,    // The window is not a native desktop window but a part of an existing one
-        Fullscreen =           0x00000200,    // The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-        Main =                 0x00000400,    // The window is a main window so may go fullscreen or change video mode
-        Dialog =               0x00000800,
-        Popup =                0x00001000,    // The window is a popup (e.g. menu)
-        Tool =                 0x00002000,    // The window shouldn't appear on the operating system taskbar
-        Modal =                0x00010000,
-        ApplicationModal =     0x00020000,
-        NoActivate =           0x00040000,
-        RequiresOwnerFocus =   0x00080000,
-        DismissOnOwnerClick =  0x00100000,
-        DismissOnParentClick = 0x00200000,
-        HideOnOwnerClick =     0x00400000,
-        HideOnParentClick =    0x00800000,
-        InitiallyHidden =      0x01000000,
-        InitiallyCentered =    0x02000000,    // Center on desktop or parent
-        DropShadow =           0x04000000,
-        Weak =                 0x80000000,
-        Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow | InitiallyCentered
+        Invalid                 = 0x00000000,
+        NoDecoration            = 0x00000001,    // No decoration at all (useful for splash screens, for example); this style cannot be combined with others
+        TitleBar                = 0x00000002,    // The window has a titlebar
+        NativeTitleBar          = 0x00000004,    // The window has a native titlebar
+        SystemMenu              = 0x00000008,
+        MinimizeBox             = 0x00000010,
+        MaximizeBox             = 0x00000020,
+        Resize                  = 0x00000040,    // The window can be resized and has a maximize button
+        Close                   = 0x00000080,    // The window has a close button
+        Nested                  = 0x00000100,    // The window is not a native desktop window but a part of an existing one
+        Fullscreen              = 0x00000200,    // The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
+        Main                    = 0x00000400,    // The window is a main window so may go fullscreen or change video mode
+        Dialog                  = 0x00000800,
+        Popup                   = 0x00001000,    // The window is a popup (e.g. menu)
+        Tool                    = 0x00002000,    // The window shouldn't appear on the operating system taskbar
+        Modal                   = 0x00010000,
+        ApplicationModal        = 0x00020000,
+        NoActivate              = 0x00040000,
+        RequiresOwnerFocus      = 0x00080000,
+        DismissOnOwnerClick     = 0x00100000,
+        DismissOnParentClick    = 0x00200000,
+        HideOnOwnerClick        = 0x00400000,
+        HideOnParentClick       = 0x00800000,
+        InitiallyHidden         = 0x01000000,
+        InitiallyCentered       = 0x02000000,    // Center on desktop or parent
+        DropShadow              = 0x04000000,
+        Weak                    = 0x80000000,
+        Default                 = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow | InitiallyCentered
     };
 
     inline constexpr window_style operator~(window_style aStyle)
@@ -88,7 +88,51 @@ namespace neogfx
         Iconized    = 0x00000001,
         Maximized   = 0x00000002
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::window_style> neolib::enum_enumerators_v<neogfx::window_style>
+{
+    declare_enum_string(neogfx::window_style, Invalid)
+    declare_enum_string(neogfx::window_style, NoDecoration)
+    declare_enum_string(neogfx::window_style, TitleBar)
+    declare_enum_string(neogfx::window_style, NativeTitleBar)
+    declare_enum_string(neogfx::window_style, SystemMenu)
+    declare_enum_string(neogfx::window_style, MinimizeBox)
+    declare_enum_string(neogfx::window_style, MaximizeBox)
+    declare_enum_string(neogfx::window_style, Resize)
+    declare_enum_string(neogfx::window_style, Close)
+    declare_enum_string(neogfx::window_style, Nested)
+    declare_enum_string(neogfx::window_style, Fullscreen)
+    declare_enum_string(neogfx::window_style, Main)
+    declare_enum_string(neogfx::window_style, Dialog)
+    declare_enum_string(neogfx::window_style, Popup)
+    declare_enum_string(neogfx::window_style, Tool)
+    declare_enum_string(neogfx::window_style, Modal)
+    declare_enum_string(neogfx::window_style, ApplicationModal)
+    declare_enum_string(neogfx::window_style, NoActivate)
+    declare_enum_string(neogfx::window_style, RequiresOwnerFocus)
+    declare_enum_string(neogfx::window_style, DismissOnOwnerClick)
+    declare_enum_string(neogfx::window_style, DismissOnParentClick)
+    declare_enum_string(neogfx::window_style, HideOnOwnerClick)
+    declare_enum_string(neogfx::window_style, HideOnParentClick)
+    declare_enum_string(neogfx::window_style, InitiallyHidden)
+    declare_enum_string(neogfx::window_style, InitiallyCentered)
+    declare_enum_string(neogfx::window_style, DropShadow)
+    declare_enum_string(neogfx::window_style, Weak)
+    declare_enum_string(neogfx::window_style, Default)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::window_state> neolib::enum_enumerators_v<neogfx::window_state>
+{
+    declare_enum_string(neogfx::window_state, Normal)
+    declare_enum_string(neogfx::window_state, Iconized)
+    declare_enum_string(neogfx::window_state, Maximized)
+};
+
+namespace neogfx
+{
     class window_placement
     {
     public:

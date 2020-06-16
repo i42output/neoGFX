@@ -53,12 +53,13 @@ namespace neogfx::nrc
             "namespace%2%\n"
             "{\n"
             " using namespace neogfx;\n"
-            " using namespace neogfx::unit_literals;\n"
-            "\n", headers(), (!aNamespace.empty() ? " " + aNamespace : ""));
+            " using namespace neogfx::unit_literals;\n",
+            headers(), (!aNamespace.empty() ? " " + aNamespace : ""));
 
         for (auto const& element : iRootElements)
         {
             emit(
+                "\n"
                 " class %1% : public %2%\n"
                 " {\n"
                 " public:\n",
@@ -89,6 +90,29 @@ namespace neogfx::nrc
         thread_local neolib::string result;
         result = iCurrentNode->name();
         return result;
+    }
+
+    void ui_parser::index(const neolib::i_string& aId, const i_ui_element& aElement) const
+    {
+        if (iIndex.find(aId.to_std_string()) != iIndex.end())
+            throw duplicate_element_id(aId.to_std_string());
+        iIndex[aId.to_std_string()] = &aElement;
+    }
+
+    const i_ui_element* ui_parser::find(const neolib::i_string& aId) const
+    {
+        auto existing = iIndex.find(aId.to_std_string());
+        if (existing != iIndex.end())
+            return existing->second;
+        return nullptr;
+    }
+
+    const i_ui_element& ui_parser::at(const neolib::i_string& aId) const
+    {
+        auto existing = find(aId);
+        if (existing != nullptr)
+            return *existing;
+        throw element_not_found(aId.to_std_string());
     }
 
     void ui_parser::generate_anonymous_id(neolib::i_string& aNewAnonymousId) const

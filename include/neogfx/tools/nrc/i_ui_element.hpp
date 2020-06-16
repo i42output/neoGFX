@@ -75,6 +75,8 @@ namespace neogfx::nrc
         virtual void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const = 0;
         virtual ui_element_type type() const = 0;
     public:
+        virtual const i_ui_element& fragment() const = 0;
+        virtual i_ui_element& fragment() = 0;
         virtual bool has_parent() const = 0;
         virtual const i_ui_element& parent() const = 0;
         virtual i_ui_element& parent() = 0;
@@ -83,6 +85,9 @@ namespace neogfx::nrc
     public:
         virtual void parse(const neolib::i_string& aType, const data_t& aData) = 0;
         virtual void parse(const neolib::i_string& aType, const array_data_t& aData) = 0;
+        virtual void add_element_ref(const neolib::i_string& aRef) = 0;
+        virtual const neolib::i_set<neolib::i_string>& element_refs() const = 0;
+        virtual const neolib::i_string& generate_ref_ctor_args(bool aArgsAfter = false) const = 0;
         virtual void emit() const = 0;
         virtual void emit_preamble() const = 0;
         virtual void emit_ctor() const = 0;
@@ -139,7 +144,7 @@ namespace neogfx::nrc
                 if (first)
                     result = neolib::string_to_enum<T>(e);
                 else
-                    result = static_cast<T>(static_cast<std::underlying_type_t<T>>(result) | static_cast<std::underlying_type_t<T>>(neolib::string_to_enum<alignment>(e)));
+                    result = static_cast<T>(static_cast<std::underlying_type_t<T>>(result) | static_cast<std::underlying_type_t<T>>(neolib::string_to_enum<T>(e)));
                 first = false;
             }
             return result;

@@ -113,6 +113,8 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, ui_element_type::Action | ui_element_type::Reference, {} },
             iReference{ aReference }
         {
+            if (aReference)
+                fragment().add_element_ref(*aReference);
         }
     public:
         const neolib::i_string& header() const override

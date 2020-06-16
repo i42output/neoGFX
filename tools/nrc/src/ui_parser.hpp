@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <map>
 #include <neolib/core/vector.hpp>
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/file/json.hpp>
@@ -35,6 +36,7 @@ namespace neogfx::nrc
     {
         typedef neolib::reference_counted<i_ui_element_parser> base_type;
     public:
+        typedef std::map<std::string, const i_ui_element*> index_t;
         typedef neolib::simple_variant data_t;
         typedef neolib::vector<neolib::simple_variant> array_data_t;
     public:
@@ -43,6 +45,9 @@ namespace neogfx::nrc
         const neolib::i_string& element_namespace() const override;
         const neolib::i_string& current_fragment() const override;
         const neolib::i_string& current_element() const override;
+        void index(const neolib::i_string& aId, const i_ui_element& aElement) const override;
+        const i_ui_element* find(const neolib::i_string& aId) const override;
+        const i_ui_element& at(const neolib::i_string& aId) const override;
         using base_type::generate_anonymous_id;
         void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const override;
         using i_ui_element_parser::indent;
@@ -79,5 +84,6 @@ namespace neogfx::nrc
         mutable std::map<std::pair<const neolib::fjson_object*, std::string>, data_t> iDataCache;
         mutable std::map<std::pair<const neolib::fjson_object*, std::string>, array_data_t> iArrayDataCache;
         mutable uint32_t iAnonymousIdCounter;
+        mutable index_t iIndex;
     };
 }

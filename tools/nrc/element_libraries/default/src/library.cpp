@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "app.hpp"
 #include "action.hpp"
 #include "window.hpp"
+#include "dialog.hpp"
 #include "widget.hpp"
 #include "text_widget.hpp"
 #include "image_widget.hpp"
@@ -56,12 +57,15 @@ namespace neogfx::nrc
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
         iRootElements{
-            "app" 
+            "app",
+            "window",
+            "dialog"
         },
         iChildElements{
             { "action", ui_element_type::HasActions },
             { "menu", ui_element_type::Menu },
             { "window", ui_element_type::None },
+            { "dialog", ui_element_type::None },
             { "widget", ui_element_type::LayoutItem },
             { "text_widget", ui_element_type::LayoutItem },
             { "image_widget", ui_element_type::LayoutItem },
@@ -127,7 +131,9 @@ namespace neogfx::nrc
     {
         static const std::map<std::string, std::function<i_ui_element*(const i_ui_element_parser&)>> sFactoryMethods =
         {
-            { "app", [](const i_ui_element_parser& aParser) -> i_ui_element* { return new app{ aParser }; } }
+            { "app", [](const i_ui_element_parser& aParser) -> i_ui_element* { return new app{ aParser }; } },
+            { "window", [](const i_ui_element_parser& aParser) -> i_ui_element* { return new window{ aParser }; } },
+            { "dialog", [](const i_ui_element_parser& aParser) -> i_ui_element* { return new dialog{ aParser }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())
@@ -141,6 +147,7 @@ namespace neogfx::nrc
         {
             { "action", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new action{ aParser, aParent }; } },
             { "window", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new window{ aParser, aParent }; } },
+            { "dialog", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new dialog{ aParser, aParent }; } },
             { "widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new widget{ aParser, aParent }; } },
             { "text_widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_widget{ aParser, aParent }; } },
             { "image_widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new image_widget{ aParser, aParent }; } },

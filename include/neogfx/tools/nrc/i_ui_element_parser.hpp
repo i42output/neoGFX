@@ -36,7 +36,15 @@ namespace neogfx::nrc
     {
         // exceptions
     public:
-        struct element_type_not_found : std::runtime_error 
+        struct duplicate_element_id : std::runtime_error
+        {
+            duplicate_element_id(const std::string& aId) : std::runtime_error{ "Duplicate element ID '" + aId + "'." } {}
+        };
+        struct element_not_found : std::logic_error
+        {
+            element_not_found(const std::string& aId) : std::logic_error{ "Element ID '" + aId + "' not found." } {}
+        };
+        struct element_type_not_found : std::runtime_error
         { 
             element_type_not_found(const std::string& aType) : std::runtime_error{ "Element type '" + aType + "' not found." } {} 
             element_type_not_found(const std::string& aType, const std::string& aParentElement) : std::runtime_error{ "Element type '" + aType + "' not found for element '" + aParentElement + "'." } {}
@@ -55,6 +63,9 @@ namespace neogfx::nrc
         virtual const neolib::i_string& element_namespace() const = 0;
         virtual const neolib::i_string& current_fragment() const = 0;
         virtual const neolib::i_string& current_element() const = 0;
+        virtual void index(const neolib::i_string& aId, const i_ui_element& aElement) const = 0;
+        virtual const i_ui_element* find(const neolib::i_string& aId) const = 0;
+        virtual const i_ui_element& at(const neolib::i_string& aId) const = 0;
         virtual void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const = 0;
         virtual void indent(int32_t aLevel, neolib::i_string& aResult) const = 0;
         virtual void emit(const neolib::i_string& aText) const = 0;
