@@ -47,6 +47,8 @@ int main(int argc, char* argv[])
     {
         DesignStudio::main_window mainWindow{ app };
             
+        app.actionShowStandardToolbar.checked([&]() { mainWindow.standardToolbar.show(); });
+        app.actionShowStandardToolbar.unchecked([&]() { mainWindow.standardToolbar.hide(); });
         app.actionShowStatusBar.checked([&]() { mainWindow.statusBar.show(); });
         app.actionShowStatusBar.unchecked([&]() { mainWindow.statusBar.hide(); });
 

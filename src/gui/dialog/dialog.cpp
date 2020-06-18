@@ -106,7 +106,7 @@ namespace neogfx
         if (result() != dialog_result::Accepted)
         {
             bool canAccept = true;
-            TryAccept.trigger(canAccept);
+            TryAccept.trigger(canAccept, false);
             if (canAccept)
                 set_result(dialog_result::Accepted);
             else
@@ -119,7 +119,7 @@ namespace neogfx
         if (result() != dialog_result::Rejected)
         {
             bool canReject = true;
-            TryReject.trigger(canReject);
+            TryReject.trigger(canReject, false);
             if (canReject)
                 set_result(dialog_result::Rejected);
             else
@@ -193,7 +193,7 @@ namespace neogfx
     bool dialog::can_close() const
     {
         bool canReject = true;
-        TryReject.trigger(canReject);
+        TryReject.trigger(canReject, true);
         return canReject;
     }
 
@@ -251,8 +251,8 @@ namespace neogfx
             {
                 bool canAccept = true;
                 bool canReject = true;
-                TryAccept.trigger(canAccept);
-                TryReject.trigger(canReject);
+                TryAccept.trigger(canAccept, true);
+                TryReject.trigger(canReject, true);
                 if (canAccept)
                     iButtonBox->enable_role(button_role::Accept);
                 else

@@ -84,17 +84,19 @@ namespace neogfx::DesignStudio
         iUpperCamelCase.checked([=]() { iNamingConvention = naming_convention::UpperCamelCase; updateNamespace(); });
         iLowerCamelCase.checked([=]() { iNamingConvention = naming_convention::LowerCamelCase; updateNamespace(); });
         iNeoGfx.checked([=]() { iNamingConvention = naming_convention::NeoGfx; updateNamespace(); });
-        TryAccept([this](bool& aCanAccept)
+        TryAccept([this](bool& aCanAccept, bool aQueryOnly)
         {
             if (to_symbol_name(iName.text(), iNamingConvention, named_entity::Namespace).empty())
             {
                 aCanAccept = false;
-                iName.set_focus();
+                if (!aQueryOnly)
+                    iName.set_focus();
             }
             else if (to_symbol_name(iNamespace.text(), iNamingConvention, named_entity::Namespace).empty())
             {
                 aCanAccept = false;
-                iNamespace.set_focus();
+                if (!aQueryOnly)
+                    iNamespace.set_focus();
             }
         });
     }

@@ -12,8 +12,14 @@
                 id: mainApp
                 name: "neoGFX Design Studio"
                 action: {
+                    id: actionShowStandardToolbar
+                    text: "Standard"
+                    checkable: true
+                    checked: true
+                }
+                action: {
                     id: actionShowStatusBar
-                    text: "Show/Hide Status Bar"
+                    text: "Status Bar"
                     checkable: true
                     checked: true
                 }
@@ -53,11 +59,15 @@
                     }
                     menu: {
                         title: "&View"
+                        menu: {
+                            title: "Toolbars"
+                            action: mainApp.actionShowStandardToolbar
+                        }
                         action: mainApp.actionShowStatusBar
                     }
                 }
                 toolbar: {
-                    id: mainToolbar
+                    id: standardToolbar
                     button_image_extents: [16dip 16dip]
                     action: mainApp.actionFileNew
                     action: mainApp.actionFileOpen
