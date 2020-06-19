@@ -177,27 +177,27 @@ namespace neogfx
         if (iPlacement == text_field_placement::LabelLeft)
             iInputLayout.add_at(0, iLabel);
 
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(neogfx::margins{});
-        iInputLayout.set_margins(neogfx::margins{});
-        iInputBoxContainer.set_margins(iInputBox.margins());
-        iInputBoxContainerLayout.set_margins(neogfx::margins{});
-        auto label_margin_updater = [this](const neogfx::optional_margins&)
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{});
+        iInputLayout.set_padding(neogfx::padding{});
+        iInputBoxContainer.set_padding(iInputBox.padding());
+        iInputBoxContainerLayout.set_padding(neogfx::padding{});
+        auto label_padding_updater = [this](const neogfx::optional_padding&)
         {
             if (iPlacement == text_field_placement::LabelAbove)
-                iLabel.set_margins(neogfx::margins{ iInputBoxContainer.margins().left + iInputBoxContainer.effective_frame_width(), 0.0 });
+                iLabel.set_padding(neogfx::padding{ iInputBoxContainer.padding().left + iInputBoxContainer.effective_frame_width(), 0.0 });
             else
-                iLabel.set_margins({});
+                iLabel.set_padding({});
         };
-        iInputBoxContainer.Margins.Changed(label_margin_updater);
-        label_margin_updater(iInputBoxContainer.Margins);
+        iInputBoxContainer.Padding.Changed(label_padding_updater);
+        label_padding_updater(iInputBoxContainer.Padding);
         iLabel.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
-        iInputBox.set_margins(neogfx::margins{});
+        iInputBox.set_padding(neogfx::padding{});
         iInputBoxLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iInputBoxLayout.set_margins(neogfx::margins{});
+        iInputBoxLayout.set_padding(neogfx::padding{});
         iHint.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iHint.set_alignment(alignment::Left | alignment::VCenter);
-        iHelp.set_margins(neogfx::margins{});
+        iHelp.set_padding(neogfx::padding{});
         iHelp.set_alignment(alignment::Left | alignment::VCenter);
 
         auto size_hint_updater = [this]()

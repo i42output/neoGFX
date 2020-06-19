@@ -39,8 +39,8 @@ namespace neogfx
         iUnpinButton{ iLayout, push_button_style::TitleBar },
         iCloseButton{ iLayout, push_button_style::TitleBar }
     {
-        set_margins(neogfx::margins{});
-        layout().set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        layout().set_padding(neogfx::padding{});
 
         iPinButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iUnpinButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });

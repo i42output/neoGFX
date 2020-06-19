@@ -41,9 +41,9 @@ namespace neogfx
     {
     }
 
-    rect framed_widget::client_rect(bool aIncludeMargins) const
+    rect framed_widget::client_rect(bool aIncludePadding) const
     {
-        rect cr = widget::client_rect(aIncludeMargins);
+        rect cr = widget::client_rect(aIncludePadding);
         auto const effectiveFrameWidth = effective_frame_width();
         cr.x += effectiveFrameWidth;
         cr.y += effectiveFrameWidth;

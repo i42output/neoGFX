@@ -31,7 +31,7 @@ namespace neogfx
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
     {
-        layout().set_margins(neogfx::margins{});
+        layout().set_padding(neogfx::padding{});
         if (aCreateDefaultModels)
         {
             set_selection_model(std::make_shared<item_selection_model>());
@@ -46,7 +46,7 @@ namespace neogfx
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
     {
-        layout().set_margins(neogfx::margins{});
+        layout().set_padding(neogfx::padding{});
         if (aCreateDefaultModels)
         {
             set_selection_model(std::make_shared<item_selection_model>());
@@ -61,7 +61,7 @@ namespace neogfx
         iColumnHeader{ iLayout, *this },
         iSpacer{ iLayout }
     {
-        layout().set_margins(neogfx::margins{});
+        layout().set_padding(neogfx::padding{});
         if (aCreateDefaultModels)
         {
             set_selection_model(std::make_shared<item_selection_model>());

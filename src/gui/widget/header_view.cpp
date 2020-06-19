@@ -412,9 +412,9 @@ namespace neogfx
             header_button& button = layout().get_widget_at<header_button>(i);
             if (i == 0u)
             {
-                auto m = button.margins();
+                auto m = button.padding();
                 m.left = separator_width() / 2.0 + 1.0;
-                button.set_margins(m);
+                button.set_padding(m);
             }
             if (i < presentation_model().columns())
             {
@@ -499,14 +499,14 @@ namespace neogfx
     {
         bool updated = false;
         for (uint32_t col = 0; col < presentation_model().columns(item_presentation_model_index{ aRow }); ++col)
-            updated = update_section_width(col, presentation_model().cell_extents(item_presentation_model_index{ aRow, col }, aGc) + presentation_model().cell_margins(*this).size() * 2.0, aGc) || updated;
+            updated = update_section_width(col, presentation_model().cell_extents(item_presentation_model_index{ aRow, col }, aGc) + presentation_model().cell_padding(*this).size() * 2.0, aGc) || updated;
         if (updated)
             layout_items();
     }
 
     bool header_view::update_section_width(uint32_t aColumn, const size& aCellExtents, i_graphics_context& aGc)
     {
-        dimension headingWidth = presentation_model().column_heading_extents(aColumn, aGc).cx + presentation_model().cell_margins(*this).size().cx * 2.0;
+        dimension headingWidth = presentation_model().column_heading_extents(aColumn, aGc).cx + presentation_model().cell_padding(*this).size().cx * 2.0;
         dimension oldSectionWidth = iSectionWidths[aColumn].calculated;
         iSectionWidths[aColumn].max = std::max(iSectionWidths[aColumn].max, units_converter(*this).to_device_units(aCellExtents.cx));
         iSectionWidths[aColumn].calculated = std::max(iSectionWidths[aColumn].calculated, units_converter(*this).to_device_units(std::max(headingWidth, aCellExtents.cx)));

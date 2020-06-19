@@ -98,7 +98,7 @@ namespace neogfx
             }, 10, true },
             iTracking{ false }
         {
-            set_margins(neogfx::margins{});
+            set_padding(neogfx::padding{});
         }
     public:
         virtual void paint(i_graphics_context& aGc) const
@@ -252,9 +252,9 @@ namespace neogfx
 
     void gradient_dialog::init()
     {
-        iLayout.set_margins(neogfx::margins{});
-        iLayout2.set_margins(neogfx::margins{});
-        iLayout3.set_margins(neogfx::margins{});
+        iLayout.set_padding(neogfx::padding{});
+        iLayout2.set_padding(neogfx::padding{});
+        iLayout3.set_padding(neogfx::padding{});
         iLayout5.set_alignment(alignment::Top);
         iReverse.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
         iReverse.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
@@ -470,7 +470,7 @@ namespace neogfx
         iXCenterSpinBox.ValueChanged([this]() { auto c = gradient().center(); if (c == std::nullopt) c = point{}; c->x = iXCenterSpinBox.value(); iGradientSelector.set_gradient(gradient().with_center(c)); });
         iYCenterSpinBox.ValueChanged([this]() { auto c = gradient().center(); if (c == std::nullopt) c = point{}; c->y = iYCenterSpinBox.value(); iGradientSelector.set_gradient(gradient().with_center(c)); });
 
-        iPreview->set_margins(neogfx::margins{});
+        iPreview->set_padding(neogfx::padding{});
         iPreview->set_fixed_size(size{ std::ceil(256.0_dip * 16.0 / 9.0), 256.0_dip });
 
         button_box().add_button(standard_button::Ok);

@@ -36,7 +36,7 @@ namespace neogfx
         Style       = Geometry | Font | Color
     };
 
-    enum class margin_role : uint32_t
+    enum class padding_role : uint32_t
     {
         Layout  = 0x0000,
         Widget  = 0x0001,
@@ -62,14 +62,14 @@ namespace neogfx
     public:
         declare_event(changed, style_aspect)
     public:
-        typedef std::array<neogfx::margins, static_cast<std::size_t>(margin_role::COUNT)> margin_list;
+        typedef std::array<neogfx::padding, static_cast<std::size_t>(padding_role::COUNT)> padding_list;
     public:
         virtual ~i_style() = default;
     public:
         virtual const std::string& name() const = 0;
-        virtual const margin_list& all_margins() const = 0;
-        virtual const neogfx::margins& margins(margin_role aMarginRole) const = 0;
-        virtual void set_margins(margin_role aMarginRole, const neogfx::margins& aMargins) = 0;
+        virtual const padding_list& all_padding() const = 0;
+        virtual const neogfx::padding& padding(padding_role aPaddingRole) const = 0;
+        virtual void set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding) = 0;
         virtual const size& spacing() const = 0;
         virtual void set_spacing(const size& aSpacing) = 0;
         virtual const i_palette& palette() const = 0;

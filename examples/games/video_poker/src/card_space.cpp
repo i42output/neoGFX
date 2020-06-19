@@ -31,7 +31,7 @@ namespace video_poker
         iCard{ nullptr },
         iCardSprite{ neogfx::game::null_entity }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         set_size_policy(neogfx::size_constraint::Expanding, kBridgeCardSize);
         set_ignore_mouse_events(true);
         iCanvas.LayoutCompleted([this]() { update_sprite_geometry(); });

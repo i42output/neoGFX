@@ -200,14 +200,14 @@ namespace neogfx
 
     void border_layout::init()
     {
-        set_margins(neogfx::margins{});
-        iRows.set_margins(neogfx::margins{});
-        iTop.set_margins(neogfx::margins{});
-        iMiddle.set_margins(neogfx::margins{});
-        iLeft.set_margins(neogfx::margins{});
-        iCenter.set_margins(neogfx::margins{});
-        iRight.set_margins(neogfx::margins{});
-        iBottom.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iRows.set_padding(neogfx::padding{});
+        iTop.set_padding(neogfx::padding{});
+        iMiddle.set_padding(neogfx::padding{});
+        iLeft.set_padding(neogfx::padding{});
+        iCenter.set_padding(neogfx::padding{});
+        iRight.set_padding(neogfx::padding{});
+        iBottom.set_padding(neogfx::padding{});
 
         set_spacing(neogfx::size{});
         iRows.set_spacing(neogfx::size{});

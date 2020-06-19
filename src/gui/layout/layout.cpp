@@ -70,7 +70,7 @@ namespace neogfx
     layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
         iParent{ nullptr },
         iOwner{ aParent.has_layout_owner() ? &aParent.layout_owner() : nullptr },
-        iMargins{ neogfx::margins{} },
+        iPadding{ neogfx::padding{} },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iIgnoreVisibility{ false },
@@ -367,23 +367,23 @@ namespace neogfx
             service<i_surface_manager>().display().metrics().ppi());
     }
 
-    bool layout::has_margins() const
+    bool layout::has_padding() const
     {
-        return iMargins != std::nullopt;
+        return iPadding != std::nullopt;
     }
 
-    margins layout::margins() const
+    padding layout::padding() const
     {
-        auto const& adjustedMargins = (has_margins() ? *iMargins : service<i_app>().current_style().margins(margin_role::Layout) * dpi_scale_factor());
-        return units_converter(*this).from_device_units(adjustedMargins);
+        auto const& adjustedPadding = (has_padding() ? *iPadding : service<i_app>().current_style().padding(padding_role::Layout) * dpi_scale_factor());
+        return units_converter(*this).from_device_units(adjustedPadding);
     }
 
-    void layout::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
+    void layout::set_padding(const optional_padding& aPadding, bool aUpdateLayout)
     {
-        optional_margins newMargins = (aMargins != std::nullopt ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
-        if (iMargins != newMargins)
+        optional_padding newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding());
+        if (iPadding != newPadding)
         {
-            iMargins = newMargins;
+            iPadding = newPadding;
             if (aUpdateLayout)
                 invalidate();
         }

@@ -217,7 +217,7 @@ namespace neogfx
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
         virtual uint32_t columns(const item_presentation_model_index& aIndex) const = 0;
-        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludeMargins = true) const = 0;
+        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludePadding = true) const = 0;
         virtual const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc) const = 0;
         virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, const std::string& aHeadingText) = 0;
@@ -243,8 +243,8 @@ namespace neogfx
         virtual void set_default_font(const optional_font& aDefaultFont) = 0;
         virtual size cell_spacing(const i_units_context& aUnitsContext) const = 0;
         virtual void set_cell_spacing(const optional_size& aSpacing, const i_units_context& aUnitsContext) = 0;
-        virtual neogfx::margins cell_margins(const i_units_context& aUnitsContext) const = 0;
-        virtual void set_cell_margins(const optional_margins& aMargins, const i_units_context& aUnitsContext) = 0;
+        virtual neogfx::padding cell_padding(const i_units_context& aUnitsContext) const = 0;
+        virtual void set_cell_padding(const optional_padding& aPadding, const i_units_context& aUnitsContext) = 0;
     public:
         virtual dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const = 0;
         virtual double total_height(const i_units_context& aUnitsContext) const = 0;

@@ -79,7 +79,7 @@ namespace neogfx
         // todo: declarations for these in i_layout_item when supported
         define_property(property_category::soft_geometry, point, Position, position)
         define_property(property_category::soft_geometry, size, Size, extents)
-        define_property(property_category::hard_geometry, optional_margins, Margins, margins)
+        define_property(property_category::hard_geometry, optional_padding, Padding, padding)
         define_property(property_category::hard_geometry, optional_size_policy, SizePolicy, size_policy)
         define_property(property_category::hard_geometry, optional_size, Weight, weight)
         define_property(property_category::hard_geometry, optional_size, MinimumSize, minimum_size)
@@ -87,7 +87,7 @@ namespace neogfx
         define_property(property_category::hard_geometry, optional_size, FixedSize, fixed_size)
         define_anchor(Position)
         define_anchor(Size)
-        define_anchor(Margins)
+        define_anchor(Padding)
         define_anchor(MinimumSize)
         define_anchor(MaximumSize)
     };

@@ -26,22 +26,22 @@ namespace neogfx
     view_stack::view_stack(i_layout& aLayout, i_view_container& aParent) :
         scrollable_widget{ aLayout, frame_style::NoFrame }, iLayout{ *this }, iParent{ aParent }
     {
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{});
     }
 
     view_container::view_container(i_widget& aParent, view_container_style aStyle) :
         widget{ aParent }, iStyle(aStyle), iLayout0{ *this }, iTabContainer{ *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
     {
-        set_margins(neogfx::margins{});
-        iLayout0.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iLayout0.set_padding(neogfx::padding{});
     }
 
     view_container::view_container(i_layout& aLayout, view_container_style aStyle) :
         widget{ aLayout }, iStyle(aStyle), iLayout0{ *this }, iTabContainer{ *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
     {
-        set_margins(neogfx::margins{});
-        iLayout0.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iLayout0.set_padding(neogfx::padding{});
     }
 
     const i_widget& view_container::as_widget() const

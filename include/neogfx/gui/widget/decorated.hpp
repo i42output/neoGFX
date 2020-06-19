@@ -203,14 +203,14 @@ namespace neogfx
                 enum { left = 1, top = 2, right = 4, bottom = 8 };
                 int hit = 0;
                 auto const clientRect = client_rect();
-                auto const clientMargins = margins();
-                if (aPosition.x < clientMargins.left)
+                auto const clientPadding = padding();
+                if (aPosition.x < clientPadding.left)
                     hit |= left;
-                if (aPosition.x > clientRect.right() - clientMargins.right)
+                if (aPosition.x > clientRect.right() - clientPadding.right)
                     hit |= right;
-                if (aPosition.y < clientMargins.top)
+                if (aPosition.y < clientPadding.top)
                     hit |= top;
-                if (aPosition.y > clientRect.bottom() - clientMargins.bottom)
+                if (aPosition.y > clientRect.bottom() - clientPadding.bottom)
                     hit |= bottom;
                 if (hit & top && hit & left)
                     return widget_part::BorderTopLeft;
@@ -297,7 +297,7 @@ namespace neogfx
     public:
         using widget_type::part;
         using widget_type::client_rect;
-        using widget_type::margins;
+        using widget_type::padding;
         using widget_type::has_parent_layout;
         using widget_type::parent_layout;
         using widget_type::has_layout_manager;
@@ -370,7 +370,7 @@ namespace neogfx
         void init()
         {
             iNonClientLayout.emplace(*this);
-            non_client_layout().set_margins(neogfx::margins{});
+            non_client_layout().set_padding(neogfx::padding{});
             non_client_layout().set_spacing(size{});
             if ((decoration() & neogfx::decoration::TitleBar) == neogfx::decoration::TitleBar)
             {

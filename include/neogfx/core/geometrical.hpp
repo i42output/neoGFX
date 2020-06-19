@@ -561,9 +561,9 @@ namespace neogfx
     }
 
     template <typename DimensionType>
-    class basic_margins
+    class basic_box_areas
     {
-        typedef basic_margins<DimensionType> self_type;
+        typedef basic_box_areas<DimensionType> self_type;
         // types
     public:
         typedef DimensionType dimension_type;
@@ -572,12 +572,12 @@ namespace neogfx
         typedef basic_size<dimension_type> size_type;
         // construction
     public:
-        basic_margins() : left{}, top{}, right{}, bottom{} {}
-        basic_margins(dimension_type all) : left(all), top(all), right(all), bottom(all) {}
-        basic_margins(dimension_type left, dimension_type top, dimension_type right, dimension_type bottom) : left(left), top(top), right(right), bottom(bottom) {}
-        basic_margins(dimension_type leftRight, dimension_type topBottom) : left(leftRight), top(topBottom), right(leftRight), bottom(topBottom) {}
+        basic_box_areas() : left{}, top{}, right{}, bottom{} {}
+        basic_box_areas(dimension_type all) : left(all), top(all), right(all), bottom(all) {}
+        basic_box_areas(dimension_type left, dimension_type top, dimension_type right, dimension_type bottom) : left(left), top(top), right(right), bottom(bottom) {}
+        basic_box_areas(dimension_type leftRight, dimension_type topBottom) : left(leftRight), top(topBottom), right(leftRight), bottom(topBottom) {}
         template <typename DimensionType2>
-        basic_margins(const basic_margins<DimensionType2>& other) :
+        basic_box_areas(const basic_box_areas<DimensionType2>& other) :
             left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}
         // operations
     public:
@@ -608,71 +608,71 @@ namespace neogfx
     };
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator+(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+    inline basic_box_areas<DimensionType> operator+(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret += right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator-(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+    inline basic_box_areas<DimensionType> operator-(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret -= right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator*(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+    inline basic_box_areas<DimensionType> operator*(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret *= right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator/(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+    inline basic_box_areas<DimensionType> operator/(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret /= right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator+(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+    inline basic_box_areas<DimensionType> operator+(const basic_box_areas<DimensionType>& left, typename basic_box_areas<DimensionType>::dimension_type right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret += right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator-(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+    inline basic_box_areas<DimensionType> operator-(const basic_box_areas<DimensionType>& left, typename basic_box_areas<DimensionType>::dimension_type right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret -= right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator*(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+    inline basic_box_areas<DimensionType> operator*(const basic_box_areas<DimensionType>& left, typename basic_box_areas<DimensionType>::dimension_type right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret *= right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline basic_margins<DimensionType> operator/(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+    inline basic_box_areas<DimensionType> operator/(const basic_box_areas<DimensionType>& left, typename basic_box_areas<DimensionType>::dimension_type right)
     {
-        basic_margins<DimensionType> ret = left;
+        basic_box_areas<DimensionType> ret = left;
         ret /= right;
         return ret;
     }
 
     template <typename DimensionType>
-    inline bool operator<(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+    inline bool operator<(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
     {
         return std::tie(left.left, left.top, left.right, left.bottom) < std::tie(right.left, right.top, right.right, right.bottom);
     }
@@ -691,7 +691,7 @@ namespace neogfx
         typedef basic_delta<coordinate_type> delta_type;
         typedef basic_size<dimension_type> size_type;
         typedef basic_point<coordinate_type> point_type;
-        typedef basic_margins<dimension_type> margins_type;
+        typedef basic_box_areas<dimension_type> padding_type;
     public:
         using point_type::x;
         using point_type::y;
@@ -774,12 +774,12 @@ namespace neogfx
         self_type& indent(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; cx -= aOffset.x; cy -= aOffset.y; return *this; }
         self_type& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * two; cy += delta.dy * two; return *this; }
         self_type& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
-        self_type& inflate(const margins_type& margins) { return inflate(margins.left, margins.top, margins.right, margins.bottom); }
+        self_type& inflate(const padding_type& padding) { return inflate(padding.left, padding.top, padding.right, padding.bottom); }
         self_type& inflate(coordinate_type dx, coordinate_type dy) { return inflate(delta_type(dx, dy)); }
         self_type& inflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { x -= left; y -= top; cx += (left + right); cy += (top + bottom); return *this; }
         self_type& deflate(const delta_type& delta) { return inflate(-delta); }
         self_type& deflate(const size_type& size) { return inflate(-size.cx, -size.cy); }
-        self_type& deflate(const margins_type& margins) { return deflate(margins.left, margins.top, margins.right, margins.bottom); }
+        self_type& deflate(const padding_type& padding) { return deflate(padding.left, padding.top, padding.right, padding.bottom); }
         self_type& deflate(coordinate_type dx, coordinate_type dy) { return inflate(-dx, -dy); }
         self_type& deflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { return inflate(-left, -top, -right, -bottom); }
         template <typename... T>
@@ -1049,7 +1049,14 @@ namespace neogfx
     typedef basic_point<uint32_t> point_u32;
     typedef basic_rect<uint32_t> rect_u32;
 
-    typedef basic_margins<dimension> margins;
+    template <typename DimensionType>
+    using basic_padding = basic_box_areas<DimensionType>;
+
+    template <typename DimensionType>
+    using basic_margin = basic_box_areas<DimensionType>;
+
+    typedef basic_padding<dimension> padding;
+    typedef basic_margin<dimension> margin;
 
     typedef std::optional<dimension> optional_dimension;
     typedef std::optional<angle> optional_angle;
@@ -1061,7 +1068,8 @@ namespace neogfx
     typedef std::optional<point_u32> optional_point_u32;
     typedef std::optional<size_u32> optional_size_u32;
     typedef std::optional<rect_u32> optional_rect_u32;
-    typedef std::optional<margins> optional_margins;
+    typedef std::optional<padding> optional_padding;
+    typedef std::optional<margin> optional_margin;
     typedef std::optional<vector1> optional_vector1;
     typedef std::optional<vector2> optional_vector2;
     typedef std::optional<vector3> optional_vector3;

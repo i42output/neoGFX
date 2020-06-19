@@ -149,8 +149,8 @@ namespace neogfx
         scrollable_widget{ aLayout, frame_style::NoFrame, aScrollbarStyle },
         iLayout{ *this }
     {
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{});
     }
 
     bool window::client::can_defer_layout() const
@@ -173,7 +173,7 @@ namespace neogfx
         if (has_minimum_size() || (static_cast<const window&>(parent()).style() & window_style::Resize) != window_style::Resize)
             return scrollable_widget::minimum_size(aAvailableSpace);
         else
-            return service<i_app>().current_style().margins(margin_role::Window).size();
+            return service<i_app>().current_style().padding(padding_role::Window).size();
     }
 
     bool window::client::transparent_background() const
@@ -966,20 +966,20 @@ namespace neogfx
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
             iTitleBar.emplace(*this, service<i_app>().default_window_icon(), title_text());
 
-        set_margins({});
-        iNonClientLayout.set_margins(neogfx::margins{});
+        set_padding({});
+        iNonClientLayout.set_padding(neogfx::padding{});
         iNonClientLayout.set_spacing(size{});
-        iTitleBarLayout.set_margins(neogfx::margins{});
-        iMenuLayout.set_margins(neogfx::margins{});
-        iToolbarLayout.set_margins(neogfx::margins{});
-        iDockLayout.set_margins(neogfx::margins{});
-        iDockLayout.top().set_margins(neogfx::margins{});
-        iDockLayout.bottom().set_margins(neogfx::margins{});
-        iDockLayout.left().set_margins(neogfx::margins{});
-        iDockLayout.right().set_margins(neogfx::margins{});
-        iDockLayout.center().set_margins(neogfx::margins{});
-        iClientLayout.set_margins(neogfx::margins{});
-        iStatusBarLayout.set_margins(neogfx::margins{});
+        iTitleBarLayout.set_padding(neogfx::padding{});
+        iMenuLayout.set_padding(neogfx::padding{});
+        iToolbarLayout.set_padding(neogfx::padding{});
+        iDockLayout.set_padding(neogfx::padding{});
+        iDockLayout.top().set_padding(neogfx::padding{});
+        iDockLayout.bottom().set_padding(neogfx::padding{});
+        iDockLayout.left().set_padding(neogfx::padding{});
+        iDockLayout.right().set_padding(neogfx::padding{});
+        iDockLayout.center().set_padding(neogfx::padding{});
+        iClientLayout.set_padding(neogfx::padding{});
+        iStatusBarLayout.set_padding(neogfx::padding{});
 
         if (!is_nested())
             resize(native_surface().surface_size());

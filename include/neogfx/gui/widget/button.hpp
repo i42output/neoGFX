@@ -61,7 +61,7 @@ namespace neogfx
         // widget
     public:
         neogfx::size_policy size_policy() const override;
-        neogfx::margins margins() const override;
+        neogfx::padding padding() const override;
         // i_button
     public:
         button_checkable checkable() const override;

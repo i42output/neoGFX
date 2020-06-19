@@ -243,8 +243,8 @@ namespace neogfx::nrc
                 iMaximumWidth.emplace(get_scalar<length>(aData));
             else if (aName == "maximum_height")
                 iMaximumHeight.emplace(get_scalar<length>(aData));
-            else if (aName == "margin")
-                iMargin.emplace(get_scalar<length>(aData));
+            else if (aName == "padding")
+                iPadding.emplace(get_scalar<length>(aData));
             else if (aName == "enabled")
                 iEnabled = aData.get<bool>();
             else if (aName == "disabled")
@@ -301,8 +301,8 @@ namespace neogfx::nrc
                 emplace_2<length>("minimum_size", iMinimumSize);
             else if (aName == "maximum_size")
                 emplace_2<length>("maximum_size", iMaximumSize);
-            else if (aName == "margin")
-                emplace_4<length>("margin", iMargin);
+            else if (aName == "padding")
+                emplace_4<length>("padding", iPadding);
             else if (aName == "weight")
                 emplace_2<double>("weight", iWeight);
             else if (aName == "focus_policy")
@@ -393,18 +393,18 @@ namespace neogfx::nrc
                 emit("   %1%.set_maximum_height(%2%);\n", id(), *iMaximumHeight);
             if (iWeight)
                 emit("   %1%.set_weight(size{ %2%, %3% });\n", id(), iWeight->cx, iWeight->cy);
-            if (iMargin)
+            if (iPadding)
             {
-                auto const& margin = *iMargin;
-                if (margin.left == margin.right && margin.top == margin.bottom)
+                auto const& padding = *iPadding;
+                if (padding.left == padding.right && padding.top == padding.bottom)
                 {
-                    if (margin.left == margin.top)
-                        emit("   %1%.set_margins(neogfx::margins{ %2% });\n", id(), margin.left);
+                    if (padding.left == padding.top)
+                        emit("   %1%.set_padding(neogfx::padding{ %2% });\n", id(), padding.left);
                     else
-                        emit("   %1%.set_margins(neogfx::margins{ %2%, %3% });\n", id(), margin.left, margin.top);
+                        emit("   %1%.set_padding(neogfx::padding{ %2%, %3% });\n", id(), padding.left, padding.top);
                 }
                 else 
-                    emit("   %1%.set_margins(neogfx::margins{ %2%, %3%, %4%, %5% });\n", id(), margin.left, margin.top, margin.right, margin.bottom);
+                    emit("   %1%.set_padding(neogfx::padding{ %2%, %3%, %4%, %5% });\n", id(), padding.left, padding.top, padding.right, padding.bottom);
             }
             if (iEnabled)
                 emit("   %1%.%2%();\n", id(), *iEnabled ? "enable" : "disable");
@@ -518,7 +518,7 @@ namespace neogfx::nrc
             if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
                 add_data_names({ "enabled", "disabled", "focus_policy" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
-                add_data_names({ "size_policy", "margin", "minimum_size", "maximum_size", "size", "minimum_width", "minimum_height", "maximum_width", "maximum_height", "weight" });
+                add_data_names({ "size_policy", "padding", "minimum_size", "maximum_size", "size", "minimum_width", "minimum_height", "maximum_width", "maximum_height", "weight" });
             if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
                 add_data_names({ "alignment" });
             if ((type() & (ui_element_type::HasText | ui_element_type::HasLabel)) != ui_element_type::None)
@@ -554,7 +554,7 @@ namespace neogfx::nrc
         std::optional<length> iMaximumWidth;
         std::optional<length> iMaximumHeight;
         std::optional<size> iWeight;
-        std::optional<basic_margins<length>> iMargin;
+        std::optional<basic_padding<length>> iPadding;
         std::optional<bool> iEnabled;
         std::pair<std::optional<focus_policy>, bool> iFocusPolicy;
         std::optional<label_placement> iLabelPlacement;

@@ -218,9 +218,9 @@ namespace neogfx
         virtual size fixed_size() const = 0;
         virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) = 0;
     public:
-        virtual bool has_margins() const = 0;
-        virtual neogfx::margins margins() const = 0;
-        virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) = 0;
+        virtual bool has_padding() const = 0;
+        virtual neogfx::padding padding() const = 0;
+        virtual void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) = 0;
         // helpers
     public:
         neogfx::size_policy effective_size_policy() const

@@ -187,7 +187,7 @@ namespace neogfx
         ValueChanged.set_trigger_type(event_trigger_type::Asynchronous);
         ConstraintsChanged.set_trigger_type(event_trigger_type::Asynchronous);
 
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         if (iOrientation == slider_orientation::Horizontal)
             set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         else

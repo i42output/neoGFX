@@ -170,19 +170,19 @@ namespace neogfx
     template <typename T>
     void basic_spin_box<T>::init()
     {
-        set_margins(neogfx::margins{});
-        iPrimaryLayout.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iPrimaryLayout.set_padding(neogfx::padding{});
         iPrimaryLayout.set_spacing(dip(INTERNAL_SPACING));
-        iSecondaryLayout.set_margins(neogfx::margins{});
+        iSecondaryLayout.set_padding(neogfx::padding{});
         iSecondaryLayout.set_spacing(size{});
-        iStepUpButton.set_margins(neogfx::margins{});
+        iStepUpButton.set_padding(neogfx::padding{});
         iStepUpButton.set_minimum_size(dip(SPIN_BUTTON_MINIMUM_SIZE));
         iStepUpButton.label().image_widget().set_minimum_size(size{ 3.0, 3.0 });
         iStepUpButton.label().image_widget().set_snap(2.0); // up and down buttons want to draw arrow texture at same size so use a snap of 2 pixels
         iStepUpButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
         iStepUpButton.Clicked.set_trigger_type(event_trigger_type::Synchronous);
         iStepUpButton.DoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
-        iStepDownButton.set_margins(neogfx::margins{});
+        iStepDownButton.set_padding(neogfx::padding{});
         iStepDownButton.set_minimum_size(dip(SPIN_BUTTON_MINIMUM_SIZE));
         iStepDownButton.label().image_widget().set_minimum_size(size{ 3.0, 3.0 });
         iStepDownButton.label().image_widget().set_snap(2.0);

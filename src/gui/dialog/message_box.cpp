@@ -264,9 +264,9 @@ namespace neogfx
 
     void message_box::init()
     {
-        iLayout1.set_margins(neogfx::margins{});
+        iLayout1.set_padding(neogfx::padding{});
         iLayout2.set_alignment(neogfx::alignment::Left);
-        iLayout2.set_margins(neogfx::margins{});
+        iLayout2.set_padding(neogfx::padding{});
 
         size maxTextSize{ service<i_window_manager>().desktop_rect(root()).width() / 3.0, size::max_dimension() };
         text().set_maximum_size(maxTextSize);

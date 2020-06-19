@@ -28,21 +28,21 @@ namespace neogfx
     tab_page_container::tab_page_container(bool aClosableTabs, tab_container_style aStyle) :
         widget{}, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         update_tab_bar_placement();
     }
 
     tab_page_container::tab_page_container(i_widget& aParent, bool aClosableTabs, tab_container_style aStyle) :
         widget{ aParent }, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         update_tab_bar_placement();
     }
 
     tab_page_container::tab_page_container(i_layout& aLayout, bool aClosableTabs, tab_container_style aStyle) :
         widget{ aLayout }, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         update_tab_bar_placement();
     }
 

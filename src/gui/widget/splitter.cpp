@@ -187,12 +187,12 @@ namespace neogfx
 
     void splitter::init()
     {
-        set_margins(neogfx::margins(0.0));
+        set_padding(neogfx::padding(0.0));
         if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             set_layout(std::make_shared<horizontal_layout>());
         else
             set_layout(std::make_shared<vertical_layout>());
-        layout().set_margins(neogfx::margins(0.0));
+        layout().set_padding(neogfx::padding(0.0));
     }
 
     std::optional<splitter::separator_type> splitter::separator_at(const point& aPosition) const

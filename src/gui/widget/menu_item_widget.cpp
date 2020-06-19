@@ -270,8 +270,8 @@ namespace neogfx
 
     void menu_item_widget::init()
     {
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(dpi_scale(neogfx::margins{ iGap, dpi_scale(2.0), iGap * (menu().type() == menu_type::Popup ? 2.0 : 1.0), dpi_scale(2.0) }));
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(dpi_scale(neogfx::padding{ iGap, dpi_scale(2.0), iGap * (menu().type() == menu_type::Popup ? 2.0 : 1.0), dpi_scale(2.0) }));
         iLayout.set_spacing(dpi_scale(size{ iGap, 0.0 }));
         if (menu().type() == menu_type::Popup)
             iIcon.set_fixed_size(dpi_scale(iIconSize));

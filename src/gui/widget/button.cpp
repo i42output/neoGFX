@@ -108,10 +108,10 @@ namespace neogfx
         return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
     }
 
-    margins button::margins() const
+    padding button::padding() const
     {
-        neogfx::margins result = widget::margins();
-        if (!has_margins() && (label().effective_placement() & label_placement::Text) == label_placement::Text)
+        neogfx::padding result = widget::padding();
+        if (!has_padding() && (label().effective_placement() & label_placement::Text) == label_placement::Text)
         {
             result.left *= 2.0;
             result.right *= 2.0;
@@ -350,7 +350,7 @@ namespace neogfx
         Unchecked.set_trigger_type(event_trigger_type::Asynchronous);
         Indeterminate.set_trigger_type(event_trigger_type::Asynchronous);
 
-        layout().set_margins(neogfx::margins(0.0));
+        layout().set_padding(neogfx::padding(0.0));
         iLabel.set_size_policy(size_constraint::Expanding);
 
         set_focus_policy(focus_policy::TabFocus);

@@ -134,7 +134,7 @@ namespace neogfx
         private:
             static window* new_window();
             void init();
-            margins border_thickness() const;
+            padding border_thickness() const;
         private:
             static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
         private:
@@ -154,7 +154,7 @@ namespace neogfx
             bool iCapturingMouse;
             bool iNonClientCapturing;
             bool iReady;
-            mutable margins iBorderThickness;
+            mutable padding iBorderThickness;
             widget_part iClickedWidgetPart;
             bool iSystemMenuOpen;
         };

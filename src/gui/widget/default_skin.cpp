@@ -153,9 +153,9 @@ namespace neogfx
             }
         }
 
-        const dimension margin = 3.0_dip;
-        rect rectUpButton = aItem.element_rect(skin_element::ScrollbarUpArrow).deflate(margin, margin);
-        rect rectDownButton = aItem.element_rect(skin_element::ScrollbarDownArrow).deflate(margin, margin);
+        const dimension padding = 3.0_dip;
+        rect rectUpButton = aItem.element_rect(skin_element::ScrollbarUpArrow).deflate(padding, padding);
+        rect rectDownButton = aItem.element_rect(skin_element::ScrollbarDownArrow).deflate(padding, padding);
         if (aScrollbar.type() == scrollbar_type::Vertical)
         {
             coordinate x = std::floor(rectUpButton.center().x);
@@ -189,7 +189,7 @@ namespace neogfx
             }
         }
         if (aScrollbar.style() == scrollbar_style::Normal)
-            aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.type() == scrollbar_type::Vertical ? margin : 0.0, aScrollbar.type() == scrollbar_type::Vertical ? 0.0 : margin), baseColor.light() ?
+            aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.type() == scrollbar_type::Vertical ? padding : 0.0, aScrollbar.type() == scrollbar_type::Vertical ? 0.0 : padding), baseColor.light() ?
                 foregroundColor.darker(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00) :
                 foregroundColor.lighter(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00));
         aGc.set_origin(oldOrigin);

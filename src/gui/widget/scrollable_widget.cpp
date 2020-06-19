@@ -83,9 +83,9 @@ namespace neogfx
             update_scrollbar_visibility();
     }
 
-    rect scrollable_widget::client_rect(bool aIncludeMargins) const
+    rect scrollable_widget::client_rect(bool aIncludePadding) const
     {
-        rect result = framed_widget::client_rect(aIncludeMargins);
+        rect result = framed_widget::client_rect(aIncludePadding);
         if (vertical_scrollbar().visible())
         {
             if (vertical_scrollbar().style() == scrollbar_style::Normal)
@@ -507,9 +507,9 @@ namespace neogfx
                 if (has_layout())
                 {
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                        max.x += layout().margins().right;
+                        max.x += layout().padding().right;
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                        max.y += layout().margins().bottom;
+                        max.y += layout().padding().bottom;
                 }
                 if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
                 {

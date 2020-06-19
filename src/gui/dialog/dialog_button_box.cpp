@@ -228,11 +228,11 @@ namespace neogfx
                 }
             }
         });
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(neogfx::margins{});
-        iOptionLayout.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{});
+        iOptionLayout.set_padding(neogfx::padding{});
         iOptionLayout.set_size_policy(size_constraint::Minimum);
-        iStandardButtonLayout.set_margins(neogfx::margins{});
+        iStandardButtonLayout.set_padding(neogfx::padding{});
     }
 
     bool dialog_button_box::can_reject() const

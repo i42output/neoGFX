@@ -364,7 +364,7 @@ namespace neogfx
 
     void popup_menu::init()
     {
-        menu_layout().set_margins(neogfx::margins{});
+        menu_layout().set_padding(neogfx::padding{});
         menu_layout().set_spacing(neogfx::size{});
         Closed([this]()
         {

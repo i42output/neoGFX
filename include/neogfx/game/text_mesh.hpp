@@ -38,7 +38,7 @@ namespace neogfx::game
         string text;
         vec2 extents;
         scalar border;
-        vec4 margins;
+        vec4 padding;
         neogfx::alignment alignment;
         shared<font> font;
         material ink;
@@ -118,7 +118,7 @@ namespace neogfx::game
                     "Text",
                     "Extents",
                     "Border",
-                    "Margins",
+                    "Padding",
                     "Alignment",
                     "Font",
                     "Ink",

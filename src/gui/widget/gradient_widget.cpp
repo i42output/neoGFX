@@ -75,8 +75,8 @@ namespace neogfx
         private:
             void init(color::component aCurrentAlpha)
             {
-                iLayout.set_margins(neogfx::margins{});
-                iLayout2.set_margins(neogfx::margins{});
+                iLayout.set_padding(neogfx::padding{});
+                iLayout2.set_padding(neogfx::padding{});
                 iSlider.set_minimum(0);
                 iSlider.set_maximum(255);
                 iSlider.set_step(1);
@@ -112,28 +112,28 @@ namespace neogfx
     gradient_widget::gradient_widget(const neogfx::gradient& aGradient) :
         iInGradientDialog{ false }, iTracking{ false }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 
     gradient_widget::gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient) :
         widget{ aParent }, iInGradientDialog{ false }, iTracking{ false }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 
     gradient_widget::gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient) :
         widget{ aLayout }, iInGradientDialog{ false }, iTracking{ false }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 
     gradient_widget::gradient_widget(gradient_dialog&, i_layout& aLayout, const neogfx::gradient& aGradient) :
         widget{ aLayout }, iInGradientDialog{ true }, iTracking{ false }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 

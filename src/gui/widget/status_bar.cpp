@@ -42,7 +42,7 @@ namespace neogfx
     {
         if (widget::has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + margins().size();
+        return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + padding().size();
     }
 
     void status_bar::separator::paint(i_graphics_context& aGc) const
@@ -258,20 +258,20 @@ namespace neogfx
 
     void status_bar::init()
     {
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{});
         iLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iNormalLayout.set_margins(neogfx::margins{});
+        iNormalLayout.set_padding(neogfx::padding{});
         iNormalLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iMessageLayout.set_margins(neogfx::margins{});
+        iMessageLayout.set_padding(neogfx::padding{});
         iMessageLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMessageWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iIdleLayout.set_margins(neogfx::margins{});
+        iIdleLayout.set_padding(neogfx::padding{});
         iIdleLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iNormalWidgetContainer.set_margins(neogfx::margins{});
-        iNormalWidgetLayout.set_margins(neogfx::margins{});
-        iPermanentWidgetLayout.set_margins(neogfx::margins{});
+        iNormalWidgetContainer.set_padding(neogfx::padding{});
+        iNormalWidgetLayout.set_padding(neogfx::padding{});
+        iPermanentWidgetLayout.set_padding(neogfx::padding{});
         auto update_size_grip = [this](style_aspect)
         {
             auto ink1 = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));

@@ -116,9 +116,9 @@ namespace neogfx
             units() == length_units::units::Pixels ? aValue : throw device_metrics_unavailable();
     }
 
-    margins length_units_converter::to_device_units(const margins& aValue) const
+    padding length_units_converter::to_device_units(const padding& aValue) const
     {
-        return iContext.device_metrics_available() ? margins{
+        return iContext.device_metrics_available() ? padding{
             to_device_units(iContext.device_metrics().extents(), size{ aValue.left, 0 }).cx,
             to_device_units(iContext.device_metrics().extents(), size{ 0, aValue.top }).cy,
             to_device_units(iContext.device_metrics().extents(), size{ aValue.right, 0 }).cx,
@@ -288,9 +288,9 @@ namespace neogfx
             units() == length_units::units::Pixels ? aValue : throw device_metrics_unavailable();
     }
 
-    margins length_units_converter::from_device_units(const margins& aValue) const
+    padding length_units_converter::from_device_units(const padding& aValue) const
     {
-        return iContext.device_metrics_available() ? margins{
+        return iContext.device_metrics_available() ? padding{
             from_device_units(iContext.device_metrics().extents(), size{ aValue.left, 0 }).cx,
             from_device_units(iContext.device_metrics().extents(), size{ 0, aValue.top }).cy,
             from_device_units(iContext.device_metrics().extents(), size{ aValue.right, 0 }).cx,

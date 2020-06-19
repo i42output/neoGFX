@@ -228,7 +228,7 @@ namespace neogfx
             return rect{};
         scoped_units su(units::Pixels);
         rect g = iContainer.scrollbar_geometry(*this);
-        const dimension margin = 3.0_dip;
+        const dimension padding = 3.0_dip;
         switch (aElement)
         {
         case scrollbar_element::Scrollbar:
@@ -237,7 +237,7 @@ namespace neogfx
             if (iType == scrollbar_type::Vertical)
             {
                 if (iStyle == scrollbar_style::Normal)
-                    g.cy = std::ceil((g.cx - margin * 2.0) / 2.0 + margin * 2.0);
+                    g.cy = std::ceil((g.cx - padding * 2.0) / 2.0 + padding * 2.0);
                 else if (iStyle == scrollbar_style::Menu)
                     g.cy = std::ceil(width());
                 else if (iStyle == scrollbar_style::Scroller)
@@ -249,7 +249,7 @@ namespace neogfx
             else
             {
                 if (iStyle == scrollbar_style::Normal)
-                    g.cx = std::ceil((g.cy - margin * 2.0) / 2.0 + margin * 2.0);
+                    g.cx = std::ceil((g.cy - padding * 2.0) / 2.0 + padding * 2.0);
                 else if (iStyle == scrollbar_style::Menu)
                     g.cx = std::ceil(width());
                 else if (iStyle == scrollbar_style::Scroller)
@@ -264,8 +264,8 @@ namespace neogfx
             {
                 if (iStyle == scrollbar_style::Normal)
                 {
-                    g.y = g.bottom() - std::ceil((g.cx - margin * 2.0) / 2.0 + margin * 2.0);
-                    g.cy = std::ceil((g.cx - margin * 2.0) / 2.0 + margin * 2.0);
+                    g.y = g.bottom() - std::ceil((g.cx - padding * 2.0) / 2.0 + padding * 2.0);
+                    g.cy = std::ceil((g.cx - padding * 2.0) / 2.0 + padding * 2.0);
                 }
                 else if (iStyle == scrollbar_style::Menu || iStyle == scrollbar_style::Scroller)
                 {
@@ -277,8 +277,8 @@ namespace neogfx
             {
                 if (iStyle == scrollbar_style::Normal)
                 {
-                    g.x = g.right() - std::ceil((g.cy - margin * 2.0) / 2.0 + margin * 2.0);
-                    g.cx = std::ceil((g.cy - margin * 2.0) / 2.0 + margin * 2.0);
+                    g.x = g.right() - std::ceil((g.cy - padding * 2.0) / 2.0 + padding * 2.0);
+                    g.cx = std::ceil((g.cy - padding * 2.0) / 2.0 + padding * 2.0);
                 }
                 else if (iStyle == scrollbar_style::Menu || iStyle == scrollbar_style::Scroller)
                 {
@@ -567,8 +567,8 @@ namespace neogfx
         dimension w = rasterize(4.0_mm);
         if (aStyle == scrollbar_style::Menu || aStyle == scrollbar_style::Scroller)
         {
-            dimension const margin = 3.0_dip;
-            w -= margin * 2.0;
+            dimension const padding = 3.0_dip;
+            w -= padding * 2.0;
         }
         if (to_px<uint32_t>(w) % 2u == 0u)
             w = from_px<dimension>(to_px<uint32_t>(w) + 1u);

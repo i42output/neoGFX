@@ -327,9 +327,9 @@ namespace neogfx
     void label::init()
     {
         image_widget().set_dpi_auto_scale(true);
-        layout().set_margins(neogfx::margins{});
-        text_widget().set_margins(neogfx::margins{});
-        image_widget().set_margins(neogfx::margins{});
+        layout().set_padding(neogfx::padding{});
+        text_widget().set_padding(neogfx::padding{});
+        image_widget().set_padding(neogfx::padding{});
         set_ignore_mouse_events(true);
         text_widget().set_ignore_mouse_events(true);
         image_widget().set_ignore_mouse_events(true);

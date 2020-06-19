@@ -697,7 +697,7 @@ namespace neogfx
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
             vertical_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cy);
-            vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
+            vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_padding(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
             vertical_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cy, 0.0));
             vertical_scrollbar().set_position(iOldPositionForScrollbarVisibility.cy);
             if (vertical_scrollbar().page() > 0 && vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
@@ -707,7 +707,7 @@ namespace neogfx
             break;
         case UsvStageCheckHorizontal:
             horizontal_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cx);
-            horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
+            horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_padding(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
             horizontal_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cx, 0.0));
             horizontal_scrollbar().set_position(iOldPositionForScrollbarVisibility.cx);
             if (horizontal_scrollbar().page() > 0 && horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
@@ -946,9 +946,9 @@ namespace neogfx
         iEditing = newIndex;
         if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
             editor().set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
-        editor().set_margins(presentation_model().cell_margins(*this));
+        editor().set_padding(presentation_model().cell_padding(*this));
         auto editorRect = cell_rect(newIndex, cell_part::Text);
-        editorRect.inflate(presentation_model().cell_margins(*this));
+        editorRect.inflate(presentation_model().cell_padding(*this));
         editor().move(editorRect.position());
         editor().resize(editorRect.extents());
         if (editor_has_text_edit())
@@ -957,7 +957,7 @@ namespace neogfx
             if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
             if (&editor() != &textEdit)
-                textEdit.set_margins(neogfx::margins{});
+                textEdit.set_padding(neogfx::padding{});
             optional_color textColor = presentation_model().cell_color(newIndex, color_role::Text);
             if (textColor == std::nullopt)
                 textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
@@ -1066,7 +1066,7 @@ namespace neogfx
         if (editing() != std::nullopt)
         {
             auto editorRect = cell_rect(*editing(), cell_part::Text);
-            editorRect.inflate(presentation_model().cell_margins(*this));
+            editorRect.inflate(presentation_model().cell_padding(*this));
             editor().move(editorRect.position());
             editor().resize(editorRect.extents());
         }
@@ -1147,7 +1147,7 @@ namespace neogfx
                 if (!cellCheckBoxSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
+                cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
                 cellRect.extents() = *cellCheckBoxSize;
                 cellRect.x += presentation_model().indent(aItemIndex, aGc);
                 return cellRect;
@@ -1159,7 +1159,7 @@ namespace neogfx
                 if (!cellTreeExpanderSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellTreeExpanderSize->cy) / 2.0) });
+                cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellTreeExpanderSize->cy) / 2.0) });
                 cellRect.extents() = *cellTreeExpanderSize;
                 cellRect.x += presentation_model().indent(aItemIndex, aGc) - presentation_model().cell_tree_expander_size(aItemIndex, aGc)->cx;
                 return cellRect;
@@ -1171,7 +1171,7 @@ namespace neogfx
                 if (!cellImageSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.indent(point{ presentation_model().cell_margins(*this).left, ((cellRect.cy - cellImageSize->cy) / 2.0) });
+                cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellImageSize->cy) / 2.0) });
                 cellRect.extents() = *cellImageSize;
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
@@ -1183,7 +1183,7 @@ namespace neogfx
         case cell_part::Text:
             {
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.deflate(presentation_model().cell_margins(*this));
+                cellRect.deflate(presentation_model().cell_padding(*this));
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
                     cellRect.indent(point{ cellCheckBoxSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
@@ -1231,7 +1231,7 @@ namespace neogfx
     void item_view::init()
     {
         set_focus_policy(focus_policy::ClickTabFocus);
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         iSink += service<i_app>().current_style_changed([this](style_aspect)
         {
             if (selection_model().has_current_index())

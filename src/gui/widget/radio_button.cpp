@@ -27,7 +27,7 @@ namespace neogfx
     radio_button::disc::disc(radio_button& aParent)
     {
         aParent.layout().add_at(0, *this);
-        set_margins(neogfx::margins(0.0));
+        set_padding(neogfx::padding(0.0));
         set_ignore_mouse_events(true);
     }
 
@@ -48,8 +48,8 @@ namespace neogfx
         button(aText), iDisc(*this)
     {
         set_checkable(button_checkable::BiState);
-        set_margins(neogfx::margins{ 0.0 });
-        layout().set_margins(neogfx::margins{ 0.0 });
+        set_padding(neogfx::padding{ 0.0 });
+        layout().set_padding(neogfx::padding{ 0.0 });
         layout().add_spacer();
         if (!any_siblings_on())
             set_on();
@@ -60,8 +60,8 @@ namespace neogfx
         button(aParent, aText), iDisc(*this)
     {
         set_checkable(button_checkable::BiState);
-        set_margins(neogfx::margins{ 0.0 });
-        layout().set_margins(neogfx::margins{ 0.0 });
+        set_padding(neogfx::padding{ 0.0 });
+        layout().set_padding(neogfx::padding{ 0.0 });
         layout().add_spacer();
         if (!any_siblings_on())
             set_on();
@@ -72,8 +72,8 @@ namespace neogfx
         button(aLayout, aText), iDisc(*this)
     {
         set_checkable(button_checkable::BiState);
-        set_margins(neogfx::margins{ 0.0 });
-        layout().set_margins(neogfx::margins{ 0.0 });
+        set_padding(neogfx::padding{ 0.0 });
+        layout().set_padding(neogfx::padding{ 0.0 });
         layout().add_spacer();
         if (!any_siblings_on())
             set_on();

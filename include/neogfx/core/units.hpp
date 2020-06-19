@@ -93,9 +93,9 @@ namespace neogfx
         {
             return aPoint * dpi_scale_factor();
         }
-        margins dpi_scale(const margins& aMargins) const
+        padding dpi_scale(const padding& aPadding) const
         {
-            return aMargins * dpi_scale_factor();
+            return aPadding * dpi_scale_factor();
         }
         template <typename T>
         T&& dpi_select(T&& aLowDpiValue, T&& aHighDpiValue) const
@@ -329,7 +329,7 @@ namespace neogfx
         size to_device_units(const size& aValue) const;
         point to_device_units(const point& aValue) const;
         rect to_device_units(const rect& aValue) const;
-        margins to_device_units(const margins& aValue) const;
+        padding to_device_units(const padding& aValue) const;
         vector2 to_device_units(const size& aExtents, const vector2& aValue) const;
         dimension to_device_units(const size& aExtents, dimension aValue) const;
         delta to_device_units(const size& aExtents, const delta& aValue) const;
@@ -342,7 +342,7 @@ namespace neogfx
         size from_device_units(const size& aValue) const;
         point from_device_units(const point& aValue) const;
         rect from_device_units(const rect& aValue) const;
-        margins from_device_units(const margins& aValue) const;
+        padding from_device_units(const padding& aValue) const;
         vector2 from_device_units(const size& aExtents, const vector2& aValue) const;
         dimension from_device_units(const size& aExtents, dimension aValue) const;
         delta from_device_units(const size& aExtents, const delta& aValue) const;

@@ -990,10 +990,10 @@ End Sub\n\
 <td align = 'left' valign = 'middle' style='Font-Family:Arial'>\n\
 %s\n\
 </td>\n\
-<td align = 'right' valign = 'middle' style = 'margin-top: 0em'>\n\
-<table  align = 'right' style = 'margin-right: 0em;'>\n\
-<tr align = 'right' style = 'margin-top: 5em;'>\n\
-<input type = 'button' value = 'OK' name = 'btn_OK' onClick = 'vbs:Run_ProgramOK' style = 'width: 5em; margin-top: 2em;'><br>\n\
+<td align = 'right' valign = 'middle' style = 'padding-top: 0em'>\n\
+<table  align = 'right' style = 'padding-right: 0em;'>\n\
+<tr align = 'right' style = 'padding-top: 5em;'>\n\
+<input type = 'button' value = 'OK' name = 'btn_OK' onClick = 'vbs:Run_ProgramOK' style = 'width: 5em; padding-top: 2em;'><br>\n\
 <input type = 'button' value = 'Cancel' name = 'btn_Cancel' onClick = 'vbs:Run_ProgramCancel' style = 'width: 5em;'><br><br>\n\
 </tr>\n\
 </table>\n\

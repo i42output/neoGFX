@@ -391,16 +391,16 @@ namespace neogfx
     {
         if (iStyle == push_button_style::ItemViewHeader)
         {
-            set_margins(neogfx::margins{ 1.0_dip, 2.0_dip });
-            layout().set_margins(neogfx::margins{});
-            label().set_margins(neogfx::margins{});
+            set_padding(neogfx::padding{ 1.0_dip, 2.0_dip });
+            layout().set_padding(neogfx::padding{});
+            label().set_padding(neogfx::padding{});
             label().text_widget().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
         }
         else if (iStyle == push_button_style::Toolbar)
         {
-            set_margins(neogfx::margins{ 2.0_dip, 2.0_dip });
-            layout().set_margins(neogfx::margins{});
-            label().set_margins(neogfx::margins{});
+            set_padding(neogfx::padding{ 2.0_dip, 2.0_dip });
+            layout().set_padding(neogfx::padding{});
+            label().set_padding(neogfx::padding{});
         }
     }
 }

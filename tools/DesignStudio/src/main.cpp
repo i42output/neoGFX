@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
         rightDock.hide();
 
         ng::i_layout& mainLayout = mainWindow.client_layout();
-        mainLayout.set_margins(ng::margins{});
+        mainLayout.set_padding(ng::padding{});
         mainLayout.set_spacing(ng::size{});
 
         ng::horizontal_layout workspaceLayout{ mainLayout };

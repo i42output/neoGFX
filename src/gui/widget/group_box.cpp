@@ -217,8 +217,8 @@ namespace neogfx
 
     void group_box::init()
     {
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(neogfx::margins{ 5.0 });
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{ 5.0 });
         iLayout.set_spacing(neogfx::size{ 5.0 });
         set_item_layout(std::make_shared<group_box_item_layout>());
     }

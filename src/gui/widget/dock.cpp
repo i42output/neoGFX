@@ -30,14 +30,14 @@ namespace neogfx
     dock::dock(i_widget& aParent, dock_area aArea) :
         base_type{ neogfx::decoration_style::Dock, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
     {
-        set_margins(neogfx::margins{ 1.5_mm });
+        set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
 
     dock::dock(i_layout& aLayout, dock_area aArea) :
         base_type{ neogfx::decoration_style::Dock, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
     {
-        set_margins(neogfx::margins{ 1.5_mm });
+        set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
 
@@ -85,8 +85,8 @@ namespace neogfx
 
     void dock::update_layout()
     {
-        layout().set_margins(neogfx::margins{});
-        layout().set_spacing(margins().top_left().to_vec2());
+        layout().set_padding(neogfx::padding{});
+        layout().set_spacing(padding().top_left().to_vec2());
     }
 
     neogfx::size_policy dock::size_policy() const

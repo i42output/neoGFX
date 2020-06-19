@@ -147,8 +147,8 @@ namespace neogfx
 
     void menu_bar::init()
     {
-        set_margins(neogfx::margins{});
-        layout().set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        layout().set_padding(neogfx::padding{});
         iSink += root().dismissing_children([this](const i_widget* aClickedWidget)
         {
             if (aClickedWidget != this && (aClickedWidget == 0 || !is_ancestor_of(*aClickedWidget)))

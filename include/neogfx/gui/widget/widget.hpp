@@ -128,9 +128,9 @@ namespace neogfx
         bool has_fixed_size() const override;
         size fixed_size() const override;
         void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
-        bool has_margins() const override;
-        neogfx::margins margins() const override;
-        void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
+        bool has_padding() const override;
+        neogfx::padding padding() const override;
+        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
         // i_skinnable_item
     public:
         bool is_widget() const override;
@@ -144,7 +144,7 @@ namespace neogfx
         void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;
         point origin() const override;
         rect non_client_rect() const override;
-        rect client_rect(bool aIncludeMargins = true) const override;
+        rect client_rect(bool aIncludePadding = true) const override;
         void move(const point& aPosition) override;
         void moved() override;
         void parent_moved() override;

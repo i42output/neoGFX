@@ -789,10 +789,10 @@ namespace neogfx
         return rect{origin(), extents()};
     }
 
-    rect widget::client_rect(bool aIncludeMargins) const
+    rect widget::client_rect(bool aIncludePadding) const
     {
-        if (!aIncludeMargins)
-            return rect{ margins().top_left(), extents() - margins().size() };
+        if (!aIncludePadding)
+            return rect{ padding().top_left(), extents() - padding().size() };
         else
             return rect{ point{}, extents() };
     }
@@ -892,14 +892,14 @@ namespace neogfx
             result = units_converter(*this).from_device_units(*MinimumSize);
         else if (has_layout())
         {
-            result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
+            result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
             if (result.cx != 0.0)
-                result.cx += margins().size().cx;
+                result.cx += padding().size().cx;
             if (result.cy != 0.0)
-                result.cy += margins().size().cy;
+                result.cy += padding().size().cy;
         }
         else
-            result = margins().size();
+            result = padding().size();
         if (debug() == this)
             std::cerr << "widget::minimum_size(...) --> " << result << std::endl;
         return result;
@@ -932,11 +932,11 @@ namespace neogfx
             result = minimum_size(aAvailableSpace);
         else if (has_layout())
         {
-            result = layout().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
+            result = layout().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
             if (result.cx != 0.0)
-                result.cx += margins().size().cx;
+                result.cx += padding().size().cx;
             if (result.cy != 0.0)
-                result.cy += margins().size().cy;
+                result.cy += padding().size().cy;
         }
         else
             result = size::max_size();
@@ -979,23 +979,23 @@ namespace neogfx
         }
     }
 
-    bool widget::has_margins() const
+    bool widget::has_padding() const
     {
-        return Margins != std::nullopt;
+        return Padding != std::nullopt;
     }
 
-    margins widget::margins() const
+    padding widget::padding() const
     {
-        auto const& adjustedMargins = (has_margins() ? *Margins : service<i_app>().current_style().margins(is_root() ? margin_role::Window : margin_role::Widget) * 1.0_dip);
-        return units_converter(*this).from_device_units(adjustedMargins);
+        auto const& adjustedPadding = (has_padding() ? *Padding : service<i_app>().current_style().padding(is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
+        return units_converter(*this).from_device_units(adjustedPadding);
     }
 
-    void widget::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
+    void widget::set_padding(const optional_padding& aPadding, bool aUpdateLayout)
     {
-        auto newMargins = (aMargins != std::nullopt ? units_converter(*this).to_device_units(*aMargins) : optional_margins{});
-        if (Margins != newMargins)
+        auto newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding{});
+        if (Padding != newPadding)
         {
-            Margins = newMargins;
+            Padding = newPadding;
             if (aUpdateLayout && has_layout_manager())
                 layout_manager().layout_items(true);
         }

@@ -236,7 +236,7 @@
                         tab_text: "Buttons"
                         vertical_layout: {
                             id: layoutButtons
-                            margin: 8px
+                            padding: 8px
                             horizontal_layout: {
                                 id: layoutTopButtons
                                 push_button: {
@@ -502,13 +502,13 @@
                                     }
                                     widget: {
                                         id: lw
-                                        margin: 0
+                                        padding: 0
                                         grid_layout: {
                                             id: layoutEffects
                                             rows: 2
                                             columns: 2
                                             alignment: [ Left VCenter ]
-                                            margin: 0
+                                            padding: 0
                                             radio_button: {
                                                 id: editNormal
                                                 text: "normal"

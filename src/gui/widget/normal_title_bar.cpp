@@ -109,8 +109,8 @@ namespace neogfx
 
     void normal_title_bar::init()
     {
-        set_margins(neogfx::margins{});
-        iLayout.set_margins(neogfx::margins{ 4.0, 4.0, 4.0, 4.0 });
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{ 4.0, 4.0, 4.0, 4.0 });
         iLayout.set_spacing(size{ 8.0 });
         icon_widget().set_ignore_mouse_events(false);
         size iconSize{ 24.0_dip };

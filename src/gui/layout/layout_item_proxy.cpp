@@ -385,19 +385,19 @@ namespace neogfx
             iFixedSize.second = *aFixedSize;
     }
 
-    bool layout_item_proxy::has_margins() const
+    bool layout_item_proxy::has_padding() const
     {
-        return subject().has_margins();
+        return subject().has_padding();
     }
 
-    margins layout_item_proxy::margins() const
+    padding layout_item_proxy::padding() const
     {
-        return subject().margins();
+        return subject().padding();
     }
 
-    void layout_item_proxy::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
+    void layout_item_proxy::set_padding(const optional_padding& aPadding, bool aUpdateLayout)
     {
-        subject().set_margins(aMargins, aUpdateLayout);
+        subject().set_padding(aPadding, aUpdateLayout);
     }
 
     bool layout_item_proxy::visible() const

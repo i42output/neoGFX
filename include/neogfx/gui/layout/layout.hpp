@@ -113,9 +113,9 @@ namespace neogfx
         bool high_dpi() const override;
         dimension dpi_scale_factor() const override;
     public:
-        bool has_margins() const override;
-        neogfx::margins margins() const override;
-        void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
+        bool has_padding() const override;
+        neogfx::padding padding() const override;
+        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
     public:
         bool has_spacing() const override;
         size spacing() const override;
@@ -187,7 +187,7 @@ namespace neogfx
     private:
         i_layout* iParent;
         mutable i_widget* iOwner;
-        optional_margins iMargins;
+        optional_padding iPadding;
         optional_size iSpacing;
         bool iAlwaysUseSpacing;
         neogfx::alignment iAlignment;

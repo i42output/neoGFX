@@ -313,17 +313,17 @@ namespace neogfx
         }
     }
 
-    bool spacer::has_margins() const
+    bool spacer::has_padding() const
     {
         return false;
     }
 
-    neogfx::margins spacer::margins() const
+    neogfx::padding spacer::padding() const
     {
-        return neogfx::margins{};
+        return neogfx::padding{};
     }
 
-    void spacer::set_margins(const optional_margins&, bool)
+    void spacer::set_padding(const optional_padding&, bool)
     {
         /* do nothing */
     }

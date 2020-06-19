@@ -61,7 +61,7 @@ namespace neogfx
         else
         {
             size extent = units_converter(*this).to_device_units(text_extent().max(size_hint_extent()));
-            size result = extent + units_converter(*this).to_device_units(margins().size());
+            size result = extent + units_converter(*this).to_device_units(padding().size());
             if (has_maximum_size())
             {
                 result.cx = std::min(std::ceil(result.cx), maximum_size().cx);
@@ -255,9 +255,9 @@ namespace neogfx
         if (multi_line())
         {
             if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-                iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), widget::minimum_size().cx - margins().size().cx);
+                iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), widget::minimum_size().cx - padding().size().cx);
             else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-                iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), widget::maximum_size().cx - margins().size().cx);
+                iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), widget::maximum_size().cx - padding().size().cx);
             else
                 iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), 0);
         }
@@ -283,11 +283,11 @@ namespace neogfx
             if (multi_line())
             {
                 if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::minimum_size().cx - margins().size().cx).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::minimum_size().cx - margins().size().cx));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::minimum_size().cx - padding().size().cx).max(
+                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::minimum_size().cx - padding().size().cx));
                 else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::maximum_size().cx - margins().size().cx).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::maximum_size().cx - margins().size().cx));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::maximum_size().cx - padding().size().cx).max(
+                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::maximum_size().cx - padding().size().cx));
                 else
                     iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font()).max(
                         gc.multiline_text_extent(iSizeHint.secondaryHint, font()));
@@ -303,7 +303,7 @@ namespace neogfx
 
     void text_widget::init()
     {
-        set_margins(neogfx::margins{ 0.0 });
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {

@@ -67,7 +67,7 @@ namespace neogfx
         void layout_items_completed() override;
     public:
         void resized() override;
-        rect client_rect(bool aIncludeMargins = true) const override;
+        rect client_rect(bool aIncludePadding = true) const override;
         widget_part hit_test(const point& aPosition) const override;
     public:
         void paint_non_client_after(i_graphics_context& aGc) const override;

@@ -60,8 +60,8 @@ namespace neogfx
         static size::dimension_type& cx(size& aSize) { return aSize.cx; }
         static const size::dimension_type& cy(const size& aSize) { return aSize.cy; }
         static size::dimension_type& cy(size& aSize) { return aSize.cy; }
-        static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
-        static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
+        static size::dimension_type cx(const neogfx::padding& aPadding) { return aPadding.left + aPadding.right; }
+        static size::dimension_type cy(const neogfx::padding& aPadding) { return aPadding.top + aPadding.bottom; }
         static neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.horizontal_size_policy(aIgnoreBits); }
         static neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.vertical_size_policy(aIgnoreBits); }
     };
@@ -82,8 +82,8 @@ namespace neogfx
         static size::dimension_type& cx(size& aSize) { return aSize.cy; }
         static const size::dimension_type& cy(const size& aSize) { return aSize.cx; }
         static size::dimension_type& cy(size& aSize) { return aSize.cx; }
-        static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
-        static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
+        static size::dimension_type cx(const neogfx::padding& aPadding) { return aPadding.top + aPadding.bottom; }
+        static size::dimension_type cy(const neogfx::padding& aPadding) { return aPadding.left + aPadding.right; }
         static neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.vertical_size_policy(aIgnoreUniformity); }
         static neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.horizontal_size_policy(aIgnoreUniformity); }
     };
@@ -145,7 +145,7 @@ namespace neogfx
         {
             auto availableSpaceForChildren = aAvailableSpace;
             if (availableSpaceForChildren != std::nullopt)
-                *availableSpaceForChildren -= margins().size();
+                *availableSpaceForChildren -= padding().size();
             uint32_t itemsZeroSized = 0;
             for (auto const& item : items())
             {
@@ -160,8 +160,8 @@ namespace neogfx
                 AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(itemMinSize));
                 AxisPolicy::cx(result) += AxisPolicy::cx(itemMinSize);
             }
-            AxisPolicy::cx(result) += AxisPolicy::cx(margins());
-            AxisPolicy::cy(result) += AxisPolicy::cy(margins());
+            AxisPolicy::cx(result) += AxisPolicy::cx(padding());
+            AxisPolicy::cy(result) += AxisPolicy::cy(padding());
             if (itemsVisible - itemsZeroSized > 0)
                 AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
             AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
@@ -193,7 +193,7 @@ namespace neogfx
         }
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
-            *availableSpaceForChildren -= margins().size();
+            *availableSpaceForChildren -= padding().size();
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         uint32_t itemsZeroSized = 0;
         size result;
@@ -216,14 +216,14 @@ namespace neogfx
         }
         if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(result) != 0.0)
         {
-            AxisPolicy::cx(result) += AxisPolicy::cx(margins());
+            AxisPolicy::cx(result) += AxisPolicy::cx(padding());
             if (itemsVisible - itemsZeroSized > 1)
                 AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
             AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
         }
         if (AxisPolicy::cy(result) != size::max_dimension() && AxisPolicy::cy(result) != 0.0)
         {
-            AxisPolicy::cy(result) += AxisPolicy::cy(margins());
+            AxisPolicy::cy(result) += AxisPolicy::cy(padding());
             AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
         }
         if (AxisPolicy::cx(result) == 0.0 && AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding)
@@ -245,8 +245,8 @@ namespace neogfx
             return;
         uint32_t itemsVisible = items_visible();
         size availableSize = aSize;
-        availableSize.cx -= margins().size().cx;
-        availableSize.cy -= margins().size().cy;
+        availableSize.cx -= padding().size().cx;
+        availableSize.cy -= padding().size().cy;
         auto itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), availableSize);
         auto spaces = (iAlwaysUseSpacing ? itemsVisibleIncludingSpacers : itemsVisible) - itemsZeroSized;
         if (spaces > 1)
@@ -326,7 +326,7 @@ namespace neogfx
             bitsLeft = static_cast<int32_t>(leftover - weightedAmount);
         neolib::bresenham_counter<int32_t> bits(bitsLeft, itemsUsingLeftover);
         uint32_t previousBit = 0;
-        point nextPos = aPosition + margins().top_left();
+        point nextPos = aPosition + padding().top_left();
         for (auto& item : *this)
         {
             if (!item.visible() && !ignore_visibility())
@@ -378,8 +378,8 @@ namespace neogfx
                 AxisPolicy::x(nextPos) += AxisPolicy::cx(spacing());
         }
         point lastPos = aPosition + aSize;
-        lastPos.x -= margins().right;
-        lastPos.y -= margins().bottom;
+        lastPos.x -= padding().right;
+        lastPos.y -= padding().bottom;
         if (AxisPolicy::x(nextPos) < AxisPolicy::x(lastPos))
         {
             size adjust;

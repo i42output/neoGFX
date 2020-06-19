@@ -105,15 +105,15 @@ namespace neogfx
             void set_min_width(const optional_dimension& aMinWidth) { iMinWidth = aMinWidth; }
             const optional_dimension& max_width() const { return iMaxWidth; }
             void set_max_width(const optional_dimension& aMaxWidth) { iMaxWidth = aMaxWidth; }
-            const neogfx::margins& margins() const { return iMargins; }
-            void set_margins(const neogfx::margins& aMargins) { iMargins = aMargins; }
+            const neogfx::padding& padding() const { return iPadding; }
+            void set_padding(const neogfx::padding& aPadding) { iPadding = aPadding; }
             const std::optional<text_edit::style>& style() const { return iStyle; }
             void set_style(const std::optional<text_edit::style>& aStyle) { iStyle = aStyle; }
 
         public:
             bool operator==(const column_info& aRhs) const
             {
-                return std::tie(iDelimiter, iMinWidth, iMaxWidth, iMargins, iStyle) == std::tie(aRhs.iDelimiter, aRhs.iMinWidth, aRhs.iMaxWidth, aRhs.iMargins, aRhs.iStyle);
+                return std::tie(iDelimiter, iMinWidth, iMaxWidth, iPadding, iStyle) == std::tie(aRhs.iDelimiter, aRhs.iMinWidth, aRhs.iMaxWidth, aRhs.iPadding, aRhs.iStyle);
             }
             bool operator!=(const column_info& aRhs) const
             {
@@ -124,7 +124,7 @@ namespace neogfx
             char32_t iDelimiter;
             optional_dimension iMinWidth;
             optional_dimension iMaxWidth;
-            neogfx::margins iMargins;
+            neogfx::padding iPadding;
             std::optional<text_edit::style> iStyle;
         };
     private:
@@ -439,7 +439,7 @@ namespace neogfx
     public:
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        neogfx::margins margins() const override;
+        neogfx::padding padding() const override;
    public:
         void paint(i_graphics_context& aGc) const override;
     public:
@@ -541,7 +541,7 @@ namespace neogfx
         void set_cursor_position(const point& aPosition, bool aMoveAnchor = true, bool aEnableDragger = false);
     protected:
         std::size_t column_index(const column_info& aColumn) const;
-        rect column_rect(std::size_t aColumnIndex, bool aIncludeMargins = false) const;
+        rect column_rect(std::size_t aColumnIndex, bool aIncludePadding = false) const;
         std::size_t column_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
     private:
         struct position_info

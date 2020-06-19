@@ -190,20 +190,20 @@ namespace neogfx
         {
             return static_cast<uint32_t>(row(aIndex).cells.size());
         }
-        dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludeMargins = true) const override
+        dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludePadding = true) const override
         {
             if (iColumns.size() < aColumnIndex + 1u)
                 return 0.0;
             auto& columnWidth = column(aColumnIndex).width;
             if (columnWidth != std::nullopt)
-                return *columnWidth + (aIncludeMargins ? cell_margins(aGc).size().cx : 0.0);
+                return *columnWidth + (aIncludePadding ? cell_padding(aGc).size().cx : 0.0);
             columnWidth = 0.0;
             for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
             {
                 auto const cellWidth = cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGc).cx;
                 columnWidth = std::max(*columnWidth, cellWidth);
             }
-            return *columnWidth + (aIncludeMargins ? cell_margins(aGc).size().cx : 0.0);
+            return *columnWidth + (aIncludePadding ? cell_padding(aGc).size().cx : 0.0);
         }
         const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
         {
@@ -368,20 +368,20 @@ namespace neogfx
             else
                 iCellSpacing = units_converter(aUnitsContext).to_device_units(*aSpacing);
         }
-        neogfx::margins cell_margins(const i_units_context& aUnitsContext) const override
+        neogfx::padding cell_padding(const i_units_context& aUnitsContext) const override
         {
-            if (iCellMargins == std::nullopt)
+            if (iCellPadding == std::nullopt)
             {
-                return units_converter(aUnitsContext).from_device_units(neogfx::margins{ 1.0, 1.0, 1.0, 1.0 });
+                return units_converter(aUnitsContext).from_device_units(neogfx::padding{ 1.0, 1.0, 1.0, 1.0 });
             }
-            return units_converter(aUnitsContext).from_device_units(*iCellMargins);
+            return units_converter(aUnitsContext).from_device_units(*iCellPadding);
         }
-        void set_cell_margins(const optional_margins& aMargins, const i_units_context& aUnitsContext) override
+        void set_cell_padding(const optional_padding& aPadding, const i_units_context& aUnitsContext) override
         {
-            if (aMargins == std::nullopt)
-                iCellMargins = aMargins;
+            if (aPadding == std::nullopt)
+                iCellPadding = aPadding;
             else
-                iCellMargins = units_converter(aUnitsContext).to_device_units(*aMargins);
+                iCellPadding = units_converter(aUnitsContext).to_device_units(*aPadding);
         }
     public:
         dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const override
@@ -404,7 +404,7 @@ namespace neogfx
                         height = std::max(height, units_converter(aUnitsContext).from_device_units(*maybeCellImageSize).cy);
                 }
             }
-            return height + cell_margins(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
+            return height + cell_padding(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
         }
         double total_height(const i_units_context& aUnitsContext) const override
         {
@@ -1169,7 +1169,7 @@ namespace neogfx
         bool iSortable;
         sink iItemModelSink;
         optional_size iCellSpacing;
-        optional_margins iCellMargins;
+        optional_padding iCellPadding;
         container_type iRows;
         mutable row_map_type iRowMap;
         mutable item_model_index::optional_row_type iRowMapDirtyFrom;

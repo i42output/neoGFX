@@ -29,7 +29,7 @@ namespace neogfx
     color_dialog::color_box::color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor) :
         framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColor(aColor), iCustomColor(aCustomColor)
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
     }
 
     size color_dialog::color_box::minimum_size(const optional_size& aAvailableSpace) const
@@ -455,7 +455,7 @@ namespace neogfx
     color_dialog::yz_picker::yz_picker(color_dialog& aOwner) :
         framed_widget(aOwner.iRightTopLayout), iOwner(aOwner), iTexture{ image{ size{256, 256}, color::Black } }, iUpdateTexture{ true }, iTracking { false }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         iOwner.SelectionChanged([this]
         {
             iUpdateTexture = true;
@@ -666,7 +666,7 @@ namespace neogfx
     color_dialog::color_selection::color_selection(color_dialog& aOwner) :
         framed_widget(aOwner.iRightBottomLayout), iOwner(aOwner)
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         iOwner.SelectionChanged([this]
         {
             update();
@@ -837,8 +837,6 @@ namespace neogfx
 
     void color_dialog::init()
     {
-        debug() = &client_widget();
-
         scoped_units su{ static_cast<framed_widget&>(*this), units::Pixels };
         static const std::set<color> sBasicColors
         {
@@ -862,17 +860,17 @@ namespace neogfx
             color::Turquoise, color::Violet, color::VioletRed, color::Wheat, color::White, color::WhiteSmoke, color::Yellow, color::YellowGreen 
         };
         auto const standardSpacing = client_layout().spacing();
-        iLayout.set_margins(neogfx::margins{});
+        iLayout.set_padding(neogfx::padding{});
         iLayout.set_spacing(standardSpacing);
-        iLayout2.set_margins(neogfx::margins{});
+        iLayout2.set_padding(neogfx::padding{});
         iLayout2.set_spacing(standardSpacing);
         iRightLayout.set_spacing(standardSpacing);
         iRightTopLayout.set_spacing(standardSpacing * 2.0);
-        auto adjustedMargins = iRightTopLayout.margins();
-        adjustedMargins.right = std::max(adjustedMargins.right, iXPicker.cursor_width());
-        iRightTopLayout.set_margins(adjustedMargins);
+        auto adjustedPadding = iRightTopLayout.padding();
+        adjustedPadding.right = std::max(adjustedPadding.right, iXPicker.cursor_width());
+        iRightTopLayout.set_padding(adjustedPadding);
         iRightBottomLayout.set_spacing(standardSpacing / 2.0);
-        iChannelLayout.set_margins(neogfx::margins{});
+        iChannelLayout.set_padding(neogfx::padding{});
         iChannelLayout.set_spacing(standardSpacing / 2.0);
         iScreenPicker.set_size_policy(size_constraint::Minimum);
         iSink += iScreenPicker.Clicked([&, this]()

@@ -32,7 +32,7 @@ namespace neogfx
     {
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };
-        struct margins_unsupported : std::logic_error { margins_unsupported() : std::logic_error("neogfx::spacer::margins_unsupported") {} };
+        struct padding_unsupported : std::logic_error { padding_unsupported() : std::logic_error("neogfx::spacer::padding_unsupported") {} };
     public:
         typedef i_spacer abstract_type;
     public:
@@ -86,9 +86,9 @@ namespace neogfx
         size fixed_size() const override;
         void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
-        neogfx::margins margins() const override;
-        bool has_margins() const override;
-        void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
+        neogfx::padding padding() const override;
+        bool has_padding() const override;
+        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
@@ -104,7 +104,7 @@ namespace neogfx
         optional_size iMinimumSize;
         optional_size iMaximumSize;
         optional_size iFixedSize;
-        optional_margins iMargins;
+        optional_padding iPadding;
         neogfx::expansion_policy iExpansionPolicy;
         optional_size iWeight;
     };

@@ -87,9 +87,9 @@ namespace neogfx
         size fixed_size() const override;
         void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
-        bool has_margins() const override;
-        neogfx::margins margins() const override;
-        void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
+        bool has_padding() const override;
+        neogfx::padding padding() const override;
+        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
     public:
         bool visible() const override;
     public:

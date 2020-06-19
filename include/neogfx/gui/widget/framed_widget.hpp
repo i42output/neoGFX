@@ -49,7 +49,7 @@ namespace neogfx
         framed_widget(i_layout& aLayout, frame_style aStyle = frame_style::SolidFrame, dimension aLineWidth = 1.0);
         ~framed_widget();
     public:
-        rect client_rect(bool aIncludeMargins = true) const override;
+        rect client_rect(bool aIncludePadding = true) const override;
     public:
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;

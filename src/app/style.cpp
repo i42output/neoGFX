@@ -27,7 +27,7 @@ namespace neogfx
 {
     style::style(const std::string& aName) :
         iName{ aName },
-        iMargins{ 2.0, 2.0, 4.0, 4.0, 4.0 },
+        iPadding{ 2.0, 2.0, 4.0, 4.0, 4.0 },
         iSpacing{ 2.0, 2.0 },
         iFontInfo{ service<i_font_manager>().default_system_font_info() }
     {
@@ -36,7 +36,7 @@ namespace neogfx
 
     style::style(const std::string& aName, const i_style& aOther) :
         iName{ aName },
-        iMargins{ aOther.all_margins() },
+        iPadding{ aOther.all_padding() },
         iSpacing{ aOther.spacing() },
         iPalette{ aOther.palette() },
         iFontInfo{ aOther.font_info() }
@@ -46,7 +46,7 @@ namespace neogfx
 
     style::style(const i_style& aOther) :
         iName{ aOther.name() },
-        iMargins{ aOther.all_margins() },
+        iPadding{ aOther.all_padding() },
         iSpacing{ aOther.spacing() },
         iPalette{ aOther.palette() },
         iFontInfo{ aOther.font_info() }
@@ -68,7 +68,7 @@ namespace neogfx
         if (*this != aOther)
         {
             iName = aOther.name();
-            iMargins = aOther.all_margins();
+            iPadding = aOther.all_padding();
             iSpacing = aOther.spacing();
             iPalette = aOther.palette();
             iFontInfo = aOther.font_info();
@@ -80,7 +80,7 @@ namespace neogfx
     bool style::operator==(const i_style& aOther) const
     {
         return iName == aOther.name() && 
-            iMargins == aOther.all_margins() &&
+            iPadding == aOther.all_padding() &&
             iSpacing == aOther.spacing() &&
             iPalette == aOther.palette() &&
             iFontInfo == aOther.font_info();
@@ -96,21 +96,21 @@ namespace neogfx
         return iName;
     }
 
-    const style::margin_list& style::all_margins() const
+    const style::padding_list& style::all_padding() const
     {
-        return iMargins;
+        return iPadding;
     }
 
-    const neogfx::margins& style::margins(margin_role aMarginRole) const
+    const neogfx::padding& style::padding(padding_role aPaddingRole) const
     {
-        return iMargins[static_cast<std::size_t>(aMarginRole)];
+        return iPadding[static_cast<std::size_t>(aPaddingRole)];
     }
 
-    void style::set_margins(margin_role aMarginRole, const neogfx::margins& aMargins)
+    void style::set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding)
     {
-        if (iMargins[static_cast<std::size_t>(aMarginRole)] != aMargins)
+        if (iPadding[static_cast<std::size_t>(aPaddingRole)] != aPadding)
         {
-            iMargins[static_cast<std::size_t>(aMarginRole)] = aMargins;
+            iPadding[static_cast<std::size_t>(aPaddingRole)] = aPadding;
             handle_change(style_aspect::Geometry);
         }
     }

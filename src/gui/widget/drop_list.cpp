@@ -35,7 +35,7 @@ namespace neogfx
         iDropList{ aDropList },
         iChangingText{ false }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         if (!iDropList.editable())
             enable_hot_tracking();
         set_selection_model(iDropList.iSelectionModel);
@@ -146,7 +146,7 @@ namespace neogfx
         iDropList{ aDropList },
         iView{ client_layout(), aDropList }
     {
-        client_layout().set_margins(neogfx::margins{});
+        client_layout().set_padding(neogfx::padding{});
         client_layout().set_size_policy(size_constraint::Expanding);
         update_placement();
         show();
@@ -245,23 +245,23 @@ namespace neogfx
     size drop_list_popup::ideal_size() const
     {
         auto totalArea = iView.total_item_area(*this);
-        auto idealSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea + iView.margins().size();
+        auto idealSize = size{ effective_frame_width() * 2.0 } + padding().size() + totalArea + iView.padding().size();
         idealSize.cy = std::min(idealSize.cy, iDropList.root().as_widget().extents().cy / 2.0);
-        if (idealSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
+        if (idealSize.cy - (effective_frame_width() * 2.0 + padding().size().cy) < totalArea.cy)
             idealSize.cx += vertical_scrollbar().width();
         return idealSize.max(iDropList.minimum_size());
     }
 
     void drop_list_popup::update_placement()
     {
-        view().set_margins(iDropList.input_widget().as_widget().margins() - view().presentation_model().cell_margins(*this) - view().effective_frame_width());
+        view().set_padding(iDropList.input_widget().as_widget().padding() - view().presentation_model().cell_padding(*this) - view().effective_frame_width());
 
         // First stab at sizing ourselves...
         resize(minimum_size());
         
         // Workout ideal position whereby text for current item in drop list popup view is at same position as text in drop button or line edit...
         point currentItemPos;
-        currentItemPos += view().presentation_model().cell_margins(*this).top_left();
+        currentItemPos += view().presentation_model().cell_padding(*this).top_left();
         currentItemPos += view().presentation_model().cell_spacing(*this) / 2.0;
         currentItemPos -= point{ effective_frame_width(), effective_frame_width() };
         if (view().presentation_model().rows() > 0 && view().presentation_model().columns() > 0)
@@ -276,7 +276,7 @@ namespace neogfx
                 currentItemPos.x += (maybeCellImageSize->cx + view().presentation_model().cell_spacing(*this).cx);
         }
         point inputWidgetPos{ iDropList.non_client_rect().top_left() + iDropList.root().window_position() };
-        point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
+        point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().padding().top_left() + iDropList.root().window_position() };
         point popupPos = -currentItemPos + textWidgetPos;
         
         // Popup goes below line edit if editable or on top of drop button if not...
@@ -348,9 +348,9 @@ namespace neogfx
             if (iDropList.list_always_visible())
             {
                 iViewContainer.emplace(iDropList.iLayout0);
-                iViewContainer->set_margins(neogfx::margins{});
+                iViewContainer->set_padding(neogfx::padding{});
                 iViewContainer->set_layout(std::make_shared<vertical_layout>());
-                iViewContainer->layout().set_margins(neogfx::margins{});
+                iViewContainer->layout().set_padding(neogfx::padding{});
                 iView.emplace(iViewContainer->layout(), iDropList);
             }
             else
@@ -392,8 +392,8 @@ namespace neogfx
             non_editable_input_widget(i_layout& aLayout) :
                 push_button{ aLayout, push_button_style::DropList }
             {
-                image_widget().set_margins(neogfx::margins{});
-                text_widget().set_margins(neogfx::margins{});
+                image_widget().set_padding(neogfx::padding{});
+                text_widget().set_padding(neogfx::padding{});
             }
         public:
             void accept(i_drop_list_input_widget::i_visitor& aVisitor) override
@@ -468,9 +468,9 @@ namespace neogfx
                 iImage{ iLayout },
                 iEditor{ iLayout, frame_style::NoFrame }
             {
-                set_margins(neogfx::margins{});
-                image_widget().set_margins(neogfx::margins{});
-                text_widget().set_margins(neogfx::margins{});
+                set_padding(neogfx::padding{});
+                image_widget().set_padding(neogfx::padding{});
+                text_widget().set_padding(neogfx::padding{});
                 iImage.hide();
             }
         public:
@@ -885,7 +885,7 @@ namespace neogfx
         if (input_widget().text_widget().visible())
         {
             minimumSize.cx -= input_widget().text_widget().minimum_size().cx;
-            minimumSize.cx += input_widget().text_widget().margins().size().cx;
+            minimumSize.cx += input_widget().text_widget().padding().size().cx;
         }
         dimension modelWidth = 0.0;
         if (has_presentation_model())
@@ -943,15 +943,15 @@ namespace neogfx
         set_presentation_model(std::shared_ptr<i_item_presentation_model>(new default_drop_list_presentation_model<>{ *this }));
         set_model(std::shared_ptr<i_item_model>(new item_model{}));
 
-        set_margins(neogfx::margins{});
-        iLayout0.set_margins(neogfx::margins{});
-        iLayout1.set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
+        iLayout0.set_padding(neogfx::padding{});
+        iLayout1.set_padding(neogfx::padding{});
 
         update_widgets();
 
         iSink += service<i_app>().current_style_changed([this](style_aspect) { update_widgets(true); });
 
-        presentation_model().set_cell_margins(neogfx::margins{ 3.0, 3.0 }, *this);
+        presentation_model().set_cell_padding(neogfx::padding{ 3.0, 3.0 }, *this);
     }
 
     void drop_list::update_widgets(bool aForce)

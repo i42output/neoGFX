@@ -826,8 +826,8 @@ namespace neogfx
                 result = wndproc(hwnd, msg, wparam, lparam);
                 if (CUSTOM_DECORATION)
                 {
-                    MARGINS margins = { 0 };
-                    DwmExtendFrameIntoClientArea(hwnd, &margins);
+                    MARGINS spacings = { 0 };
+                    DwmExtendFrameIntoClientArea(hwnd, &spacings);
                 }
                 break;
             case WM_CLOSE:
@@ -1163,11 +1163,11 @@ namespace neogfx
                     GetClientRect(hwnd, &rc);
                     enum { left = 1, top = 2, right = 4, bottom = 8 };
                     int hit = 0;
-                    auto margins = self.border_thickness();
-                    if (pt.x < margins.left) hit |= left;
-                    if (pt.x > rc.right - margins.right) hit |= right;
-                    if (pt.y < margins.top) hit |= top;
-                    if (pt.y > rc.bottom - margins.bottom) hit |= bottom;
+                    auto padding = self.border_thickness();
+                    if (pt.x < padding.left) hit |= left;
+                    if (pt.x > rc.right - padding.right) hit |= right;
+                    if (pt.y < padding.top) hit |= top;
+                    if (pt.y > rc.bottom - padding.bottom) hit |= bottom;
                     if (hit & top && hit & left) result = HTTOPLEFT;
                     else if (hit & top && hit & right) result = HTTOPRIGHT;
                     else if (hit & bottom && hit & left) result = HTBOTTOMLEFT;
@@ -1370,7 +1370,7 @@ namespace neogfx
             surface_window().native_window_closed();
         }
 
-        margins window::border_thickness() const
+        padding window::border_thickness() const
         {
             if ((surface_window().style() & window_style::Resize) == window_style::Resize)
             {
@@ -1379,11 +1379,11 @@ namespace neogfx
                 ::AdjustWindowRectEx(&borderThickness, GetWindowLong(iHandle, GWL_STYLE) | WS_THICKFRAME & ~WS_CAPTION, FALSE, NULL);
                 borderThickness.left *= -1;
                 borderThickness.top *= -1;
-                iBorderThickness = basic_margins<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };
-                iBorderThickness += service<i_app>().current_style().margins(margin_role::Window);
+                iBorderThickness = basic_padding<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };
+                iBorderThickness += service<i_app>().current_style().padding(padding_role::Window);
             }
             else
-                iBorderThickness = margins{ 1.0, 1.0, 1.0, 1.0 };
+                iBorderThickness = padding{ 1.0, 1.0, 1.0, 1.0 };
             return iBorderThickness;
         }
 

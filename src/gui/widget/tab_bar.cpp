@@ -29,21 +29,21 @@ namespace neogfx
     tab_bar::tab_bar(i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
         scrollable_widget{ frame_style::NoFrame, scrollbar_style::Scroller }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         update_placement();
     }
 
     tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
         scrollable_widget{ aParent, frame_style::NoFrame , scrollbar_style::Scroller }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         update_placement();
     }
 
     tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
         scrollable_widget{ aLayout, frame_style::NoFrame, scrollbar_style::Scroller }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
         update_placement();
     }
 
@@ -333,7 +333,7 @@ namespace neogfx
             layout().set_alignment(alignment::Left);
             break;
         }
-        layout().set_margins(neogfx::margins{});
+        layout().set_padding(neogfx::padding{});
         layout().set_spacing(size{});
         layout().invalidate();
     }

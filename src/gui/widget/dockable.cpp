@@ -31,7 +31,7 @@ namespace neogfx
     {
         title_bar().set_title(aTitle);
         set_client(docked_widget());
-        set_margins(neogfx::margins{});
+        set_padding(neogfx::padding{});
     }
 
     const neolib::string& dockable::title() const

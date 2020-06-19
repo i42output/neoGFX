@@ -65,8 +65,8 @@ namespace neogfx
                 result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
                 result.cy = std::max(result.cy, item.minimum_size(aAvailableSpace).cy);
             }
-            result.cx += margins().size().cx;
-            result.cy += margins().size().cy;
+            result.cx += padding().size().cx;
+            result.cy += padding().size().cy;
             result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
             result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
         }
@@ -87,9 +87,9 @@ namespace neogfx
                 result.cy = std::min(result.cy, itemMaxSize.cy);
         }
         if (result.cx != size::max_dimension())
-            result.cx += margins().size().cx;
+            result.cx += padding().size().cx;
         if (result.cy != size::max_dimension())
-            result.cy += margins().size().cy;
+            result.cy += padding().size().cy;
         if (result.cx != size::max_dimension())
             result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
         if (result.cy != size::max_dimension())
@@ -113,7 +113,7 @@ namespace neogfx
         {
             if (!item.visible())
                 continue;
-            item.layout_as(aPosition + margins().top_left(), aSize - margins().size());
+            item.layout_as(aPosition + padding().top_left(), aSize - padding().size());
         }
         if (has_layout_owner())
             layout_owner().layout_items_completed();
