@@ -93,6 +93,7 @@ namespace neogfx
                 button_box().add_button(standard_button::Ok);
                 button_box().add_button(standard_button::Cancel);
                 center_on_parent();
+                set_ready_to_render(true);
             }
         private:
             virtual void paint_non_client(i_graphics_context& aGc) const

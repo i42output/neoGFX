@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
+#include <neogfx/gui/dialog/dialog_button_box.hpp>
 #include "window.hpp"
 
 namespace neogfx::nrc
@@ -31,10 +32,12 @@ namespace neogfx::nrc
         dialog(const i_ui_element_parser& aParser) :
             window{ aParser, ui_element_type::Dialog }
         {
+            add_data_names({ "button_box" });
         }
         dialog(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             window{ aParser, aParent, ui_element_type::Dialog }
         {
+            add_data_names({ "button_box" });
         }
     public:
         const neolib::i_string& header() const override
@@ -45,11 +48,17 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            window::parse(aName, aData);
+            if (aName == "button_box")
+                iButtonBox = get_enum<standard_button>(aData);
+            else
+                window::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            window::parse(aName, aData);
+            if (aName == "button_box")
+                iButtonBox = get_enum<standard_button>(aData);
+            else
+                window::parse(aName, aData);
         }
     protected:
         void emit() const override
@@ -70,10 +79,13 @@ namespace neogfx::nrc
         }
         void emit_body() const override
         {
-            ui_element<>::emit_body();
+            if (iButtonBox)
+                emit("   button_box().add_buttons(%1%);\n", enum_to_string("standard_button", *iButtonBox));
+            window::emit_body();
         }
     protected:
         using ui_element<>::emit;
     private:
+        std::optional<standard_button> iButtonBox;
     };
 }

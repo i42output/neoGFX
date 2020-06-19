@@ -2,7 +2,6 @@
     namespace: neogfx
 
     resource: {
-        ref: icons
         file: resources/icons.zip
     }
 }

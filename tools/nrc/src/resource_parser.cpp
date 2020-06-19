@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "resource_parser.hpp"
 
@@ -41,10 +42,12 @@ namespace neogfx::nrc
 
         typedef neolib::fjson_string symbol_t;
         std::vector<std::string> resourcePaths;
-        auto const& resourcePrefix = iNamespace + (resource.has("namespace") ? ("/" + resource.at("namespace").text()) : "");
+
+        auto resourcePrefix = (iNamespace + (resource.has("namespace") ? ("/" + resource.at("namespace").text()) : ""));
+        boost::replace_all(resourcePrefix, "::", "/");
 
         auto const& resourceRef = resource.has("ref") ? resource.at("ref").text() : "";
-        auto symbol = resourcePrefix;
+        auto symbol = iInputFilename.filename().stem().string();
         if (!symbol.empty() && !resourceRef.empty())
             symbol += "_";
         symbol += resourceRef;
@@ -125,6 +128,8 @@ namespace neogfx::nrc
 
         iOutput << "}" << std::endl << "}" << std::endl << std::endl;
 
-        iOutput << "extern \"C\" void* nrc_" << symbol << " = &nrc::" << symbol << ";" << std::endl << std::endl;
+        auto initializerName = (iNamespace + (resource.has("namespace") ? ("_" + resource.at("namespace").text()) : "")) + "_" + symbol;
+        boost::replace_all(initializerName, "::", "_");
+        iOutput << "extern \"C\" void* nrc_" << initializerName << " = &nrc::" << symbol << ";" << std::endl << std::endl;
     }
 }

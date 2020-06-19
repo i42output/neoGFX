@@ -284,6 +284,7 @@ namespace neogfx
         icon().set_fixed_size(size{ 32.0_dip, 32.0_dip });
     
         center_on_parent();
+        set_ready_to_render(true);
 
         button_box().clicked([this](standard_button aButton)
         {

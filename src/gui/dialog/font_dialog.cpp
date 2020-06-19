@@ -258,8 +258,8 @@ namespace neogfx
             iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
 
         center_on_parent();
-
         update_selected_font(*this);
+        set_ready_to_render(true);
     }
 
     void font_dialog::update_selected_font(const i_widget& aUpdatingWidget)

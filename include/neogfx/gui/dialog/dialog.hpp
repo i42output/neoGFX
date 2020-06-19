@@ -39,18 +39,18 @@ namespace neogfx
         define_event(TryAccept, try_accept, bool& /* aCanAccept */, bool /* aQueryOnly */)
         define_event(TryReject, try_reject, bool& /* acanReject */, bool /* aQueryOnly */)
     public:
-        dialog(window_style aStyle = window_style::Default);
-        dialog(const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-        dialog(const size& aDimensions, window_style aStyle = window_style::Default);
-        dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-        dialog(const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default);
-        dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-        dialog(i_widget& aParent, window_style aStyle = window_style::Default);
-        dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-        dialog(i_widget& aParent, const size& aDimensions, window_style aStyle = window_style::Default);
-        dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
-        dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default);
-        dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::Default);
+        dialog(window_style aStyle = window_style::DefaultDialog);
+        dialog(const std::string& aDialogTitle, window_style aStyle = window_style::DefaultDialog);
+        dialog(const size& aDimensions, window_style aStyle = window_style::DefaultDialog);
+        dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::DefaultDialog);
+        dialog(const point& aPosition, const size& aDimensions, window_style aStyle = window_style::DefaultDialog);
+        dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::DefaultDialog);
+        dialog(i_widget& aParent, window_style aStyle = window_style::DefaultDialog);
+        dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle = window_style::DefaultDialog);
+        dialog(i_widget& aParent, const size& aDimensions, window_style aStyle = window_style::DefaultDialog);
+        dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::DefaultDialog);
+        dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle = window_style::DefaultDialog);
+        dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle = window_style::DefaultDialog);
         ~dialog();
     public:
         virtual void accept();

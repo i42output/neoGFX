@@ -152,6 +152,7 @@ namespace neogfx::nrc
         {
             return iType;
         }
+        using base_type::check_element_ref;
     public:
         const i_ui_element& fragment() const override
         {
@@ -220,6 +221,8 @@ namespace neogfx::nrc
                 std::cerr << parser().source_location() << ": warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
                 return;
             }
+            if (aName == "type")
+                iWidgetType = get_enum<widget_type>(aData);
             if (aName == "weight")
                 iWeight.emplace(get_scalar<double>(aData));
             else if (aName == "size_policy")
@@ -276,6 +279,8 @@ namespace neogfx::nrc
                 iOpacity = aData.get<double>();
             else if (aName == "transparency")
                 iOpacity = 1.0 - aData.get<double>();
+            else if (aName == "default_focus")
+                iDefaultFocus = aData.get<neolib::i_string>();
         }
         void parse(const neolib::i_string& aName, const array_data_t& aArrayData) override
         {
@@ -322,9 +327,11 @@ namespace neogfx::nrc
         {
             return iRefs;
         }
-        const neolib::i_string& generate_ref_ctor_args(bool aArgsAfter = false) const override
+        const neolib::i_string& generate_ctor_params(bool aParamsAfter = false) const override
         {
             std::string temp;
+            if (iWidgetType && *iWidgetType == widget_type::Child)
+                temp += "i_widget& aParent";
             for (auto const& ref : iRefs)
             {
                 if (!temp.empty())
@@ -332,8 +339,24 @@ namespace neogfx::nrc
                 auto const& e = parser().at(ref);
                 temp += e.fragment_name().to_std_string() + "& " + e.id().to_std_string();
             }
-            if (aArgsAfter && !temp.empty())
+            if (aParamsAfter && !temp.empty())
                 temp += ", ";
+            thread_local neolib::string result;
+            result = temp;
+            return result;
+        }
+        const neolib::i_string& generate_base_ctor_args(bool aArgsAfter = false) const override
+        {
+            std::string temp;
+            if (iWidgetType && *iWidgetType == widget_type::Child)
+                temp += "aParent";
+            if (!temp.empty())
+            {
+                if (aArgsAfter)
+                    temp += ", ";
+                else
+                    temp = " " + temp + " ";
+            }
             thread_local neolib::string result;
             result = temp;
             return result;
@@ -412,6 +435,11 @@ namespace neogfx::nrc
                 emit("   %1%.set_foreground_color(color{ %2% });\n", id(), *iForegroundColor);
             if (iBackgroundColor)
                 emit("   %1%.set_background_color(color{ %2% });\n", id(), *iBackgroundColor);
+            if (iDefaultFocus)
+            {
+                check_element_ref(*iDefaultFocus);
+                emit("   %1%.set_focus();\n", *iDefaultFocus);
+            }
             for (auto const& child : children())
                 child->emit_body();
         }
@@ -485,6 +513,8 @@ namespace neogfx::nrc
         {
             if (!anonymous())
                 parser().index(id(), *this);
+            if (!has_parent() && (type() & ui_element_type::Widget) == ui_element_type::Widget)
+                add_data_names({ "type", "default_focus" });
             if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
                 add_data_names({ "enabled", "disabled", "focus_policy" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
@@ -513,6 +543,7 @@ namespace neogfx::nrc
         ui_element_type iType;
         children_t iChildren;
         neolib::set<neolib::string> iRefs;
+        std::optional<widget_type> iWidgetType;
         std::optional<size_policy> iSizePolicy;
         std::optional<alignment> iAlignment;
         std::optional<basic_size<length>> iFixedSize;
@@ -536,5 +567,6 @@ namespace neogfx::nrc
         std::optional<double> iOpacity;
         std::optional<color> iForegroundColor;
         std::optional<color> iBackgroundColor;
+        std::optional<string> iDefaultFocus;
     };
 }

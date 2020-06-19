@@ -48,13 +48,16 @@ namespace neogfx::nrc
         emit(
             "// This is an automatically generated file, do not edit!\n"
             "\n"
-            "%1%\n"
+            "#ifndef %1%_UI_HPP\n"
+            "#define %1%_UI_HPP\n"
             "\n"
-            "namespace%2%\n"
+            "%2%\n"
+            "\n"
+            "namespace%3%\n"
             "{\n"
             " using namespace neogfx;\n"
             " using namespace neogfx::unit_literals;\n",
-            headers(), (!aNamespace.empty() ? " " + aNamespace : ""));
+            iInputFilename.filename().stem().string(), headers(), (!aNamespace.empty() ? " " + aNamespace : ""));
 
         for (auto const& element : iRootElements)
         {
@@ -70,7 +73,9 @@ namespace neogfx::nrc
         }
 
         emit(
-            "}\n");
+            "}\n"
+            "\n"
+            "#endif\n");
     }
 
     const neolib::i_string& ui_parser::element_namespace() const

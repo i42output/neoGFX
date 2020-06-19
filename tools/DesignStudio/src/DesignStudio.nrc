@@ -1,5 +1,5 @@
 {
-    namespace: DesignStudio
+    namespace: "neogfx::DesignStudio"
 
     resource: {
         file: resources/neoGFX.png
@@ -82,7 +82,7 @@
                 }
             }
         }
-        new_project: {
+        new_project_dialog: {
             dialog: {
                 id: newProject
                 title: "New Project"
@@ -180,7 +180,7 @@
                                         text: "Lower camel case"
                                     }
                                     radio_button: {
-                                        id: namingSymbian
+                                        id: namingNeogfx
                                         text: "neoGFX (Symbianesque)"
                                     }
                                 }

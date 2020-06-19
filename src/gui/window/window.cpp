@@ -181,7 +181,7 @@ namespace neogfx
         return true;
     }
 
-    window::window(window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) : 
+    window::window(window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
         window{ nullptr, window_placement::default_placement(), {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
@@ -234,6 +234,7 @@ namespace neogfx
         iParentWindow{ nullptr },
         iPlacement{ aPlacement },
         iClosed{ false },
+        iReadyToRender{ (aStyle & window_style::InitiallyRenderable) == window_style::InitiallyRenderable },
         iTitleText{ aWindowTitle ? *aWindowTitle : service<i_app>().name() },
         iStyle{ aStyle },
         iCountedEnable{ 0 },
@@ -999,13 +1000,27 @@ namespace neogfx
             {
                 if (placement().position_specified())
                     move(placement().normal_geometry()->top_left());
-                else if ((style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
+                else if ((style() & window_style::InitiallyCentered) == window_style::InitiallyCentered &&
+                    (style() & window_style::Dialog) != window_style::Dialog)
                     center_on_parent(false);
             }
         }
 
         if (has_native_window())
             native_window().initialisation_complete();
+    }
+
+    bool window::ready_to_render() const
+    {
+        return widget::ready_to_render() && iReadyToRender;
+    }
+
+    void window::set_ready_to_render(bool aReady)
+    {
+        bool wasReady = ready_to_render();
+        iReadyToRender = aReady;
+        if (!wasReady && ready_to_render())
+            update();
     }
 
     double window::rendering_priority() const

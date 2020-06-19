@@ -48,7 +48,8 @@ namespace neogfx
                     std::distance(iEventQueue.cbegin(), e1) < std::distance(iEventQueue.cbegin(), e2)))
                     push_event(window_event{ window_event_type::NonClientLeave });
             }
-        }, 10 }
+        }, 10 },
+        iPaused{ 0 }
     {
         set_alive();
     }
@@ -75,6 +76,23 @@ namespace neogfx
     dimension native_window::em_size() const
     {
         return 0;
+    }
+
+    bool native_window::can_render() const
+    {
+        return !iPaused && surface_window().as_window().ready_to_render();
+    }
+
+    void native_window::pause()
+    {
+        ++iPaused;
+    }
+
+    void native_window::resume()
+    {
+        if (iPaused == 0)
+            throw bad_pause_count();
+        --iPaused;
     }
 
     void native_window::display_error_message(const std::string& aTitle, const std::string& aMessage) const

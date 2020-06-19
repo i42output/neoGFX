@@ -27,11 +27,11 @@ namespace neogfx::DesignStudio
 {
     enum class naming_convention
     {
-        LowerCaseWithUnderscores,
-        MixedCaseWithUnderscores,
+        LowerCaseSnake,
+        MixedCaseSnake,
         UpperCamelCase,
         LowerCamelCase,
-        NeoGfx
+        Neogfx
     };
 
     enum class named_entity
@@ -66,11 +66,11 @@ namespace neogfx::DesignStudio
         std::string symbolName;
         switch (aNamingConvention)
         {
-        case naming_convention::LowerCaseWithUnderscores:
+        case naming_convention::LowerCaseSnake:
             for (auto& word : tokens)
                 word = neolib::to_lower(word);
             break;
-        case naming_convention::MixedCaseWithUnderscores:
+        case naming_convention::MixedCaseSnake:
         case naming_convention::UpperCamelCase:
             for (auto& word : tokens)
                 word = neolib::to_upper(word.substr(0, 1)) + neolib::to_lower(word.substr(1));
@@ -82,7 +82,7 @@ namespace neogfx::DesignStudio
                 else
                     word = neolib::to_upper(word.substr(0, 1)) + neolib::to_lower(word.substr(1));
             break;
-        case naming_convention::NeoGfx:
+        case naming_convention::Neogfx:
             if (!named_entity_is_variable(aNamedEntity))
             {
                 for (auto& word : tokens)
@@ -113,9 +113,9 @@ namespace neogfx::DesignStudio
         for (auto& word : tokens)
         {
             if (!symbolName.empty() &&
-                (aNamingConvention == naming_convention::LowerCaseWithUnderscores ||
-                aNamingConvention == naming_convention::MixedCaseWithUnderscores ||
-                (aNamingConvention == naming_convention::NeoGfx && !named_entity_is_variable(aNamedEntity))))
+                (aNamingConvention == naming_convention::LowerCaseSnake ||
+                aNamingConvention == naming_convention::MixedCaseSnake ||
+                (aNamingConvention == naming_convention::Neogfx && !named_entity_is_variable(aNamedEntity))))
                 symbolName += '_';
             symbolName += word;
         }

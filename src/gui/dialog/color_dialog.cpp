@@ -937,6 +937,7 @@ namespace neogfx
         update_widgets(*this);
 
         center_on_parent();
+        set_ready_to_render(true);
     }
 
     color_dialog::mode_e color_dialog::current_mode() const

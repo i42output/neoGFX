@@ -37,9 +37,6 @@ namespace neogfx
     class opengl_window : public native_window
     {
     public:
-        struct busy_rendering : std::logic_error { busy_rendering() : std::logic_error("neogfx::opengl_window::busy_rendering") {} };
-        struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::opengl_window::bad_pause_count") {} };
-    public:
         opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow);
         ~opengl_window();
     public:
@@ -66,10 +63,7 @@ namespace neogfx
         bool has_invalidated_area() const override;
         const rect& invalidated_area() const override;
         rect validate() override;
-        bool can_render() const override;
         void render(bool aOOBRequest = false) override;
-        void pause() override;
-        void resume() override;
         bool is_rendering() const override;
     public:
         void debug(bool aEnableDebug) override;
@@ -99,7 +93,6 @@ namespace neogfx
         std::optional<frame_time_point> iLastFrameTime;
         std::deque<frame_times> iFpsData;
         bool iRendering;
-        uint32_t iPaused;
         bool iDebug;
     };
 }

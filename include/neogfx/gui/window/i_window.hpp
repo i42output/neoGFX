@@ -132,6 +132,8 @@ namespace neogfx
         virtual bool dismissed() const = 0;
         virtual void dismiss() = 0;
     public:
+        virtual bool ready_to_render() const = 0;
+        virtual void set_ready_to_render(bool aReady) = 0;
         virtual double rendering_priority() const = 0;
         virtual double fps() const = 0;
         virtual double potential_fps() const = 0;

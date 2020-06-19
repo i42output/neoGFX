@@ -161,6 +161,8 @@ namespace neogfx
         bool dismissed() const override;
         void dismiss() override;
     public:
+        bool ready_to_render() const override;
+        void set_ready_to_render(bool aReady) override;
         double rendering_priority() const override;
         double fps() const override;
         double potential_fps() const override;
@@ -208,6 +210,7 @@ namespace neogfx
         std::optional<neogfx::nest> iNest;
         std::unique_ptr<i_surface_window> iSurfaceWindow;
         std::unique_ptr<i_nested_window> iNestedWindowDetails;
+        bool iReadyToRender;
         std::string iTitleText;
         window_style iStyle;
         int32_t iCountedEnable;

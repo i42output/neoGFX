@@ -41,11 +41,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
-    DesignStudio::main_app app{ argc, argv };
+    ds::main_app app{ argc, argv };
 
     try
     {
-        DesignStudio::main_window mainWindow{ app };
+        ds::main_window mainWindow{ app };
             
         app.actionShowStandardToolbar.checked([&]() { mainWindow.standardToolbar.show(); });
         app.actionShowStandardToolbar.unchecked([&]() { mainWindow.standardToolbar.hide(); });
@@ -73,8 +73,8 @@ int main(int argc, char* argv[])
         ng::horizontal_layout workspaceLayout{ mainLayout };
         ng::view_container workspace{ workspaceLayout };
 
-        ng::texture backgroundTexture1{ ng::image{ ":/DesignStudio/resources/neoGFX.png" } };
-        ng::texture backgroundTexture2{ ng::image{ ":/DesignStudio/resources/logo_i42.png" } };
+        ng::texture backgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } };
+        ng::texture backgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } };
 
         ds::project_manager pm;
 
@@ -125,9 +125,9 @@ int main(int argc, char* argv[])
 
         app.action_file_new().triggered([&]()
         {
-            ds::new_project_dialog dialog{ mainWindow };
+            ds::new_project_dialog_ex dialog{ mainWindow };
             if (dialog.exec() == ng::dialog_result::Accepted)
-                pm.create_project(dialog.name(), dialog.namespace_()).set_dirty();
+                pm.create_project(dialog.projectName.text(), dialog.projectNamespace.text()).set_dirty();
         });
 
         //        ng::css css{"test.css"};

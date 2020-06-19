@@ -39,7 +39,6 @@ namespace neogfx
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGui },
         iFrameCounter{ 0 },
         iRendering{ false },
-        iPaused{ 0 },
         iDebug{ false }
     {
     }
@@ -238,11 +237,6 @@ namespace neogfx
         throw no_invalidated_area();
     }
 
-    bool opengl_window::can_render() const
-    {
-        return !iPaused;
-    }
-
     void opengl_window::render(bool aOOBRequest)
     {
         if (iRendering || rendering_engine().creating_window() || !can_render())
@@ -351,18 +345,6 @@ namespace neogfx
         iFpsData.push_back(frame_times{ *iLastFrameTime, std::chrono::high_resolution_clock::now() });
         if (iFpsData.size() > 100)
             iFpsData.pop_front();        
-    }
-
-    void opengl_window::pause()
-    {
-        ++iPaused;
-    }
-
-    void opengl_window::resume()
-    {
-        if (iPaused == 0)
-            throw bad_pause_count();
-        --iPaused;
     }
 
     bool opengl_window::is_rendering() const

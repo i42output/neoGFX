@@ -2,18 +2,9 @@
     namespace: neogfx
 
     resource: {
-        ref: resources
         file: resources/icons/neoGFX.png
         file: resources/images/game_controller.png
-    }
-
-    resource: {
-        ref: languages
         file: resources/language-subtag-registry.txt
-    }
-
-    resource: {
-        ref: game_controller_db
         file: resources/gamecontrollerdb.txt
     }
 }

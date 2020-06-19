@@ -29,28 +29,28 @@ namespace neogfx
 {
     enum class standard_button : uint32_t
     {
-        Ok              = 0x00000001,
-        Cancel          = 0x00000002,
-        Close           = 0x00000004,
-        Discard         = 0x00000008,
-        Apply           = 0x00000010,
-        Reset           = 0x00000020,
+        Ok = 0x00000001,
+        Cancel = 0x00000002,
+        Close = 0x00000004,
+        Discard = 0x00000008,
+        Apply = 0x00000010,
+        Reset = 0x00000020,
         RestoreDefaults = 0x00000040,
-        Yes             = 0x00000080,
-        No              = 0x00000100,
-        YesToAll        = 0x00000200,
-        NoToAll         = 0x00000400,
-        Abort           = 0x00000800,
-        Retry           = 0x00001000,
-        Ignore          = 0x00002000,
-        Open            = 0x00004000,
-        Save            = 0x00008000,
-        SaveAll         = 0x00010000,
-        Help            = 0x00020000,
-        Custom1         = 0x10000000,
-        Custom2         = 0x20000000,
-        Custom3         = 0x40000000,
-        Custom4         = 0x80000000
+        Yes = 0x00000080,
+        No = 0x00000100,
+        YesToAll = 0x00000200,
+        NoToAll = 0x00000400,
+        Abort = 0x00000800,
+        Retry = 0x00001000,
+        Ignore = 0x00002000,
+        Open = 0x00004000,
+        Save = 0x00008000,
+        SaveAll = 0x00010000,
+        Help = 0x00020000,
+        Custom1 = 0x10000000,
+        Custom2 = 0x20000000,
+        Custom3 = 0x40000000,
+        Custom4 = 0x80000000
     };
 
     inline constexpr standard_button operator|(standard_button aLhs, standard_button aRhs)
@@ -76,7 +76,52 @@ namespace neogfx
         No,
         Help
     };
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::standard_button> neolib::enum_enumerators_v<neogfx::standard_button>
+{
+    declare_enum_string(neogfx::standard_button, Ok)
+    declare_enum_string(neogfx::standard_button, Cancel)
+    declare_enum_string(neogfx::standard_button, Close)
+    declare_enum_string(neogfx::standard_button, Discard)
+    declare_enum_string(neogfx::standard_button, Apply)
+    declare_enum_string(neogfx::standard_button, Reset)
+    declare_enum_string(neogfx::standard_button, RestoreDefaults)
+    declare_enum_string(neogfx::standard_button, Yes)
+    declare_enum_string(neogfx::standard_button, No)
+    declare_enum_string(neogfx::standard_button, YesToAll)
+    declare_enum_string(neogfx::standard_button, NoToAll)
+    declare_enum_string(neogfx::standard_button, Abort)
+    declare_enum_string(neogfx::standard_button, Retry)
+    declare_enum_string(neogfx::standard_button, Ignore)
+    declare_enum_string(neogfx::standard_button, Open)
+    declare_enum_string(neogfx::standard_button, Save)
+    declare_enum_string(neogfx::standard_button, SaveAll)
+    declare_enum_string(neogfx::standard_button, Help)
+    declare_enum_string(neogfx::standard_button, Custom1)
+    declare_enum_string(neogfx::standard_button, Custom2)
+    declare_enum_string(neogfx::standard_button, Custom3)
+    declare_enum_string(neogfx::standard_button, Custom4)
+};
+
+template <>
+const neolib::enum_enumerators_t<neogfx::button_role> neolib::enum_enumerators_v<neogfx::button_role>
+{
+    declare_enum_string(neogfx::button_role, Invalid)
+    declare_enum_string(neogfx::button_role, Accept)
+    declare_enum_string(neogfx::button_role, Reject)
+    declare_enum_string(neogfx::button_role, Destructive)
+    declare_enum_string(neogfx::button_role, Action)
+    declare_enum_string(neogfx::button_role, Apply)
+    declare_enum_string(neogfx::button_role, Reset)
+    declare_enum_string(neogfx::button_role, Yes)
+    declare_enum_string(neogfx::button_role, No)
+    declare_enum_string(neogfx::button_role, Help)
+};
+
+namespace neogfx
+{
     class dialog_button_box : public widget
     {
     public:

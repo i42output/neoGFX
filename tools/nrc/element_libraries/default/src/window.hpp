@@ -70,7 +70,7 @@ namespace neogfx::nrc
             {
                 emit_preamble();
                 emit("\n"
-                    "  %1%(%2%) :\n", fragment_name().to_std_string_view(), generate_ref_ctor_args(false));
+                    "  %1%(%2%) :\n", fragment_name().to_std_string_view(), generate_ctor_params(false));
                 emit_ctor();
                 emit("  {\n");
                 emit_body();
@@ -87,47 +87,23 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if (has_parent())
+            if (iDefaultSize)
             {
-                if (iDefaultSize)
-                {
-                    if (iStyle)
-                        emit(",\n"
-                            "   %1%{ %2%, size{ %3%, %4% }, %5% }", id(), parent().id(), iDefaultSize->cx, iDefaultSize->cy, enum_to_string("window_style", *iStyle));
-                    else
-                        emit(",\n"
-                            "   %1%{ %2%, size{ %3%, %4% } }", id(), parent().id(), iDefaultSize->cx, iDefaultSize->cy);
-                }
+                if (iStyle)
+                    emit(
+                        "   %1%{ %2%%3%, size{ %4%, %5% }, %6% }", type_name(), generate_base_ctor_args(true), iDefaultSize->cx, iDefaultSize->cy, enum_to_string("window_style", *iStyle));
                 else
-                {
-                    if (iStyle)
-                        emit(",\n"
-                            "   %1%{ %2%, %3% }", id(), parent().id(), enum_to_string("window_style", *iStyle));
-                    else
-                        emit(",\n"
-                            "   %1%{ %2% }", id(), parent().id());
-                }
+                    emit(
+                        "   %1%{ %2%size{ %3%, %4% } }", type_name(), generate_base_ctor_args(true), iDefaultSize->cx, iDefaultSize->cy);
             }
             else
             {
-                if (iDefaultSize)
-                {
-                    if (iStyle)
-                        emit(
-                            "   %1%{ %2%, size{ %3%, %4% }, %5% }", type_name(), iDefaultSize->cx, iDefaultSize->cy, enum_to_string("window_style", *iStyle));
-                    else
-                        emit(
-                            "   %1%{ size{ %2%, %3% } }", type_name(), iDefaultSize->cx, iDefaultSize->cy);
-                }
+                if (iStyle)
+                    emit(
+                        "   %1%{ %2%%3% }", type_name(), generate_base_ctor_args(true), enum_to_string("window_style", *iStyle));
                 else
-                {
-                    if (iStyle)
-                        emit(
-                            "   %1%{ %2% }", type_name(), enum_to_string("window_style", *iStyle));
-                    else
-                        emit(
-                            "   %1%{}", type_name());
-                }
+                    emit(
+                        "   %1%{%2%}", type_name(), generate_base_ctor_args(false) );
             }
             if (!has_parent())
                 emit(",\n"
@@ -138,8 +114,17 @@ namespace neogfx::nrc
         void emit_body() const override
         {
             if (iTitle)
-                emit("   %1%.set_title(\"%2%\"_t);\n", id(), iTitle->to_std_string_view());
+                emit("   %1%.set_title_text(\"%2%\"_t);\n", id(), iTitle->to_std_string_view());
             ui_element<>::emit_body();
+            if (!iStyle || (*iStyle & window_style::InitiallyCentered) == window_style::InitiallyCentered)
+            {
+                if ((type() & ui_element_type::Dialog) == ui_element_type::Dialog)
+                {
+                    emit(
+                        "   center_on_parent();\n"
+                        "   set_ready_to_render(true);\n");
+                }
+            }
         }
     protected:
         using ui_element<>::emit;

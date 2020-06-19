@@ -45,6 +45,22 @@ namespace neogfx::nrc
         return ((category(aType) & (ui_element_type::Widget | ui_element_type::Layout)) != ui_element_type::Invalid);
     }
 
+    enum class widget_type : uint32_t
+    {
+        TopLevel,
+        Child
+    };
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::nrc::widget_type> neolib::enum_enumerators_v<neogfx::nrc::widget_type>
+{
+    declare_enum_string(neogfx::nrc::widget_type, TopLevel)
+    declare_enum_string(neogfx::nrc::widget_type, Child)
+};
+
+namespace neogfx::nrc 
+{
     struct element_not_found : std::runtime_error { element_not_found(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
     struct element_ill_formed : std::runtime_error { element_ill_formed(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
     struct unsupported_member_element : std::runtime_error { unsupported_member_element() : std::runtime_error{ "Unsupported member element." } {} };
@@ -87,7 +103,8 @@ namespace neogfx::nrc
         virtual void parse(const neolib::i_string& aType, const array_data_t& aData) = 0;
         virtual void add_element_ref(const neolib::i_string& aRef) = 0;
         virtual const neolib::i_set<neolib::i_string>& element_refs() const = 0;
-        virtual const neolib::i_string& generate_ref_ctor_args(bool aArgsAfter = false) const = 0;
+        virtual const neolib::i_string& generate_ctor_params(bool aParamsAfter = false) const = 0;
+        virtual const neolib::i_string& generate_base_ctor_args(bool aArgsAfter = false) const = 0;
         virtual void emit() const = 0;
         virtual void emit_preamble() const = 0;
         virtual void emit_ctor() const = 0;
@@ -103,17 +120,26 @@ namespace neogfx::nrc
             generate_anonymous_id(newAnonymousId);
             return newAnonymousId;
         }
-        const i_ui_element& find(const neolib::i_string& aId) const
+        const i_ui_element& ancestor(const neolib::i_string& aId) const
         {
             if (!anonymous() && id() == aId)
                 return *this;
             if (has_parent())
-                return parent().find(aId);
+                return parent().ancestor(aId);
             throw element_not_found(aId.to_std_string());
         }
-        i_ui_element& find(const neolib::i_string& aId)
+        i_ui_element& ancestor(const neolib::i_string& aId)
         {
-            return const_cast<i_ui_element&>(to_const(*this).find(aId));
+            return const_cast<i_ui_element&>(to_const(*this).ancestor(aId));
+        }
+        void check_element_ref(const neolib::i_string& aRef) const
+        {
+            auto const& fullRef = aRef.to_std_string_view();
+            auto part = fullRef.find_first_of('.');
+            auto ref = fullRef.substr(0, part);
+            auto resolved = parser().find(neolib::string{ ref });
+            if (!resolved || (part == std::string::npos && resolved->fragment_name() != fragment_name()))
+                throw element_not_found(aRef.to_std_string());
         }
     public:
         template <typename T>

@@ -485,6 +485,7 @@ namespace neogfx
 
         layout().invalidate();
         center_on_parent();
+        set_ready_to_render(true);
     }
 
     void gradient_dialog::update_widgets()

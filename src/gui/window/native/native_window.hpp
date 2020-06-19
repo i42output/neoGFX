@@ -38,6 +38,9 @@ namespace neogfx
         define_declared_event(TargetDeactivating, target_deactivating)
         define_declared_event(TargetDeactivated, target_deactivated)
         define_declared_event(Filter, filter, native_event&)
+    public:
+        struct busy_rendering : std::logic_error { busy_rendering() : std::logic_error("neogfx::native_window::busy_rendering") {} };
+        struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::native_window::bad_pause_count") {} };
     private:
         typedef std::deque<native_event> event_queue;
     public:
@@ -48,6 +51,10 @@ namespace neogfx
         dimension vertical_dpi() const override;
         dimension ppi() const override;
         dimension em_size() const override;
+    public:
+        bool can_render() const override;
+        void pause() override;
+        void resume() override;
     public:
         void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
         bool events_queued() const override;
@@ -91,5 +98,6 @@ namespace neogfx
         std::string iTitleText;
         bool iNonClientEntered;
         neolib::callback_timer iUpdater;
+        uint32_t iPaused;
     };
 }

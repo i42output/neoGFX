@@ -263,7 +263,6 @@ namespace neogfx
                     iButtonBox->disable_role(button_role::Reject);
             }
         }, 100);
-
         non_client_layout().add_at(non_client_layout().index_of(status_bar_layout()), iButtonBoxLayout);
         iButtonBoxLayout.set_weight(size{});
         set_standard_layout(service<i_app>().current_style().spacing(), false);

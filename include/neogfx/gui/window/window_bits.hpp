@@ -42,6 +42,7 @@ namespace neogfx
         Dialog                  = 0x00000800,
         Popup                   = 0x00001000,    // The window is a popup (e.g. menu)
         Tool                    = 0x00002000,    // The window shouldn't appear on the operating system taskbar
+        DropShadow              = 0x00004000,
         Modal                   = 0x00010000,
         ApplicationModal        = 0x00020000,
         NoActivate              = 0x00040000,
@@ -52,9 +53,10 @@ namespace neogfx
         HideOnParentClick       = 0x00800000,
         InitiallyHidden         = 0x01000000,
         InitiallyCentered       = 0x02000000,    // Center on desktop or parent
-        DropShadow              = 0x04000000,
+        InitiallyRenderable     = 0x04000000,
         Weak                    = 0x80000000,
-        Default                 = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow | InitiallyCentered
+        Default                 = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow | InitiallyCentered | InitiallyRenderable,
+        DefaultDialog           = (Default | Dialog) & ~InitiallyRenderable
     };
 
     inline constexpr window_style operator~(window_style aStyle)
@@ -121,6 +123,7 @@ const neolib::enum_enumerators_t<neogfx::window_style> neolib::enum_enumerators_
     declare_enum_string(neogfx::window_style, DropShadow)
     declare_enum_string(neogfx::window_style, Weak)
     declare_enum_string(neogfx::window_style, Default)
+    declare_enum_string(neogfx::window_style, DefaultDialog)
 };
 
 template <>
