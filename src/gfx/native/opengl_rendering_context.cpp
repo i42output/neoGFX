@@ -1679,9 +1679,9 @@ namespace neogfx
                             if (materialTexture.type == texture_type::Texture)
                                 uvFixupOffset = vec2{ 1.0, 1.0 };
                             else if (materialTexture.subTexture == std::nullopt)
-                                uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
+                                uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2() + vec2{ 1.0, 1.0 };
                             else
-                                uvFixupOffset = materialTexture.subTexture->min;
+                                uvFixupOffset = materialTexture.subTexture->min + vec2{ 1.0, 1.0 };
                         }
                     }
                     // todo: check vertex count is same as in cache

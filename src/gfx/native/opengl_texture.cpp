@@ -369,6 +369,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
     {
+        auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
         {
             GLint previousTexture = bind(1);
@@ -378,14 +379,14 @@ namespace neogfx
             if (sampling() != texture_sampling::Data)
             {
                 glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
-                    static_cast<GLint>(aRect.x), static_cast<GLint>(aRect.y), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
+                    static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y), static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy),
                     std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
             }
             else
             {
                 glCheck(glTexImage2D(to_gl_enum(sampling()), 0,
                     std::get<0>(to_gl_enum(iDataFormat, kDataType)),
-                    static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy), 0,
+                    static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy), 0,
                     std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
             }
             if (sampling() == texture_sampling::NormalMipmap)
@@ -402,7 +403,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::set_pixels(const i_image& aImage)
     {
-        set_pixels(rect{ point{ 1.0, 1.0 }, aImage.extents() }, aImage.cpixels());
+        set_pixels(rect{ point{}, aImage.extents() }, aImage.cpixels());
     }
 
     template <typename T>
