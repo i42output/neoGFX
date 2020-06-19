@@ -30,8 +30,8 @@ namespace neogfx
         iText{ iLayout2, aText, text_widget_type::MultiLine },
         iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
     {
-        button_box().add_buttons(aButtons);
         init();
+        button_box().add_buttons(aButtons);
     }
 
     message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
@@ -42,8 +42,8 @@ namespace neogfx
         iText{ iLayout2, aText, text_widget_type::MultiLine },
         iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
     {
-        button_box().add_buttons(aButtons);
         init();
+        button_box().add_buttons(aButtons);
     }
 
     message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons) :
@@ -264,12 +264,9 @@ namespace neogfx
 
     void message_box::init()
     {
-        auto standardSpacing = set_standard_layout(size{ 16.0 });
         iLayout1.set_margins(neogfx::margins{});
-        iLayout1.set_spacing(standardSpacing);
         iLayout2.set_alignment(neogfx::alignment::Left);
         iLayout2.set_margins(neogfx::margins{});
-        iLayout2.set_spacing(standardSpacing / 2.0);
 
         size maxTextSize{ service<i_window_manager>().desktop_rect(root()).width() / 3.0, size::max_dimension() };
         text().set_maximum_size(maxTextSize);

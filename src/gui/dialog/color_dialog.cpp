@@ -226,13 +226,17 @@ namespace neogfx
         iLeftCursor(*this, cursor_widget::LeftCursor),
         iRightCursor(*this, cursor_widget::RightCursor)
     {
-        set_margins(neogfx::margins{});
         iSink = iOwner.SelectionChanged([this]()
         {
             update_cursors();
             update();
         });
         update_cursors();
+    }
+
+    scalar color_dialog::x_picker::cursor_width() const
+    {
+        return iRightCursor.extents().cx;
     }
 
     size color_dialog::x_picker::minimum_size(const optional_size& aAvailableSpace) const
@@ -833,6 +837,8 @@ namespace neogfx
 
     void color_dialog::init()
     {
+        debug() = &client_widget();
+
         scoped_units su{ static_cast<framed_widget&>(*this), units::Pixels };
         static const std::set<color> sBasicColors
         {
@@ -855,13 +861,16 @@ namespace neogfx
             color::SlateBlue, color::SlateGray, color::Snow, color::SpringGreen, color::SteelBlue, color::Tan, color::Thistle, color::Tomato, 
             color::Turquoise, color::Violet, color::VioletRed, color::Wheat, color::White, color::WhiteSmoke, color::Yellow, color::YellowGreen 
         };
-        auto standardSpacing = set_standard_layout(size{ 16.0 });
+        auto const standardSpacing = client_layout().spacing();
         iLayout.set_margins(neogfx::margins{});
         iLayout.set_spacing(standardSpacing);
         iLayout2.set_margins(neogfx::margins{});
         iLayout2.set_spacing(standardSpacing);
         iRightLayout.set_spacing(standardSpacing);
-        iRightTopLayout.set_spacing(standardSpacing);
+        iRightTopLayout.set_spacing(standardSpacing * 2.0);
+        auto adjustedMargins = iRightTopLayout.margins();
+        adjustedMargins.right = std::max(adjustedMargins.right, iXPicker.cursor_width());
+        iRightTopLayout.set_margins(adjustedMargins);
         iRightBottomLayout.set_spacing(standardSpacing / 2.0);
         iChannelLayout.set_margins(neogfx::margins{});
         iChannelLayout.set_spacing(standardSpacing / 2.0);
@@ -871,13 +880,13 @@ namespace neogfx
             iScreenPickerActive = true;
             surface().as_surface_window().set_capture(*this);
         });
-        iH.first.set_size_policy(size_constraint::Minimum); iH.first.label().set_text("&Hue:"_t); iH.second.set_size_policy(size_constraint::Minimum); iH.second.text_box().set_size_hint(size_hint{ "359.9" }); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
-        iS.first.set_size_policy(size_constraint::Minimum); iS.first.label().set_text("&Sat:"_t); iS.second.set_size_policy(size_constraint::Minimum); iS.second.text_box().set_size_hint(size_hint{ "100.0" }); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
-        iV.first.set_size_policy(size_constraint::Minimum); iV.first.label().set_text("&Val:"_t); iV.second.set_size_policy(size_constraint::Minimum); iV.second.text_box().set_size_hint(size_hint{ "100.0" }); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
-        iR.first.set_size_policy(size_constraint::Minimum); iR.first.label().set_text("&Red:"_t); iR.second.set_size_policy(size_constraint::Minimum); iR.second.text_box().set_size_hint(size_hint{ "255" }); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
-        iG.first.set_size_policy(size_constraint::Minimum); iG.first.label().set_text("&Green:"_t); iG.second.set_size_policy(size_constraint::Minimum); iG.second.text_box().set_size_hint(size_hint{ "255" }); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
-        iB.first.set_size_policy(size_constraint::Minimum); iB.first.label().set_text("&Blue:"_t); iB.second.set_size_policy(size_constraint::Minimum); iB.second.text_box().set_size_hint(size_hint{ "255" }); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
-        iA.first.set_size_policy(size_constraint::Minimum); iA.first.label().set_text("&Alpha:"_t); iA.second.set_size_policy(size_constraint::Minimum); iA.second.text_box().set_size_hint(size_hint{ "255" }); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
+        iH.first.set_size_policy(size_constraint::Minimum); iH.first.label().set_text("&Hue:"_t); iH.second.set_size_policy(size_constraint::Minimum); iH.second.set_text_box_size_hint(size_hint{ "999.9" }); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
+        iS.first.set_size_policy(size_constraint::Minimum); iS.first.label().set_text("&Sat:"_t); iS.second.set_size_policy(size_constraint::Minimum); iS.second.set_text_box_size_hint(size_hint{ "999.9" }); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
+        iV.first.set_size_policy(size_constraint::Minimum); iV.first.label().set_text("&Val:"_t); iV.second.set_size_policy(size_constraint::Minimum); iV.second.set_text_box_size_hint(size_hint{ "999.9" }); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
+        iR.first.set_size_policy(size_constraint::Minimum); iR.first.label().set_text("&Red:"_t); iR.second.set_size_policy(size_constraint::Minimum); iR.second.set_text_box_size_hint(size_hint{ "255" }); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
+        iG.first.set_size_policy(size_constraint::Minimum); iG.first.label().set_text("&Green:"_t); iG.second.set_size_policy(size_constraint::Minimum); iG.second.set_text_box_size_hint(size_hint{ "255" }); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
+        iB.first.set_size_policy(size_constraint::Minimum); iB.first.label().set_text("&Blue:"_t); iB.second.set_size_policy(size_constraint::Minimum); iB.second.set_text_box_size_hint(size_hint{ "255" }); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
+        iA.first.set_size_policy(size_constraint::Minimum); iA.first.label().set_text("&Alpha:"_t); iA.second.set_size_policy(size_constraint::Minimum); iA.second.set_text_box_size_hint(size_hint{ "255" }); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
         iChannelLayout.set_dimensions(4, 4);
         iChannelLayout.add(iH.first); iChannelLayout.add(iH.second);
         iChannelLayout.add(iR.first); iChannelLayout.add(iR.second);
@@ -936,7 +945,8 @@ namespace neogfx
 
         update_widgets(*this);
 
-        center_on_parent();
+        layout().invalidate();
+        center_on_parent(true);
         set_ready_to_render(true);
     }
 

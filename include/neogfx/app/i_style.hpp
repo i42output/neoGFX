@@ -36,6 +36,17 @@ namespace neogfx
         Style       = Geometry | Font | Color
     };
 
+    enum class margin_role : uint32_t
+    {
+        Layout  = 0x0000,
+        Widget  = 0x0001,
+        Window  = 0x0002,
+        Dialog  = 0x0003,
+        Menu    = 0x0004,
+
+        COUNT
+    };
+
     inline constexpr style_aspect operator|(style_aspect aLhs, style_aspect aRhs)
     {
         return static_cast<style_aspect>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
@@ -51,11 +62,14 @@ namespace neogfx
     public:
         declare_event(changed, style_aspect)
     public:
+        typedef std::array<neogfx::margins, static_cast<std::size_t>(margin_role::COUNT)> margin_list;
+    public:
         virtual ~i_style() = default;
     public:
         virtual const std::string& name() const = 0;
-        virtual const neogfx::margins& margins() const = 0;
-        virtual void set_margins(const neogfx::margins& aMargins) = 0;
+        virtual const margin_list& all_margins() const = 0;
+        virtual const neogfx::margins& margins(margin_role aMarginRole) const = 0;
+        virtual void set_margins(margin_role aMarginRole, const neogfx::margins& aMargins) = 0;
         virtual const size& spacing() const = 0;
         virtual void set_spacing(const size& aSpacing) = 0;
         virtual const i_palette& palette() const = 0;

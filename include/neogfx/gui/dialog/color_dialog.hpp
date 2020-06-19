@@ -92,6 +92,8 @@ namespace neogfx
         public:
             x_picker(color_dialog& aOwner);
         public:
+            scalar cursor_width() const;
+        public:
             virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
             virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
         public:

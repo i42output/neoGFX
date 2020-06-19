@@ -58,7 +58,7 @@ namespace neogfx
         virtual dialog_result result() const;
         virtual void set_result(dialog_result aResult);
     public:
-        size set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox = true, bool aDpiScaling = true);
+        void set_standard_layout(const size& aControlSpacing, const neogfx::margins& aMargins, bool aCreateButtonBox = true);
         dialog_button_box& button_box();
     public:
         virtual dialog_result exec();

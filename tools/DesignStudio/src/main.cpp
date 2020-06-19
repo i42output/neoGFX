@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/core/css.hpp>
+#include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include "new_project_dialog.hpp"
@@ -46,7 +47,7 @@ int main(int argc, char* argv[])
     try
     {
         ds::main_window mainWindow{ app };
-            
+
         app.actionShowStandardToolbar.checked([&]() { mainWindow.standardToolbar.show(); });
         app.actionShowStandardToolbar.unchecked([&]() { mainWindow.standardToolbar.hide(); });
         app.actionShowStatusBar.checked([&]() { mainWindow.statusBar.show(); });
@@ -105,8 +106,6 @@ int main(int argc, char* argv[])
 
         auto update_ui = [&]()
         {
-            app.actionFileNew.enable(pm.projects().empty());
-            app.actionFileOpen.enable(pm.projects().empty());
             app.actionFileClose.enable(pm.project_active());
             app.actionFileSave.enable(pm.project_active() && pm.active_project().dirty());
             leftDock.show(pm.project_active());
@@ -128,6 +127,12 @@ int main(int argc, char* argv[])
             ds::new_project_dialog_ex dialog{ mainWindow };
             if (dialog.exec() == ng::dialog_result::Accepted)
                 pm.create_project(dialog.projectName.text(), dialog.projectNamespace.text()).set_dirty();
+        });
+
+        app.actionSettings.triggered([&]()
+        {
+            ng::settings_dialog dialog{ mainWindow };
+            dialog.exec();
         });
 
         //        ng::css css{"test.css"};

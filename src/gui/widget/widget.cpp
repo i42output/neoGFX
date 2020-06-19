@@ -885,23 +885,24 @@ namespace neogfx
 
     size widget::minimum_size(const optional_size& aAvailableSpace) const
     {
-        if (debug() == this)
-            std::cerr << "widget::minimum_size(...)" << std::endl;
+        size result;
         if (has_fixed_size())
-            return fixed_size();
+            result = fixed_size();
         else if (has_minimum_size())
-            return units_converter(*this).from_device_units(*MinimumSize);
+            result = units_converter(*this).from_device_units(*MinimumSize);
         else if (has_layout())
         {
-            auto result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
+            result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
             if (result.cx != 0.0)
                 result.cx += margins().size().cx;
             if (result.cy != 0.0)
                 result.cy += margins().size().cy;
-            return result;
         }
         else
-            return margins().size();
+            result = margins().size();
+        if (debug() == this)
+            std::cerr << "widget::minimum_size(...) --> " << result << std::endl;
+        return result;
     }
 
     void widget::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
@@ -922,25 +923,26 @@ namespace neogfx
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
-        if (debug() == this)
-            std::cerr << "widget::maximum_size(...)" << std::endl;
+        size result;
         if (has_fixed_size())
-            return fixed_size();
+            result = fixed_size();
         else if (has_maximum_size())
-            return units_converter(*this).from_device_units(*MaximumSize);
+            result = units_converter(*this).from_device_units(*MaximumSize);
         else if (size_policy() == size_constraint::Minimum || size_policy() == size_constraint::Fixed)
-            return minimum_size(aAvailableSpace);
+            result = minimum_size(aAvailableSpace);
         else if (has_layout())
         {
-            auto result = layout().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
+            result = layout().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
             if (result.cx != 0.0)
                 result.cx += margins().size().cx;
             if (result.cy != 0.0)
                 result.cy += margins().size().cy;
-            return result;
         }
         else
-            return size::max_size();
+            result = size::max_size();
+        if (debug() == this)
+            std::cerr << "widget::maximum_size(...) --> " << result << std::endl;
+        return result;
     }
 
     void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
@@ -984,10 +986,7 @@ namespace neogfx
 
     margins widget::margins() const
     {
-        auto const& adjustedMargins =
-            (has_margins() ?
-                *Margins :
-                service<i_app>().current_style().margins() * 1.0_dip);
+        auto const& adjustedMargins = (has_margins() ? *Margins : service<i_app>().current_style().margins(is_root() ? margin_role::Window : margin_role::Widget) * 1.0_dip);
         return units_converter(*this).from_device_units(adjustedMargins);
     }
 

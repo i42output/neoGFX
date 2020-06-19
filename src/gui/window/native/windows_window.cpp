@@ -1380,7 +1380,7 @@ namespace neogfx
                 borderThickness.left *= -1;
                 borderThickness.top *= -1;
                 iBorderThickness = basic_margins<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };
-                iBorderThickness += service<i_app>().current_style().margins();
+                iBorderThickness += service<i_app>().current_style().margins(margin_role::Window);
             }
             else
                 iBorderThickness = margins{ 1.0, 1.0, 1.0, 1.0 };

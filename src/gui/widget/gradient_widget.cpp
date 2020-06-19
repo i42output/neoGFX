@@ -75,11 +75,8 @@ namespace neogfx
         private:
             void init(color::component aCurrentAlpha)
             {
-                auto standardSpacing = set_standard_layout(size{ 16.0 });
                 iLayout.set_margins(neogfx::margins{});
-                iLayout.set_spacing(standardSpacing);
                 iLayout2.set_margins(neogfx::margins{});
-                iLayout2.set_spacing(standardSpacing);
                 iSlider.set_minimum(0);
                 iSlider.set_maximum(255);
                 iSlider.set_step(1);

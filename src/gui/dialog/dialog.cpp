@@ -139,17 +139,15 @@ namespace neogfx
         iResult = aResult;
     }
 
-    size dialog::set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox, bool aDpiScaling)
+    void dialog::set_standard_layout(const size& aControlSpacing, const neogfx::margins& aMargins, bool aCreateButtonBox)
     {
-        auto ajustedSpacing = (aDpiScaling ? dpi_scale(aControlSpacing) : aControlSpacing);
         set_margins(neogfx::margins{});
-        client_layout().set_margins(neogfx::margins{ ajustedSpacing.cx, ajustedSpacing.cy, ajustedSpacing.cx, ajustedSpacing.cy });
-        client_layout().set_spacing(ajustedSpacing);
-        button_box_layout().set_margins(neogfx::margins{ ajustedSpacing.cx, ajustedSpacing.cy, ajustedSpacing.cx, ajustedSpacing.cy });
-        button_box_layout().set_spacing(ajustedSpacing);
+        client_layout().set_margins(aMargins);
+        client_layout().set_spacing(aControlSpacing);
+        button_box_layout().set_margins(aMargins);
+        button_box_layout().set_spacing(aControlSpacing);
         if (aCreateButtonBox)
-            button_box().layout().set_spacing(ajustedSpacing);
-        return ajustedSpacing;
+            button_box().layout().set_spacing(aControlSpacing);
     }
 
     dialog_button_box& dialog::button_box()
@@ -265,6 +263,6 @@ namespace neogfx
         }, 100);
         non_client_layout().add_at(non_client_layout().index_of(status_bar_layout()), iButtonBoxLayout);
         iButtonBoxLayout.set_weight(size{});
-        set_standard_layout(service<i_app>().current_style().spacing(), false);
+        set_standard_layout(size{ 8_dip, 8_dip }, neogfx::margins{ 8_dip, 8_dip }, false);
     }
 }

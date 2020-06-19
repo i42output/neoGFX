@@ -374,7 +374,7 @@ namespace neogfx
 
     margins layout::margins() const
     {
-        auto const& adjustedMargins = (has_margins() ? *iMargins : service<i_app>().current_style().margins() * dpi_scale_factor());
+        auto const& adjustedMargins = (has_margins() ? *iMargins : service<i_app>().current_style().margins(margin_role::Layout) * dpi_scale_factor());
         return units_converter(*this).from_device_units(adjustedMargins);
     }
 

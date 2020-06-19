@@ -82,9 +82,10 @@ namespace neogfx
         return iDimensions;
     }
 
-    void grid_layout::set_dimensions(cell_coordinate aRows, cell_coordinate aColumns)
+    grid_layout& grid_layout::set_dimensions(cell_coordinate aRows, cell_coordinate aColumns)
     {
         iDimensions = cell_dimensions{aColumns, aRows};
+        return *this;
     }
 
     bool grid_layout::is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const

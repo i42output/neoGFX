@@ -23,6 +23,19 @@
                     checkable: true
                     checked: true
                 }
+                action: {
+                    id: actionSettings
+                    text: "&Settings..."
+                    image: ":/neogfx/resources/icons.zip#settings.png"
+                }
+                action: {
+                    id: actionImportAndExportSettings
+                    text: "Import and Export Settings..."
+                }
+                action: {
+                    id: actionAbout
+                    text: "About neoGFX Design Studio"
+                }
             }
         }
         main_window: {
@@ -65,10 +78,19 @@
                         }
                         action: mainApp.actionShowStatusBar
                     }
+                    menu: {
+                        title: "&Tools"
+                        action: mainApp.actionSettings
+                        action: mainApp.actionImportAndExportSettings
+                    }
+                    menu: {
+                        title: "&Help"
+                        action: mainApp.actionAbout
+                    }
                 }
                 toolbar: {
                     id: standardToolbar
-                    button_image_extents: [16dip 16dip]
+                    button_image_extents: [32dip 32dip]
                     action: mainApp.actionFileNew
                     action: mainApp.actionFileOpen
                     action: mainApp.actionFileSave
@@ -79,6 +101,8 @@
                     action: mainApp.actionCut
                     action: mainApp.actionCopy
                     action: mainApp.actionPaste
+                    action: separator
+                    action: mainApp.actionSettings
                 }
             }
         }

@@ -173,7 +173,7 @@ namespace neogfx
         if (has_minimum_size() || (static_cast<const window&>(parent()).style() & window_style::Resize) != window_style::Resize)
             return scrollable_widget::minimum_size(aAvailableSpace);
         else
-            return service<i_app>().current_style().margins().size();
+            return service<i_app>().current_style().margins(margin_role::Window).size();
     }
 
     bool window::client::transparent_background() const

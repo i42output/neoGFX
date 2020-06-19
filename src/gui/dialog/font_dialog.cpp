@@ -213,7 +213,6 @@ namespace neogfx
         iSample.set_minimum_size(size{ 192.0_dip, 48.0_dip });
         iSample.set_maximum_size(size{ size::max_dimension(), 48.0_dip });
 
-        set_standard_layout(size{ 16.0 });
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
 

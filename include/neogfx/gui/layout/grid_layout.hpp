@@ -53,7 +53,7 @@ namespace neogfx
         cell_coordinate rows() const;
         cell_coordinate columns() const;
         cell_coordinates dimensions() const;
-        void set_dimensions(cell_coordinate aRows, cell_coordinate aColumns);
+        grid_layout& set_dimensions(cell_coordinate aRows, cell_coordinate aColumns);
         bool is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
         i_layout_item& add(i_layout_item& aItem) override;
         i_layout_item& add(std::shared_ptr<i_layout_item> aItem) override;

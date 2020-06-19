@@ -453,14 +453,16 @@ namespace neogfx
         case UsvStageCheckVertical2:
             if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
             {
-                auto cr = client_rect();
-                for (auto& c : children())
+                auto const& cr = client_rect();
+                for (auto& child : children())
                 {
-                    if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
+                    auto const& childPos = child->position();
+                    auto const& childExtents = child->extents();
+                    if (child->hidden() || childExtents.cx == 0.0 || childExtents.cy == 0.0)
                         continue;
-                    if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::DontScrollChildWidget)
+                    if ((scrolling_disposition(*child) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::DontScrollChildWidget)
                         continue;
-                    if (c->position().y < cr.top() || c->position().y + c->extents().cy > cr.bottom())
+                    if (childPos.y < cr.top() || childPos.y + childExtents.cy > cr.bottom())
                     {
                         vertical_scrollbar().show();
                         layout_items();
@@ -472,14 +474,16 @@ namespace neogfx
         case UsvStageCheckHorizontal:
             if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
             {
-                auto cr = client_rect();
-                for (auto& c : children())
+                auto const& cr = client_rect();
+                for (auto& child : children())
                 {
-                    if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
+                    auto const& childPos = child->position();
+                    auto const& childExtents = child->extents();
+                    if (child->hidden() || childExtents.cx == 0.0 || childExtents.cy == 0.0)
                         continue;
-                    if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::DontScrollChildWidget)
+                    if ((scrolling_disposition(*child) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::DontScrollChildWidget)
                         continue;
-                    if (c->position().x < cr.left() || c->position().x + c->extents().cx > cr.right())
+                    if (childPos.x < cr.left() || childPos.x + childExtents.cx > cr.right())
                     {
                         horizontal_scrollbar().show();
                         layout_items();

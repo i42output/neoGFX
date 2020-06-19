@@ -32,12 +32,12 @@ namespace neogfx::nrc
         dialog(const i_ui_element_parser& aParser) :
             window{ aParser, ui_element_type::Dialog }
         {
-            add_data_names({ "button_box" });
+            add_data_names({ "standard_layout", "button_box" });
         }
         dialog(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             window{ aParser, aParent, ui_element_type::Dialog }
         {
-            add_data_names({ "button_box" });
+            add_data_names({ "standard_layout", "button_box" });
         }
     public:
         const neolib::i_string& header() const override
@@ -48,14 +48,18 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "button_box")
+            if (aName == "standard_layout")
+                iStandardLayout.emplace(get_scalar<length>(aData));
+            else if (aName == "button_box")
                 iButtonBox = get_enum<standard_button>(aData);
             else
                 window::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            if (aName == "button_box")
+            if (aName == "standard_layout")
+                emplace_2<length>("standard_layout", iStandardLayout);
+            else if (aName == "button_box")
                 iButtonBox = get_enum<standard_button>(aData);
             else
                 window::parse(aName, aData);
@@ -79,6 +83,8 @@ namespace neogfx::nrc
         }
         void emit_body() const override
         {
+            if (iStandardLayout)
+                emit("   set_standard_layout(size{ %1%, %2% });\n", iStandardLayout->cx, iStandardLayout->cy);
             if (iButtonBox)
                 emit("   button_box().add_buttons(%1%);\n", enum_to_string("standard_button", *iButtonBox));
             window::emit_body();
@@ -86,6 +92,7 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
+        std::optional<basic_size<length>> iStandardLayout;
         std::optional<standard_button> iButtonBox;
     };
 }

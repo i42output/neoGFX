@@ -36,6 +36,7 @@ namespace neogfx
             window_style::RequiresOwnerFocus | 
             window_style::HideOnOwnerClick | 
             window_style::InitiallyHidden | 
+            window_style::InitiallyRenderable |
             window_style::DropShadow |
             window_style::Popup;
     public:

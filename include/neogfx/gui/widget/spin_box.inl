@@ -283,27 +283,30 @@ namespace neogfx
     {
         if (text_box_size_hint())
             text_box().set_size_hint(*text_box_size_hint());
-        std::string hintText;
-        try 
-        { 
-            std::string tryText;
-            tryText = boost::str(boost::format(iFormat) % minimum());
-            if (tryText.length() > hintText.length())
-                hintText = tryText;
-            tryText = boost::str(boost::format(iFormat) % (minimum() + step()));
-            if (tryText.length() > hintText.length())
-                hintText = tryText;
-            tryText = boost::str(boost::format(iFormat) % maximum());
-            if (tryText.length() > hintText.length())
-                hintText = tryText;
-            tryText = boost::str(boost::format(iFormat) % (maximum() - step()));
-            if (tryText.length() > hintText.length())
-                hintText = tryText;
-        }
-        catch (...) 
+        else
         {
+            std::string hintText;
+            try
+            {
+                std::string tryText;
+                tryText = boost::str(boost::format(iFormat) % minimum());
+                if (tryText.length() > hintText.length())
+                    hintText = tryText;
+                tryText = boost::str(boost::format(iFormat) % (minimum() + step()));
+                if (tryText.length() > hintText.length())
+                    hintText = tryText;
+                tryText = boost::str(boost::format(iFormat) % maximum());
+                if (tryText.length() > hintText.length())
+                    hintText = tryText;
+                tryText = boost::str(boost::format(iFormat) % (maximum() - step()));
+                if (tryText.length() > hintText.length())
+                    hintText = tryText;
+            }
+            catch (...)
+            {
+            }
+            text_box().set_size_hint(size_hint{ hintText });
         }
-        text_box().set_size_hint(size_hint{ hintText });
     }
 
     template <typename T>

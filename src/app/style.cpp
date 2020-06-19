@@ -26,30 +26,30 @@
 namespace neogfx
 {
     style::style(const std::string& aName) :
-        iName(aName),
-        iMargins(2.0),
-        iSpacing(2.0, 2.0),
-        iFontInfo(service<i_font_manager>().default_system_font_info())
+        iName{ aName },
+        iMargins{ 2.0, 2.0, 4.0, 4.0, 4.0 },
+        iSpacing{ 2.0, 2.0 },
+        iFontInfo{ service<i_font_manager>().default_system_font_info() }
     {
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
     style::style(const std::string& aName, const i_style& aOther) :
-        iName(aName),
-        iMargins(aOther.margins()),
-        iSpacing(aOther.spacing()),
-        iPalette(aOther.palette()),
-        iFontInfo(aOther.font_info())
+        iName{ aName },
+        iMargins{ aOther.all_margins() },
+        iSpacing{ aOther.spacing() },
+        iPalette{ aOther.palette() },
+        iFontInfo{ aOther.font_info() }
     {
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
     style::style(const i_style& aOther) :
-        iName(aOther.name()),
-        iMargins(aOther.margins()),
-        iSpacing(aOther.spacing()),
-        iPalette(aOther.palette()),
-        iFontInfo(aOther.font_info())
+        iName{ aOther.name() },
+        iMargins{ aOther.all_margins() },
+        iSpacing{ aOther.spacing() },
+        iPalette{ aOther.palette() },
+        iFontInfo{ aOther.font_info() }
     {
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
@@ -68,7 +68,7 @@ namespace neogfx
         if (*this != aOther)
         {
             iName = aOther.name();
-            iMargins = aOther.margins();
+            iMargins = aOther.all_margins();
             iSpacing = aOther.spacing();
             iPalette = aOther.palette();
             iFontInfo = aOther.font_info();
@@ -80,7 +80,7 @@ namespace neogfx
     bool style::operator==(const i_style& aOther) const
     {
         return iName == aOther.name() && 
-            iMargins == aOther.margins() &&
+            iMargins == aOther.all_margins() &&
             iSpacing == aOther.spacing() &&
             iPalette == aOther.palette() &&
             iFontInfo == aOther.font_info();
@@ -96,16 +96,21 @@ namespace neogfx
         return iName;
     }
 
-    const neogfx::margins& style::margins() const
+    const style::margin_list& style::all_margins() const
     {
         return iMargins;
     }
 
-    void style::set_margins(const neogfx::margins& aMargins)
+    const neogfx::margins& style::margins(margin_role aMarginRole) const
     {
-        if (iMargins != aMargins)
+        return iMargins[static_cast<std::size_t>(aMarginRole)];
+    }
+
+    void style::set_margins(margin_role aMarginRole, const neogfx::margins& aMargins)
+    {
+        if (iMargins[static_cast<std::size_t>(aMarginRole)] != aMargins)
         {
-            iMargins = aMargins;
+            iMargins[static_cast<std::size_t>(aMarginRole)] = aMargins;
             handle_change(style_aspect::Geometry);
         }
     }

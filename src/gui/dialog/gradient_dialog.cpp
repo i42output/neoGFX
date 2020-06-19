@@ -252,18 +252,13 @@ namespace neogfx
 
     void gradient_dialog::init()
     {
-        auto standardSpacing = set_standard_layout(size{ 16.0 });
-
         iLayout.set_margins(neogfx::margins{});
-        iLayout.set_spacing(standardSpacing);
         iLayout2.set_margins(neogfx::margins{});
-        iLayout2.set_spacing(standardSpacing);
         iLayout3.set_margins(neogfx::margins{});
-        iLayout3.set_spacing(standardSpacing);
         iLayout5.set_alignment(alignment::Top);
-        iReverse.image_widget().set_fixed_size(size{ 16.0_dip });
+        iReverse.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
         iReverse.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
-        iReversePartial.image_widget().set_fixed_size(size{ 16.0_dip });
+        iReversePartial.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
         iReversePartial.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iHueSlider.set_minimum(0.0);
         iHueSlider.set_maximum(360.0);
@@ -276,7 +271,7 @@ namespace neogfx
             hues.emplace_back(pos, color::from_hsv(pos * 360.0, 1.0, 1.0));
         }
         iHueSlider.set_bar_color(neogfx::gradient{ hues, gradient_direction::Horizontal });
-        iImport.image_widget().set_fixed_size(size{ 16.0_dip });
+        iImport.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);
         iSmoothnessSpinBox.set_step(0.1);
