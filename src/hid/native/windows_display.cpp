@@ -121,7 +121,7 @@ namespace neogfx
 
         color display::read_pixel(const point& aPosition) const
         {
-            auto clr = GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));
+            auto clr = ::GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));
             return color{ GetRValue(clr), GetGValue(clr), GetBValue(clr) };
         }
     }

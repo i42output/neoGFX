@@ -282,7 +282,6 @@ namespace neogfx
         else if (!is_nested())
         {
             auto correctedPlacement = aPlacement;
-            // todo: multiple displays
             if (!has_parent_window(false) && service<i_surface_manager>().display().is_fullscreen())
             {
                 iStyle |= window_style::Fullscreen;

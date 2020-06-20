@@ -818,21 +818,12 @@ namespace neogfx
 
     void color_dialog::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        if (aButton == mouse_button::Left && iScreenPickerActive)
-        {
-            iScreenPickerActive = false;
-            surface().as_surface_window().release_capture(*this);
-        }
-        else
-            dialog::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        dialog::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
     }
 
     neogfx::mouse_cursor color_dialog::mouse_cursor() const
     {
-        if (iScreenPickerActive)
-            return mouse_system_cursor::Crosshair;
-        else
-            return dialog::mouse_cursor();
+        return dialog::mouse_cursor();
     }
 
     void color_dialog::init()
@@ -873,10 +864,12 @@ namespace neogfx
         iChannelLayout.set_padding(neogfx::padding{});
         iChannelLayout.set_spacing(standardSpacing / 2.0);
         iScreenPicker.set_size_policy(size_constraint::Minimum);
+        iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.png" });
+        iScreenPicker.image_widget().set_fixed_size(size{ 16_dip });
+        iScreenPicker.enable(false);
         iSink += iScreenPicker.Clicked([&, this]()
         {
-            iScreenPickerActive = true;
-            surface().as_surface_window().set_capture(*this);
+            // todo: capture screen as texture and place in yz picker.
         });
         iH.first.set_size_policy(size_constraint::Minimum); iH.first.label().set_text("&Hue:"_t); iH.second.set_size_policy(size_constraint::Minimum); iH.second.set_text_box_size_hint(size_hint{ "999.9" }); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
         iS.first.set_size_policy(size_constraint::Minimum); iS.first.label().set_text("&Sat:"_t); iS.second.set_size_policy(size_constraint::Minimum); iS.second.set_text_box_size_hint(size_hint{ "999.9" }); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);

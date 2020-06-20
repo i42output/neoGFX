@@ -2,6 +2,31 @@
     namespace: neogfx
 
     resource: {
-        file: resources/icons.zip
+        file: resources/icons/print.png
+        file: resources/icons/question.png
+        file: resources/icons/redo.png
+        file: resources/icons/reverse.png
+        file: resources/icons/reversepartial.png
+        file: resources/icons/save.png
+        file: resources/icons/search.png
+        file: resources/icons/settings.png
+        file: resources/icons/stop.png
+        file: resources/icons/undo.png
+        file: resources/icons/warning.png
+        file: resources/icons/bold.png
+        file: resources/icons/colour.png
+        file: resources/icons/copy.png
+        file: resources/icons/critical.png
+        file: resources/icons/cut.png
+        file: resources/icons/error.png
+        file: resources/icons/eyedropper.png
+        file: resources/icons/gamecontroller.png
+        file: resources/icons/information.png
+        file: resources/icons/italic.png
+        file: resources/icons/neoGFX.png
+        file: resources/icons/new.png
+        file: resources/icons/open.png
+        file: resources/icons/openfolder.png
+        file: resources/icons/paste.png
     }
 }

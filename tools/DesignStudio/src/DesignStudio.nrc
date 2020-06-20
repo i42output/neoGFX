@@ -26,7 +26,7 @@
                 action: {
                     id: actionSettings
                     text: "&Settings..."
-                    image: ":/neogfx/resources/icons.zip#settings.png"
+                    image: ":/neogfx/resources/icons/settings.png"
                 }
                 action: {
                     id: actionImportAndExportSettings
@@ -171,7 +171,7 @@
                                     push_button: {
                                         id: browseProjectLocation
                                         .image: {
-                                            uri: ":/neogfx/resources/icons.zip#openfolder.png"
+                                            uri: ":/neogfx/resources/icons/openfolder.png"
                                             size: 16dip
                                         }
                                     }

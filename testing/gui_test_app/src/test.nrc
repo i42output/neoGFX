@@ -28,7 +28,7 @@
                 action: {
                     id: actionGameControllerCalibration
                     text: "Game Controller Calibration"
-                    image: ":/neogfx/resources/icons.zip#gamecontroller.png"
+                    image: ":/neogfx/resources/icons/gamecontroller.png"
                 }
                 action: {
                     id: actionGoldenrodStyle
@@ -181,7 +181,7 @@
                     action: appTest.actionContacts
                     action: appTest.actionArcadeMode
                     action: appTest.actionMute
-                    action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons.zip#eyedropper.png" }
+                    action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons/eyedropper.png" }
                     menu: {
                         id: menuTest
                         title: "&Test"
@@ -583,7 +583,7 @@
                                     id: radioMessageBoxIconInformation
                                     text: "Information"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.zip#information.png"
+                                        uri: ":/neogfx/resources/icons/information.png"
                                         size: 24dip
                                     }
                                 }
@@ -591,7 +591,7 @@
                                     id: radioMessageBoxIconQuestion
                                     text: "Question"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.zip#question.png"
+                                        uri: ":/neogfx/resources/icons/question.png"
                                         size: 24dip
                                     }
                                 }
@@ -599,7 +599,7 @@
                                     id: radioMessageBoxIconWarning
                                     text: "Warning"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.zip#warning.png"
+                                        uri: ":/neogfx/resources/icons/warning.png"
                                         size: 24dip
                                     }
                                 }
@@ -607,7 +607,7 @@
                                     id: radioMessageBoxIconStop
                                     text: "Stop"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.zip#stop.png"
+                                        uri: ":/neogfx/resources/icons/stop.png"
                                         size: 24dip
                                     }
                                 }
@@ -615,7 +615,7 @@
                                     id: radioMessageBoxIconError
                                     text: "Error"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.zip#error.png"
+                                        uri: ":/neogfx/resources/icons/error.png"
                                         size: 24dip
                                     }
                                 }
@@ -623,7 +623,7 @@
                                     id: radioMessageBoxIconCritical
                                     text: "Critical"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons.zip#critical.png"
+                                        uri: ":/neogfx/resources/icons/critical.png"
                                         size: 24dip
                                     }
                                 }
