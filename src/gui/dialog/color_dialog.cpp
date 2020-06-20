@@ -318,6 +318,14 @@ namespace neogfx
             select(aPosition - client_rect(false).top_left());
     }
 
+    neogfx::mouse_cursor color_dialog::x_picker::mouse_cursor() const
+    {
+        point mousePos = root().mouse_position() - origin();
+        if (client_rect(false).contains(mousePos))
+            return mouse_system_cursor::Crosshair;
+        return framed_widget::mouse_cursor();
+    }
+
     void color_dialog::x_picker::select(const point& aPosition)
     {
         iOwner.select_color(color_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
@@ -525,6 +533,14 @@ namespace neogfx
     {
         if (iTracking)
             select(aPosition - client_rect(false).top_left());
+    }
+
+    neogfx::mouse_cursor color_dialog::yz_picker::mouse_cursor() const
+    {
+        point mousePos = root().mouse_position() - origin();
+        if (client_rect(false).contains(mousePos))
+            return mouse_system_cursor::Crosshair;
+        return framed_widget::mouse_cursor();
     }
 
     void color_dialog::yz_picker::select(const point& aPosition)
@@ -819,11 +835,6 @@ namespace neogfx
     void color_dialog::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         dialog::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-    }
-
-    neogfx::mouse_cursor color_dialog::mouse_cursor() const
-    {
-        return dialog::mouse_cursor();
     }
 
     void color_dialog::init()

@@ -82,9 +82,9 @@ namespace neogfx
             public:
                 cursor_widget(x_picker& aParent, type_e aType);
             public:
-                virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-                virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-                virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
+                void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+                void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+                void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
             private:
                 x_picker& iParent;
                 optional_point iDragOffset;
@@ -94,17 +94,19 @@ namespace neogfx
         public:
             scalar cursor_width() const;
         public:
-            virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-            virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+            size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+            size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         public:
-            virtual void moved();
-            virtual void resized();
+            void moved() override;
+            void resized() override;
         public:
-            virtual void paint(i_graphics_context& aGc) const;
+            void paint(i_graphics_context& aGc) const override;
         public:
-            virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-            virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-            virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
+            void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+            void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+            void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        public:
+            neogfx::mouse_cursor mouse_cursor() const override;
         public:
             using framed_widget::effective_frame_width;
         private:
@@ -124,14 +126,16 @@ namespace neogfx
         public:
             yz_picker(color_dialog& aOwner);
         public:
-            virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-            virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+            size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+            size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         public:
-            virtual void paint(i_graphics_context& aGc) const;
+            void paint(i_graphics_context& aGc) const override;
         public:
-            virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-            virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-            virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
+            void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+            void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+            void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        public:
+            neogfx::mouse_cursor mouse_cursor() const override;
         private:
             void select(const point& aPosition);
             representations color_at_position(const point& aCursorPos) const;
@@ -148,10 +152,10 @@ namespace neogfx
         public:
             color_selection(color_dialog& aOwner);
         public:
-            virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-            virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+            size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+            size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         public:
-            virtual void paint(i_graphics_context& aGc) const;
+            void paint(i_graphics_context& aGc) const override;
         private:
             color_dialog& iOwner;
         };
@@ -168,7 +172,6 @@ namespace neogfx
         void set_custom_colors(const custom_color_list& aCustomColors);
     protected:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-        neogfx::mouse_cursor mouse_cursor() const override;
     private:
         void init();
         mode_e current_mode() const;
