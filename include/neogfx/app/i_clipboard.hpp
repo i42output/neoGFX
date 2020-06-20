@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
+#include <neogfx/gfx/image.hpp>
 
 namespace neogfx
 {
@@ -48,6 +49,7 @@ namespace neogfx
     class i_clipboard
     {
     public:
+        declare_event(updated)
         declare_event(sink_activated)
         declare_event(sink_deactivated)
     public:
@@ -62,6 +64,9 @@ namespace neogfx
         virtual bool has_text() const = 0;
         virtual std::string text() const = 0;
         virtual void set_text(const std::string& aText) = 0;
+        virtual bool has_image() const = 0;
+        virtual neogfx::image image() const = 0;
+        virtual void set_image(const neogfx::image& aImage) = 0;
     public:
         virtual void cut() = 0;
         virtual void copy() = 0;

@@ -61,6 +61,7 @@ namespace neogfx
         ~scrollable_widget();
         scrollable_widget(const scrollable_widget&) = delete;
     public:
+        point scroll_position() const;
         void scroll_to(i_widget& aChild);
     public:
         void layout_items_started() override;

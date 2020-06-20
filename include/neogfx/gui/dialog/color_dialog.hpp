@@ -121,15 +121,13 @@ namespace neogfx
             cursor_widget iLeftCursor;
             cursor_widget iRightCursor;
         };
-        class yz_picker : public framed_widget
+        class yz_picker : public scrollable_widget
         {
         public:
             yz_picker(color_dialog& aOwner);
         public:
-            size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-            size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        public:
-            void paint(i_graphics_context& aGc) const override;
+            void set_image(image&& aImage);
+            void clear_image();
         public:
             void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
             void mouse_button_released(mouse_button aButton, const point& aPosition) override;
@@ -140,12 +138,16 @@ namespace neogfx
             void select(const point& aPosition);
             representations color_at_position(const point& aCursorPos) const;
             point current_cursor_position() const;
+            void update_texture();
         private:
             color_dialog& iOwner;
+            vertical_layout iLayout;
+            std::optional<image> iImage;
             mutable std::array<std::array<std::array<uint8_t, 4>, 256>, 256> iPixels;
+            image_widget iCanvas;
             mutable texture iTexture;
-            mutable bool iUpdateTexture;
             bool iTracking;
+            std::optional<point> iCursorPosition;
         };
         class color_selection : public framed_widget
         {
@@ -205,6 +207,7 @@ namespace neogfx
         vertical_spacer iSpacer;
         group_box iCustomColorsGroup;
         grid_layout iCustomColorsGrid;
+        horizontal_spacer iSpacer2;
         yz_picker iYZPicker;
         x_picker iXPicker;
         std::pair<radio_button, double_spin_box> iH;

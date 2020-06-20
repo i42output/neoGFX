@@ -146,7 +146,7 @@ namespace neogfx
                         else
                         {
                             ::CloseClipboard();
-                            throw failed_to_set_clipboard_data();
+                            throw failed_to_get_clipboard_data();
                         }
                         ::CloseClipboard();
                     }
@@ -172,6 +172,79 @@ namespace neogfx
                         }
                         ::EmptyClipboard();
                         if (!SetClipboardData(CF_UNICODETEXT, hMem))
+                        {
+                            ::CloseClipboard();
+                            throw failed_to_set_clipboard_data();
+                        }
+                    }
+                    ::CloseClipboard();
+                }
+                else
+                    throw failed_to_open_clipboard();
+            }
+            bool has_image() const override
+            {
+                return ::IsClipboardFormatAvailable(CF_DIB);
+            }
+            neogfx::image image() const override
+            {
+                neogfx::image result{ 1.0, texture_sampling::Nearest };
+                if (::IsClipboardFormatAvailable(CF_DIB))
+                {
+                    if (::OpenClipboard(NULL))
+                    {
+                        auto const hMem = GetClipboardData(CF_DIB);
+                        if (hMem)
+                        {
+                            // todo: this is a naive implementation not yet supporting all DIB formats...
+                            auto const& bitmapInfo = *reinterpret_cast<BITMAPINFO const*>(::GlobalLock(hMem));
+                            result.resize(basic_size<LONG>{ bitmapInfo.bmiHeader.biWidth, std::abs(bitmapInfo.bmiHeader.biHeight) });
+                            int32_t const cx = static_cast<int32_t>(result.extents().cx);
+                            int32_t const cy = static_cast<int32_t>(result.extents().cy);
+                            auto const memStart = reinterpret_cast<RGBQUAD const*>(reinterpret_cast<std::byte const*>(&bitmapInfo) + 
+                                bitmapInfo.bmiHeader.biSize) + 3;
+                            for (int32_t y = 0; y < cy; ++y)
+                            {
+                                auto src = memStart + (bitmapInfo.bmiHeader.biHeight >= 0 ? (cy - y - 1) * cx : y * cx);
+                                auto dst = static_cast<std::array<uint8_t, 4>*>(result.data()) + y * cx;
+                                for (int32_t x = 0; x < cx; ++x)
+                                {
+                                    *dst++ = { src->rgbRed, src->rgbGreen, src->rgbBlue, 0xFF };
+                                    ++src;
+                                }
+                            }
+                            ::GlobalUnlock(hMem);
+                        }
+                        else
+                        {
+                            ::CloseClipboard();
+                            throw failed_to_get_clipboard_data();
+                        }
+                        ::CloseClipboard();
+                    }
+                    else
+                        throw failed_to_open_clipboard();
+                }
+                return std::move(result);
+            }
+            void set_image(const neogfx::image& aImage) override
+            {
+                throw unsupported_clipboard_operation(); // todo
+                if (::OpenClipboard(NULL))
+                {
+                    auto const src = static_cast<std::byte const*>(aImage.cdata());
+                    auto const hDIB = nullptr; // todo
+                    auto const hMem = ::GlobalAlloc(GMEM_MOVEABLE, ::GlobalSize(hDIB));
+                    if (hMem)
+                    {
+                        auto dst = reinterpret_cast<std::byte*>(::GlobalLock(hMem));
+                        if (dst)
+                        {
+                            dst = std::copy(src, src + aImage.size(), dst);
+                            ::GlobalUnlock(hMem);
+                        }
+                        ::EmptyClipboard();
+                        if (!SetClipboardData(CF_DIB, hMem))
                         {
                             ::CloseClipboard();
                             throw failed_to_set_clipboard_data();

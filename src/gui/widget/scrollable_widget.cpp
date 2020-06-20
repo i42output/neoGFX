@@ -58,6 +58,11 @@ namespace neogfx
     {
     }
 
+    point scrollable_widget::scroll_position() const
+    {
+        return units_converter(*this).from_device_units(point(static_cast<coordinate>(horizontal_scrollbar().position()), static_cast<coordinate>(vertical_scrollbar().position())));
+    }
+
     void scrollable_widget::scroll_to(i_widget& aChild)
     {
         (void)aChild;
@@ -372,7 +377,7 @@ namespace neogfx
     {
         if (!iIgnoreScrollbarUpdates)
         {
-            point scrollPosition = units_converter(*this).from_device_units(point(static_cast<coordinate>(horizontal_scrollbar().position()), static_cast<coordinate>(vertical_scrollbar().position())));
+            point scrollPosition = scroll_position();
             if (iOldScrollPosition != scrollPosition)
             {
                 for (auto& c : children())
@@ -500,9 +505,9 @@ namespace neogfx
                     if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
                         continue;
                     if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                        max.x = std::max(max.x, units_converter(*c).to_device_units(c->position().x + c->extents().cx));
+                        max.x = std::max(max.x, units_converter(*c).to_device_units(c->position().x + c->extents().cx) - 1.0);
                     if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                        max.y = std::max(max.y, units_converter(*c).to_device_units(c->position().y + c->extents().cy));
+                        max.y = std::max(max.y, units_converter(*c).to_device_units(c->position().y + c->extents().cy) - 1.0);
                 }
                 if (has_layout())
                 {

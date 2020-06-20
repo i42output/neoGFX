@@ -29,25 +29,29 @@ namespace neogfx
     class clipboard : public i_clipboard
     {
     public:
+        define_declared_event(Updated, updated)
         define_declared_event(SinkActivated, sink_activated)
         define_declared_event(SinkDeactivated, sink_deactivated)
     public:
         clipboard(i_native_clipboard& aSystemClipboard);
     public:
-        virtual bool sink_active() const;
-        virtual i_clipboard_sink& active_sink();
-        virtual void activate(i_clipboard_sink& aSink);
-        virtual void deactivate(i_clipboard_sink& aSink);
+        bool sink_active() const override;
+        i_clipboard_sink& active_sink() override;
+        void activate(i_clipboard_sink& aSink) override;
+        void deactivate(i_clipboard_sink& aSink) override;
     public:
-        virtual bool has_text() const;
-        virtual std::string text() const;
-        virtual void set_text(const std::string& aText);
+        bool has_text() const override;
+        std::string text() const override;
+        void set_text(const std::string& aText) override;
+        bool has_image() const override;
+        neogfx::image image() const override;
+        void set_image(const neogfx::image& aImage) override;
     public:
-        virtual void cut();
-        virtual void copy();
-        virtual void paste();
-        virtual void delete_selected();
-        virtual void select_all();
+        void cut() override;
+        void copy() override;
+        void paste() override;
+        void delete_selected() override;
+        void select_all() override;
     private:
         i_native_clipboard& iSystemClipboard;
         i_clipboard_sink* iActiveSink;

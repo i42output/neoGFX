@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/dialog/color_dialog.hpp>
 
@@ -230,6 +231,11 @@ namespace neogfx
         {
             update_cursors();
             update();
+        });
+        iSink += VisibilityChanged([this]()
+        {
+            iLeftCursor.show(visible());
+            iRightCursor.show(visible());
         });
         update_cursors();
     }
@@ -461,61 +467,46 @@ namespace neogfx
     }
 
     color_dialog::yz_picker::yz_picker(color_dialog& aOwner) :
-        framed_widget(aOwner.iRightTopLayout), iOwner(aOwner), iTexture{ image{ size{256, 256}, color::Black } }, iUpdateTexture{ true }, iTracking { false }
+        scrollable_widget(aOwner.iRightTopLayout), iOwner(aOwner), iLayout{ *this }, iCanvas{ iLayout }, iTexture{ image{ size{256, 256}, color::Black } }, iTracking{ false }
     {
+        iCanvas.set_image(iTexture);
+        set_fixed_size(size{ 256.0_dip, 256.0_dip } + size{ effective_frame_width() * 2.0 });
+        iLayout.set_padding(neogfx::padding{});
         set_padding(neogfx::padding{});
         iOwner.SelectionChanged([this]
         {
-            iUpdateTexture = true;
-            update();
+            update_texture();
+        });
+        update_texture();
+        iCanvas.Painted([this](i_graphics_context& aGc)
+        {
+            point cursor = dip(current_cursor_position());
+            aGc.fill_circle(cursor, 4.0, iOwner.selected_color());
+            aGc.draw_circle(cursor, 4.0, pen{ iOwner.selected_color().light(0x80) ? color::Black : color::White });
         });
     }
 
-    size color_dialog::yz_picker::minimum_size(const optional_size& aAvailableSpace) const
+    void color_dialog::yz_picker::set_image(image&& aImage)
     {
-        if (has_minimum_size())
-            return framed_widget::minimum_size(aAvailableSpace);
-        return framed_widget::minimum_size(aAvailableSpace) + size{ 256_dip, 256_dip };
+        iImage.emplace(std::move(aImage));
+        iCanvas.set_image(*iImage);
+        iOwner.iXPicker.hide();
+        update();
     }
 
-    size color_dialog::yz_picker::maximum_size(const optional_size& aAvailableSpace) const
+    void color_dialog::yz_picker::clear_image()
     {
-        if (has_maximum_size())
-            return framed_widget::maximum_size(aAvailableSpace);
-        return minimum_size();
-    }
-
-    void color_dialog::yz_picker::paint(i_graphics_context& aGc) const
-    {
-        framed_widget::paint(aGc);
-        rect cr = client_rect(false);
-        if (iUpdateTexture)
-        {
-            iUpdateTexture = false;
-            for (uint32_t y = 0; y < 256; ++y)
-            {
-                for (uint32_t z = 0; z < 256; ++z)
-                {
-                    auto r = color_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
-                    color rgbColor = (std::holds_alternative<hsv_color>(r) ? static_variant_cast<const hsv_color&>(r).to_rgb() : static_variant_cast<const color&>(r));
-                    iPixels[z][y][0] = rgbColor.red();
-                    iPixels[z][y][1] = rgbColor.green();
-                    iPixels[z][y][2] = rgbColor.blue();
-                    iPixels[z][y][3] = 255; // alpha
-                }
-            }
-            iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
-        }
-        aGc.draw_texture(rect{ cr.top_left(), size{ 256.0_dip, 256.0_dip } }, iTexture);
-        point cursor = dip(current_cursor_position());
-        aGc.fill_circle(cr.top_left() + cursor, 4.0, iOwner.selected_color());
-        aGc.draw_circle(cr.top_left() + cursor, 4.0, pen{ iOwner.selected_color().light(0x80) ? color::Black : color::White });
+        iImage.reset();
+        iCanvas.set_image(iTexture);
+        iCursorPosition.reset();
+        iOwner.iXPicker.show();
+        update();
     }
 
     void color_dialog::yz_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (aButton == mouse_button::Left)
+        scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             select(aPosition - client_rect(false).top_left());
             iTracking = true;
@@ -524,13 +515,14 @@ namespace neogfx
 
     void color_dialog::yz_picker::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        framed_widget::mouse_button_released(aButton, aPosition);
+        scrollable_widget::mouse_button_released(aButton, aPosition);
         if (!capturing())
             iTracking = false;
     }
 
     void color_dialog::yz_picker::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
+        scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
         if (iTracking)
             select(aPosition - client_rect(false).top_left());
     }
@@ -540,18 +532,21 @@ namespace neogfx
         point mousePos = root().mouse_position() - origin();
         if (client_rect(false).contains(mousePos))
             return mouse_system_cursor::Crosshair;
-        return framed_widget::mouse_cursor();
+        return scrollable_widget::mouse_cursor();
     }
 
     void color_dialog::yz_picker::select(const point& aPosition)
     {
+        if (iImage)
+            iCursorPosition = aPosition;
         iOwner.select_color(color_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
-        iUpdateTexture = false;
     }
 
     color_dialog::representations color_dialog::yz_picker::color_at_position(const point& aCursorPos) const
     {
         point pos{ std::max(std::min(aCursorPos.x, 255.0), 0.0), std::max(std::min(aCursorPos.y, 255.0), 0.0) };
+        if (iImage)
+            return iImage->get_pixel(pos + scroll_position());
         switch (iOwner.current_channel())
         {
         case ChannelHue:
@@ -624,6 +619,8 @@ namespace neogfx
 
     point color_dialog::yz_picker::current_cursor_position() const
     {
+        if (iCursorPosition)
+            return *iCursorPosition;
         switch (iOwner.current_channel())
         {
         case ChannelHue:
@@ -678,7 +675,25 @@ namespace neogfx
             return point{};
         }
     }
-    
+
+    void color_dialog::yz_picker::update_texture()
+    {
+        for (uint32_t y = 0; y < 256; ++y)
+        {
+            for (uint32_t z = 0; z < 256; ++z)
+            {
+                auto r = color_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
+                color rgbColor = (std::holds_alternative<hsv_color>(r) ? static_variant_cast<const hsv_color&>(r).to_rgb() : static_variant_cast<const color&>(r));
+                iPixels[z][y][0] = rgbColor.red();
+                iPixels[z][y][1] = rgbColor.green();
+                iPixels[z][y][2] = rgbColor.blue();
+                iPixels[z][y][3] = 255; // alpha
+            }
+        }
+        iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
+        update();
+    }
+
     color_dialog::color_selection::color_selection(color_dialog& aOwner) :
         framed_widget(aOwner.iRightBottomLayout), iOwner(aOwner)
     {
@@ -740,6 +755,7 @@ namespace neogfx
         iSpacer{ iLeftLayout },
         iCustomColorsGroup{ iLeftLayout, "&Custom colors"_t },
         iCustomColorsGrid{ iCustomColorsGroup.item_layout() },
+        iSpacer2{ iRightTopLayout },
         iYZPicker{ *this },
         iXPicker{ *this },
         iH{ client_widget(), client_widget() },
@@ -777,6 +793,7 @@ namespace neogfx
         iSpacer{ iLeftLayout },
         iCustomColorsGroup{ iLeftLayout, "&Custom colors"_t },
         iCustomColorsGrid{ iCustomColorsGroup.item_layout() },
+        iSpacer2{ iRightTopLayout },
         iYZPicker{ *this },
         iXPicker{ *this },
         iH{ client_widget(), client_widget() },
@@ -874,13 +891,24 @@ namespace neogfx
         iRightBottomLayout.set_spacing(standardSpacing / 2.0);
         iChannelLayout.set_padding(neogfx::padding{});
         iChannelLayout.set_spacing(standardSpacing / 2.0);
+        iScreenPicker.set_checkable();
         iScreenPicker.set_size_policy(size_constraint::Minimum);
         iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.png" });
         iScreenPicker.image_widget().set_fixed_size(size{ 16_dip });
-        iScreenPicker.enable(false);
-        iSink += iScreenPicker.Clicked([&, this]()
+        iScreenPicker.enable(service<i_clipboard>().has_image());
+        iSink += service<i_clipboard>().updated([this]()
         {
-            // todo: capture screen as texture and place in yz picker.
+            iScreenPicker.enable(service<i_clipboard>().has_image());
+        });
+        iSink += iScreenPicker.Checked([&, this]()
+        {
+            iScreenPicker.set_image(image{ ":/neogfx/resources/icons/colour.png" });
+            iYZPicker.set_image(service<i_clipboard>().image());
+        });
+        iSink += iScreenPicker.Unchecked([&, this]()
+        {
+            iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.png" });
+            iYZPicker.clear_image();
         });
         iH.first.set_size_policy(size_constraint::Minimum); iH.first.label().set_text("&Hue:"_t); iH.second.set_size_policy(size_constraint::Minimum); iH.second.set_text_box_size_hint(size_hint{ "999.9" }); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
         iS.first.set_size_policy(size_constraint::Minimum); iS.first.label().set_text("&Sat:"_t); iS.second.set_size_policy(size_constraint::Minimum); iS.second.set_text_box_size_hint(size_hint{ "999.9" }); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);

@@ -112,6 +112,18 @@ namespace neogfx
         }
     }
 
+    image::image(image&& aOther) :
+        iResource{ std::move(aOther.iResource) },
+        iUri{ std::move(aOther.iUri) },
+        iError{ std::move(aOther.iError) },
+        iDpiScaleFactor{ std::move(aOther.iDpiScaleFactor) },
+        iColorFormat{ std::move(aOther.iColorFormat) },
+        iData{ std::move(aOther.iData) },
+        iSampling{ std::move(aOther.iSampling) },
+        iSize{ std::move(aOther.iSize) }
+    {
+    }
+
     image::~image()
     {
     }

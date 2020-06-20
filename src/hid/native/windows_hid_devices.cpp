@@ -24,6 +24,7 @@
 #include <initguid.h>
 #include <Usbiodef.h>
 #include <hidclass.h>
+#include <neogfx/app/i_clipboard.hpp>
 #include "windows_hid_devices.hpp"
 
 namespace neogfx
@@ -77,8 +78,10 @@ namespace neogfx
                     break;
                 }
                 return TRUE;
+            case WM_CLIPBOARDUPDATE:
+                service<i_clipboard>().updated().trigger();
+                break;
             }
-
             return DefWindowProc(hwnd, message, wParam, lParam);
         }
 
@@ -99,6 +102,7 @@ namespace neogfx
             devBroadcast.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
             devBroadcast.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
             iHidHelperNotifyHandle = ::RegisterDeviceNotification(iHidHelperWindow, &devBroadcast, DEVICE_NOTIFY_WINDOW_HANDLE | DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
+            ::AddClipboardFormatListener(iHidHelperWindow);
         }
 
         hid_devices::~hid_devices()

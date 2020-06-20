@@ -70,6 +70,21 @@ namespace neogfx
         iSystemClipboard.set_text(aText);
     }
 
+    bool clipboard::has_image() const
+    {
+        return iSystemClipboard.has_image();
+    }
+
+    neogfx::image clipboard::image() const
+    {
+        return iSystemClipboard.image();
+    }
+
+    void clipboard::set_image(const neogfx::image& aImage)
+    {
+        iSystemClipboard.set_image(aImage);
+    }
+
     void clipboard::cut()
     {
         if (sink_active())

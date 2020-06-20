@@ -48,6 +48,7 @@ namespace neogfx
         image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
         image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
         image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(image&& aOther);
         ~image();
     public:
         bool available() const override;
