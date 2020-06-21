@@ -177,11 +177,15 @@ namespace neogfx
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
     private:
         void init();
+        scalar color_space_coefficient() const;
+        void change_color_space(color_space aColorSpace);
         mode_e current_mode() const;
         channel_e current_channel() const;
         void set_current_channel(channel_e aChannel);
         hsv_color selected_color_as_hsv(bool aChangeRepresentation) const;
+        vec4 selected_color_in_color_space() const;
         void select_color(const representations& aColor, const i_widget& aUpdatingWidget);
+        void select_color_in_color_space(const vec4& aColor, const i_widget& aUpdatingWidget);
         custom_color_list::iterator current_custom_color() const;
         void set_current_custom_color(custom_color_list::iterator aCustomColor);
         void update_widgets(const i_widget& aUpdatingWidget);
@@ -214,7 +218,8 @@ namespace neogfx
         x_picker iXPicker;
         horizontal_layout iModelLayout;
         horizontal_spacer iSpacer3;
-        drop_list iColorSpace;
+        std::optional<color_space> iColorSpace;
+        drop_list iColorSpaceSelector;
         std::pair<radio_button, double_spin_box> iH;
         std::pair<radio_button, double_spin_box> iS;
         std::pair<radio_button, double_spin_box> iV;

@@ -171,7 +171,7 @@ namespace neogfx
         view_component newRed = std::numeric_limits<view_component>::max() - red() < aDelta ? std::numeric_limits<view_component>::max() : red() + aDelta;
         view_component newGreen = std::numeric_limits<view_component>::max() - green() < aDelta ? std::numeric_limits<view_component>::max() : green() + aDelta;
         view_component newBlue = std::numeric_limits<view_component>::max() - blue() < aDelta ? std::numeric_limits<view_component>::max() : blue() + aDelta;
-        *this = basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>(newRed, newGreen, newBlue, alpha());
+        *this = basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>{ newRed, newGreen, newBlue, alpha() };
         return static_cast<return_type&>(*this);
     }
 
@@ -181,14 +181,14 @@ namespace neogfx
         view_component newRed = red() < aDelta ? std::numeric_limits<view_component>::min() : red() - aDelta;
         view_component newGreen = green() < aDelta ? std::numeric_limits<view_component>::min() : green() - aDelta;
         view_component newBlue = blue() < aDelta ? std::numeric_limits<view_component>::min() : blue() - aDelta;
-        *this = basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>(newRed, newGreen, newBlue, alpha());
+        *this = basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>{ newRed, newGreen, newBlue, alpha() };
         return static_cast<return_type&>(*this);
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::operator~() const
     {
-        return basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>(static_cast<view_component>(~red() & 0xFF), static_cast<view_component>(~green() & 0xFF), static_cast<view_component>(~blue() & 0xFF), alpha());
+        return basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>{ static_cast<view_component>(~red() & 0xFF), static_cast<view_component>(~green() & 0xFF), static_cast<view_component>(~blue() & 0xFF), alpha() };
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
@@ -220,23 +220,25 @@ namespace neogfx
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type operator+(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aLeft, typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::view_component aRight)
     {
-        typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type ret = aLeft;
-        ret += aRight;
-        return ret;
+        typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type result{ aLeft };
+        result += aRight;
+        return result;
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type operator-(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aLeft, typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::view_component aRight)
     {
-        typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type ret = aLeft;
-        ret -= aRight;
-        return ret;
+        typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type result{ aLeft };
+        result -= aRight;
+        return result;
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type operator*(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aLeft, scalar aCoefficient)
     {
-        return aLeft *= vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 };
+        typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type result{ aLeft };
+        result *= vec4 { aCoefficient, aCoefficient, aCoefficient, aCoefficient };
+        return result;
     }
 
     template <typename Elem, typename Traits, color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>

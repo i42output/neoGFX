@@ -32,7 +32,7 @@ namespace neogfx
     class basic_item_selection_model : public object<i_item_selection_model>
     {
     public:
-        define_declared_event(CurrentIndexChanged, current_index_changed, const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+        define_declared_event(CurrentIndexChanged, current_index_changed, const optional_item_presentation_model_index& /* aCurrentIndex */, const optional_item_presentation_model_index& /* aPreviousIndex */)
         define_declared_event(SelectionChanged, selection_changed, const item_selection&, const item_selection&)
         define_declared_event(PresentationModelAdded, presentation_model_added, i_item_presentation_model&)
         define_declared_event(PresentationModelChanged, presentation_model_changed, i_item_presentation_model&, i_item_presentation_model&)

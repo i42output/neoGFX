@@ -201,7 +201,7 @@ namespace neogfx
     class i_item_selection_model
     {
     public:
-        declare_event(current_index_changed, const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+        declare_event(current_index_changed, const optional_item_presentation_model_index& /* aCurrentIndex */, const optional_item_presentation_model_index& /* aPreviousIndex */)
         declare_event(selection_changed, const item_selection&, const item_selection&)
         declare_event(presentation_model_added, i_item_presentation_model&)
         declare_event(presentation_model_changed, i_item_presentation_model&, i_item_presentation_model&)

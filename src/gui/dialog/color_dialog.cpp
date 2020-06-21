@@ -761,7 +761,7 @@ namespace neogfx
         iXPicker{ *this },
         iModelLayout{ client_layout() },
         iSpacer3{ iModelLayout },
-        iColorSpace{ iModelLayout },
+        iColorSpaceSelector{ iModelLayout },
         iH{ client_widget(), client_widget() },
         iS{ client_widget(), client_widget() },
         iV{ client_widget(), client_widget() },
@@ -803,7 +803,7 @@ namespace neogfx
         iXPicker{ *this },
         iModelLayout{ client_layout() },
         iSpacer3{ iModelLayout },
-        iColorSpace{ iModelLayout },
+        iColorSpaceSelector{ iModelLayout },
         iH{ client_widget(), client_widget() },
         iS{ client_widget(), client_widget() },
         iV{ client_widget(), client_widget() },
@@ -832,6 +832,19 @@ namespace neogfx
             return static_variant_cast<const color&>(iSelectedColor);
         else
             return static_variant_cast<const hsv_color&>(iSelectedColor).to_rgb<color>();
+    }
+
+    vec4 color_dialog::selected_color_in_color_space() const
+    {
+        auto const selectedColor = selected_color();
+        switch (*iColorSpace)
+        {
+        case color_space::LinearRGB:
+            return selectedColor.to_linear();
+        case color_space::sRGB:
+            return selectedColor;
+        }
+        return {};
     }
 
     hsv_color color_dialog::selected_color_as_hsv() const
@@ -870,10 +883,14 @@ namespace neogfx
             model.insert_item(model.end(), color_space::LinearRGB, "Linear RGB");
             model.insert_item(model.end(), color_space::sRGB, "sRGB");
         }
-        iColorSpace.set_model(model);
-        iColorSpace.selection_model().set_current_index(static_cast<std::underlying_type_t<color_space>>(color_space::sRGB));
-        iColorSpace.accept_selection();
-        iColorSpace.enable(false); // todo
+        change_color_space(color_space::sRGB);
+        iColorSpaceSelector.set_model(model);
+        iColorSpaceSelector.selection_model().set_current_index(static_cast<std::underlying_type_t<color_space>>(color_space::sRGB));
+        iColorSpaceSelector.accept_selection();
+        iSink += iColorSpaceSelector.selection_model().current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
+        {
+            change_color_space(static_cast<color_space>(aCurrentIndex->row()));
+        });
 
         scoped_units su{ static_cast<framed_widget&>(*this), units::Pixels };
         static const std::set<color> sBasicColors
@@ -932,10 +949,10 @@ namespace neogfx
         iH.first.set_size_policy(size_constraint::Minimum); iH.first.label().set_text("&Hue:"_t); iH.second.set_size_policy(size_constraint::Minimum); iH.second.set_text_box_size_hint(size_hint{ "999.9" }); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
         iS.first.set_size_policy(size_constraint::Minimum); iS.first.label().set_text("&Sat:"_t); iS.second.set_size_policy(size_constraint::Minimum); iS.second.set_text_box_size_hint(size_hint{ "999.9" }); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
         iV.first.set_size_policy(size_constraint::Minimum); iV.first.label().set_text("&Val:"_t); iV.second.set_size_policy(size_constraint::Minimum); iV.second.set_text_box_size_hint(size_hint{ "999.9" }); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
-        iR.first.set_size_policy(size_constraint::Minimum); iR.first.label().set_text("&Red:"_t); iR.second.set_size_policy(size_constraint::Minimum); iR.second.set_text_box_size_hint(size_hint{ "255" }); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
-        iG.first.set_size_policy(size_constraint::Minimum); iG.first.label().set_text("&Green:"_t); iG.second.set_size_policy(size_constraint::Minimum); iG.second.set_text_box_size_hint(size_hint{ "255" }); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
-        iB.first.set_size_policy(size_constraint::Minimum); iB.first.label().set_text("&Blue:"_t); iB.second.set_size_policy(size_constraint::Minimum); iB.second.set_text_box_size_hint(size_hint{ "255" }); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
-        iA.first.set_size_policy(size_constraint::Minimum); iA.first.label().set_text("&Alpha:"_t); iA.second.set_size_policy(size_constraint::Minimum); iA.second.set_text_box_size_hint(size_hint{ "255" }); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
+        iR.first.set_size_policy(size_constraint::Minimum); iR.first.label().set_text("&Red:"_t); iR.second.set_size_policy(size_constraint::Minimum); 
+        iG.first.set_size_policy(size_constraint::Minimum); iG.first.label().set_text("&Green:"_t); iG.second.set_size_policy(size_constraint::Minimum); 
+        iB.first.set_size_policy(size_constraint::Minimum); iB.first.label().set_text("&Blue:"_t); iB.second.set_size_policy(size_constraint::Minimum); 
+        iA.first.set_size_policy(size_constraint::Minimum); iA.first.label().set_text("&Alpha:"_t); iA.second.set_size_policy(size_constraint::Minimum); 
         iChannelLayout.set_dimensions(5, 4);
         iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 0 }, grid_layout::cell_coordinates{ 3, 0 });
         iChannelLayout.add(iModelLayout);
@@ -966,19 +983,25 @@ namespace neogfx
         iSink += iH.second.ValueChanged([this]() { if (iUpdatingWidgets) return; auto hsv = selected_color_as_hsv(); hsv.set_hue(iH.second.value()); select_color(hsv, iH.second); });
         iSink += iS.second.ValueChanged([this]() { if (iUpdatingWidgets) return; auto hsv = selected_color_as_hsv(); hsv.set_saturation(iS.second.value() / 100.0); select_color(hsv, iS.second); });
         iSink += iV.second.ValueChanged([this]() { if (iUpdatingWidgets) return; auto hsv = selected_color_as_hsv(); hsv.set_value(iV.second.value() / 100.0); select_color(hsv, iV.second); });
-        iSink += iR.second.ValueChanged([this]() { if (iUpdatingWidgets) return; select_color(selected_color().with_red(static_cast<color::component>(iR.second.value())), iR.second); });
-        iSink += iG.second.ValueChanged([this]() { if (iUpdatingWidgets) return; select_color(selected_color().with_green(static_cast<color::component>(iG.second.value())), iG.second); });
-        iSink += iB.second.ValueChanged([this]() { if (iUpdatingWidgets) return; select_color(selected_color().with_blue(static_cast<color::component>(iB.second.value())), iB.second); });
-        iSink += iA.second.ValueChanged([this]() 
+        iSink += iR.second.ValueChanged([this]() { if (iUpdatingWidgets) return; auto rgb = selected_color_in_color_space(); rgb[0] = iR.second.value() / color_space_coefficient(); select_color_in_color_space(rgb, iR.second); });
+        iSink += iG.second.ValueChanged([this]() { if (iUpdatingWidgets) return; auto rgb = selected_color_in_color_space(); rgb[1] = iG.second.value() / color_space_coefficient(); select_color_in_color_space(rgb, iG.second); });
+        iSink += iB.second.ValueChanged([this]() { if (iUpdatingWidgets) return; auto rgb = selected_color_in_color_space(); rgb[2] = iB.second.value() / color_space_coefficient(); select_color_in_color_space(rgb, iB.second); });
+        iSink += iA.second.ValueChanged([this]()
         { 
             if (iUpdatingWidgets) 
                 return;
             if (std::holds_alternative<color>(iSelectedColor))
-                select_color(selected_color().with_alpha(static_cast<color::component>(iA.second.value())), iA.second); 
+            {
+                auto rgb = selected_color_in_color_space(); 
+                rgb[3] = iA.second.value() / color_space_coefficient();
+                select_color_in_color_space(rgb, iA.second);
+            }            
             else
             {
+                auto rgb = selected_color_in_color_space();
+                rgb[3] = iA.second.value() / color_space_coefficient();
+                select_color_in_color_space(rgb, iA.second);
                 auto hsv = selected_color_as_hsv();
-                hsv.set_alpha(iA.second.value() / 255.0);
                 select_color(hsv, iA.second);
             }
         });
@@ -999,6 +1022,48 @@ namespace neogfx
         layout().invalidate();
         center_on_parent(true);
         set_ready_to_render(true);
+    }
+
+    scalar color_dialog::color_space_coefficient() const
+    {
+        switch (*iColorSpace)
+        {
+        case color_space::LinearRGB:
+            return 1.0;
+        case color_space::sRGB:
+            return 255.0;
+        default:
+            return 1.0;
+        }
+    }
+
+    void color_dialog::change_color_space(color_space aColorSpace)
+    {
+        if (iColorSpace != aColorSpace)
+        {
+            iColorSpace = aColorSpace;
+            {
+                neolib::scoped_flag sf{ iUpdatingWidgets };
+                switch (*iColorSpace)
+                {
+                case color_space::LinearRGB:
+                    iR.second.set_text_box_size_hint(size_hint{ "8.888" }); iR.second.set_format("%.3f"); iR.second.set_minimum(0.0); iR.second.set_maximum(1.0); iR.second.set_step(0.001);
+                    iG.second.set_text_box_size_hint(size_hint{ "8.888" }); iG.second.set_format("%.3f"); iG.second.set_minimum(0.0); iG.second.set_maximum(1.0); iG.second.set_step(0.001);
+                    iB.second.set_text_box_size_hint(size_hint{ "8.888" }); iB.second.set_format("%.3f"); iB.second.set_minimum(0.0); iB.second.set_maximum(1.0); iB.second.set_step(0.001);
+                    iA.second.set_text_box_size_hint(size_hint{ "8.888" }); iA.second.set_format("%.3f"); iA.second.set_minimum(0.0); iA.second.set_maximum(1.0); iA.second.set_step(0.001);
+                    iRgb.hide();
+                    break;
+                case color_space::sRGB:
+                    iR.second.set_text_box_size_hint(size_hint{ "888" }); iR.second.set_format("%.0f"); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
+                    iG.second.set_text_box_size_hint(size_hint{ "888" }); iG.second.set_format("%.0f"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
+                    iB.second.set_text_box_size_hint(size_hint{ "888" }); iB.second.set_format("%.0f"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
+                    iA.second.set_text_box_size_hint(size_hint{ "888" }); iA.second.set_format("%.0f"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
+                    iRgb.show();
+                    break;
+                }
+            }
+            update_widgets(*this);
+        }
     }
 
     color_dialog::mode_e color_dialog::current_mode() const
@@ -1049,6 +1114,23 @@ namespace neogfx
         }
     }
 
+    void color_dialog::select_color_in_color_space(const vec4& aColor, const i_widget& aUpdatingWidget)
+    {
+        if (iUpdatingWidgets)
+            return;
+        color newColor;
+        switch (*iColorSpace)
+        {
+        case color_space::LinearRGB:
+            newColor = color::from_linear(linear_color{ aColor });
+            break;
+        case color_space::sRGB:
+            newColor = color{ aColor };
+            break;
+        }
+        select_color(newColor, aUpdatingWidget);
+    }
+
     color_dialog::custom_color_list::iterator color_dialog::current_custom_color() const
     {
         return iCurrentCustomColor;
@@ -1067,7 +1149,7 @@ namespace neogfx
     {
         if (iUpdatingWidgets)
             return;
-        iUpdatingWidgets = true;
+        neolib::scoped_flag sf{ iUpdatingWidgets };
         if (&aUpdatingWidget != &iH.second)
             iH.second.set_value(static_cast<int32_t>(selected_color_as_hsv(false).hue()));
         if (&aUpdatingWidget != &iS.second)
@@ -1075,15 +1157,14 @@ namespace neogfx
         if (&aUpdatingWidget != &iV.second)
             iV.second.set_value(static_cast<int32_t>(selected_color_as_hsv(false).value() * 100.0));
         if (&aUpdatingWidget != &iR.second)
-            iR.second.set_value(selected_color().red());
+            iR.second.set_value(selected_color_in_color_space()[0] * color_space_coefficient());
         if (&aUpdatingWidget != &iG.second)
-            iG.second.set_value(selected_color().green());
+            iG.second.set_value(selected_color_in_color_space()[1] * color_space_coefficient());
         if (&aUpdatingWidget != &iB.second)
-            iB.second.set_value(selected_color().blue());
+            iB.second.set_value(selected_color_in_color_space()[2] * color_space_coefficient());
         if (&aUpdatingWidget != &iA.second)
-            iA.second.set_value(selected_color().alpha());
+            iA.second.set_value(selected_color_in_color_space()[3] * color_space_coefficient());
         if (&aUpdatingWidget != &iRgb)
             iRgb.set_text(selected_color().to_hex_string());
-        iUpdatingWidgets = false;
     }
 }
