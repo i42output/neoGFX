@@ -28,8 +28,8 @@ namespace neogfx
     {
     }
 
-    texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_color& aColor) :
-        iNativeTexture{ service<i_texture_manager>().create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColor) }
+    texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, neogfx::color_space aColorSpace, const optional_color& aColor) :
+        iNativeTexture{ service<i_texture_manager>().create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColorSpace, aColor) }
     {
     }
 
@@ -80,6 +80,13 @@ namespace neogfx
         if (is_empty())
             return 1.0;
         return native_texture()->dpi_scale_factor();
+    }
+
+    color_space texture::color_space() const
+    {
+        if (is_empty())
+            return neogfx::color_space::sRGB;
+        return native_texture()->color_space();
     }
 
     texture_sampling texture::sampling() const

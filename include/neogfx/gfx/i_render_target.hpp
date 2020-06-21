@@ -64,6 +64,7 @@ namespace neogfx
         virtual void activate_target() const = 0;
         virtual void deactivate_target() const = 0;
     public:
+        virtual neogfx::color_space color_space() const = 0;
         virtual color read_pixel(const point& aPosition) const = 0;
     public:
         virtual std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0;

@@ -46,7 +46,7 @@ namespace neogfx
         typedef T value_type;
         static constexpr texture_data_type kDataType = crack_shader_array_data_type<value_type>::DATA_TYPE;
     public:
-        opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, const optional_color& aColor = optional_color());
+        opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, neogfx::color_space aColorSpace = neogfx::color_space::sRGB, const optional_color& aColor = optional_color());
         opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA);
         ~opengl_texture();
     public:
@@ -100,11 +100,13 @@ namespace neogfx
         void activate_target() const override;
         void deactivate_target() const override;
     public:
+        neogfx::color_space color_space() const override;
         color read_pixel(const point& aPosition) const override;
     private:
         i_texture_manager& iManager;
         texture_id iId;
         dimension iDpiScaleFactor;
+        neogfx::color_space iColorSpace;
         texture_sampling iSampling;
         texture_data_format iDataFormat;
         size_u32 iSize;

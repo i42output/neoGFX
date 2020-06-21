@@ -119,6 +119,11 @@ namespace neogfx
             iFullscreenDisplaySettings = std::nullopt;
         }
 
+        color_space display::color_space() const
+        {
+            return neogfx::color_space::sRGB;
+        }
+
         color display::read_pixel(const point& aPosition) const
         {
             auto clr = ::GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));

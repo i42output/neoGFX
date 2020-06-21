@@ -81,6 +81,7 @@ namespace neogfx
         virtual bool is_render_target() const = 0;
         virtual const i_sub_texture& as_sub_texture() const = 0;
         virtual dimension dpi_scale_factor() const = 0;
+        virtual neogfx::color_space color_space() const = 0;
         virtual texture_sampling sampling() const = 0;
         virtual uint32_t samples() const = 0;
         virtual texture_data_format data_format() const = 0;

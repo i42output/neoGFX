@@ -25,6 +25,7 @@
 #include <neolib/task/thread.hpp>
 
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include "opengl_window.hpp"
@@ -126,6 +127,11 @@ namespace neogfx
             return;
         }
 //        throw not_active();
+    }
+
+    color_space opengl_window::color_space() const
+    {
+        return surface_manager().display(surface_window()).color_space();
     }
 
     color opengl_window::read_pixel(const point& aPosition) const

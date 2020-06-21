@@ -34,5 +34,7 @@ namespace neogfx
         virtual const std::string& uri() const = 0;
     public:
         virtual size extents() const = 0;
+    public:
+        using i_texture::color_space;
     };
 }

@@ -67,6 +67,11 @@ namespace neogfx
         return native_texture()->dpi_scale_factor();
     }
 
+    neogfx::color_space sub_texture::color_space() const
+    {
+        return native_texture()->color_space();
+    }
+
     texture_sampling sub_texture::sampling() const
     {
         return native_texture()->sampling();

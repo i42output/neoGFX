@@ -43,11 +43,11 @@ namespace neogfx
         struct error_parsing_image_pattern : std::logic_error { error_parsing_image_pattern() : std::logic_error("neogfx::image::error_parsing_image_pattern") {} };
         struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
     public:
-        image(dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
-        image(const neogfx::size& aSize, const color& aColor = color::Black, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
-        image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
-        image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
-        image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap);
+        image(dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(const neogfx::size& aSize, const color& aColor = color::Black, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
         image(image&& aOther);
         ~image();
     public:
@@ -64,6 +64,7 @@ namespace neogfx
         hash_digest_type hash() const override;
     public:
         dimension dpi_scale_factor() const override;
+        neogfx::color_space color_space() const override;
         neogfx::color_format color_format() const override;
         texture_sampling sampling() const override;
         texture_data_format data_format() const override;
@@ -85,6 +86,7 @@ namespace neogfx
         std::string iUri;
         std::optional<std::string> iError;
         dimension iDpiScaleFactor;
+        neogfx::color_space iColorSpace;
         neogfx::color_format iColorFormat;
         data_type iData;
         texture_sampling iSampling;

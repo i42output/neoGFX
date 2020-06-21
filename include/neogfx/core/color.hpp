@@ -31,7 +31,7 @@ namespace neogfx
 {
     enum class color_space : uint32_t
     {
-        Linear,
+        LinearRGB,
         sRGB
     };
 
@@ -216,7 +216,7 @@ namespace neogfx
         }
     };
 
-    using linear_color = basic_color<color_space::Linear, scalar>;
+    using linear_color = basic_color<color_space::LinearRGB, scalar>;
 
     class sRGB_color : public basic_color<color_space::sRGB, scalar, uint8_t, sRGB_color>
     {

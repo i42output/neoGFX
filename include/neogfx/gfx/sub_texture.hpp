@@ -41,6 +41,7 @@ namespace neogfx
         bool is_render_target() const override;
         const i_sub_texture& as_sub_texture() const override;
         dimension dpi_scale_factor() const override;
+        neogfx::color_space color_space() const override;
         texture_sampling sampling() const override;
         uint32_t samples() const override;
         texture_data_format data_format() const override;

@@ -38,6 +38,7 @@ namespace neogfx
             const video_mode& fullscreen_video_mode() const override;
             void enter_fullscreen(const video_mode& aVideoMode) override;
             void leave_fullscreen() override;
+            neogfx::color_space color_space() const override;
             color read_pixel(const point& aPosition) const override;
         private:
             void* iNativeDisplayHandle;

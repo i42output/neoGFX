@@ -75,6 +75,7 @@ namespace neogfx
         virtual neogfx::rect rect() const = 0;
         virtual neogfx::rect desktop_rect() const = 0;
         virtual window_placement default_window_placement() const = 0;
+        virtual neogfx::color_space color_space() const = 0;
         virtual color read_pixel(const point& aPosition) const = 0;
     public:
         virtual neogfx::subpixel_format subpixel_format() const = 0;

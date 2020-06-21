@@ -36,7 +36,7 @@ namespace neogfx
         // construction
     public:
         texture();
-        texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_color& aColor = optional_color());
+        texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, neogfx::color_space aColorSpace = neogfx::color_space::sRGB, const optional_color& aColor = optional_color());
         texture(const i_texture& aTexture);
         texture(const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
         texture(const i_sub_texture& aSubTexture);
@@ -48,6 +48,7 @@ namespace neogfx
         bool is_render_target() const override;
         const i_sub_texture& as_sub_texture() const override;
         dimension dpi_scale_factor() const override;
+        neogfx::color_space color_space() const override;
         texture_sampling sampling() const override;
         uint32_t samples() const override;
         texture_data_format data_format() const override;

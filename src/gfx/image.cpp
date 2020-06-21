@@ -27,16 +27,18 @@
 
 namespace neogfx
 {
-    image::image(dimension aDpiScaleFactor, texture_sampling aSampling) :
+    image::image(dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iDpiScaleFactor{ aDpiScaleFactor }, 
+        iColorSpace{ aColorSpace },
         iColorFormat{ neogfx::color_format::RGBA8 },
         iSampling{ aSampling }
     {
     }
 
-    image::image(const neogfx::size& aSize, const color& aColor, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    image::image(const neogfx::size& aSize, const color& aColor, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iDpiScaleFactor{ aDpiScaleFactor }, 
-        iColorFormat{ neogfx::color_format::RGBA8 }, 
+        iColorSpace{ aColorSpace },
+        iColorFormat{ neogfx::color_format::RGBA8 },
         iSampling{ aSampling }
     {
         resize(aSize);
@@ -45,10 +47,11 @@ namespace neogfx
                 set_pixel(point{ x, y }, aColor);
     }
 
-    image::image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    image::image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iResource{ resource_manager::instance().load_resource(aUri) },
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
+        iColorSpace{ aColorSpace },
         iColorFormat{ neogfx::color_format::RGBA8 },
         iSampling{ aSampling }
     {
@@ -56,14 +59,15 @@ namespace neogfx
             load();
     }
 
-    image::image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling) :
-        image{ std::string{}, aImagePattern, aColorMap, aDpiScaleFactor, aSampling }
+    image::image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
+        image{ std::string{}, aImagePattern, aColorMap, aDpiScaleFactor, aSampling, aColorSpace }
     {
     }
 
-    image::image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    image::image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
+        iColorSpace{ aColorSpace },
         iColorFormat{ neogfx::color_format::RGBA8 },
         iSampling{ aSampling }
     {
@@ -117,6 +121,7 @@ namespace neogfx
         iUri{ std::move(aOther.iUri) },
         iError{ std::move(aOther.iError) },
         iDpiScaleFactor{ std::move(aOther.iDpiScaleFactor) },
+        iColorSpace{ std::move(aOther.iColorSpace) },
         iColorFormat{ std::move(aOther.iColorFormat) },
         iData{ std::move(aOther.iData) },
         iSampling{ std::move(aOther.iSampling) },
@@ -199,6 +204,11 @@ namespace neogfx
     dimension image::dpi_scale_factor() const
     {
         return iDpiScaleFactor;
+    }
+
+    color_space image::color_space() const
+    {
+        return iColorSpace;
     }
 
     color_format image::color_format() const

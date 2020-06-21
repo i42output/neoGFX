@@ -87,10 +87,11 @@ namespace neogfx
     }
 
     template <typename T>
-    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, const optional_color& aColor) :
+    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, neogfx::color_space aColorSpace, const optional_color& aColor) :
         iManager{ aManager },
         iId{ aId },
         iDpiScaleFactor{ aDpiScaleFactor },
+        iColorSpace{ aColorSpace },
         iSampling{ aSampling },
         iDataFormat{ aDataFormat },
         iSize{ aExtents },
@@ -181,6 +182,7 @@ namespace neogfx
         iManager{ aManager },
         iId{ aId },
         iDpiScaleFactor{ aImage.dpi_scale_factor() },
+        iColorSpace{ aImage.color_space() },
         iSampling{ aImage.sampling() },
         iDataFormat{ aDataFormat },
         iSize{ aImage.extents() },
@@ -666,6 +668,12 @@ namespace neogfx
             return;
         }
         throw not_active();
+    }
+
+    template <typename T>
+    color_space opengl_texture<T>::color_space() const
+    {
+        return iColorSpace;
     }
 
     template <typename T>
