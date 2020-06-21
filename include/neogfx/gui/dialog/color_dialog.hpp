@@ -24,6 +24,7 @@
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
+#include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 
 namespace neogfx
@@ -201,6 +202,7 @@ namespace neogfx
         horizontal_layout iRightBottomLayout;
         color_selection iColorSelection;
         push_button iScreenPicker;
+        horizontal_spacer iSpacer0;
         grid_layout iChannelLayout;
         group_box iBasicColorsGroup;
         grid_layout iBasicColorsGrid;
@@ -210,13 +212,16 @@ namespace neogfx
         horizontal_spacer iSpacer2;
         yz_picker iYZPicker;
         x_picker iXPicker;
+        horizontal_layout iModelLayout;
+        horizontal_spacer iSpacer3;
+        drop_list iColorSpace;
         std::pair<radio_button, double_spin_box> iH;
         std::pair<radio_button, double_spin_box> iS;
         std::pair<radio_button, double_spin_box> iV;
-        std::pair<radio_button, spin_box> iR;
-        std::pair<radio_button, spin_box> iG;
-        std::pair<radio_button, spin_box> iB;
-        std::pair<radio_button, spin_box> iA;
+        std::pair<radio_button, double_spin_box> iR;
+        std::pair<radio_button, double_spin_box> iG;
+        std::pair<radio_button, double_spin_box> iB;
+        std::pair<radio_button, double_spin_box> iA;
         line_edit iRgb;
         push_button iAddToCustomColors;
     };

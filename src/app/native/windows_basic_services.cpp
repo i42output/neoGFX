@@ -230,6 +230,7 @@ namespace neogfx
             void set_image(const neogfx::image& aImage) override
             {
                 throw unsupported_clipboard_operation(); // todo
+#if 0 // todo
                 if (::OpenClipboard(NULL))
                 {
                     auto const src = static_cast<std::byte const*>(aImage.cdata());
@@ -254,6 +255,7 @@ namespace neogfx
                 }
                 else
                     throw failed_to_open_clipboard();
+#endif // todo
             }
         };
 

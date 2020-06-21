@@ -749,6 +749,7 @@ namespace neogfx
         iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
         iColorSelection{ *this },
         iScreenPicker{ iRightBottomLayout },
+        iSpacer0{ iRightBottomLayout },
         iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCenter },
         iBasicColorsGroup{ iLeftLayout, "&Basic colors"_t },
         iBasicColorsGrid{ iBasicColorsGroup.item_layout() },
@@ -758,6 +759,9 @@ namespace neogfx
         iSpacer2{ iRightTopLayout },
         iYZPicker{ *this },
         iXPicker{ *this },
+        iModelLayout{ client_layout() },
+        iSpacer3{ iModelLayout },
+        iColorSpace{ iModelLayout },
         iH{ client_widget(), client_widget() },
         iS{ client_widget(), client_widget() },
         iV{ client_widget(), client_widget() },
@@ -787,6 +791,7 @@ namespace neogfx
         iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
         iColorSelection{ *this },
         iScreenPicker{ iRightBottomLayout },
+        iSpacer0{ iRightBottomLayout },
         iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCenter },
         iBasicColorsGroup{ iLeftLayout, "&Basic colors"_t },
         iBasicColorsGrid{ iBasicColorsGroup.item_layout() },
@@ -796,6 +801,9 @@ namespace neogfx
         iSpacer2{ iRightTopLayout },
         iYZPicker{ *this },
         iXPicker{ *this },
+        iModelLayout{ client_layout() },
+        iSpacer3{ iModelLayout },
+        iColorSpace{ iModelLayout },
         iH{ client_widget(), client_widget() },
         iS{ client_widget(), client_widget() },
         iV{ client_widget(), client_widget() },
@@ -856,6 +864,17 @@ namespace neogfx
 
     void color_dialog::init()
     {
+        thread_local basic_item_model<color_space> model;
+        if (model.empty())
+        {
+            model.insert_item(model.end(), color_space::LinearRGB, "Linear RGB");
+            model.insert_item(model.end(), color_space::sRGB, "sRGB");
+        }
+        iColorSpace.set_model(model);
+        iColorSpace.selection_model().set_current_index(static_cast<std::underlying_type_t<color_space>>(color_space::sRGB));
+        iColorSpace.accept_selection();
+        iColorSpace.enable(false); // todo
+
         scoped_units su{ static_cast<framed_widget&>(*this), units::Pixels };
         static const std::set<color> sBasicColors
         {
@@ -917,14 +936,16 @@ namespace neogfx
         iG.first.set_size_policy(size_constraint::Minimum); iG.first.label().set_text("&Green:"_t); iG.second.set_size_policy(size_constraint::Minimum); iG.second.set_text_box_size_hint(size_hint{ "255" }); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
         iB.first.set_size_policy(size_constraint::Minimum); iB.first.label().set_text("&Blue:"_t); iB.second.set_size_policy(size_constraint::Minimum); iB.second.set_text_box_size_hint(size_hint{ "255" }); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
         iA.first.set_size_policy(size_constraint::Minimum); iA.first.label().set_text("&Alpha:"_t); iA.second.set_size_policy(size_constraint::Minimum); iA.second.set_text_box_size_hint(size_hint{ "255" }); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
-        iChannelLayout.set_dimensions(4, 4);
+        iChannelLayout.set_dimensions(5, 4);
+        iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 0 }, grid_layout::cell_coordinates{ 3, 0 });
+        iChannelLayout.add(iModelLayout);
         iChannelLayout.add(iH.first); iChannelLayout.add(iH.second);
         iChannelLayout.add(iR.first); iChannelLayout.add(iR.second);
         iChannelLayout.add(iS.first); iChannelLayout.add(iS.second);
         iChannelLayout.add(iG.first); iChannelLayout.add(iG.second);
         iChannelLayout.add(iV.first); iChannelLayout.add(iV.second);
         iChannelLayout.add(iB.first); iChannelLayout.add(iB.second);
-        iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 3 }, grid_layout::cell_coordinates{ 1, 3 });
+        iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 4 }, grid_layout::cell_coordinates{ 1, 4 });
         iChannelLayout.add(iRgb);
         iChannelLayout.add(iA.first); iChannelLayout.add(iA.second);
         iBasicColorsGrid.set_dimensions(12, 12);
