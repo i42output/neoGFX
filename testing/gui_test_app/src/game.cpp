@@ -168,7 +168,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         auto material = explosionAnimation.material;
         if (color)
         {
-            material.color = ng::game::color{ color->to_vec4() };
+            material.color = ng::game::color{ *color };
             material.shaderEffect = ng::shader_effect::Colorize;
         }
         auto filter = explosionAnimation.filter;

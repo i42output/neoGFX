@@ -45,29 +45,9 @@ namespace neogfx
             return std::pow(l, 1 / 2.4) * 1.055 - 0.055;
     }
 
-    sRGB_color sRGB_color::from_argb(argb aValue)
-    {
-        sRGB_color result;
-        result.set_red((aValue >> RedShift) & 0xFF);
-        result.set_green((aValue >> GreenShift) & 0xFF);
-        result.set_blue((aValue >> BlueShift) & 0xFF);
-        result.set_alpha((aValue >> AlphaShift) & 0xFF);
-        return result;
-    }
-
     sRGB_color sRGB_color::from_linear(const linear_color& aLinear)
     {
         return sRGB_color{ linear_to_sRGB(aLinear.x), linear_to_sRGB(aLinear.y), linear_to_sRGB(aLinear.z), aLinear[3] };
-    }
-
-    sRGB_color sRGB_color::from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha)
-    {
-        return hsl_color{ aHue, aSaturation, aLightness, aAlpha }.to_rgb();
-    }
-
-    sRGB_color sRGB_color::from_hsv(double aHue, double aSaturation, double aValue, double aAlpha)
-    {
-        return hsv_color{ aHue, aSaturation, aValue, aAlpha }.to_rgb();
     }
 
     sRGB_color::sRGB_color() : 
@@ -80,30 +60,9 @@ namespace neogfx
     {
     }
 
-    sRGB_color::sRGB_color(const vec3& aBaseNoAlpha) :
-        base_type{ aBaseNoAlpha }
-    {
-    }
-
-    sRGB_color::sRGB_color(const vec4& aBase) :
-        base_type{ aBase }
-    {
-    }
-
-    sRGB_color::sRGB_color(view_component aRed, view_component aGreen, view_component aBlue, view_component aAlpha) :
-        base_type{ convert<base_component>(aRed), convert<base_component>(aGreen), convert<base_component>(aBlue), convert<base_component>(aAlpha) }
-    {
-    }
-
-    sRGB_color::sRGB_color(argb aValue) : 
-        base_type{ from_argb(aValue) }
-    {
-    }
-
     sRGB_color::sRGB_color(const linear_color& aLinear) : 
         base_type{ from_linear(aLinear) }
     {
-
     }
 
     sRGB_color::sRGB_color(const std::string& aTextValue) : 
@@ -181,24 +140,9 @@ namespace neogfx
         return *this;
     }
 
-    sRGB_color::argb sRGB_color::as_argb() const 
-    { 
-        return (red() << RedShift) | (green() << GreenShift) | (blue() << BlueShift) | (alpha() << AlphaShift);
-    }
-
     linear_color sRGB_color::to_linear() const
     {
         return linear_color{ sRGB_to_linear(red<scalar>()), sRGB_to_linear(green<scalar>()), sRGB_to_linear(blue<scalar>()), alpha<scalar>() };
-    }
-
-    hsl_color sRGB_color::to_hsl() const
-    {
-        return hsl_color(*this);
-    }
-
-    hsv_color sRGB_color::to_hsv() const
-    {
-        return hsv_color(*this);
     }
 
     double sRGB_color::brightness() const
@@ -206,161 +150,9 @@ namespace neogfx
         return std::min(1.0, std::max(0.0, std::sqrt(red<double>() * red<double>() * 0.241 + green<double>() * green<double>() * 0.691 + blue<double>() * blue<double>() * 0.068)));
     }
 
-    double sRGB_color::intensity() const
-    { 
-        return (red<double>() + green<double>() + blue<double>()) / 3.0;
-    }
-
     double sRGB_color::luma() const
     {
         return red<double>() * 0.21 + green<double>() * 0.72 + blue<double>() * 0.07;
-    }
-
-    bool sRGB_color::similar_intensity(const sRGB_color& aOther, double aThreshold)
-    {
-        return std::abs(intensity() - aOther.intensity()) <= aThreshold;
-    }
-
-    sRGB_color sRGB_color::mid(const sRGB_color& aOther) const
-    {
-        return sRGB_color(
-            static_cast<view_component>((red<double>() + aOther.red<double>()) / 2.0 * 0xFF),
-            static_cast<view_component>((green<double>() + aOther.green<double>()) / 2.0 * 0xFF),
-            static_cast<view_component>((blue<double>() + aOther.blue<double>()) / 2.0 * 0xFF),
-            static_cast<view_component>((alpha<double>() + aOther.alpha<double>()) / 2.0 * 0xFF));
-    }
-
-    bool sRGB_color::light(double aThreshold) const
-    { 
-        return to_hsl().lightness() >= aThreshold;
-    }
-
-    bool sRGB_color::dark(double aThreshold) const
-    { 
-        return to_hsl().lightness() < aThreshold;
-    }
-
-    sRGB_color& sRGB_color::lighten(view_component aDelta) 
-    { 
-        *this += aDelta; 
-        return *this; 
-    }
-
-    sRGB_color& sRGB_color::darken(view_component aDelta) 
-    { 
-        *this -= aDelta; 
-        return *this; 
-    }
-
-    sRGB_color sRGB_color::lighter(view_component aDelta) const
-    {
-        sRGB_color ret(*this);
-        ret += aDelta;
-        return ret;
-    }
-
-    sRGB_color sRGB_color::darker(view_component aDelta) const
-    {
-        sRGB_color ret(*this);
-        ret -= aDelta;
-        return ret;
-    }
-
-    sRGB_color sRGB_color::shade(view_component aDelta) const
-    {
-        if (light())
-            return darker(aDelta);
-        else
-            return lighter(aDelta);
-    }
-    
-    sRGB_color sRGB_color::unshade(view_component aDelta) const
-    {
-        if (light())
-            return lighter(aDelta);
-        else
-            return darker(aDelta);
-    }
-
-    sRGB_color sRGB_color::monochrome() const
-    {
-        view_component i = static_cast<view_component>(intensity() * 255.0);
-        return sRGB_color(i, i, i, alpha());
-    }
-
-    sRGB_color sRGB_color::same_lightness_as(const sRGB_color& aOther) const
-    {
-        hsl_color temp = to_hsl();
-        temp.set_lightness(aOther.to_hsl().lightness());
-        return temp.to_rgb();
-    }
-
-    sRGB_color sRGB_color::with_lightness(double aLightness) const
-    {
-        hsl_color temp = to_hsl();
-        temp.set_lightness(std::min(aLightness, 1.0));
-        return temp.to_rgb();
-    }
-
-    sRGB_color sRGB_color::inverse() const
-    {
-        return sRGB_color{ static_cast<view_component>(0xFF - red()), static_cast<view_component>(0xFF - green()), static_cast<view_component>(0xFF - blue()), alpha() };
-    }
-
-    sRGB_color& sRGB_color::operator+=(view_component aDelta)
-    {
-        view_component newRed = std::numeric_limits<view_component>::max() - red() < aDelta ? std::numeric_limits<view_component>::max() : red() + aDelta;
-        view_component newGreen = std::numeric_limits<view_component>::max() - green() < aDelta ? std::numeric_limits<view_component>::max() : green() + aDelta;
-        view_component newBlue = std::numeric_limits<view_component>::max() - blue() < aDelta ? std::numeric_limits<view_component>::max() : blue() + aDelta;
-        *this = sRGB_color(newRed, newGreen, newBlue, alpha());
-        return *this;
-    }
-
-    sRGB_color& sRGB_color::operator-=(view_component aDelta)
-    {
-        view_component newRed = red() < aDelta ? std::numeric_limits<view_component>::min() : red() - aDelta;
-        view_component newGreen = green() < aDelta ? std::numeric_limits<view_component>::min() : green() - aDelta;
-        view_component newBlue = blue() < aDelta ? std::numeric_limits<view_component>::min() : blue() - aDelta;
-        *this = sRGB_color(newRed, newGreen, newBlue, alpha());
-        return *this;
-    }
-    
-    sRGB_color sRGB_color::operator~() const 
-    { 
-        return sRGB_color(static_cast<view_component>(~red() & 0xFF), static_cast<view_component>(~green() & 0xFF), static_cast<view_component>(~blue() & 0xFF), alpha());
-    }
-
-    bool sRGB_color::operator<(const sRGB_color& aOther) const
-    {
-        hsv_color left = to_hsv();
-        hsv_color right = aOther.to_hsv();
-        return std::make_tuple(left.hue(), left.saturation(), left.value()) < std::make_tuple(right.hue(), right.saturation(), right.value());
-    }
-
-    std::string sRGB_color::to_string() const
-    {
-        std::ostringstream result;
-        result << "rgba(" << static_cast<int>(red()) << ", " << static_cast<int>(green()) << ", " << static_cast<int>(blue()) << ", " << alpha() / 255.0 << ");";
-        return result.str();
-    }
-
-    std::string sRGB_color::to_hex_string() const
-    {
-        std::ostringstream result;
-        result << "#" << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << with_alpha(0).as_argb();
-        if (alpha() != 0xFF)
-            result << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint32_t>(alpha());
-        return result.str();
-    }
-
-    vec4 sRGB_color::to_vec4() const
-    {
-        return vec4{ red<double>(), green<double>(), blue<double>(), alpha<double>() };
-    }
-
-    vec4f sRGB_color::to_vec4f() const
-    {
-        return vec4{ red<float>(), green<float>(), blue<float>(), alpha<float>() };
     }
 
     gradient::gradient() :

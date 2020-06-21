@@ -632,8 +632,8 @@
     <ClCompile Include="..\..\..\src\core\color.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
     <ClCompile Include="..\..\..\src\core\units.cpp" />
-    <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
-    <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
+    <ClCompile Include="..\..\..\src\core\hsl_color.cpp" />
+    <ClCompile Include="..\..\..\src\core\hsv_color.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\animator.cpp" />
     <ClCompile Include="..\..\..\src\game\collision_detector.cpp" />
@@ -798,6 +798,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\include\neogfx\core\color.inl" />
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />

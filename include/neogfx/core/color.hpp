@@ -26,15 +26,10 @@
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/core/hsl_color.hpp>
 #include <neogfx/core/hsv_color.hpp>
+#include <neogfx/core/color_bits.hpp>
 
 namespace neogfx
 {
-    enum class color_space : uint32_t
-    {
-        LinearRGB,
-        sRGB
-    };
-
     template <typename Color, typename Derived>
     struct color_return_type_cracker
     {
@@ -47,20 +42,27 @@ namespace neogfx
         typedef Color return_type;
     };
 
-    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent = BaseComponent, typename Derived = void>
-    class basic_color : public basic_vector<BaseComponent, 4>
+    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent = BaseComponent, std::size_t ColorComponentCount = 3, typename Derived = void>
+    class basic_color : public basic_vector<BaseComponent, ColorComponentCount + 1>
     {
-        typedef basic_color<ColorSpace, BaseComponent, ViewComponent, Derived> self_type;
-        typedef basic_vector<BaseComponent, 4> base_type;
+        typedef basic_color<ColorSpace, BaseComponent, ViewComponent, ColorComponentCount, Derived> self_type;
+        typedef basic_vector<BaseComponent, ColorComponentCount + 1> base_type;
         typedef Derived derived_type;
     public:
         typedef BaseComponent base_component;
         typedef ViewComponent view_component;
         typedef typename color_return_type_cracker<self_type, derived_type>::return_type return_type;
     public:
+        static constexpr color_space color_space = ColorSpace;
+        static constexpr std::size_t component_count = ColorComponentCount + 1;
+        static constexpr std::size_t alpha_component_index = component_count - 1;
+    public:
         using base_type::base_type;
-        basic_color(const basic_vector<BaseComponent, 3>& aNoAlpha) :
-            base_type{ aNoAlpha.x, aNoAlpha.y, aNoAlpha.z, static_cast<BaseComponent>(1.0) } {}
+        basic_color(const basic_vector<BaseComponent, ColorComponentCount>& aNoAlpha) :
+            base_type{ aNoAlpha }
+        {
+            set_alpha(1.0);
+        }
     public:
         self_type& operator=(const self_type& aOther)
         {
@@ -89,6 +91,108 @@ namespace neogfx
         {
             return convert<view_component>(aComponent);
         }
+        view_component alpha() const
+        {
+            return base_to_view(base_type::operator[](alpha_component_index));
+        }
+        template <typename T>
+        T alpha() const
+        {
+            return convert<T>(base_type::operator[](alpha_component_index));
+        }
+        return_type& set_alpha(view_component aAlpha)
+        {
+            base_type::operator[](alpha_component_index) = convert<base_component>(aAlpha);
+            return static_cast<return_type&>(*this);
+        }
+        template <typename T>
+        return_type& set_alpha(T aAlpha)
+        {
+            base_type::operator[](alpha_component_index) = convert<base_component>(aAlpha);
+            return static_cast<return_type&>(*this);
+        }
+        return_type with_alpha(view_component aAlpha) const
+        {
+            return return_type{ *this }.set_alpha(aAlpha);
+        }
+        template <typename T>
+        return_type with_alpha(T aAlpha) const
+        {
+            return return_type{ *this }.set_alpha(aAlpha);
+        }
+        return_type with_combined_alpha(view_component aAlpha) const
+        {
+            return return_type{ *this }.with_alpha(convert<scalar>(alpha()) * convert<scalar>(aAlpha));
+        }
+        template <typename T>
+        return_type with_combined_alpha(T aAlpha) const
+        {
+            return return_type{ *this }.with_alpha(convert<scalar>(alpha()) * convert<scalar>(aAlpha));
+        }
+    };
+
+    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent = BaseComponent, typename Derived = void>
+    class basic_rgb_color : public basic_color<ColorSpace, BaseComponent, ViewComponent, 3, Derived>
+    {
+        typedef basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived> self_type;
+        typedef basic_color<ColorSpace, BaseComponent, ViewComponent, 3, Derived> base_type;
+    public:
+        using typename base_type::base_component;
+        using typename base_type::view_component;
+        using typename base_type::return_type;
+        typedef uint32_t argb;
+    protected:
+        static const argb AlphaShift = 24;
+        static const argb RedShift = 16;
+        static const argb GreenShift = 8;
+        static const argb BlueShift = 0;
+    public:
+        using base_type::color_space;
+        using base_type::component_count;
+    public:
+        using base_type::convert;
+    public:
+        basic_rgb_color() :
+            base_type{} {}
+        explicit basic_rgb_color(const vec3& aBaseNoAlpha) :
+            base_type{ aBaseNoAlpha } {}
+        explicit basic_rgb_color(const vec4& aBase) :
+            base_type{ aBase } {}
+        basic_rgb_color(view_component aRed, view_component aGreen, view_component aBlue, view_component aAlpha = 0xFF) :
+            base_type{ convert<base_component>(aRed), convert<base_component>(aGreen), convert<base_component>(aBlue), convert<base_component>(aAlpha) } {}
+        basic_rgb_color(int32_t aRed, int32_t aGreen, int32_t aBlue, int32_t aAlpha = 0xFF) :
+            basic_rgb_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
+        basic_rgb_color(uint32_t aRed, uint32_t aGreen, uint32_t aBlue, uint32_t aAlpha = 0xFF) :
+            basic_rgb_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
+        template <typename T>
+        basic_rgb_color(T aRed, T aGreen, T aBlue, T aAlpha = 1.0, std::enable_if_t<std::is_scalar_v<T> && !std::is_same_v<view_component, T>, sfinae> = {}) :
+            basic_rgb_color{ convert<view_component>(aRed), convert<view_component>(aGreen), convert<view_component>(aBlue), convert<view_component>(aAlpha) } {}
+        explicit basic_rgb_color(argb aValue) :
+            base_type{ from_argb(aValue) } {}
+        // assignment
+    public:
+        self_type& operator=(const base_type& aOther)
+        {
+            base_type::operator=(aOther);
+            return *this;
+        }
+        // operations
+    public:
+        static self_type from_argb(argb aValue)
+        {
+            self_type result;
+            result.set_red((aValue >> RedShift) & 0xFF);
+            result.set_green((aValue >> GreenShift) & 0xFF);
+            result.set_blue((aValue >> BlueShift) & 0xFF);
+            result.set_alpha((aValue >> AlphaShift) & 0xFF);
+            return result;
+        }
+    public:
+        using base_type::base_to_view;
+        using base_type::alpha;
+        using base_type::set_alpha;
+        using base_type::with_alpha;
+        using base_type::with_combined_alpha;
         view_component red() const
         {
             return base_to_view(base_type::operator[](0));
@@ -100,10 +204,6 @@ namespace neogfx
         view_component blue() const
         {
             return base_to_view(base_type::operator[](2));
-        }
-        view_component alpha() const
-        {
-            return base_to_view(base_type::operator[](3));
         }
         template <typename T>
         T red() const
@@ -120,11 +220,6 @@ namespace neogfx
         {
             return convert<T>(base_type::operator[](2));
         }
-        template <typename T>
-        T alpha() const
-        {
-            return convert<T>(base_type::operator[](3));
-        }
         return_type& set_red(view_component aRed)
         {
             base_type::operator[](0) = convert<base_component>(aRed);
@@ -138,11 +233,6 @@ namespace neogfx
         return_type& set_blue(view_component aBlue)
         {
             base_type::operator[](2) = convert<base_component>(aBlue);
-            return static_cast<return_type&>(*this);
-        }
-        return_type& set_alpha(view_component aAlpha)
-        {
-            base_type::operator[](3) = convert<base_component>(aAlpha);
             return static_cast<return_type&>(*this);
         }
         template <typename T>
@@ -163,12 +253,6 @@ namespace neogfx
             base_type::operator[](2) = convert<base_component>(aBlue);
             return static_cast<return_type&>(*this);
         }
-        template <typename T>
-        return_type& set_alpha(T aAlpha)
-        {
-            base_type::operator[](3) = convert<base_component>(aAlpha);
-            return static_cast<return_type&>(*this);
-        }
         return_type with_red(view_component aRed) const
         {
             return return_type{ *this }.set_red(aRed);
@@ -180,10 +264,6 @@ namespace neogfx
         return_type with_blue(view_component aBlue) const
         {
             return return_type{ *this }.set_blue(aBlue);
-        }
-        return_type with_alpha(view_component aAlpha) const
-        {
-            return return_type{ *this }.set_alpha(aAlpha);
         }
         template <typename T>
         return_type with_red(T aRed) const
@@ -200,31 +280,44 @@ namespace neogfx
         {
             return return_type{ *this }.set_blue(aBlue);
         }
-        template <typename T>
-        return_type with_alpha(T aAlpha) const
-        {
-            return return_type{ *this }.set_alpha(aAlpha);
-        }
-        return_type with_combined_alpha(view_component aAlpha) const
-        {
-            return return_type{ *this }.with_alpha(convert<scalar>(alpha()) * convert<scalar>(aAlpha));
-        }
-        template <typename T>
-        return_type with_combined_alpha(T aAlpha) const
-        {
-            return return_type{ *this }.with_alpha(convert<scalar>(alpha()) * convert<scalar>(aAlpha));
-        }
+    public:
+        static return_type from_hsl(scalar aHue, scalar aSaturation, scalar aLightness, scalar aAlpha = 1.0);
+        static return_type from_hsv(scalar aHue, scalar aSaturation, scalar aValue, scalar aAlpha = 1.0);
+        argb as_argb() const;
+        hsl_color to_hsl() const;
+        hsv_color to_hsv() const;
+        scalar intensity() const;
+        bool similar_intensity(const self_type& aOther, scalar aThreshold = 0.5);
+        return_type mid(const self_type& aOther) const;
+        bool light(scalar aThreshold = 0.50) const;
+        bool dark(scalar aThreshold = 0.50) const;
+        return_type& lighten(view_component aDelta);
+        return_type& darken(view_component aDelta);
+        return_type lighter(view_component aDelta) const;
+        return_type darker(view_component aDelta) const;
+        return_type shade(view_component aDelta) const;
+        return_type unshade(view_component aDelta) const;
+        return_type monochrome() const;
+        return_type same_lightness_as(const self_type& aOther) const;
+        return_type with_lightness(scalar aLightness) const;
+        return_type inverse() const;
+        return_type& operator+=(view_component aDelta);
+        return_type& operator-=(view_component aDelta);
+        return_type operator~() const;
+        bool operator<(const self_type& aOther) const;
+    public:
+        std::string to_string() const;
+        std::string to_hex_string() const;
     };
+        
+    using linear_color = basic_rgb_color<color_space::LinearRGB, scalar>;
 
-    using linear_color = basic_color<color_space::LinearRGB, scalar>;
-
-    class sRGB_color : public basic_color<color_space::sRGB, scalar, uint8_t, sRGB_color>
+    class sRGB_color : public basic_rgb_color<color_space::sRGB, scalar, uint8_t, sRGB_color>
     {
-        typedef basic_color<color_space::sRGB, scalar, uint8_t, sRGB_color> base_type;
+        typedef basic_rgb_color<color_space::sRGB, scalar, uint8_t, sRGB_color> base_type;
         // types
     public:
         typedef view_component component;
-        typedef uint32_t argb;
         // constants
     public:
         static const sRGB_color AliceBlue;
@@ -885,25 +978,11 @@ namespace neogfx
         static const sRGB_color Yellow3;
         static const sRGB_color Yellow4;
         static const sRGB_color YellowGreen;
-    private:
-        static const argb AlphaShift = 24;
-        static const argb RedShift = 16;
-        static const argb GreenShift = 8;
-        static const argb BlueShift = 0;
         // construction
     public:
+        using base_type::base_type;
         sRGB_color();
         sRGB_color(const sRGB_color& aOther);
-        explicit sRGB_color(const vec3& aBaseNoAlpha);
-        explicit sRGB_color(const vec4& aBase);
-        sRGB_color(view_component aRed, view_component aGreen, view_component aBlue, view_component aAlpha = 0xFF);
-        sRGB_color(int32_t aRed, int32_t aGreen, int32_t aBlue, int32_t aAlpha = 0xFF) :
-            sRGB_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
-        sRGB_color(uint32_t aRed, uint32_t aGreen, uint32_t aBlue, uint32_t aAlpha = 0xFF) :
-            sRGB_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
-        sRGB_color(scalar aRed, scalar aGreen, scalar aBlue, scalar aAlpha = 1.0) :
-            sRGB_color{ convert<view_component>(aRed), convert<view_component>(aGreen), convert<view_component>(aBlue), convert<view_component>(aAlpha) } {}
-        explicit sRGB_color(argb aValue);
         explicit sRGB_color(const linear_color& aLinear);
         sRGB_color(const std::string& aTextValue);
         // assignment
@@ -911,70 +990,12 @@ namespace neogfx
         sRGB_color& operator=(const base_type& aOther);
          // operations
     public:
-        static sRGB_color from_argb(argb aValue);
         static sRGB_color from_linear(const linear_color& aLinear);
-        static sRGB_color from_hsl(scalar aHue, scalar aSaturation, scalar aLightness, scalar aAlpha = 1.0);
-        static sRGB_color from_hsv(scalar aHue, scalar aSaturation, scalar aValue, scalar aAlpha = 1.0);
         static std::optional<sRGB_color> from_name(const std::string& aName);
-        argb as_argb() const;
         linear_color to_linear() const;
-        hsl_color to_hsl() const;
-        hsv_color to_hsv() const;
         scalar brightness() const;
-        scalar intensity() const;
         scalar luma() const;
-        bool similar_intensity(const sRGB_color& aOther, scalar aThreshold = 0.5);
-        sRGB_color mid(const sRGB_color& aOther) const;
-        bool light(scalar aThreshold = 0.50) const;
-        bool dark(scalar aThreshold = 0.50) const;
-        sRGB_color& lighten(view_component aDelta);
-        sRGB_color& darken(view_component aDelta);
-        sRGB_color lighter(view_component aDelta) const;
-        sRGB_color darker(view_component aDelta) const;
-        sRGB_color shade(view_component aDelta) const;
-        sRGB_color unshade(view_component aDelta) const;
-        sRGB_color monochrome() const;
-        sRGB_color same_lightness_as(const sRGB_color& aOther) const;
-        sRGB_color with_lightness(scalar aLightness) const;
-        sRGB_color inverse() const;
-        sRGB_color& operator+=(view_component aDelta);
-        sRGB_color& operator-=(view_component aDelta);
-        sRGB_color operator~() const;
-        bool operator<(const sRGB_color& aOther) const;
-        std::string to_string() const;
-        std::string to_hex_string() const;
-        vec4 to_vec4() const;
-        vec4f to_vec4f() const;
     };
-
-    inline sRGB_color operator+(const sRGB_color& aLeft, sRGB_color::view_component aRight)
-    {
-        sRGB_color ret = aLeft;
-        ret += aRight;
-        return ret;
-    }
-
-    inline sRGB_color operator-(const sRGB_color& aLeft, sRGB_color::view_component aRight)
-    {
-        sRGB_color ret = aLeft;
-        ret -= aRight;
-        return ret;
-    }
-
-    inline sRGB_color operator*(const sRGB_color& aLeft, scalar aCoefficient)
-    {
-        return sRGB_color{ aLeft.to_vec4() *= vec4 { aCoefficient, aCoefficient, aCoefficient, 1.0 } };
-    }
-
-    template <typename Elem, typename Traits>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const sRGB_color& aColor)
-    {
-        aStream << "[A: 0x" << std::hex << (int)aColor.alpha() <<
-            ", R: 0x" << std::hex << (int)aColor.red() <<
-            ", G: 0x" << std::hex << (int)aColor.green() <<
-            ", B: 0x" << std::hex << (int)aColor.blue() << "]";
-        return aStream;
-    }
 
     enum class gradient_direction : uint32_t
     {
@@ -1152,3 +1173,5 @@ namespace neogfx
     typedef neolib::variant<color, gradient> color_or_gradient;
     typedef std::optional<color_or_gradient> optional_color_or_gradient;
 }
+
+#include "color.inl"

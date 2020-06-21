@@ -1159,12 +1159,6 @@
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\hsv_colour.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\hsl_colour.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1534,6 +1528,12 @@
     <ClCompile Include="..\..\..\src\gui\dialog\settings_dialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\core\hsl_color.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\hsv_color.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
@@ -1552,6 +1552,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\core\color.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

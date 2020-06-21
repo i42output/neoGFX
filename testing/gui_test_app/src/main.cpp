@@ -621,7 +621,7 @@ int main(int argc, char* argv[])
         {
             auto themeColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Theme).to_hsv();
             themeColor.set_hue(window.slider1.normalized_value() * 360.0);
-            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColor.to_rgb());
+            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColor.to_rgb<ng::color>());
         };
         window.slider1.ValueChanged([update_theme_color, &window, &app]()
         {
@@ -727,7 +727,7 @@ int main(int argc, char* argv[])
                 double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
                 neolib::random prng{ app.program_elapsed_ms() / 5000 };
                 ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
-                randomColor = randomColor.to_hsv().with_brightness(brightness).to_rgb();
+                randomColor = randomColor.to_hsv().with_brightness(brightness).to_rgb<ng::color>();
                 window.button6.set_foreground_color(randomColor);
             }
         }, 16);

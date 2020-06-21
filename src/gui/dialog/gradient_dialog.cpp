@@ -378,7 +378,7 @@ namespace neogfx
                 auto& colorStop = *std::next(newGradient.color_begin(), hs.first);
                 auto newColor = colorStop.second.to_hsv();
                 newColor.set_hue(iHueSlider.value() + hs.second);
-                colorStop.second = newColor.to_rgb();
+                colorStop.second = newColor.to_rgb<color>();
             }
             thread_local decltype(iHueSelection) hueSelectionCopy;
             hueSelectionCopy = iHueSelection;

@@ -62,7 +62,7 @@ namespace neogfx
 
     inline game::color to_ecs_component(const color& aColor)
     {
-        return game::color{ aColor.to_vec4() };
+        return game::color{ aColor };
     }
 
     inline game::gradient to_ecs_component(const gradient& aGradient)

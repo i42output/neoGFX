@@ -23,15 +23,17 @@
 
 namespace neogfx
 {
-    class sRGB_color;
-    typedef sRGB_color color;
+    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
+    class basic_rgb_color;
 
     class hsv_color
     {
     public:
         hsv_color();
         hsv_color(double aHue, double aSaturation, double aValue, double aAlpha = 1.0);
-        hsv_color(const color& aColor);
+        template <color_space ColorSpace, typename BaseComponent, typename ViewComponent = BaseComponent, typename Derived = void>
+        hsv_color(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor) :
+            hsv_color{ from_rgb(aColor) } {}
     public:
         double hue() const;
         double saturation() const;
@@ -48,8 +50,25 @@ namespace neogfx
         hsv_color with_brightness(double aNewLightness) const;
         hsv_color brighter(double aDelta) const;
         hsv_color brighter(double aCoeffecient, double aDelta) const;
-        color to_rgb() const;
-        static hsv_color from_rgb(const color& aColor);
+        void to_rgb(scalar& aRed, scalar& aGreen, scalar& aBlue, scalar& aAlpha) const;
+        template <typename RgbColor>
+        typename RgbColor::return_type to_rgb() const
+        {
+            vec4 components;
+            to_rgb(components.x, components.y, components.z, components[3]);
+            typename RgbColor::return_type result;
+            result.set_red<scalar>(components.x);
+            result.set_green<scalar>(components.y);
+            result.set_blue<scalar>(components.z);
+            result.set_alpha<scalar>(components[3]);
+            return result;
+        }
+        static hsv_color from_rgb(scalar aRed, scalar aGreen, scalar aBlue, scalar aAlpha = 1.0);
+        template <color_space ColorSpace, typename BaseComponent, typename ViewComponent = BaseComponent, typename Derived = void>
+        static hsv_color from_rgb(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor)
+        {
+            return from_rgb(aColor.template red<scalar>(), aColor.template green<scalar>(), aColor.template blue<scalar>(), aColor.template alpha<scalar>());
+        }
     public:
         static double undefined_hue();
     public:

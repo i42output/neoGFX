@@ -1160,7 +1160,7 @@ namespace neogfx
             aMesh, 
             game::material
             { 
-                aColor != std::nullopt ? game::color{ aColor->to_vec4() } : std::optional<game::color>{},
+                aColor != std::nullopt ? game::color{ *aColor } : std::optional<game::color>{},
                 {}, 
                 {},
                 to_ecs_component(aTexture),

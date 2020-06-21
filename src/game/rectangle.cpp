@@ -34,7 +34,7 @@ namespace neogfx::game
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::color& aColor) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ color{ aColor.to_vec4() }, {}, {} } }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ to_ecs_component(aColor), {}, {} } }, aEcs, id());
         }
 
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :

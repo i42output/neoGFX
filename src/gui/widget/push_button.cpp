@@ -196,7 +196,7 @@ namespace neogfx
         }
         const double colorOffset = 0.2;
         color colorStart = faceColor;
-        color colorEnd = colorStart.to_hsl().lighter(-colorOffset).to_rgb();
+        color colorEnd = colorStart.to_hsl().lighter(-colorOffset).to_rgb<color>();
         if (colorStart.to_hsl().lightness() - colorEnd.to_hsl().lightness() < colorOffset)
             colorStart = colorEnd.with_lightness(colorEnd.to_hsl().lightness() + colorOffset);
         switch(iStyle)
@@ -213,8 +213,8 @@ namespace neogfx
                 aGc.fill_path(outline,
                     gradient{ gradient::color_stop_list{
                         gradient::color_stop{ 0.0, colorStart },
-                        gradient::color_stop{ transitionStart, colorEnd.to_hsl().lighter(colorOffset * 0.6).to_rgb() },
-                        gradient::color_stop{ transitionEnd, colorEnd.to_hsl().lighter(colorOffset * 0.2).to_rgb() },
+                        gradient::color_stop{ transitionStart, colorEnd.to_hsl().lighter(colorOffset * 0.6).to_rgb<color>() },
+                        gradient::color_stop{ transitionEnd, colorEnd.to_hsl().lighter(colorOffset * 0.2).to_rgb<color>() },
                         gradient::color_stop{ 1.0, colorEnd } } });
             }
             else

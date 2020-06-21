@@ -291,7 +291,7 @@ namespace neogfx
                     hsv.set_saturation(1.0);
                     hsv.set_value(1.0);
                 }
-                rgb = hsv.to_rgb();
+                rgb = hsv.to_rgb<color>();
             }
             else
                 rgb = static_variant_cast<color>(r);
@@ -683,7 +683,7 @@ namespace neogfx
             for (uint32_t z = 0; z < 256; ++z)
             {
                 auto r = color_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
-                color rgbColor = (std::holds_alternative<hsv_color>(r) ? static_variant_cast<const hsv_color&>(r).to_rgb() : static_variant_cast<const color&>(r));
+                color rgbColor = (std::holds_alternative<hsv_color>(r) ? static_variant_cast<const hsv_color&>(r).to_rgb<color>() : static_variant_cast<const color&>(r));
                 iPixels[z][y][0] = rgbColor.red();
                 iPixels[z][y][1] = rgbColor.green();
                 iPixels[z][y][2] = rgbColor.blue();
@@ -823,7 +823,7 @@ namespace neogfx
         if (std::holds_alternative<color>(iSelectedColor))
             return static_variant_cast<const color&>(iSelectedColor);
         else
-            return static_variant_cast<const hsv_color&>(iSelectedColor).to_rgb();
+            return static_variant_cast<const hsv_color&>(iSelectedColor).to_rgb<color>();
     }
 
     hsv_color color_dialog::selected_color_as_hsv() const
