@@ -23,7 +23,8 @@
 
 namespace neogfx
 {
-    class color;
+    class sRGB_color;
+    typedef sRGB_color color;
 
     class hsv_color
     {

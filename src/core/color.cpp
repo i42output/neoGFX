@@ -29,96 +29,97 @@
 
 namespace neogfx
 {
-    color color::from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha)
+    inline scalar sRGB_to_linear(scalar s)
+    {
+        if (s <= 0.04045)
+            return s / 12.92;
+        else
+            return std::pow(((s + 0.055) / 1.055), 2.4);
+    }
+
+    inline scalar linear_to_sRGB(scalar l)
+    {
+        if (l <= 0.0031308)
+            return l * 12.92;
+        else
+            return std::pow(l, 1 / 2.4) * 1.055 - 0.055;
+    }
+
+    sRGB_color sRGB_color::from_argb(argb aValue)
+    {
+        sRGB_color result;
+        result.set_red((aValue >> RedShift) & 0xFF);
+        result.set_green((aValue >> GreenShift) & 0xFF);
+        result.set_blue((aValue >> BlueShift) & 0xFF);
+        result.set_alpha((aValue >> AlphaShift) & 0xFF);
+        return result;
+    }
+
+    sRGB_color sRGB_color::from_linear(const linear_color& aLinear)
+    {
+        return sRGB_color{ linear_to_sRGB(aLinear.x), linear_to_sRGB(aLinear.y), linear_to_sRGB(aLinear.z), aLinear[3] };
+    }
+
+    sRGB_color sRGB_color::from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha)
     {
         return hsl_color{ aHue, aSaturation, aLightness, aAlpha }.to_rgb();
     }
 
-    color color::from_hsv(double aHue, double aSaturation, double aValue, double aAlpha)
+    sRGB_color sRGB_color::from_hsv(double aHue, double aSaturation, double aValue, double aAlpha)
     {
         return hsv_color{ aHue, aSaturation, aValue, aAlpha }.to_rgb();
     }
 
-    color::color() : iValue{}
+    sRGB_color::sRGB_color() : 
+        base_type{}
     {
     }
 
-    color::color(const color& aOther) : iValue{ aOther.iValue }
+    sRGB_color::sRGB_color(const sRGB_color& aOther) : 
+        base_type{ aOther }
     {
     }
 
-    color::color(argb aValue) : iValue{ aValue }
+    sRGB_color::sRGB_color(const vec3& aBaseNoAlpha) :
+        base_type{ aBaseNoAlpha }
     {
     }
 
-    color::color(const vec3u32& aValue) :
-        color{
-            (static_cast<argb>(0xFF) << AlphaShift) |
-            (static_cast<argb>(aValue[0]) << RedShift) |
-            (static_cast<argb>(aValue[1]) << GreenShift) |
-            (static_cast<argb>(aValue[2]) << BlueShift) }
+    sRGB_color::sRGB_color(const vec4& aBase) :
+        base_type{ aBase }
     {
     }
 
-    color::color(const vec4u32& aValue) :
-        color{
-            (static_cast<argb>(aValue[3]) << AlphaShift) |
-            (static_cast<argb>(aValue[0]) << RedShift) |
-            (static_cast<argb>(aValue[1]) << GreenShift) |
-            (static_cast<argb>(aValue[2]) << BlueShift) }
+    sRGB_color::sRGB_color(view_component aRed, view_component aGreen, view_component aBlue, view_component aAlpha) :
+        base_type{ convert<base_component>(aRed), convert<base_component>(aGreen), convert<base_component>(aBlue), convert<base_component>(aAlpha) }
     {
     }
 
-    color::color(const vec3& aValue) :
-        color{
-            (static_cast<argb>(0xFF) << AlphaShift) |
-            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
-            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
-            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) }
+    sRGB_color::sRGB_color(argb aValue) : 
+        base_type{ from_argb(aValue) }
     {
     }
 
-    color::color(const vec3f& aValue) :
-        color{
-            (static_cast<argb>(0xFF) << AlphaShift) |
-            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
-            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
-            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) }
+    sRGB_color::sRGB_color(const linear_color& aLinear) : 
+        base_type{ from_linear(aLinear) }
     {
+
     }
 
-    color::color(const vec4& aValue) :
-        color{
-            (static_cast<argb>(aValue[3] * 0xFF) << AlphaShift) |
-            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
-            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
-            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) }    
-    {
-    }
-
-    color::color(const vec4f& aValue) :
-        color{
-            (static_cast<argb>(aValue[3] * 0xFF) << AlphaShift) |
-            (static_cast<argb>(aValue[0] * 0xFF) << RedShift) |
-            (static_cast<argb>(aValue[1] * 0xFF) << GreenShift) |
-            (static_cast<argb>(aValue[2] * 0xFF) << BlueShift) } 
-    {
-    }
-
-    color::color(const std::string& aTextValue) : iValue{}
+    sRGB_color::sRGB_color(const std::string& aTextValue) : 
+        base_type{}
     {
         if (aTextValue.empty())
             *this = Black;
         else if (aTextValue[0] == L'#')
         {
-            iValue = neolib::string_to_uint32(aTextValue.substr(1), 16);
+            *this = from_argb(neolib::string_to_uint32(aTextValue.substr(1), 16));
             if (aTextValue.size() <= 7)
                 set_alpha(0xFF);
             else
             {
                 auto actualAlpha = blue();
-                iValue >>= GreenShift;
-                set_alpha(actualAlpha);
+                *this = from_argb(as_argb() >> GreenShift).with_alpha(actualAlpha);
             }
         }
         else
@@ -141,7 +142,7 @@ namespace neogfx
                             neolib::tokens(bits[1], std::string(","), moreBits, 3, false);
                             if (moreBits.size() == 3)
                             {
-                                *this = color{
+                                *this = sRGB_color{
                                     boost::lexical_cast<uint32_t>(moreBits[0]),
                                     boost::lexical_cast<uint32_t>(moreBits[1]),
                                     boost::lexical_cast<uint32_t>(moreBits[2]) };
@@ -153,7 +154,7 @@ namespace neogfx
                             neolib::tokens(bits[1], std::string(","), moreBits, 4, false);
                             if (moreBits.size() == 4)
                             {
-                                *this = color{
+                                *this = sRGB_color{
                                     boost::lexical_cast<uint32_t>(moreBits[0]),
                                     boost::lexical_cast<uint32_t>(moreBits[1]),
                                     boost::lexical_cast<uint32_t>(moreBits[2]),
@@ -174,198 +175,98 @@ namespace neogfx
         }
     }
 
-    color& color::operator=(const color& aOther)
+    sRGB_color& sRGB_color::operator=(const base_type& aOther)
     {
-        iValue = aOther.iValue;
+        base_type::operator=(aOther);
         return *this;
     }
 
-    color& color::operator=(argb aOther)
-    {
-        iValue = aOther;
-        return *this;
-    }
-
-    color& color::operator=(const vec3u32& aValue)
-    {
-        *this = color{ aValue };
-        return *this;
-    }
-
-    color& color::operator=(const vec4u32& aValue)
-    {
-        *this = color{ aValue };
-        return *this;
-    }
-
-    color& color::operator=(const vec3& aValue)
-    {
-        *this = color{ aValue };
-        return *this;
-    }
-
-    color& color::operator=(const vec3f& aValue)
-    {
-        *this = color{ aValue };
-        return *this;
-    }
-
-    color& color::operator=(const vec4& aValue)
-    {
-        *this = color{ aValue };
-        return *this;
-    }
-
-    color& color::operator=(const vec4f& aValue)
-    {
-        *this = color{ aValue };
-        return *this;
-    }
-
-    color::argb color::value() const 
+    sRGB_color::argb sRGB_color::as_argb() const 
     { 
-        return iValue; 
+        return (red() << RedShift) | (green() << GreenShift) | (blue() << BlueShift) | (alpha() << AlphaShift);
     }
 
-    color::component color::alpha() const 
-    { 
-        return (iValue >> AlphaShift) & 0xFF; 
-    }
-
-    color::component color::red() const 
-    { 
-        return (iValue >> RedShift) & 0xFF; 
-    }
-
-    color::component color::green() const 
-    { 
-        return (iValue >> GreenShift) & 0xFF; 
-    }
-
-    color::component color::blue() const 
-    { 
-        return (iValue >> BlueShift) & 0xFF; 
-    }
-
-    color& color::set_red(component aNewValue)
-    { 
-        *this = color(aNewValue, green(), blue(), alpha()); 
-        return *this;
-    }
-
-    color& color::set_green(component aNewValue)
-    { 
-        *this = color(red(), aNewValue, blue(), alpha()); 
-        return *this;
-    }
-
-    color& color::set_blue(component aNewValue)
-    { 
-        *this = color(red(), green(), aNewValue, alpha()); 
-        return *this;
-    }
-
-    color color::with_red(component aNewValue) const
+    linear_color sRGB_color::to_linear() const
     {
-        return color(aNewValue, green(), blue(), alpha());
+        return linear_color{ sRGB_to_linear(red<scalar>()), sRGB_to_linear(green<scalar>()), sRGB_to_linear(blue<scalar>()), alpha<scalar>() };
     }
 
-    color color::with_green(component aNewValue) const
-    {
-        return color(red(), aNewValue, blue(), alpha());
-    }
-
-    color color::with_blue(component aNewValue) const
-    {
-        return color(red(), green(), aNewValue, alpha());
-    }
-
-    color color::with_combined_alpha(component aNewValue) const
-    {
-        return color(red(), green(), blue(), static_cast<component>((alpha() / 255.0 * aNewValue / 255.0) * 255));
-    }
-    
-    color color::with_combined_alpha(double aCoefficient) const
-    {
-        return color(red(), green(), blue(), static_cast<component>((alpha() / 255.0 * aCoefficient) * 255));
-    }
-
-    hsl_color color::to_hsl() const
+    hsl_color sRGB_color::to_hsl() const
     {
         return hsl_color(*this);
     }
 
-    hsv_color color::to_hsv() const
+    hsv_color sRGB_color::to_hsv() const
     {
         return hsv_color(*this);
     }
 
-    double color::brightness() const
+    double sRGB_color::brightness() const
     {
         return std::min(1.0, std::max(0.0, std::sqrt(red<double>() * red<double>() * 0.241 + green<double>() * green<double>() * 0.691 + blue<double>() * blue<double>() * 0.068)));
     }
 
-    double color::intensity() const
+    double sRGB_color::intensity() const
     { 
         return (red<double>() + green<double>() + blue<double>()) / 3.0;
     }
 
-    double color::luma() const
+    double sRGB_color::luma() const
     {
         return red<double>() * 0.21 + green<double>() * 0.72 + blue<double>() * 0.07;
     }
 
-    bool color::similar_intensity(const color& aOther, double aThreshold)
+    bool sRGB_color::similar_intensity(const sRGB_color& aOther, double aThreshold)
     {
         return std::abs(intensity() - aOther.intensity()) <= aThreshold;
     }
 
-    color color::mid(const color& aOther) const
+    sRGB_color sRGB_color::mid(const sRGB_color& aOther) const
     {
-        return color(
-            static_cast<component>((red<double>() + aOther.red<double>()) / 2.0 * 0xFF),
-            static_cast<component>((green<double>() + aOther.green<double>()) / 2.0 * 0xFF),
-            static_cast<component>((blue<double>() + aOther.blue<double>()) / 2.0 * 0xFF),
-            static_cast<component>((alpha<double>() + aOther.alpha<double>()) / 2.0 * 0xFF));
+        return sRGB_color(
+            static_cast<view_component>((red<double>() + aOther.red<double>()) / 2.0 * 0xFF),
+            static_cast<view_component>((green<double>() + aOther.green<double>()) / 2.0 * 0xFF),
+            static_cast<view_component>((blue<double>() + aOther.blue<double>()) / 2.0 * 0xFF),
+            static_cast<view_component>((alpha<double>() + aOther.alpha<double>()) / 2.0 * 0xFF));
     }
 
-    bool color::light(double aThreshold) const
+    bool sRGB_color::light(double aThreshold) const
     { 
         return to_hsl().lightness() >= aThreshold;
     }
 
-    bool color::dark(double aThreshold) const
+    bool sRGB_color::dark(double aThreshold) const
     { 
         return to_hsl().lightness() < aThreshold;
     }
 
-    color& color::lighten(component aDelta) 
+    sRGB_color& sRGB_color::lighten(view_component aDelta) 
     { 
         *this += aDelta; 
         return *this; 
     }
 
-    color& color::darken(component aDelta) 
+    sRGB_color& sRGB_color::darken(view_component aDelta) 
     { 
         *this -= aDelta; 
         return *this; 
     }
 
-    color color::lighter(component aDelta) const
+    sRGB_color sRGB_color::lighter(view_component aDelta) const
     {
-        color ret(*this);
+        sRGB_color ret(*this);
         ret += aDelta;
         return ret;
     }
 
-    color color::darker(component aDelta) const
+    sRGB_color sRGB_color::darker(view_component aDelta) const
     {
-        color ret(*this);
+        sRGB_color ret(*this);
         ret -= aDelta;
         return ret;
     }
 
-    color color::shade(component aDelta) const
+    sRGB_color sRGB_color::shade(view_component aDelta) const
     {
         if (light())
             return darker(aDelta);
@@ -373,7 +274,7 @@ namespace neogfx
             return lighter(aDelta);
     }
     
-    color color::unshade(component aDelta) const
+    sRGB_color sRGB_color::unshade(view_component aDelta) const
     {
         if (light())
             return lighter(aDelta);
@@ -381,100 +282,90 @@ namespace neogfx
             return darker(aDelta);
     }
 
-    color color::monochrome() const
+    sRGB_color sRGB_color::monochrome() const
     {
-        component i = static_cast<component>(intensity() * 255.0);
-        return color(i, i, i, alpha());
+        view_component i = static_cast<view_component>(intensity() * 255.0);
+        return sRGB_color(i, i, i, alpha());
     }
 
-    color color::same_lightness_as(const color& aOther) const
+    sRGB_color sRGB_color::same_lightness_as(const sRGB_color& aOther) const
     {
         hsl_color temp = to_hsl();
         temp.set_lightness(aOther.to_hsl().lightness());
         return temp.to_rgb();
     }
 
-    color color::with_lightness(double aLightness) const
+    sRGB_color sRGB_color::with_lightness(double aLightness) const
     {
         hsl_color temp = to_hsl();
         temp.set_lightness(std::min(aLightness, 1.0));
         return temp.to_rgb();
     }
 
-    color color::inverse() const
+    sRGB_color sRGB_color::inverse() const
     {
-        return color{ static_cast<component>(0xFF - red()), static_cast<component>(0xFF - green()), static_cast<component>(0xFF - blue()), alpha() };
+        return sRGB_color{ static_cast<view_component>(0xFF - red()), static_cast<view_component>(0xFF - green()), static_cast<view_component>(0xFF - blue()), alpha() };
     }
 
-    color& color::operator+=(component aDelta)
+    sRGB_color& sRGB_color::operator+=(view_component aDelta)
     {
-        component newRed = MaxComponetValue - red() < aDelta ? MaxComponetValue : red() + aDelta;
-        component newGreen = MaxComponetValue - green() < aDelta ? MaxComponetValue : green() + aDelta;
-        component newBlue = MaxComponetValue - blue() < aDelta ? MaxComponetValue : blue() + aDelta;
-        *this = color(newRed, newGreen, newBlue, alpha());
+        view_component newRed = std::numeric_limits<view_component>::max() - red() < aDelta ? std::numeric_limits<view_component>::max() : red() + aDelta;
+        view_component newGreen = std::numeric_limits<view_component>::max() - green() < aDelta ? std::numeric_limits<view_component>::max() : green() + aDelta;
+        view_component newBlue = std::numeric_limits<view_component>::max() - blue() < aDelta ? std::numeric_limits<view_component>::max() : blue() + aDelta;
+        *this = sRGB_color(newRed, newGreen, newBlue, alpha());
         return *this;
     }
 
-    color& color::operator-=(component aDelta)
+    sRGB_color& sRGB_color::operator-=(view_component aDelta)
     {
-        component newRed = red() < aDelta ? MinComponetValue : red() - aDelta;
-        component newGreen = green() < aDelta ? MinComponetValue : green() - aDelta;
-        component newBlue = blue() < aDelta ? MinComponetValue : blue() - aDelta;
-        *this = color(newRed, newGreen, newBlue, alpha());
+        view_component newRed = red() < aDelta ? std::numeric_limits<view_component>::min() : red() - aDelta;
+        view_component newGreen = green() < aDelta ? std::numeric_limits<view_component>::min() : green() - aDelta;
+        view_component newBlue = blue() < aDelta ? std::numeric_limits<view_component>::min() : blue() - aDelta;
+        *this = sRGB_color(newRed, newGreen, newBlue, alpha());
         return *this;
     }
     
-    color color::operator~() const 
+    sRGB_color sRGB_color::operator~() const 
     { 
-        return color(static_cast<component>(~red() & 0xFF), static_cast<component>(~green() & 0xFF), static_cast<component>(~blue() & 0xFF), alpha());
+        return sRGB_color(static_cast<view_component>(~red() & 0xFF), static_cast<view_component>(~green() & 0xFF), static_cast<view_component>(~blue() & 0xFF), alpha());
     }
 
-    bool color::operator==(const color& aOther) const 
-    { 
-        return iValue == aOther.iValue; 
-    }
-
-    bool color::operator!=(const color& aOther) const 
-    { 
-        return iValue != aOther.iValue; 
-    }
-
-    bool color::operator<(const color& aOther) const
+    bool sRGB_color::operator<(const sRGB_color& aOther) const
     {
         hsv_color left = to_hsv();
         hsv_color right = aOther.to_hsv();
         return std::make_tuple(left.hue(), left.saturation(), left.value()) < std::make_tuple(right.hue(), right.saturation(), right.value());
     }
 
-    std::string color::to_string() const
+    std::string sRGB_color::to_string() const
     {
         std::ostringstream result;
         result << "rgba(" << static_cast<int>(red()) << ", " << static_cast<int>(green()) << ", " << static_cast<int>(blue()) << ", " << alpha() / 255.0 << ");";
         return result.str();
     }
 
-    std::string color::to_hex_string() const
+    std::string sRGB_color::to_hex_string() const
     {
         std::ostringstream result;
-        result << "#" << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << with_alpha(0).value();
+        result << "#" << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << with_alpha(0).as_argb();
         if (alpha() != 0xFF)
             result << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint32_t>(alpha());
         return result.str();
     }
 
-    vec4 color::to_vec4() const
+    vec4 sRGB_color::to_vec4() const
     {
         return vec4{ red<double>(), green<double>(), blue<double>(), alpha<double>() };
     }
 
-    vec4f color::to_vec4f() const
+    vec4f sRGB_color::to_vec4f() const
     {
         return vec4{ red<float>(), green<float>(), blue<float>(), alpha<float>() };
     }
 
     gradient::gradient() :
         iUseCache{ true },
-        iColorStops{ {0.0, color::Black}, {1.0, color::Black} },
+        iColorStops{ {0.0, sRGB_color::Black}, {1.0, sRGB_color::Black} },
         iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
         iDirection{ gradient_direction::Vertical },
         iOrientation{ corner::TopLeft },
@@ -498,17 +389,17 @@ namespace neogfx
     {
     }
 
-    gradient::gradient(const color& aColor) :
+    gradient::gradient(const sRGB_color& aColor) :
         gradient{ aColor, gradient_direction::Vertical }
     {
     }
 
-    gradient::gradient(const color& aColor, gradient_direction aDirection) :
+    gradient::gradient(const sRGB_color& aColor, gradient_direction aDirection) :
         gradient{ aColor, aColor, aDirection }
     {
     }
 
-    gradient::gradient(const color& aColor1, const color& aColor2, gradient_direction aDirection) :
+    gradient::gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection) :
         iUseCache{ true },
         iColorStops{ {0.0, aColor1}, {1.0, aColor2} },
         iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
@@ -522,7 +413,7 @@ namespace neogfx
 
     gradient::gradient(const color_stop_list& aColorStops, gradient_direction aDirection) :
         iUseCache{ true },
-        iColorStops{ !aColorStops.empty() ? aColorStops : color_stop_list{ {0.0, color::Black}, {1.0, color::Black} } },
+        iColorStops{ !aColorStops.empty() ? aColorStops : color_stop_list{ {0.0, sRGB_color::Black}, {1.0, sRGB_color::Black} } },
         iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
         iDirection{ aDirection },
         iOrientation{ corner::TopLeft },
@@ -533,7 +424,7 @@ namespace neogfx
         fix();
     }
     
-    gradient::gradient(const std::initializer_list<color>& aColors, gradient_direction aDirection) :
+    gradient::gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection) :
         gradient{}
     {
         set_direction(aDirection);
@@ -552,7 +443,7 @@ namespace neogfx
 
     gradient::gradient(const color_stop_list& aColorStops, const alpha_stop_list& aAlphaStops, gradient_direction aDirection) :
         iUseCache{ true },
-        iColorStops{ !aColorStops.empty() ? aColorStops : color_stop_list{ {0.0, color::Black}, {1.0, color::Black} } },
+        iColorStops{ !aColorStops.empty() ? aColorStops : color_stop_list{ {0.0, sRGB_color::Black}, {1.0, sRGB_color::Black} } },
         iAlphaStops{ !aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{ {0.0, 255_u8}, {1.0, 255_u8} } },
         iDirection{ aDirection },
         iOrientation{ corner::TopLeft },
@@ -650,7 +541,7 @@ namespace neogfx
     
     gradient::color_stop_list::iterator gradient::find_color_stop(double aPos, bool aToInsert)
     {
-        auto colorStop = std::lower_bound(color_stops().begin(), color_stops().end(), color_stop{ aPos, color{} },
+        auto colorStop = std::lower_bound(color_stops().begin(), color_stops().end(), color_stop{ aPos, sRGB_color{} },
             [](const color_stop& aLeft, const color_stop& aRight)
         {
             return aLeft.first < aRight.first;
@@ -724,23 +615,23 @@ namespace neogfx
         return alpha_stops().size();
     }
     
-    color gradient::at(double aPos) const
+    sRGB_color gradient::at(double aPos) const
     {
-        color result = color_at(aPos);
+        sRGB_color result = color_at(aPos);
         return result.with_combined_alpha(alpha_at(aPos));
     }
 
-    color gradient::at(double aPos, double aStart, double aEnd) const
+    sRGB_color gradient::at(double aPos, double aStart, double aEnd) const
     {
         return at(normalized_position(aPos, aStart, aEnd));
     }
 
-    color gradient::color_at(double aPos) const
+    sRGB_color gradient::color_at(double aPos) const
     {
         if (aPos < 0.0 || aPos > 1.0)
             throw bad_position();
-        color::component red{}, green{}, blue{}, alpha{};
-        auto colorStop = std::lower_bound(color_stops().begin(), color_stops().end(), color_stop{ aPos, color{} },
+        sRGB_color::view_component red{}, green{}, blue{}, alpha{};
+        auto colorStop = std::lower_bound(color_stops().begin(), color_stops().end(), color_stop{ aPos, sRGB_color{} },
             [](const color_stop& aLeft, const color_stop& aRight)
         {
             return aLeft.first < aRight.first;
@@ -759,15 +650,15 @@ namespace neogfx
         green = lerp(left->second.green(), right->second.green(), nc);
         blue = lerp(left->second.blue(), right->second.blue(), nc);
         alpha = lerp(left->second.alpha(), right->second.alpha(), nc);
-        return color{ red, green, blue, alpha };
+        return sRGB_color{ red, green, blue, alpha };
     }
 
-    color gradient::color_at(double aPos, double aStart, double aEnd) const
+    sRGB_color gradient::color_at(double aPos, double aStart, double aEnd) const
     {
         return color_at(normalized_position(aPos, aStart, aEnd));
     }
 
-    color::component gradient::alpha_at(double aPos) const
+    sRGB_color::view_component gradient::alpha_at(double aPos) const
     {
         auto alphaStop = std::lower_bound(alpha_stops().begin(), alpha_stops().end(), alpha_stop{ aPos, 255_u8 },
             [](const alpha_stop& aLeft, const alpha_stop& aRight)
@@ -784,7 +675,7 @@ namespace neogfx
             --right;
         aPos = std::min(std::max(left->first, aPos), right->first);
         double na = (left != right ? (aPos - left->first) / (right->first - left->first) : 0.0);
-        color::component alpha = static_cast<color::component>((lerp(left->second, right->second, na) / 255.0) * 255.0);
+        sRGB_color::view_component alpha = static_cast<sRGB_color::view_component>((lerp(left->second, right->second, na) / 255.0) * 255.0);
         return alpha;
     }
 
@@ -800,12 +691,12 @@ namespace neogfx
         return reversedGradient;
     }
 
-    color::component gradient::alpha_at(double aPos, double aStart, double aEnd) const
+    sRGB_color::view_component gradient::alpha_at(double aPos, double aStart, double aEnd) const
     {
         return alpha_at(normalized_position(aPos, aStart, aEnd));
     }
 
-    gradient gradient::with_alpha(color::component aAlpha) const
+    gradient gradient::with_alpha(sRGB_color::view_component aAlpha) const
     {
         gradient result{color_stops(), {{0.0, aAlpha}, {1.0, aAlpha}}, direction()};
         for (auto& stop : result.color_stops())
@@ -813,11 +704,11 @@ namespace neogfx
         return result;
     }
 
-    gradient gradient::with_combined_alpha(color::component aAlpha) const
+    gradient gradient::with_combined_alpha(sRGB_color::view_component aAlpha) const
     {
         gradient result{ color_stops(), alpha_stops(), direction() };
         for (auto& stop : result.alpha_stops())
-            stop.second = static_cast<color::component>((stop.second / 255.0 * aAlpha / 255.0) * 255.0);
+            stop.second = static_cast<sRGB_color::view_component>((stop.second / 255.0 * aAlpha / 255.0) * 255.0);
         return result;
     }
 
@@ -1007,7 +898,7 @@ namespace neogfx
     {
         if (color_stops().empty())
         {
-            color_stops().assign({ { 0.0, color::Black }, { 1.0, color::Black } });
+            color_stops().assign({ { 0.0, sRGB_color::Black }, { 1.0, sRGB_color::Black } });
         }
         else if (color_stops().size() == 1)
         {
@@ -1033,670 +924,670 @@ namespace neogfx
         }
     }
 
-    const color color::AliceBlue = color(0xF0, 0xF8, 0xFF);
-    const color color::AntiqueWhite = color(0xFA, 0xEB, 0xD7);
-    const color color::AntiqueWhite1 = color(0xFF, 0xEF, 0xDB);
-    const color color::AntiqueWhite2 = color(0xEE, 0xDF, 0xCC);
-    const color color::AntiqueWhite3 = color(0xCD, 0xC0, 0xB0);
-    const color color::AntiqueWhite4 = color(0x8B, 0x83, 0x78);
-    const color color::Aquamarine = color(0x7F, 0xFF, 0xD4);
-    const color color::Aquamarine1 = color(0x7F, 0xFF, 0xD4);
-    const color color::Aquamarine2 = color(0x76, 0xEE, 0xC6);
-    const color color::Aquamarine3 = color(0x66, 0xCD, 0xAA);
-    const color color::Aquamarine4 = color(0x45, 0x8B, 0x74);
-    const color color::Azure = color(0xF0, 0xFF, 0xFF);
-    const color color::Azure1 = color(0xF0, 0xFF, 0xFF);
-    const color color::Azure2 = color(0xE0, 0xEE, 0xEE);
-    const color color::Azure3 = color(0xC1, 0xCD, 0xCD);
-    const color color::Azure4 = color(0x83, 0x8B, 0x8B);
-    const color color::Beige = color(0xF5, 0xF5, 0xDC);
-    const color color::Bisque = color(0xFF, 0xE4, 0xC4);
-    const color color::Bisque1 = color(0xFF, 0xE4, 0xC4);
-    const color color::Bisque2 = color(0xEE, 0xD5, 0xB7);
-    const color color::Bisque3 = color(0xCD, 0xB7, 0x9E);
-    const color color::Bisque4 = color(0x8B, 0x7D, 0x6B);
-    const color color::Black = color(0x00, 0x00, 0x00);
-    const color color::BlanchedAlmond = color(0xFF, 0xEB, 0xCD);
-    const color color::Blue = color(0x00, 0x00, 0xFF);
-    const color color::Blue1 = color(0x00, 0x00, 0xFF);
-    const color color::Blue2 = color(0x00, 0x00, 0xEE);
-    const color color::Blue3 = color(0x00, 0x00, 0xCD);
-    const color color::Blue4 = color(0x00, 0x00, 0x8B);
-    const color color::BlueViolet = color(0x8A, 0x2B, 0xE2);
-    const color color::Brown = color(0xA5, 0x2A, 0x2A);
-    const color color::Brown1 = color(0xFF, 0x40, 0x40);
-    const color color::Brown2 = color(0xEE, 0x3B, 0x3B);
-    const color color::Brown3 = color(0xCD, 0x33, 0x33);
-    const color color::Brown4 = color(0x8B, 0x23, 0x23);
-    const color color::Burlywood = color(0xDE, 0xB8, 0x87);
-    const color color::Burlywood1 = color(0xFF, 0xD3, 0x9B);
-    const color color::Burlywood2 = color(0xEE, 0xC5, 0x91);
-    const color color::Burlywood3 = color(0xCD, 0xAA, 0x7D);
-    const color color::Burlywood4 = color(0x8B, 0x73, 0x55);
-    const color color::CadetBlue = color(0x5F, 0x9E, 0xA0);
-    const color color::CadetBlue1 = color(0x98, 0xF5, 0xFF);
-    const color color::CadetBlue2 = color(0x8E, 0xE5, 0xEE);
-    const color color::CadetBlue3 = color(0x7A, 0xC5, 0xCD);
-    const color color::CadetBlue4 = color(0x53, 0x86, 0x8B);
-    const color color::Chartreuse = color(0x7F, 0xFF, 0x00);
-    const color color::Chartreuse1 = color(0x7F, 0xFF, 0x00);
-    const color color::Chartreuse2 = color(0x76, 0xEE, 0x00);
-    const color color::Chartreuse3 = color(0x66, 0xCD, 0x00);
-    const color color::Chartreuse4 = color(0x45, 0x8B, 0x00);
-    const color color::Chocolate = color(0xD2, 0x69, 0x1E);
-    const color color::Chocolate1 = color(0xFF, 0x7F, 0x24);
-    const color color::Chocolate2 = color(0xEE, 0x76, 0x21);
-    const color color::Chocolate3 = color(0xCD, 0x66, 0x1D);
-    const color color::Chocolate4 = color(0x8B, 0x45, 0x13);
-    const color color::Coral = color(0xFF, 0x7F, 0x50);
-    const color color::Coral1 = color(0xFF, 0x72, 0x56);
-    const color color::Coral2 = color(0xEE, 0x6A, 0x50);
-    const color color::Coral3 = color(0xCD, 0x5B, 0x45);
-    const color color::Coral4 = color(0x8B, 0x3E, 0x2F);
-    const color color::CornflowerBlue = color(0x64, 0x95, 0xED);
-    const color color::Cornsilk = color(0xFF, 0xF8, 0xDC);
-    const color color::Cornsilk1 = color(0xFF, 0xF8, 0xDC);
-    const color color::Cornsilk2 = color(0xEE, 0xE8, 0xCD);
-    const color color::Cornsilk3 = color(0xCD, 0xC8, 0xB1);
-    const color color::Cornsilk4 = color(0x8B, 0x88, 0x78);
-    const color color::Cyan = color(0x00, 0xFF, 0xFF);
-    const color color::Cyan1 = color(0x00, 0xFF, 0xFF);
-    const color color::Cyan2 = color(0x00, 0xEE, 0xEE);
-    const color color::Cyan3 = color(0x00, 0xCD, 0xCD);
-    const color color::Cyan4 = color(0x00, 0x8B, 0x8B);
-    const color color::DarkBlue = color(0x00, 0x00, 0x8B);
-    const color color::DarkCyan = color(0x00, 0x8B, 0x8B);
-    const color color::DarkGoldenrod = color(0xB8, 0x86, 0x0B);
-    const color color::DarkGoldenrod1 = color(0xFF, 0xB9, 0x0F);
-    const color color::DarkGoldenrod2 = color(0xEE, 0xAD, 0x0E);
-    const color color::DarkGoldenrod3 = color(0xCD, 0x95, 0x0C);
-    const color color::DarkGoldenrod4 = color(0x8B, 0x65, 0x08);
-    const color color::DarkGray = color(0xA9, 0xA9, 0xA9);
-    const color color::DarkGreen = color(0x00, 0x64, 0x00);
-    const color color::DarkGrey = color(0xA9, 0xA9, 0xA9);
-    const color color::DarkKhaki = color(0xBD, 0xB7, 0x6B);
-    const color color::DarkMagenta = color(0x8B, 0x00, 0x8B);
-    const color color::DarkOliveGreen = color(0x55, 0x6B, 0x2F);
-    const color color::DarkOliveGreen1 = color(0xCA, 0xFF, 0x70);
-    const color color::DarkOliveGreen2 = color(0xBC, 0xEE, 0x68);
-    const color color::DarkOliveGreen3 = color(0xA2, 0xCD, 0x5A);
-    const color color::DarkOliveGreen4 = color(0x6E, 0x8B, 0x3D);
-    const color color::DarkOrange = color(0xFF, 0x8C, 0x00);
-    const color color::DarkOrange1 = color(0xFF, 0x7F, 0x00);
-    const color color::DarkOrange2 = color(0xEE, 0x76, 0x00);
-    const color color::DarkOrange3 = color(0xCD, 0x66, 0x00);
-    const color color::DarkOrange4 = color(0x8B, 0x45, 0x00);
-    const color color::DarkOrchid = color(0x99, 0x32, 0xCC);
-    const color color::DarkOrchid1 = color(0xBF, 0x3E, 0xFF);
-    const color color::DarkOrchid2 = color(0xB2, 0x3A, 0xEE);
-    const color color::DarkOrchid3 = color(0x9A, 0x32, 0xCD);
-    const color color::DarkOrchid4 = color(0x68, 0x22, 0x8B);
-    const color color::DarkRed = color(0x8B, 0x00, 0x00);
-    const color color::DarkSalmon = color(0xE9, 0x96, 0x7A);
-    const color color::DarkSeaGreen = color(0x8F, 0xBC, 0x8F);
-    const color color::DarkSeaGreen1 = color(0xC1, 0xFF, 0xC1);
-    const color color::DarkSeaGreen2 = color(0xB4, 0xEE, 0xB4);
-    const color color::DarkSeaGreen3 = color(0x9B, 0xCD, 0x9B);
-    const color color::DarkSeaGreen4 = color(0x69, 0x8B, 0x69);
-    const color color::DarkSlateBlue = color(0x48, 0x3D, 0x8B);
-    const color color::DarkSlateGray = color(0x2F, 0x4F, 0x4F);
-    const color color::DarkSlateGray1 = color(0x97, 0xFF, 0xFF);
-    const color color::DarkSlateGray2 = color(0x8D, 0xEE, 0xEE);
-    const color color::DarkSlateGray3 = color(0x79, 0xCD, 0xCD);
-    const color color::DarkSlateGray4 = color(0x52, 0x8B, 0x8B);
-    const color color::DarkSlateGrey = color(0x2F, 0x4F, 0x4F);
-    const color color::DarkTurquoise = color(0x00, 0xCE, 0xD1);
-    const color color::DarkViolet = color(0x94, 0x00, 0xD3);
-    const color color::DebianRed = color(0xD7, 0x07, 0x51);
-    const color color::DeepPink = color(0xFF, 0x14, 0x93);
-    const color color::DeepPink1 = color(0xFF, 0x14, 0x93);
-    const color color::DeepPink2 = color(0xEE, 0x12, 0x89);
-    const color color::DeepPink3 = color(0xCD, 0x10, 0x76);
-    const color color::DeepPink4 = color(0x8B, 0x0A, 0x50);
-    const color color::DeepSkyBlue = color(0x00, 0xBF, 0xFF);
-    const color color::DeepSkyBlue1 = color(0x00, 0xBF, 0xFF);
-    const color color::DeepSkyBlue2 = color(0x00, 0xB2, 0xEE);
-    const color color::DeepSkyBlue3 = color(0x00, 0x9A, 0xCD);
-    const color color::DeepSkyBlue4 = color(0x00, 0x68, 0x8B);
-    const color color::DimGray = color(0x69, 0x69, 0x69);
-    const color color::DimGrey = color(0x69, 0x69, 0x69);
-    const color color::DodgerBlue = color(0x1E, 0x90, 0xFF);
-    const color color::DodgerBlue1 = color(0x1E, 0x90, 0xFF);
-    const color color::DodgerBlue2 = color(0x1C, 0x86, 0xEE);
-    const color color::DodgerBlue3 = color(0x18, 0x74, 0xCD);
-    const color color::DodgerBlue4 = color(0x10, 0x4E, 0x8B);
-    const color color::Firebrick = color(0xB2, 0x22, 0x22);
-    const color color::Firebrick1 = color(0xFF, 0x30, 0x30);
-    const color color::Firebrick2 = color(0xEE, 0x2C, 0x2C);
-    const color color::Firebrick3 = color(0xCD, 0x26, 0x26);
-    const color color::Firebrick4 = color(0x8B, 0x1A, 0x1A);
-    const color color::FloralWhite = color(0xFF, 0xFA, 0xF0);
-    const color color::ForestGreen = color(0x22, 0x8B, 0x22);
-    const color color::Gainsboro = color(0xDC, 0xDC, 0xDC);
-    const color color::GhostWhite = color(0xF8, 0xF8, 0xFF);
-    const color color::Gold = color(0xFF, 0xD7, 0x00);
-    const color color::Gold1 = color(0xFF, 0xD7, 0x00);
-    const color color::Gold2 = color(0xEE, 0xC9, 0x00);
-    const color color::Gold3 = color(0xCD, 0xAD, 0x00);
-    const color color::Gold4 = color(0x8B, 0x75, 0x00);
-    const color color::Goldenrod = color(0xDA, 0xA5, 0x20);
-    const color color::Goldenrod1 = color(0xFF, 0xC1, 0x25);
-    const color color::Goldenrod2 = color(0xEE, 0xB4, 0x22);
-    const color color::Goldenrod3 = color(0xCD, 0x9B, 0x1D);
-    const color color::Goldenrod4 = color(0x8B, 0x69, 0x14);
-    const color color::Gray = color(0xBE, 0xBE, 0xBE);
-    const color color::Gray0 = color(0x00, 0x00, 0x00);
-    const color color::Gray1 = color(0x03, 0x03, 0x03);
-    const color color::Gray10 = color(0x1A, 0x1A, 0x1A);
-    const color color::Gray100 = color(0xFF, 0xFF, 0xFF);
-    const color color::Gray11 = color(0x1C, 0x1C, 0x1C);
-    const color color::Gray12 = color(0x1F, 0x1F, 0x1F);
-    const color color::Gray13 = color(0x21, 0x21, 0x21);
-    const color color::Gray14 = color(0x24, 0x24, 0x24);
-    const color color::Gray15 = color(0x26, 0x26, 0x26);
-    const color color::Gray16 = color(0x29, 0x29, 0x29);
-    const color color::Gray17 = color(0x2B, 0x2B, 0x2B);
-    const color color::Gray18 = color(0x2E, 0x2E, 0x2E);
-    const color color::Gray19 = color(0x30, 0x30, 0x30);
-    const color color::Gray2 = color(0x05, 0x05, 0x05);
-    const color color::Gray20 = color(0x33, 0x33, 0x33);
-    const color color::Gray21 = color(0x36, 0x36, 0x36);
-    const color color::Gray22 = color(0x38, 0x38, 0x38);
-    const color color::Gray23 = color(0x3B, 0x3B, 0x3B);
-    const color color::Gray24 = color(0x3D, 0x3D, 0x3D);
-    const color color::Gray25 = color(0x40, 0x40, 0x40);
-    const color color::Gray26 = color(0x42, 0x42, 0x42);
-    const color color::Gray27 = color(0x45, 0x45, 0x45);
-    const color color::Gray28 = color(0x47, 0x47, 0x47);
-    const color color::Gray29 = color(0x4A, 0x4A, 0x4A);
-    const color color::Gray3 = color(0x08, 0x08, 0x08);
-    const color color::Gray30 = color(0x4D, 0x4D, 0x4D);
-    const color color::Gray31 = color(0x4F, 0x4F, 0x4F);
-    const color color::Gray32 = color(0x52, 0x52, 0x52);
-    const color color::Gray33 = color(0x54, 0x54, 0x54);
-    const color color::Gray34 = color(0x57, 0x57, 0x57);
-    const color color::Gray35 = color(0x59, 0x59, 0x59);
-    const color color::Gray36 = color(0x5C, 0x5C, 0x5C);
-    const color color::Gray37 = color(0x5E, 0x5E, 0x5E);
-    const color color::Gray38 = color(0x61, 0x61, 0x61);
-    const color color::Gray39 = color(0x63, 0x63, 0x63);
-    const color color::Gray4 = color(0x0A, 0x0A, 0x0A);
-    const color color::Gray40 = color(0x66, 0x66, 0x66);
-    const color color::Gray41 = color(0x69, 0x69, 0x69);
-    const color color::Gray42 = color(0x6B, 0x6B, 0x6B);
-    const color color::Gray43 = color(0x6E, 0x6E, 0x6E);
-    const color color::Gray44 = color(0x70, 0x70, 0x70);
-    const color color::Gray45 = color(0x73, 0x73, 0x73);
-    const color color::Gray46 = color(0x75, 0x75, 0x75);
-    const color color::Gray47 = color(0x78, 0x78, 0x78);
-    const color color::Gray48 = color(0x7A, 0x7A, 0x7A);
-    const color color::Gray49 = color(0x7D, 0x7D, 0x7D);
-    const color color::Gray5 = color(0x0D, 0x0D, 0x0D);
-    const color color::Gray50 = color(0x7F, 0x7F, 0x7F);
-    const color color::Gray51 = color(0x82, 0x82, 0x82);
-    const color color::Gray52 = color(0x85, 0x85, 0x85);
-    const color color::Gray53 = color(0x87, 0x87, 0x87);
-    const color color::Gray54 = color(0x8A, 0x8A, 0x8A);
-    const color color::Gray55 = color(0x8C, 0x8C, 0x8C);
-    const color color::Gray56 = color(0x8F, 0x8F, 0x8F);
-    const color color::Gray57 = color(0x91, 0x91, 0x91);
-    const color color::Gray58 = color(0x94, 0x94, 0x94);
-    const color color::Gray59 = color(0x96, 0x96, 0x96);
-    const color color::Gray6 = color(0x0F, 0x0F, 0x0F);
-    const color color::Gray60 = color(0x99, 0x99, 0x99);
-    const color color::Gray61 = color(0x9C, 0x9C, 0x9C);
-    const color color::Gray62 = color(0x9E, 0x9E, 0x9E);
-    const color color::Gray63 = color(0xA1, 0xA1, 0xA1);
-    const color color::Gray64 = color(0xA3, 0xA3, 0xA3);
-    const color color::Gray65 = color(0xA6, 0xA6, 0xA6);
-    const color color::Gray66 = color(0xA8, 0xA8, 0xA8);
-    const color color::Gray67 = color(0xAB, 0xAB, 0xAB);
-    const color color::Gray68 = color(0xAD, 0xAD, 0xAD);
-    const color color::Gray69 = color(0xB0, 0xB0, 0xB0);
-    const color color::Gray7 = color(0x12, 0x12, 0x12);
-    const color color::Gray70 = color(0xB3, 0xB3, 0xB3);
-    const color color::Gray71 = color(0xB5, 0xB5, 0xB5);
-    const color color::Gray72 = color(0xB8, 0xB8, 0xB8);
-    const color color::Gray73 = color(0xBA, 0xBA, 0xBA);
-    const color color::Gray74 = color(0xBD, 0xBD, 0xBD);
-    const color color::Gray75 = color(0xBF, 0xBF, 0xBF);
-    const color color::Gray76 = color(0xC2, 0xC2, 0xC2);
-    const color color::Gray77 = color(0xC4, 0xC4, 0xC4);
-    const color color::Gray78 = color(0xC7, 0xC7, 0xC7);
-    const color color::Gray79 = color(0xC9, 0xC9, 0xC9);
-    const color color::Gray8 = color(0x14, 0x14, 0x14);
-    const color color::Gray80 = color(0xCC, 0xCC, 0xCC);
-    const color color::Gray81 = color(0xCF, 0xCF, 0xCF);
-    const color color::Gray82 = color(0xD1, 0xD1, 0xD1);
-    const color color::Gray83 = color(0xD4, 0xD4, 0xD4);
-    const color color::Gray84 = color(0xD6, 0xD6, 0xD6);
-    const color color::Gray85 = color(0xD9, 0xD9, 0xD9);
-    const color color::Gray86 = color(0xDB, 0xDB, 0xDB);
-    const color color::Gray87 = color(0xDE, 0xDE, 0xDE);
-    const color color::Gray88 = color(0xE0, 0xE0, 0xE0);
-    const color color::Gray89 = color(0xE3, 0xE3, 0xE3);
-    const color color::Gray9 = color(0x17, 0x17, 0x17);
-    const color color::Gray90 = color(0xE5, 0xE5, 0xE5);
-    const color color::Gray91 = color(0xE8, 0xE8, 0xE8);
-    const color color::Gray92 = color(0xEB, 0xEB, 0xEB);
-    const color color::Gray93 = color(0xED, 0xED, 0xED);
-    const color color::Gray94 = color(0xF0, 0xF0, 0xF0);
-    const color color::Gray95 = color(0xF2, 0xF2, 0xF2);
-    const color color::Gray96 = color(0xF5, 0xF5, 0xF5);
-    const color color::Gray97 = color(0xF7, 0xF7, 0xF7);
-    const color color::Gray98 = color(0xFA, 0xFA, 0xFA);
-    const color color::Gray99 = color(0xFC, 0xFC, 0xFC);
-    const color color::Green = color(0x00, 0xFF, 0x00);
-    const color color::Green1 = color(0x00, 0xFF, 0x00);
-    const color color::Green2 = color(0x00, 0xEE, 0x00);
-    const color color::Green3 = color(0x00, 0xCD, 0x00);
-    const color color::Green4 = color(0x00, 0x8B, 0x00);
-    const color color::GreenYellow = color(0xAD, 0xFF, 0x2F);
-    const color color::Grey = color(0xBE, 0xBE, 0xBE);
-    const color color::Grey0 = color(0x00, 0x00, 0x00);
-    const color color::Grey1 = color(0x03, 0x03, 0x03);
-    const color color::Grey10 = color(0x1A, 0x1A, 0x1A);
-    const color color::Grey100 = color(0xFF, 0xFF, 0xFF);
-    const color color::Grey11 = color(0x1C, 0x1C, 0x1C);
-    const color color::Grey12 = color(0x1F, 0x1F, 0x1F);
-    const color color::Grey13 = color(0x21, 0x21, 0x21);
-    const color color::Grey14 = color(0x24, 0x24, 0x24);
-    const color color::Grey15 = color(0x26, 0x26, 0x26);
-    const color color::Grey16 = color(0x29, 0x29, 0x29);
-    const color color::Grey17 = color(0x2B, 0x2B, 0x2B);
-    const color color::Grey18 = color(0x2E, 0x2E, 0x2E);
-    const color color::Grey19 = color(0x30, 0x30, 0x30);
-    const color color::Grey2 = color(0x05, 0x05, 0x05);
-    const color color::Grey20 = color(0x33, 0x33, 0x33);
-    const color color::Grey21 = color(0x36, 0x36, 0x36);
-    const color color::Grey22 = color(0x38, 0x38, 0x38);
-    const color color::Grey23 = color(0x3B, 0x3B, 0x3B);
-    const color color::Grey24 = color(0x3D, 0x3D, 0x3D);
-    const color color::Grey25 = color(0x40, 0x40, 0x40);
-    const color color::Grey26 = color(0x42, 0x42, 0x42);
-    const color color::Grey27 = color(0x45, 0x45, 0x45);
-    const color color::Grey28 = color(0x47, 0x47, 0x47);
-    const color color::Grey29 = color(0x4A, 0x4A, 0x4A);
-    const color color::Grey3 = color(0x08, 0x08, 0x08);
-    const color color::Grey30 = color(0x4D, 0x4D, 0x4D);
-    const color color::Grey31 = color(0x4F, 0x4F, 0x4F);
-    const color color::Grey32 = color(0x52, 0x52, 0x52);
-    const color color::Grey33 = color(0x54, 0x54, 0x54);
-    const color color::Grey34 = color(0x57, 0x57, 0x57);
-    const color color::Grey35 = color(0x59, 0x59, 0x59);
-    const color color::Grey36 = color(0x5C, 0x5C, 0x5C);
-    const color color::Grey37 = color(0x5E, 0x5E, 0x5E);
-    const color color::Grey38 = color(0x61, 0x61, 0x61);
-    const color color::Grey39 = color(0x63, 0x63, 0x63);
-    const color color::Grey4 = color(0x0A, 0x0A, 0x0A);
-    const color color::Grey40 = color(0x66, 0x66, 0x66);
-    const color color::Grey41 = color(0x69, 0x69, 0x69);
-    const color color::Grey42 = color(0x6B, 0x6B, 0x6B);
-    const color color::Grey43 = color(0x6E, 0x6E, 0x6E);
-    const color color::Grey44 = color(0x70, 0x70, 0x70);
-    const color color::Grey45 = color(0x73, 0x73, 0x73);
-    const color color::Grey46 = color(0x75, 0x75, 0x75);
-    const color color::Grey47 = color(0x78, 0x78, 0x78);
-    const color color::Grey48 = color(0x7A, 0x7A, 0x7A);
-    const color color::Grey49 = color(0x7D, 0x7D, 0x7D);
-    const color color::Grey5 = color(0x0D, 0x0D, 0x0D);
-    const color color::Grey50 = color(0x7F, 0x7F, 0x7F);
-    const color color::Grey51 = color(0x82, 0x82, 0x82);
-    const color color::Grey52 = color(0x85, 0x85, 0x85);
-    const color color::Grey53 = color(0x87, 0x87, 0x87);
-    const color color::Grey54 = color(0x8A, 0x8A, 0x8A);
-    const color color::Grey55 = color(0x8C, 0x8C, 0x8C);
-    const color color::Grey56 = color(0x8F, 0x8F, 0x8F);
-    const color color::Grey57 = color(0x91, 0x91, 0x91);
-    const color color::Grey58 = color(0x94, 0x94, 0x94);
-    const color color::Grey59 = color(0x96, 0x96, 0x96);
-    const color color::Grey6 = color(0x0F, 0x0F, 0x0F);
-    const color color::Grey60 = color(0x99, 0x99, 0x99);
-    const color color::Grey61 = color(0x9C, 0x9C, 0x9C);
-    const color color::Grey62 = color(0x9E, 0x9E, 0x9E);
-    const color color::Grey63 = color(0xA1, 0xA1, 0xA1);
-    const color color::Grey64 = color(0xA3, 0xA3, 0xA3);
-    const color color::Grey65 = color(0xA6, 0xA6, 0xA6);
-    const color color::Grey66 = color(0xA8, 0xA8, 0xA8);
-    const color color::Grey67 = color(0xAB, 0xAB, 0xAB);
-    const color color::Grey68 = color(0xAD, 0xAD, 0xAD);
-    const color color::Grey69 = color(0xB0, 0xB0, 0xB0);
-    const color color::Grey7 = color(0x12, 0x12, 0x12);
-    const color color::Grey70 = color(0xB3, 0xB3, 0xB3);
-    const color color::Grey71 = color(0xB5, 0xB5, 0xB5);
-    const color color::Grey72 = color(0xB8, 0xB8, 0xB8);
-    const color color::Grey73 = color(0xBA, 0xBA, 0xBA);
-    const color color::Grey74 = color(0xBD, 0xBD, 0xBD);
-    const color color::Grey75 = color(0xBF, 0xBF, 0xBF);
-    const color color::Grey76 = color(0xC2, 0xC2, 0xC2);
-    const color color::Grey77 = color(0xC4, 0xC4, 0xC4);
-    const color color::Grey78 = color(0xC7, 0xC7, 0xC7);
-    const color color::Grey79 = color(0xC9, 0xC9, 0xC9);
-    const color color::Grey8 = color(0x14, 0x14, 0x14);
-    const color color::Grey80 = color(0xCC, 0xCC, 0xCC);
-    const color color::Grey81 = color(0xCF, 0xCF, 0xCF);
-    const color color::Grey82 = color(0xD1, 0xD1, 0xD1);
-    const color color::Grey83 = color(0xD4, 0xD4, 0xD4);
-    const color color::Grey84 = color(0xD6, 0xD6, 0xD6);
-    const color color::Grey85 = color(0xD9, 0xD9, 0xD9);
-    const color color::Grey86 = color(0xDB, 0xDB, 0xDB);
-    const color color::Grey87 = color(0xDE, 0xDE, 0xDE);
-    const color color::Grey88 = color(0xE0, 0xE0, 0xE0);
-    const color color::Grey89 = color(0xE3, 0xE3, 0xE3);
-    const color color::Grey9 = color(0x17, 0x17, 0x17);
-    const color color::Grey90 = color(0xE5, 0xE5, 0xE5);
-    const color color::Grey91 = color(0xE8, 0xE8, 0xE8);
-    const color color::Grey92 = color(0xEB, 0xEB, 0xEB);
-    const color color::Grey93 = color(0xED, 0xED, 0xED);
-    const color color::Grey94 = color(0xF0, 0xF0, 0xF0);
-    const color color::Grey95 = color(0xF2, 0xF2, 0xF2);
-    const color color::Grey96 = color(0xF5, 0xF5, 0xF5);
-    const color color::Grey97 = color(0xF7, 0xF7, 0xF7);
-    const color color::Grey98 = color(0xFA, 0xFA, 0xFA);
-    const color color::Grey99 = color(0xFC, 0xFC, 0xFC);
-    const color color::Honeydew = color(0xF0, 0xFF, 0xF0);
-    const color color::Honeydew1 = color(0xF0, 0xFF, 0xF0);
-    const color color::Honeydew2 = color(0xE0, 0xEE, 0xE0);
-    const color color::Honeydew3 = color(0xC1, 0xCD, 0xC1);
-    const color color::Honeydew4 = color(0x83, 0x8B, 0x83);
-    const color color::HotPink = color(0xFF, 0x69, 0xB4);
-    const color color::HotPink1 = color(0xFF, 0x6E, 0xB4);
-    const color color::HotPink2 = color(0xEE, 0x6A, 0xA7);
-    const color color::HotPink3 = color(0xCD, 0x60, 0x90);
-    const color color::HotPink4 = color(0x8B, 0x3A, 0x62);
-    const color color::IndianRed = color(0xCD, 0x5C, 0x5C);
-    const color color::IndianRed1 = color(0xFF, 0x6A, 0x6A);
-    const color color::IndianRed2 = color(0xEE, 0x63, 0x63);
-    const color color::IndianRed3 = color(0xCD, 0x55, 0x55);
-    const color color::IndianRed4 = color(0x8B, 0x3A, 0x3A);
-    const color color::Ivory = color(0xFF, 0xFF, 0xF0);
-    const color color::Ivory1 = color(0xFF, 0xFF, 0xF0);
-    const color color::Ivory2 = color(0xEE, 0xEE, 0xE0);
-    const color color::Ivory3 = color(0xCD, 0xCD, 0xC1);
-    const color color::Ivory4 = color(0x8B, 0x8B, 0x83);
-    const color color::Khaki = color(0xF0, 0xE6, 0x8C);
-    const color color::Khaki1 = color(0xFF, 0xF6, 0x8F);
-    const color color::Khaki2 = color(0xEE, 0xE6, 0x85);
-    const color color::Khaki3 = color(0xCD, 0xC6, 0x73);
-    const color color::Khaki4 = color(0x8B, 0x86, 0x4E);
-    const color color::Lavender = color(0xE6, 0xE6, 0xFA);
-    const color color::LavenderBlush = color(0xFF, 0xF0, 0xF5);
-    const color color::LavenderBlush1 = color(0xFF, 0xF0, 0xF5);
-    const color color::LavenderBlush2 = color(0xEE, 0xE0, 0xE5);
-    const color color::LavenderBlush3 = color(0xCD, 0xC1, 0xC5);
-    const color color::LavenderBlush4 = color(0x8B, 0x83, 0x86);
-    const color color::LawnGreen = color(0x7C, 0xFC, 0x00);
-    const color color::LemonChiffon = color(0xFF, 0xFA, 0xCD);
-    const color color::LemonChiffon1 = color(0xFF, 0xFA, 0xCD);
-    const color color::LemonChiffon2 = color(0xEE, 0xE9, 0xBF);
-    const color color::LemonChiffon3 = color(0xCD, 0xC9, 0xA5);
-    const color color::LemonChiffon4 = color(0x8B, 0x89, 0x70);
-    const color color::LightBlue = color(0xAD, 0xD8, 0xE6);
-    const color color::LightBlue1 = color(0xBF, 0xEF, 0xFF);
-    const color color::LightBlue2 = color(0xB2, 0xDF, 0xEE);
-    const color color::LightBlue3 = color(0x9A, 0xC0, 0xCD);
-    const color color::LightBlue4 = color(0x68, 0x83, 0x8B);
-    const color color::LightCoral = color(0xF0, 0x80, 0x80);
-    const color color::LightCyan = color(0xE0, 0xFF, 0xFF);
-    const color color::LightCyan1 = color(0xE0, 0xFF, 0xFF);
-    const color color::LightCyan2 = color(0xD1, 0xEE, 0xEE);
-    const color color::LightCyan3 = color(0xB4, 0xCD, 0xCD);
-    const color color::LightCyan4 = color(0x7A, 0x8B, 0x8B);
-    const color color::LightGoldenrod = color(0xEE, 0xDD, 0x82);
-    const color color::LightGoldenrod1 = color(0xFF, 0xEC, 0x8B);
-    const color color::LightGoldenrod2 = color(0xEE, 0xDC, 0x82);
-    const color color::LightGoldenrod3 = color(0xCD, 0xBE, 0x70);
-    const color color::LightGoldenrod4 = color(0x8B, 0x81, 0x4C);
-    const color color::LightGoldenrodYellow = color(0xFA, 0xFA, 0xD2);
-    const color color::LightGray = color(0xD3, 0xD3, 0xD3);
-    const color color::LightGreen = color(0x90, 0xEE, 0x90);
-    const color color::LightGrey = color(0xD3, 0xD3, 0xD3);
-    const color color::LightPink = color(0xFF, 0xB6, 0xC1);
-    const color color::LightPink1 = color(0xFF, 0xAE, 0xB9);
-    const color color::LightPink2 = color(0xEE, 0xA2, 0xAD);
-    const color color::LightPink3 = color(0xCD, 0x8C, 0x95);
-    const color color::LightPink4 = color(0x8B, 0x5F, 0x65);
-    const color color::LightSalmon = color(0xFF, 0xA0, 0x7A);
-    const color color::LightSalmon1 = color(0xFF, 0xA0, 0x7A);
-    const color color::LightSalmon2 = color(0xEE, 0x95, 0x72);
-    const color color::LightSalmon3 = color(0xCD, 0x81, 0x62);
-    const color color::LightSalmon4 = color(0x8B, 0x57, 0x42);
-    const color color::LightSeaGreen = color(0x20, 0xB2, 0xAA);
-    const color color::LightSkyBlue = color(0x87, 0xCE, 0xFA);
-    const color color::LightSkyBlue1 = color(0xB0, 0xE2, 0xFF);
-    const color color::LightSkyBlue2 = color(0xA4, 0xD3, 0xEE);
-    const color color::LightSkyBlue3 = color(0x8D, 0xB6, 0xCD);
-    const color color::LightSkyBlue4 = color(0x60, 0x7B, 0x8B);
-    const color color::LightSlateBlue = color(0x84, 0x70, 0xFF);
-    const color color::LightSlateGray = color(0x77, 0x88, 0x99);
-    const color color::LightSlateGrey = color(0x77, 0x88, 0x99);
-    const color color::LightSteelBlue = color(0xB0, 0xC4, 0xDE);
-    const color color::LightSteelBlue1 = color(0xCA, 0xE1, 0xFF);
-    const color color::LightSteelBlue2 = color(0xBC, 0xD2, 0xEE);
-    const color color::LightSteelBlue3 = color(0xA2, 0xB5, 0xCD);
-    const color color::LightSteelBlue4 = color(0x6E, 0x7B, 0x8B);
-    const color color::LightYellow = color(0xFF, 0xFF, 0xE0);
-    const color color::LightYellow1 = color(0xFF, 0xFF, 0xE0);
-    const color color::LightYellow2 = color(0xEE, 0xEE, 0xD1);
-    const color color::LightYellow3 = color(0xCD, 0xCD, 0xB4);
-    const color color::LightYellow4 = color(0x8B, 0x8B, 0x7A);
-    const color color::LimeGreen = color(0x32, 0xCD, 0x32);
-    const color color::Linen = color(0xFA, 0xF0, 0xE6);
-    const color color::Magenta = color(0xFF, 0x00, 0xFF);
-    const color color::Magenta1 = color(0xFF, 0x00, 0xFF);
-    const color color::Magenta2 = color(0xEE, 0x00, 0xEE);
-    const color color::Magenta3 = color(0xCD, 0x00, 0xCD);
-    const color color::Magenta4 = color(0x8B, 0x00, 0x8B);
-    const color color::Maroon = color(0xB0, 0x30, 0x60);
-    const color color::Maroon1 = color(0xFF, 0x34, 0xB3);
-    const color color::Maroon2 = color(0xEE, 0x30, 0xA7);
-    const color color::Maroon3 = color(0xCD, 0x29, 0x90);
-    const color color::Maroon4 = color(0x8B, 0x1C, 0x62);
-    const color color::MediumAquamarine = color(0x66, 0xCD, 0xAA);
-    const color color::MediumBlue = color(0x00, 0x00, 0xCD);
-    const color color::MediumOrchid = color(0xBA, 0x55, 0xD3);
-    const color color::MediumOrchid1 = color(0xE0, 0x66, 0xFF);
-    const color color::MediumOrchid2 = color(0xD1, 0x5F, 0xEE);
-    const color color::MediumOrchid3 = color(0xB4, 0x52, 0xCD);
-    const color color::MediumOrchid4 = color(0x7A, 0x37, 0x8B);
-    const color color::MediumPurple = color(0x93, 0x70, 0xDB);
-    const color color::MediumPurple1 = color(0xAB, 0x82, 0xFF);
-    const color color::MediumPurple2 = color(0x9F, 0x79, 0xEE);
-    const color color::MediumPurple3 = color(0x89, 0x68, 0xCD);
-    const color color::MediumPurple4 = color(0x5D, 0x47, 0x8B);
-    const color color::MediumSeaGreen = color(0x3C, 0xB3, 0x71);
-    const color color::MediumSlateBlue = color(0x7B, 0x68, 0xEE);
-    const color color::MediumSpringGreen = color(0x00, 0xFA, 0x9A);
-    const color color::MediumTurquoise = color(0x48, 0xD1, 0xCC);
-    const color color::MediumVioletRed = color(0xC7, 0x15, 0x85);
-    const color color::MidnightBlue = color(0x19, 0x19, 0x70);
-    const color color::MintCream = color(0xF5, 0xFF, 0xFA);
-    const color color::MistyRose = color(0xFF, 0xE4, 0xE1);
-    const color color::MistyRose1 = color(0xFF, 0xE4, 0xE1);
-    const color color::MistyRose2 = color(0xEE, 0xD5, 0xD2);
-    const color color::MistyRose3 = color(0xCD, 0xB7, 0xB5);
-    const color color::MistyRose4 = color(0x8B, 0x7D, 0x7B);
-    const color color::Moccasin = color(0xFF, 0xE4, 0xB5);
-    const color color::NavajoWhite = color(0xFF, 0xDE, 0xAD);
-    const color color::NavajoWhite1 = color(0xFF, 0xDE, 0xAD);
-    const color color::NavajoWhite2 = color(0xEE, 0xCF, 0xA1);
-    const color color::NavajoWhite3 = color(0xCD, 0xB3, 0x8B);
-    const color color::NavajoWhite4 = color(0x8B, 0x79, 0x5E);
-    const color color::Navy = color(0x00, 0x00, 0x80);
-    const color color::NavyBlue = color(0x00, 0x00, 0x80);
-    const color color::OldLace = color(0xFD, 0xF5, 0xE6);
-    const color color::OliveDrab = color(0x6B, 0x8E, 0x23);
-    const color color::OliveDrab1 = color(0xC0, 0xFF, 0x3E);
-    const color color::OliveDrab2 = color(0xB3, 0xEE, 0x3A);
-    const color color::OliveDrab3 = color(0x9A, 0xCD, 0x32);
-    const color color::OliveDrab4 = color(0x69, 0x8B, 0x22);
-    const color color::Orange = color(0xFF, 0xA5, 0x00);
-    const color color::Orange1 = color(0xFF, 0xA5, 0x00);
-    const color color::Orange2 = color(0xEE, 0x9A, 0x00);
-    const color color::Orange3 = color(0xCD, 0x85, 0x00);
-    const color color::Orange4 = color(0x8B, 0x5A, 0x00);
-    const color color::OrangeRed = color(0xFF, 0x45, 0x00);
-    const color color::OrangeRed1 = color(0xFF, 0x45, 0x00);
-    const color color::OrangeRed2 = color(0xEE, 0x40, 0x00);
-    const color color::OrangeRed3 = color(0xCD, 0x37, 0x00);
-    const color color::OrangeRed4 = color(0x8B, 0x25, 0x00);
-    const color color::Orchid = color(0xDA, 0x70, 0xD6);
-    const color color::Orchid1 = color(0xFF, 0x83, 0xFA);
-    const color color::Orchid2 = color(0xEE, 0x7A, 0xE9);
-    const color color::Orchid3 = color(0xCD, 0x69, 0xC9);
-    const color color::Orchid4 = color(0x8B, 0x47, 0x89);
-    const color color::PaleGoldenrod = color(0xEE, 0xE8, 0xAA);
-    const color color::PaleGreen = color(0x98, 0xFB, 0x98);
-    const color color::PaleGreen1 = color(0x9A, 0xFF, 0x9A);
-    const color color::PaleGreen2 = color(0x90, 0xEE, 0x90);
-    const color color::PaleGreen3 = color(0x7C, 0xCD, 0x7C);
-    const color color::PaleGreen4 = color(0x54, 0x8B, 0x54);
-    const color color::PaleTurquoise = color(0xAF, 0xEE, 0xEE);
-    const color color::PaleTurquoise1 = color(0xBB, 0xFF, 0xFF);
-    const color color::PaleTurquoise2 = color(0xAE, 0xEE, 0xEE);
-    const color color::PaleTurquoise3 = color(0x96, 0xCD, 0xCD);
-    const color color::PaleTurquoise4 = color(0x66, 0x8B, 0x8B);
-    const color color::PaleVioletRed = color(0xDB, 0x70, 0x93);
-    const color color::PaleVioletRed1 = color(0xFF, 0x82, 0xAB);
-    const color color::PaleVioletRed2 = color(0xEE, 0x79, 0x9F);
-    const color color::PaleVioletRed3 = color(0xCD, 0x68, 0x89);
-    const color color::PaleVioletRed4 = color(0x8B, 0x47, 0x5D);
-    const color color::PapayaWhip = color(0xFF, 0xEF, 0xD5);
-    const color color::PeachPuff = color(0xFF, 0xDA, 0xB9);
-    const color color::PeachPuff1 = color(0xFF, 0xDA, 0xB9);
-    const color color::PeachPuff2 = color(0xEE, 0xCB, 0xAD);
-    const color color::PeachPuff3 = color(0xCD, 0xAF, 0x95);
-    const color color::PeachPuff4 = color(0x8B, 0x77, 0x65);
-    const color color::Peru = color(0xCD, 0x85, 0x3F);
-    const color color::Pink = color(0xFF, 0xC0, 0xCB);
-    const color color::Pink1 = color(0xFF, 0xB5, 0xC5);
-    const color color::Pink2 = color(0xEE, 0xA9, 0xB8);
-    const color color::Pink3 = color(0xCD, 0x91, 0x9E);
-    const color color::Pink4 = color(0x8B, 0x63, 0x6C);
-    const color color::Plum = color(0xDD, 0xA0, 0xDD);
-    const color color::Plum1 = color(0xFF, 0xBB, 0xFF);
-    const color color::Plum2 = color(0xEE, 0xAE, 0xEE);
-    const color color::Plum3 = color(0xCD, 0x96, 0xCD);
-    const color color::Plum4 = color(0x8B, 0x66, 0x8B);
-    const color color::PowderBlue = color(0xB0, 0xE0, 0xE6);
-    const color color::Purple = color(0xA0, 0x20, 0xF0);
-    const color color::Purple1 = color(0x9B, 0x30, 0xFF);
-    const color color::Purple2 = color(0x91, 0x2C, 0xEE);
-    const color color::Purple3 = color(0x7D, 0x26, 0xCD);
-    const color color::Purple4 = color(0x55, 0x1A, 0x8B);
-    const color color::Red = color(0xFF, 0x00, 0x00);
-    const color color::Red1 = color(0xFF, 0x00, 0x00);
-    const color color::Red2 = color(0xEE, 0x00, 0x00);
-    const color color::Red3 = color(0xCD, 0x00, 0x00);
-    const color color::Red4 = color(0x8B, 0x00, 0x00);
-    const color color::RosyBrown = color(0xBC, 0x8F, 0x8F);
-    const color color::RosyBrown1 = color(0xFF, 0xC1, 0xC1);
-    const color color::RosyBrown2 = color(0xEE, 0xB4, 0xB4);
-    const color color::RosyBrown3 = color(0xCD, 0x9B, 0x9B);
-    const color color::RosyBrown4 = color(0x8B, 0x69, 0x69);
-    const color color::RoyalBlue = color(0x41, 0x69, 0xE1);
-    const color color::RoyalBlue1 = color(0x48, 0x76, 0xFF);
-    const color color::RoyalBlue2 = color(0x43, 0x6E, 0xEE);
-    const color color::RoyalBlue3 = color(0x3A, 0x5F, 0xCD);
-    const color color::RoyalBlue4 = color(0x27, 0x40, 0x8B);
-    const color color::SaddleBrown = color(0x8B, 0x45, 0x13);
-    const color color::Salmon = color(0xFA, 0x80, 0x72);
-    const color color::Salmon1 = color(0xFF, 0x8C, 0x69);
-    const color color::Salmon2 = color(0xEE, 0x82, 0x62);
-    const color color::Salmon3 = color(0xCD, 0x70, 0x54);
-    const color color::Salmon4 = color(0x8B, 0x4C, 0x39);
-    const color color::SandyBrown = color(0xF4, 0xA4, 0x60);
-    const color color::SeaGreen = color(0x2E, 0x8B, 0x57);
-    const color color::SeaGreen1 = color(0x54, 0xFF, 0x9F);
-    const color color::SeaGreen2 = color(0x4E, 0xEE, 0x94);
-    const color color::SeaGreen3 = color(0x43, 0xCD, 0x80);
-    const color color::SeaGreen4 = color(0x2E, 0x8B, 0x57);
-    const color color::Seashell = color(0xFF, 0xF5, 0xEE);
-    const color color::Seashell1 = color(0xFF, 0xF5, 0xEE);
-    const color color::Seashell2 = color(0xEE, 0xE5, 0xDE);
-    const color color::Seashell3 = color(0xCD, 0xC5, 0xBF);
-    const color color::Seashell4 = color(0x8B, 0x86, 0x82);
-    const color color::Sienna = color(0xA0, 0x52, 0x2D);
-    const color color::Sienna1 = color(0xFF, 0x82, 0x47);
-    const color color::Sienna2 = color(0xEE, 0x79, 0x42);
-    const color color::Sienna3 = color(0xCD, 0x68, 0x39);
-    const color color::Sienna4 = color(0x8B, 0x47, 0x26);
-    const color color::SkyBlue = color(0x87, 0xCE, 0xEB);
-    const color color::SkyBlue1 = color(0x87, 0xCE, 0xFF);
-    const color color::SkyBlue2 = color(0x7E, 0xC0, 0xEE);
-    const color color::SkyBlue3 = color(0x6C, 0xA6, 0xCD);
-    const color color::SkyBlue4 = color(0x4A, 0x70, 0x8B);
-    const color color::SlateBlue = color(0x6A, 0x5A, 0xCD);
-    const color color::SlateBlue1 = color(0x83, 0x6F, 0xFF);
-    const color color::SlateBlue2 = color(0x7A, 0x67, 0xEE);
-    const color color::SlateBlue3 = color(0x69, 0x59, 0xCD);
-    const color color::SlateBlue4 = color(0x47, 0x3C, 0x8B);
-    const color color::SlateGray = color(0x70, 0x80, 0x90);
-    const color color::SlateGray1 = color(0xC6, 0xE2, 0xFF);
-    const color color::SlateGray2 = color(0xB9, 0xD3, 0xEE);
-    const color color::SlateGray3 = color(0x9F, 0xB6, 0xCD);
-    const color color::SlateGray4 = color(0x6C, 0x7B, 0x8B);
-    const color color::SlateGrey = color(0x70, 0x80, 0x90);
-    const color color::Snow = color(0xFF, 0xFA, 0xFA);
-    const color color::Snow1 = color(0xFF, 0xFA, 0xFA);
-    const color color::Snow2 = color(0xEE, 0xE9, 0xE9);
-    const color color::Snow3 = color(0xCD, 0xC9, 0xC9);
-    const color color::Snow4 = color(0x8B, 0x89, 0x89);
-    const color color::SpringGreen = color(0x00, 0xFF, 0x7F);
-    const color color::SpringGreen1 = color(0x00, 0xFF, 0x7F);
-    const color color::SpringGreen2 = color(0x00, 0xEE, 0x76);
-    const color color::SpringGreen3 = color(0x00, 0xCD, 0x66);
-    const color color::SpringGreen4 = color(0x00, 0x8B, 0x45);
-    const color color::SteelBlue = color(0x46, 0x82, 0xB4);
-    const color color::SteelBlue1 = color(0x63, 0xB8, 0xFF);
-    const color color::SteelBlue2 = color(0x5C, 0xAC, 0xEE);
-    const color color::SteelBlue3 = color(0x4F, 0x94, 0xCD);
-    const color color::SteelBlue4 = color(0x36, 0x64, 0x8B);
-    const color color::Tan = color(0xD2, 0xB4, 0x8C);
-    const color color::Tan1 = color(0xFF, 0xA5, 0x4F);
-    const color color::Tan2 = color(0xEE, 0x9A, 0x49);
-    const color color::Tan3 = color(0xCD, 0x85, 0x3F);
-    const color color::Tan4 = color(0x8B, 0x5A, 0x2B);
-    const color color::Thistle = color(0xD8, 0xBF, 0xD8);
-    const color color::Thistle1 = color(0xFF, 0xE1, 0xFF);
-    const color color::Thistle2 = color(0xEE, 0xD2, 0xEE);
-    const color color::Thistle3 = color(0xCD, 0xB5, 0xCD);
-    const color color::Thistle4 = color(0x8B, 0x7B, 0x8B);
-    const color color::Tomato = color(0xFF, 0x63, 0x47);
-    const color color::Tomato1 = color(0xFF, 0x63, 0x47);
-    const color color::Tomato2 = color(0xEE, 0x5C, 0x42);
-    const color color::Tomato3 = color(0xCD, 0x4F, 0x39);
-    const color color::Tomato4 = color(0x8B, 0x36, 0x26);
-    const color color::Turquoise = color(0x40, 0xE0, 0xD0);
-    const color color::Turquoise1 = color(0x00, 0xF5, 0xFF);
-    const color color::Turquoise2 = color(0x00, 0xE5, 0xEE);
-    const color color::Turquoise3 = color(0x00, 0xC5, 0xCD);
-    const color color::Turquoise4 = color(0x00, 0x86, 0x8B);
-    const color color::Violet = color(0xEE, 0x82, 0xEE);
-    const color color::VioletRed = color(0xD0, 0x20, 0x90);
-    const color color::VioletRed1 = color(0xFF, 0x3E, 0x96);
-    const color color::VioletRed2 = color(0xEE, 0x3A, 0x8C);
-    const color color::VioletRed3 = color(0xCD, 0x32, 0x78);
-    const color color::VioletRed4 = color(0x8B, 0x22, 0x52);
-    const color color::Wheat = color(0xF5, 0xDE, 0xB3);
-    const color color::Wheat1 = color(0xFF, 0xE7, 0xBA);
-    const color color::Wheat2 = color(0xEE, 0xD8, 0xAE);
-    const color color::Wheat3 = color(0xCD, 0xBA, 0x96);
-    const color color::Wheat4 = color(0x8B, 0x7E, 0x66);
-    const color color::White = color(0xFF, 0xFF, 0xFF);
-    const color color::WhiteSmoke = color(0xF5, 0xF5, 0xF5);
-    const color color::Yellow = color(0xFF, 0xFF, 0x00);
-    const color color::Yellow1 = color(0xFF, 0xFF, 0x00);
-    const color color::Yellow2 = color(0xEE, 0xEE, 0x00);
-    const color color::Yellow3 = color(0xCD, 0xCD, 0x00);
-    const color color::Yellow4 = color(0x8B, 0x8B, 0x00);
-    const color color::YellowGreen = color(0x9A, 0xCD, 0x32);
+    const sRGB_color sRGB_color::AliceBlue = sRGB_color{ 0xF0, 0xF8, 0xFF };
+    const sRGB_color sRGB_color::AntiqueWhite = sRGB_color{ 0xFA, 0xEB, 0xD7 };
+    const sRGB_color sRGB_color::AntiqueWhite1 = sRGB_color{ 0xFF, 0xEF, 0xDB };
+    const sRGB_color sRGB_color::AntiqueWhite2 = sRGB_color{ 0xEE, 0xDF, 0xCC };
+    const sRGB_color sRGB_color::AntiqueWhite3 = sRGB_color{ 0xCD, 0xC0, 0xB0 };
+    const sRGB_color sRGB_color::AntiqueWhite4 = sRGB_color{ 0x8B, 0x83, 0x78 };
+    const sRGB_color sRGB_color::Aquamarine = sRGB_color{ 0x7F, 0xFF, 0xD4 };
+    const sRGB_color sRGB_color::Aquamarine1 = sRGB_color{ 0x7F, 0xFF, 0xD4 };
+    const sRGB_color sRGB_color::Aquamarine2 = sRGB_color{ 0x76, 0xEE, 0xC6 };
+    const sRGB_color sRGB_color::Aquamarine3 = sRGB_color{ 0x66, 0xCD, 0xAA };
+    const sRGB_color sRGB_color::Aquamarine4 = sRGB_color{ 0x45, 0x8B, 0x74 };
+    const sRGB_color sRGB_color::Azure = sRGB_color{ 0xF0, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::Azure1 = sRGB_color{ 0xF0, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::Azure2 = sRGB_color{ 0xE0, 0xEE, 0xEE };
+    const sRGB_color sRGB_color::Azure3 = sRGB_color{ 0xC1, 0xCD, 0xCD };
+    const sRGB_color sRGB_color::Azure4 = sRGB_color{ 0x83, 0x8B, 0x8B };
+    const sRGB_color sRGB_color::Beige = sRGB_color{ 0xF5, 0xF5, 0xDC };
+    const sRGB_color sRGB_color::Bisque = sRGB_color{ 0xFF, 0xE4, 0xC4 };
+    const sRGB_color sRGB_color::Bisque1 = sRGB_color{ 0xFF, 0xE4, 0xC4 };
+    const sRGB_color sRGB_color::Bisque2 = sRGB_color{ 0xEE, 0xD5, 0xB7 };
+    const sRGB_color sRGB_color::Bisque3 = sRGB_color{ 0xCD, 0xB7, 0x9E };
+    const sRGB_color sRGB_color::Bisque4 = sRGB_color{ 0x8B, 0x7D, 0x6B };
+    const sRGB_color sRGB_color::Black = sRGB_color{ 0x00, 0x00, 0x00 };
+    const sRGB_color sRGB_color::BlanchedAlmond = sRGB_color{ 0xFF, 0xEB, 0xCD };
+    const sRGB_color sRGB_color::Blue = sRGB_color{ 0x00, 0x00, 0xFF };
+    const sRGB_color sRGB_color::Blue1 = sRGB_color{ 0x00, 0x00, 0xFF };
+    const sRGB_color sRGB_color::Blue2 = sRGB_color{ 0x00, 0x00, 0xEE };
+    const sRGB_color sRGB_color::Blue3 = sRGB_color{ 0x00, 0x00, 0xCD };
+    const sRGB_color sRGB_color::Blue4 = sRGB_color{ 0x00, 0x00, 0x8B };
+    const sRGB_color sRGB_color::BlueViolet = sRGB_color{ 0x8A, 0x2B, 0xE2 };
+    const sRGB_color sRGB_color::Brown = sRGB_color{ 0xA5, 0x2A, 0x2A };
+    const sRGB_color sRGB_color::Brown1 = sRGB_color{ 0xFF, 0x40, 0x40 };
+    const sRGB_color sRGB_color::Brown2 = sRGB_color{ 0xEE, 0x3B, 0x3B };
+    const sRGB_color sRGB_color::Brown3 = sRGB_color{ 0xCD, 0x33, 0x33 };
+    const sRGB_color sRGB_color::Brown4 = sRGB_color{ 0x8B, 0x23, 0x23 };
+    const sRGB_color sRGB_color::Burlywood = sRGB_color{ 0xDE, 0xB8, 0x87 };
+    const sRGB_color sRGB_color::Burlywood1 = sRGB_color{ 0xFF, 0xD3, 0x9B };
+    const sRGB_color sRGB_color::Burlywood2 = sRGB_color{ 0xEE, 0xC5, 0x91 };
+    const sRGB_color sRGB_color::Burlywood3 = sRGB_color{ 0xCD, 0xAA, 0x7D };
+    const sRGB_color sRGB_color::Burlywood4 = sRGB_color{ 0x8B, 0x73, 0x55 };
+    const sRGB_color sRGB_color::CadetBlue = sRGB_color{ 0x5F, 0x9E, 0xA0 };
+    const sRGB_color sRGB_color::CadetBlue1 = sRGB_color{ 0x98, 0xF5, 0xFF };
+    const sRGB_color sRGB_color::CadetBlue2 = sRGB_color{ 0x8E, 0xE5, 0xEE };
+    const sRGB_color sRGB_color::CadetBlue3 = sRGB_color{ 0x7A, 0xC5, 0xCD };
+    const sRGB_color sRGB_color::CadetBlue4 = sRGB_color{ 0x53, 0x86, 0x8B };
+    const sRGB_color sRGB_color::Chartreuse = sRGB_color{ 0x7F, 0xFF, 0x00 };
+    const sRGB_color sRGB_color::Chartreuse1 = sRGB_color{ 0x7F, 0xFF, 0x00 };
+    const sRGB_color sRGB_color::Chartreuse2 = sRGB_color{ 0x76, 0xEE, 0x00 };
+    const sRGB_color sRGB_color::Chartreuse3 = sRGB_color{ 0x66, 0xCD, 0x00 };
+    const sRGB_color sRGB_color::Chartreuse4 = sRGB_color{ 0x45, 0x8B, 0x00 };
+    const sRGB_color sRGB_color::Chocolate = sRGB_color{ 0xD2, 0x69, 0x1E };
+    const sRGB_color sRGB_color::Chocolate1 = sRGB_color{ 0xFF, 0x7F, 0x24 };
+    const sRGB_color sRGB_color::Chocolate2 = sRGB_color{ 0xEE, 0x76, 0x21 };
+    const sRGB_color sRGB_color::Chocolate3 = sRGB_color{ 0xCD, 0x66, 0x1D };
+    const sRGB_color sRGB_color::Chocolate4 = sRGB_color{ 0x8B, 0x45, 0x13 };
+    const sRGB_color sRGB_color::Coral = sRGB_color{ 0xFF, 0x7F, 0x50 };
+    const sRGB_color sRGB_color::Coral1 = sRGB_color{ 0xFF, 0x72, 0x56 };
+    const sRGB_color sRGB_color::Coral2 = sRGB_color{ 0xEE, 0x6A, 0x50 };
+    const sRGB_color sRGB_color::Coral3 = sRGB_color{ 0xCD, 0x5B, 0x45 };
+    const sRGB_color sRGB_color::Coral4 = sRGB_color{ 0x8B, 0x3E, 0x2F };
+    const sRGB_color sRGB_color::CornflowerBlue = sRGB_color{ 0x64, 0x95, 0xED };
+    const sRGB_color sRGB_color::Cornsilk = sRGB_color{ 0xFF, 0xF8, 0xDC };
+    const sRGB_color sRGB_color::Cornsilk1 = sRGB_color{ 0xFF, 0xF8, 0xDC };
+    const sRGB_color sRGB_color::Cornsilk2 = sRGB_color{ 0xEE, 0xE8, 0xCD };
+    const sRGB_color sRGB_color::Cornsilk3 = sRGB_color{ 0xCD, 0xC8, 0xB1 };
+    const sRGB_color sRGB_color::Cornsilk4 = sRGB_color{ 0x8B, 0x88, 0x78 };
+    const sRGB_color sRGB_color::Cyan = sRGB_color{ 0x00, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::Cyan1 = sRGB_color{ 0x00, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::Cyan2 = sRGB_color{ 0x00, 0xEE, 0xEE };
+    const sRGB_color sRGB_color::Cyan3 = sRGB_color{ 0x00, 0xCD, 0xCD };
+    const sRGB_color sRGB_color::Cyan4 = sRGB_color{ 0x00, 0x8B, 0x8B };
+    const sRGB_color sRGB_color::DarkBlue = sRGB_color{ 0x00, 0x00, 0x8B };
+    const sRGB_color sRGB_color::DarkCyan = sRGB_color{ 0x00, 0x8B, 0x8B };
+    const sRGB_color sRGB_color::DarkGoldenrod = sRGB_color{ 0xB8, 0x86, 0x0B };
+    const sRGB_color sRGB_color::DarkGoldenrod1 = sRGB_color{ 0xFF, 0xB9, 0x0F };
+    const sRGB_color sRGB_color::DarkGoldenrod2 = sRGB_color{ 0xEE, 0xAD, 0x0E };
+    const sRGB_color sRGB_color::DarkGoldenrod3 = sRGB_color{ 0xCD, 0x95, 0x0C };
+    const sRGB_color sRGB_color::DarkGoldenrod4 = sRGB_color{ 0x8B, 0x65, 0x08 };
+    const sRGB_color sRGB_color::DarkGray = sRGB_color{ 0xA9, 0xA9, 0xA9 };
+    const sRGB_color sRGB_color::DarkGreen = sRGB_color{ 0x00, 0x64, 0x00 };
+    const sRGB_color sRGB_color::DarkGrey = sRGB_color{ 0xA9, 0xA9, 0xA9 };
+    const sRGB_color sRGB_color::DarkKhaki = sRGB_color{ 0xBD, 0xB7, 0x6B };
+    const sRGB_color sRGB_color::DarkMagenta = sRGB_color{ 0x8B, 0x00, 0x8B };
+    const sRGB_color sRGB_color::DarkOliveGreen = sRGB_color{ 0x55, 0x6B, 0x2F };
+    const sRGB_color sRGB_color::DarkOliveGreen1 = sRGB_color{ 0xCA, 0xFF, 0x70 };
+    const sRGB_color sRGB_color::DarkOliveGreen2 = sRGB_color{ 0xBC, 0xEE, 0x68 };
+    const sRGB_color sRGB_color::DarkOliveGreen3 = sRGB_color{ 0xA2, 0xCD, 0x5A };
+    const sRGB_color sRGB_color::DarkOliveGreen4 = sRGB_color{ 0x6E, 0x8B, 0x3D };
+    const sRGB_color sRGB_color::DarkOrange = sRGB_color{ 0xFF, 0x8C, 0x00 };
+    const sRGB_color sRGB_color::DarkOrange1 = sRGB_color{ 0xFF, 0x7F, 0x00 };
+    const sRGB_color sRGB_color::DarkOrange2 = sRGB_color{ 0xEE, 0x76, 0x00 };
+    const sRGB_color sRGB_color::DarkOrange3 = sRGB_color{ 0xCD, 0x66, 0x00 };
+    const sRGB_color sRGB_color::DarkOrange4 = sRGB_color{ 0x8B, 0x45, 0x00 };
+    const sRGB_color sRGB_color::DarkOrchid = sRGB_color{ 0x99, 0x32, 0xCC };
+    const sRGB_color sRGB_color::DarkOrchid1 = sRGB_color{ 0xBF, 0x3E, 0xFF };
+    const sRGB_color sRGB_color::DarkOrchid2 = sRGB_color{ 0xB2, 0x3A, 0xEE };
+    const sRGB_color sRGB_color::DarkOrchid3 = sRGB_color{ 0x9A, 0x32, 0xCD };
+    const sRGB_color sRGB_color::DarkOrchid4 = sRGB_color{ 0x68, 0x22, 0x8B };
+    const sRGB_color sRGB_color::DarkRed = sRGB_color{ 0x8B, 0x00, 0x00 };
+    const sRGB_color sRGB_color::DarkSalmon = sRGB_color{ 0xE9, 0x96, 0x7A };
+    const sRGB_color sRGB_color::DarkSeaGreen = sRGB_color{ 0x8F, 0xBC, 0x8F };
+    const sRGB_color sRGB_color::DarkSeaGreen1 = sRGB_color{ 0xC1, 0xFF, 0xC1 };
+    const sRGB_color sRGB_color::DarkSeaGreen2 = sRGB_color{ 0xB4, 0xEE, 0xB4 };
+    const sRGB_color sRGB_color::DarkSeaGreen3 = sRGB_color{ 0x9B, 0xCD, 0x9B };
+    const sRGB_color sRGB_color::DarkSeaGreen4 = sRGB_color{ 0x69, 0x8B, 0x69 };
+    const sRGB_color sRGB_color::DarkSlateBlue = sRGB_color{ 0x48, 0x3D, 0x8B };
+    const sRGB_color sRGB_color::DarkSlateGray = sRGB_color{ 0x2F, 0x4F, 0x4F };
+    const sRGB_color sRGB_color::DarkSlateGray1 = sRGB_color{ 0x97, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::DarkSlateGray2 = sRGB_color{ 0x8D, 0xEE, 0xEE };
+    const sRGB_color sRGB_color::DarkSlateGray3 = sRGB_color{ 0x79, 0xCD, 0xCD };
+    const sRGB_color sRGB_color::DarkSlateGray4 = sRGB_color{ 0x52, 0x8B, 0x8B };
+    const sRGB_color sRGB_color::DarkSlateGrey = sRGB_color{ 0x2F, 0x4F, 0x4F };
+    const sRGB_color sRGB_color::DarkTurquoise = sRGB_color{ 0x00, 0xCE, 0xD1 };
+    const sRGB_color sRGB_color::DarkViolet = sRGB_color{ 0x94, 0x00, 0xD3 };
+    const sRGB_color sRGB_color::DebianRed = sRGB_color{ 0xD7, 0x07, 0x51 };
+    const sRGB_color sRGB_color::DeepPink = sRGB_color{ 0xFF, 0x14, 0x93 };
+    const sRGB_color sRGB_color::DeepPink1 = sRGB_color{ 0xFF, 0x14, 0x93 };
+    const sRGB_color sRGB_color::DeepPink2 = sRGB_color{ 0xEE, 0x12, 0x89 };
+    const sRGB_color sRGB_color::DeepPink3 = sRGB_color{ 0xCD, 0x10, 0x76 };
+    const sRGB_color sRGB_color::DeepPink4 = sRGB_color{ 0x8B, 0x0A, 0x50 };
+    const sRGB_color sRGB_color::DeepSkyBlue = sRGB_color{ 0x00, 0xBF, 0xFF };
+    const sRGB_color sRGB_color::DeepSkyBlue1 = sRGB_color{ 0x00, 0xBF, 0xFF };
+    const sRGB_color sRGB_color::DeepSkyBlue2 = sRGB_color{ 0x00, 0xB2, 0xEE };
+    const sRGB_color sRGB_color::DeepSkyBlue3 = sRGB_color{ 0x00, 0x9A, 0xCD };
+    const sRGB_color sRGB_color::DeepSkyBlue4 = sRGB_color{ 0x00, 0x68, 0x8B };
+    const sRGB_color sRGB_color::DimGray = sRGB_color{ 0x69, 0x69, 0x69 };
+    const sRGB_color sRGB_color::DimGrey = sRGB_color{ 0x69, 0x69, 0x69 };
+    const sRGB_color sRGB_color::DodgerBlue = sRGB_color{ 0x1E, 0x90, 0xFF };
+    const sRGB_color sRGB_color::DodgerBlue1 = sRGB_color{ 0x1E, 0x90, 0xFF };
+    const sRGB_color sRGB_color::DodgerBlue2 = sRGB_color{ 0x1C, 0x86, 0xEE };
+    const sRGB_color sRGB_color::DodgerBlue3 = sRGB_color{ 0x18, 0x74, 0xCD };
+    const sRGB_color sRGB_color::DodgerBlue4 = sRGB_color{ 0x10, 0x4E, 0x8B };
+    const sRGB_color sRGB_color::Firebrick = sRGB_color{ 0xB2, 0x22, 0x22 };
+    const sRGB_color sRGB_color::Firebrick1 = sRGB_color{ 0xFF, 0x30, 0x30 };
+    const sRGB_color sRGB_color::Firebrick2 = sRGB_color{ 0xEE, 0x2C, 0x2C };
+    const sRGB_color sRGB_color::Firebrick3 = sRGB_color{ 0xCD, 0x26, 0x26 };
+    const sRGB_color sRGB_color::Firebrick4 = sRGB_color{ 0x8B, 0x1A, 0x1A };
+    const sRGB_color sRGB_color::FloralWhite = sRGB_color{ 0xFF, 0xFA, 0xF0 };
+    const sRGB_color sRGB_color::ForestGreen = sRGB_color{ 0x22, 0x8B, 0x22 };
+    const sRGB_color sRGB_color::Gainsboro = sRGB_color{ 0xDC, 0xDC, 0xDC };
+    const sRGB_color sRGB_color::GhostWhite = sRGB_color{ 0xF8, 0xF8, 0xFF };
+    const sRGB_color sRGB_color::Gold = sRGB_color{ 0xFF, 0xD7, 0x00 };
+    const sRGB_color sRGB_color::Gold1 = sRGB_color{ 0xFF, 0xD7, 0x00 };
+    const sRGB_color sRGB_color::Gold2 = sRGB_color{ 0xEE, 0xC9, 0x00 };
+    const sRGB_color sRGB_color::Gold3 = sRGB_color{ 0xCD, 0xAD, 0x00 };
+    const sRGB_color sRGB_color::Gold4 = sRGB_color{ 0x8B, 0x75, 0x00 };
+    const sRGB_color sRGB_color::Goldenrod = sRGB_color{ 0xDA, 0xA5, 0x20 };
+    const sRGB_color sRGB_color::Goldenrod1 = sRGB_color{ 0xFF, 0xC1, 0x25 };
+    const sRGB_color sRGB_color::Goldenrod2 = sRGB_color{ 0xEE, 0xB4, 0x22 };
+    const sRGB_color sRGB_color::Goldenrod3 = sRGB_color{ 0xCD, 0x9B, 0x1D };
+    const sRGB_color sRGB_color::Goldenrod4 = sRGB_color{ 0x8B, 0x69, 0x14 };
+    const sRGB_color sRGB_color::Gray = sRGB_color{ 0xBE, 0xBE, 0xBE };
+    const sRGB_color sRGB_color::Gray0 = sRGB_color{ 0x00, 0x00, 0x00 };
+    const sRGB_color sRGB_color::Gray1 = sRGB_color{ 0x03, 0x03, 0x03 };
+    const sRGB_color sRGB_color::Gray10 = sRGB_color{ 0x1A, 0x1A, 0x1A };
+    const sRGB_color sRGB_color::Gray100 = sRGB_color{ 0xFF, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::Gray11 = sRGB_color{ 0x1C, 0x1C, 0x1C };
+    const sRGB_color sRGB_color::Gray12 = sRGB_color{ 0x1F, 0x1F, 0x1F };
+    const sRGB_color sRGB_color::Gray13 = sRGB_color{ 0x21, 0x21, 0x21 };
+    const sRGB_color sRGB_color::Gray14 = sRGB_color{ 0x24, 0x24, 0x24 };
+    const sRGB_color sRGB_color::Gray15 = sRGB_color{ 0x26, 0x26, 0x26 };
+    const sRGB_color sRGB_color::Gray16 = sRGB_color{ 0x29, 0x29, 0x29 };
+    const sRGB_color sRGB_color::Gray17 = sRGB_color{ 0x2B, 0x2B, 0x2B };
+    const sRGB_color sRGB_color::Gray18 = sRGB_color{ 0x2E, 0x2E, 0x2E };
+    const sRGB_color sRGB_color::Gray19 = sRGB_color{ 0x30, 0x30, 0x30 };
+    const sRGB_color sRGB_color::Gray2 = sRGB_color{ 0x05, 0x05, 0x05 };
+    const sRGB_color sRGB_color::Gray20 = sRGB_color{ 0x33, 0x33, 0x33 };
+    const sRGB_color sRGB_color::Gray21 = sRGB_color{ 0x36, 0x36, 0x36 };
+    const sRGB_color sRGB_color::Gray22 = sRGB_color{ 0x38, 0x38, 0x38 };
+    const sRGB_color sRGB_color::Gray23 = sRGB_color{ 0x3B, 0x3B, 0x3B };
+    const sRGB_color sRGB_color::Gray24 = sRGB_color{ 0x3D, 0x3D, 0x3D };
+    const sRGB_color sRGB_color::Gray25 = sRGB_color{ 0x40, 0x40, 0x40 };
+    const sRGB_color sRGB_color::Gray26 = sRGB_color{ 0x42, 0x42, 0x42 };
+    const sRGB_color sRGB_color::Gray27 = sRGB_color{ 0x45, 0x45, 0x45 };
+    const sRGB_color sRGB_color::Gray28 = sRGB_color{ 0x47, 0x47, 0x47 };
+    const sRGB_color sRGB_color::Gray29 = sRGB_color{ 0x4A, 0x4A, 0x4A };
+    const sRGB_color sRGB_color::Gray3 = sRGB_color{ 0x08, 0x08, 0x08 };
+    const sRGB_color sRGB_color::Gray30 = sRGB_color{ 0x4D, 0x4D, 0x4D };
+    const sRGB_color sRGB_color::Gray31 = sRGB_color{ 0x4F, 0x4F, 0x4F };
+    const sRGB_color sRGB_color::Gray32 = sRGB_color{ 0x52, 0x52, 0x52 };
+    const sRGB_color sRGB_color::Gray33 = sRGB_color{ 0x54, 0x54, 0x54 };
+    const sRGB_color sRGB_color::Gray34 = sRGB_color{ 0x57, 0x57, 0x57 };
+    const sRGB_color sRGB_color::Gray35 = sRGB_color{ 0x59, 0x59, 0x59 };
+    const sRGB_color sRGB_color::Gray36 = sRGB_color{ 0x5C, 0x5C, 0x5C };
+    const sRGB_color sRGB_color::Gray37 = sRGB_color{ 0x5E, 0x5E, 0x5E };
+    const sRGB_color sRGB_color::Gray38 = sRGB_color{ 0x61, 0x61, 0x61 };
+    const sRGB_color sRGB_color::Gray39 = sRGB_color{ 0x63, 0x63, 0x63 };
+    const sRGB_color sRGB_color::Gray4 = sRGB_color{ 0x0A, 0x0A, 0x0A };
+    const sRGB_color sRGB_color::Gray40 = sRGB_color{ 0x66, 0x66, 0x66 };
+    const sRGB_color sRGB_color::Gray41 = sRGB_color{ 0x69, 0x69, 0x69 };
+    const sRGB_color sRGB_color::Gray42 = sRGB_color{ 0x6B, 0x6B, 0x6B };
+    const sRGB_color sRGB_color::Gray43 = sRGB_color{ 0x6E, 0x6E, 0x6E };
+    const sRGB_color sRGB_color::Gray44 = sRGB_color{ 0x70, 0x70, 0x70 };
+    const sRGB_color sRGB_color::Gray45 = sRGB_color{ 0x73, 0x73, 0x73 };
+    const sRGB_color sRGB_color::Gray46 = sRGB_color{ 0x75, 0x75, 0x75 };
+    const sRGB_color sRGB_color::Gray47 = sRGB_color{ 0x78, 0x78, 0x78 };
+    const sRGB_color sRGB_color::Gray48 = sRGB_color{ 0x7A, 0x7A, 0x7A };
+    const sRGB_color sRGB_color::Gray49 = sRGB_color{ 0x7D, 0x7D, 0x7D };
+    const sRGB_color sRGB_color::Gray5 = sRGB_color{ 0x0D, 0x0D, 0x0D };
+    const sRGB_color sRGB_color::Gray50 = sRGB_color{ 0x7F, 0x7F, 0x7F };
+    const sRGB_color sRGB_color::Gray51 = sRGB_color{ 0x82, 0x82, 0x82 };
+    const sRGB_color sRGB_color::Gray52 = sRGB_color{ 0x85, 0x85, 0x85 };
+    const sRGB_color sRGB_color::Gray53 = sRGB_color{ 0x87, 0x87, 0x87 };
+    const sRGB_color sRGB_color::Gray54 = sRGB_color{ 0x8A, 0x8A, 0x8A };
+    const sRGB_color sRGB_color::Gray55 = sRGB_color{ 0x8C, 0x8C, 0x8C };
+    const sRGB_color sRGB_color::Gray56 = sRGB_color{ 0x8F, 0x8F, 0x8F };
+    const sRGB_color sRGB_color::Gray57 = sRGB_color{ 0x91, 0x91, 0x91 };
+    const sRGB_color sRGB_color::Gray58 = sRGB_color{ 0x94, 0x94, 0x94 };
+    const sRGB_color sRGB_color::Gray59 = sRGB_color{ 0x96, 0x96, 0x96 };
+    const sRGB_color sRGB_color::Gray6 = sRGB_color{ 0x0F, 0x0F, 0x0F };
+    const sRGB_color sRGB_color::Gray60 = sRGB_color{ 0x99, 0x99, 0x99 };
+    const sRGB_color sRGB_color::Gray61 = sRGB_color{ 0x9C, 0x9C, 0x9C };
+    const sRGB_color sRGB_color::Gray62 = sRGB_color{ 0x9E, 0x9E, 0x9E };
+    const sRGB_color sRGB_color::Gray63 = sRGB_color{ 0xA1, 0xA1, 0xA1 };
+    const sRGB_color sRGB_color::Gray64 = sRGB_color{ 0xA3, 0xA3, 0xA3 };
+    const sRGB_color sRGB_color::Gray65 = sRGB_color{ 0xA6, 0xA6, 0xA6 };
+    const sRGB_color sRGB_color::Gray66 = sRGB_color{ 0xA8, 0xA8, 0xA8 };
+    const sRGB_color sRGB_color::Gray67 = sRGB_color{ 0xAB, 0xAB, 0xAB };
+    const sRGB_color sRGB_color::Gray68 = sRGB_color{ 0xAD, 0xAD, 0xAD };
+    const sRGB_color sRGB_color::Gray69 = sRGB_color{ 0xB0, 0xB0, 0xB0 };
+    const sRGB_color sRGB_color::Gray7 = sRGB_color{ 0x12, 0x12, 0x12 };
+    const sRGB_color sRGB_color::Gray70 = sRGB_color{ 0xB3, 0xB3, 0xB3 };
+    const sRGB_color sRGB_color::Gray71 = sRGB_color{ 0xB5, 0xB5, 0xB5 };
+    const sRGB_color sRGB_color::Gray72 = sRGB_color{ 0xB8, 0xB8, 0xB8 };
+    const sRGB_color sRGB_color::Gray73 = sRGB_color{ 0xBA, 0xBA, 0xBA };
+    const sRGB_color sRGB_color::Gray74 = sRGB_color{ 0xBD, 0xBD, 0xBD };
+    const sRGB_color sRGB_color::Gray75 = sRGB_color{ 0xBF, 0xBF, 0xBF };
+    const sRGB_color sRGB_color::Gray76 = sRGB_color{ 0xC2, 0xC2, 0xC2 };
+    const sRGB_color sRGB_color::Gray77 = sRGB_color{ 0xC4, 0xC4, 0xC4 };
+    const sRGB_color sRGB_color::Gray78 = sRGB_color{ 0xC7, 0xC7, 0xC7 };
+    const sRGB_color sRGB_color::Gray79 = sRGB_color{ 0xC9, 0xC9, 0xC9 };
+    const sRGB_color sRGB_color::Gray8 = sRGB_color{ 0x14, 0x14, 0x14 };
+    const sRGB_color sRGB_color::Gray80 = sRGB_color{ 0xCC, 0xCC, 0xCC };
+    const sRGB_color sRGB_color::Gray81 = sRGB_color{ 0xCF, 0xCF, 0xCF };
+    const sRGB_color sRGB_color::Gray82 = sRGB_color{ 0xD1, 0xD1, 0xD1 };
+    const sRGB_color sRGB_color::Gray83 = sRGB_color{ 0xD4, 0xD4, 0xD4 };
+    const sRGB_color sRGB_color::Gray84 = sRGB_color{ 0xD6, 0xD6, 0xD6 };
+    const sRGB_color sRGB_color::Gray85 = sRGB_color{ 0xD9, 0xD9, 0xD9 };
+    const sRGB_color sRGB_color::Gray86 = sRGB_color{ 0xDB, 0xDB, 0xDB };
+    const sRGB_color sRGB_color::Gray87 = sRGB_color{ 0xDE, 0xDE, 0xDE };
+    const sRGB_color sRGB_color::Gray88 = sRGB_color{ 0xE0, 0xE0, 0xE0 };
+    const sRGB_color sRGB_color::Gray89 = sRGB_color{ 0xE3, 0xE3, 0xE3 };
+    const sRGB_color sRGB_color::Gray9 = sRGB_color{ 0x17, 0x17, 0x17 };
+    const sRGB_color sRGB_color::Gray90 = sRGB_color{ 0xE5, 0xE5, 0xE5 };
+    const sRGB_color sRGB_color::Gray91 = sRGB_color{ 0xE8, 0xE8, 0xE8 };
+    const sRGB_color sRGB_color::Gray92 = sRGB_color{ 0xEB, 0xEB, 0xEB };
+    const sRGB_color sRGB_color::Gray93 = sRGB_color{ 0xED, 0xED, 0xED };
+    const sRGB_color sRGB_color::Gray94 = sRGB_color{ 0xF0, 0xF0, 0xF0 };
+    const sRGB_color sRGB_color::Gray95 = sRGB_color{ 0xF2, 0xF2, 0xF2 };
+    const sRGB_color sRGB_color::Gray96 = sRGB_color{ 0xF5, 0xF5, 0xF5 };
+    const sRGB_color sRGB_color::Gray97 = sRGB_color{ 0xF7, 0xF7, 0xF7 };
+    const sRGB_color sRGB_color::Gray98 = sRGB_color{ 0xFA, 0xFA, 0xFA };
+    const sRGB_color sRGB_color::Gray99 = sRGB_color{ 0xFC, 0xFC, 0xFC };
+    const sRGB_color sRGB_color::Green = sRGB_color{ 0x00, 0xFF, 0x00 };
+    const sRGB_color sRGB_color::Green1 = sRGB_color{ 0x00, 0xFF, 0x00 };
+    const sRGB_color sRGB_color::Green2 = sRGB_color{ 0x00, 0xEE, 0x00 };
+    const sRGB_color sRGB_color::Green3 = sRGB_color{ 0x00, 0xCD, 0x00 };
+    const sRGB_color sRGB_color::Green4 = sRGB_color{ 0x00, 0x8B, 0x00 };
+    const sRGB_color sRGB_color::GreenYellow = sRGB_color{ 0xAD, 0xFF, 0x2F };
+    const sRGB_color sRGB_color::Grey = sRGB_color{ 0xBE, 0xBE, 0xBE };
+    const sRGB_color sRGB_color::Grey0 = sRGB_color{ 0x00, 0x00, 0x00 };
+    const sRGB_color sRGB_color::Grey1 = sRGB_color{ 0x03, 0x03, 0x03 };
+    const sRGB_color sRGB_color::Grey10 = sRGB_color{ 0x1A, 0x1A, 0x1A };
+    const sRGB_color sRGB_color::Grey100 = sRGB_color{ 0xFF, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::Grey11 = sRGB_color{ 0x1C, 0x1C, 0x1C };
+    const sRGB_color sRGB_color::Grey12 = sRGB_color{ 0x1F, 0x1F, 0x1F };
+    const sRGB_color sRGB_color::Grey13 = sRGB_color{ 0x21, 0x21, 0x21 };
+    const sRGB_color sRGB_color::Grey14 = sRGB_color{ 0x24, 0x24, 0x24 };
+    const sRGB_color sRGB_color::Grey15 = sRGB_color{ 0x26, 0x26, 0x26 };
+    const sRGB_color sRGB_color::Grey16 = sRGB_color{ 0x29, 0x29, 0x29 };
+    const sRGB_color sRGB_color::Grey17 = sRGB_color{ 0x2B, 0x2B, 0x2B };
+    const sRGB_color sRGB_color::Grey18 = sRGB_color{ 0x2E, 0x2E, 0x2E };
+    const sRGB_color sRGB_color::Grey19 = sRGB_color{ 0x30, 0x30, 0x30 };
+    const sRGB_color sRGB_color::Grey2 = sRGB_color{ 0x05, 0x05, 0x05 };
+    const sRGB_color sRGB_color::Grey20 = sRGB_color{ 0x33, 0x33, 0x33 };
+    const sRGB_color sRGB_color::Grey21 = sRGB_color{ 0x36, 0x36, 0x36 };
+    const sRGB_color sRGB_color::Grey22 = sRGB_color{ 0x38, 0x38, 0x38 };
+    const sRGB_color sRGB_color::Grey23 = sRGB_color{ 0x3B, 0x3B, 0x3B };
+    const sRGB_color sRGB_color::Grey24 = sRGB_color{ 0x3D, 0x3D, 0x3D };
+    const sRGB_color sRGB_color::Grey25 = sRGB_color{ 0x40, 0x40, 0x40 };
+    const sRGB_color sRGB_color::Grey26 = sRGB_color{ 0x42, 0x42, 0x42 };
+    const sRGB_color sRGB_color::Grey27 = sRGB_color{ 0x45, 0x45, 0x45 };
+    const sRGB_color sRGB_color::Grey28 = sRGB_color{ 0x47, 0x47, 0x47 };
+    const sRGB_color sRGB_color::Grey29 = sRGB_color{ 0x4A, 0x4A, 0x4A };
+    const sRGB_color sRGB_color::Grey3 = sRGB_color{ 0x08, 0x08, 0x08 };
+    const sRGB_color sRGB_color::Grey30 = sRGB_color{ 0x4D, 0x4D, 0x4D };
+    const sRGB_color sRGB_color::Grey31 = sRGB_color{ 0x4F, 0x4F, 0x4F };
+    const sRGB_color sRGB_color::Grey32 = sRGB_color{ 0x52, 0x52, 0x52 };
+    const sRGB_color sRGB_color::Grey33 = sRGB_color{ 0x54, 0x54, 0x54 };
+    const sRGB_color sRGB_color::Grey34 = sRGB_color{ 0x57, 0x57, 0x57 };
+    const sRGB_color sRGB_color::Grey35 = sRGB_color{ 0x59, 0x59, 0x59 };
+    const sRGB_color sRGB_color::Grey36 = sRGB_color{ 0x5C, 0x5C, 0x5C };
+    const sRGB_color sRGB_color::Grey37 = sRGB_color{ 0x5E, 0x5E, 0x5E };
+    const sRGB_color sRGB_color::Grey38 = sRGB_color{ 0x61, 0x61, 0x61 };
+    const sRGB_color sRGB_color::Grey39 = sRGB_color{ 0x63, 0x63, 0x63 };
+    const sRGB_color sRGB_color::Grey4 = sRGB_color{ 0x0A, 0x0A, 0x0A };
+    const sRGB_color sRGB_color::Grey40 = sRGB_color{ 0x66, 0x66, 0x66 };
+    const sRGB_color sRGB_color::Grey41 = sRGB_color{ 0x69, 0x69, 0x69 };
+    const sRGB_color sRGB_color::Grey42 = sRGB_color{ 0x6B, 0x6B, 0x6B };
+    const sRGB_color sRGB_color::Grey43 = sRGB_color{ 0x6E, 0x6E, 0x6E };
+    const sRGB_color sRGB_color::Grey44 = sRGB_color{ 0x70, 0x70, 0x70 };
+    const sRGB_color sRGB_color::Grey45 = sRGB_color{ 0x73, 0x73, 0x73 };
+    const sRGB_color sRGB_color::Grey46 = sRGB_color{ 0x75, 0x75, 0x75 };
+    const sRGB_color sRGB_color::Grey47 = sRGB_color{ 0x78, 0x78, 0x78 };
+    const sRGB_color sRGB_color::Grey48 = sRGB_color{ 0x7A, 0x7A, 0x7A };
+    const sRGB_color sRGB_color::Grey49 = sRGB_color{ 0x7D, 0x7D, 0x7D };
+    const sRGB_color sRGB_color::Grey5 = sRGB_color{ 0x0D, 0x0D, 0x0D };
+    const sRGB_color sRGB_color::Grey50 = sRGB_color{ 0x7F, 0x7F, 0x7F };
+    const sRGB_color sRGB_color::Grey51 = sRGB_color{ 0x82, 0x82, 0x82 };
+    const sRGB_color sRGB_color::Grey52 = sRGB_color{ 0x85, 0x85, 0x85 };
+    const sRGB_color sRGB_color::Grey53 = sRGB_color{ 0x87, 0x87, 0x87 };
+    const sRGB_color sRGB_color::Grey54 = sRGB_color{ 0x8A, 0x8A, 0x8A };
+    const sRGB_color sRGB_color::Grey55 = sRGB_color{ 0x8C, 0x8C, 0x8C };
+    const sRGB_color sRGB_color::Grey56 = sRGB_color{ 0x8F, 0x8F, 0x8F };
+    const sRGB_color sRGB_color::Grey57 = sRGB_color{ 0x91, 0x91, 0x91 };
+    const sRGB_color sRGB_color::Grey58 = sRGB_color{ 0x94, 0x94, 0x94 };
+    const sRGB_color sRGB_color::Grey59 = sRGB_color{ 0x96, 0x96, 0x96 };
+    const sRGB_color sRGB_color::Grey6 = sRGB_color{ 0x0F, 0x0F, 0x0F };
+    const sRGB_color sRGB_color::Grey60 = sRGB_color{ 0x99, 0x99, 0x99 };
+    const sRGB_color sRGB_color::Grey61 = sRGB_color{ 0x9C, 0x9C, 0x9C };
+    const sRGB_color sRGB_color::Grey62 = sRGB_color{ 0x9E, 0x9E, 0x9E };
+    const sRGB_color sRGB_color::Grey63 = sRGB_color{ 0xA1, 0xA1, 0xA1 };
+    const sRGB_color sRGB_color::Grey64 = sRGB_color{ 0xA3, 0xA3, 0xA3 };
+    const sRGB_color sRGB_color::Grey65 = sRGB_color{ 0xA6, 0xA6, 0xA6 };
+    const sRGB_color sRGB_color::Grey66 = sRGB_color{ 0xA8, 0xA8, 0xA8 };
+    const sRGB_color sRGB_color::Grey67 = sRGB_color{ 0xAB, 0xAB, 0xAB };
+    const sRGB_color sRGB_color::Grey68 = sRGB_color{ 0xAD, 0xAD, 0xAD };
+    const sRGB_color sRGB_color::Grey69 = sRGB_color{ 0xB0, 0xB0, 0xB0 };
+    const sRGB_color sRGB_color::Grey7 = sRGB_color{ 0x12, 0x12, 0x12 };
+    const sRGB_color sRGB_color::Grey70 = sRGB_color{ 0xB3, 0xB3, 0xB3 };
+    const sRGB_color sRGB_color::Grey71 = sRGB_color{ 0xB5, 0xB5, 0xB5 };
+    const sRGB_color sRGB_color::Grey72 = sRGB_color{ 0xB8, 0xB8, 0xB8 };
+    const sRGB_color sRGB_color::Grey73 = sRGB_color{ 0xBA, 0xBA, 0xBA };
+    const sRGB_color sRGB_color::Grey74 = sRGB_color{ 0xBD, 0xBD, 0xBD };
+    const sRGB_color sRGB_color::Grey75 = sRGB_color{ 0xBF, 0xBF, 0xBF };
+    const sRGB_color sRGB_color::Grey76 = sRGB_color{ 0xC2, 0xC2, 0xC2 };
+    const sRGB_color sRGB_color::Grey77 = sRGB_color{ 0xC4, 0xC4, 0xC4 };
+    const sRGB_color sRGB_color::Grey78 = sRGB_color{ 0xC7, 0xC7, 0xC7 };
+    const sRGB_color sRGB_color::Grey79 = sRGB_color{ 0xC9, 0xC9, 0xC9 };
+    const sRGB_color sRGB_color::Grey8 = sRGB_color{ 0x14, 0x14, 0x14 };
+    const sRGB_color sRGB_color::Grey80 = sRGB_color{ 0xCC, 0xCC, 0xCC };
+    const sRGB_color sRGB_color::Grey81 = sRGB_color{ 0xCF, 0xCF, 0xCF };
+    const sRGB_color sRGB_color::Grey82 = sRGB_color{ 0xD1, 0xD1, 0xD1 };
+    const sRGB_color sRGB_color::Grey83 = sRGB_color{ 0xD4, 0xD4, 0xD4 };
+    const sRGB_color sRGB_color::Grey84 = sRGB_color{ 0xD6, 0xD6, 0xD6 };
+    const sRGB_color sRGB_color::Grey85 = sRGB_color{ 0xD9, 0xD9, 0xD9 };
+    const sRGB_color sRGB_color::Grey86 = sRGB_color{ 0xDB, 0xDB, 0xDB };
+    const sRGB_color sRGB_color::Grey87 = sRGB_color{ 0xDE, 0xDE, 0xDE };
+    const sRGB_color sRGB_color::Grey88 = sRGB_color{ 0xE0, 0xE0, 0xE0 };
+    const sRGB_color sRGB_color::Grey89 = sRGB_color{ 0xE3, 0xE3, 0xE3 };
+    const sRGB_color sRGB_color::Grey9 = sRGB_color{ 0x17, 0x17, 0x17 };
+    const sRGB_color sRGB_color::Grey90 = sRGB_color{ 0xE5, 0xE5, 0xE5 };
+    const sRGB_color sRGB_color::Grey91 = sRGB_color{ 0xE8, 0xE8, 0xE8 };
+    const sRGB_color sRGB_color::Grey92 = sRGB_color{ 0xEB, 0xEB, 0xEB };
+    const sRGB_color sRGB_color::Grey93 = sRGB_color{ 0xED, 0xED, 0xED };
+    const sRGB_color sRGB_color::Grey94 = sRGB_color{ 0xF0, 0xF0, 0xF0 };
+    const sRGB_color sRGB_color::Grey95 = sRGB_color{ 0xF2, 0xF2, 0xF2 };
+    const sRGB_color sRGB_color::Grey96 = sRGB_color{ 0xF5, 0xF5, 0xF5 };
+    const sRGB_color sRGB_color::Grey97 = sRGB_color{ 0xF7, 0xF7, 0xF7 };
+    const sRGB_color sRGB_color::Grey98 = sRGB_color{ 0xFA, 0xFA, 0xFA };
+    const sRGB_color sRGB_color::Grey99 = sRGB_color{ 0xFC, 0xFC, 0xFC };
+    const sRGB_color sRGB_color::Honeydew = sRGB_color{ 0xF0, 0xFF, 0xF0 };
+    const sRGB_color sRGB_color::Honeydew1 = sRGB_color{ 0xF0, 0xFF, 0xF0 };
+    const sRGB_color sRGB_color::Honeydew2 = sRGB_color{ 0xE0, 0xEE, 0xE0 };
+    const sRGB_color sRGB_color::Honeydew3 = sRGB_color{ 0xC1, 0xCD, 0xC1 };
+    const sRGB_color sRGB_color::Honeydew4 = sRGB_color{ 0x83, 0x8B, 0x83 };
+    const sRGB_color sRGB_color::HotPink = sRGB_color{ 0xFF, 0x69, 0xB4 };
+    const sRGB_color sRGB_color::HotPink1 = sRGB_color{ 0xFF, 0x6E, 0xB4 };
+    const sRGB_color sRGB_color::HotPink2 = sRGB_color{ 0xEE, 0x6A, 0xA7 };
+    const sRGB_color sRGB_color::HotPink3 = sRGB_color{ 0xCD, 0x60, 0x90 };
+    const sRGB_color sRGB_color::HotPink4 = sRGB_color{ 0x8B, 0x3A, 0x62 };
+    const sRGB_color sRGB_color::IndianRed = sRGB_color{ 0xCD, 0x5C, 0x5C };
+    const sRGB_color sRGB_color::IndianRed1 = sRGB_color{ 0xFF, 0x6A, 0x6A };
+    const sRGB_color sRGB_color::IndianRed2 = sRGB_color{ 0xEE, 0x63, 0x63 };
+    const sRGB_color sRGB_color::IndianRed3 = sRGB_color{ 0xCD, 0x55, 0x55 };
+    const sRGB_color sRGB_color::IndianRed4 = sRGB_color{ 0x8B, 0x3A, 0x3A };
+    const sRGB_color sRGB_color::Ivory = sRGB_color{ 0xFF, 0xFF, 0xF0 };
+    const sRGB_color sRGB_color::Ivory1 = sRGB_color{ 0xFF, 0xFF, 0xF0 };
+    const sRGB_color sRGB_color::Ivory2 = sRGB_color{ 0xEE, 0xEE, 0xE0 };
+    const sRGB_color sRGB_color::Ivory3 = sRGB_color{ 0xCD, 0xCD, 0xC1 };
+    const sRGB_color sRGB_color::Ivory4 = sRGB_color{ 0x8B, 0x8B, 0x83 };
+    const sRGB_color sRGB_color::Khaki = sRGB_color{ 0xF0, 0xE6, 0x8C };
+    const sRGB_color sRGB_color::Khaki1 = sRGB_color{ 0xFF, 0xF6, 0x8F };
+    const sRGB_color sRGB_color::Khaki2 = sRGB_color{ 0xEE, 0xE6, 0x85 };
+    const sRGB_color sRGB_color::Khaki3 = sRGB_color{ 0xCD, 0xC6, 0x73 };
+    const sRGB_color sRGB_color::Khaki4 = sRGB_color{ 0x8B, 0x86, 0x4E };
+    const sRGB_color sRGB_color::Lavender = sRGB_color{ 0xE6, 0xE6, 0xFA };
+    const sRGB_color sRGB_color::LavenderBlush = sRGB_color{ 0xFF, 0xF0, 0xF5 };
+    const sRGB_color sRGB_color::LavenderBlush1 = sRGB_color{ 0xFF, 0xF0, 0xF5 };
+    const sRGB_color sRGB_color::LavenderBlush2 = sRGB_color{ 0xEE, 0xE0, 0xE5 };
+    const sRGB_color sRGB_color::LavenderBlush3 = sRGB_color{ 0xCD, 0xC1, 0xC5 };
+    const sRGB_color sRGB_color::LavenderBlush4 = sRGB_color{ 0x8B, 0x83, 0x86 };
+    const sRGB_color sRGB_color::LawnGreen = sRGB_color{ 0x7C, 0xFC, 0x00 };
+    const sRGB_color sRGB_color::LemonChiffon = sRGB_color{ 0xFF, 0xFA, 0xCD };
+    const sRGB_color sRGB_color::LemonChiffon1 = sRGB_color{ 0xFF, 0xFA, 0xCD };
+    const sRGB_color sRGB_color::LemonChiffon2 = sRGB_color{ 0xEE, 0xE9, 0xBF };
+    const sRGB_color sRGB_color::LemonChiffon3 = sRGB_color{ 0xCD, 0xC9, 0xA5 };
+    const sRGB_color sRGB_color::LemonChiffon4 = sRGB_color{ 0x8B, 0x89, 0x70 };
+    const sRGB_color sRGB_color::LightBlue = sRGB_color{ 0xAD, 0xD8, 0xE6 };
+    const sRGB_color sRGB_color::LightBlue1 = sRGB_color{ 0xBF, 0xEF, 0xFF };
+    const sRGB_color sRGB_color::LightBlue2 = sRGB_color{ 0xB2, 0xDF, 0xEE };
+    const sRGB_color sRGB_color::LightBlue3 = sRGB_color{ 0x9A, 0xC0, 0xCD };
+    const sRGB_color sRGB_color::LightBlue4 = sRGB_color{ 0x68, 0x83, 0x8B };
+    const sRGB_color sRGB_color::LightCoral = sRGB_color{ 0xF0, 0x80, 0x80 };
+    const sRGB_color sRGB_color::LightCyan = sRGB_color{ 0xE0, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::LightCyan1 = sRGB_color{ 0xE0, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::LightCyan2 = sRGB_color{ 0xD1, 0xEE, 0xEE };
+    const sRGB_color sRGB_color::LightCyan3 = sRGB_color{ 0xB4, 0xCD, 0xCD };
+    const sRGB_color sRGB_color::LightCyan4 = sRGB_color{ 0x7A, 0x8B, 0x8B };
+    const sRGB_color sRGB_color::LightGoldenrod = sRGB_color{ 0xEE, 0xDD, 0x82 };
+    const sRGB_color sRGB_color::LightGoldenrod1 = sRGB_color{ 0xFF, 0xEC, 0x8B };
+    const sRGB_color sRGB_color::LightGoldenrod2 = sRGB_color{ 0xEE, 0xDC, 0x82 };
+    const sRGB_color sRGB_color::LightGoldenrod3 = sRGB_color{ 0xCD, 0xBE, 0x70 };
+    const sRGB_color sRGB_color::LightGoldenrod4 = sRGB_color{ 0x8B, 0x81, 0x4C };
+    const sRGB_color sRGB_color::LightGoldenrodYellow = sRGB_color{ 0xFA, 0xFA, 0xD2 };
+    const sRGB_color sRGB_color::LightGray = sRGB_color{ 0xD3, 0xD3, 0xD3 };
+    const sRGB_color sRGB_color::LightGreen = sRGB_color{ 0x90, 0xEE, 0x90 };
+    const sRGB_color sRGB_color::LightGrey = sRGB_color{ 0xD3, 0xD3, 0xD3 };
+    const sRGB_color sRGB_color::LightPink = sRGB_color{ 0xFF, 0xB6, 0xC1 };
+    const sRGB_color sRGB_color::LightPink1 = sRGB_color{ 0xFF, 0xAE, 0xB9 };
+    const sRGB_color sRGB_color::LightPink2 = sRGB_color{ 0xEE, 0xA2, 0xAD };
+    const sRGB_color sRGB_color::LightPink3 = sRGB_color{ 0xCD, 0x8C, 0x95 };
+    const sRGB_color sRGB_color::LightPink4 = sRGB_color{ 0x8B, 0x5F, 0x65 };
+    const sRGB_color sRGB_color::LightSalmon = sRGB_color{ 0xFF, 0xA0, 0x7A };
+    const sRGB_color sRGB_color::LightSalmon1 = sRGB_color{ 0xFF, 0xA0, 0x7A };
+    const sRGB_color sRGB_color::LightSalmon2 = sRGB_color{ 0xEE, 0x95, 0x72 };
+    const sRGB_color sRGB_color::LightSalmon3 = sRGB_color{ 0xCD, 0x81, 0x62 };
+    const sRGB_color sRGB_color::LightSalmon4 = sRGB_color{ 0x8B, 0x57, 0x42 };
+    const sRGB_color sRGB_color::LightSeaGreen = sRGB_color{ 0x20, 0xB2, 0xAA };
+    const sRGB_color sRGB_color::LightSkyBlue = sRGB_color{ 0x87, 0xCE, 0xFA };
+    const sRGB_color sRGB_color::LightSkyBlue1 = sRGB_color{ 0xB0, 0xE2, 0xFF };
+    const sRGB_color sRGB_color::LightSkyBlue2 = sRGB_color{ 0xA4, 0xD3, 0xEE };
+    const sRGB_color sRGB_color::LightSkyBlue3 = sRGB_color{ 0x8D, 0xB6, 0xCD };
+    const sRGB_color sRGB_color::LightSkyBlue4 = sRGB_color{ 0x60, 0x7B, 0x8B };
+    const sRGB_color sRGB_color::LightSlateBlue = sRGB_color{ 0x84, 0x70, 0xFF };
+    const sRGB_color sRGB_color::LightSlateGray = sRGB_color{ 0x77, 0x88, 0x99 };
+    const sRGB_color sRGB_color::LightSlateGrey = sRGB_color{ 0x77, 0x88, 0x99 };
+    const sRGB_color sRGB_color::LightSteelBlue = sRGB_color{ 0xB0, 0xC4, 0xDE };
+    const sRGB_color sRGB_color::LightSteelBlue1 = sRGB_color{ 0xCA, 0xE1, 0xFF };
+    const sRGB_color sRGB_color::LightSteelBlue2 = sRGB_color{ 0xBC, 0xD2, 0xEE };
+    const sRGB_color sRGB_color::LightSteelBlue3 = sRGB_color{ 0xA2, 0xB5, 0xCD };
+    const sRGB_color sRGB_color::LightSteelBlue4 = sRGB_color{ 0x6E, 0x7B, 0x8B };
+    const sRGB_color sRGB_color::LightYellow = sRGB_color{ 0xFF, 0xFF, 0xE0 };
+    const sRGB_color sRGB_color::LightYellow1 = sRGB_color{ 0xFF, 0xFF, 0xE0 };
+    const sRGB_color sRGB_color::LightYellow2 = sRGB_color{ 0xEE, 0xEE, 0xD1 };
+    const sRGB_color sRGB_color::LightYellow3 = sRGB_color{ 0xCD, 0xCD, 0xB4 };
+    const sRGB_color sRGB_color::LightYellow4 = sRGB_color{ 0x8B, 0x8B, 0x7A };
+    const sRGB_color sRGB_color::LimeGreen = sRGB_color{ 0x32, 0xCD, 0x32 };
+    const sRGB_color sRGB_color::Linen = sRGB_color{ 0xFA, 0xF0, 0xE6 };
+    const sRGB_color sRGB_color::Magenta = sRGB_color{ 0xFF, 0x00, 0xFF };
+    const sRGB_color sRGB_color::Magenta1 = sRGB_color{ 0xFF, 0x00, 0xFF };
+    const sRGB_color sRGB_color::Magenta2 = sRGB_color{ 0xEE, 0x00, 0xEE };
+    const sRGB_color sRGB_color::Magenta3 = sRGB_color{ 0xCD, 0x00, 0xCD };
+    const sRGB_color sRGB_color::Magenta4 = sRGB_color{ 0x8B, 0x00, 0x8B };
+    const sRGB_color sRGB_color::Maroon = sRGB_color{ 0xB0, 0x30, 0x60 };
+    const sRGB_color sRGB_color::Maroon1 = sRGB_color{ 0xFF, 0x34, 0xB3 };
+    const sRGB_color sRGB_color::Maroon2 = sRGB_color{ 0xEE, 0x30, 0xA7 };
+    const sRGB_color sRGB_color::Maroon3 = sRGB_color{ 0xCD, 0x29, 0x90 };
+    const sRGB_color sRGB_color::Maroon4 = sRGB_color{ 0x8B, 0x1C, 0x62 };
+    const sRGB_color sRGB_color::MediumAquamarine = sRGB_color{ 0x66, 0xCD, 0xAA };
+    const sRGB_color sRGB_color::MediumBlue = sRGB_color{ 0x00, 0x00, 0xCD };
+    const sRGB_color sRGB_color::MediumOrchid = sRGB_color{ 0xBA, 0x55, 0xD3 };
+    const sRGB_color sRGB_color::MediumOrchid1 = sRGB_color{ 0xE0, 0x66, 0xFF };
+    const sRGB_color sRGB_color::MediumOrchid2 = sRGB_color{ 0xD1, 0x5F, 0xEE };
+    const sRGB_color sRGB_color::MediumOrchid3 = sRGB_color{ 0xB4, 0x52, 0xCD };
+    const sRGB_color sRGB_color::MediumOrchid4 = sRGB_color{ 0x7A, 0x37, 0x8B };
+    const sRGB_color sRGB_color::MediumPurple = sRGB_color{ 0x93, 0x70, 0xDB };
+    const sRGB_color sRGB_color::MediumPurple1 = sRGB_color{ 0xAB, 0x82, 0xFF };
+    const sRGB_color sRGB_color::MediumPurple2 = sRGB_color{ 0x9F, 0x79, 0xEE };
+    const sRGB_color sRGB_color::MediumPurple3 = sRGB_color{ 0x89, 0x68, 0xCD };
+    const sRGB_color sRGB_color::MediumPurple4 = sRGB_color{ 0x5D, 0x47, 0x8B };
+    const sRGB_color sRGB_color::MediumSeaGreen = sRGB_color{ 0x3C, 0xB3, 0x71 };
+    const sRGB_color sRGB_color::MediumSlateBlue = sRGB_color{ 0x7B, 0x68, 0xEE };
+    const sRGB_color sRGB_color::MediumSpringGreen = sRGB_color{ 0x00, 0xFA, 0x9A };
+    const sRGB_color sRGB_color::MediumTurquoise = sRGB_color{ 0x48, 0xD1, 0xCC };
+    const sRGB_color sRGB_color::MediumVioletRed = sRGB_color{ 0xC7, 0x15, 0x85 };
+    const sRGB_color sRGB_color::MidnightBlue = sRGB_color{ 0x19, 0x19, 0x70 };
+    const sRGB_color sRGB_color::MintCream = sRGB_color{ 0xF5, 0xFF, 0xFA };
+    const sRGB_color sRGB_color::MistyRose = sRGB_color{ 0xFF, 0xE4, 0xE1 };
+    const sRGB_color sRGB_color::MistyRose1 = sRGB_color{ 0xFF, 0xE4, 0xE1 };
+    const sRGB_color sRGB_color::MistyRose2 = sRGB_color{ 0xEE, 0xD5, 0xD2 };
+    const sRGB_color sRGB_color::MistyRose3 = sRGB_color{ 0xCD, 0xB7, 0xB5 };
+    const sRGB_color sRGB_color::MistyRose4 = sRGB_color{ 0x8B, 0x7D, 0x7B };
+    const sRGB_color sRGB_color::Moccasin = sRGB_color{ 0xFF, 0xE4, 0xB5 };
+    const sRGB_color sRGB_color::NavajoWhite = sRGB_color{ 0xFF, 0xDE, 0xAD };
+    const sRGB_color sRGB_color::NavajoWhite1 = sRGB_color{ 0xFF, 0xDE, 0xAD };
+    const sRGB_color sRGB_color::NavajoWhite2 = sRGB_color{ 0xEE, 0xCF, 0xA1 };
+    const sRGB_color sRGB_color::NavajoWhite3 = sRGB_color{ 0xCD, 0xB3, 0x8B };
+    const sRGB_color sRGB_color::NavajoWhite4 = sRGB_color{ 0x8B, 0x79, 0x5E };
+    const sRGB_color sRGB_color::Navy = sRGB_color{ 0x00, 0x00, 0x80 };
+    const sRGB_color sRGB_color::NavyBlue = sRGB_color{ 0x00, 0x00, 0x80 };
+    const sRGB_color sRGB_color::OldLace = sRGB_color{ 0xFD, 0xF5, 0xE6 };
+    const sRGB_color sRGB_color::OliveDrab = sRGB_color{ 0x6B, 0x8E, 0x23 };
+    const sRGB_color sRGB_color::OliveDrab1 = sRGB_color{ 0xC0, 0xFF, 0x3E };
+    const sRGB_color sRGB_color::OliveDrab2 = sRGB_color{ 0xB3, 0xEE, 0x3A };
+    const sRGB_color sRGB_color::OliveDrab3 = sRGB_color{ 0x9A, 0xCD, 0x32 };
+    const sRGB_color sRGB_color::OliveDrab4 = sRGB_color{ 0x69, 0x8B, 0x22 };
+    const sRGB_color sRGB_color::Orange = sRGB_color{ 0xFF, 0xA5, 0x00 };
+    const sRGB_color sRGB_color::Orange1 = sRGB_color{ 0xFF, 0xA5, 0x00 };
+    const sRGB_color sRGB_color::Orange2 = sRGB_color{ 0xEE, 0x9A, 0x00 };
+    const sRGB_color sRGB_color::Orange3 = sRGB_color{ 0xCD, 0x85, 0x00 };
+    const sRGB_color sRGB_color::Orange4 = sRGB_color{ 0x8B, 0x5A, 0x00 };
+    const sRGB_color sRGB_color::OrangeRed = sRGB_color{ 0xFF, 0x45, 0x00 };
+    const sRGB_color sRGB_color::OrangeRed1 = sRGB_color{ 0xFF, 0x45, 0x00 };
+    const sRGB_color sRGB_color::OrangeRed2 = sRGB_color{ 0xEE, 0x40, 0x00 };
+    const sRGB_color sRGB_color::OrangeRed3 = sRGB_color{ 0xCD, 0x37, 0x00 };
+    const sRGB_color sRGB_color::OrangeRed4 = sRGB_color{ 0x8B, 0x25, 0x00 };
+    const sRGB_color sRGB_color::Orchid = sRGB_color{ 0xDA, 0x70, 0xD6 };
+    const sRGB_color sRGB_color::Orchid1 = sRGB_color{ 0xFF, 0x83, 0xFA };
+    const sRGB_color sRGB_color::Orchid2 = sRGB_color{ 0xEE, 0x7A, 0xE9 };
+    const sRGB_color sRGB_color::Orchid3 = sRGB_color{ 0xCD, 0x69, 0xC9 };
+    const sRGB_color sRGB_color::Orchid4 = sRGB_color{ 0x8B, 0x47, 0x89 };
+    const sRGB_color sRGB_color::PaleGoldenrod = sRGB_color{ 0xEE, 0xE8, 0xAA };
+    const sRGB_color sRGB_color::PaleGreen = sRGB_color{ 0x98, 0xFB, 0x98 };
+    const sRGB_color sRGB_color::PaleGreen1 = sRGB_color{ 0x9A, 0xFF, 0x9A };
+    const sRGB_color sRGB_color::PaleGreen2 = sRGB_color{ 0x90, 0xEE, 0x90 };
+    const sRGB_color sRGB_color::PaleGreen3 = sRGB_color{ 0x7C, 0xCD, 0x7C };
+    const sRGB_color sRGB_color::PaleGreen4 = sRGB_color{ 0x54, 0x8B, 0x54 };
+    const sRGB_color sRGB_color::PaleTurquoise = sRGB_color{ 0xAF, 0xEE, 0xEE };
+    const sRGB_color sRGB_color::PaleTurquoise1 = sRGB_color{ 0xBB, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::PaleTurquoise2 = sRGB_color{ 0xAE, 0xEE, 0xEE };
+    const sRGB_color sRGB_color::PaleTurquoise3 = sRGB_color{ 0x96, 0xCD, 0xCD };
+    const sRGB_color sRGB_color::PaleTurquoise4 = sRGB_color{ 0x66, 0x8B, 0x8B };
+    const sRGB_color sRGB_color::PaleVioletRed = sRGB_color{ 0xDB, 0x70, 0x93 };
+    const sRGB_color sRGB_color::PaleVioletRed1 = sRGB_color{ 0xFF, 0x82, 0xAB };
+    const sRGB_color sRGB_color::PaleVioletRed2 = sRGB_color{ 0xEE, 0x79, 0x9F };
+    const sRGB_color sRGB_color::PaleVioletRed3 = sRGB_color{ 0xCD, 0x68, 0x89 };
+    const sRGB_color sRGB_color::PaleVioletRed4 = sRGB_color{ 0x8B, 0x47, 0x5D };
+    const sRGB_color sRGB_color::PapayaWhip = sRGB_color{ 0xFF, 0xEF, 0xD5 };
+    const sRGB_color sRGB_color::PeachPuff = sRGB_color{ 0xFF, 0xDA, 0xB9 };
+    const sRGB_color sRGB_color::PeachPuff1 = sRGB_color{ 0xFF, 0xDA, 0xB9 };
+    const sRGB_color sRGB_color::PeachPuff2 = sRGB_color{ 0xEE, 0xCB, 0xAD };
+    const sRGB_color sRGB_color::PeachPuff3 = sRGB_color{ 0xCD, 0xAF, 0x95 };
+    const sRGB_color sRGB_color::PeachPuff4 = sRGB_color{ 0x8B, 0x77, 0x65 };
+    const sRGB_color sRGB_color::Peru = sRGB_color{ 0xCD, 0x85, 0x3F };
+    const sRGB_color sRGB_color::Pink = sRGB_color{ 0xFF, 0xC0, 0xCB };
+    const sRGB_color sRGB_color::Pink1 = sRGB_color{ 0xFF, 0xB5, 0xC5 };
+    const sRGB_color sRGB_color::Pink2 = sRGB_color{ 0xEE, 0xA9, 0xB8 };
+    const sRGB_color sRGB_color::Pink3 = sRGB_color{ 0xCD, 0x91, 0x9E };
+    const sRGB_color sRGB_color::Pink4 = sRGB_color{ 0x8B, 0x63, 0x6C };
+    const sRGB_color sRGB_color::Plum = sRGB_color{ 0xDD, 0xA0, 0xDD };
+    const sRGB_color sRGB_color::Plum1 = sRGB_color{ 0xFF, 0xBB, 0xFF };
+    const sRGB_color sRGB_color::Plum2 = sRGB_color{ 0xEE, 0xAE, 0xEE };
+    const sRGB_color sRGB_color::Plum3 = sRGB_color{ 0xCD, 0x96, 0xCD };
+    const sRGB_color sRGB_color::Plum4 = sRGB_color{ 0x8B, 0x66, 0x8B };
+    const sRGB_color sRGB_color::PowderBlue = sRGB_color{ 0xB0, 0xE0, 0xE6 };
+    const sRGB_color sRGB_color::Purple = sRGB_color{ 0xA0, 0x20, 0xF0 };
+    const sRGB_color sRGB_color::Purple1 = sRGB_color{ 0x9B, 0x30, 0xFF };
+    const sRGB_color sRGB_color::Purple2 = sRGB_color{ 0x91, 0x2C, 0xEE };
+    const sRGB_color sRGB_color::Purple3 = sRGB_color{ 0x7D, 0x26, 0xCD };
+    const sRGB_color sRGB_color::Purple4 = sRGB_color{ 0x55, 0x1A, 0x8B };
+    const sRGB_color sRGB_color::Red = sRGB_color{ 0xFF, 0x00, 0x00 };
+    const sRGB_color sRGB_color::Red1 = sRGB_color{ 0xFF, 0x00, 0x00 };
+    const sRGB_color sRGB_color::Red2 = sRGB_color{ 0xEE, 0x00, 0x00 };
+    const sRGB_color sRGB_color::Red3 = sRGB_color{ 0xCD, 0x00, 0x00 };
+    const sRGB_color sRGB_color::Red4 = sRGB_color{ 0x8B, 0x00, 0x00 };
+    const sRGB_color sRGB_color::RosyBrown = sRGB_color{ 0xBC, 0x8F, 0x8F };
+    const sRGB_color sRGB_color::RosyBrown1 = sRGB_color{ 0xFF, 0xC1, 0xC1 };
+    const sRGB_color sRGB_color::RosyBrown2 = sRGB_color{ 0xEE, 0xB4, 0xB4 };
+    const sRGB_color sRGB_color::RosyBrown3 = sRGB_color{ 0xCD, 0x9B, 0x9B };
+    const sRGB_color sRGB_color::RosyBrown4 = sRGB_color{ 0x8B, 0x69, 0x69 };
+    const sRGB_color sRGB_color::RoyalBlue = sRGB_color{ 0x41, 0x69, 0xE1 };
+    const sRGB_color sRGB_color::RoyalBlue1 = sRGB_color{ 0x48, 0x76, 0xFF };
+    const sRGB_color sRGB_color::RoyalBlue2 = sRGB_color{ 0x43, 0x6E, 0xEE };
+    const sRGB_color sRGB_color::RoyalBlue3 = sRGB_color{ 0x3A, 0x5F, 0xCD };
+    const sRGB_color sRGB_color::RoyalBlue4 = sRGB_color{ 0x27, 0x40, 0x8B };
+    const sRGB_color sRGB_color::SaddleBrown = sRGB_color{ 0x8B, 0x45, 0x13 };
+    const sRGB_color sRGB_color::Salmon = sRGB_color{ 0xFA, 0x80, 0x72 };
+    const sRGB_color sRGB_color::Salmon1 = sRGB_color{ 0xFF, 0x8C, 0x69 };
+    const sRGB_color sRGB_color::Salmon2 = sRGB_color{ 0xEE, 0x82, 0x62 };
+    const sRGB_color sRGB_color::Salmon3 = sRGB_color{ 0xCD, 0x70, 0x54 };
+    const sRGB_color sRGB_color::Salmon4 = sRGB_color{ 0x8B, 0x4C, 0x39 };
+    const sRGB_color sRGB_color::SandyBrown = sRGB_color{ 0xF4, 0xA4, 0x60 };
+    const sRGB_color sRGB_color::SeaGreen = sRGB_color{ 0x2E, 0x8B, 0x57 };
+    const sRGB_color sRGB_color::SeaGreen1 = sRGB_color{ 0x54, 0xFF, 0x9F };
+    const sRGB_color sRGB_color::SeaGreen2 = sRGB_color{ 0x4E, 0xEE, 0x94 };
+    const sRGB_color sRGB_color::SeaGreen3 = sRGB_color{ 0x43, 0xCD, 0x80 };
+    const sRGB_color sRGB_color::SeaGreen4 = sRGB_color{ 0x2E, 0x8B, 0x57 };
+    const sRGB_color sRGB_color::Seashell = sRGB_color{ 0xFF, 0xF5, 0xEE };
+    const sRGB_color sRGB_color::Seashell1 = sRGB_color{ 0xFF, 0xF5, 0xEE };
+    const sRGB_color sRGB_color::Seashell2 = sRGB_color{ 0xEE, 0xE5, 0xDE };
+    const sRGB_color sRGB_color::Seashell3 = sRGB_color{ 0xCD, 0xC5, 0xBF };
+    const sRGB_color sRGB_color::Seashell4 = sRGB_color{ 0x8B, 0x86, 0x82 };
+    const sRGB_color sRGB_color::Sienna = sRGB_color{ 0xA0, 0x52, 0x2D };
+    const sRGB_color sRGB_color::Sienna1 = sRGB_color{ 0xFF, 0x82, 0x47 };
+    const sRGB_color sRGB_color::Sienna2 = sRGB_color{ 0xEE, 0x79, 0x42 };
+    const sRGB_color sRGB_color::Sienna3 = sRGB_color{ 0xCD, 0x68, 0x39 };
+    const sRGB_color sRGB_color::Sienna4 = sRGB_color{ 0x8B, 0x47, 0x26 };
+    const sRGB_color sRGB_color::SkyBlue = sRGB_color{ 0x87, 0xCE, 0xEB };
+    const sRGB_color sRGB_color::SkyBlue1 = sRGB_color{ 0x87, 0xCE, 0xFF };
+    const sRGB_color sRGB_color::SkyBlue2 = sRGB_color{ 0x7E, 0xC0, 0xEE };
+    const sRGB_color sRGB_color::SkyBlue3 = sRGB_color{ 0x6C, 0xA6, 0xCD };
+    const sRGB_color sRGB_color::SkyBlue4 = sRGB_color{ 0x4A, 0x70, 0x8B };
+    const sRGB_color sRGB_color::SlateBlue = sRGB_color{ 0x6A, 0x5A, 0xCD };
+    const sRGB_color sRGB_color::SlateBlue1 = sRGB_color{ 0x83, 0x6F, 0xFF };
+    const sRGB_color sRGB_color::SlateBlue2 = sRGB_color{ 0x7A, 0x67, 0xEE };
+    const sRGB_color sRGB_color::SlateBlue3 = sRGB_color{ 0x69, 0x59, 0xCD };
+    const sRGB_color sRGB_color::SlateBlue4 = sRGB_color{ 0x47, 0x3C, 0x8B };
+    const sRGB_color sRGB_color::SlateGray = sRGB_color{ 0x70, 0x80, 0x90 };
+    const sRGB_color sRGB_color::SlateGray1 = sRGB_color{ 0xC6, 0xE2, 0xFF };
+    const sRGB_color sRGB_color::SlateGray2 = sRGB_color{ 0xB9, 0xD3, 0xEE };
+    const sRGB_color sRGB_color::SlateGray3 = sRGB_color{ 0x9F, 0xB6, 0xCD };
+    const sRGB_color sRGB_color::SlateGray4 = sRGB_color{ 0x6C, 0x7B, 0x8B };
+    const sRGB_color sRGB_color::SlateGrey = sRGB_color{ 0x70, 0x80, 0x90 };
+    const sRGB_color sRGB_color::Snow = sRGB_color{ 0xFF, 0xFA, 0xFA };
+    const sRGB_color sRGB_color::Snow1 = sRGB_color{ 0xFF, 0xFA, 0xFA };
+    const sRGB_color sRGB_color::Snow2 = sRGB_color{ 0xEE, 0xE9, 0xE9 };
+    const sRGB_color sRGB_color::Snow3 = sRGB_color{ 0xCD, 0xC9, 0xC9 };
+    const sRGB_color sRGB_color::Snow4 = sRGB_color{ 0x8B, 0x89, 0x89 };
+    const sRGB_color sRGB_color::SpringGreen = sRGB_color{ 0x00, 0xFF, 0x7F };
+    const sRGB_color sRGB_color::SpringGreen1 = sRGB_color{ 0x00, 0xFF, 0x7F };
+    const sRGB_color sRGB_color::SpringGreen2 = sRGB_color{ 0x00, 0xEE, 0x76 };
+    const sRGB_color sRGB_color::SpringGreen3 = sRGB_color{ 0x00, 0xCD, 0x66 };
+    const sRGB_color sRGB_color::SpringGreen4 = sRGB_color{ 0x00, 0x8B, 0x45 };
+    const sRGB_color sRGB_color::SteelBlue = sRGB_color{ 0x46, 0x82, 0xB4 };
+    const sRGB_color sRGB_color::SteelBlue1 = sRGB_color{ 0x63, 0xB8, 0xFF };
+    const sRGB_color sRGB_color::SteelBlue2 = sRGB_color{ 0x5C, 0xAC, 0xEE };
+    const sRGB_color sRGB_color::SteelBlue3 = sRGB_color{ 0x4F, 0x94, 0xCD };
+    const sRGB_color sRGB_color::SteelBlue4 = sRGB_color{ 0x36, 0x64, 0x8B };
+    const sRGB_color sRGB_color::Tan = sRGB_color{ 0xD2, 0xB4, 0x8C };
+    const sRGB_color sRGB_color::Tan1 = sRGB_color{ 0xFF, 0xA5, 0x4F };
+    const sRGB_color sRGB_color::Tan2 = sRGB_color{ 0xEE, 0x9A, 0x49 };
+    const sRGB_color sRGB_color::Tan3 = sRGB_color{ 0xCD, 0x85, 0x3F };
+    const sRGB_color sRGB_color::Tan4 = sRGB_color{ 0x8B, 0x5A, 0x2B };
+    const sRGB_color sRGB_color::Thistle = sRGB_color{ 0xD8, 0xBF, 0xD8 };
+    const sRGB_color sRGB_color::Thistle1 = sRGB_color{ 0xFF, 0xE1, 0xFF };
+    const sRGB_color sRGB_color::Thistle2 = sRGB_color{ 0xEE, 0xD2, 0xEE };
+    const sRGB_color sRGB_color::Thistle3 = sRGB_color{ 0xCD, 0xB5, 0xCD };
+    const sRGB_color sRGB_color::Thistle4 = sRGB_color{ 0x8B, 0x7B, 0x8B };
+    const sRGB_color sRGB_color::Tomato = sRGB_color{ 0xFF, 0x63, 0x47 };
+    const sRGB_color sRGB_color::Tomato1 = sRGB_color{ 0xFF, 0x63, 0x47 };
+    const sRGB_color sRGB_color::Tomato2 = sRGB_color{ 0xEE, 0x5C, 0x42 };
+    const sRGB_color sRGB_color::Tomato3 = sRGB_color{ 0xCD, 0x4F, 0x39 };
+    const sRGB_color sRGB_color::Tomato4 = sRGB_color{ 0x8B, 0x36, 0x26 };
+    const sRGB_color sRGB_color::Turquoise = sRGB_color{ 0x40, 0xE0, 0xD0 };
+    const sRGB_color sRGB_color::Turquoise1 = sRGB_color{ 0x00, 0xF5, 0xFF };
+    const sRGB_color sRGB_color::Turquoise2 = sRGB_color{ 0x00, 0xE5, 0xEE };
+    const sRGB_color sRGB_color::Turquoise3 = sRGB_color{ 0x00, 0xC5, 0xCD };
+    const sRGB_color sRGB_color::Turquoise4 = sRGB_color{ 0x00, 0x86, 0x8B };
+    const sRGB_color sRGB_color::Violet = sRGB_color{ 0xEE, 0x82, 0xEE };
+    const sRGB_color sRGB_color::VioletRed = sRGB_color{ 0xD0, 0x20, 0x90 };
+    const sRGB_color sRGB_color::VioletRed1 = sRGB_color{ 0xFF, 0x3E, 0x96 };
+    const sRGB_color sRGB_color::VioletRed2 = sRGB_color{ 0xEE, 0x3A, 0x8C };
+    const sRGB_color sRGB_color::VioletRed3 = sRGB_color{ 0xCD, 0x32, 0x78 };
+    const sRGB_color sRGB_color::VioletRed4 = sRGB_color{ 0x8B, 0x22, 0x52 };
+    const sRGB_color sRGB_color::Wheat = sRGB_color{ 0xF5, 0xDE, 0xB3 };
+    const sRGB_color sRGB_color::Wheat1 = sRGB_color{ 0xFF, 0xE7, 0xBA };
+    const sRGB_color sRGB_color::Wheat2 = sRGB_color{ 0xEE, 0xD8, 0xAE };
+    const sRGB_color sRGB_color::Wheat3 = sRGB_color{ 0xCD, 0xBA, 0x96 };
+    const sRGB_color sRGB_color::Wheat4 = sRGB_color{ 0x8B, 0x7E, 0x66 };
+    const sRGB_color sRGB_color::White = sRGB_color{ 0xFF, 0xFF, 0xFF };
+    const sRGB_color sRGB_color::WhiteSmoke = sRGB_color{ 0xF5, 0xF5, 0xF5 };
+    const sRGB_color sRGB_color::Yellow = sRGB_color{ 0xFF, 0xFF, 0x00 };
+    const sRGB_color sRGB_color::Yellow1 = sRGB_color{ 0xFF, 0xFF, 0x00 };
+    const sRGB_color sRGB_color::Yellow2 = sRGB_color{ 0xEE, 0xEE, 0x00 };
+    const sRGB_color sRGB_color::Yellow3 = sRGB_color{ 0xCD, 0xCD, 0x00 };
+    const sRGB_color sRGB_color::Yellow4 = sRGB_color{ 0x8B, 0x8B, 0x00 };
+    const sRGB_color sRGB_color::YellowGreen = sRGB_color{ 0x9A, 0xCD, 0x32 };
 
-    optional_color color::from_name(const std::string& aName)
+    optional_color sRGB_color::from_name(const std::string& aName)
     {
-        struct named_colors : public std::map<neolib::ci_string, color>
+        struct named_colors : public std::map<neolib::ci_string, sRGB_color>
         {
-            named_colors() : std::map<neolib::ci_string, color>
+            named_colors() : std::map<neolib::ci_string, sRGB_color>
             ({
                 { "alice blue", AliceBlue },
                 { "AliceBlue", AliceBlue },
