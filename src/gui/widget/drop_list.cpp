@@ -142,7 +142,7 @@ namespace neogfx
             window_placement{ 
                 aDropList.non_client_rect().bottom_left() + aDropList.root().window_position(),
                 aDropList.non_client_rect().extents() },
-            window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::DismissOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow },
+            window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::DismissOnOwnerClick | window_style::InitiallyHidden | window_style::InitiallyRenderable | window_style::DropShadow },
         iDropList{ aDropList },
         iView{ client_layout(), aDropList }
     {
