@@ -29,20 +29,22 @@
 
 namespace neogfx
 {
-    inline scalar sRGB_to_linear(scalar s)
+    scalar sRGB_to_linear(scalar s, scalar scale)
     {
+        s /= scale;
         if (s <= 0.04045)
-            return s / 12.92;
+            return s / 12.92 * scale;
         else
-            return std::pow(((s + 0.055) / 1.055), 2.4);
+            return std::pow(((s + 0.055) / 1.055), 2.4) * scale;
     }
 
-    inline scalar linear_to_sRGB(scalar l)
+    scalar linear_to_sRGB(scalar l, scalar scale)
     {
+        l /= scale;
         if (l <= 0.0031308)
-            return l * 12.92;
+            return l * 12.92 * scale;
         else
-            return std::pow(l, 1 / 2.4) * 1.055 - 0.055;
+            return std::pow(l, 1 / 2.4) * 1.055 - 0.055 * scale;
     }
 
     sRGB_color sRGB_color::from_linear(const linear_color& aLinear)

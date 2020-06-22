@@ -33,6 +33,8 @@ namespace neogfx
     {
     public:
         define_event(SelectionChanged, selection_changed)
+    protected:
+        define_event(ColorSpaceChanged, color_space_changed)
     public:
         enum mode_e
         {

@@ -30,6 +30,33 @@
 
 namespace neogfx
 {
+    scalar sRGB_to_linear(scalar s, scalar scale = 1.0);
+    scalar linear_to_sRGB(scalar l, scalar scale = 1.0);
+
+    inline scalar to_sRGB(color_space srcSpace, scalar srcValue, scalar scale)
+    {
+        switch (srcSpace)
+        {
+        case color_space::sRGB:
+        default:
+            return srcValue;
+        case color_space::LinearRGB:
+            return linear_to_sRGB(srcValue, scale);
+        }
+    }
+
+    inline scalar from_sRGB(color_space srcSpace, scalar srcValue, scalar scale)
+    {
+        switch (srcSpace)
+        {
+        case color_space::sRGB:
+        default:
+            return srcValue;
+        case color_space::LinearRGB:
+            return sRGB_to_linear(srcValue, scale);
+        }
+    }
+
     template <typename Color, typename Derived>
     struct color_return_type_cracker
     {

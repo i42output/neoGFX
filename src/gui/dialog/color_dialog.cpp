@@ -232,6 +232,11 @@ namespace neogfx
             update_cursors();
             update();
         });
+        iSink += iOwner.ColorSpaceChanged([this]()
+        {
+            update_cursors();
+            update();
+        });
         iSink += VisibilityChanged([this]()
         {
             iLeftCursor.show(visible());
@@ -366,21 +371,21 @@ namespace neogfx
         case ChannelRed:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_red(static_cast<color::component>(255.0 - pos.y));
+                rgb.set_red(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0));
                 return rgb;
             }
             break;
         case ChannelGreen:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_green(static_cast<color::component>(255.0 - pos.y));
+                rgb.set_green(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0));
                 return rgb;
             }
             break;
         case ChannelBlue:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_blue(static_cast<color::component>(255.0 - pos.y));
+                rgb.set_blue(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0));
                 return rgb;
             }
             break;
@@ -434,19 +439,19 @@ namespace neogfx
         case ChannelRed:
             {
                 auto rgb = iOwner.selected_color();
-                return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.red()) };
+                return point{ 0.0, 255.0 - from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(rgb.red()), 255.0) };
             }
             break;
         case ChannelGreen:
             {
                 auto rgb = iOwner.selected_color();
-                return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.green()) };
+                return point{ 0.0, 255.0 - from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(rgb.green()), 255.0) };
             }
             break;
         case ChannelBlue:
             {
                 auto rgb = iOwner.selected_color();
-                return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.blue()) };
+                return point{ 0.0, 255.0 - from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(rgb.blue()), 255.0) };
             }
             break;
         case ChannelAlpha:
@@ -474,6 +479,10 @@ namespace neogfx
         iLayout.set_padding(neogfx::padding{});
         set_padding(neogfx::padding{});
         iOwner.SelectionChanged([this]
+        {
+            update_texture();
+        });
+        iOwner.ColorSpaceChanged([this]
         {
             update_texture();
         });
@@ -576,24 +585,24 @@ namespace neogfx
         case ChannelRed:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_blue(static_cast<color::component>(pos.x));
-                rgb.set_green(static_cast<color::component>(255.0 - pos.y));
+                rgb.set_blue(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, pos.x, 255.0)));
+                rgb.set_green(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, 255.0 - pos.y, 255.0)));
                 return rgb;
             }
             break;
         case ChannelGreen:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_blue(static_cast<color::component>(pos.x));
-                rgb.set_red(static_cast<color::component>(255.0 - pos.y));
+                rgb.set_blue(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, pos.x, 255.0)));
+                rgb.set_red(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, 255.0 - pos.y, 255.0)));
                 return rgb;
             }
             break;
         case ChannelBlue:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_red(static_cast<color::component>(pos.x));
-                rgb.set_green(static_cast<color::component>(255.0 - pos.y));
+                rgb.set_red(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, pos.x, 255.0)));
+                rgb.set_green(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, 255.0 - pos.y, 255.0)));
                 return rgb;
             }
             break;
@@ -608,8 +617,8 @@ namespace neogfx
             else
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_blue(static_cast<color::component>(pos.x));
-                rgb.set_green(static_cast<color::component>(255.0 - pos.y));
+                rgb.set_blue(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, pos.x, 255.0)));
+                rgb.set_green(static_cast<color::component>(to_sRGB(*iOwner.iColorSpace, 255.0 - pos.y, 255.0)));
                 return rgb;
             }
             break;
@@ -644,19 +653,19 @@ namespace neogfx
         case ChannelRed:
             {
                 auto rgb = iOwner.selected_color();
-                return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.green()) };
+                return point{ from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(rgb.blue()), 255.0), from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(255 - rgb.green()), 255.0) };
             }
             break;
         case ChannelGreen:
             {
                 auto rgb = iOwner.selected_color();
-                return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.red()) };
+                return point{ from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(rgb.blue()), 255.0), from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(255 - rgb.red()), 255.0) };
             }
             break;
         case ChannelBlue:
             {
                 auto rgb = iOwner.selected_color();
-                return point{ static_cast<coordinate>(rgb.red()), static_cast<coordinate>(255 - rgb.green()) };
+                return point{ from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(rgb.red()), 255.0), from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(255 - rgb.green()), 255.0) };
             }
             break;
         case ChannelAlpha:
@@ -668,7 +677,7 @@ namespace neogfx
             else
             {
                 auto rgb = iOwner.selected_color();
-                return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.green()) };
+                return point{ from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(rgb.blue()), 255.0), from_sRGB(*iOwner.iColorSpace, static_cast<coordinate>(255 - rgb.green()), 255.0) };
             }
             break;
         default:
@@ -1042,6 +1051,7 @@ namespace neogfx
         if (iColorSpace != aColorSpace)
         {
             iColorSpace = aColorSpace;
+            ColorSpaceChanged.trigger();
             {
                 neolib::scoped_flag sf{ iUpdatingWidgets };
                 switch (*iColorSpace)
