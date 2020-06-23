@@ -51,8 +51,6 @@ namespace neogfx
 
     void settings_dialog::init()
     {
-        widget::debug() = &iDetails;
-
         set_minimum_size(size{ 760_dip, 440_dip });
         iLayout.set_size_policy(size_constraint::Expanding);
         iTree.set_weight(size{ 1.0, 1.0 });
