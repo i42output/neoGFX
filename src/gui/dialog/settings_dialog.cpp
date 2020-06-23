@@ -26,13 +26,21 @@
 namespace neogfx
 {
     settings_dialog::settings_dialog() :
-        dialog{ "Settings", window_style::Modal | window_style::TitleBar | window_style::Close }
+        dialog{ "Settings", window_style::DefaultDialog },
+        iLayout{ client_layout() },
+        iTree{ iLayout },
+        iDetails{ iLayout },
+        iDetailLayout{ iDetails }
     {
         init();
     }
 
     settings_dialog::settings_dialog(i_widget& aParent) :
-        dialog{ aParent, "Settings", window_style::Modal | window_style::TitleBar | window_style::Close }
+        dialog{ aParent, "Settings", window_style::DefaultDialog },
+        iLayout{ client_layout() },
+        iTree{ iLayout },
+        iDetails{ iLayout },
+        iDetailLayout{ iDetails }
     {
         init();
     }
@@ -41,16 +49,17 @@ namespace neogfx
     {
     }
 
-    size settings_dialog::minimum_size(const optional_size& aAvailableSpace) const
-    {
-        auto result = dialog::minimum_size(aAvailableSpace);
-        if (dialog::has_minimum_size())
-            return result;
-        return result;
-    }
-
     void settings_dialog::init()
     {
+        widget::debug() = &iDetails;
+
+        set_minimum_size(size{ 760_dip, 440_dip });
+        iLayout.set_size_policy(size_constraint::Expanding);
+        iTree.set_weight(size{ 1.0, 1.0 });
+        iDetails.set_size_policy(size_constraint::Expanding);
+        iDetails.set_weight(size{ 2.0, 1.0 });
+        iDetailLayout.set_size_policy(size_constraint::Expanding);
+
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
 

@@ -185,6 +185,8 @@ namespace neogfx
     {
         if (window::has_size_policy())
             return window::size_policy();
+        else if ((style() & window_style::Resize) == window_style::Resize)
+            return size_constraint::Manual;
         return size_constraint::Minimum;
     }
 

@@ -1287,6 +1287,14 @@ namespace neogfx
                     self.handle_event(window_event(window_event_type::Resizing, self.surface_size()));
                 }
                 break;
+            case WM_GETMINMAXINFO:
+                {
+                    MINMAXINFO& mmi = *reinterpret_cast<MINMAXINFO*>(lparam);
+                    mmi.ptMinTrackSize.x = static_cast<LONG>(self.surface_window().as_widget().minimum_size().cx);
+                    mmi.ptMinTrackSize.y = static_cast<LONG>(self.surface_window().as_widget().minimum_size().cy);
+                    result = 0;
+                }
+                break;
             case WM_NCDESTROY:
                 {
                     self.set_destroyed();

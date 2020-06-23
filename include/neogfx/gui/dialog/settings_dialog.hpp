@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
+#include <neogfx/gui/widget/tree_view.hpp>
+#include <neogfx/gui/widget/framed_widget.hpp>
 
 namespace neogfx
 {
@@ -30,11 +32,13 @@ namespace neogfx
         settings_dialog();
         settings_dialog(i_widget& aParent);
         ~settings_dialog();
-    public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     private:
         void init();
     private:
         sink iSink;
+        horizontal_layout iLayout;
+        tree_view iTree;
+        framed_widget iDetails;
+        vertical_layout iDetailLayout;
     };
 }
