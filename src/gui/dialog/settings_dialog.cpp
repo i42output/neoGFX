@@ -62,6 +62,22 @@ namespace neogfx
         button_box().add_button(standard_button::Cancel);
 
         center_on_parent();
+
+        iTree.set_frame_style(frame_style::NoFrame);
+        iDetails.set_frame_color();
+
+        auto update_colors = [&](style_aspect aspect)
+        {
+            if (aspect == style_aspect::Color)
+            {
+                iTree.set_background_color(container_background_color());
+                iDetails.set_background_color(container_background_color());
+                iDetails.set_frame_color(container_background_color().dark() ? color::Black : color::White);
+            }
+        };
+        update_colors(style_aspect::Color);
+        iSink += service<i_app>().current_style_changed(update_colors);
+
         set_ready_to_render(true);
     }
 }
