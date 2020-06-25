@@ -37,6 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
+#include <neogfx/tools/DesignStudio/settings.hpp>
 #include "new_project_dialog.hpp"
 #include "DesignStudio.ui.hpp"
 
@@ -77,6 +78,7 @@ int main(int argc, char* argv[])
         ng::texture backgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } };
         ng::texture backgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } };
 
+        ds::settings settings;
         ds::project_manager pm;
 
         workspace.view_stack().Painting([&](ng::i_graphics_context& aGc)
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
 
         app.actionSettings.triggered([&]()
         {
-            ng::settings_dialog dialog{ mainWindow };
+            ng::settings_dialog dialog{ mainWindow, settings };
             dialog.exec();
         });
 

@@ -877,16 +877,9 @@
                                 label: {
                                     text: "Timestep:"
                                 }
-                                double_slider: {
-                                    id: sliderTimestep
+                                double_slider_box: {
+                                    id: sliderBoxTimestep
                                     orientation: Horizontal
-                                    minimum: 0.0001
-                                    maximum: 1.0000
-                                    step: 0.0001
-                                    value: 0.01
-                                }
-                                double_spin_box: {
-                                    id: spinBoxTimestep
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001
@@ -895,16 +888,9 @@
                                 label: {
                                     text: "Timestep Growth:"
                                 }
-                                double_slider: {
-                                    id: sliderTimestepGrowth
+                                double_slider_box: {
+                                    id: sliderBoxTimestepGrowth
                                     orientation: Horizontal
-                                    minimum: 1.0
-                                    maximum: 10.0
-                                    step: 0.05
-                                    value: 1.75
-                                }
-                                double_spin_box: {
-                                    id: spinBoxTimestepGrowth
                                     minimum: 1.0
                                     maximum: 10.0
                                     step: 0.05
@@ -913,16 +899,9 @@
                                 label: {
                                     text: "Maximum Timestep:"
                                 }
-                                double_slider: {
-                                    id: sliderMaximumTimestep
+                                double_slider_box: {
+                                    id: sliderBoxMaximumTimestep
                                     orientation: Horizontal
-                                    minimum: 0.0001
-                                    maximum: 1.0000
-                                    step: 0.0001
-                                    value: 0.01
-                                }
-                                double_spin_box: {
-                                    id: spinBoxMaximumTimestep
                                     minimum: 0.0001
                                     maximum: 1.0000
                                     step: 0.0001
@@ -931,16 +910,9 @@
                                 label: {
                                     text: "Yield After (ms):"
                                 }
-                                double_slider: {
-                                    id: sliderYieldAfter
+                                double_slider_box: {
+                                    id: sliderBoxYieldAfter
                                     orientation: Horizontal
-                                    minimum: 0.1
-                                    maximum: 100.0
-                                    step: 0.1
-                                    value: 1.0
-                                }
-                                double_spin_box: {
-                                    id: spinBoxYieldAfter
                                     minimum: 0.1
                                     maximum: 100.0
                                     step: 0.1

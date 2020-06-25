@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/program_options.hpp>
+#include <neolib/app/i_application.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_texture.hpp>
@@ -63,7 +64,7 @@ namespace neogfx
         virtual bool nest() const = 0;
     };
 
-    class i_app : public i_action_container
+    class i_app : public neolib::i_application, public i_action_container
     {
     public:
         declare_event(execution_started)

@@ -218,6 +218,7 @@
     <ClInclude Include="..\..\..\src\menu.hpp" />
     <ClInclude Include="..\..\..\src\menu_bar.hpp" />
     <ClInclude Include="..\..\..\src\slider.hpp" />
+    <ClInclude Include="..\..\..\src\slider_box.hpp" />
     <ClInclude Include="..\..\..\src\spacer.hpp" />
     <ClInclude Include="..\..\..\src\spin_box.hpp" />
     <ClInclude Include="..\..\..\src\status_bar.hpp" />

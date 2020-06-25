@@ -386,7 +386,7 @@ namespace neogfx::nrc
         static std::string convert_emit_argument(const color& aArgument)
         {
             std::ostringstream result;
-            result << "0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << aArgument.value() << "u";
+            result << "0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << aArgument.as_argb() << "u";
             return result.str();
         }
         static std::string convert_emit_argument(const gradient& aArgument)

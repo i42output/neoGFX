@@ -76,6 +76,7 @@ namespace neogfx
         typedef basic_vector<BaseComponent, ColorComponentCount + 1> base_type;
         typedef Derived derived_type;
     public:
+        typedef self_type abstract_type; // todo
         typedef BaseComponent base_component;
         typedef ViewComponent view_component;
         typedef typename color_return_type_cracker<self_type, derived_type>::return_type return_type;
@@ -164,6 +165,7 @@ namespace neogfx
         typedef basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived> self_type;
         typedef basic_color<ColorSpace, BaseComponent, ViewComponent, 3, Derived> base_type;
     public:
+        typedef self_type abstract_type; // todo
         using typename base_type::base_component;
         using typename base_type::view_component;
         using typename base_type::return_type;
@@ -198,6 +200,11 @@ namespace neogfx
             base_type{ from_argb(aValue) } {}
         // assignment
     public:
+        self_type& operator=(const self_type& aOther)
+        {
+            base_type::operator=(aOther);
+            return *this;
+        }
         self_type& operator=(const base_type& aOther)
         {
             base_type::operator=(aOther);
@@ -344,6 +351,7 @@ namespace neogfx
         typedef basic_rgb_color<color_space::sRGB, scalar, uint8_t, sRGB_color> base_type;
         // types
     public:
+        typedef sRGB_color abstract_type; // todo
         typedef view_component component;
         // constants
     public:
@@ -1010,12 +1018,14 @@ namespace neogfx
         using base_type::base_type;
         sRGB_color();
         sRGB_color(const sRGB_color& aOther);
+        explicit sRGB_color(const base_type& aOther);
         explicit sRGB_color(const linear_color& aLinear);
         sRGB_color(const std::string& aTextValue);
         // assignment
     public:
+        sRGB_color& operator=(const sRGB_color& aOther);
         sRGB_color& operator=(const base_type& aOther);
-         // operations
+        // operations
     public:
         static sRGB_color from_linear(const linear_color& aLinear);
         static std::optional<sRGB_color> from_name(const std::string& aName);

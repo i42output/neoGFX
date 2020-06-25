@@ -25,8 +25,9 @@
 
 namespace neogfx
 {
-    settings_dialog::settings_dialog() :
+    settings_dialog::settings_dialog(neolib::i_settings& aSettings) :
         dialog{ "Settings", window_style::DefaultDialog },
+        iSettings{ aSettings },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
@@ -35,8 +36,9 @@ namespace neogfx
         init();
     }
 
-    settings_dialog::settings_dialog(i_widget& aParent) :
+    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings) :
         dialog{ aParent, "Settings", window_style::DefaultDialog },
+        iSettings{ aSettings },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
@@ -60,6 +62,7 @@ namespace neogfx
 
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
+        button_box().add_button(standard_button::Apply);
 
         center_on_parent();
 

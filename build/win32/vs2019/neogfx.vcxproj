@@ -280,6 +280,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\palette.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\resource_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\settings.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_beeper_sample.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_playback_device.hpp" />
@@ -509,6 +510,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\skin.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\skin_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\slider.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\slider_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\spin_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\splitter.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\status_bar.hpp" />
@@ -620,6 +622,7 @@
     <ClCompile Include="..\..\..\src\app\palette.cpp" />
     <ClCompile Include="..\..\..\src\app\resource.cpp" />
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
+    <ClCompile Include="..\..\..\src\app\settings.cpp" />
     <ClCompile Include="..\..\..\src\app\style.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_beeper.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_beeper_sample.cpp" />

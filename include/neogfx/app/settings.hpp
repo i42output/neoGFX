@@ -1,4 +1,4 @@
-// settings_dialog.hpp
+// settings.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,27 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/app/i_settings.hpp>
-#include <neogfx/gui/dialog/dialog.hpp>
-#include <neogfx/gui/widget/tree_view.hpp>
-#include <neogfx/gui/widget/framed_widget.hpp>
+#include <neolib/app/settings.hpp>
 
 namespace neogfx
 {
-    class settings_dialog : public dialog
+    class settings : public neolib::settings
     {
+        typedef neolib::settings base_type;
     public:
-        settings_dialog(neolib::i_settings& aSettings);
-        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings);
-        ~settings_dialog();
-    private:
-        void init();
-    private:
-        neolib::i_settings& iSettings;
-        sink iSink;
-        horizontal_layout iLayout;
-        tree_view iTree;
-        framed_widget iDetails;
-        vertical_layout iDetailLayout;
+        settings(const std::string& aFileName = "settings.xml", ref_ptr<neolib::i_custom_type_factory> aCustomSettingTypeFactory = {});
     };
 }

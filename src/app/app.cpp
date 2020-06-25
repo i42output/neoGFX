@@ -165,22 +165,13 @@ namespace neogfx
         sFirstInstance.compare_exchange_strong(tp, np);
     }
 
-    app::app() :
-        app{ 0, nullptr, std::string{} }
-    {
-    }
-
-    app::app(int argc, char* argv[]) :
-        app{ argc, argv, std::string{} }
-    {
-    }
-        
-    app::app(int argc, char* argv[], const std::string& aName)
+    app::app(const neolib::i_application_info& aAppInfo)
         try :
         async_thread{ "neogfx::app", true },
-        iProgramOptions{ argc, argv },
+        neolib::application<i_app>{ aAppInfo },
+        iProgramOptions{ aAppInfo.arguments().argc(), aAppInfo.arguments().argv() },
         iLoader{ iProgramOptions, *this },
-        iName{ aName },
+        iName{ aAppInfo.name() },
         iQuitWhenLastWindowClosed{ true },
         iInExec{ false },
         iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
@@ -306,26 +297,14 @@ namespace neogfx
     catch (std::exception& e)
     {
         std::cerr << "neogfx::app::app: terminating with exception: " << e.what() << std::endl;
-        service<i_basic_services>().display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
+        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), std::string("main: terminating with exception: ") + e.what());
         throw;
     }
     catch (...)
     {
         std::cerr << "neogfx::app::app: terminating with unknown exception" << std::endl;
-        service<i_basic_services>().display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
+        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), "main: terminating with unknown exception");
         throw;
-    }
-
-    app::app(int argc, char* argv[], const std::string& aName, const i_texture& aDefaultWindowIcon) : 
-        app{ argc, argv, aName }
-    {
-        set_default_window_icon(aDefaultWindowIcon);
-    }
-
-    app::app(int argc, char* argv[], const std::string& aName, const i_image& aDefaultWindowIcon) :
-        app{ argc, argv, aName }
-    {
-        set_default_window_icon(aDefaultWindowIcon);
     }
 
     app::~app()

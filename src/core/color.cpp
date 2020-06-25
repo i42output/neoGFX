@@ -62,7 +62,12 @@ namespace neogfx
     {
     }
 
-    sRGB_color::sRGB_color(const linear_color& aLinear) : 
+    sRGB_color::sRGB_color(const base_type& aOther) :
+        base_type{ aOther }
+    {
+    }
+
+    sRGB_color::sRGB_color(const linear_color& aLinear) :
         base_type{ from_linear(aLinear) }
     {
     }
@@ -134,6 +139,12 @@ namespace neogfx
                 }
             }
         }
+    }
+
+    sRGB_color& sRGB_color::operator=(const sRGB_color& aOther)
+    {
+        base_type::operator=(aOther);
+        return *this;
     }
 
     sRGB_color& sRGB_color::operator=(const base_type& aOther)

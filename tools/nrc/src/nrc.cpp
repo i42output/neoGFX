@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 
     neolib::application_info appInfo
     {
-        neolib::to_program_arguments(argc, argv),
+        argc, argv,
         "nrc neoGFX resource compiler",
         "i42 Software",
         neolib::version{ 1, 0, 0, 0 },

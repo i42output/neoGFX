@@ -24,6 +24,7 @@
 #include <optional>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/task/timer.hpp>
+#include <neolib/app/application.hpp>
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/event_processing_context.hpp>
@@ -57,7 +58,7 @@ namespace neogfx
         boost::program_options::variables_map iOptions;
     };
 
-    class app : public async_thread, public i_app, private i_keyboard_handler
+    class app : public async_thread, public neolib::application<i_app>, private i_keyboard_handler
     {
     public:
         define_declared_event(ExecutionStarted, execution_started)
@@ -82,14 +83,14 @@ namespace neogfx
         struct style_not_found : std::runtime_error { style_not_found() : std::runtime_error("neogfx::app::style_not_found") {} };
         struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
     public:
-        app();
-        app(int argc, char* argv[]);
-        app(int argc, char* argv[], const std::string& aName);
-        app(int argc, char* argv[], const std::string& aName, const i_texture& aDefaultWindowIcon);
-        app(int argc, char* argv[], const std::string& aName, const i_image& aDefaultWindowIcon);
+        app(const neolib::i_application_info& aAppInfo);
+        template <typename... Args>
+        app(Args... aArgs) :
+            app{ static_cast<const neolib::i_application_info&>(neolib::application_info{ std::forward<Args>(aArgs)... }) } {}
         ~app();
     public:
         static app& instance();
+    public:
         const i_program_options& program_options() const override;
         const std::string& name() const override;
         void set_name(const std::string& aName) override;

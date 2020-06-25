@@ -199,6 +199,7 @@
     <ClCompile Include="..\..\..\src\new_project_dialog.cpp" />
     <ClCompile Include="..\..\..\src\project.cpp" />
     <ClCompile Include="..\..\..\src\project_manager.cpp" />
+    <ClCompile Include="..\..\..\src\settings.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
@@ -243,6 +244,7 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_element_library.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\project.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\project_manager.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\settings.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\symbol.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element_library_plugin.hpp" />

@@ -53,9 +53,28 @@ namespace neogfx
     {
     }
 
+    void slider_impl::set_orientation(slider_orientation aOrientation, bool aUpdateLayout)
+    {
+        if (iOrientation != aOrientation)
+        {
+            iOrientation = aOrientation;
+            if (aUpdateLayout && has_layout_manager())
+                layout_manager().layout_items(true);
+        }
+    }
+
     void slider_impl::set_bar_color(const optional_color_or_gradient& aBarColor)
     {
         iBarColor = aBarColor;
+    }
+
+    size_policy slider_impl::size_policy() const
+    {
+        if (has_size_policy())
+            return widget::size_policy();
+        return iOrientation == slider_orientation::Horizontal ? 
+            neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum } : 
+            neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
     size slider_impl::minimum_size(const optional_size& aAvailableSpace) const
@@ -188,10 +207,6 @@ namespace neogfx
         ConstraintsChanged.set_trigger_type(event_trigger_type::Asynchronous);
 
         set_padding(neogfx::padding{});
-        if (iOrientation == slider_orientation::Horizontal)
-            set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        else
-            set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
     }
 
     rect slider_impl::bar_box() const

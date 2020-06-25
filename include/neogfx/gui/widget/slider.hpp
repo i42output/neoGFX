@@ -51,17 +51,19 @@ namespace neogfx
         slider_impl(i_layout& aLayout, slider_orientation aOrientation = slider_orientation::Horizontal);
         ~slider_impl();
     public:
+        void set_orientation(slider_orientation aOrientation, bool aUpdateLayout = true);
         void set_bar_color(const optional_color_or_gradient& aBarColor);
     public:
-        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+        neogfx::size_policy size_policy() const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     public:
-        virtual void paint(i_graphics_context& aGc) const;
+        void paint(i_graphics_context& aGc) const override;
     public:
-        virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-        virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-        virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-        virtual void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers);
-        virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
+        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+        void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
+        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
     public:
         virtual double normalized_step_value() const = 0;
         virtual double normalized_value() const = 0;

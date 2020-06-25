@@ -1005,29 +1005,21 @@ int main(int argc, char* argv[])
                 auto& ecs = create_game(window.layoutGame);
                 gameEcs = &ecs;
                 auto& worldClock = ecs.shared_component<ng::game::clock>()[0];
-                window.spinBoxTimestep.ValueChanged([&]() { window.sliderTimestep.set_value(window.spinBoxTimestep.value()); });
-                window.sliderTimestep.ValueChanged([&]() 
+                window.sliderBoxTimestep.ValueChanged([&]() 
                 { 
-                    window.spinBoxTimestep.set_value(window.sliderTimestep.value()); 
-                    worldClock.timestep = ng::game::chrono::to_flicks(window.spinBoxTimestep.value()).count();
+                    worldClock.timestep = ng::game::chrono::to_flicks(window.sliderBoxTimestep.value()).count();
                 });
-                window.spinBoxTimestepGrowth.ValueChanged([&]() { window.sliderTimestepGrowth.set_value(window.spinBoxTimestepGrowth.value()); });
-                window.sliderTimestepGrowth.ValueChanged([&]() 
+                window.sliderBoxTimestepGrowth.ValueChanged([&]() 
                 { 
-                    window.spinBoxTimestepGrowth.set_value(window.sliderTimestepGrowth.value()); 
-                    worldClock.timestepGrowth = window.spinBoxTimestepGrowth.value();
+                    worldClock.timestepGrowth = window.sliderBoxTimestepGrowth.value();
                 });
-                window.spinBoxMaximumTimestep.ValueChanged([&]() { window.sliderMaximumTimestep.set_value(window.spinBoxMaximumTimestep.value()); });
-                window.sliderMaximumTimestep.ValueChanged([&]() 
+                window.sliderBoxMaximumTimestep.ValueChanged([&]() 
                 { 
-                    window.spinBoxMaximumTimestep.set_value(window.sliderMaximumTimestep.value()); 
-                    worldClock.maximumTimestep = ng::game::chrono::to_flicks(window.sliderMaximumTimestep.value()).count();
+                    worldClock.maximumTimestep = ng::game::chrono::to_flicks(window.sliderBoxMaximumTimestep.value()).count();
                 });
-                window.spinBoxYieldAfter.ValueChanged([&]() { window.sliderYieldAfter.set_value(window.spinBoxYieldAfter.value()); });
-                window.sliderYieldAfter.ValueChanged([&]()
+                window.sliderBoxYieldAfter.ValueChanged([&]()
                 {
-                    window.spinBoxYieldAfter.set_value(window.sliderYieldAfter.value());
-                    ecs.system<ng::game::simple_physics>().yield_after(std::chrono::duration<double, std::milli>{window.sliderYieldAfter.value() });
+                    ecs.system<ng::game::simple_physics>().yield_after(std::chrono::duration<double, std::milli>{window.sliderBoxYieldAfter.value() });
                 });
                 window.checkCollisions.set_checked(true);
                 window.checkCollisions.Toggled([&]()
