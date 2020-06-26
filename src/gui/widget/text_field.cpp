@@ -24,14 +24,14 @@
 namespace neogfx
 {
     text_field::input_box_container::input_box_container(i_layout& aParentLayout, frame_style aFrameStyle) :
-        framed_widget{ aParentLayout, aFrameStyle }
+        base_type{ aParentLayout, aFrameStyle }
     {
     }
 
     color text_field::input_box_container::frame_color() const
     {
         if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
-            return framed_widget::frame_color();
+            return base_type::frame_color();
         return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 

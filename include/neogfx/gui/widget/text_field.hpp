@@ -44,8 +44,9 @@ namespace neogfx
     class text_field : public widget
     {
     private:
-        class input_box_container : public framed_widget
+        class input_box_container : public framed_widget<>
         {
+            typedef framed_widget<> base_type;
         public:
             input_box_container(i_layout& aParentLayout, frame_style aFrameStyle);
         public:

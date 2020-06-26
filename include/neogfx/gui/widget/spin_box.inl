@@ -48,7 +48,7 @@ namespace neogfx
 
     template <typename T>
     basic_spin_box<T>::basic_spin_box(i_widget& aParent) :
-        framed_widget{ aParent },
+        base_type{ aParent },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
         iSecondaryLayout{ iPrimaryLayout },
@@ -65,7 +65,7 @@ namespace neogfx
 
     template <typename T>
     basic_spin_box<T>::basic_spin_box(i_layout& aLayout) :
-        framed_widget{ aLayout },
+        base_type{ aLayout },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
         iSecondaryLayout{ iPrimaryLayout },
@@ -83,8 +83,8 @@ namespace neogfx
     template <typename T>
     neogfx::size_policy basic_spin_box<T>::size_policy() const
     {
-        if (framed_widget::has_size_policy())
-            return framed_widget::size_policy();
+        if (base_type::has_size_policy())
+            return base_type::size_policy();
         return neogfx::size_policy{ text_box().size_hint() ? size_constraint::Minimum : size_constraint::Expanding, size_constraint::Minimum };
     }
 
@@ -92,7 +92,7 @@ namespace neogfx
     color basic_spin_box<T>::frame_color() const
     {
         if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
-            return framed_widget::frame_color();
+            return base_type::frame_color();
         return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
@@ -102,7 +102,7 @@ namespace neogfx
         if (aWheel == mouse_wheel::Vertical)
             do_step(aDelta.dy > 0.0 ? step_direction::Up : step_direction::Down);
         else
-            framed_widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+            base_type::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
 
     template <typename T>
@@ -119,7 +119,7 @@ namespace neogfx
             return true;
         }
         else
-            return framed_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            return base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
     }
 
     template <typename T>

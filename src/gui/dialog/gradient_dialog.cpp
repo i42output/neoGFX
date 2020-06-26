@@ -84,11 +84,12 @@ namespace neogfx
 
     void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
-    class gradient_dialog::preview_box : public framed_widget
+    class gradient_dialog::preview_box : public framed_widget<>
     {
+        typedef framed_widget<> base_type;
     public:
         preview_box(gradient_dialog& aOwner) :
-            framed_widget(aOwner.iPreviewGroupBox.item_layout()),
+            base_type(aOwner.iPreviewGroupBox.item_layout()),
             iOwner(aOwner),
             iAnimationTimer{ service<async_task>(), [this](neolib::callback_timer& aTimer)
             {
@@ -103,7 +104,7 @@ namespace neogfx
     public:
         virtual void paint(i_graphics_context& aGc) const
         {
-            framed_widget::paint(aGc);
+            base_type::paint(aGc);
             auto const& cr = client_rect();
             draw_alpha_background(aGc, cr, 16.0_dip);
             aGc.fill_rect(cr, iOwner.gradient());
@@ -121,7 +122,7 @@ namespace neogfx
     public:
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
         {
-            framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+            base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
                 select(aPosition - client_rect(false).top_left());
@@ -130,7 +131,7 @@ namespace neogfx
         }
         virtual void mouse_button_released(mouse_button aButton, const point& aPosition)
         {
-            framed_widget::mouse_button_released(aButton, aPosition);
+            base_type::mouse_button_released(aButton, aPosition);
             if (!capturing())
                 iTracking = false;
         }

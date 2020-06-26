@@ -55,8 +55,9 @@ namespace neogfx
     private:
         typedef neolib::variant<color, hsv_color> representations;
         typedef std::optional<custom_color_list::iterator> optional_custom_color_list_iterator;
-        class color_box : public framed_widget
+        class color_box : public framed_widget<>
         {
+            typedef framed_widget<> base_type;
         public:
             color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor = optional_custom_color_list_iterator());
         public:
@@ -71,8 +72,9 @@ namespace neogfx
             optional_color iColor;
             optional_custom_color_list_iterator iCustomColor;
         };
-        class x_picker : public framed_widget
+        class x_picker : public framed_widget<>
         {
+            typedef framed_widget<> base_type;
         private:
             class cursor_widget : public image_widget
             {
@@ -152,8 +154,9 @@ namespace neogfx
             bool iTracking;
             std::optional<point> iCursorPosition;
         };
-        class color_selection : public framed_widget
+        class color_selection : public framed_widget<>
         {
+            typedef framed_widget<> base_type;
         public:
             color_selection(color_dialog& aOwner);
         public:

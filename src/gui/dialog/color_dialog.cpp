@@ -28,7 +28,7 @@ namespace neogfx
     void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0_dip);
 
     color_dialog::color_box::color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor) :
-        framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColor(aColor), iCustomColor(aCustomColor)
+        base_type(frame_style::SolidFrame), iOwner(aOwner), iColor(aColor), iCustomColor(aCustomColor)
     {
         set_padding(neogfx::padding{});
     }
@@ -36,20 +36,20 @@ namespace neogfx
     size color_dialog::color_box::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size())
-            return framed_widget::minimum_size(aAvailableSpace);
-        return rasterize(framed_widget::minimum_size(aAvailableSpace) + size{ 4_mm, 3.5_mm });
+            return base_type::minimum_size(aAvailableSpace);
+        return rasterize(base_type::minimum_size(aAvailableSpace) + size{ 4_mm, 3.5_mm });
     }
 
     size color_dialog::color_box::maximum_size(const optional_size& aAvailableSpace) const
     {
         if (has_maximum_size())
-            return framed_widget::maximum_size(aAvailableSpace);
+            return base_type::maximum_size(aAvailableSpace);
         return minimum_size();
     }
 
     void color_dialog::color_box::paint(i_graphics_context& aGc) const
     {
-        framed_widget::paint(aGc);
+        base_type::paint(aGc);
         draw_alpha_background(aGc, client_rect(false));
         const optional_color& fillColor = (iCustomColor == std::nullopt ? iColor : **iCustomColor);
         if (fillColor != std::nullopt)
@@ -64,7 +64,7 @@ namespace neogfx
 
     void color_dialog::color_box::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
             if (iCustomColor == std::nullopt)
@@ -221,7 +221,7 @@ namespace neogfx
     }
 
     color_dialog::x_picker::x_picker(color_dialog& aOwner) :
-        framed_widget(aOwner.iRightTopLayout), 
+        base_type(aOwner.iRightTopLayout),
         iOwner(aOwner), 
         iTracking(false),
         iLeftCursor(*this, cursor_widget::LeftCursor),
@@ -253,32 +253,32 @@ namespace neogfx
     size color_dialog::x_picker::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size())
-            return framed_widget::minimum_size(aAvailableSpace);
-        return framed_widget::minimum_size(aAvailableSpace) + size{ 32_dip, 256_dip };
+            return base_type::minimum_size(aAvailableSpace);
+        return base_type::minimum_size(aAvailableSpace) + size{ 32_dip, 256_dip };
     }
 
     size color_dialog::x_picker::maximum_size(const optional_size& aAvailableSpace) const
     {
         if (has_maximum_size())
-            return framed_widget::maximum_size(aAvailableSpace);
+            return base_type::maximum_size(aAvailableSpace);
         return minimum_size();
     }
 
     void color_dialog::x_picker::moved()
     {
-        framed_widget::moved();
+        base_type::moved();
         update_cursors();
     }
 
     void color_dialog::x_picker::resized()
     {
-        framed_widget::resized();
+        base_type::resized();
         update_cursors();
     }
 
     void color_dialog::x_picker::paint(i_graphics_context& aGc) const
     {
-        framed_widget::paint(aGc);
+        base_type::paint(aGc);
         scoped_units su{ *this, units::Pixels };
         rect cr = client_rect(false);
         if (iOwner.current_channel() == ChannelAlpha)
@@ -308,7 +308,7 @@ namespace neogfx
 
     void color_dialog::x_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
             select(aPosition - client_rect(false).top_left());
@@ -318,7 +318,7 @@ namespace neogfx
 
     void color_dialog::x_picker::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        framed_widget::mouse_button_released(aButton, aPosition);
+        base_type::mouse_button_released(aButton, aPosition);
         if (!capturing())
             iTracking = false;
     }
@@ -334,7 +334,7 @@ namespace neogfx
         point mousePos = root().mouse_position() - origin();
         if (client_rect(false).contains(mousePos))
             return mouse_system_cursor::Crosshair;
-        return framed_widget::mouse_cursor();
+        return base_type::mouse_cursor();
     }
 
     void color_dialog::x_picker::select(const point& aPosition)
@@ -704,7 +704,7 @@ namespace neogfx
     }
 
     color_dialog::color_selection::color_selection(color_dialog& aOwner) :
-        framed_widget(aOwner.iRightBottomLayout), iOwner(aOwner)
+        base_type{ aOwner.iRightBottomLayout }, iOwner(aOwner)
     {
         set_padding(neogfx::padding{});
         iOwner.SelectionChanged([this]
@@ -716,20 +716,20 @@ namespace neogfx
     size color_dialog::color_selection::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size())
-            return framed_widget::minimum_size(aAvailableSpace);
-        return framed_widget::minimum_size(aAvailableSpace) + size{ 60_dip, 80_dip };
+            return base_type::minimum_size(aAvailableSpace);
+        return base_type::minimum_size(aAvailableSpace) + size{ 60_dip, 80_dip };
     }
 
     size color_dialog::color_selection::maximum_size(const optional_size& aAvailableSpace) const
     {
         if (has_maximum_size())
-            return framed_widget::maximum_size(aAvailableSpace);
+            return base_type::maximum_size(aAvailableSpace);
         return minimum_size();
     }
 
     void color_dialog::color_selection::paint(i_graphics_context& aGc) const
     {
-        framed_widget::paint(aGc);
+        base_type::paint(aGc);
         scoped_units su{ *this, units::Pixels };
         rect cr = client_rect(false);
         draw_alpha_background(aGc, cr);
@@ -901,7 +901,7 @@ namespace neogfx
             change_color_space(static_cast<color_space>(aCurrentIndex->row()));
         });
 
-        scoped_units su{ static_cast<framed_widget&>(*this), units::Pixels };
+        scoped_units su{ static_cast<framed_widget<>&>(*this), units::Pixels };
         static const std::set<color> sBasicColors
         {
             color::AliceBlue, color::AntiqueWhite, color::Aquamarine, color::Azure, color::Beige, color::Bisque, color::Black, color::BlanchedAlmond, 

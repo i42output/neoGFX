@@ -298,14 +298,14 @@ namespace neogfx
     }
 
     drop_list::list_proxy::view_container::view_container(i_layout& aLayout) :
-        framed_widget{ aLayout }
+        base_type{ aLayout }
     {
     }
 
     color drop_list::list_proxy::view_container::background_color() const
     {
-        if (framed_widget::has_background_color())
-            return framed_widget::background_color();
+        if (has_background_color())
+            return base_type::background_color();
         else if (container_background_color().light())
             return parent().background_color().darker(24);
         else
@@ -314,8 +314,8 @@ namespace neogfx
 
     color drop_list::list_proxy::view_container::frame_color() const
     {
-        if (framed_widget::has_frame_color())
-            return framed_widget::frame_color();
+        if (has_frame_color())
+            return base_type::frame_color();
         else if (container_background_color().light())
             return background_color().darker(24);
         else
@@ -457,13 +457,14 @@ namespace neogfx
             }
         };
 
-        class editable_input_widget : public framed_widget, public i_drop_list_input_widget
+        class editable_input_widget : public framed_widget<>, public i_drop_list_input_widget
         {
+            typedef framed_widget<> base_type;
         public:
             define_declared_event(TextChanged, text_changed)
         public:
             editable_input_widget(i_layout& aLayout) :
-                framed_widget{ aLayout, frame_style::SolidFrame },
+                base_type{ aLayout, frame_style::SolidFrame },
                 iLayout{ *this },
                 iImage{ iLayout },
                 iEditor{ iLayout, frame_style::NoFrame }

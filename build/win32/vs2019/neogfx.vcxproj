@@ -452,6 +452,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widgets.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\color_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\decorated.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp" />
@@ -702,12 +703,12 @@
     <ClCompile Include="..\..\..\src\gui\view\view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\color_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\default_skin.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\dock.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\dockable.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\group_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\header_view.cpp" />

@@ -43,8 +43,10 @@ namespace neogfx
         return static_cast<scrolling_disposition>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    class scrollable_widget : public framed_widget, private i_scrollbar_container
+    // todo: make a template mixin like framed_widget
+    class scrollable_widget : public framed_widget<>, private i_scrollbar_container
     {
+        typedef framed_widget<> base_type;
     protected:
         enum usv_stage_e
         {

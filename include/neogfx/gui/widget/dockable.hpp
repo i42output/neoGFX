@@ -29,9 +29,9 @@
 
 namespace neogfx
 {
-    class dockable : public decorated<framed_widget, reference_counted<i_dockable>>
+    class dockable : public decorated<framed_widget<>, reference_counted<i_dockable>>
     {
-        typedef decorated<framed_widget, reference_counted<i_dockable>> base_type;
+        typedef decorated<framed_widget<>, reference_counted<i_dockable>> base_type;
     public:
         define_declared_event(Docked, docked, i_dock&)
         define_declared_event(Undocked, undocked, i_dock&)

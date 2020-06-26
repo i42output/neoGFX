@@ -94,6 +94,6 @@ namespace neogfx
 
     color dockable::frame_color() const
     {
-        return has_frame_color() ? framed_widget::frame_color() : framed_widget::frame_color().shade(0x08);
+        return has_frame_color() ? base_type::frame_color() : base_type::frame_color().shade(0x08);
     }
 }

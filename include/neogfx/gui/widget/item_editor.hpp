@@ -63,7 +63,7 @@ namespace neogfx
     protected:
         void init()
         {
-            static_cast<framed_widget&>(as_widget()).set_frame_style(frame_style::NoFrame);
+            static_cast<framed_widget<>&>(as_widget()).set_frame_style(frame_style::NoFrame);
         }
     private:
         std::shared_ptr<i_widget> iEditorWidget;

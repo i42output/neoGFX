@@ -187,8 +187,9 @@ namespace neogfx
         class list_proxy
         {
         private:
-            class view_container : public framed_widget
+            class view_container : public framed_widget<>
             {
+                typedef framed_widget<> base_type;
             public:
                 view_container(i_layout& aLayout);
             public:

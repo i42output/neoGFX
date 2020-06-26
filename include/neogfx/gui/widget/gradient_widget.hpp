@@ -20,9 +20,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
-#include "widget.hpp"
 #include <neogfx/app/i_resource.hpp>
 #include <neogfx/core/color.hpp>
+#include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/gui/dialog/color_dialog.hpp>
 
@@ -55,16 +55,16 @@ namespace neogfx
         gradient::color_stop_list::const_iterator selected_color_stop() const;
         gradient::alpha_stop_list::const_iterator selected_alpha_stop() const;
     public:
-        virtual neogfx::size_policy size_policy() const;
-        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+        neogfx::size_policy size_policy() const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
     public:
-        virtual void paint(i_graphics_context& aGc) const;
+        void paint(i_graphics_context& aGc) const override;
     public:
-        virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-        virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-        virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-        virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers);
-        virtual neogfx::mouse_cursor mouse_cursor() const;
+        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        neogfx::mouse_cursor mouse_cursor() const override;
     private:
         rect contents_rect() const;
         stop_const_iterator stop_at(const point& aPosition) const;

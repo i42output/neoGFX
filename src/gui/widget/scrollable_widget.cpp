@@ -25,7 +25,7 @@
 namespace neogfx
 {
     scrollable_widget::scrollable_widget(frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
-        framed_widget{ aFrameStyle },
+        base_type{ aFrameStyle },
         iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
         iIgnoreScrollbarUpdates{ 0 }
@@ -35,7 +35,7 @@ namespace neogfx
     }
     
     scrollable_widget::scrollable_widget(i_widget& aParent, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
-        framed_widget{ aParent, aFrameStyle },
+        base_type{ aParent, aFrameStyle },
         iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
         iIgnoreScrollbarUpdates{ 0 }
@@ -45,7 +45,7 @@ namespace neogfx
     }
     
     scrollable_widget::scrollable_widget(i_layout& aLayout, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
-        framed_widget{ aLayout, aFrameStyle },
+        base_type{ aLayout, aFrameStyle },
         iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
         iIgnoreScrollbarUpdates{ 0 }
@@ -71,26 +71,26 @@ namespace neogfx
 
     void scrollable_widget::layout_items_started()
     {
-        framed_widget::layout_items_started();
+        base_type::layout_items_started();
     }
 
     void scrollable_widget::layout_items_completed()
     {
-        framed_widget::layout_items_completed();
+        base_type::layout_items_completed();
         if (!layout_items_in_progress() && !iIgnoreScrollbarUpdates)
             update_scrollbar_visibility();
     }
 
     void scrollable_widget::resized()
     {
-        framed_widget::resized();
+        base_type::resized();
         if (!layout_items_in_progress() && !iIgnoreScrollbarUpdates)
             update_scrollbar_visibility();
     }
 
     rect scrollable_widget::client_rect(bool aIncludePadding) const
     {
-        rect result = framed_widget::client_rect(aIncludePadding);
+        rect result = base_type::client_rect(aIncludePadding);
         if (vertical_scrollbar().visible())
         {
             if (vertical_scrollbar().style() == scrollbar_style::Normal)
@@ -130,7 +130,7 @@ namespace neogfx
 
     void scrollable_widget::paint_non_client_after(i_graphics_context& aGc) const
     {
-        framed_widget::paint_non_client_after(aGc);
+        base_type::paint_non_client_after(aGc);
         if (vertical_scrollbar().visible())
             vertical_scrollbar().render(aGc);
         if (horizontal_scrollbar().visible())
@@ -164,7 +164,7 @@ namespace neogfx
         mouse_wheel passOn = static_cast<mouse_wheel>(
             aWheel & ((handledVertical ? ~verticalSense : verticalSense) | (handledHorizontal ? ~horizontalSense : horizontalSense)));
         if (passOn != mouse_wheel::None)
-            framed_widget::mouse_wheel_scrolled(passOn, aPosition, aDelta, aKeyModifiers);
+            base_type::mouse_wheel_scrolled(passOn, aPosition, aDelta, aKeyModifiers);
     }
 
     void scrollable_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -185,11 +185,11 @@ namespace neogfx
             if (handled)
                 set_capture();
             else
-                framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+                base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         }
         else
         {
-            framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+            base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
                 if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
@@ -211,7 +211,7 @@ namespace neogfx
 
     void scrollable_widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
             if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
@@ -232,7 +232,7 @@ namespace neogfx
 
     void scrollable_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        framed_widget::mouse_button_released(aButton, aPosition);
+        base_type::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Left)
         {
             if (vertical_scrollbar().clicked_element() != scrollbar_element::None)
@@ -255,21 +255,21 @@ namespace neogfx
 
     void scrollable_widget::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_widget::mouse_moved(aPosition, aKeyModifiers);
+        base_type::mouse_moved(aPosition, aKeyModifiers);
         vertical_scrollbar().update(aPosition + origin());
         horizontal_scrollbar().update(aPosition + origin());
     }
 
     void scrollable_widget::mouse_entered(const point& aPosition)
     {
-        framed_widget::mouse_entered(aPosition);
+        base_type::mouse_entered(aPosition);
         vertical_scrollbar().update();
         horizontal_scrollbar().update();
     }
 
     void scrollable_widget::mouse_left()
     {
-        framed_widget::mouse_left();
+        base_type::mouse_left();
         vertical_scrollbar().update();
         horizontal_scrollbar().update();
     }
@@ -310,7 +310,7 @@ namespace neogfx
                 vertical_scrollbar().set_position(vertical_scrollbar().maximum());
             break;
         default:
-            handled = framed_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             break;
         }
         return handled;
