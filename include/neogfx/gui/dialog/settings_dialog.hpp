@@ -27,16 +27,29 @@
 
 namespace neogfx
 {
+    class i_setting_widget_factory : public i_reference_counted
+    {
+    public:
+        struct unsupported_setting_type : std::runtime_error { unsupported_setting_type(const std::string& aType) : std::runtime_error{ "neogfx::i_setting_widget_factory::unsupported_setting_type: " + aType } {} };
+    public:
+        typedef i_setting_widget_factory abstract_type;
+    public:
+        virtual ~i_setting_widget_factory() = default;
+    public:
+        virtual std::shared_ptr<i_widget> create_widget(const neolib::i_setting& aSetting, i_layout& aLayout) const = 0;
+    };
+
     class settings_dialog : public dialog
     {
     public:
-        settings_dialog(neolib::i_settings& aSettings);
-        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings);
+        settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {});
+        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {});
         ~settings_dialog();
     private:
         void init();
     private:
         neolib::i_settings& iSettings;
+        ref_ptr<i_setting_widget_factory> iWidgetFactory;
         sink iSink;
         horizontal_layout iLayout;
         tree_view iTree;

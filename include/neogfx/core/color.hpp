@@ -1093,6 +1093,7 @@ namespace neogfx
         static const std::uint32_t MaxStops = 256;
         // types
     public:
+        typedef gradient abstract_type; // todo
         typedef neolib::variant<corner, scalar> orientation_type;
         typedef std::pair<scalar, sRGB_color> color_stop;
         typedef std::vector<color_stop> color_stop_list;

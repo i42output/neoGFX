@@ -25,7 +25,54 @@
 
 namespace neogfx
 {
-    settings_dialog::settings_dialog(neolib::i_settings& aSettings) :
+    class default_setting_widget_factory : public reference_counted<i_setting_widget_factory>
+    {
+    public:
+        default_setting_widget_factory(ref_ptr<i_setting_widget_factory> aUserFactory) :
+            iUserFactory{ aUserFactory }
+        {
+        }
+    public:
+        std::shared_ptr<i_widget> create_widget(const neolib::i_setting& aSetting, i_layout& aLayout) const
+        {
+            std::shared_ptr<i_widget> settingWidget;
+            if (iUserFactory)
+                settingWidget = iUserFactory->create_widget(aSetting, aLayout);
+            if (!settingWidget)
+            {
+                switch (aSetting.type())
+                {
+                case neolib::simple_variant_type::Boolean:
+                    // todo
+                    break;
+                case neolib::simple_variant_type::Integer:
+                    // todo
+                    break;
+                case neolib::simple_variant_type::Real:
+                    // todo
+                    break;
+                case neolib::simple_variant_type::String:
+                    // todo
+                    break;
+                case neolib::simple_variant_type::Enum:
+                    // todo
+                    break;
+                case neolib::simple_variant_type::CustomType:
+                    {
+                        auto const& customTypeName = aSetting.value().get<i_ref_ptr<neolib::i_custom_type>>()->name();
+                        // todo
+                        throw unsupported_setting_type(customTypeName);
+                    }
+                    break;
+                }
+            }
+            return settingWidget;
+        }
+    private:
+        ref_ptr<i_setting_widget_factory> iUserFactory;
+    };
+
+    settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory) :
         dialog{ "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iLayout{ client_layout() },
@@ -36,7 +83,7 @@ namespace neogfx
         init();
     }
 
-    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings) :
+    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory) :
         dialog{ aParent, "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iLayout{ client_layout() },

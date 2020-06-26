@@ -37,11 +37,18 @@ namespace neogfx
     public:
         void create(const i_string& aType, const i_string& aValue, i_ref_ptr<neolib::i_custom_type>& aObject) const override
         {
-            // todo: supported neogfx types
-            if (aType == "neogfx::color")
-                aObject = make_ref<neolib::custom_type<color>>(aValue.to_std_string());
-            else if (iUserCustomSettingTypeFactory)
+            if (iUserCustomSettingTypeFactory)
                 iUserCustomSettingTypeFactory->create(aType, aValue, aObject);
+            if (!aObject)
+            {
+                if (aType == "neogfx::color")
+                    aObject = make_ref<neolib::custom_type<color>>("neogfx::color", aValue);
+                else if (aType == "neogfx::gradient")
+                    aObject = make_ref<neolib::custom_type<gradient>>("neogfx::color", aValue);
+                // todo: supported neogfx types
+            }
+            if (!aObject)
+                throw unsupported_custom_type(aType.to_std_string());
         }
     private:
         ref_ptr<neolib::i_custom_type_factory> iUserCustomSettingTypeFactory;

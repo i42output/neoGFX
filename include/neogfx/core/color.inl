@@ -250,4 +250,28 @@ namespace neogfx
             ", B: 0x" << std::hex << (int)aColor.blue() << "]";
         return aStream;
     }
+
+    template <typename Elem, typename Traits, color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
+    inline std::basic_ostream<Elem, Traits>& operator>>(std::basic_ostream<Elem, Traits>& aStream, basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor)
+    {
+        // todo
+        throw std::logic_error("not yet implemented");
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const gradient& aGradient)
+    {
+        // todo
+        throw std::logic_error("not yet implemented");
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator>>(std::basic_ostream<Elem, Traits>& aStream, gradient& aGradient)
+    {
+        // todo
+        throw std::logic_error("not yet implemented");
+        return aStream;
+    }
 }
