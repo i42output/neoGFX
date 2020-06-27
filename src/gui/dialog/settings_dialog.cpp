@@ -126,7 +126,61 @@ namespace neogfx
 
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
+        button_box().add_button(standard_button::Discard);
         button_box().add_button(standard_button::Apply);
+
+        TryAccept([&](bool& aCanAccept, bool)
+        {
+            aCanAccept = iSettings.dirty();
+        });
+
+        auto update_buttons = [&]()
+        {
+            if (iSettings.dirty())
+            {
+                button_box().enable_role(button_role::Accept);
+                button_box().enable_role(button_role::Apply);
+                button_box().enable_role(button_role::Destructive);
+            }
+            else
+            {
+                button_box().disable_role(button_role::Accept);
+                button_box().disable_role(button_role::Apply);
+                button_box().disable_role(button_role::Destructive);
+            }
+        };
+        update_buttons();
+
+        iSink += iSettings.setting_changed([&](const neolib::i_setting&)
+        {
+            update_buttons();
+        });
+
+        HaveResult([&](dialog_result aResult)
+        {
+            switch (aResult)
+            {
+            case dialog_result::Accepted:
+                iSettings.apply_changes();
+                break;
+            case dialog_result::Rejected:
+                iSettings.discard_changes();
+                break;
+            }
+        });
+
+        button_box().Clicked([&](standard_button aButton)
+        {
+            switch (aButton)
+            {
+            case standard_button::Apply:
+                iSettings.apply_changes();
+                break;
+            case standard_button::Discard:
+                iSettings.discard_changes();
+                break;
+            }
+        });
 
         center_on_parent();
 

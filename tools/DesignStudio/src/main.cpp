@@ -43,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
-    ds::main_app app{ argc, argv };
+    ds::main_app app{ argc, argv,  };
 
     try
     {

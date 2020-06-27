@@ -268,11 +268,17 @@ namespace neogfx
                 return false;
             }
         case button_role::Invalid:
+            return aButtonRole2 == button_role::Invalid;
         case button_role::Destructive:
+            return aButtonRole2 == button_role::Destructive;
         case button_role::Action:
+            return aButtonRole2 == button_role::Action;
         case button_role::Apply:
+            return aButtonRole2 == button_role::Apply;
         case button_role::Reset:
+            return aButtonRole2 == button_role::Reset;
         case button_role::Help:
+            return aButtonRole2 == button_role::Help;
         default:
             return false;
         }

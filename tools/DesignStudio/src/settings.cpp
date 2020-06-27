@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/tools/DesignStudio/Settings.hpp>
 
 namespace neogfx::DesignStudio
@@ -27,12 +28,19 @@ namespace neogfx::DesignStudio
     settings::settings() : 
         base_type{}
     {
-        //register_setting();
-    }
+        register_category("environment"_s, "Environment"_t);
+        register_group("environment.general"_s, "General"_t);
+        auto const& themeSetting = register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Color Theme: %?%"_t);
+        
+        if (dirty())
+            save();
 
-    color settings::theme_color() const
-    {
-        // todo
-        return color{};
+        service<i_app>().current_style().palette().set_color(color_role::Theme, themeSetting.value<color>());
+
+        SettingChanged([&](neolib::i_setting const& aSetting)
+        {
+            if (&aSetting == &themeSetting)
+                service<i_app>().current_style().palette().set_color(color_role::Theme, aSetting.value<color>());
+        });
     }
 }

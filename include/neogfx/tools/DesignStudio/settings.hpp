@@ -30,7 +30,5 @@ namespace neogfx::DesignStudio
         typedef neogfx::settings base_type;
     public:
         settings();
-    public:
-        color theme_color() const;
     };
 }

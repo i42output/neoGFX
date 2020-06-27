@@ -37,7 +37,10 @@ namespace neogfx
     {
     public:
         define_event(TryAccept, try_accept, bool& /* aCanAccept */, bool /* aQueryOnly */)
-        define_event(TryReject, try_reject, bool& /* acanReject */, bool /* aQueryOnly */)
+        define_event(TryReject, try_reject, bool& /* aCanReject */, bool /* aQueryOnly */)
+        define_event(Accepted, accepted)
+        define_event(Rejected, rejected)
+        define_event(HaveResult, have_result, dialog_result /* aResult */)
     public:
         dialog(window_style aStyle = window_style::DefaultDialog);
         dialog(const std::string& aDialogTitle, window_style aStyle = window_style::DefaultDialog);

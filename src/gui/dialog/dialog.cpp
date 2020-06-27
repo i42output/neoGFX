@@ -137,6 +137,14 @@ namespace neogfx
     void dialog::set_result(dialog_result aResult)
     {
         iResult = aResult;
+        if (result() != dialog_result::NoResult)
+        {
+            HaveResult.trigger(result());
+            if (result() == dialog_result::Accepted)
+                Accepted.trigger();
+            else if (result() == dialog_result::Rejected)
+                Rejected.trigger();
+        }
     }
 
     void dialog::set_standard_layout(const size& aControlSpacing, const neogfx::padding& aPadding, bool aCreateButtonBox)
