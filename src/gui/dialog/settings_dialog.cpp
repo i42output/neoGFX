@@ -124,6 +124,9 @@ namespace neogfx
         iDetails.set_weight(size{ 2.0, 1.0 });
         iDetailLayout.set_size_policy(size_constraint::Expanding);
 
+        for (auto const& setting : iSettings.all_settings())
+            ;
+
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
         button_box().add_button(standard_button::Discard);
@@ -138,13 +141,11 @@ namespace neogfx
         {
             if (iSettings.dirty())
             {
-                button_box().enable_role(button_role::Accept);
                 button_box().enable_role(button_role::Apply);
                 button_box().enable_role(button_role::Destructive);
             }
             else
             {
-                button_box().disable_role(button_role::Accept);
                 button_box().disable_role(button_role::Apply);
                 button_box().disable_role(button_role::Destructive);
             }
