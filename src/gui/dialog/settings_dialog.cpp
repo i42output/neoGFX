@@ -22,6 +22,8 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
+#include <neogfx/gui/widget/line_edit.hpp>
+#include <neogfx/gui/widget/check_box.hpp>
 
 namespace neogfx
 {
@@ -33,40 +35,55 @@ namespace neogfx
         {
         }
     public:
-        std::shared_ptr<i_widget> create_widget(const neolib::i_setting& aSetting, i_layout& aLayout) const
+        std::shared_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout) const
         {
-            std::shared_ptr<i_widget> settingWidget;
+            std::shared_ptr<i_widget> result;
             if (iUserFactory)
-                settingWidget = iUserFactory->create_widget(aSetting, aLayout);
-            if (!settingWidget)
+                result = iUserFactory->create_widget(aSetting, aLayout);
+            if (!result)
             {
-                switch (aSetting.type())
+                switch (aSetting.value().type())
                 {
-                case neolib::simple_variant_type::Boolean:
-                    // todo
-                    break;
-                case neolib::simple_variant_type::Integer:
-                    // todo
-                    break;
-                case neolib::simple_variant_type::Real:
-                    // todo
-                    break;
-                case neolib::simple_variant_type::String:
-                    // todo
-                    break;
-                case neolib::simple_variant_type::Enum:
-                    // todo
-                    break;
-                case neolib::simple_variant_type::CustomType:
+                case neolib::setting_type::Boolean:
                     {
-                        auto const& customTypeName = aSetting.value().get<i_ref_ptr<neolib::i_custom_type>>()->name();
-                        // todo
-                        throw unsupported_setting_type(customTypeName);
+                        auto settingWidget = std::make_shared<check_box>(aLayout);
+                        settingWidget->Checked([&]()
+                        {
+                            aSetting.set_value(true);
+                        });
+                        settingWidget->Unchecked([&]()
+                        {
+                            aSetting.set_value(false);
+                        });
+                        result = settingWidget;
                     }
+                    break;
+                case neolib::setting_type::Int8:
+                case neolib::setting_type::Int16:
+                case neolib::setting_type::Int32:
+                case neolib::setting_type::Int64:
+                case neolib::setting_type::Uint8:
+                case neolib::setting_type::Uint16:
+                case neolib::setting_type::Uint32:
+                case neolib::setting_type::Uint64:
+                    // todo
+                    break;
+                case neolib::setting_type::Float32:
+                case neolib::setting_type::Float64:
+                    // todo
+                    break;
+                case neolib::setting_type::String:
+                    // todo
+                    break;
+                case neolib::setting_type::Enum:
+                case neolib::setting_type::Custom:
+                default:
                     break;
                 }
             }
-            return settingWidget;
+            if (!result)
+                throw unsupported_setting_type();
+            return result;
         }
     private:
         ref_ptr<i_setting_widget_factory> iUserFactory;

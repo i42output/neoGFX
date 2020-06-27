@@ -27,35 +27,8 @@
 
 namespace neogfx
 {
-    class default_custom_type_factory : public reference_counted<neolib::i_custom_type_factory>
-    {
-    public:
-        default_custom_type_factory(ref_ptr<neolib::i_custom_type_factory> aUserCustomSettingTypeFactory) :
-            iUserCustomSettingTypeFactory{ aUserCustomSettingTypeFactory }
-        {
-        }
-    public:
-        void create(const i_string& aType, const i_string& aValue, i_ref_ptr<neolib::i_custom_type>& aObject) const override
-        {
-            if (iUserCustomSettingTypeFactory)
-                iUserCustomSettingTypeFactory->create(aType, aValue, aObject);
-            if (!aObject)
-            {
-                if (aType == "neogfx::color")
-                    aObject = make_ref<neolib::custom_type<color>>("neogfx::color", aValue);
-                else if (aType == "neogfx::gradient")
-                    aObject = make_ref<neolib::custom_type<gradient>>("neogfx::color", aValue);
-                // todo: supported neogfx types
-            }
-            if (!aObject)
-                throw unsupported_custom_type(aType.to_std_string());
-        }
-    private:
-        ref_ptr<neolib::i_custom_type_factory> iUserCustomSettingTypeFactory;
-    };
-
-    settings::settings(const std::string& aFileName, ref_ptr<neolib::i_custom_type_factory> aCustomSettingTypeFactory) :
-        base_type{ service<i_app>(), string{ aFileName }, make_ref<default_custom_type_factory>(aCustomSettingTypeFactory) }
+    settings::settings(const std::string& aFileName) :
+        base_type{ service<i_app>(), string{ aFileName } }
     {
     }
 }

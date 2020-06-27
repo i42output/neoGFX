@@ -29,6 +29,7 @@ using namespace boost::multiprecision;
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/enum.hpp>
 #include <neolib/core/string.hpp>
+#include <neolib/core/string_utils.hpp>
 #include <neogfx/app/i18n.hpp>
 #include <neogfx/core/async_task.hpp>
 

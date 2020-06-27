@@ -244,18 +244,15 @@ namespace neogfx
     template <typename Elem, typename Traits, color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor)
     {
-        aStream << "[A: 0x" << std::hex << (int)aColor.alpha() <<
-            ", R: 0x" << std::hex << (int)aColor.red() <<
-            ", G: 0x" << std::hex << (int)aColor.green() <<
-            ", B: 0x" << std::hex << (int)aColor.blue() << "]";
+        aStream << std::setprecision(4) << "[" << aColor.red<double>() << ", " << aColor.green<double>() << ", " << aColor.blue<double>() << ", " << aColor.alpha<double>() << "]";
         return aStream;
     }
 
     template <typename Elem, typename Traits, color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
-    inline std::basic_ostream<Elem, Traits>& operator>>(std::basic_ostream<Elem, Traits>& aStream, basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor)
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor)
     {
-        // todo
-        throw std::logic_error("not yet implemented");
+        char ignore;
+        aStream >> ignore >> aColor[0] >> ignore >> aColor[1] >> ignore >> aColor[2] >> ignore >> aColor[3] >> ignore;
         return aStream;
     }
 
@@ -268,7 +265,7 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits>
-    inline std::basic_ostream<Elem, Traits>& operator>>(std::basic_ostream<Elem, Traits>& aStream, gradient& aGradient)
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, gradient& aGradient)
     {
         // todo
         throw std::logic_error("not yet implemented");

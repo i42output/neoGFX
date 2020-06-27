@@ -30,13 +30,13 @@ namespace neogfx
     class i_setting_widget_factory : public i_reference_counted
     {
     public:
-        struct unsupported_setting_type : std::runtime_error { unsupported_setting_type(const std::string& aType) : std::runtime_error{ "neogfx::i_setting_widget_factory::unsupported_setting_type: " + aType } {} };
+        struct unsupported_setting_type : std::runtime_error { unsupported_setting_type() : std::runtime_error{ "neogfx::i_setting_widget_factory::unsupported_setting_type" } {} };
     public:
         typedef i_setting_widget_factory abstract_type;
     public:
         virtual ~i_setting_widget_factory() = default;
     public:
-        virtual std::shared_ptr<i_widget> create_widget(const neolib::i_setting& aSetting, i_layout& aLayout) const = 0;
+        virtual std::shared_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout) const = 0;
     };
 
     class settings_dialog : public dialog

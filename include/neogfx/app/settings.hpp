@@ -28,6 +28,6 @@ namespace neogfx
     {
         typedef neolib::settings base_type;
     public:
-        settings(const std::string& aFileName = "settings.xml", ref_ptr<neolib::i_custom_type_factory> aCustomSettingTypeFactory = {});
+        settings(const std::string& aFileName = "settings.xml");
     };
 }
