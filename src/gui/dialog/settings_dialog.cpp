@@ -117,7 +117,7 @@ namespace neogfx
 
     void settings_dialog::init()
     {
-        set_minimum_size(size{ 760_dip, 440_dip });
+        set_minimum_size(size{ 656_dip, 446_dip });
         iLayout.set_size_policy(size_constraint::Expanding);
         iTree.set_weight(size{ 1.0, 1.0 });
         iDetails.set_size_policy(size_constraint::Expanding);
