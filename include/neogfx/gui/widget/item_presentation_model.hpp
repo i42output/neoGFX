@@ -674,7 +674,7 @@ namespace neogfx
             if constexpr (container_traits::is_flat)
                 return {};
             else
-                return size{ item_height(aIndex, aGc) };
+                return size{ 16.0_dip };
         }
         optional_texture cell_image(const item_presentation_model_index&) const override
         {
@@ -732,7 +732,7 @@ namespace neogfx
                 auto baseIter = typename item_model_type::const_base_iterator{ item_model().index_to_iterator(to_item_model_index(aIndex)) };
                 auto treeIter = baseIter.get<typename item_model_type::const_iterator, typename item_model_type::const_iterator,
                     typename item_model_type::iterator, typename item_model_type::const_sibling_iterator, typename item_model_type::sibling_iterator>();
-                return treeIter.depth() * item_height(aIndex, aGc) + (aIndex.column() == 0 ? cell_tree_expander_size(aIndex, aGc)->cx : 0.0);
+                return (treeIter.depth() + 1) * cell_tree_expander_size(aIndex, aGc)->cx;
             }
         }
     public:

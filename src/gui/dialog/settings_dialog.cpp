@@ -115,6 +115,36 @@ namespace neogfx
     {
     }
 
+    class settings_tree_presentation_model : public item_tree_presentation_model
+    {
+    public:
+        settings_tree_presentation_model() : 
+            iIcon{ image{ ":/neogfx/resources/icons/settings.png" } }
+        {
+        }
+    public:
+        optional_font cell_font(const item_presentation_model_index& aIndex) const override
+        {
+            if (!item_model().has_parent(to_item_model_index(aIndex)))
+                return default_font();
+            return default_font().with_size(9).with_style(font_style::Normal);
+        }
+        optional_texture cell_image(const item_presentation_model_index& aIndex) const override
+        {
+            if (!item_model().has_parent(to_item_model_index(aIndex)))
+                return iIcon;
+            return {};
+        }
+        optional_size cell_image_size(const item_presentation_model_index& aIndex) const override
+        {
+            if (!item_model().has_parent(to_item_model_index(aIndex)))
+                return size{ 32.0_dip, 32.0_dip };
+            return {};
+        }
+    private:
+        texture iIcon;
+    };
+
     void settings_dialog::init()
     {
         set_minimum_size(size{ 656_dip, 446_dip });
@@ -124,8 +154,22 @@ namespace neogfx
         iDetails.set_weight(size{ 2.0, 1.0 });
         iDetailLayout.set_size_policy(size_constraint::Expanding);
 
-        for (auto const& setting : iSettings.all_settings())
-            ;
+        auto treeModel = std::make_shared<item_tree_model>();
+        auto treePresentationModel = std::make_shared<settings_tree_presentation_model>();
+        iTree.set_model(treeModel);
+        iTree.set_presentation_model(treePresentationModel);
+
+        for (auto const& category : iSettings.all_categories())
+        {
+            auto c = treeModel->insert_item(treeModel->send(), category.second().to_std_string());
+            for (auto const& group : iSettings.all_groups().find(category.first())->second())
+            {
+                treeModel->append_item(c, group.second().to_std_string());
+            }
+        }
+        treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
+        treePresentationModel->set_column_read_only(0);
+        iTree.selection_model().set_mode(item_selection_mode::SingleSelection);
 
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
