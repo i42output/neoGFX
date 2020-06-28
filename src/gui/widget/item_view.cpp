@@ -464,13 +464,17 @@ namespace neogfx
             auto item = item_at(aPosition);
             if (item != std::nullopt)
             {
+                bool actioned = false;
                 if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
                 {
                     presentation_model().toggle_expanded(*item);
-                    return;
+                    actioned = true;
                 }
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
+                {
                     iClickedCheckBox = item;
+                    actioned = true;
+                }
                 bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
                     select(*item, item_selection_operation::None);
@@ -478,9 +482,14 @@ namespace neogfx
                     select(*item);
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
-                    (presentation_model().cell_editable_when_focused(*item) || 
+                    (presentation_model().cell_editable_when_focused(*item) ||
                         (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item))))
+                {
                     edit(*item);
+                    actioned = true;
+                }
+                if (model().is_tree() && !actioned)
+                    presentation_model().toggle_expanded(*item);
             }
         }
     }

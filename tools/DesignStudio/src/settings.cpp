@@ -30,7 +30,7 @@ namespace neogfx::DesignStudio
     {
         register_category("environment"_s, "Environment"_t);
         register_group("environment.general"_s, "General"_t);
-        register_group("environment.licence"_s, "Licence"_t);
+        register_group("environment.accounts_and_licensing"_s, "Accounts and Licensing"_t);
         register_group("environment.documents"_s, "Documents"_t);
         register_group("environment.fonts_and_colors"_s, "Fonts and Colors"_t);
         register_group("environment.workspace"_s, "Workspace"_t);
