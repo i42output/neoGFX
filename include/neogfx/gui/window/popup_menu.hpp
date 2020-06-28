@@ -55,9 +55,6 @@ namespace neogfx
     public:
         void resized() override;
     public:
-        bool can_dismiss(const i_widget* aClickedWidget) const override;
-        dismissal_type_e dismissal_type() const override;
-        bool dismissed() const override;
         void dismiss() override;
     public:
         double rendering_priority() const override;

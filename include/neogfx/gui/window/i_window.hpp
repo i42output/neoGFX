@@ -78,6 +78,7 @@ namespace neogfx
         virtual bool has_parent_window(bool aSameSurface = true) const = 0;
         virtual const i_window& parent_window() const = 0;
         virtual i_window& parent_window() = 0;
+        virtual bool is_parent_of(const i_window& aChildWindow) const = 0;
         virtual bool is_owner_of(const i_window& aChildWindow) const = 0;
         virtual const i_window& ultimate_ancestor() const = 0;
         virtual i_window& ultimate_ancestor() = 0;

@@ -415,6 +415,11 @@ namespace neogfx
         return const_cast<i_window&>(to_const(*this).parent_window());
     }
 
+    bool window::is_parent_of(const i_window& aChildWindow) const
+    {
+        return aChildWindow.has_parent_window(false) && &aChildWindow.parent_window() == this;
+    }
+
     bool window::is_owner_of(const i_window& aChildWindow) const
     {
         const i_window* w = &aChildWindow;
@@ -672,24 +677,64 @@ namespace neogfx
         return iDismissingChildren;
     }
 
-    bool window::can_dismiss(const i_widget*) const
+    bool window::can_dismiss(const i_widget* aClickedWidget) const
     {
-        return true;
+        switch (dismissal_type())
+        {
+        default:
+        case CannotDismiss:
+            return false;
+        case CloseOnDismissal:
+            return aClickedWidget == nullptr ||
+                ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick &&
+                    aClickedWidget->root().is_owner_of(*this)) ||
+                ((style() & window_style::DismissOnParentClick) == window_style::DismissOnParentClick &&
+                    aClickedWidget->root().is_parent_of(*this));
+        case HideOnDismissal:
+            return aClickedWidget == nullptr ||
+                ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick &&
+                    aClickedWidget->root().is_owner_of(*this)) ||
+                ((style() & window_style::HideOnParentClick) == window_style::HideOnParentClick &&
+                    aClickedWidget->root().is_parent_of(*this));
+        }
     }
 
     window::dismissal_type_e window::dismissal_type() const
     {
-        return CloseOnDismissal;
+        if ((style() & (window_style::DismissOnOwnerClick | window_style::DismissOnParentClick)) != window_style::Invalid)
+            return CloseOnDismissal;
+        else if ((style() & (window_style::HideOnOwnerClick | window_style::HideOnParentClick)) != window_style::Invalid)
+            return HideOnDismissal;
+        else
+            return CannotDismiss;
     }
 
     bool window::dismissed() const
     {
-        return iClosed;
+        switch (dismissal_type())
+        {
+        case CloseOnDismissal:
+            return is_closed();
+        case HideOnDismissal:
+            return hidden();
+        default:
+            return false;
+        }
     }
 
     void window::dismiss()
     {
-        close();
+        if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
+            service<i_keyboard>().ungrab_keyboard(*this);
+        switch (dismissal_type())
+        {
+        case CloseOnDismissal:
+            close();
+            break;
+        case HideOnDismissal:
+            hide();
+            break;
+        }
     }
 
     void window::center(bool aSetMinimumSize)

@@ -240,6 +240,10 @@ namespace neogfx
                 &surface() == &aWidget.surface();
         }
     public:
+        bool is_parent_of(const i_widget& aWidget) const
+        {
+            return aWidget.has_parent() && &aWidget.parent() == this;
+        }
         bool is_ancestor_of(const i_widget& aWidget) const
         {
             const i_widget* w = &aWidget;

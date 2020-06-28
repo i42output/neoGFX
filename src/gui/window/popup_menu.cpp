@@ -73,49 +73,11 @@ namespace neogfx
             menu().close();
     }
 
-    bool popup_menu::can_dismiss(const i_widget* aClickedWidget) const
-    {
-        return aClickedWidget == nullptr || 
-            iParentWidget == nullptr || 
-            (iParentWidget == aClickedWidget && (style() & (window_style::DismissOnParentClick | window_style::HideOnParentClick)) != window_style::Invalid) ||
-            (iParentWidget != aClickedWidget && !iParentWidget->is_ancestor_of(*aClickedWidget));
-    }
-
-    i_window::dismissal_type_e popup_menu::dismissal_type() const
-    {
-        if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
-            return CloseOnDismissal;
-        else if ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick)
-            return HideOnDismissal;
-        else
-            return CannotDismiss;
-    }
-
-    bool popup_menu::dismissed() const
-    {
-        switch (dismissal_type())
-        {
-        case CloseOnDismissal:
-            return surface().is_closed();
-        case HideOnDismissal:
-            return hidden();
-        default:
-            return false;
-        }
-    }
-
     void popup_menu::dismiss()
     {
-        if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
-            service<i_keyboard>().ungrab_keyboard(*this);
-        if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
-            close();
-        else if ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick)
-        {
-            hide();
-            if (has_menu() && menu().is_open())
-                menu().close();
-        }
+        if (has_menu() && menu().is_open())
+            menu().close();
+        window::dismiss();
     }
 
     double popup_menu::rendering_priority() const
