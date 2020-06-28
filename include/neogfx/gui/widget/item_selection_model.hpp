@@ -97,16 +97,19 @@ namespace neogfx
                     else if (iCurrentIndex->row() >= presentation_model().rows() - 1u)
                         iCurrentIndex->set_row(iCurrentIndex->row() - 1u);
                 }
+                reindex();
             });
             iSink += presentation_model().item_expanded([this](const item_presentation_model_index& aIndex)
             {
                 if (has_current_index() && current_index().row() > aIndex.row())
                     iCurrentIndex = std::nullopt;
+                reindex();
             });
             iSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aIndex)
             {
                 if (has_current_index() && current_index().row() > aIndex.row())
                     iCurrentIndex = std::nullopt;
+                reindex();
             });
             iSink += presentation_model().items_sorting([this]()
             {
@@ -120,6 +123,7 @@ namespace neogfx
                 if (iSavedModelIndex != std::nullopt)
                     set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
                 iSavedModelIndex = std::nullopt;
+                reindex();
             });
             iSink += presentation_model().items_filtering([this]()
             {
@@ -135,6 +139,7 @@ namespace neogfx
                 else if (presentation_model().rows() >= 1)
                     set_current_index(item_presentation_model_index{ 0u, 0u });
                 iSavedModelIndex = std::nullopt;
+                reindex();
             });
             iSink += neolib::destroying(presentation_model(), [this]()
             {
@@ -357,8 +362,16 @@ namespace neogfx
                 if (clear)
                 {
                     if (aUpdateCells)
-                        for (auto& cellIndex : *this)
-                            presentation_model().cell_meta(cellIndex).selection &= ~item_cell_selection_flags::Selected;
+                    {
+                        struct selection_clearer : i_item_presentation_model::i_meta_visitor
+                        {
+                            void visit(i_item_presentation_model::cell_meta_type& aMeta) override
+                            {
+                                aMeta.selection &= ~item_cell_selection_flags::Selected;
+                            }
+                        } selectionClearer;
+                        presentation_model().accept(selectionClearer, true);
+                    }
                     aSelection.clear();
                 }
                 if (select)
@@ -411,7 +424,8 @@ namespace neogfx
                 }
             };
             update(iSelection, true);
-            SelectionChanged.trigger(iSelection, iPreviousSelection);
+            if ((aOperation & item_selection_operation::Internal) != item_selection_operation::Internal)
+                SelectionChanged.trigger(iSelection, iPreviousSelection);
             update(iPreviousSelection, false);
         }
     public:
@@ -445,6 +459,15 @@ namespace neogfx
                         presentation_model().cell_meta(*iCurrentIndex).selection | item_cell_selection_flags::Current;
                 CurrentIndexChanged.trigger(iCurrentIndex, previousIndex);
             }
+        }
+        void reindex()
+        {
+            iPreviousSelection.clear();
+            iSelection.clear();
+            for (item_presentation_model_index::row_type row = 0; row < presentation_model().rows(); ++row)
+                for (item_presentation_model_index::column_type column = 0; column < presentation_model().columns(); ++column)
+                    if ((presentation_model().cell_meta(item_presentation_model_index{ row, column }).selection & item_cell_selection_flags::Selected) == item_cell_selection_flags::Selected)
+                        select(item_presentation_model_index{ row, column }, item_selection_operation::Select | item_selection_operation::Internal);
         }
     private:
         i_item_presentation_model* iModel;

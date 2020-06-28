@@ -38,13 +38,14 @@ namespace neogfx
 
     enum class item_selection_operation
     {
-        None                 = 0x00,
-        Select               = 0x01,
-        Deselect             = 0x02,
-        Toggle               = 0x04,
-        Clear                = 0x08,
-        Row                  = 0x10,
-        Column               = 0x20,
+        None                 = 0x0000,
+        Select               = 0x0001,
+        Deselect             = 0x0002,
+        Toggle               = 0x0004,
+        Clear                = 0x0008,
+        Row                  = 0x0100,
+        Column               = 0x0200,
+        Internal             = 0x1000,
 
         SelectRow            = Select | Row,
         SelectColumn         = Select | Column,

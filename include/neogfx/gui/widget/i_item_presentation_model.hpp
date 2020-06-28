@@ -157,6 +157,8 @@ namespace neogfx
         declare_event(item_added, const item_presentation_model_index&)
         declare_event(item_changed, const item_presentation_model_index&)
         declare_event(item_removed, const item_presentation_model_index&)
+        declare_event(item_expanding, const item_presentation_model_index&)
+        declare_event(item_collapsing, const item_presentation_model_index&)
         declare_event(item_expanded, const item_presentation_model_index&)
         declare_event(item_collapsed, const item_presentation_model_index&)
         declare_event(item_toggled, const item_presentation_model_index&)
@@ -176,6 +178,11 @@ namespace neogfx
             bool expanded = false;
             optional_glyph_text text;
             optional_size extents;
+        };
+        class i_meta_visitor
+        {
+        public:
+            virtual void visit(cell_meta_type& aMeta) = 0;
         };
         enum class sort_direction
         {
@@ -217,6 +224,9 @@ namespace neogfx
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
         virtual uint32_t columns(const item_presentation_model_index& aIndex) const = 0;
+    public:
+        virtual void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) = 0;
+    public:
         virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludePadding = true) const = 0;
         virtual const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc) const = 0;

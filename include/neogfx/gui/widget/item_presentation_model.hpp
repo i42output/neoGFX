@@ -48,6 +48,8 @@ namespace neogfx
         define_declared_event(ItemAdded, item_added, const item_presentation_model_index&)
         define_declared_event(ItemChanged, item_changed, const item_presentation_model_index&)
         define_declared_event(ItemRemoved, item_removed, const item_presentation_model_index&)
+        define_declared_event(ItemExpanding, item_expanding, const item_presentation_model_index&)
+        define_declared_event(ItemCollapsing, item_collapsing, const item_presentation_model_index&)
         define_declared_event(ItemExpanded, item_expanded, const item_presentation_model_index&)
         define_declared_event(ItemCollapsed, item_collapsed, const item_presentation_model_index&)
         define_declared_event(ItemToggled, item_toggled, const item_presentation_model_index&)
@@ -190,6 +192,29 @@ namespace neogfx
         {
             return static_cast<uint32_t>(row(aIndex).cells.size());
         }
+    public:
+        void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) override
+        {
+            if constexpr (container_traits::is_flat)
+            {
+                for (auto row = iRows.begin(); row != iRows.end(); ++row)
+                    for (auto& cell : row->cells)
+                        aVisitor.visit(cell);
+            }
+            else if (!aIgnoreCollapsedState)
+            {
+                for (auto row = iRows.kbegin(); row != iRows.kend(); ++row)
+                    for (auto& cell : row->cells)
+                        aVisitor.visit(cell);
+            }
+            else
+            {
+                for (auto row = iRows.begin(); row != iRows.end(); ++row)
+                    for (auto& cell : row->cells)
+                        aVisitor.visit(cell);
+            }
+        }
+    public:
         dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludePadding = true) const override
         {
             if (iColumns.size() < aColumnIndex + 1u)
@@ -265,6 +290,10 @@ namespace neogfx
             if constexpr (container_traits::is_tree)
             {
                 item_presentation_model_index const indexFirstColumn{ aIndex.row() };
+                if (!cell_meta(indexFirstColumn).expanded)
+                    ItemExpanding.trigger(aIndex);
+                else
+                    ItemCollapsing.trigger(aIndex);
                 cell_meta(indexFirstColumn).expanded = !cell_meta(indexFirstColumn).expanded;
                 if (cell_meta(indexFirstColumn).expanded)
                     std::next(begin(), aIndex.row()).unskip_children();
