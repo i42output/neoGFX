@@ -131,15 +131,13 @@ namespace neogfx
         }
         optional_texture cell_image(const item_presentation_model_index& aIndex) const override
         {
-            if (!item_model().has_parent(to_item_model_index(aIndex)))
-                return iIcon;
-            return {};
+            return iIcon;
         }
         optional_size cell_image_size(const item_presentation_model_index& aIndex) const override
         {
             if (!item_model().has_parent(to_item_model_index(aIndex)))
                 return size{ 32.0_dip, 32.0_dip };
-            return {};
+            return size{ 16.0_dip, 16.0_dip };
         }
     private:
         texture iIcon;
@@ -147,7 +145,7 @@ namespace neogfx
 
     void settings_dialog::init()
     {
-        set_minimum_size(size{ 656_dip, 446_dip });
+        set_minimum_size(size{ 672_dip, 446_dip });
         iLayout.set_size_policy(size_constraint::Expanding);
         iTree.set_weight(size{ 1.0, 1.0 });
         iDetails.set_size_policy(size_constraint::Expanding);
@@ -162,10 +160,10 @@ namespace neogfx
         for (auto const& category : iSettings.all_categories())
         {
             auto c = treeModel->insert_item(treeModel->send(), category.second().to_std_string());
-            for (auto const& group : iSettings.all_groups().find(category.first())->second())
-            {
-                treeModel->append_item(c, group.second().to_std_string());
-            }
+            auto g = iSettings.all_groups().find(category.first());
+            if (g != iSettings.all_groups().end())
+                for (auto const& group : g->second())
+                    treeModel->append_item(c, group.second().to_std_string());
         }
         treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
         treePresentationModel->set_column_read_only(0);
