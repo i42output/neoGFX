@@ -47,6 +47,7 @@ namespace neogfx
                 case neolib::setting_type::Boolean:
                     {
                         auto settingWidget = std::make_shared<check_box>(aLayout);
+                        settingWidget->set_checked(aSetting.value().get<bool>());
                         settingWidget->Checked([&]()
                         {
                             aSetting.set_value(true);
@@ -127,7 +128,7 @@ namespace neogfx
         {
             if (!item_model().has_parent(to_item_model_index(aIndex)))
                 return default_font();
-            return default_font().with_size(9).with_style(font_style::Normal);
+            return default_font().with_size(10).with_style(font_style::Normal);
         }
         optional_texture cell_image(const item_presentation_model_index& aIndex) const override
         {
@@ -141,6 +142,33 @@ namespace neogfx
         }
     private:
         texture iIcon;
+    };
+
+    class setting_group_widget : public widget
+    {
+    public:
+        setting_group_widget(const std::string& aTitle) :
+            iLayout{ *this },
+            iTitle{ iLayout, aTitle }
+        {
+            set_padding({});
+            set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
+            iLayout.set_padding({});
+            auto reset_font = [&]()
+            {
+                iTitle.set_font(service<i_app>().current_style().font().with_size(10).with_style(font_style::Underline));
+            };
+            iSink += service<i_app>().current_style_changed([this, reset_font](style_aspect aAspect)
+            {
+                if ((aAspect & style_aspect::Font) == style_aspect::Font)
+                    reset_font();
+            });
+            reset_font();
+        }
+    public:
+        vertical_layout iLayout;
+        text_widget iTitle;
+        sink iSink;
     };
 
     void settings_dialog::init()
@@ -163,11 +191,17 @@ namespace neogfx
             auto g = iSettings.all_groups().find(category.first());
             if (g != iSettings.all_groups().end())
                 for (auto const& group : g->second())
+                {
                     treeModel->append_item(c, group.second().to_std_string());
+                    auto settingGroupWidget = std::make_shared<setting_group_widget>(group.second().to_std_string());
+                    iDetailLayout.add(settingGroupWidget);
+                }
         }
         treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
         treePresentationModel->set_column_read_only(0);
         iTree.selection_model().set_mode(item_selection_mode::SingleSelection);
+
+        iDetailLayout.add_spacer();
 
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
@@ -176,12 +210,12 @@ namespace neogfx
 
         TryAccept([&](bool& aCanAccept, bool)
         {
-            aCanAccept = iSettings.dirty();
+            aCanAccept = iSettings.modified();
         });
 
         auto update_buttons = [&]()
         {
-            if (iSettings.dirty())
+            if (iSettings.modified())
             {
                 button_box().enable_role(button_role::Apply);
                 button_box().enable_role(button_role::Destructive);

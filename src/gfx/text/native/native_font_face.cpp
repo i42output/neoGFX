@@ -146,11 +146,13 @@ namespace neogfx
     dimension native_font_face::underline_position() const
     {
         auto result = 0.0;
+#if 0 // todo: get this to work properly
         if (FT_IS_SCALABLE(iHandle))
-            result = (iHandle->underline_position + iHandle->underline_thickness / 2.0) / 64.0;
+            result = iHandle->underline_position / 64.0;
         else
-            result = -underline_thickness() / 2.0;
-        return std::ceil(result);
+#endif
+            result = -1.0 - underline_thickness();
+        return std::floor(result);
     }
 
     dimension native_font_face::underline_thickness() const
@@ -160,7 +162,9 @@ namespace neogfx
             result = iHandle->underline_thickness / 64.0;
         else
             result = static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_weight::Normal);
-        return std::max(1.0, std::floor(result));
+        if (result < 1.0 || (result > 1.0 && iSize < 20))
+            result = 1.0;
+        return std::floor(result);
     }
 
     dimension native_font_face::line_spacing() const

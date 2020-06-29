@@ -1080,9 +1080,10 @@ namespace neogfx
     void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
         auto const& font = aGlyph.font();
-        auto yLine = logical_coordinates().is_gui_orientation() ?
-            (font.height() - 1.0 + font.descender()) - font.native_font_face().underline_position() :
-            -font.descender() + font.native_font_face().underline_position();
+        auto const descender = font.descender();
+        auto const underlinePosition = font.native_font_face().underline_position(); 
+        auto const dy = descender - underlinePosition;
+        auto const yLine = logical_coordinates().is_gui_orientation() ? font.height() - 1 + dy : -dy;
         draw_line(
             aPoint + vec3{ 0.0, yLine },
             aPoint + vec3{ mnemonics_shown() && aGlyph.mnemonic() ? aGlyph.extents(font).cx : aGlyph.advance().cx, yLine },

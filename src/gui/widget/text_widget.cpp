@@ -305,19 +305,7 @@ namespace neogfx
     {
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
-        iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
-        {
-            if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
-            {
-                iTextExtent = std::nullopt;
-                iSizeHintExtent = std::nullopt;
-                iGlyphText = neogfx::glyph_text{};
-                if (has_parent_layout())
-                    parent_layout().invalidate();
-                update();
-            }
-        });
-        iSink += service<i_rendering_engine>().subpixel_rendering_changed([this]()
+        auto reset_cache = [&]()
         {
             iTextExtent = std::nullopt;
             iSizeHintExtent = std::nullopt;
@@ -325,7 +313,13 @@ namespace neogfx
             if (has_parent_layout())
                 parent_layout().invalidate();
             update();
+        };
+        iSink += service<i_app>().current_style_changed([this, reset_cache](style_aspect aAspect)
+        {
+            if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
+                reset_cache();
         });
+        iSink += service<i_rendering_engine>().subpixel_rendering_changed(reset_cache);
     }
 
     const neogfx::glyph_text& text_widget::glyph_text() const

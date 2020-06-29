@@ -55,10 +55,11 @@ namespace neogfx::DesignStudio
             if (&aSetting == &themeSetting)
                 service<i_app>().current_style().palette().set_color(color_role::Theme, aSetting.value<color>());
         };
+        SettingChanging(themeChanged);
         SettingChanged(themeChanged);
         themeChanged(themeSetting);
 
-        if (dirty())
+        if (modified())
             save();
     }
 }

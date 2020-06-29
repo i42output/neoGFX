@@ -23,6 +23,7 @@
 #include <type_traits>
 #include <neolib/core/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neolib/app/i_setting_value.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/core/hsl_color.hpp>
 #include <neogfx/core/hsv_color.hpp>
@@ -1211,5 +1212,7 @@ namespace neogfx
     typedef neolib::variant<color, gradient> color_or_gradient;
     typedef std::optional<color_or_gradient> optional_color_or_gradient;
 }
+
+define_setting_type(neogfx::color)
 
 #include "color.inl"
