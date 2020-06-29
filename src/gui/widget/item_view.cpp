@@ -280,52 +280,48 @@ namespace neogfx
                 if (textColor == std::nullopt)
                     textColor = service<i_app>().current_style().palette().color(color_role::Text);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
-                if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
-                    aGc.fill_rect(cellBackgroundRect, cellBackgroundColor->
-                        shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0.875));
+                    if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
+                        aGc.fill_rect(cellBackgroundRect, cellBackgroundColor->
+                            shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0.875));
+                    else
+                        aGc.fill_rect(cellBackgroundRect, *cellBackgroundColor);
                 }
-                else
+                if (model().is_tree() && model().has_children(presentation_model().to_item_model_index(itemIndex)))
                 {
-                    scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
-                    aGc.fill_rect(cellBackgroundRect, *cellBackgroundColor);
+                    auto const expanderRect = cell_rect(itemIndex, aGc, cell_part::TreeExpander);
+                    scoped_scissor scissor(aGc, clipRect.intersection(expanderRect));
+                    thread_local struct : i_skinnable_item
+                    {
+                        const item_view* widget;
+                        rect treeExpanderRect;
+                        bool is_widget() const override
+                        {
+                            return true;
+                        }
+                        const i_widget& as_widget() const override
+                        {
+                            return *widget;
+                        }
+                        rect element_rect(skin_element aElement) const override
+                        {
+                            switch (aElement)
+                            {
+                            case skin_element::ClickableArea:
+                            case skin_element::TreeExpander:
+                                return treeExpanderRect;
+                            default:
+                                return widget->element_rect(aElement);
+                            }
+                        }
+                    } skinnableItem = {};
+                    skinnableItem.widget = this;
+                    skinnableItem.treeExpanderRect = expanderRect;
+                    service<i_skin_manager>().active_skin().draw_tree_expander(aGc, skinnableItem, presentation_model().cell_meta(itemIndex).expanded);
                 }
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellRect));
-                    if (model().is_tree() && model().has_children(presentation_model().to_item_model_index(itemIndex)))
-                    {
-                        thread_local struct : i_skinnable_item
-                        {
-                            const item_view* widget;
-                            rect treeExpanderRect;
-
-                            bool is_widget() const override
-                            {
-                                return true;
-                            }
-
-                            const i_widget& as_widget() const override
-                            {
-                                return *widget;
-                            }
-
-                            rect element_rect(skin_element aElement) const override
-                            {
-                                switch (aElement)
-                                {
-                                case skin_element::ClickableArea:
-                                case skin_element::TreeExpander:
-                                    return treeExpanderRect;
-                                default:
-                                    return widget->element_rect(aElement);
-                                }
-                            }
-                        } skinnableItem = {};
-                        skinnableItem.widget = this;
-                        skinnableItem.treeExpanderRect = cell_rect(itemIndex, aGc, cell_part::TreeExpander);
-                        service<i_skin_manager>().active_skin().draw_tree_expander(aGc, skinnableItem, presentation_model().cell_meta(itemIndex).expanded);
-                    }
                     if (presentation_model().cell_checkable(itemIndex))
                     {
                         thread_local struct : i_skinnable_item
@@ -464,12 +460,12 @@ namespace neogfx
             auto item = item_at(aPosition);
             if (item != std::nullopt)
             {
-                bool actioned = false;
                 if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
                 {
                     presentation_model().toggle_expanded(*item);
-                    actioned = true;
+                    return;
                 }
+                bool actioned = false;
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                 {
                     iClickedCheckBox = item;
@@ -1092,6 +1088,7 @@ namespace neogfx
 
     rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart) const
     {
+        graphics_context gc{ *this, graphics_context::type::Unattached };
         switch(aPart)
         {
         case cell_part::Background:
@@ -1100,7 +1097,9 @@ namespace neogfx
                 size const cellSpacing = presentation_model().cell_spacing(*this);
                 coordinate y = presentation_model().item_position(aItemIndex, *this);
                 dimension const h = presentation_model().item_height(aItemIndex, *this);
-                coordinate x = 0.0;
+                coordinate x = presentation_model().indent(aItemIndex, gc);
+                if (aPart == cell_part::Background && aItemIndex.column() == 0)
+                    x = 0.0;
                 for (uint32_t col = 0; col < presentation_model().columns(); ++col)
                 {
                     bool const lastColumn = (col == presentation_model().columns() - 1);
@@ -1137,10 +1136,7 @@ namespace neogfx
                 throw i_item_presentation_model::bad_index();
             }
         default:
-            {
-                graphics_context gc{ *this, graphics_context::type::Unattached };
-                return cell_rect(aItemIndex, gc, aPart);
-            }
+            return cell_rect(aItemIndex, gc, aPart);
         }
     }
         
@@ -1150,7 +1146,11 @@ namespace neogfx
         {
         case cell_part::Background:
         case cell_part::Foreground:
-            return cell_rect(aItemIndex, aPart);
+            {
+                auto cellRect = cell_rect(aItemIndex, aPart);
+                return cellRect;
+            }
+            break;
         case cell_part::CheckBox:
             {
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
@@ -1159,7 +1159,6 @@ namespace neogfx
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
                 cellRect.extents() = *cellCheckBoxSize;
-                cellRect.x += presentation_model().indent(aItemIndex, aGc);
                 return cellRect;
             }
             break;
@@ -1171,7 +1170,7 @@ namespace neogfx
                 auto cellRect = cell_rect(aItemIndex);
                 cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellTreeExpanderSize->cy) / 2.0) });
                 cellRect.extents() = *cellTreeExpanderSize;
-                cellRect.x += presentation_model().indent(aItemIndex, aGc) - presentation_model().cell_tree_expander_size(aItemIndex, aGc)->cx;
+                cellRect.x -= presentation_model().cell_tree_expander_size(aItemIndex, aGc)->cx;
                 return cellRect;
             }
             break;
@@ -1186,7 +1185,6 @@ namespace neogfx
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
                     cellRect.x += (cellCheckBoxSize->cx + presentation_model().cell_spacing(aGc).cx);
-                cellRect.x += presentation_model().indent(aItemIndex, aGc);
                 return cellRect;
             }
             break;
@@ -1204,7 +1202,6 @@ namespace neogfx
                 auto const textHeight = std::max(glyphText.extents().cy,
                     (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());
                 cellRect.indent(point{ 0.0, (cellRect.height() - textHeight) / 2.0 });
-                cellRect.x += presentation_model().indent(aItemIndex, aGc);
                 return cellRect;
             }
         }
