@@ -371,21 +371,21 @@ namespace neogfx
         case ChannelRed:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_red(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0));
+                rgb.set_red(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0) / 255.0);
                 return rgb;
             }
             break;
         case ChannelGreen:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_green(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0));
+                rgb.set_green(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0) / 255.0);
                 return rgb;
             }
             break;
         case ChannelBlue:
             {
                 auto rgb = iOwner.selected_color();
-                rgb.set_blue(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0));
+                rgb.set_blue(to_sRGB(*iOwner.iColorSpace, static_cast<color::component>(255.0 - pos.y), 255.0) / 255.0);
                 return rgb;
             }
             break;
