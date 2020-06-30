@@ -501,7 +501,7 @@ namespace neogfx
     rect gradient_widget::contents_rect() const
     {
         rect r = client_rect(false);
-        r.move(point{ std::floor(dip(STOP_WIDTH) / 2), dip(STOP_HEIGHT) });
+        r.translate(point{ std::floor(dip(STOP_WIDTH) / 2), dip(STOP_HEIGHT) });
         r.cx = r.width() - dip(STOP_WIDTH);
         r.cy = dip(BAR_HEIGHT);
         r.deflate(size{ dip(BORDER_THICKNESS) });

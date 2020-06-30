@@ -36,7 +36,7 @@ namespace neogfx
     public:
         virtual ~i_setting_widget_factory() = default;
     public:
-        virtual std::shared_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout) const = 0;
+        virtual std::shared_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink) const = 0;
     };
 
     class settings_dialog : public dialog
@@ -55,5 +55,6 @@ namespace neogfx
         tree_view iTree;
         framed_widget<> iDetails;
         vertical_layout iDetailLayout;
+        texture iBackground;
     };
 }

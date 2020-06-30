@@ -38,11 +38,14 @@ namespace neogfx
         color_widget(i_layout& aLayout, const neogfx::color& aColor = neogfx::color{});
     public:
         neogfx::color const& color() const;
+        void set_color(neogfx::color const& aColor);
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
     public:
         void paint(i_graphics_context& aGc) const override;
+    private:
+        void init();
     private:
         neogfx::color iColor;
    };

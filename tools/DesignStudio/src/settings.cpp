@@ -53,7 +53,7 @@ namespace neogfx::DesignStudio
         auto themeChanged = [&](neolib::i_setting const& aSetting)
         {
             if (&aSetting == &themeSetting)
-                service<i_app>().current_style().palette().set_color(color_role::Theme, aSetting.value<color>());
+                service<i_app>().current_style().palette().set_color(color_role::Theme, aSetting.modified() ? aSetting.new_value<color>() : aSetting.value<color>());
         };
         SettingChanging(themeChanged);
         SettingChanged(themeChanged);

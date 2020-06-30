@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/widget/color_widget.hpp>
 
 namespace neogfx
@@ -25,16 +26,19 @@ namespace neogfx
     color_widget::color_widget(const neogfx::color& aColor) : 
         base_type{}, iColor{ aColor }
     {
+        init();
     }
 
     color_widget::color_widget(i_widget& aParent, const neogfx::color& aColor) :
         base_type{ aParent }, iColor{ aColor }
     {
+        init();
     }
 
     color_widget::color_widget(i_layout& aLayout, const neogfx::color& aColor) :
         base_type{ aLayout }, iColor{ aColor }
     {
+        init();
     }
 
     color const& color_widget::color() const
@@ -42,22 +46,49 @@ namespace neogfx
         return iColor;
     }
 
+    void color_widget::set_color(neogfx::color const& aColor)
+    {
+        if (iColor != aColor)
+        {
+            iColor = aColor;
+            ColorChanged.trigger();
+            update();
+        }
+    }
+
     size_policy color_widget::size_policy() const
     {
         if (has_size_policy())
             return base_type::size_policy();
-        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
+        return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum };
     }
 
     size color_widget::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
-        return base_type::minimum_size(aAvailableSpace) + size{ 16.0_dip, 16.0_dip };
+        return size{ 24.0_dip, 24.0_dip };
     }
 
     void color_widget::paint(i_graphics_context& aGc) const
     {
         aGc.fill_rect(client_rect(), iColor);
+    }
+
+    void color_widget::init()
+    {
+        Clicked([&]()
+        {
+            neogfx::color oldColor = color();
+            color_dialog cd{ *this, iColor };
+            cd.SelectionChanged([&]()
+            {
+                set_color(cd.selected_color());
+            });
+            if (cd.exec() == dialog_result::Accepted)
+                set_color(cd.selected_color());
+            else
+                set_color(oldColor);
+        });
     }
 }

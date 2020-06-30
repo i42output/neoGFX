@@ -770,7 +770,8 @@ namespace neogfx
             else
                 return point_type{ left() + static_cast<coordinate_type>(width()) / two, bottom() + static_cast<coordinate_type>(height()) / two };
         }
-        self_type& move(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
+        self_type& translate(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
+        self_type translated(const point_type& aOffset) const { self_type result = *this; result.x += aOffset.x; result.y += aOffset.y; return result; }
         self_type& indent(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; cx -= aOffset.x; cy -= aOffset.y; return *this; }
         self_type& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * two; cy += delta.dy * two; return *this; }
         self_type& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }

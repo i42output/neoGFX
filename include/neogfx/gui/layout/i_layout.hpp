@@ -222,6 +222,12 @@ namespace neogfx
         // helpers
     public:
         template <typename ItemType>
+        ItemType& add()
+        {
+            auto item = std::make_shared<ItemType>();
+            return static_cast<ItemType&>(add(item));
+        }
+        template <typename ItemType>
         ItemType& add(ItemType&& aItem)
         {
             return static_cast<ItemType&>(add(static_cast<i_layout_item&>(aItem)));

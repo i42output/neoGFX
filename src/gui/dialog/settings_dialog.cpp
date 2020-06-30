@@ -24,22 +24,25 @@
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
+#include <neogfx/gui/widget/color_widget.hpp>
 
 namespace neogfx
 {
     class default_setting_widget_factory : public reference_counted<i_setting_widget_factory>
     {
     public:
+        typedef i_setting_widget_factory abstract_type;
+    public:
         default_setting_widget_factory(ref_ptr<i_setting_widget_factory> aUserFactory) :
             iUserFactory{ aUserFactory }
         {
         }
     public:
-        std::shared_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout) const
+        std::shared_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink) const
         {
             std::shared_ptr<i_widget> result;
             if (iUserFactory)
-                result = iUserFactory->create_widget(aSetting, aLayout);
+                result = iUserFactory->create_widget(aSetting, aLayout, aSink);
             if (!result)
             {
                 switch (aSetting.value().type())
@@ -55,6 +58,14 @@ namespace neogfx
                         settingWidget->Unchecked([&]()
                         {
                             aSetting.set_value(false);
+                        });
+                        aSink += aSetting.changing([&, settingWidget]()
+                        {
+                            settingWidget->set_checked(aSetting.new_value<bool>());
+                        });
+                        aSink += aSetting.changed([&, settingWidget]()
+                        {
+                            settingWidget->set_checked(aSetting.value<bool>());
                         });
                         result = settingWidget;
                     }
@@ -77,7 +88,26 @@ namespace neogfx
                     // todo
                     break;
                 case neolib::setting_type::Enum:
+                    break;
                 case neolib::setting_type::Custom:
+                    if (aSetting.value().type_name() == "neogfx::color")
+                    {
+                        auto settingWidget = std::make_shared<color_widget>(aLayout, aSetting.value().get<color>());
+                        settingWidget->ColorChanged([&, settingWidget]()
+                        {
+                            aSetting.set_value(settingWidget->color());
+                        });
+                        aSink += aSetting.changing([&, settingWidget]()
+                        {
+                            settingWidget->set_color(aSetting.new_value<color>());
+                        });
+                        aSink += aSetting.changed([&, settingWidget]()
+                        {
+                            settingWidget->set_color(aSetting.value<color>());
+                        });
+                        result = settingWidget;
+                    }
+                    break;
                 default:
                     break;
                 }
@@ -93,10 +123,12 @@ namespace neogfx
     settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory) :
         dialog{ "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
+        iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
-        iDetailLayout{ iDetails }
+        iDetailLayout{ iDetails },
+        iBackground{ image{ ":/neogfx/resources/images/settings.png" } }
     {
         init();
     }
@@ -104,10 +136,12 @@ namespace neogfx
     settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory) :
         dialog{ aParent, "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
+        iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
-        iDetailLayout{ iDetails }
+        iDetailLayout{ iDetails },
+        iBackground{ image{ ":/neogfx/resources/images/settings.png" } }
     {
         init();
     }
@@ -187,6 +221,7 @@ namespace neogfx
         iTree.set_model(treeModel);
         iTree.set_presentation_model(treePresentationModel);
 
+        std::map<std::string, std::shared_ptr<setting_group_widget>> groupWidgets;
         for (auto const& category : iSettings.all_categories())
         {
             auto c = treeModel->insert_item(treeModel->send(), std::make_shared<setting_group_widget_list::element_type>(), category.second().to_std_string());
@@ -199,8 +234,25 @@ namespace neogfx
                     iDetailLayout.add(settingGroupWidget);
                     treeModel->item(c)->push_back(settingGroupWidget);
                     treeModel->item(g)->push_back(settingGroupWidget);
+                    groupWidgets[group.first().to_std_string()] = settingGroupWidget;
                 }
         }
+
+        for (auto const& setting : iSettings.all_settings())
+        {
+            thread_local std::vector<std::string> keyBits;
+            keyBits.clear();
+            keyBits = neolib::tokens(setting.first().to_std_string(), "."s);
+            keyBits.resize(2);
+            auto groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1]);
+            if (groupWidget == groupWidgets.end())
+                continue;
+            auto& itemLayout = groupWidget->second->layout().add<horizontal_layout>();
+            itemLayout.set_padding({});
+            itemLayout.set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
+            iWidgetFactory->create_widget(*setting.second(), itemLayout, iSink);
+        }
+
         iDetailLayout.add_spacer();
 
         treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
@@ -243,7 +295,12 @@ namespace neogfx
         };
         update_buttons();
 
-        iSink += iSettings.setting_changed([&](const neolib::i_setting&)
+        iSink += iSettings.setting_changing([update_buttons](const neolib::i_setting&)
+        {
+            update_buttons();
+        });
+
+        iSink += iSettings.setting_changed([update_buttons](const neolib::i_setting&)
         {
             update_buttons();
         });
@@ -278,6 +335,12 @@ namespace neogfx
 
         iTree.set_frame_style(frame_style::NoFrame);
         iDetails.set_frame_color();
+
+        iDetails.Painting([&](i_graphics_context& aGc)
+        {
+            rect const candyRect{ iDetails.client_rect().bottom_right() - size{ 128.0_dip, 128.0_dip }, size{ 256.0_dip, 256.0_dip } };
+            aGc.draw_texture(candyRect, iBackground, color::White.with_alpha(0.25));
+        });
 
         auto update_colors = [&](style_aspect aspect)
         {

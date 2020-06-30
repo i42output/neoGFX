@@ -4,6 +4,7 @@
     resource: {
         file: resources/icons/neoGFX.png
         file: resources/images/game_controller.png
+        file: resources/images/settings.png
         file: resources/language-subtag-registry.txt
         file: resources/gamecontrollerdb.txt
     }
