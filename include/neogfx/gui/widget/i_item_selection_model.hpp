@@ -243,6 +243,12 @@ namespace neogfx
         virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
         // helpers
     public:
+        optional_item_presentation_model_index current_index_maybe() const
+        {
+            if (has_current_index())
+                return current_index();
+            return {};
+        }
         void select(const item_presentation_model_index& aIndex)
         {
             switch (mode())

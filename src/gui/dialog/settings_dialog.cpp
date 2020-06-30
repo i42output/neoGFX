@@ -116,7 +116,9 @@ namespace neogfx
     {
     }
 
-    class settings_tree_presentation_model : public item_tree_presentation_model
+    typedef std::shared_ptr<std::vector<std::shared_ptr<i_widget>>> setting_group_widget_list;
+    typedef basic_item_tree_model<setting_group_widget_list> settings_tree_item_model;
+    class settings_tree_presentation_model : public basic_item_presentation_model<settings_tree_item_model>
     {
     public:
         settings_tree_presentation_model() : 
@@ -180,28 +182,41 @@ namespace neogfx
         iDetails.set_weight(size{ 2.0, 1.0 });
         iDetailLayout.set_size_policy(size_constraint::Expanding);
 
-        auto treeModel = std::make_shared<item_tree_model>();
+        auto treeModel = std::make_shared<settings_tree_item_model>();
         auto treePresentationModel = std::make_shared<settings_tree_presentation_model>();
         iTree.set_model(treeModel);
         iTree.set_presentation_model(treePresentationModel);
 
         for (auto const& category : iSettings.all_categories())
         {
-            auto c = treeModel->insert_item(treeModel->send(), category.second().to_std_string());
-            auto g = iSettings.all_groups().find(category.first());
-            if (g != iSettings.all_groups().end())
-                for (auto const& group : g->second())
+            auto c = treeModel->insert_item(treeModel->send(), std::make_shared<setting_group_widget_list::element_type>(), category.second().to_std_string());
+            auto existingGroups = iSettings.all_groups().find(category.first());
+            if (existingGroups != iSettings.all_groups().end())
+                for (auto const& group : existingGroups->second())
                 {
-                    treeModel->append_item(c, group.second().to_std_string());
+                    auto g = treeModel->append_item(c, std::make_shared<setting_group_widget_list::element_type>(), group.second().to_std_string());
                     auto settingGroupWidget = std::make_shared<setting_group_widget>(group.second().to_std_string());
                     iDetailLayout.add(settingGroupWidget);
+                    treeModel->item(c)->push_back(settingGroupWidget);
+                    treeModel->item(g)->push_back(settingGroupWidget);
                 }
         }
+        iDetailLayout.add_spacer();
+
         treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
         treePresentationModel->set_column_read_only(0);
         iTree.selection_model().set_mode(item_selection_mode::SingleSelection);
-
-        iDetailLayout.add_spacer();
+        auto update_details = [&, treeModel](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /* aPreviousIndex */)
+        {
+            for (auto c = treeModel->sbegin(); c != treeModel->send(); ++c)
+                for (auto& w : *treeModel->item(c))
+                    aCurrentIndex ? w->hide() : w->show();
+            if (aCurrentIndex)
+                for (auto& w : *treeModel->item(iTree.presentation_model().to_item_model_index(*aCurrentIndex)))
+                    w->show();
+        };
+        iTree.selection_model().current_index_changed(update_details);
+        update_details(iTree.selection_model().current_index_maybe(), {});
 
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);

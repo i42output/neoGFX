@@ -41,5 +41,14 @@ namespace neogfx
     public:
         virtual value_type& item(const item_model_index& aIndex) = 0;
         virtual const value_type& item(const item_model_index& aIndex) const = 0;
+    public:
+        value_type& item(const_iterator aItem)
+        {
+            return item(iterator_to_index(aItem));
+        }
+        const value_type& item(const_iterator aItem) const
+        {
+            return item(iterator_to_index(aItem));
+        }
     };
 }
