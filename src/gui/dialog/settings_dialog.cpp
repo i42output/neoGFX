@@ -185,14 +185,14 @@ namespace neogfx
     public:
         setting_group_widget(const std::string& aTitle) :
             iLayout{ *this },
-            iTitle{ iLayout, aTitle }
+            iTitle{ iLayout, translate(aTitle) }
         {
             set_padding({});
             set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
             iLayout.set_padding({});
             auto reset_font = [&]()
             {
-                iTitle.set_font(service<i_app>().current_style().font().with_size(10).with_style(font_style::Underline));
+                iTitle.text_widget().set_font(service<i_app>().current_style().font().with_size(10).with_style(font_style::Underline));
             };
             iSink += service<i_app>().current_style_changed([this, reset_font](style_aspect aAspect)
             {
@@ -203,7 +203,7 @@ namespace neogfx
         }
     public:
         vertical_layout iLayout;
-        text_widget iTitle;
+        label iTitle;
         sink iSink;
     };
 
@@ -240,6 +240,8 @@ namespace neogfx
 
         for (auto const& setting : iSettings.all_settings())
         {
+            if (setting.second()->format().empty())
+                continue;
             thread_local std::vector<std::string> keyBits;
             keyBits.clear();
             keyBits = neolib::tokens(setting.first().to_std_string(), "."s);
@@ -247,10 +249,62 @@ namespace neogfx
             auto groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1]);
             if (groupWidget == groupWidgets.end())
                 continue;
-            auto& itemLayout = groupWidget->second->layout().add<horizontal_layout>();
-            itemLayout.set_padding({});
-            itemLayout.set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
-            iWidgetFactory->create_widget(*setting.second(), itemLayout, iSink);
+            i_layout* itemLayout = nullptr;
+            auto new_layout = [&]()
+            {
+                itemLayout = &groupWidget->second->layout().add<horizontal_layout>();
+                itemLayout->set_padding({});
+                itemLayout->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
+            };
+            
+            new_layout();
+            
+            std::string nextLabel;
+            std::optional<std::string> nextArgument;
+
+            auto emit_label = [&]()
+            {
+                if (!nextLabel.empty())
+                {
+                    itemLayout->add(std::make_shared<label>(translate(nextLabel)));
+                    nextLabel.clear();
+                }
+            };
+
+            for (auto ch : setting.second()->format().to_std_string())
+            {
+                switch (ch)
+                {
+                case '%':
+                    if (!nextArgument)
+                        nextArgument.emplace();
+                    else if (nextArgument->empty())
+                    {
+                        nextLabel += ch;
+                        nextArgument = {};
+                    }
+                    else if (*nextArgument == "?")
+                    {
+                        iWidgetFactory->create_widget(*setting.second(), *itemLayout, iSink);
+                        nextArgument = {};
+                    }
+                    break;
+                case '\n':
+                    emit_label();
+                    new_layout();
+                    break;
+                default:
+                    if (nextArgument)
+                    {
+                        emit_label();
+                        *nextArgument += ch;
+                    }
+                    else
+                        nextLabel += ch;
+                    break;
+                }
+            }
+            emit_label();
         }
 
         iDetailLayout.add_spacer();
