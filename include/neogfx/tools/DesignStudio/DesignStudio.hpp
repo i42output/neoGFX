@@ -27,6 +27,7 @@ using namespace ng::unit_literals;
 
 namespace neogfx::DesignStudio
 {
+    using namespace std::string_literals;
 }
 
 namespace ds = neogfx::DesignStudio;

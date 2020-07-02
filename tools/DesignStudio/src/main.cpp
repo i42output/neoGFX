@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <fstream>
+#include <neolib/core/string.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
@@ -40,6 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/settings.hpp>
 #include "new_project_dialog.hpp"
 #include "DesignStudio.ui.hpp"
+
+using namespace neolib::string_literals;
 
 int main(int argc, char* argv[])
 {
@@ -79,6 +82,16 @@ int main(int argc, char* argv[])
         ng::texture backgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } };
 
         ds::settings settings;
+
+        auto& themeColorSetting = settings.setting("environment.general.theme"_s);
+        auto themeColorChanged = [&]()
+        {
+            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColorSetting.modified() ? themeColorSetting.new_value<ng::color>() : themeColorSetting.value<ng::color>());
+        };
+        themeColorSetting.changing(themeColorChanged);
+        themeColorSetting.changed(themeColorChanged);
+        themeColorChanged();
+
         ds::project_manager pm;
 
         workspace.view_stack().Painting([&](ng::i_graphics_context& aGc)

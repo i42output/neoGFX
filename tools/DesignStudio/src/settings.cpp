@@ -25,7 +25,7 @@
 
 namespace neogfx::DesignStudio
 {
-    settings::settings() : 
+    settings::settings() :
         base_type{}
     {
         register_category("environment"_s, "Environment"_t);
@@ -48,18 +48,14 @@ namespace neogfx::DesignStudio
         register_category("source_control"_s, "Source Control"_t);
         register_category("team"_s, "Team"_t);
         register_category("plugins"_s, "Plugins"_t);
-        
-        auto const& themeSetting = register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Color Theme: %?%"_t);
-        auto themeChanged = [&](neolib::i_setting const& aSetting)
-        {
-            if (&aSetting == &themeSetting)
-                service<i_app>().current_style().palette().set_color(color_role::Theme, aSetting.modified() ? aSetting.new_value<color>() : aSetting.value<color>());
-        };
-        SettingChanging(themeChanged);
-        SettingChanged(themeChanged);
-        themeChanged(themeSetting);
+
+        register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme Color: %?%"_t);
+        register_setting<gradient>("environment.workspace.grid_color", gradient{}, "Grid Color: %?%"_t);
 
         if (modified())
+        {
+            apply_changes();
             save();
+        }
     }
 }

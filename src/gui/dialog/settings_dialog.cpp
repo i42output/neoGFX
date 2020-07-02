@@ -25,6 +25,7 @@
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
 #include <neogfx/gui/widget/color_widget.hpp>
+#include <neogfx/gui/widget/gradient_widget.hpp>
 
 namespace neogfx
 {
@@ -104,6 +105,23 @@ namespace neogfx
                         aSink += aSetting.changed([&, settingWidget]()
                         {
                             settingWidget->set_color(aSetting.value<color>());
+                        });
+                        result = settingWidget;
+                    }
+                    else if (aSetting.value().type_name() == "neogfx::gradient")
+                    {
+                        auto settingWidget = std::make_shared<gradient_widget>(aLayout, aSetting.value().get<gradient>());
+                        settingWidget->GradientChanged([&, settingWidget]()
+                        {
+                            aSetting.set_value(settingWidget->gradient());
+                        });
+                        aSink += aSetting.changing([&, settingWidget]()
+                        {
+                            settingWidget->set_gradient(aSetting.new_value<gradient>());
+                        });
+                        aSink += aSetting.changed([&, settingWidget]()
+                        {
+                            settingWidget->set_gradient(aSetting.value<gradient>());
                         });
                         result = settingWidget;
                     }
@@ -212,6 +230,7 @@ namespace neogfx
         set_minimum_size(size{ 672_dip, 446_dip });
         iLayout.set_size_policy(size_constraint::Expanding);
         iTree.set_weight(size{ 1.0, 1.0 });
+        iDetails.set_minimum_size(size{});
         iDetails.set_size_policy(size_constraint::Expanding);
         iDetails.set_weight(size{ 2.0, 1.0 });
         iDetailLayout.set_size_policy(size_constraint::Expanding);

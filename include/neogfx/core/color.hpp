@@ -1214,5 +1214,6 @@ namespace neogfx
 }
 
 define_setting_type(neogfx::color)
+define_setting_type(neogfx::gradient)
 
 #include "color.inl"

@@ -260,7 +260,6 @@ namespace neogfx
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const gradient& aGradient)
     {
         // todo
-        throw std::logic_error("not yet implemented");
         return aStream;
     }
 
@@ -268,7 +267,6 @@ namespace neogfx
     inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, gradient& aGradient)
     {
         // todo
-        throw std::logic_error("not yet implemented");
         return aStream;
     }
 }
