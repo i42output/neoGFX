@@ -378,6 +378,16 @@ namespace neogfx
         return from_device_units(iOrigin);
     }
 
+    void graphics_context::clear_gradient()
+    {
+        native_context().enqueue(graphics_operation::clear_gradient{});
+    }
+
+    void graphics_context::set_gradient(const gradient& aGradient, const rect& aBoundingBox)
+    {
+        native_context().enqueue(graphics_operation::set_gradient{ aGradient, to_device_units(aBoundingBox) + iOrigin });
+    }
+
     void graphics_context::set_pixel(const point& aPoint, const color& aColor) const
     {
         native_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint) + iOrigin, aColor });

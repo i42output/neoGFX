@@ -50,7 +50,7 @@ namespace neogfx::DesignStudio
         register_category("plugins"_s, "Plugins"_t);
 
         register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme Color: %?%"_t);
-        register_setting<gradient>("environment.workspace.grid_color", gradient{}, "Grid Color: %?%"_t);
+        register_setting<gradient>("environment.workspace.grid_color", gradient{ service<i_app>().current_style().palette().color(color_role::Theme).with_alpha(0.25) }, { true }, "Grid Color: %?%"_t);
 
         if (modified())
         {

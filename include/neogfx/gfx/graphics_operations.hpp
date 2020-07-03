@@ -117,6 +117,16 @@ namespace neogfx
         {
         };
 
+        struct clear_gradient
+        {
+        };
+
+        struct set_gradient
+        {
+            gradient gradient;
+            rect boundingBox;
+        };
+
         struct set_pixel
         {
             point point;
@@ -262,6 +272,8 @@ namespace neogfx
             clear,
             clear_depth_buffer,
             clear_stencil_buffer,
+            clear_gradient,
+            set_gradient,
             set_pixel,
             draw_pixel,
             draw_line,
@@ -303,6 +315,8 @@ namespace neogfx
             Clear,
             ClearDepthBuffer,
             ClearStencilBuffer,
+            ClearGradient,
+            SetGradient,
             SetPixel,
             DrawPixel,
             DrawLine,

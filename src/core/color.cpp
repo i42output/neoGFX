@@ -206,8 +206,8 @@ namespace neogfx
 
     gradient::gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection) :
         iUseCache{ true },
-        iColorStops{ {0.0, aColor1}, {1.0, aColor2} },
-        iAlphaStops{ {0.0, 255_u8}, {1.0, 255_u8} },
+        iColorStops{ {0.0, aColor1.with_alpha(255_u8)}, {1.0, aColor2.with_alpha(255_u8)} },
+        iAlphaStops{ {0.0, aColor1.alpha()}, {1.0, aColor2.alpha()} },
         iDirection{ aDirection },
         iOrientation{ corner::TopLeft },
         iShape{ gradient_shape::Ellipse },
@@ -233,15 +233,18 @@ namespace neogfx
         gradient{}
     {
         set_direction(aDirection);
-        color_stop_list temp;
+        color_stop_list tempColors;
+        alpha_stop_list tempAlphas;
         double pos = 0.0;
         for (auto const& c : aColors)
         {
-            temp.push_back(color_stop{ pos, c });
+            tempColors.push_back(color_stop{ pos, c.with_alpha(255_u8) });
+            tempAlphas.push_back(alpha_stop{ pos, c.alpha() });
             if (aColors.size() > 1)
                 pos += (1.0 / (aColors.size() - 1));
         }
-        color_stops() = temp;
+        color_stops() = tempColors;
+        alpha_stops() = tempAlphas;
         fix();
     }
 

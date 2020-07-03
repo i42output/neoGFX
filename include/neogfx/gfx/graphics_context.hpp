@@ -103,6 +103,8 @@ namespace neogfx
         void clear_stencil_buffer() const override;
         void blit(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect) const override;
         void blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, uint32_t aParameter1 = 5, double aParameter2 = 1.0) const override;
+        void clear_gradient() override;
+        void set_gradient(const gradient& aGradient, const rect& aBoundingBox) override;
         void set_pixel(const point& aPoint, const color& aColor) const override;
         void draw_pixel(const point& aPoint, const color& aColor) const override;
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const override;
