@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/string_utils.hpp>
 #include <neogfx/core/color.hpp>
 
 namespace neogfx
@@ -251,22 +252,131 @@ namespace neogfx
     template <typename Elem, typename Traits, color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor)
     {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
         char ignore;
-        aStream >> ignore >> aColor[0] >> ignore >> aColor[1] >> ignore >> aColor[2] >> ignore >> aColor[3] >> ignore;
+        aStream >> ignore >> aColor[0] >> aColor[1] >> aColor[2] >> aColor[3] >> ignore;
+        aStream.imbue(previousImbued);
         return aStream;
     }
 
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const gradient& aGradient)
     {
-        // todo
+        aStream << std::setprecision(4) << "[";
+        aStream << "(";
+        for (auto const& stop : aGradient.color_stops())
+            aStream << (&stop != &aGradient.color_stops()[0] ? ", " : "") << stop.first << ", " << stop.second;
+        aStream << ")";
+        aStream << ", (";
+        for (auto const& stop : aGradient.alpha_stops())
+            aStream << (&stop != &aGradient.alpha_stops()[0] ? ", " : "") << stop.first << ", " << stop.second / std::numeric_limits<sRGB_color::view_component>::max();
+        aStream << ")";
+        aStream << ", " << enum_to_string(aGradient.direction());
+        if (std::holds_alternative<scalar>(aGradient.orientation()))
+            aStream << ", " << std::get<scalar>(aGradient.orientation());
+        else
+            aStream << ", " << enum_to_string(std::get<corner>(aGradient.orientation()));
+        aStream << ", " << enum_to_string(aGradient.shape());
+        aStream << ", " << enum_to_string(aGradient.size());
+        aStream << ", (";
+        if (aGradient.exponents())
+            aStream << aGradient.exponents()->x << ", " << aGradient.exponents()->y;
+        aStream << ")";
+        aStream << ", (";
+        if (aGradient.center())
+            aStream << aGradient.center()->x << ", " << aGradient.center()->y;
+        aStream << ")";
+        aStream << ", " << aGradient.smoothness();
+        aStream << "]";
         return aStream;
     }
 
     template <typename Elem, typename Traits>
     inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, gradient& aGradient)
     {
-        // todo
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
+        char ignore;
+        std::string tempString;
+        scalar tempScalar;
+        aStream >> ignore >> ignore;
+        gradient::color_stop_list colorStops;
+        while (aStream)
+        {
+            gradient::color_stop colorStop;
+            aStream >> colorStop.first >> colorStop.second;
+            if (aStream)
+                colorStops.push_back(colorStop);
+        }
+        aStream.clear();
+        aStream >> ignore >> ignore;
+        gradient::alpha_stop_list alphaStops;
+        while (aStream)
+        {
+            gradient::alpha_stop alphaStop;
+            aStream >> alphaStop.first >> tempScalar;
+            alphaStop.second = static_cast<sRGB_color::view_component>(tempScalar * std::numeric_limits<sRGB_color::view_component>::max());
+            if (aStream)
+                alphaStops.push_back(alphaStop);
+        }
+        aStream.clear();
+        aStream >> ignore;
+        gradient_direction direction;
+        aStream >> tempString;
+        direction = neolib::string_to_enum<gradient_direction>(tempString);
+        gradient::orientation_type orientation;
+        if (aStream >> tempScalar)
+        {
+            orientation = tempScalar;
+        }
+        else
+        {
+            aStream.clear();
+            aStream >> tempString;
+            orientation = neolib::string_to_enum<corner>(tempString);
+        }
+        gradient_shape shape;
+        aStream >> tempString;
+        shape = neolib::string_to_enum<gradient_shape>(tempString);
+        gradient_size size;
+        aStream >> tempString;
+        size = neolib::string_to_enum<gradient_size>(tempString);
+        aStream >> ignore;
+        optional_vec2 exponents;
+        if (aStream >> tempScalar)
+        {
+            scalar y;
+            aStream >> y;
+            exponents.emplace(tempScalar, y);
+        }
+        else
+            aStream.clear();
+        aStream >> ignore;
+        aStream >> ignore;
+        optional_point center;
+        if (aStream >> tempScalar)
+        {
+            scalar y;
+            aStream >> y;
+            center.emplace(tempScalar, y);
+        }
+        else
+            aStream.clear();
+        aStream >> ignore;
+        scalar smoothness;
+        aStream >> smoothness;
+        aStream >> ignore;
+        aGradient = gradient{ colorStops, alphaStops, direction };
+        aGradient.set_orientation(orientation);
+        aGradient.set_shape(shape);
+        aGradient.set_size(size);
+        aGradient.set_exponents(exponents);
+        aGradient.set_center(center);
+        aGradient.set_smoothness(smoothness);
+        aStream.imbue(previousImbued);
         return aStream;
     }
 }

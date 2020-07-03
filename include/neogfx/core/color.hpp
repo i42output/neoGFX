@@ -1184,10 +1184,11 @@ namespace neogfx
         bool operator<(const gradient& aOther) const;
     public:
         static scalar normalized_position(scalar aPos, scalar aStart, scalar aEnd);
-    private:
+    public:
         const color_stop_list& color_stops() const;
-        color_stop_list& color_stops();
         const alpha_stop_list& alpha_stops() const;
+    private:
+        color_stop_list& color_stops();
         alpha_stop_list& alpha_stops();
         void fix();
         // attributes
