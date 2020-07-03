@@ -649,15 +649,16 @@ namespace neogfx
 
     bool gradient::operator==(const gradient& aOther) const
     {
-        return color_stops() == aOther.color_stops() &&
-            alpha_stops() == aOther.alpha_stops() &&
+        scalar const epsilon = 0.00001;
+        return nearly_equal(color_stops(), aOther.color_stops()) &&
+            nearly_equal(alpha_stops(), aOther.alpha_stops()) &&
             direction() == aOther.direction() &&
             orientation() == aOther.orientation() &&
             shape() == aOther.shape() &&
             size() == aOther.size() &&
-            exponents() == aOther.exponents() &&
-            center() == aOther.center() &&
-            smoothness() == aOther.smoothness();
+            nearly_equal(exponents(), aOther.exponents()) &&
+            nearly_equal(center(), aOther.center()) &&
+            nearly_equal(smoothness(), aOther.smoothness());
     }
 
     bool gradient::operator!=(const gradient& aOther) const

@@ -44,4 +44,6 @@ namespace neogfx
     using neolib::math::operators::operator>=;
     using neolib::math::operators::operator==;
     using neolib::math::operators::operator!=;
+
+    using neolib::math::nearly_equal;
 }

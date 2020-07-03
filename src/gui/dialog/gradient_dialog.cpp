@@ -465,7 +465,7 @@ namespace neogfx
             iGradientSelector.set_gradient(gradient().with_exponents(e));
         });
 
-        iCenterGroupBox.check_box().checked([this]() { iGradientSelector.set_gradient(gradient().with_center(point{})); });
+        iCenterGroupBox.check_box().Checked([this]() { iGradientSelector.set_gradient(gradient().center() ? gradient() : gradient().with_center(point{})); });
         iCenterGroupBox.check_box().Unchecked([this]() { iGradientSelector.set_gradient(gradient().with_center(optional_point{})); });
 
         iXCenterSpinBox.ValueChanged([this]() { auto c = gradient().center(); if (c == std::nullopt) c = point{}; c->x = iXCenterSpinBox.value(); iGradientSelector.set_gradient(gradient().with_center(c)); });
@@ -527,9 +527,8 @@ namespace neogfx
         iMExponentSpinBox.enable(specifyExponents);
         iNExponent.enable(specifyExponents);
         iNExponentSpinBox.enable(specifyExponents);        
-        auto center = gradient().center();
-        bool specifyCenter = (center != std::nullopt);
-        iCenterGroupBox.check_box().set_checked(specifyCenter);
+        auto const center = gradient().center();
+        bool const specifyCenter = (center != std::nullopt);
         if (specifyCenter)
         {
             iXCenterSpinBox.set_value(center->x, false);
@@ -540,6 +539,7 @@ namespace neogfx
             iXCenterSpinBox.text_box().set_text("");
             iYCenterSpinBox.text_box().set_text("");
         }
+        iCenterGroupBox.check_box().set_checked(specifyCenter);
         iXCenter.enable(specifyCenter);
         iXCenterSpinBox.enable(specifyCenter);
         iYCenter.enable(specifyCenter);

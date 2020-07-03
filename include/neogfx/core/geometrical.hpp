@@ -169,6 +169,12 @@ namespace neogfx
         return ret;
     }
 
+    template <typename CoordinateType>
+    inline bool nearly_equal(basic_delta<CoordinateType> const& lhs, basic_delta<CoordinateType> const& rhs, scalar epsilon = 0.00001)
+    {
+        return nearly_equal(lhs.dx, rhs.dx, epsilon) && nearly_equal(lhs.dy, rhs.dy, epsilon);
+    }
+
     struct bad_size : std::logic_error { bad_size() : std::logic_error{ "neogfx::bad_size" } {} };
 
     template <typename CoordinateType>
@@ -317,6 +323,12 @@ namespace neogfx
     inline bool operator>=(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
     {
         return std::tie(left.cx, left.cy) >= std::tie(right.cx, right.cy);
+    }
+
+    template <typename CoordinateType>
+    inline bool nearly_equal(basic_size<CoordinateType> const& lhs, basic_size<CoordinateType> const& rhs, scalar epsilon = 0.00001)
+    {
+        return nearly_equal(lhs.cx, rhs.cx, epsilon) && nearly_equal(lhs.cy, rhs.cy, epsilon);
     }
 
     template <typename CoordinateType>
@@ -558,6 +570,12 @@ namespace neogfx
     inline bool operator>=(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
     {
         return right < left || left == right;
+    }
+
+    template <typename CoordinateType>
+    inline bool nearly_equal(basic_point<CoordinateType> const& lhs, basic_point<CoordinateType> const& rhs, scalar epsilon = 0.00001)
+    {
+        return nearly_equal(lhs.x, rhs.x, epsilon) && nearly_equal(lhs.y, rhs.y, epsilon);
     }
 
     template <typename DimensionType>
