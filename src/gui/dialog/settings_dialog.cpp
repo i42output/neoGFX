@@ -29,6 +29,15 @@
 
 namespace neogfx
 {
+    template <typename Base>
+    struct setting_widget : public Base
+    {
+        bool updating = false;
+
+        typedef Base base_type;
+        using base_type::base_type;
+    };
+
     class default_setting_widget_factory : public reference_counted<i_setting_widget_factory>
     {
     public:
@@ -62,11 +71,11 @@ namespace neogfx
                         });
                         aSink += aSetting.changing([&, settingWidget]()
                         {
-                            settingWidget->set_checked(aSetting.new_value<bool>());
+                            settingWidget->set_checked(aSetting.value<bool>(true));
                         });
                         aSink += aSetting.changed([&, settingWidget]()
                         {
-                            settingWidget->set_checked(aSetting.value<bool>());
+                            settingWidget->set_checked(aSetting.value<bool>(true));
                         });
                         result = settingWidget;
                     }
@@ -93,35 +102,41 @@ namespace neogfx
                 case neolib::setting_type::Custom:
                     if (aSetting.value().type_name() == "neogfx::color")
                     {
-                        auto settingWidget = std::make_shared<color_widget>(aLayout, aSetting.value().get<color>());
+                        auto settingWidget = std::make_shared<setting_widget<color_widget>>(aLayout, aSetting.value().get<color>());
                         settingWidget->ColorChanged([&, settingWidget]()
                         {
-                            aSetting.set_value(settingWidget->color());
+                            if (!settingWidget->updating)
+                                aSetting.set_value(settingWidget->color());
                         });
                         aSink += aSetting.changing([&, settingWidget]()
                         {
-                            settingWidget->set_color(aSetting.new_value<color>());
+                            neolib::scoped_flag sf{ settingWidget->updating };
+                            settingWidget->set_color(aSetting.value<color>(true));
                         });
                         aSink += aSetting.changed([&, settingWidget]()
                         {
-                            settingWidget->set_color(aSetting.value<color>());
+                            neolib::scoped_flag sf{ settingWidget->updating };
+                            settingWidget->set_color(aSetting.value<color>(true));
                         });
                         result = settingWidget;
                     }
                     else if (aSetting.value().type_name() == "neogfx::gradient")
                     {
-                        auto settingWidget = std::make_shared<gradient_widget>(aLayout, aSetting.value().get<gradient>());
+                        auto settingWidget = std::make_shared<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<gradient>());
                         settingWidget->GradientChanged([&, settingWidget]()
                         {
-                            aSetting.set_value(settingWidget->gradient());
+                            if (!settingWidget->updating)
+                                aSetting.set_value(settingWidget->gradient());
                         });
                         aSink += aSetting.changing([&, settingWidget]()
                         {
-                            settingWidget->set_gradient(aSetting.new_value<gradient>());
+                            neolib::scoped_flag sf{ settingWidget->updating };
+                            settingWidget->set_gradient(aSetting.value<gradient>(true));
                         });
                         aSink += aSetting.changed([&, settingWidget]()
                         {
-                            settingWidget->set_gradient(aSetting.value<gradient>());
+                            neolib::scoped_flag sf{ settingWidget->updating };
+                            settingWidget->set_gradient(aSetting.value<gradient>(true));
                         });
                         result = settingWidget;
                     }
@@ -290,6 +305,31 @@ namespace neogfx
                 }
             };
 
+            auto emit_optional_check_box = [&]()
+            {
+                if (!nextLabel.empty())
+                {
+                    auto& optionalCheckBox = itemLayout->add(std::make_shared<check_box>(translate(nextLabel)));
+                    iSink += optionalCheckBox.Checked([&]()
+                    { 
+                        if (setting.second()->is_default(true))
+                            setting.second()->set_value(setting.second()->default_value()); 
+                    });
+                    iSink += optionalCheckBox.Unchecked([&]()
+                    { 
+                        setting.second()->clear(); 
+                    });
+                    auto update_check_box = [&]()
+                    {
+                        optionalCheckBox.set_checked(!setting.second()->is_default(true));
+                    };
+                    iSink += setting.second()->changing(update_check_box);
+                    iSink += setting.second()->changed(update_check_box);
+                    update_check_box();
+                    nextLabel.clear();
+                }
+            };
+
             for (auto ch : setting.second()->format().to_std_string())
             {
                 switch (ch)
@@ -315,7 +355,10 @@ namespace neogfx
                 default:
                     if (nextArgument)
                     {
-                        emit_label();
+                        if (setting.second()->constraints().optional())
+                            emit_optional_check_box();
+                        else
+                            emit_label();
                         *nextArgument += ch;
                     }
                     else

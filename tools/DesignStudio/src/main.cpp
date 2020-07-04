@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
         auto& themeColorSetting = settings.setting("environment.general.theme"_s);
         auto themeColorChanged = [&]()
         {
-            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColorSetting.modified() ? themeColorSetting.new_value<ng::color>() : themeColorSetting.value<ng::color>());
+            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColorSetting.value<ng::color>(true));
             workspaceGridColorSetting.set_default_value(ng::gradient{ ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Foreground).with_alpha(0.25) });
         };
         themeColorSetting.changing(themeColorChanged);

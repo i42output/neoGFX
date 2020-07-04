@@ -271,7 +271,7 @@ namespace neogfx
         aStream << ")";
         aStream << ", (";
         for (auto const& stop : aGradient.alpha_stops())
-            aStream << (&stop != &aGradient.alpha_stops()[0] ? ", " : "") << stop.first << ", " << stop.second / std::numeric_limits<sRGB_color::view_component>::max();
+            aStream << (&stop != &aGradient.alpha_stops()[0] ? ", " : "") << stop.first << ", " << stop.second * 1.0 / std::numeric_limits<sRGB_color::view_component>::max();
         aStream << ")";
         aStream << ", " << enum_to_string(aGradient.direction());
         if (std::holds_alternative<scalar>(aGradient.orientation()))
