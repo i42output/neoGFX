@@ -56,6 +56,8 @@ namespace neogfx
         neogfx::logical_coordinates logical_coordinates() const override;
         vec2 offset() const override;
         void set_offset(const optional_vec2& aOffset) override;
+        bool gradient_set() const override;
+        void apply_gradient(i_gradient_shader& aShader) override;
         // i_graphics_context
     public:
         ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const override;

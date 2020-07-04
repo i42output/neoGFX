@@ -29,7 +29,12 @@ namespace neogfx
         iCurrentProgram{ aShaderProgram },
         iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
     {
-        iCurrentProgram.activate(aContext);
+        iCurrentProgram.activate(iRenderingContext);
+        if (iCurrentProgram.type() == shader_program_type::Standard)
+        {
+            if (iRenderingContext.gradient_set())
+                iRenderingContext.apply_gradient(iCurrentProgram.as<i_standard_shader_program>().gradient_shader());
+        }
     }
 
     use_shader_program::~use_shader_program()
@@ -42,7 +47,8 @@ namespace neogfx
         }
         if (iCurrentProgram.type() == shader_program_type::Standard)
         {
-            iCurrentProgram.as<i_standard_shader_program>().gradient_shader().clear_gradient();
+            if (!iRenderingContext.gradient_set())
+                iCurrentProgram.as<i_standard_shader_program>().gradient_shader().clear_gradient();
             iCurrentProgram.as<i_standard_shader_program>().texture_shader().clear_texture();
             iCurrentProgram.as<i_standard_shader_program>().glyph_shader().clear_glyph();
             iCurrentProgram.as<i_standard_shader_program>().stipple_shader().clear_stipple();

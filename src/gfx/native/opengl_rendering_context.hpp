@@ -207,6 +207,8 @@ namespace neogfx
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates);
         vec2 offset() const override;
         void set_offset(const optional_vec2& aOffset) override;
+        bool gradient_set() const override;
+        void apply_gradient(i_gradient_shader& aShader) override;
         bool snap_to_pixel() const;
         void set_snap_to_pixel(bool aSnapToPixel);
         void scissor_on(const rect& aRect);
@@ -225,6 +227,8 @@ namespace neogfx
         void pop_logical_operation();
         void line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition);
         void line_stipple_off();
+        void set_gradient(const gradient& aGradient, const rect& aBoundingBox);
+        void clear_gradient();
         bool is_subpixel_rendering_on() const;
         void subpixel_rendering_on();
         void subpixel_rendering_off();
@@ -279,9 +283,10 @@ namespace neogfx
         std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
         sink iSink;
         scoped_render_target iSrt;
-        use_shader_program iUseDefaultShaderProgram;
         optional_vec2 iOffset;
         bool iSnapToPixel;
+        std::optional<std::pair<gradient, rect>> iGradient;
+        use_shader_program iUseDefaultShaderProgram; // must be last
     private:
         static standard_batching& as_vertex_provider()
         {

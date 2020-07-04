@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <vector>
+#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>

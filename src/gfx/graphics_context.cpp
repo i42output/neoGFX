@@ -358,6 +358,16 @@ namespace neogfx
         throw not_implemented();
     }
 
+    bool graphics_context::gradient_set() const
+    {
+        throw not_implemented();
+    }
+
+    void graphics_context::apply_gradient(i_gradient_shader& aShader)
+    {
+        throw not_implemented();
+    }
+
     void graphics_context::set_default_font(const font& aDefaultFont) const
     {
         iDefaultFont = aDefaultFont;

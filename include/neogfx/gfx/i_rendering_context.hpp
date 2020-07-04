@@ -29,6 +29,7 @@
 namespace neogfx
 {
     class i_rendering_engine;
+    class i_gradient_shader;
 
     class i_rendering_context
     {
@@ -50,6 +51,8 @@ namespace neogfx
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
         virtual vec2 offset() const = 0;
         virtual void set_offset(const optional_vec2& aOffset) = 0;
+        virtual bool gradient_set() const = 0;
+        virtual void apply_gradient(i_gradient_shader& aShader) = 0;
     public:
         virtual neogfx::subpixel_format subpixel_format() const = 0;
     };

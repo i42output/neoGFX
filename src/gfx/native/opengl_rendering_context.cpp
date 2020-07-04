@@ -232,8 +232,8 @@ namespace neogfx
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iSrt{ iTarget },
-        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
-        iSnapToPixel{ false }
+        iSnapToPixel{ false },
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
@@ -252,8 +252,8 @@ namespace neogfx
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iSrt{ iTarget },
-        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
-        iSnapToPixel{ false }
+        iSnapToPixel{ false },
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
@@ -273,8 +273,8 @@ namespace neogfx
         iOpacity{ 1.0 },
         iSubpixelRendering{ aOther.iSubpixelRendering },
         iSrt{ iTarget },
-        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() },
-        iSnapToPixel{ false }
+        iSnapToPixel{ false },
+        iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aOther.blending_mode());
         set_smoothing_mode(aOther.smoothing_mode());
@@ -364,6 +364,16 @@ namespace neogfx
     void opengl_rendering_context::set_offset(const optional_vec2& aOffset)
     {
         iOffset = aOffset;
+    }
+
+    bool opengl_rendering_context::gradient_set() const
+    {
+        return !!iGradient;
+    }
+
+    void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
+    {
+        aShader.set_gradient(*this, iGradient->first, iGradient->second);
     }
 
     bool opengl_rendering_context::snap_to_pixel() const
@@ -478,6 +488,14 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::ClearStencilBuffer:
                 clear_stencil_buffer();
+                break;
+            case graphics_operation::operation_type::SetGradient:
+                for (auto op = opBatch.first; op != opBatch.second; ++op)
+                    set_gradient(static_variant_cast<const graphics_operation::set_gradient&>(*op).gradient, static_variant_cast<const graphics_operation::set_gradient&>(*op).boundingBox);
+                break;
+            case graphics_operation::operation_type::ClearGradient:
+                for (auto op = opBatch.first; op != opBatch.second; ++op)
+                    clear_gradient();
                 break;
             case graphics_operation::operation_type::SetPixel:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -771,6 +789,16 @@ namespace neogfx
     void opengl_rendering_context::line_stipple_off()
     {
         rendering_engine().default_shader_program().stipple_shader().clear_stipple();
+    }
+
+    void opengl_rendering_context::set_gradient(const gradient& aGradient, const rect& aBoundingBox)
+    {
+        iGradient = std::make_pair(aGradient, aBoundingBox);
+    }
+
+    void opengl_rendering_context::clear_gradient()
+    {
+        iGradient = std::nullopt;
     }
 
     bool opengl_rendering_context::is_subpixel_rendering_on() const

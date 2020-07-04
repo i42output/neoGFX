@@ -83,9 +83,9 @@ int main(int argc, char* argv[])
 
         ds::settings settings;
 
+        auto& themeColorSetting = settings.setting("environment.general.theme"_s);
         auto& workspaceGridColorSetting = settings.setting("environment.workspace.grid_color"_s);
 
-        auto& themeColorSetting = settings.setting("environment.general.theme"_s);
         auto themeColorChanged = [&]()
         {
             ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColorSetting.value<ng::color>(true));
@@ -94,6 +94,13 @@ int main(int argc, char* argv[])
         themeColorSetting.changing(themeColorChanged);
         themeColorSetting.changed(themeColorChanged);
         themeColorChanged();
+
+        auto workspaceGridColorChanged = [&]()
+        {
+            workspace.view_stack().update();
+        };
+        workspaceGridColorSetting.changing(workspaceGridColorChanged);
+        workspaceGridColorSetting.changed(workspaceGridColorChanged);
 
         ds::project_manager pm;
 
@@ -113,12 +120,13 @@ int main(int argc, char* argv[])
             }
             else
             {
-                auto const workspaceGridColor = app.current_style().palette().color(ng::color_role::Foreground).with_alpha(0.25); // todo: make a project setting
+                aGc.set_gradient(workspaceGridColorSetting.value<ng::gradient>(true), workspace.view_stack().client_rect());
                 auto const workspaceGridSize = ng::size{ 20.0_dip, 20.0_dip }; // todo: make a project setting
                 for (ng::scalar x = 0; x < cr.cx; x += workspaceGridSize.cx)
-                    aGc.draw_line(ng::point{ x, 0.0 }, ng::point{ x, cr.bottom() }, workspaceGridColor);
+                    aGc.draw_line(ng::point{ x, 0.0 }, ng::point{ x, cr.bottom() }, ng::color::White);
                 for (ng::scalar y = 0; y < cr.cy; y += workspaceGridSize.cy)
-                    aGc.draw_line(ng::point{ 0.0, y }, ng::point{ cr.right(), y }, workspaceGridColor);
+                    aGc.draw_line(ng::point{ 0.0, y }, ng::point{ cr.right(), y }, ng::color::White);
+                aGc.clear_gradient();
             }
         });
 
