@@ -138,6 +138,7 @@ namespace neogfx
             {
                 if (iSettingParameter)
                     return;
+                neolib::scoped_flag sf{ iSettingParameter };
                 iSpinBox.set_value(iSlider.value());
                 ValueChanged.trigger();
             });
@@ -145,6 +146,7 @@ namespace neogfx
             {
                 if (iSettingParameter)
                     return;
+                neolib::scoped_flag sf{ iSettingParameter };
                 iSlider.set_value(iSpinBox.value());
                 ValueChanged.trigger();
             });
@@ -152,6 +154,7 @@ namespace neogfx
             {
                 if (iSettingParameter)
                     return;
+                neolib::scoped_flag sf{ iSettingParameter };
                 iSpinBox.set_minimum(iSlider.minimum());
                 iSpinBox.set_maximum(iSlider.maximum());
                 iSpinBox.set_step(iSlider.step());
@@ -161,6 +164,7 @@ namespace neogfx
             {
                 if (iSettingParameter)
                     return;
+                neolib::scoped_flag sf{ iSettingParameter };
                 iSlider.set_minimum(iSpinBox.minimum());
                 iSlider.set_maximum(iSpinBox.maximum());
                 iSlider.set_step(iSpinBox.step());

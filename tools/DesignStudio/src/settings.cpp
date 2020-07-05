@@ -50,7 +50,8 @@ namespace neogfx::DesignStudio
         register_category("plugins"_s, "Plugins"_t);
 
         register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
-        register_setting<gradient>("environment.workspace.grid_color", gradient{ service<i_app>().current_style().palette().color(color_role::Theme).with_alpha(0.25) }, { true }, "Custom grid color: %?%"_t);
+        register_setting<uint32_t>("environment.workspace.grid_size"_s, 20, ng::setting_constraints<uint32_t>{ false, false, 2, 64, 2 }, "Grid size: %?%"_t);
+        register_setting<gradient>("environment.workspace.grid_color"_s, gradient{ service<i_app>().current_style().palette().color(color_role::Theme).with_alpha(0.25) }, { true }, "Custom grid color: %?%"_t);
 
         if (modified())
         {

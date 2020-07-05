@@ -24,6 +24,7 @@
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
+#include <neogfx/gui/widget/slider_box.hpp>
 #include <neogfx/gui/widget/color_widget.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
 
@@ -36,6 +37,35 @@ namespace neogfx
 
         typedef Base base_type;
         using base_type::base_type;
+    };
+
+    template <typename T>
+    struct create_slider_box
+    {
+        std::shared_ptr<i_widget> operator()(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink)
+        {
+            auto settingWidget = std::make_shared<setting_widget<basic_slider_box<T>>>(aLayout);
+            settingWidget->set_minimum(aSetting.constraints().minimum_value<T>());
+            settingWidget->set_maximum(aSetting.constraints().maximum_value<T>());
+            settingWidget->set_step(aSetting.constraints().step_value<T>());
+            settingWidget->set_value(aSetting.value().get<T>());
+            settingWidget->value_changed([&, settingWidget]()
+            {
+                if (!settingWidget->updating)
+                    aSetting.set_value(settingWidget->value());
+            });
+            aSink += aSetting.changing([&, settingWidget]()
+            {
+                neolib::scoped_flag sf{ settingWidget->updating };
+                settingWidget->set_value(aSetting.value<T>(true));
+            });
+            aSink += aSetting.changed([&, settingWidget]()
+            {
+                neolib::scoped_flag sf{ settingWidget->updating };
+                settingWidget->set_value(aSetting.value<T>(true));
+            });
+            return settingWidget;
+        }
     };
 
     class default_setting_widget_factory : public reference_counted<i_setting_widget_factory>
@@ -59,40 +89,60 @@ namespace neogfx
                 {
                 case neolib::setting_type::Boolean:
                     {
-                        auto settingWidget = std::make_shared<check_box>(aLayout);
+                        auto settingWidget = std::make_shared<setting_widget<check_box>>(aLayout);
                         settingWidget->set_checked(aSetting.value().get<bool>());
                         settingWidget->Checked([&]()
                         {
-                            aSetting.set_value(true);
+                            if (!settingWidget->updating)
+                                aSetting.set_value(true);
                         });
                         settingWidget->Unchecked([&]()
                         {
-                            aSetting.set_value(false);
+                            if (!settingWidget->updating)
+                                aSetting.set_value(false);
                         });
                         aSink += aSetting.changing([&, settingWidget]()
                         {
+                            neolib::scoped_flag sf{ settingWidget->updating };
                             settingWidget->set_checked(aSetting.value<bool>(true));
                         });
                         aSink += aSetting.changed([&, settingWidget]()
                         {
+                            neolib::scoped_flag sf{ settingWidget->updating };
                             settingWidget->set_checked(aSetting.value<bool>(true));
                         });
                         result = settingWidget;
                     }
                     break;
                 case neolib::setting_type::Int8:
+                    result = create_slider_box<int8_t>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Int16:
+                    result = create_slider_box<int16_t>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Int32:
+                    result = create_slider_box<int32_t>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Int64:
+                    result = create_slider_box<int64_t>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Uint8:
+                    result = create_slider_box<uint8_t>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Uint16:
+                    result = create_slider_box<uint16_t>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Uint32:
+                    result = create_slider_box<uint32_t>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Uint64:
-                    // todo
+                    result = create_slider_box<uint64_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Float32:
+                    result = create_slider_box<float>{}(aSetting, aLayout, aSink);
+                    break;
                 case neolib::setting_type::Float64:
-                    // todo
+                    result = create_slider_box<double>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::String:
                     // todo

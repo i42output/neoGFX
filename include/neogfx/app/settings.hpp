@@ -24,6 +24,14 @@
 
 namespace neogfx
 {
+    using neolib::i_setting;
+    using neolib::setting;
+    using neolib::i_setting_value;
+    using neolib::setting_value;
+    using neolib::i_setting_constraints;
+    using neolib::setting_constraints;
+    using neolib::i_settings;
+
     class settings : public neolib::settings
     {
         typedef neolib::settings base_type;

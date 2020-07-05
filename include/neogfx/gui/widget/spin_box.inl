@@ -143,7 +143,9 @@ namespace neogfx
     template <typename T>
     void basic_spin_box<T>::do_step(step_direction aDirection, uint32_t aAmount)
     {
-        auto result = std::max(minimum(), std::min(maximum(), aDirection == step_direction::Up ? value() + static_cast<value_type>(aAmount * step()) : value() - static_cast<value_type>(aAmount * step())));
+        auto result = std::max(minimum(), 
+            std::min(maximum(), 
+                static_cast<value_type>(aDirection == step_direction::Up ? value() + static_cast<value_type>(aAmount * step()) : value() - static_cast<value_type>(aAmount * step()))));
         if ((aDirection == step_direction::Up && result > value()) || (aDirection == step_direction::Down && result < value()))
             set_value(result, true);
     };

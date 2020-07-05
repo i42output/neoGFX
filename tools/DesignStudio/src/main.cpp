@@ -83,24 +83,32 @@ int main(int argc, char* argv[])
 
         ds::settings settings;
 
-        auto& themeColorSetting = settings.setting("environment.general.theme"_s);
-        auto& workspaceGridColorSetting = settings.setting("environment.workspace.grid_color"_s);
+        auto& themeColor = settings.setting("environment.general.theme"_s);
+        auto& workspaceGridSize = settings.setting("environment.workspace.grid_size"_s);
+        auto& workspaceGridColor = settings.setting("environment.workspace.grid_color"_s);
 
         auto themeColorChanged = [&]()
         {
-            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColorSetting.value<ng::color>(true));
-            workspaceGridColorSetting.set_default_value(ng::gradient{ ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Foreground).with_alpha(0.25) });
+            ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColor.value<ng::color>(true));
+            workspaceGridColor.set_default_value(ng::gradient{ ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Foreground).with_alpha(0.25) });
         };
-        themeColorSetting.changing(themeColorChanged);
-        themeColorSetting.changed(themeColorChanged);
+        themeColor.changing(themeColorChanged);
+        themeColor.changed(themeColorChanged);
         themeColorChanged();
 
         auto workspaceGridColorChanged = [&]()
         {
             workspace.view_stack().update();
         };
-        workspaceGridColorSetting.changing(workspaceGridColorChanged);
-        workspaceGridColorSetting.changed(workspaceGridColorChanged);
+        workspaceGridColor.changing(workspaceGridColorChanged);
+        workspaceGridColor.changed(workspaceGridColorChanged);
+
+        auto workspaceGridSizeChanged = [&]()
+        {
+            workspace.view_stack().update();
+        };
+        workspaceGridSize.changing(workspaceGridSizeChanged);
+        workspaceGridSize.changed(workspaceGridSizeChanged);
 
         ds::project_manager pm;
 
@@ -120,11 +128,11 @@ int main(int argc, char* argv[])
             }
             else
             {
-                aGc.set_gradient(workspaceGridColorSetting.value<ng::gradient>(true), workspace.view_stack().client_rect());
-                auto const workspaceGridSize = ng::size{ 20.0_dip, 20.0_dip }; // todo: make a project setting
-                for (ng::scalar x = 0; x < cr.cx; x += workspaceGridSize.cx)
+                aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), workspace.view_stack().client_rect());
+                ng::size const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{ workspaceGridSize.value<uint32_t>(true), workspaceGridSize.value<uint32_t>(true) });
+                for (ng::scalar x = 0; x < cr.cx; x += gridSize.cx)
                     aGc.draw_line(ng::point{ x, 0.0 }, ng::point{ x, cr.bottom() }, ng::color::White);
-                for (ng::scalar y = 0; y < cr.cy; y += workspaceGridSize.cy)
+                for (ng::scalar y = 0; y < cr.cy; y += gridSize.cy)
                     aGc.draw_line(ng::point{ 0.0, y }, ng::point{ cr.right(), y }, ng::color::White);
                 aGc.clear_gradient();
             }
