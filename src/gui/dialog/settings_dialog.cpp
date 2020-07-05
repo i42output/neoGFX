@@ -49,7 +49,7 @@ namespace neogfx
             settingWidget->set_maximum(aSetting.constraints().maximum_value<T>());
             settingWidget->set_step(aSetting.constraints().step_value<T>());
             settingWidget->set_value(aSetting.value().get<T>());
-            settingWidget->value_changed([&, settingWidget]()
+            aSink += settingWidget->value_changed([&, settingWidget]()
             {
                 if (!settingWidget->updating)
                     aSetting.set_value(settingWidget->value());
@@ -91,12 +91,12 @@ namespace neogfx
                     {
                         auto settingWidget = std::make_shared<setting_widget<check_box>>(aLayout);
                         settingWidget->set_checked(aSetting.value().get<bool>());
-                        settingWidget->Checked([&]()
+                        aSink += settingWidget->Checked([&]()
                         {
                             if (!settingWidget->updating)
                                 aSetting.set_value(true);
                         });
-                        settingWidget->Unchecked([&]()
+                        aSink += settingWidget->Unchecked([&]()
                         {
                             if (!settingWidget->updating)
                                 aSetting.set_value(false);
@@ -153,7 +153,7 @@ namespace neogfx
                     if (aSetting.value().type_name() == "neogfx::color")
                     {
                         auto settingWidget = std::make_shared<setting_widget<color_widget>>(aLayout, aSetting.value().get<color>());
-                        settingWidget->ColorChanged([&, settingWidget]()
+                        aSink += settingWidget->ColorChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
                                 aSetting.set_value(settingWidget->color());
@@ -173,7 +173,7 @@ namespace neogfx
                     else if (aSetting.value().type_name() == "neogfx::gradient")
                     {
                         auto settingWidget = std::make_shared<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<gradient>());
-                        settingWidget->GradientChanged([&, settingWidget]()
+                        aSink += settingWidget->GradientChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
                                 aSetting.set_value(settingWidget->gradient());

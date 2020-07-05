@@ -223,8 +223,10 @@ namespace neogfx
 
     window::~window()
     {
+        set_destroying();
         update_modality(true);
         window_manager().remove_window(*this);
+        close();
         set_destroyed();
     }
 
