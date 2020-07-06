@@ -225,7 +225,8 @@ namespace neogfx
     {
         set_destroying();
         update_modality(true);
-        window_manager().remove_window(*this);
+        if (window_manager().has_window(*this))
+            window_manager().remove_window(*this);
         close();
         set_destroyed();
     }
