@@ -30,6 +30,8 @@ namespace neogfx
     public:
         virtual ~i_object() = default;
     public:
+        virtual i_object& as_object() = 0;
+    public:
         virtual neogfx::object_type object_type() const = 0;
     };
 }

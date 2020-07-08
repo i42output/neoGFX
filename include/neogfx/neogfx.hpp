@@ -42,6 +42,7 @@ namespace neogfx
 
     using neolib::to_const;
 
+    using neolib::destroying_flag;
     using neolib::destroyed_flag;
 
     using neolib::i_reference_counted;

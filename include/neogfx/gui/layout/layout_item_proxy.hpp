@@ -112,6 +112,6 @@ namespace neogfx
         mutable std::pair<uint32_t, size> iMinimumSize;
         mutable std::pair<uint32_t, size> iMaximumSize;
         mutable std::pair<uint32_t, size> iFixedSize;
-        mutable std::optional<const i_anchor_t<decltype(layout_item<i_layout>::MinimumSize)>*> iMinimumSizeAnchor;
+        mutable std::optional<const i_anchor_t<decltype(layout_item<object<i_layout>>::MinimumSize)>*> iMinimumSizeAnchor;
     };
 }

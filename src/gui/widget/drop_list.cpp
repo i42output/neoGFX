@@ -368,7 +368,7 @@ namespace neogfx
     void drop_list::list_proxy::hide_view()
     {
         if (iPopup != std::nullopt)
-            iPopup = std::nullopt;
+            iPopup->close();
         else if (iView != std::nullopt)
         {
             iView = std::nullopt;

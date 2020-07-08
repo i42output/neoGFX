@@ -44,15 +44,18 @@ namespace neogfx
         typedef std::vector<constraint_entry_t> constraint_entries_t;
     public:
         anchor(i_anchorable& aOwner, i_property& aProperty) :
-            iOwner{ aOwner }, iProperty{ aProperty }
+            iOwnerDestroying{ aOwner.as_object() }, iOwner { aOwner }, iProperty{ aProperty }
         {
             iOwner.anchors()[name()] = this;
         }
         ~anchor()
         {
-            auto iter = iOwner.anchors().find(name());
-            if (iter != iOwner.anchors().end())
-                iOwner.anchors().erase(iter);
+            if (!iOwnerDestroying)
+            {
+                auto iter = iOwner.anchors().find(name());
+                if (iter != iOwner.anchors().end())
+                    iOwner.anchors().erase(iter);
+            }
         }
     public:
         const i_string& name() const override
@@ -136,6 +139,7 @@ namespace neogfx
             return result;
         }
     private:
+        destroying_flag iOwnerDestroying;
         i_anchorable& iOwner;
         i_property& iProperty;
         constraint_entries_t iConstraints;

@@ -26,6 +26,8 @@
 
 namespace neogfx
 {
+    class i_object;
+
     struct anchor_not_found : std::runtime_error { anchor_not_found(const std::string& aAnchor) : std::runtime_error{ "neoGFX: Anchor '" + aAnchor + "' not found." } {} };
 
     class i_anchorable
@@ -34,6 +36,9 @@ namespace neogfx
     public:
         typedef i_anchorable abstract_type;
         typedef neolib::i_map<i_string, i_anchor*> anchor_map_type;
+        // meta
+    public:
+        virtual i_object& as_object() = 0;
         // operations
     public:
         virtual void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) = 0;

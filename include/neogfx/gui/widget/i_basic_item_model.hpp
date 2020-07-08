@@ -50,5 +50,13 @@ namespace neogfx
         {
             return item(iterator_to_index(aItem));
         }
+        item_model_index find_item(const value_type& aItem) const
+        {
+            auto const end = rows();
+            for (item_model_index::row_type row = 0; row < end; ++row)
+                if (item(item_model_index{ row, 0 }) == aItem)
+                    return item_model_index{ row, 0 };
+            throw item_not_found();
+        }
     };
 }

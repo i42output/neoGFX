@@ -35,6 +35,12 @@ namespace neogfx
         typedef neolib::object<i_property_owner, i_properties, Bases...> base_type;
     public:
         using base_type::base_type;
+    public:
+        // meta
+        i_object& as_object() override
+        {
+            return *this;
+        }
         // type
     public:
         neogfx::object_type object_type() const override

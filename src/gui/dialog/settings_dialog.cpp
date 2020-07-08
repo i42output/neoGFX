@@ -19,11 +19,13 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/scoped.hpp>
+#include <neolib/core/i_enum.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
+#include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/slider_box.hpp>
 #include <neogfx/gui/widget/color_widget.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
@@ -148,6 +150,30 @@ namespace neogfx
                     // todo
                     break;
                 case neolib::setting_type::Enum:
+                    {
+                        auto settingWidget = std::make_shared<setting_widget<drop_list>>(aLayout);
+                        auto const& e = aSetting.value().get<neolib::i_enum>();
+                        auto enumModel = std::make_shared<basic_item_model<neolib::i_enum::underlying_type>>();
+                        for (auto& ee : e.enumerators())
+                            enumModel->insert_item(enumModel->end(), ee.first(), ee.second().to_std_string());
+                        settingWidget->set_model(enumModel);
+                        aSink += settingWidget->selection_changed([&, settingWidget, enumModel](const optional_item_model_index& aCurrentIndex)
+                        {
+                            if (!settingWidget->updating)
+                                aSetting.set_value(enumModel->item(*aCurrentIndex));
+                        });
+                        auto update_widget = [&, settingWidget, enumModel]()
+                        {
+                            neolib::scoped_flag sf{ settingWidget->updating };
+                            auto const modelIndex = enumModel->find_item(aSetting.value(true).get<neolib::i_enum>().value());
+                            settingWidget->selection_model().set_current_index(settingWidget->presentation_model().from_item_model_index(modelIndex));
+                            settingWidget->accept_selection();
+                        };
+                        aSink += aSetting.changing(update_widget);
+                        aSink += aSetting.changed(update_widget);
+                        update_widget();
+                        result = settingWidget;
+                    }
                     break;
                 case neolib::setting_type::Custom:
                     if (aSetting.value().type_name() == "neogfx::color")
@@ -392,9 +418,19 @@ namespace neogfx
                         nextLabel += ch;
                         nextArgument = {};
                     }
-                    else if (*nextArgument == "?")
+                    else
                     {
-                        iWidgetFactory->create_widget(*setting.second(), *itemLayout, iSink);
+                        thread_local std::vector<std::string> bits;
+                        bits.clear();
+                        bits = neolib::tokens(*nextArgument, ":"s);
+                        if (bits.size() == 1 && bits[0] == "?")
+                            iWidgetFactory->create_widget(*setting.second(), *itemLayout, iSink);
+                        else if (bits.size() == 2 && bits[1] == "?")
+                        {
+                            auto existing = iSettings.all_settings().find(string{ bits[0] });
+                            if (existing != iSettings.all_settings().end())
+                                iWidgetFactory->create_widget(*existing->second(), *itemLayout, iSink);
+                        }
                         nextArgument = {};
                     }
                     break;

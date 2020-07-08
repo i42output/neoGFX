@@ -25,6 +25,22 @@
 
 namespace neogfx::DesignStudio
 {
+    enum class workspace_grid
+    {
+        Lines,
+        Quads
+    };
+}
+
+template <>
+const neolib::enum_enumerators_t<neogfx::DesignStudio::workspace_grid> neolib::enum_enumerators_v<neogfx::DesignStudio::workspace_grid>
+{
+    declare_enum_string(neogfx::DesignStudio::workspace_grid, Lines)
+    declare_enum_string(neogfx::DesignStudio::workspace_grid, Quads)
+};
+
+namespace neogfx::DesignStudio 
+{
     class settings : public neogfx::settings
     {
         typedef neogfx::settings base_type;

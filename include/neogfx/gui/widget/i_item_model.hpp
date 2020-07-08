@@ -245,6 +245,7 @@ namespace neogfx
     public:
         struct wrong_model_type : std::logic_error { wrong_model_type() : std::logic_error("neogfx::i_item_model::wrong_model_type") {} };
         struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_model::bad_column_index") {} };
+        struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_item_model::item_not_found") {} };
     public:
         virtual ~i_item_model() = default;
     public:

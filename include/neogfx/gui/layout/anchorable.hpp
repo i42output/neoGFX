@@ -35,6 +35,10 @@ namespace neogfx
         typedef neolib::map<string, i_anchor*> anchor_map_type;
         // operations
     public:
+        ~anchorable()
+        {
+        }
+    public:
         using base_type::anchor_to;
         void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {

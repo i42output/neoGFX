@@ -36,6 +36,12 @@ namespace neogfx
         typedef i_layout_item abstract_type;
     private:
         typedef self_type property_context_type;
+        // construction
+    public:
+        ~layout_item()
+        {
+            base_type::set_destroying();
+        }
         // implementation
     public:
         void fix_weightings() override
