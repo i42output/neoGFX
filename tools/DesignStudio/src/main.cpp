@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
         ds::settings settings;
 
         auto& themeColor = settings.setting("environment.general.theme"_s);
+        auto& workspaceGridType = settings.setting("environment.workspace.grid_type"_s);
         auto& workspaceGridSize = settings.setting("environment.workspace.grid_size"_s);
         auto& workspaceGridColor = settings.setting("environment.workspace.grid_color"_s);
 
@@ -96,19 +97,16 @@ int main(int argc, char* argv[])
         themeColor.changed(themeColorChanged);
         themeColorChanged();
 
-        auto workspaceGridColorChanged = [&]()
+        auto workspaceGridChanged = [&]()
         {
             workspace.view_stack().update();
         };
-        workspaceGridColor.changing(workspaceGridColorChanged);
-        workspaceGridColor.changed(workspaceGridColorChanged);
-
-        auto workspaceGridSizeChanged = [&]()
-        {
-            workspace.view_stack().update();
-        };
-        workspaceGridSize.changing(workspaceGridSizeChanged);
-        workspaceGridSize.changed(workspaceGridSizeChanged);
+        workspaceGridType.changing(workspaceGridChanged);
+        workspaceGridType.changed(workspaceGridChanged);
+        workspaceGridColor.changing(workspaceGridChanged);
+        workspaceGridColor.changed(workspaceGridChanged);
+        workspaceGridSize.changing(workspaceGridChanged);
+        workspaceGridSize.changed(workspaceGridChanged);
 
         ds::project_manager pm;
 
@@ -130,10 +128,27 @@ int main(int argc, char* argv[])
             {
                 aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), workspace.view_stack().client_rect());
                 ng::size const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{ workspaceGridSize.value<uint32_t>(true), workspaceGridSize.value<uint32_t>(true) });
-                for (ng::scalar x = 0; x < cr.cx; x += gridSize.cx)
-                    aGc.draw_line(ng::point{ x, 0.0 }, ng::point{ x, cr.bottom() }, ng::color::White);
-                for (ng::scalar y = 0; y < cr.cy; y += gridSize.cy)
-                    aGc.draw_line(ng::point{ 0.0, y }, ng::point{ cr.right(), y }, ng::color::White);
+                ng::basic_size<int32_t> const cells = ng::size{ cr.cx / gridSize.cx, cr.cy / gridSize.cy };
+                if (workspaceGridType.value<ds::workspace_grid>(true) == ds::workspace_grid::Lines)
+                {
+                    for (int32_t x = 0; x <= cells.cx; ++x)
+                        aGc.draw_line(ng::point{ x * gridSize.cx, 0.0 }, ng::point{ x * gridSize.cx, cr.bottom() }, ng::color::White);
+                    for (int32_t y = 0; y <= cells.cy; ++y)
+                        aGc.draw_line(ng::point{ 0.0, y * gridSize.cy }, ng::point{ cr.right(), y * gridSize.cy }, ng::color::White);
+                }
+                else if (workspaceGridType.value<ds::workspace_grid>(true) == ds::workspace_grid::Quads)
+                {
+                    for (int32_t x = 0; x <= cells.cx; ++x)
+                        for (int32_t y = 0; y <= cells.cy; ++y)
+                            if ((x + y) % 2 == 0)
+                                aGc.fill_rect(ng::rect{ ng::point{ x * gridSize.cx, y * gridSize.cy }, gridSize }, ng::color::White);
+                }
+                else // Points
+                {
+                    for (int32_t x = 0; x <= cells.cx; ++x)
+                        for (int32_t y = 0; y <= cells.cy; ++y)
+                            aGc.draw_pixel(ng::point{ x * gridSize.cx, y * gridSize.cy }, ng::color::White);
+                }
                 aGc.clear_gradient();
             }
         });

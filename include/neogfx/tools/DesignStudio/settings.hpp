@@ -25,10 +25,11 @@
 
 namespace neogfx::DesignStudio
 {
-    enum class workspace_grid
+    enum class workspace_grid : int32_t
     {
-        Lines,
-        Quads
+        Lines   = 0x00000000,
+        Quads   = 0x00000001,
+        Points  = 0x00000002
     };
 }
 
@@ -37,6 +38,7 @@ const neolib::enum_enumerators_t<neogfx::DesignStudio::workspace_grid> neolib::e
 {
     declare_enum_string(neogfx::DesignStudio::workspace_grid, Lines)
     declare_enum_string(neogfx::DesignStudio::workspace_grid, Quads)
+    declare_enum_string(neogfx::DesignStudio::workspace_grid, Points)
 };
 
 namespace neogfx::DesignStudio 
