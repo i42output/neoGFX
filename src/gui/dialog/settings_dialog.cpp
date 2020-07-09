@@ -199,6 +199,7 @@ namespace neogfx
                     else if (aSetting.value().type_name() == "neogfx::gradient")
                     {
                         auto settingWidget = std::make_shared<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<gradient>());
+                        settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
                         aSink += settingWidget->GradientChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
@@ -348,13 +349,13 @@ namespace neogfx
                 }
         }
 
-        for (auto const& setting : iSettings.all_settings())
+        for (auto const& setting : iSettings.all_settings_ordered())
         {
-            if (setting.second()->format().empty())
+            if (setting->format().empty())
                 continue;
             thread_local std::vector<std::string> keyBits;
             keyBits.clear();
-            keyBits = neolib::tokens(setting.first().to_std_string(), "."s);
+            keyBits = neolib::tokens(setting->key().to_std_string(), "."s);
             keyBits.resize(2);
             auto groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1]);
             if (groupWidget == groupWidgets.end())
@@ -362,6 +363,8 @@ namespace neogfx
             i_layout* itemLayout = nullptr;
             auto new_layout = [&]()
             {
+                if (itemLayout != nullptr)
+                    itemLayout->add_spacer();
                 itemLayout = &groupWidget->second->layout().add<horizontal_layout>();
                 itemLayout->set_padding({});
                 itemLayout->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
@@ -388,25 +391,25 @@ namespace neogfx
                     auto& optionalCheckBox = itemLayout->add(std::make_shared<check_box>(translate(nextLabel)));
                     iSink += optionalCheckBox.Checked([&]()
                     { 
-                        if (setting.second()->is_default(true))
-                            setting.second()->set_value(setting.second()->default_value()); 
+                        if (setting->is_default(true))
+                            setting->set_value(setting->default_value()); 
                     });
                     iSink += optionalCheckBox.Unchecked([&]()
                     { 
-                        setting.second()->clear(); 
+                        setting->clear(); 
                     });
                     auto update_check_box = [&]()
                     {
-                        optionalCheckBox.set_checked(!setting.second()->is_default(true));
+                        optionalCheckBox.set_checked(!setting->is_default(true));
                     };
-                    iSink += setting.second()->changing(update_check_box);
-                    iSink += setting.second()->changed(update_check_box);
+                    iSink += setting->changing(update_check_box);
+                    iSink += setting->changed(update_check_box);
                     update_check_box();
                     nextLabel.clear();
                 }
             };
 
-            for (auto ch : setting.second()->format().to_std_string())
+            for (auto ch : setting->format().to_std_string())
             {
                 switch (ch)
                 {
@@ -424,7 +427,7 @@ namespace neogfx
                         bits.clear();
                         bits = neolib::tokens(*nextArgument, ":"s);
                         if (bits.size() == 1 && bits[0] == "?")
-                            iWidgetFactory->create_widget(*setting.second(), *itemLayout, iSink);
+                            iWidgetFactory->create_widget(*setting, *itemLayout, iSink);
                         else if (bits.size() == 2 && bits[1] == "?")
                         {
                             auto existing = iSettings.all_settings().find(string{ bits[0] });
@@ -441,7 +444,7 @@ namespace neogfx
                 default:
                     if (nextArgument)
                     {
-                        if (setting.second()->constraints().optional())
+                        if (setting->constraints().optional())
                             emit_optional_check_box();
                         else
                             emit_label();
@@ -453,6 +456,8 @@ namespace neogfx
                 }
             }
             emit_label();
+            if (itemLayout != nullptr)
+                itemLayout->add_spacer();
         }
 
         iDetailLayout.add_spacer();
