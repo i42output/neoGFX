@@ -131,7 +131,7 @@ namespace neogfx
         void disable() override;
         bool enabled() const override;
         bool invalidated() const override;
-        void invalidate() override;
+        void invalidate(bool aDeferLayout = true) override;
         void validate() override;
     public:
         point position() const override;

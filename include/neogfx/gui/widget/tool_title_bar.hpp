@@ -49,6 +49,7 @@ namespace neogfx
         neogfx::focus_policy focus_policy() const override;
     private:
         void update_textures();
+        void update_state();
     private:
         i_standard_layout_container& iContainer;
         neolib::callback_timer iUpdater;
@@ -62,5 +63,6 @@ namespace neogfx
         mutable std::optional<std::pair<color, texture>> iPinTexture;
         mutable std::optional<std::pair<color, texture>> iUnpinTexture;
         mutable std::optional<std::pair<color, texture>> iCloseTexture;
+        bool iStateActive;
     };
 }

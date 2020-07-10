@@ -49,7 +49,7 @@ namespace neogfx
             auto& self = static_cast<i_layout_item&>(*this);
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
             if (base_type::debug() == this)
-                std::cout << typeid(*this).name() << "::fix_weightings(): ";
+                std::cout << typeid(*this).name() << "::fix_weightings(): " << std::endl;
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
@@ -59,7 +59,7 @@ namespace neogfx
                 item.set_fixed_size({}, false);
             }
             if (base_type::debug() == this)
-                std::cout << std::endl;
+                std::cout << typeid(*this).name() << "::fix_weightings() done" << std::endl;
         }
         void clear_weightings() override
         {

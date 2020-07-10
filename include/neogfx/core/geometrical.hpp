@@ -1121,6 +1121,42 @@ namespace neogfx
         aStream << "[" << aRect.top_left() << " -> " << aRect.bottom_right() << ", " << aRect.extents() << "]";
         return aStream;
     }
+
+    template <typename Elem, typename Traits, typename T>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_point<T>>& aPoint)
+    {
+        if (aPoint)
+            return aStream << *aPoint;
+        aStream << "(nullopt)";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_size<T>>& aSize)
+    {
+        if (aSize)
+            return aStream << *aSize;
+        aStream << "(nullopt)";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_delta<T>>& aDelta)
+    {
+        if (aDelta)
+            return aStream << *aDelta;
+        aStream << "(nullopt)";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_rect<T>>& aRect)
+    {
+        if (aRect)
+            return aStream << *aRect;
+        aStream << "(nullopt)";
+        return aStream;
+    }
 }
 
 namespace std 

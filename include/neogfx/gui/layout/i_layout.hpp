@@ -217,7 +217,7 @@ namespace neogfx
         virtual bool enabled() const = 0;
         virtual void layout_items(const point& aPosition, const size& aSize) = 0;
         virtual bool invalidated() const = 0;
-        virtual void invalidate() = 0;
+        virtual void invalidate(bool aDeferLayout = true) = 0;
         virtual void validate() = 0;
         // helpers
     public:

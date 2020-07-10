@@ -30,14 +30,15 @@ namespace neogfx
         iUpdater{service<async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
-            update();
+            update_state();
         }, 100},
         iLayout{ *this },
         iTitle{ iLayout, aTitle },
         iSpacer{ iLayout },
         iPinButton{ iLayout, push_button_style::TitleBar },
         iUnpinButton{ iLayout, push_button_style::TitleBar },
-        iCloseButton{ iLayout, push_button_style::TitleBar }
+        iCloseButton{ iLayout, push_button_style::TitleBar },
+        iStateActive{ false }
     {
         set_padding(neogfx::padding{});
         layout().set_padding(neogfx::padding{});
@@ -57,7 +58,7 @@ namespace neogfx
         });
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
-            if ((aAspect & style_aspect::Color) == style_aspect::Color) 
+            if ((aAspect & style_aspect::Color) == style_aspect::Color)
                 update_textures();
         });
 
@@ -91,7 +92,7 @@ namespace neogfx
     {
         if (has_background_color())
             return widget::background_color();
-        else if (!iContainer.as_widget().has_focus() && !iContainer.as_widget().child_has_focus())
+        else if (!iStateActive)
             return widget::container_background_color();
         else
             return service<i_app>().current_style().palette().color(color_role::Selection);
@@ -160,5 +161,16 @@ namespace neogfx
                         sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
         }
         iCloseButton.set_image(iCloseTexture->second);
+        update();
+    }
+
+    void tool_title_bar::update_state()
+    {
+        bool stateActive = iContainer.as_widget().has_focus() || iContainer.as_widget().child_has_focus();
+        if (iStateActive != stateActive)
+        {
+            iStateActive = stateActive;
+            update();
+        }
     }
 }

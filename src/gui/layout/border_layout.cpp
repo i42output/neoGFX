@@ -153,18 +153,18 @@ namespace neogfx
         throw not_implemented();
     }
 
-    void border_layout::invalidate()
+    void border_layout::invalidate(bool aDeferLayout)
     {
         if (!is_alive())
             return;
-        layout::invalidate();
-        iRows.invalidate();
-        iTop.invalidate();
-        iMiddle.invalidate();
-        iLeft.invalidate();
-        iCenter.invalidate();
-        iRight.invalidate();
-        iBottom.invalidate();
+        layout::invalidate(aDeferLayout);
+        iRows.invalidate(aDeferLayout);
+        iTop.invalidate(aDeferLayout);
+        iMiddle.invalidate(aDeferLayout);
+        iLeft.invalidate(aDeferLayout);
+        iCenter.invalidate(aDeferLayout);
+        iRight.invalidate(aDeferLayout);
+        iBottom.invalidate(aDeferLayout);
     }
 
     void border_layout::layout_items(const point& aPosition, const size& aSize)
@@ -180,22 +180,30 @@ namespace neogfx
     {
         iRows.fix_weightings();
         iMiddle.fix_weightings();
+        invalidate(false);
     }
 
     void border_layout::clear_weightings()
     {
         iRows.clear_weightings();
         iMiddle.clear_weightings();
+        invalidate(false);
     }
 
     size border_layout::minimum_size(const optional_size& aAvailableSpace) const
     {
-        return iRows.minimum_size(aAvailableSpace);
+        size result = iRows.minimum_size(aAvailableSpace);
+        if (debug() == this)
+            std::cerr << "border_layout::minimum_size(...) --> " << result << std::endl;
+        return result;
     }
 
     size border_layout::maximum_size(const optional_size& aAvailableSpace) const
     {
-        return iRows.maximum_size(aAvailableSpace);
+        size result = iRows.maximum_size(aAvailableSpace);
+        if (debug() == this)
+            std::cerr << "border_layout::maximum_size(...) --> " << result << std::endl;
+        return result;
     }
 
     void border_layout::init()

@@ -289,6 +289,12 @@ namespace neogfx
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     protected:
+        void fix_weightings() override
+        {
+            widget_type::fix_weightings();
+            widget_type::template ancestor_layout<border_layout>().fix_weightings(); // todo: is this layout relationship assumption good idea?
+        }
+    protected:
         void capture_released() override
         {
             widget_type::capture_released();
@@ -314,12 +320,42 @@ namespace neogfx
                     iTracking = tracking{ clickedPart, aPosition };
                     if (widget_type::has_root())
                         widget_type::root().window_manager().update_mouse_cursor(widget_type::root());
+                    update_tracking(aPosition);
                 }
             }
         }
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override
         {
             widget_type::mouse_moved(aPosition, aKeyModifiers);
+            update_tracking(aPosition);
+        }
+    private:
+        void init()
+        {
+            iNonClientLayout.emplace(*this);
+            non_client_layout().set_padding(neogfx::padding{});
+            non_client_layout().set_spacing(size{});
+            if ((decoration() & neogfx::decoration::TitleBar) == neogfx::decoration::TitleBar)
+            {
+                iTitleBarLayout.emplace(non_client_layout());
+                if ((decoration_style() & neogfx::decoration_style::Tool) == neogfx::decoration_style::None)
+                    iTitleBar = create_title_bar<normal_title_bar>();
+                else
+                    iTitleBar = create_title_bar<tool_title_bar>();
+            }
+            // todo: create widgets for the following decorations
+            if ((decoration() & neogfx::decoration::Menu) == neogfx::decoration::Menu)
+                iMenuLayout.emplace(non_client_layout());
+            if ((decoration() & neogfx::decoration::Toolbar) == neogfx::decoration::Toolbar)
+                iToolbarLayout.emplace(non_client_layout());
+            if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
+                iDockLayout.emplace(non_client_layout());
+            if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
+                iStatusBarLayout.emplace(non_client_layout());
+            // todo: make neogfx::window derive from this class
+        }
+        void update_tracking(const point& aPosition)
+        {
             if (iTracking)
             {
                 auto const delta = aPosition - iTracking->trackFrom;
@@ -361,35 +397,10 @@ namespace neogfx
                     if ((decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock)
                     {
                         widget_type::set_fixed_size({}, false);
-                        widget_type::template ancestor_layout<border_layout>().fix_weightings();
+                        fix_weightings();
                     }
                 }
             }
-        }
-    private:
-        void init()
-        {
-            iNonClientLayout.emplace(*this);
-            non_client_layout().set_padding(neogfx::padding{});
-            non_client_layout().set_spacing(size{});
-            if ((decoration() & neogfx::decoration::TitleBar) == neogfx::decoration::TitleBar)
-            {
-                iTitleBarLayout.emplace(non_client_layout());
-                if ((decoration_style() & neogfx::decoration_style::Tool) == neogfx::decoration_style::None)
-                    iTitleBar = create_title_bar<normal_title_bar>();
-                else
-                    iTitleBar = create_title_bar<tool_title_bar>();
-            }
-            // todo: create widgets for the following decorations
-            if ((decoration() & neogfx::decoration::Menu) == neogfx::decoration::Menu)
-                iMenuLayout.emplace(non_client_layout());
-            if ((decoration() & neogfx::decoration::Toolbar) == neogfx::decoration::Toolbar)
-                iToolbarLayout.emplace(non_client_layout());
-            if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
-                iDockLayout.emplace(non_client_layout());
-            if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
-                iStatusBarLayout.emplace(non_client_layout());
-            // todo: make neogfx::window derive from this class
         }
     private:
         static neogfx::decoration default_decoration(neogfx::decoration_style aStyle)

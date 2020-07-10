@@ -488,7 +488,7 @@ namespace neogfx
         return iInvalidated;
     }
 
-    void layout::invalidate()
+    void layout::invalidate(bool aDeferLayout)
     {
         if (!enabled())
             return;
@@ -500,7 +500,7 @@ namespace neogfx
         if (has_layout_owner())
         {
             if (layout_owner().is_managing_layout())
-                layout_owner().layout_items(true);
+                layout_owner().layout_items(aDeferLayout);
             i_widget* w = iOwner;
             while (w != nullptr && w->has_parent())
             {
@@ -602,12 +602,14 @@ namespace neogfx
 
     size layout::minimum_size(const optional_size&) const
     {
+        size result;
         if (has_fixed_size())
-            return fixed_size();
+            result = fixed_size();
         else if (has_minimum_size())
-            return units_converter(*this).from_device_units(*iMinimumSize);
-        else
-            return size{};
+            result = units_converter(*this).from_device_units(*iMinimumSize);
+        if (debug() == this)
+            std::cerr << "layout::minimum_size(...) --> " << result << std::endl;
+        return result;
     }
 
     void layout::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
@@ -615,6 +617,8 @@ namespace neogfx
         optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
         if (iMinimumSize != newMinimumSize)
         {
+            if (debug() == this)
+                std::cerr << "layout::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
             iMinimumSize = newMinimumSize;
             if (aUpdateLayout)
                 invalidate();
@@ -628,12 +632,14 @@ namespace neogfx
 
     size layout::maximum_size(const optional_size&) const
     {
+        size result = size::max_size();
         if (has_fixed_size())
-            return fixed_size();
+            result = fixed_size();
         else if (has_maximum_size())
-            return units_converter(*this).from_device_units(*iMaximumSize);
-        else
-            return size::max_size();
+            result = units_converter(*this).from_device_units(*iMaximumSize);
+        if (debug() == this)
+            std::cerr << "layout::maximum_size(...) --> " << result << std::endl;
+        return result;
     }
 
     void layout::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
@@ -641,6 +647,8 @@ namespace neogfx
         optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
         if (iMaximumSize != newMaximumSize)
         {
+            if (debug() == this)
+                std::cerr << "layout::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
             iMaximumSize = newMaximumSize;
             if (aUpdateLayout)
                 invalidate();
@@ -664,6 +672,8 @@ namespace neogfx
         optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
         if (iFixedSize != newFixedSize)
         {
+            if (debug() == this)
+                std::cerr << "layout::set_maximum_size(" << newFixedSize << ", " << aUpdateLayout << ")" << std::endl;
             iFixedSize = newFixedSize;
             if (aUpdateLayout)
                 invalidate();

@@ -910,6 +910,8 @@ namespace neogfx
         optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
         if (MinimumSize != newMinimumSize)
         {
+            if (debug() == this)
+                std::cerr << "widget::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
             MinimumSize.assign(newMinimumSize, aUpdateLayout);
             if (aUpdateLayout && has_layout_manager())
                 layout_manager().layout_items(true);
@@ -950,6 +952,8 @@ namespace neogfx
         optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
         if (MaximumSize != newMaximumSize)
         {
+            if (debug() == this)
+                std::cerr << "widget::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
             MaximumSize.assign(newMaximumSize, aUpdateLayout);
             if (aUpdateLayout && has_layout_manager())
                 layout_manager().layout_items(true);
@@ -973,6 +977,8 @@ namespace neogfx
         optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
         if (FixedSize != newFixedSize)
         {
+            if (debug() == this)
+                std::cerr << "widget::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << std::endl;
             FixedSize.assign(newFixedSize, aUpdateLayout);
             if (aUpdateLayout && has_layout_manager())
                 layout_manager().layout_items(true);

@@ -133,12 +133,7 @@ namespace neogfx
     size layout::do_minimum_size(const optional_size& aAvailableSpace) const
     {
         if (debug() == this)
-        {
-            std::cerr << "layout::do_minimum_size(";
-            if (aAvailableSpace != std::nullopt)
-                std::cerr << *aAvailableSpace;
-            std::cerr << "): ";
-        }
+            std::cerr << "layout(" << this << ")::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
         if (itemsVisible != 0)
@@ -168,7 +163,7 @@ namespace neogfx
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
         }
         if (debug() == this)
-            std::cerr << result << std::endl;
+            std::cerr << "layout(" << this << ")::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
@@ -176,12 +171,7 @@ namespace neogfx
     size layout::do_maximum_size(const optional_size& aAvailableSpace) const
     {
         if (debug() == this)
-        {
-            std::cerr << "layout::do_maximum_size(";
-            if (aAvailableSpace != std::nullopt)
-                std::cerr << *aAvailableSpace;
-            std::cerr << ")" << std::endl;
-        }
+            std::cerr << "layout(" << this << ")::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
         {
             size result;
@@ -230,6 +220,8 @@ namespace neogfx
             AxisPolicy::cx(result) = size::max_dimension();
         if (AxisPolicy::cy(result) == 0.0 && AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding)
             AxisPolicy::cy(result) = size::max_dimension();
+        if (debug() == this)
+            std::cerr << "layout(" << this << ")::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
