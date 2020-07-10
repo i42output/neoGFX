@@ -84,5 +84,18 @@ namespace neogfx
         virtual i_texture_atlas& glyph_atlas() = 0;
         virtual const i_emoji_atlas& emoji_atlas() const = 0;
         virtual i_emoji_atlas& emoji_atlas() = 0;
+    public:
+        bool has_font(const std::string& aFamily, const std::string& aStyle) const
+        {
+            for (uint32_t familyIndex = 0; familyIndex < font_family_count(); ++familyIndex)
+                if (font_family(familyIndex) == aFamily)
+                {
+                    for (uint32_t styleIndex = 0; styleIndex < font_style_count(familyIndex); ++styleIndex)
+                        if (font_style(familyIndex, styleIndex) == aStyle)
+                            return true;
+                    return false;
+                }
+            return false;
+        }
     };
 }

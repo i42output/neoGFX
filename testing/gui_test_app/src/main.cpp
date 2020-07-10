@@ -259,9 +259,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        app.change_style("Light").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
-        app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
-        app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+        app.register_style(ng::style("Keypad"));
         app.change_style("Keypad");
         app.current_style().palette().set_color(ng::color_role::Theme, ng::color::Black);
         app.change_style("Dark");

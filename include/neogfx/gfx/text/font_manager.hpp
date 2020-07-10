@@ -104,8 +104,8 @@ namespace neogfx
         i_native_font_face& add_font(const ref_ptr<i_native_font_face>& aNewFont);
         void cleanup();
     private:
-        font_info iDefaultSystemFontInfo;
-        fallback_font_info iDefaultFallbackFontInfo;
+        mutable std::optional<font_info> iDefaultSystemFontInfo;
+        mutable std::optional<fallback_font_info> iDefaultFallbackFontInfo;
         FT_Library iFontLib;
         native_font_list iNativeFonts;
         font_family_list iFontFamilies;

@@ -53,6 +53,8 @@ namespace neogfx
             font_info default_system_font_info()
             {
 #ifdef WIN32
+                if (service<i_font_manager>().has_font("Segoe UI", "Regular"))
+                    return font_info{ "Segoe UI", "Regular", 9 };
                 std::wstring defaultFontFaceName = L"Microsoft Sans Serif";
                 HKEY hkeyDefaultFont;
                 if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes",
@@ -73,7 +75,7 @@ namespace neogfx
                     }
                     ::RegCloseKey(hkeyDefaultFont);
                 }
-                return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font_style::Normal, 9);
+                return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font_style::Normal, 8);
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::default_system_font_info: Unknown system");
 #endif
@@ -138,8 +140,6 @@ namespace neogfx
     }
 
     font_manager::font_manager() :
-        iDefaultSystemFontInfo{ detail::platform_specific::default_system_font_info() },
-        iDefaultFallbackFontInfo{ detail::platform_specific::default_fallback_font_info() },
         iGlyphAtlas{ size{1024.0, 1024.0} },
         iEmojiAtlas{}
     {
@@ -193,12 +193,16 @@ namespace neogfx
 
     const font_info& font_manager::default_system_font_info() const
     {
-        return iDefaultSystemFontInfo;
+        if (iDefaultSystemFontInfo == std::nullopt)
+            iDefaultSystemFontInfo.emplace(detail::platform_specific::default_system_font_info());
+        return *iDefaultSystemFontInfo;
     }
 
     const i_fallback_font_info& font_manager::default_fallback_font_info() const
     {
-        return iDefaultFallbackFontInfo;
+        if (iDefaultFallbackFontInfo == std::nullopt)
+            iDefaultFallbackFontInfo.emplace(detail::platform_specific::default_fallback_font_info());
+        return *iDefaultFallbackFontInfo;
     }
 
     i_native_font_face& font_manager::create_default_font(const i_device_resolution& aDevice)
