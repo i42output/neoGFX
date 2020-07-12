@@ -34,7 +34,6 @@ namespace neogfx
         }, 100},
         iLayout{ *this },
         iTitle{ iLayout, aTitle },
-        iSpacer{ iLayout },
         iPinButton{ iLayout, push_button_style::TitleBar },
         iUnpinButton{ iLayout, push_button_style::TitleBar },
         iCloseButton{ iLayout, push_button_style::TitleBar },
@@ -42,6 +41,10 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         layout().set_padding(neogfx::padding{});
+
+        iTitle.set_size_policy(size_constraint::Expanding);
+        iTitle.set_minimum_size(size{});
+        iTitle.set_alignment(alignment::Left | alignment::VCenter);
 
         iPinButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iUnpinButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });

@@ -124,6 +124,7 @@ namespace neogfx
         widget_part hit_test(const point& aPosition) const override;
     public:
         neogfx::size_policy size_policy() const override;
+        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
     public:
         using widget::update;
         bool update(const rect& aUpdateRect) override;

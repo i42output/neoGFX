@@ -81,7 +81,6 @@ namespace neogfx
         horizontal_layout iLayout;
         non_client_item<image_widget, widget_part::SystemMenu> iIcon;
         non_client_item<text_widget, widget_part::TitleBar> iTitle;
-        horizontal_spacer iSpacer;
         non_client_item<push_button, widget_part::MinimizeButton> iMinimizeButton;
         non_client_item<push_button, widget_part::MaximizeButton> iMaximizeButton;
         non_client_item<push_button, widget_part::MaximizeButton> iRestoreButton;

@@ -57,8 +57,7 @@ namespace neogfx
         i_standard_layout_container& iContainer;
         neolib::callback_timer iUpdater;
         horizontal_layout iLayout;
-        label iTitle;
-        horizontal_spacer iSpacer;
+        text_widget iTitle;
         push_button iPinButton;
         push_button iUnpinButton;
         push_button iCloseButton;

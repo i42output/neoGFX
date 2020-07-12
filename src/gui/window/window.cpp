@@ -233,7 +233,7 @@ namespace neogfx
 
     inline decoration_style window_style_to_decoration_style(window_style aStyle)
     {
-        decoration_style result = (aStyle & window_style::NoDecoration) == window_style::NoDecoration ? 
+        decoration_style result = (aStyle & window_style::NoDecoration) == window_style::NoDecoration ?
             decoration_style::None : decoration_style::Window;
         if ((aStyle & window_style::Tool) == window_style::Tool)
             result |= decoration_style::Tool;
@@ -277,15 +277,15 @@ namespace neogfx
             iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
             iSurfaceWindow = std::make_unique<surface_window_proxy>(
                 *this,
-                [&](i_surface_window& aProxy) 
-                    { 
-                        return service<i_rendering_engine>().create_window(
-                            service<i_surface_manager>(), 
-                            aProxy, 
-                            *aPlacement.video_mode(),
-                            title_text(), 
-                            style()); 
-                    });
+                [&](i_surface_window& aProxy)
+            {
+                return service<i_rendering_engine>().create_window(
+                    service<i_surface_manager>(),
+                    aProxy,
+                    *aPlacement.video_mode(),
+                    title_text(),
+                    style());
+            });
         }
         else if (!is_nested())
         {
@@ -303,13 +303,13 @@ namespace neogfx
                 if (!has_parent_window(false))
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
-                        [&](i_surface_window& aProxy) 
-                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
+                        [&](i_surface_window& aProxy)
+                { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
                 else
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
-                        [&](i_surface_window& aProxy) 
-                            { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent_window().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
+                        [&](i_surface_window& aProxy)
+                { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent_window().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
                 break;
             case window_state::Iconized:
                 // todo
@@ -408,7 +408,7 @@ namespace neogfx
     {
         return iParentWindow != nullptr &&
             (!aSameSurface ||
-            (has_surface() && iParentWindow->has_surface() && &surface() == &iParentWindow->surface()));
+                (has_surface() && iParentWindow->has_surface() && &surface() == &iParentWindow->surface()));
     }
 
     const i_window& window::parent_window() const
@@ -628,6 +628,15 @@ namespace neogfx
         if (base_type::has_size_policy())
             return base_type::size_policy();
         return size_constraint::Manual;
+    }
+
+    size window::minimum_size(const optional_size& aAvailableSpace) const
+    {
+        if (has_minimum_size())
+            return base_type::minimum_size(aAvailableSpace);
+        if ((style() & window_style::TitleBar) == window_style::TitleBar)
+            return size{ 200_dip, 200_dip };
+        return size{ 32_dip, 32_dip };
     }
 
     bool window::update(const rect& aUpdateRect)

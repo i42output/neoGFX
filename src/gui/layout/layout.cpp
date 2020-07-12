@@ -600,7 +600,7 @@ namespace neogfx
         return has_fixed_size() || iMinimumSize != std::nullopt;
     }
 
-    size layout::minimum_size(const optional_size&) const
+    size layout::minimum_size(const optional_size& aAvailableSpace) const
     {
         size result;
         if (has_fixed_size())
@@ -608,7 +608,7 @@ namespace neogfx
         else if (has_minimum_size())
             result = units_converter(*this).from_device_units(*iMinimumSize);
         if (debug() == this)
-            std::cerr << "layout::minimum_size(...) --> " << result << std::endl;
+            std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
@@ -618,7 +618,7 @@ namespace neogfx
         if (iMinimumSize != newMinimumSize)
         {
             if (debug() == this)
-                std::cerr << "layout::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
+                std::cerr << typeid(*this).name() << "::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
             iMinimumSize = newMinimumSize;
             if (aUpdateLayout)
                 invalidate();
@@ -630,7 +630,7 @@ namespace neogfx
         return has_fixed_size() || iMaximumSize != std::nullopt;
     }
 
-    size layout::maximum_size(const optional_size&) const
+    size layout::maximum_size(const optional_size& aAvailableSpace) const
     {
         size result = size::max_size();
         if (has_fixed_size())
@@ -638,7 +638,7 @@ namespace neogfx
         else if (has_maximum_size())
             result = units_converter(*this).from_device_units(*iMaximumSize);
         if (debug() == this)
-            std::cerr << "layout::maximum_size(...) --> " << result << std::endl;
+            std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
@@ -648,7 +648,7 @@ namespace neogfx
         if (iMaximumSize != newMaximumSize)
         {
             if (debug() == this)
-                std::cerr << "layout::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
+                std::cerr << typeid(*this).name() << "::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
             iMaximumSize = newMaximumSize;
             if (aUpdateLayout)
                 invalidate();
@@ -673,7 +673,7 @@ namespace neogfx
         if (iFixedSize != newFixedSize)
         {
             if (debug() == this)
-                std::cerr << "layout::set_maximum_size(" << newFixedSize << ", " << aUpdateLayout << ")" << std::endl;
+                std::cerr << typeid(*this).name() << "::set_maximum_size(" << newFixedSize << ", " << aUpdateLayout << ")" << std::endl;
             iFixedSize = newFixedSize;
             if (aUpdateLayout)
                 invalidate();
@@ -775,7 +775,7 @@ namespace neogfx
     void layout::remove(item_list::iterator aItem)
     {
         if (debug() == this)
-            std::cerr << "layout::remove(" << std::distance(iItems.begin(), aItem) << ")" << std::endl;
+            std::cerr << typeid(*this).name() << "::remove(" << std::distance(iItems.begin(), aItem) << ")" << std::endl;
         {
             item_list toRemove;
             toRemove.splice(toRemove.begin(), iItems, aItem);
