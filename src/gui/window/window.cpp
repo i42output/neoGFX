@@ -636,7 +636,7 @@ namespace neogfx
             return base_type::minimum_size(aAvailableSpace);
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
             return size{ 200_dip, 200_dip };
-        return size{ 32_dip, 32_dip };
+        return base_type::minimum_size(aAvailableSpace);
     }
 
     bool window::update(const rect& aUpdateRect)
