@@ -1095,6 +1095,9 @@ namespace neogfx
             aGc.set_extents(client_rect().extents());
             aGc.set_origin(origin());
 
+            if (debug() == this)
+                std::cerr << "widget::render(...): client_rect: " << client_rect() << ", origin: " << origin() << std::endl;
+
             scoped_scissor scissor(aGc, clipRect);
 
             scoped_coordinate_system scs1(aGc, origin(), extents(), logical_coordinate_system());

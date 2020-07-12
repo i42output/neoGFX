@@ -1271,20 +1271,26 @@ namespace neogfx
                 break;
             case WM_SIZING:
                 {
-                    self.iExtents = size{
+                    auto const requestedSize = size{
                         static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->right - reinterpret_cast<const RECT*>(lparam)->left),
                         static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->bottom - reinterpret_cast<const RECT*>(lparam)->top) };
-                    if (!CUSTOM_DECORATION)
+                    auto const newSize = requestedSize.max(self.surface_window().as_widget().minimum_size());
+                    auto const previousSize = self.iExtents;
+                    if (newSize != previousSize)
                     {
-                        const RECT referenceClientRect = { 0, 0, 256, 256 };
-                        RECT referenceWindowRect = referenceClientRect;
-                        AdjustWindowRectEx(&referenceWindowRect, GetWindowLong(hwnd, GWL_STYLE), false, GetWindowLong(hwnd, GWL_EXSTYLE));
-                        *self.iExtents += size{
-                            basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
-                            basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
+                        self.iExtents = newSize;
+                        if (!CUSTOM_DECORATION)
+                        {
+                            const RECT referenceClientRect = { 0, 0, 256, 256 };
+                            RECT referenceWindowRect = referenceClientRect;
+                            AdjustWindowRectEx(&referenceWindowRect, GetWindowLong(hwnd, GWL_STYLE), false, GetWindowLong(hwnd, GWL_EXSTYLE));
+                            *self.iExtents += size{
+                                basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
+                                basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
+                        }
+                        result = wndproc(hwnd, msg, wparam, lparam);
+                        self.handle_event(window_event(window_event_type::Resizing, self.surface_size()));
                     }
-                    result = wndproc(hwnd, msg, wparam, lparam);
-                    self.handle_event(window_event(window_event_type::Resizing, self.surface_size()));
                 }
                 break;
             case WM_GETMINMAXINFO:
