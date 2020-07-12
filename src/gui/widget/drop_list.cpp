@@ -146,6 +146,7 @@ namespace neogfx
         iDropList{ aDropList },
         iView{ client_layout(), aDropList }
     {
+        set_padding(neogfx::padding{});
         client_layout().set_padding(neogfx::padding{});
         client_layout().set_size_policy(size_constraint::Expanding);
         update_placement();

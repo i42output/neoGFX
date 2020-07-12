@@ -172,6 +172,7 @@ namespace neogfx
                 else
                 {
                     iClientLayout = std::make_shared<vertical_layout>();
+                    iClientLayout->set_padding(neogfx::padding{});
                     layout_item_index clientLayoutIndex = non_client_layout().count();
                     if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
                         clientLayoutIndex = non_client_layout().index_of(status_bar_layout());
