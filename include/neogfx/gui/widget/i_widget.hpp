@@ -136,6 +136,7 @@ namespace neogfx
         virtual void resized() = 0;
         virtual const i_widget& get_widget_at(const point& aPosition) const = 0;
         virtual i_widget& get_widget_at(const point& aPosition) = 0;
+        virtual neogfx::widget_type widget_type() const = 0;
         virtual bool part_active(widget_part aPart) const = 0;
         virtual widget_part part(const point& aPosition) const = 0;
         virtual widget_part hit_test(const point& aPosition) const = 0;

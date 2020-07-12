@@ -813,6 +813,11 @@ namespace neogfx
         return const_cast<i_widget&>(to_const(*this).get_widget_at(aPosition));
     }
 
+    widget_type widget::widget_type() const
+    {
+        return neogfx::widget_type::Client;
+    }
+
     bool widget::part_active(widget_part aPart) const
     {
         return true;
@@ -1049,11 +1054,11 @@ namespace neogfx
         if (!aIncludeNonClient)
             clipRect = clipRect.intersection(client_rect());
         if (!is_root())
-            clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect())));
+            clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect(widget_type() == neogfx::widget_type::NonClient))));
         else if (root().is_nested())
         {
             auto& parent = root().parent_window().as_widget();
-            clipRect = clipRect.intersection(to_client_coordinates(parent.to_window_coordinates(parent.default_clip_rect())));
+            clipRect = clipRect.intersection(to_client_coordinates(parent.to_window_coordinates(parent.default_clip_rect(widget_type() == neogfx::widget_type::NonClient))));
         }
         return *(cachedRect = clipRect);
     }
@@ -1087,6 +1092,16 @@ namespace neogfx
         {
             scoped_scissor scissor(aGc, nonClientClipRect);
             paint_non_client(aGc);
+
+            for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
+            {
+                auto const& child = *i;
+                if (child->widget_type() == neogfx::widget_type::Client)
+                    continue;
+                rect intersection = nonClientClipRect.intersection(child->non_client_rect());
+                if (!intersection.empty())
+                    child->render(aGc);
+            }
         }
 
         {
@@ -1113,6 +1128,8 @@ namespace neogfx
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
                 auto const& child = *i;
+                if (child->widget_type() == neogfx::widget_type::NonClient)
+                    continue;
                 rect intersection = clipRect.intersection(to_client_coordinates(child->non_client_rect()));
                 if (!intersection.empty())
                     child->render(aGc);

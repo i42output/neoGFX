@@ -356,6 +356,14 @@ namespace neogfx
             update_tracking(aPosition);
         }
     protected:
+        rect default_clip_rect(bool aIncludeNonClient = false) const override
+        {
+            auto clipRect = widget_type::default_clip_rect(aIncludeNonClient);
+            if (!aIncludeNonClient && has_layout(standard_layout::TitleBar))
+                clipRect.y += layout(standard_layout::TitleBar).extents().cy;
+            return clipRect;
+        }
+    protected:
         void init()
         {
             if (iInitialized)

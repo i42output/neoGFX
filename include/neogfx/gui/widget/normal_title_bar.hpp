@@ -73,6 +73,7 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     public:
+        neogfx::widget_type widget_type() const override;
         widget_part hit_test(const point& aPosition) const override;
     private:
         void init();

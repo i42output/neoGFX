@@ -45,6 +45,8 @@ namespace neogfx
     protected:
         size minimum_size(const optional_size& aAvailableSpace = {}) const override;
     protected:
+        neogfx::widget_type widget_type() const override;
+    protected:
         bool transparent_background() const override;
     protected:
         color background_color() const override;

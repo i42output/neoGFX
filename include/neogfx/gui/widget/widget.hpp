@@ -152,6 +152,7 @@ namespace neogfx
         void resized() override;
         const i_widget& get_widget_at(const point& aPosition) const override;
         i_widget& get_widget_at(const point& aPosition) override;
+        neogfx::widget_type widget_type() const override;
         bool part_active(widget_part aPart) const override;
         widget_part part(const point& aPosition) const override;
         widget_part hit_test(const point& aPosition) const override;

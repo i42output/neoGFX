@@ -96,6 +96,11 @@ namespace neogfx
             return widget::minimum_size(aAvailableSpace) + size{ 2.0_cm, 0.0 };
     }
 
+    widget_type tool_title_bar::widget_type() const
+    {
+        return neogfx::widget_type::NonClient;
+    }
+
     bool tool_title_bar::transparent_background() const
     {
         return false;

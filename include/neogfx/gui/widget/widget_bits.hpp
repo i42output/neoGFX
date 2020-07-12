@@ -23,6 +23,32 @@
 
 namespace neogfx
 {
+    enum class widget_type : uint32_t
+    {
+        Client,
+        NonClient
+    };
+
+    inline constexpr widget_type operator|(widget_type aLhs, widget_type aRhs)
+    {
+        return static_cast<widget_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr widget_type operator&(widget_type aLhs, widget_type aRhs)
+    {
+        return static_cast<widget_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr widget_type& operator|=(widget_type& aLhs, widget_type aRhs)
+    {
+        return aLhs = static_cast<widget_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr widget_type& operator&=(widget_type& aLhs, widget_type aRhs)
+    {
+        return aLhs = static_cast<widget_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
     enum class widget_part : uint32_t
     {
         Client,
@@ -104,6 +130,13 @@ namespace neogfx
     };
 }
 
+template <>
+const neolib::enum_enumerators_t<neogfx::widget_type> neolib::enum_enumerators_v<neogfx::widget_type>
+{
+    declare_enum_string(neogfx::widget_type, Client)
+    declare_enum_string(neogfx::widget_type, NonClient)
+};
+        
 template <>
 const neolib::enum_enumerators_t<neogfx::widget_part> neolib::enum_enumerators_v<neogfx::widget_part>
 {

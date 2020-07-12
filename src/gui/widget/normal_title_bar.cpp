@@ -109,6 +109,11 @@ namespace neogfx
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
+    widget_type normal_title_bar::widget_type() const
+    {
+        return neogfx::widget_type::NonClient;
+    }
+
     widget_part normal_title_bar::hit_test(const point&) const
     {
         return widget_part::TitleBar;
