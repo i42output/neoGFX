@@ -105,6 +105,36 @@ namespace neogfx
 }
 
 template <>
+const neolib::enum_enumerators_t<neogfx::widget_part> neolib::enum_enumerators_v<neogfx::widget_part>
+{
+    declare_enum_string(neogfx::widget_part, Client)
+    declare_enum_string(neogfx::widget_part, NonClient)
+    declare_enum_string(neogfx::widget_part, NonClientOther)
+    declare_enum_string(neogfx::widget_part, TitleBar)
+    declare_enum_string(neogfx::widget_part, Grab)
+    declare_enum_string(neogfx::widget_part, Border)
+    declare_enum_string(neogfx::widget_part, BorderLeft)
+    declare_enum_string(neogfx::widget_part, BorderTopLeft)
+    declare_enum_string(neogfx::widget_part, BorderTop)
+    declare_enum_string(neogfx::widget_part, BorderTopRight)
+    declare_enum_string(neogfx::widget_part, BorderRight)
+    declare_enum_string(neogfx::widget_part, BorderBottomRight)
+    declare_enum_string(neogfx::widget_part, BorderBottom)
+    declare_enum_string(neogfx::widget_part, BorderBottomLeft)
+    declare_enum_string(neogfx::widget_part, GrowBox)
+    declare_enum_string(neogfx::widget_part, CloseButton)
+    declare_enum_string(neogfx::widget_part, MaximizeButton)
+    declare_enum_string(neogfx::widget_part, MinimizeButton)
+    declare_enum_string(neogfx::widget_part, RestoreButton)
+    declare_enum_string(neogfx::widget_part, Menu)
+    declare_enum_string(neogfx::widget_part, SystemMenu)
+    declare_enum_string(neogfx::widget_part, VerticalScrollbar)
+    declare_enum_string(neogfx::widget_part, HorizontalScrollbar)
+    declare_enum_string(neogfx::widget_part, Nowhere)
+    declare_enum_string(neogfx::widget_part, NowhereError)
+};
+
+template <>
 const neolib::enum_enumerators_t<neogfx::focus_policy> neolib::enum_enumerators_v<neogfx::focus_policy>
 {
     declare_enum_string(neogfx::focus_policy, NoFocus)

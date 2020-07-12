@@ -33,7 +33,7 @@
 
 namespace neogfx
 {
-    class text_edit : public scrollable_widget, public i_clipboard_sink, public i_text_document
+    class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
     public:
         define_event(TextFilter, text_filter, const std::string&, bool&)
@@ -462,7 +462,7 @@ namespace neogfx
         bool text_input(const std::string& aText) override;
     public:
         neogfx::scrolling_disposition scrolling_disposition() const override;
-        using scrollable_widget::update_scrollbar_visibility;
+        using framed_scrollable_widget::update_scrollbar_visibility;
         void update_scrollbar_visibility(usv_stage_e aStage) override;
     public:
         color frame_color() const override;

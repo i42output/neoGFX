@@ -65,6 +65,9 @@ namespace neogfx
     using neolib::to_string;
     using namespace neolib::string_literals;
 
+    using neolib::operator<<;
+    using neolib::operator>>;
+
     template <typename Component>
     Component& service();
 

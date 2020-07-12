@@ -129,10 +129,10 @@ namespace neogfx
         i_window& iSurrogate;
     };
 
-    class window::client : public scrollable_widget
+    class window::client : public framed_scrollable_widget
     {
     public:
-        client(i_layout& aLayout, scrollbar_style aScrollbarStyle);
+        client(neogfx::scrollbar_style aScrollbarStyle);
     protected:
         bool can_defer_layout() const override;
         bool is_managing_layout() const override;
@@ -145,8 +145,8 @@ namespace neogfx
         vertical_layout iLayout;
     };
 
-    window::client::client(i_layout& aLayout, scrollbar_style aScrollbarStyle) :
-        scrollable_widget{ aLayout, frame_style::NoFrame, aScrollbarStyle },
+    window::client::client(neogfx::scrollbar_style aScrollbarStyle) :
+        framed_scrollable_widget{ aScrollbarStyle, frame_style::NoFrame },
         iLayout{ *this }
     {
         set_padding(neogfx::padding{});
@@ -171,7 +171,7 @@ namespace neogfx
     size window::client::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size() || (static_cast<const window&>(parent()).style() & window_style::Resize) != window_style::Resize)
-            return scrollable_widget::minimum_size(aAvailableSpace);
+            return framed_scrollable_widget::minimum_size(aAvailableSpace);
         else
             return service<i_app>().current_style().padding(padding_role::Window).size();
     }
@@ -181,42 +181,42 @@ namespace neogfx
         return true;
     }
 
-    window::window(window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, window_placement::default_placement(), {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(const window_placement& aPlacement, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(const window_placement& aPlacement, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, aPlacement, {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, window_placement::default_placement(), {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, aPlacement, {}, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
@@ -231,8 +231,21 @@ namespace neogfx
         set_destroyed();
     }
 
-    window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle) :
-        scrollable_widget{ aFrameStyle, aScrollbarStyle },
+    inline decoration_style window_style_to_decoration_style(window_style aStyle)
+    {
+        decoration_style result = (aStyle & window_style::NoDecoration) == window_style::NoDecoration ? 
+            decoration_style::None : decoration_style::Window;
+        if ((aStyle & window_style::Tool) == window_style::Tool)
+            result |= decoration_style::Tool;
+        if ((aStyle & window_style::Popup) == window_style::Popup)
+            result |= decoration_style::Popup;
+        if ((aStyle & window_style::Nested) == window_style::Nested)
+            result |= decoration_style::Nested;
+        return result;
+    }
+
+    window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+        base_type{ window_style_to_decoration_style(aStyle), aScrollbarStyle, aFrameStyle },
         iWindowManager{ service<i_window_manager>() },
         iParentWindow{ nullptr },
         iPlacement{ aPlacement },
@@ -243,15 +256,7 @@ namespace neogfx
         iCountedEnable{ 0 },
         iEnteredWidget{ nullptr },
         iFocusedWidget{ nullptr },
-        iDismissingChildren{ false },
-        iNonClientLayout{ *this },
-        iTitleBarLayout{ iNonClientLayout },
-        iMenuLayout{ iNonClientLayout },
-        iToolbarLayout{ iNonClientLayout },
-        iDockLayout{ iToolbarLayout.center() },
-        iClientWidget{ std::make_unique<client>(iDockLayout.center(), aScrollbarStyle) },
-        iClientLayout{ iClientWidget->layout() },
-        iStatusBarLayout{ iNonClientLayout }
+        iDismissingChildren{ false }
     {
         if (aParent)
             set_parent(*aParent);
@@ -541,7 +546,7 @@ namespace neogfx
 
     color window::frame_color() const
     {
-        if (effectively_enabled() && !scrollable_widget::has_frame_color() && is_active())
+        if (effectively_enabled() && !base_type::has_frame_color() && is_active())
         {
             if (!is_nested())
                 return service<i_app>().current_style().palette().color(color_role::Selection);
@@ -549,7 +554,7 @@ namespace neogfx
                 return service<i_app>().current_style().palette().color(color_role::SecondaryAccent);
         }
         else
-            return scrollable_widget::frame_color().with_alpha(is_active() ? 1.0 : 0.25);
+            return base_type::frame_color().with_alpha(is_active() ? 1.0 : 0.25);
     }
 
     bool window::is_root() const
@@ -584,7 +589,7 @@ namespace neogfx
 
     void window::layout_items_completed()
     {
-        scrollable_widget::layout_items_completed();
+        base_type::layout_items_completed();
         if (iEnteredWidget != nullptr)
         {
             i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
@@ -595,24 +600,24 @@ namespace neogfx
 
     bool window::device_metrics_available() const
     {
-        return scrollable_widget::device_metrics_available();
+        return base_type::device_metrics_available();
     }
 
     const i_device_metrics& window::device_metrics() const
     {
-        return scrollable_widget::device_metrics();
+        return base_type::device_metrics();
     }
 
     void window::resized()
     {
         window_manager().resize_window(*this, widget::extents());
-        scrollable_widget::resized();
+        base_type::resized();
         update(true);
     }
 
     widget_part window::hit_test(const point& aPosition) const
     {
-        auto result = scrollable_widget::hit_test(aPosition);
+        auto result = base_type::hit_test(aPosition);
         if (result == widget_part::Client)
             result = widget_part::Grab;
         return result;
@@ -620,14 +625,14 @@ namespace neogfx
 
     neogfx::size_policy window::size_policy() const
     {
-        if (scrollable_widget::has_size_policy())
-            return scrollable_widget::size_policy();
+        if (base_type::has_size_policy())
+            return base_type::size_policy();
         return size_constraint::Manual;
     }
 
     bool window::update(const rect& aUpdateRect)
     {
-        if (!scrollable_widget::update(aUpdateRect))
+        if (!base_type::update(aUpdateRect))
             return false;
         if (is_nest())
             for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
@@ -655,7 +660,7 @@ namespace neogfx
         }
         aGc.set_extents(extents());
         aGc.set_origin(origin());
-        scrollable_widget::render(aGc);
+        base_type::render(aGc);
         if (is_nest())
             for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
                 as_nest().nested_window(nw).as_window().as_widget().render(aGc);
@@ -664,13 +669,13 @@ namespace neogfx
 
     void window::paint(i_graphics_context& aGc) const
     {
-        scrollable_widget::paint(aGc);
+        base_type::paint(aGc);
     }
 
     color window::background_color() const
     {
         if (has_background_color())
-            return scrollable_widget::background_color();
+            return base_type::background_color();
         else
             return container_background_color();
     }
@@ -783,7 +788,7 @@ namespace neogfx
     {
         if (iEnteredWidget == &aWidget)
             iEnteredWidget = nullptr;
-        if (surface().has_capturing_widget() && &surface().capturing_widget() == &aWidget)
+        if (!iSurfaceDestroyed && surface().has_capturing_widget() && &surface().capturing_widget() == &aWidget)
             surface().release_capture(aWidget);
         if (iFocusedWidget == &aWidget)
             iFocusedWidget = nullptr;
@@ -868,11 +873,11 @@ namespace neogfx
 
     scrolling_disposition window::scrolling_disposition(const i_widget& aChildWidget) const
     {
-        if (iTitleBar != std::nullopt && &aChildWidget == &*iTitleBar)
+        if (has_layout(standard_layout::TitleBar) && layout(standard_layout::TitleBar).find(aChildWidget) != std::nullopt)
             return neogfx::scrolling_disposition::DontScrollChildWidget;
-        else if (iStatusBarLayout.find(aChildWidget) != std::nullopt)
+        else if (has_layout(standard_layout::StatusBar) && layout(standard_layout::StatusBar).find(aChildWidget) != std::nullopt)
             return neogfx::scrolling_disposition::DontScrollChildWidget;
-        return scrollable_widget::scrolling_disposition(aChildWidget);
+        return base_type::scrolling_disposition(aChildWidget);
     }
 
     const std::string& window::title_text() const
@@ -885,10 +890,10 @@ namespace neogfx
         if (iTitleText != aTitleText)
         {
             iTitleText = aTitleText;
-            if (iTitleBar != std::nullopt)
-                iTitleBar->set_title(iTitleText);
+            if ((style() & window_style::TitleBar) == window_style::TitleBar)
+                title_bar().set_title(title_text());
             if (has_native_window())
-                native_window().set_title_text(aTitleText);
+                native_window().set_title_text(title_text());
         }
     }
 
@@ -995,6 +1000,9 @@ namespace neogfx
     {
         iSurfaceDestroyed.emplace(surface().native_surface());
 
+        base_type::init();
+        set_decoration_style(window_style_to_decoration_style(iStyle));
+
         if (is_fullscreen() || (service<i_app>().program_options().nest() && &ultimate_ancestor() == this))
         {
             if (is_fullscreen())
@@ -1011,22 +1019,9 @@ namespace neogfx
         update_modality(false);
 
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
-            iTitleBar.emplace(*this, service<i_app>().default_window_icon(), title_text());
+            title_bar().set_title(title_text());
 
         set_padding({});
-        iNonClientLayout.set_padding(neogfx::padding{});
-        iNonClientLayout.set_spacing(size{});
-        iTitleBarLayout.set_padding(neogfx::padding{});
-        iMenuLayout.set_padding(neogfx::padding{});
-        iToolbarLayout.set_padding(neogfx::padding{});
-        iDockLayout.set_padding(neogfx::padding{});
-        iDockLayout.top().set_padding(neogfx::padding{});
-        iDockLayout.bottom().set_padding(neogfx::padding{});
-        iDockLayout.left().set_padding(neogfx::padding{});
-        iDockLayout.right().set_padding(neogfx::padding{});
-        iDockLayout.center().set_padding(neogfx::padding{});
-        iClientLayout.set_padding(neogfx::padding{});
-        iStatusBarLayout.set_padding(neogfx::padding{});
 
         if (!is_nested())
             resize(native_surface().surface_size());
@@ -1052,6 +1047,8 @@ namespace neogfx
                     center_on_parent(false);
             }
         }
+
+        set_client(std::make_shared<client>(scrollbar_style()));
 
         if (has_native_window())
             native_window().initialisation_complete();
@@ -1103,8 +1100,8 @@ namespace neogfx
         switch (aWidgetPart)
         {
         case widget_part::TitleBar:
-            if (iTitleBar != std::nullopt)
-                return to_client_coordinates(iTitleBar->non_client_rect());
+            if ((style() & window_style::TitleBar) == window_style::TitleBar)
+                return to_client_coordinates(title_bar().as_widget().non_client_rect());
             else
                 return rect{};
         default:
@@ -1112,63 +1109,44 @@ namespace neogfx
         }
     }
 
+    bool window::has_client_widget() const
+    {
+        return base_type::has_client_widget();
+    }
+
     const i_widget& window::client_widget() const
     {
-        return *iClientWidget;
+        return base_type::client_widget();
     }
 
     i_widget& window::client_widget()
     {
-        return *iClientWidget;
+        return base_type::client_widget();
+    }
+
+    void window::set_client(i_widget& aClient)
+    {
+        base_type::set_client(aClient);
+    }
+
+    void window::set_client(std::shared_ptr<i_widget> aClient)
+    {
+        base_type::set_client(aClient);
     }
 
     bool window::has_layout(standard_layout aStandardLayout) const
     {
-        switch (aStandardLayout)
-        {
-        case standard_layout::Client:
-        case standard_layout::NonClient:
-        case standard_layout::TitleBar:
-        case standard_layout::Menu:
-        case standard_layout::Toolbar:
-        case standard_layout::Dock:
-        case standard_layout::StatusBar:
-            return true;
-        case standard_layout::Default:
-            return has_layout();
-        default:
-            return false;
-        }
+        return base_type::has_layout(aStandardLayout);
     }
 
     const i_layout& window::layout(standard_layout aStandardLayout, layout_position aPosition) const
     {
-        switch (aStandardLayout)
-        {
-        case standard_layout::Client:
-            return iClientLayout;
-        case standard_layout::NonClient:
-            return iNonClientLayout;
-        case standard_layout::TitleBar:
-            return iTitleBarLayout;
-        case standard_layout::Menu:
-            return iMenuLayout;
-        case standard_layout::Toolbar:
-            return iToolbarLayout.part(aPosition);
-        case standard_layout::Dock:
-            return iDockLayout.part(aPosition);
-        case standard_layout::StatusBar:
-            return iStatusBarLayout;
-        case standard_layout::Default:
-            return layout();
-        default:
-            throw standard_layout_not_found();
-        }
+        return base_type::layout(aStandardLayout, aPosition);
     }
 
     i_layout& window::layout(standard_layout aStandardLayout, layout_position aPosition)
     {
-        return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
+        return base_type::layout(aStandardLayout, aPosition);
     }
 
     bool window::is_widget() const

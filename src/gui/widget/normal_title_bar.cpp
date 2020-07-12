@@ -67,6 +67,16 @@ namespace neogfx
         init();
     }
 
+    const i_widget& normal_title_bar::as_widget() const
+    {
+        return *this;
+    }
+
+    i_widget& normal_title_bar::as_widget()
+    {
+        return *this;
+    }
+
     const std::string& normal_title_bar::title() const
     {
         return iTitle.text();

@@ -1114,9 +1114,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1567,6 +1564,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\core\color.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

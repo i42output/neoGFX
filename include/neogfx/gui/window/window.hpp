@@ -21,9 +21,11 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/widget/decorated.hpp>
 #include <neogfx/gui/widget/nest.hpp>
 #include <neogfx/gui/widget/i_nested_window.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
@@ -33,8 +35,9 @@ namespace neogfx
 {
     class i_window_manager;
 
-    class window : public i_window, public scrollable_widget
+    class window : public decorated<framed_scrollable_widget, i_window>
     {
+        typedef decorated<framed_scrollable_widget, i_window> base_type;
     public:
         define_declared_event(Window, window_event, neogfx::window_event&)
         define_declared_event(DismissingChildren, dismissing_children, const i_widget*)
@@ -48,17 +51,17 @@ namespace neogfx
         struct fullscreen_window_cannot_nest : std::logic_error { fullscreen_window_cannot_nest() : std::logic_error("neogfx::window::fullscreen_window_cannot_nest") {} };
         struct parentless_window_cannot_nest : std::logic_error { parentless_window_cannot_nest() : std::logic_error("neogfx::window::parentless_window_cannot_nest") {} };
     public:
-        window(window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        window(const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        window(const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        window(i_widget& aParent, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        window(window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         ~window();
     private:
-        window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, scrollbar_style aScrollbarStyle);
+        window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle);
     public:
         window_style style() const override;
         void set_style(window_style aStyle) override;
@@ -172,14 +175,17 @@ namespace neogfx
     public:
         rect widget_part_rect(widget_part aWidgetPart) const override;
     public:
-        using scrollable_widget::has_layout;
-        using scrollable_widget::layout;
+        bool has_client_widget() const override;
+        const i_widget& client_widget() const override;
+        i_widget& client_widget() override;
+        void set_client(i_widget& aClient) override;
+        void set_client(std::shared_ptr<i_widget> aClient) override;
+    public:
+        using base_type::has_layout;
+        using base_type::layout;
         bool has_layout(standard_layout aStandardLayout) const override;
         const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const override;
         i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) override;
-    public:
-        const i_widget& client_widget() const override;
-        i_widget& client_widget() override;
     public:
         bool requires_owner_focus() const override;
         bool has_entered_widget() const override;
@@ -218,15 +224,6 @@ namespace neogfx
         i_widget* iEnteredWidget;
         i_widget* iFocusedWidget;
         bool iDismissingChildren;
-        vertical_layout iNonClientLayout;
-        vertical_layout iTitleBarLayout;
-        vertical_layout iMenuLayout;
-        border_layout iToolbarLayout;
-        border_layout iDockLayout;
-        std::unique_ptr<i_widget> iClientWidget;
-        i_layout& iClientLayout;
-        vertical_layout iStatusBarLayout;
-        optional_title_bar iTitleBar;
         std::optional<destroyed_flag> iSurfaceDestroyed;
     };
 }

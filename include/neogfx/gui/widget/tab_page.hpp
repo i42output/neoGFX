@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class tab_page : public scrollable_widget, public i_tab_page
+    class tab_page : public framed_scrollable_widget, public i_tab_page
     {
     public:
         define_declared_event(Selected, selected)

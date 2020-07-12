@@ -30,25 +30,25 @@ namespace neogfx
     }
 
     tab_page::tab_page(i_tab_page_container& aContainer, i_tab& aTab) :
-        scrollable_widget{ aContainer.page_layout(), frame_style::ContainerFrame }, iTab{ aTab }
+        framed_scrollable_widget{ aContainer.page_layout(), frame_style::ContainerFrame }, iTab{ aTab }
     {
         aContainer.add_tab_page(aTab, *this);
     }
 
     tab_page::tab_page(i_widget& aParent, i_tab& aTab) :
-        scrollable_widget{ aParent, frame_style::ContainerFrame }, iTab{ aTab }
+        framed_scrollable_widget{ aParent, frame_style::ContainerFrame }, iTab{ aTab }
     {
     }
 
     tab_page::tab_page(i_layout& aLayout, i_tab& aTab) :
-        scrollable_widget{ aLayout, frame_style::ContainerFrame }, iTab{ aTab }
+        framed_scrollable_widget{ aLayout, frame_style::ContainerFrame }, iTab{ aTab }
     {
     }
 
     neogfx::size_policy tab_page::size_policy() const
     {
         if (has_size_policy())
-            return scrollable_widget::size_policy();
+            return framed_scrollable_widget::size_policy();
         else
             return size_constraint::Expanding;
     }
@@ -56,7 +56,7 @@ namespace neogfx
     size tab_page::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size() || (iTab.container().style() & tab_container_style::ResizeToTabs) == tab_container_style::ResizeToTabs)
-            return scrollable_widget::minimum_size(aAvailableSpace);
+            return framed_scrollable_widget::minimum_size(aAvailableSpace);
         else
             return size{};
     }
@@ -64,7 +64,7 @@ namespace neogfx
     size tab_page::maximum_size(const optional_size& aAvailableSpace) const
     {
         if (has_maximum_size() || size_policy() != size_constraint::Expanding)
-            return scrollable_widget::maximum_size(aAvailableSpace);
+            return framed_scrollable_widget::maximum_size(aAvailableSpace);
         else
             return size::max_size();
     }
@@ -102,13 +102,13 @@ namespace neogfx
                 break;
             }
         }
-        scrollable_widget::paint_non_client_after(aGc);
+        framed_scrollable_widget::paint_non_client_after(aGc);
     }
 
     color tab_page::background_color() const
     {
         if (has_background_color())
-            return scrollable_widget::background_color();
+            return framed_scrollable_widget::background_color();
         else
             return container_background_color();
     }

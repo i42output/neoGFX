@@ -472,7 +472,7 @@ namespace neogfx
     }
 
     color_dialog::yz_picker::yz_picker(color_dialog& aOwner) :
-        scrollable_widget(aOwner.iRightTopLayout), iOwner(aOwner), iLayout{ *this }, iCanvas{ iLayout }, iTexture{ image{ size{256, 256}, color::Black } }, iTracking{ false }
+        framed_scrollable_widget(aOwner.iRightTopLayout), iOwner(aOwner), iLayout{ *this }, iCanvas{ iLayout }, iTexture{ image{ size{256, 256}, color::Black } }, iTracking{ false }
     {
         iCanvas.set_image(iTexture);
         set_fixed_size(size{ 256.0_dip, 256.0_dip } + size{ effective_frame_width() * 2.0 });
@@ -514,7 +514,7 @@ namespace neogfx
 
     void color_dialog::yz_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             select(aPosition - client_rect(false).top_left());
@@ -524,14 +524,14 @@ namespace neogfx
 
     void color_dialog::yz_picker::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        scrollable_widget::mouse_button_released(aButton, aPosition);
+        framed_scrollable_widget::mouse_button_released(aButton, aPosition);
         if (!capturing())
             iTracking = false;
     }
 
     void color_dialog::yz_picker::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
         if (iTracking)
             select(aPosition - client_rect(false).top_left());
     }
@@ -541,7 +541,7 @@ namespace neogfx
         point mousePos = root().mouse_position() - origin();
         if (client_rect(false).contains(mousePos))
             return mouse_system_cursor::Crosshair;
-        return scrollable_widget::mouse_cursor();
+        return framed_scrollable_widget::mouse_cursor();
     }
 
     void color_dialog::yz_picker::select(const point& aPosition)
@@ -901,7 +901,7 @@ namespace neogfx
             change_color_space(static_cast<color_space>(aCurrentIndex->row()));
         });
 
-        scoped_units su{ static_cast<framed_widget<>&>(*this), units::Pixels };
+        scoped_units su{ *this, units::Pixels };
         static const std::set<color> sBasicColors
         {
             color::AliceBlue, color::AntiqueWhite, color::Aquamarine, color::Azure, color::Beige, color::Bisque, color::Black, color::BlanchedAlmond, 

@@ -724,7 +724,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\nest.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\skin_manager.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\slider.cpp" />
@@ -805,6 +804,7 @@
     <None Include="..\..\..\include\neogfx\core\color.inl" />
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
+    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl" />
     <CustomBuild Include="..\..\..\src\resources.nrc">

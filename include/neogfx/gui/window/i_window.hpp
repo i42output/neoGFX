@@ -37,7 +37,7 @@ namespace neogfx
     class i_nest;
     class i_widget;
 
-    class i_window : public i_standard_layout_container
+    class i_window : public virtual i_standard_layout_container
     {
     public:
         declare_event(window_event, neogfx::window_event&)

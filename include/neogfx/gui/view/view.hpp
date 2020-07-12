@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_controller;
 
-    class view : public i_view, public scrollable_widget
+    class view : public i_view, public framed_scrollable_widget
     {
     public:
         define_declared_event(Activated, activated)

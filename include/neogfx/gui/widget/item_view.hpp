@@ -40,7 +40,7 @@ namespace neogfx
         TreeExpander
     };
 
-    class item_view : public scrollable_widget, protected i_header_view_owner
+    class item_view : public framed_scrollable_widget, protected i_header_view_owner
     {
     public:
         define_event(CellEntered, cell_entered, const item_presentation_model_index&)
@@ -53,9 +53,9 @@ namespace neogfx
         struct unknown_editor_type : std::logic_error { unknown_editor_type() : std::logic_error("neogfx::item_view::unknown_editor_type") {} };
         struct invalid_cell_part : std::logic_error { invalid_cell_part() : std::logic_error("neogfx::item_view::invalid_cell_part") {} };
     public:
-        item_view(frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        item_view(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        item_view(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        item_view(frame_style aFrameStyle = frame_style::SolidFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        item_view(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        item_view(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         ~item_view();
     public:
         bool has_model() const;
@@ -127,7 +127,7 @@ namespace neogfx
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool text_input(const std::string& aText) override;
     protected:
-        using scrollable_widget::scrolling_disposition;
+        using framed_scrollable_widget::scrolling_disposition;
         neogfx::scrolling_disposition scrolling_disposition() const override;
         void update_scrollbar_visibility() override;
         void update_scrollbar_visibility(usv_stage_e aStage) override;

@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class view_stack : public scrollable_widget
+    class view_stack : public framed_scrollable_widget
     {
     public:
         view_stack(i_layout& aLayout, i_view_container& aParent);

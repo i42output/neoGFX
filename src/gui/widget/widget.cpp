@@ -1147,7 +1147,7 @@ namespace neogfx
         // do nothing
     }
 
-    void widget::paint(i_graphics_context&) const
+    void widget::paint(i_graphics_context& aGc) const
     {
         // do nothing
     }

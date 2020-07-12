@@ -65,6 +65,16 @@ namespace neogfx
         update_textures();
     }
 
+    const i_widget& tool_title_bar::as_widget() const
+    {
+        return *this;
+    }
+
+    i_widget& tool_title_bar::as_widget()
+    {
+        return *this;
+    }
+
     const std::string& tool_title_bar::title() const
     {
         return iTitle.text();

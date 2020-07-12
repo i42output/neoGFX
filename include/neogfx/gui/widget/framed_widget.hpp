@@ -46,18 +46,68 @@ namespace neogfx
         typedef framed_widget<Base> self_type;
         typedef Base base_type;
     public:
-        framed_widget(frame_style aStyle = frame_style::SolidFrame, dimension aLineWidth = 1.0) :
-            base_type{}, iStyle(aStyle), iLineWidth(aLineWidth)
+        template <typename... Args>
+        framed_widget(Args&&... aArgs) :
+            base_type{ std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ 1.0 }
         {
         }
-        framed_widget(i_widget& aParent, frame_style aStyle = frame_style::SolidFrame, dimension aLineWidth = 1.0) :
-            base_type(aParent), iStyle(aStyle), iLineWidth(aLineWidth)
+        template <typename... Args>
+        framed_widget(i_widget& aParent, Args&&... aArgs) :
+            base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ 1.0 }
         {
         }
-        framed_widget(i_layout& aLayout, frame_style aStyle = frame_style::SolidFrame, dimension aLineWidth = 1.0) :
-            base_type(aLayout), iStyle(aStyle), iLineWidth(aLineWidth)
+        template <typename... Args>
+        framed_widget(i_layout& aLayout, Args&&... aArgs) :
+            base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ 1.0 }
         {
         }
+        template <typename... Args>
+        framed_widget(dimension aLineWidth, Args&&... aArgs) :
+            base_type{ std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ aLineWidth }
+        {
+        }
+        template <typename... Args>
+        framed_widget(i_widget& aParent, dimension aLineWidth, Args&&... aArgs) :
+            base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ aLineWidth }
+        {
+        }
+        template <typename... Args>
+        framed_widget(i_layout& aLayout, dimension aLineWidth, Args&&... aArgs) :
+            base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ aLineWidth }
+        {
+        }
+        template <typename... Args>
+        framed_widget(frame_style aStyle, Args&&... aArgs) :
+            base_type{ std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ 1.0 }
+        {
+        }
+        template <typename... Args>
+        framed_widget(i_widget& aParent, frame_style aStyle, Args&&... aArgs) :
+            base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ 1.0 }
+        {
+        }
+        template <typename... Args>
+        framed_widget(i_layout& aLayout, frame_style aStyle, Args&&... aArgs) :
+            base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ 1.0 }
+        {
+        }
+        template <typename... Args>
+        framed_widget(frame_style aStyle, dimension aLineWidth, Args&&... aArgs) :
+            base_type{ std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ aLineWidth }
+        {
+        }
+        template <typename... Args>
+        framed_widget(i_widget& aParent, frame_style aStyle, dimension aLineWidth, Args&&... aArgs) :
+            base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ aLineWidth }
+        {
+        }
+        template <typename... Args>
+        framed_widget(i_layout& aLayout, frame_style aStyle, dimension aLineWidth, Args&&... aArgs) :
+            base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ aLineWidth }
+        {
+        }
+    public:
+        using base_type::as_widget;
     public:
         rect client_rect(bool aIncludePadding = true) const override
         {
@@ -109,11 +159,11 @@ namespace neogfx
                 break;
             case frame_style::SolidFrame:
             case frame_style::WindowFrame:
-                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, base_type::non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
+                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, as_widget().non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
                 break;
             case frame_style::ContainerFrame:
             {
-                rect rectBorder{ point{ 0.0, 0.0 }, base_type::non_client_rect().extents() };
+                rect rectBorder{ point{ 0.0, 0.0 }, as_widget().non_client_rect().extents() };
                 rectBorder.deflate(line_width(), line_width());
                 aGc.draw_rect(rectBorder, pen(inner_frame_color(), line_width()));
                 rectBorder.inflate(line_width(), line_width());
@@ -138,8 +188,8 @@ namespace neogfx
             if (iStyle != aStyle)
             {
                 iStyle = aStyle;
-                if (base_type::has_layout_manager())
-                    base_type::layout_manager().layout_items(true);
+                if (as_widget().has_layout_manager())
+                    as_widget().layout_manager().layout_items(true);
             }
         }
     public:
@@ -152,21 +202,21 @@ namespace neogfx
             if (has_frame_color())
                 return *iFrameColor;
             else if (iStyle != frame_style::ContainerFrame)
-                return base_type::background_color().shade(0x60);
+                return as_widget().background_color().shade(0x60);
             else
-                return (base_type::has_foreground_color() ? base_type::foreground_color() : base_type::container_background_color()).darker(0x40);
+                return (as_widget().has_foreground_color() ? as_widget().foreground_color() : as_widget().container_background_color()).darker(0x40);
         }
         virtual void set_frame_color(const optional_color& aFrameColor = optional_color{})
         {
             iFrameColor = aFrameColor;
-            base_type::update();
+            as_widget().update();
         }
         virtual color inner_frame_color() const
         {
             if (iStyle != frame_style::ContainerFrame)
                 return frame_color();
             else
-                return (base_type::has_foreground_color() ? base_type::foreground_color() : base_type::container_background_color()).lighter(0x40);
+                return (as_widget().has_foreground_color() ? as_widget().foreground_color() : as_widget().container_background_color()).lighter(0x40);
         }
     public:
         dimension line_width() const

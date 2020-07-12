@@ -174,7 +174,7 @@ namespace neogfx
     };
 
     text_edit::text_edit(type_e aType, frame_style aFrameStyle) :
-        scrollable_widget{ aFrameStyle, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible},
+        framed_scrollable_widget{ aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iType{ aType },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -193,7 +193,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_widget& aParent, type_e aType, frame_style aFrameStyle) :
-        scrollable_widget{ aParent, aFrameStyle, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible },
+        framed_scrollable_widget{ aParent, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iType{ aType },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -212,7 +212,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_layout& aLayout, type_e aType, frame_style aFrameStyle) :
-        scrollable_widget{ aLayout, aFrameStyle, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible },
+        framed_scrollable_widget{ aLayout, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iType{ aType },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -238,21 +238,21 @@ namespace neogfx
 
     void text_edit::moved()
     {
-        scrollable_widget::moved();
+        framed_scrollable_widget::moved();
     }
 
     void text_edit::resized()
     {
-        scrollable_widget::resized();
+        framed_scrollable_widget::resized();
     }
 
     size text_edit::minimum_size(const optional_size& aAvailableSpace) const
     {
         if (has_minimum_size())
-            return scrollable_widget::minimum_size(aAvailableSpace);
+            return framed_scrollable_widget::minimum_size(aAvailableSpace);
         scoped_units su{ *this, units::Pixels };
         auto childLayoutSize = has_layout() ? layout().minimum_size(aAvailableSpace) : size{};
-        auto result = scrollable_widget::minimum_size(aAvailableSpace) - childLayoutSize;
+        auto result = framed_scrollable_widget::minimum_size(aAvailableSpace) - childLayoutSize;
         if (!size_hint())
             result += size{ font().height() }.max(childLayoutSize);
         else
@@ -273,13 +273,13 @@ namespace neogfx
     size text_edit::maximum_size(const optional_size& aAvailableSpace) const
     {
         if (iType == MultiLine || has_maximum_size())
-            return scrollable_widget::maximum_size(aAvailableSpace);
-        return size{ scrollable_widget::maximum_size(aAvailableSpace).cx, minimum_size(aAvailableSpace).cy };
+            return framed_scrollable_widget::maximum_size(aAvailableSpace);
+        return size{ framed_scrollable_widget::maximum_size(aAvailableSpace).cx, minimum_size(aAvailableSpace).cy };
     }
 
     neogfx::padding text_edit::padding() const
     {
-        auto result = scrollable_widget::padding();
+        auto result = framed_scrollable_widget::padding();
         if (default_style().text_effect())
             result += default_style().text_effect()->width();
         return result;
@@ -289,7 +289,7 @@ namespace neogfx
 
     void text_edit::paint(i_graphics_context& aGc) const
     {
-        scrollable_widget::paint(aGc);
+        framed_scrollable_widget::paint(aGc);
         rect clipRect = default_clip_rect().intersection(client_rect(false));
         if (default_style().text_effect())
             clipRect.inflate(size{ default_style().text_effect()->width() });
@@ -341,7 +341,7 @@ namespace neogfx
 
     const font& text_edit::font() const
     {
-        return default_style().font() != std::nullopt ? *default_style().font() : scrollable_widget::font();
+        return default_style().font() != std::nullopt ? *default_style().font() : framed_scrollable_widget::font();
     }
 
     void text_edit::set_font(const optional_font& aFont)
@@ -353,7 +353,7 @@ namespace neogfx
 
     void text_edit::focus_gained(focus_reason aFocusReason)
     {
-        scrollable_widget::focus_gained(aFocusReason);
+        framed_scrollable_widget::focus_gained(aFocusReason);
         neolib::service<neolib::i_power>().register_activity();
         service<i_clipboard>().activate(*this);
         iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
@@ -368,7 +368,7 @@ namespace neogfx
     void text_edit::focus_lost(focus_reason aFocusReason)
     {
         destroyed_flag destroyed{ *this };
-        scrollable_widget::focus_lost(aFocusReason);
+        framed_scrollable_widget::focus_lost(aFocusReason);
         if (destroyed)
             return;
         service<i_clipboard>().deactivate(*this);
@@ -379,14 +379,14 @@ namespace neogfx
 
     void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
             set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
     }
 
     void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (!password() && aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             auto word = word_at(document_hit_test(aPosition));
@@ -397,7 +397,7 @@ namespace neogfx
     
     void text_edit::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        scrollable_widget::mouse_button_released(aButton, aPosition);
+        framed_scrollable_widget::mouse_button_released(aButton, aPosition);
         iDragger = std::nullopt;
         if (aButton == mouse_button::Right)
         {
@@ -428,7 +428,7 @@ namespace neogfx
 
     void text_edit::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
         neolib::service<neolib::i_power>().register_activity();
         if (iDragger != std::nullopt)
             set_cursor_position(aPosition, false);
@@ -436,17 +436,17 @@ namespace neogfx
 
     void text_edit::mouse_entered(const point& aPosition)
     {
-        scrollable_widget::mouse_entered(aPosition);
+        framed_scrollable_widget::mouse_entered(aPosition);
     }
 
     void text_edit::mouse_left()
     {
-        scrollable_widget::mouse_left();
+        framed_scrollable_widget::mouse_left();
     }
 
     neogfx::mouse_cursor text_edit::mouse_cursor() const
     {
-        return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt ? mouse_system_cursor::IBeam : scrollable_widget::mouse_cursor();
+        return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt ? mouse_system_cursor::IBeam : framed_scrollable_widget::mouse_cursor();
     }
 
     bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -471,7 +471,7 @@ namespace neogfx
                 cursor().set_position(cursor().position() + 1);
             }
             else
-                handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             break;
         case ScanCode_BACKSPACE:
             if (cursor().position() == cursor().anchor())
@@ -502,7 +502,7 @@ namespace neogfx
             if (iType == MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
-                    scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                 else
                     move_cursor(cursor::Up, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
             }
@@ -513,7 +513,7 @@ namespace neogfx
             if (iType == MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
-                    scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                 else
                     move_cursor(cursor::Down, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
             }
@@ -543,7 +543,7 @@ namespace neogfx
                 else
                 {
                     auto pos = point{ glyph_position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
-                    scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                     set_cursor_position(pos + client_rect(false).top_left(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
                 }
             }
@@ -557,7 +557,7 @@ namespace neogfx
                 set_text(std::string{});
             break;
         default:
-            handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             break;
         }
         return handled;
@@ -575,7 +575,7 @@ namespace neogfx
             if ((focus_policy() & neogfx::focus_policy::ConsumeReturnKey) == neogfx::focus_policy::ConsumeReturnKey)
                 return true;
             else
-                return scrollable_widget::text_input(aText);
+                return framed_scrollable_widget::text_input(aText);
         }
         multiple_text_changes mtc{ *this };
         delete_any_selection();
@@ -624,7 +624,7 @@ namespace neogfx
                 }
                 if (changed)
                     refresh_lines();
-                scrollable_widget::update_scrollbar_visibility(aStage);
+                framed_scrollable_widget::update_scrollbar_visibility(aStage);
             }
             break;
         case UsvStageCheckHorizontal:
@@ -638,7 +638,7 @@ namespace neogfx
                     horizontal_scrollbar().show();
                 else
                     horizontal_scrollbar().hide();
-                scrollable_widget::update_scrollbar_visibility(aStage);
+                framed_scrollable_widget::update_scrollbar_visibility(aStage);
             }
             break;
         case UsvStageDone:
@@ -652,7 +652,7 @@ namespace neogfx
     color text_edit::frame_color() const
     {
         if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
-            return scrollable_widget::frame_color();
+            return framed_scrollable_widget::frame_color();
         return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 

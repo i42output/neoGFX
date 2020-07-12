@@ -60,6 +60,9 @@ namespace neogfx
         normal_title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle = std::string{});
         normal_title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle = std::string{});
     public:
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
+    public:
         const std::string& title() const override;
         void set_title(const std::string& aTitle) override;
     public:

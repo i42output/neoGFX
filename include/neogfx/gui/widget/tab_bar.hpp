@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class tab_bar : public scrollable_widget, public i_tab_container
+    class tab_bar : public framed_scrollable_widget, public i_tab_container
     {
     public:
         define_declared_event(StyleChanged, style_changed)

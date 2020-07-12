@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "framed_widget.hpp"
-#include "scrollbar.hpp"
+#include <neogfx/gui/widget/framed_widget.hpp>
+#include <neogfx/gui/widget/scrollbar.hpp>
 
 namespace neogfx
 {
@@ -43,10 +43,10 @@ namespace neogfx
         return static_cast<scrolling_disposition>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    // todo: make a template mixin like framed_widget
-    class scrollable_widget : public framed_widget<>, private i_scrollbar_container
+    template <typename Base = widget>
+    class scrollable_widget : public Base, private i_scrollbar_container
     {
-        typedef framed_widget<> base_type;
+        typedef Base base_type;
     protected:
         enum usv_stage_e
         {
@@ -57,11 +57,22 @@ namespace neogfx
             UsvStageDone
         };
     public:
-        scrollable_widget(frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        scrollable_widget(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
-        scrollable_widget(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame, scrollbar_style aScrollbarStyle = scrollbar_style::Normal);
+        template <typename... Args>
+        scrollable_widget(Args&&... aArgs);
+        template <typename... Args>
+        scrollable_widget(neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs);
+        template <typename... Args>
+        scrollable_widget(i_widget& aParent, Args&&... aArgs);
+        template <typename... Args>
+        scrollable_widget(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs);
+        template <typename... Args>
+        scrollable_widget(i_layout& aLayout, Args&&... aArgs);
+        template <typename... Args>
+        scrollable_widget(i_layout& aLayout, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs);
         ~scrollable_widget();
         scrollable_widget(const scrollable_widget&) = delete;
+    public:
+        neogfx::scrollbar_style scrollbar_style() const;
     public:
         point scroll_position() const;
         void scroll_to(i_widget& aChild);
@@ -103,9 +114,14 @@ namespace neogfx
     protected:
         void init_scrollbars();
     private:
+        neogfx::scrollbar_style iScrollbarStyle;
         scrollbar iVerticalScrollbar;
         scrollbar iHorizontalScrollbar;
         point iOldScrollPosition;
         uint32_t iIgnoreScrollbarUpdates;
     };
+
+    typedef scrollable_widget<framed_widget<widget>> framed_scrollable_widget;
 }
+
+#include "scrollable_widget.inl"

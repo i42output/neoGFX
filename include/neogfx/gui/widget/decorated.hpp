@@ -47,10 +47,12 @@ namespace neogfx
         Window          = 0x00000001,
         Tool            = 0x00000002,
         Dock            = 0x00000004,
-        Splash          = 0x00000008,
+        Popup           = 0x00000008,
+        Splash          = 0x00000010,
         Nested          = 0x10000000,
         NestedWindow    = Window | Nested,
         NestedTool      = Tool | Nested,
+        NestedPopup     = Popup | Nested,
         NestedSplash    = Splash | Nested
     };
 
@@ -108,8 +110,8 @@ namespace neogfx
         };
     public:
         template <typename... Args>
-        decorated(decoration_style aStyle, Args&&... aArgs) :
-            widget_type{ std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iDecoration{ default_decoration(aStyle) }
+        decorated(neogfx::decoration_style aStyle, Args&&... aArgs) :
+            widget_type{ std::forward<Args>(aArgs)... }, iInitialized{ false }, iStyle{ aStyle }, iDecoration{ default_decoration(aStyle) }
         {
             init();
         }
@@ -117,6 +119,15 @@ namespace neogfx
         neogfx::decoration_style decoration_style() const
         {
             return iStyle;
+        }
+        void set_decoration_style(neogfx::decoration_style aStyle)
+        {
+            if (iStyle != aStyle)
+            {
+                iStyle = aStyle;
+                as_widget().update();
+                as_widget().layout().invalidate();
+            }
         }
         neogfx::decoration decoration() const
         {
@@ -132,13 +143,28 @@ namespace neogfx
             return *iTitleBar;
         }
     public:
-        void set_client(i_widget& aClient)
+        bool has_client_widget() const override
+        {
+            return iClient != nullptr;
+        }
+        const i_widget& client_widget() const override
+        {
+            if (has_client_widget())
+                return *iClient;
+            throw no_client_widget();
+        }
+        i_widget& client_widget() override
+        {
+            if (has_client_widget())
+                return *iClient;
+            throw no_client_widget();
+        }
+        void set_client(i_widget& aClient) override
         {
             set_client(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, & aClient });
         }
-        void set_client(std::shared_ptr<i_widget> aClient)
+        void set_client(std::shared_ptr<i_widget> aClient) override
         {
-            iClient = aClient;
             if (!iClientLayout)
             {
                 if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
@@ -152,8 +178,10 @@ namespace neogfx
                     non_client_layout().add_at(clientLayoutIndex, iClientLayout);
                 }
             }
-            client_layout().remove_all();
-            client_layout().add(iClient);
+            iClientLayout->remove_all();
+            iClient = aClient;
+            if (iClient != nullptr)
+                iClientLayout->add(iClient);
         }
         template <typename TitleBar, typename... Args>
         std::shared_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
@@ -195,41 +223,46 @@ namespace neogfx
         }
         widget_part part(const point& aPosition) const override
         {
+            if (widget_type::debug() == this)
+                std::cerr << "decorated<>::part(...) --> ";
             auto result = widget_type::part(aPosition);
-            if (result != widget_part::Client)
-                return result;
-            if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
+            if (result == widget_part::Client)
             {
-                enum { left = 1, top = 2, right = 4, bottom = 8 };
-                int hit = 0;
-                auto const clientRect = client_rect();
-                auto const clientPadding = padding();
-                if (aPosition.x < clientPadding.left)
-                    hit |= left;
-                if (aPosition.x > clientRect.right() - clientPadding.right)
-                    hit |= right;
-                if (aPosition.y < clientPadding.top)
-                    hit |= top;
-                if (aPosition.y > clientRect.bottom() - clientPadding.bottom)
-                    hit |= bottom;
-                if (hit & top && hit & left)
-                    return widget_part::BorderTopLeft;
-                else if (hit & top && hit & right)
-                    return widget_part::BorderTopRight;
-                else if (hit & bottom && hit & left)
-                    return widget_part::BorderBottomLeft;
-                else if (hit & bottom && hit & right)
-                    return widget_part::BorderBottomRight;
-                else if (hit & left)
-                    return widget_part::BorderLeft;
-                else if (hit & top)
-                    return widget_part::BorderTop;
-                else if (hit & right)
-                    return widget_part::BorderRight;
-                else if (hit & bottom)
-                    return widget_part::BorderBottom;
+                if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
+                {
+                    enum { left = 1, top = 2, right = 4, bottom = 8 };
+                    int hit = 0;
+                    auto const clientRect = as_widget().client_rect();
+                    auto const clientPadding = as_widget().padding();
+                    if (aPosition.x < clientPadding.left)
+                        hit |= left;
+                    if (aPosition.x > clientRect.right() - clientPadding.right)
+                        hit |= right;
+                    if (aPosition.y < clientPadding.top)
+                        hit |= top;
+                    if (aPosition.y > clientRect.bottom() - clientPadding.bottom)
+                        hit |= bottom;
+                    if (hit & top && hit & left)
+                        result = widget_part::BorderTopLeft;
+                    else if (hit & top && hit & right)
+                        result = widget_part::BorderTopRight;
+                    else if (hit & bottom && hit & left)
+                        result = widget_part::BorderBottomLeft;
+                    else if (hit & bottom && hit & right)
+                        result = widget_part::BorderBottomRight;
+                    else if (hit & left)
+                        result = widget_part::BorderLeft;
+                    else if (hit & top)
+                        result = widget_part::BorderTop;
+                    else if (hit & right)
+                        result = widget_part::BorderRight;
+                    else if (hit & bottom)
+                        result = widget_part::BorderBottom;
+                }
             }
-            return widget_part::Client;
+            if (widget_type::debug() == this)
+                std::cerr << result << std::endl;
+            return result;
         }
     public:
         using widget_type::has_layout;
@@ -239,7 +272,7 @@ namespace neogfx
             switch (aStandardLayout)
             {
             case standard_layout::Default:
-                return widget_type::has_layout();
+                return as_widget().has_layout();
             case standard_layout::Client:
                 return !!iClientLayout;
             case standard_layout::NonClient:
@@ -265,9 +298,9 @@ namespace neogfx
             switch (aStandardLayout)
             {
             case standard_layout::Default:
-                return widget_type::layout();
+                return as_widget().layout();
             case standard_layout::Client:
-                return *iClientLayout;
+                return has_client_widget() ? client_widget().layout() : *iClientLayout;
             case standard_layout::NonClient:
                 return *iNonClientLayout;
             case standard_layout::TitleBar:
@@ -292,7 +325,7 @@ namespace neogfx
         void fix_weightings() override
         {
             widget_type::fix_weightings();
-            widget_type::template ancestor_layout<border_layout>().fix_weightings(); // todo: is this layout relationship assumption good idea?
+            as_widget().template ancestor_layout<border_layout>().fix_weightings(); // todo: is this layout relationship assumption good idea?
         }
     protected:
         void capture_released() override
@@ -300,26 +333,18 @@ namespace neogfx
             widget_type::capture_released();
             iTracking = std::nullopt;
         }
-    public:
-        using widget_type::part;
-        using widget_type::client_rect;
-        using widget_type::padding;
-        using widget_type::has_parent_layout;
-        using widget_type::parent_layout;
-        using widget_type::has_layout_manager;
-        using widget_type::layout_manager;
     protected:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override
         {
             widget_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-            if (aButton == mouse_button::Left && widget_type::capturing())
+            if (aButton == mouse_button::Left && as_widget().capturing())
             {
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
                 {
                     iTracking = tracking{ clickedPart, aPosition };
-                    if (widget_type::has_root())
-                        widget_type::root().window_manager().update_mouse_cursor(widget_type::root());
+                    if (as_widget().has_root())
+                        as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
                     update_tracking(aPosition);
                 }
             }
@@ -329,15 +354,22 @@ namespace neogfx
             widget_type::mouse_moved(aPosition, aKeyModifiers);
             update_tracking(aPosition);
         }
-    private:
+    protected:
         void init()
         {
+            if (iInitialized)
+                return;
+
+            if ((decoration_style() & neogfx::decoration_style::Window) == neogfx::decoration_style::Window && !as_widget().is_root())
+                return; // surface not yet created
+
             iNonClientLayout.emplace(*this);
             non_client_layout().set_padding(neogfx::padding{});
             non_client_layout().set_spacing(size{});
             if ((decoration() & neogfx::decoration::TitleBar) == neogfx::decoration::TitleBar)
             {
                 iTitleBarLayout.emplace(non_client_layout());
+                iTitleBarLayout->set_padding(neogfx::padding{});
                 if ((decoration_style() & neogfx::decoration_style::Tool) == neogfx::decoration_style::None)
                     iTitleBar = create_title_bar<normal_title_bar>();
                 else
@@ -345,58 +377,72 @@ namespace neogfx
             }
             // todo: create widgets for the following decorations
             if ((decoration() & neogfx::decoration::Menu) == neogfx::decoration::Menu)
+            {
                 iMenuLayout.emplace(non_client_layout());
+                iMenuLayout->set_padding(neogfx::padding{});
+            }
             if ((decoration() & neogfx::decoration::Toolbar) == neogfx::decoration::Toolbar)
+            {
                 iToolbarLayout.emplace(non_client_layout());
+                iToolbarLayout->set_padding(neogfx::padding{});
+            }
             if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
-                iDockLayout.emplace(non_client_layout());
+            {
+                iDockLayout.emplace(has_layout(standard_layout::Toolbar) ? 
+                    toolbar_layout(layout_position::Center) : non_client_layout());
+                iDockLayout->set_padding(neogfx::padding{});
+            }
             if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
+            {
                 iStatusBarLayout.emplace(non_client_layout());
-            // todo: make neogfx::window derive from this class
+                iStatusBarLayout->set_padding(neogfx::padding{});
+            }
+
+            iInitialized = true;
         }
         void update_tracking(const point& aPosition)
         {
             if (iTracking)
             {
                 auto const delta = aPosition - iTracking->trackFrom;
-                auto const currentSize = widget_type::extents();
-                widget_type::set_fixed_size({}, false);
+                auto const currentSize = as_widget().extents();
+                as_widget().set_fixed_size({}, false);
                 optional_size newSize;
                 switch (iTracking->part)
                 {
                 case widget_part::BorderLeft:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy });
                     break;
                 case widget_part::BorderTopLeft:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy - delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTop:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx, currentSize.cy - delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx, currentSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTopRight:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy - delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy - delta.dy });
                     break;
                 case widget_part::BorderRight:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy });
                     break;
                 case widget_part::BorderBottomRight:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy + delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottom:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx, currentSize.cy + delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx, currentSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottomLeft:
-                    newSize = widget_type::minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy + delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy + delta.dy });
                     break;
                 }
-                widget_type::set_fixed_size(newSize, false);
-                if (has_layout_manager())
+                as_widget().set_fixed_size(newSize, false);
+                if (as_widget().has_layout_manager())
                 {
-                    layout_manager().layout_items();
+                    as_widget().layout_manager().layout_items();
                     // todo: not sure I am happy with this, assumes border layout...
                     if ((decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock)
                     {
-                        widget_type::set_fixed_size({}, false);
+                        as_widget().set_fixed_size({}, false);
                         fix_weightings();
                     }
                 }
@@ -408,13 +454,14 @@ namespace neogfx
             auto result = neogfx::decoration::None;
             if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Tool)) != neogfx::decoration_style::None)
                 result |= neogfx::decoration::TitleBar;
-            if ((aStyle & neogfx::decoration_style::Window) != neogfx::decoration_style::None)
+            if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Popup)) != neogfx::decoration_style::None)
                 result |= (neogfx::decoration::Menu | neogfx::decoration::Toolbar | neogfx::decoration::Dock | neogfx::decoration::StatusBar);
             if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Dock)) != neogfx::decoration_style::None)
                 result |= neogfx::decoration::Border;
             return result;
         }                                      
-    private:                                   
+    private:                             
+        bool iInitialized;
         neogfx::decoration_style iStyle;
         neogfx::decoration iDecoration;
         std::optional<vertical_layout> iNonClientLayout;

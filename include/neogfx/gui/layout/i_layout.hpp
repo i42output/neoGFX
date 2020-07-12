@@ -62,11 +62,19 @@ namespace neogfx
     class i_standard_layout_container
     {
     public:
+        struct no_client_widget : std::logic_error { no_client_widget() : std::logic_error{ "neogfx::i_standard_layout_container::no_client_widget" } {} };
+    public:
         virtual ~i_standard_layout_container() = default;
     public:
         virtual bool is_widget() const = 0;
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
+    public:
+        virtual bool has_client_widget() const = 0;
+        virtual const i_widget& client_widget() const = 0;
+        virtual i_widget& client_widget() = 0;
+        virtual void set_client(i_widget& aClient) = 0;
+        virtual void set_client(std::shared_ptr<i_widget> aClient) = 0;
     public:
         virtual bool has_layout(standard_layout aStandardLayout) const = 0;
         virtual const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const = 0;

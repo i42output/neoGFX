@@ -22,10 +22,15 @@
 
 namespace neogfx
 {
+    class i_widget;
+
     class i_title_bar
     {
     public:
         virtual ~i_title_bar() = default;
+    public:
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
     public:
         virtual const std::string& title() const = 0;
         virtual void set_title(const std::string& aTitle) = 0;

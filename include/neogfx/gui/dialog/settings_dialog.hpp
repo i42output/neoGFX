@@ -53,7 +53,7 @@ namespace neogfx
         sink iSink;
         horizontal_layout iLayout;
         tree_view iTree;
-        scrollable_widget iDetails;
+        framed_scrollable_widget iDetails;
         vertical_layout iDetailLayout;
         texture iBackground;
     };

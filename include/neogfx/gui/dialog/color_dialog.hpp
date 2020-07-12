@@ -126,7 +126,7 @@ namespace neogfx
             cursor_widget iLeftCursor;
             cursor_widget iRightCursor;
         };
-        class yz_picker : public scrollable_widget
+        class yz_picker : public framed_scrollable_widget
         {
         public:
             yz_picker(color_dialog& aOwner);
