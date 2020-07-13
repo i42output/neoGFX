@@ -1098,7 +1098,7 @@ namespace neogfx
                 auto const& child = *i;
                 if (child->widget_type() == neogfx::widget_type::Client)
                     continue;
-                rect intersection = nonClientClipRect.intersection(child->non_client_rect());
+                rect intersection = nonClientClipRect.intersection(child->non_client_rect() - origin());
                 if (!intersection.empty())
                     child->render(aGc);
             }

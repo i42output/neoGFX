@@ -42,7 +42,7 @@ namespace neogfx
         set_padding(neogfx::padding{});
         layout().set_padding(neogfx::padding{});
 
-        iTitle.set_size_policy(size_constraint::Expanding);
+        iTitle.set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
         iTitle.set_alignment(alignment::Left | alignment::VCenter);
 
         iPinButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
@@ -97,8 +97,7 @@ namespace neogfx
 
     widget_type tool_title_bar::widget_type() const
     {
-        return neogfx::widget_type::Client;
-        //return neogfx::widget_type::NonClient; // todo
+        return neogfx::widget_type::NonClient;
     }
 
     bool tool_title_bar::transparent_background() const
