@@ -237,6 +237,7 @@ namespace neogfx
         void clear_stencil_buffer();
         void set_pixel(const point& aPoint, const color& aColor);
         void draw_pixel(const point& aPoint, const color& aColor);
+        void draw_pixels(const graphics_operation::batch& aFillRectOps);
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
         void draw_rect(const rect& aRect, const pen& aPen);
         void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen);
@@ -246,13 +247,13 @@ namespace neogfx
         void draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen);
         void draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation);
         void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0);
-        void fill_rect(const graphics_operation::batch& aFillRectOps);
+        void fill_rects(const graphics_operation::batch& aFillRectOps);
         void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill);
         void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill);
         void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill);
         void fill_path(const path& aPath, const brush& aFill);
-        void fill_shape(const graphics_operation::batch& aFillShapeOps);
-        void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
+        void fill_shapes(const graphics_operation::batch& aFillShapeOps);
+        void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
         void draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);

@@ -502,8 +502,7 @@ namespace neogfx
                     set_pixel(static_variant_cast<const graphics_operation::set_pixel&>(*op).point, static_variant_cast<const graphics_operation::set_pixel&>(*op).color);
                 break;
             case graphics_operation::operation_type::DrawPixel:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    draw_pixel(static_variant_cast<const graphics_operation::draw_pixel&>(*op).point, static_variant_cast<const graphics_operation::draw_pixel&>(*op).color);
+                draw_pixels(opBatch);
                 break;
             case graphics_operation::operation_type::DrawLine:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -563,7 +562,7 @@ namespace neogfx
                 }
                 break;
             case graphics_operation::operation_type::FillRect:
-                fill_rect(opBatch);
+                fill_rects(opBatch);
                 break;
             case graphics_operation::operation_type::FillRoundedRect:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -591,10 +590,10 @@ namespace neogfx
                     fill_path(static_variant_cast<const graphics_operation::fill_path&>(*op).path, static_variant_cast<const graphics_operation::fill_path&>(*op).fill);
                 break;
             case graphics_operation::operation_type::FillShape:
-                fill_shape(opBatch);
+                fill_shapes(opBatch);
                 break;
             case graphics_operation::operation_type::DrawGlyph:
-                draw_glyph(opBatch);
+                draw_glyphs(opBatch);
                 break;
             case graphics_operation::operation_type::DrawMesh:
                 // todo: use draw_meshes
@@ -844,8 +843,34 @@ namespace neogfx
 
     void opengl_rendering_context::draw_pixel(const point& aPoint, const color& aColor)
     {
-        /* todo: faster alternative to this... */
-        fill_rect(rect{ aPoint, size{1.0, 1.0} }, aColor);
+        graphics_operation::operation op{ graphics_operation::draw_pixel{ aPoint, aColor } };
+        draw_pixels(graphics_operation::batch{ &op, &op + 1 });
+    }
+
+    void opengl_rendering_context::draw_pixels(const graphics_operation::batch& aDrawPixelOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+        scoped_anti_alias saa{ *this, smoothing_mode::None };
+        disable_multisample disableMultisample{ *this };
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.second - aDrawPixelOps.first)) };
+
+            for (auto op = aDrawPixelOps.first; op != aDrawPixelOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(*op);
+                auto rectVertices = rect_vertices(rect{ drawOp.point, size{1.0, 1.0} }, mesh_type::Triangles, 0);
+                for (auto const& v : rectVertices)
+                    vertexArrays.push_back({ v,
+                            vec4f{{
+                                drawOp.color.red<float>(),
+                                drawOp.color.green<float>(),
+                                drawOp.color.blue<float>(),
+                                drawOp.color.alpha<float>() * static_cast<float>(iOpacity)}} });
+            }
+        }
     }
 
     void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
@@ -1159,10 +1184,10 @@ namespace neogfx
     void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
     {
         graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill, aZpos } };
-        fill_rect(graphics_operation::batch{ &op, &op + 1 });
+        fill_rects(graphics_operation::batch{ &op, &op + 1 });
     }
 
-    void opengl_rendering_context::fill_rect(const graphics_operation::batch& aFillRectOps)
+    void opengl_rendering_context::fill_rects(const graphics_operation::batch& aFillRectOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
@@ -1316,7 +1341,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::fill_shape(const graphics_operation::batch& aFillShapeOps)
+    void opengl_rendering_context::fill_shapes(const graphics_operation::batch& aFillShapeOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
@@ -1383,7 +1408,7 @@ namespace neogfx
         return service<i_basic_services>().display(0).subpixel_format();
     }
 
-    void opengl_rendering_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
+    void opengl_rendering_context::draw_glyphs(const graphics_operation::batch& aDrawGlyphOps)
     {
         disable_anti_alias daa{ *this };
         neolib::scoped_flag snap{ iSnapToPixel, false };
