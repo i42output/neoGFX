@@ -31,9 +31,11 @@ namespace neogfx
 
     enum class text_widget_flags
     {
-        None = 0x00,
-        HideOnEmpty = 0x01,
-        TakesSpaceWhenEmpty = 0x02
+        None                = 0x00,
+        HideOnEmpty         = 0x01,
+        TakesSpaceWhenEmpty = 0x02,
+        CutOff              = 0x04,
+        UseEllipsis         = 0x08
     };
 
     inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)

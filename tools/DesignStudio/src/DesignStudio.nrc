@@ -111,7 +111,7 @@
                 id: newProject
                 title: "New Project"
                 type: Child
-                style: [Modal TitleBar Close InitiallyCentered]
+                style: [Modal Dialog TitleBar Close InitiallyCentered]
                 button_box: [Ok Cancel]
                 default_focus: projectName
                 vertical_layout: {

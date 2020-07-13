@@ -67,6 +67,9 @@ namespace neogfx
                 result.cx = std::min(std::ceil(result.cx), maximum_size().cx);
                 result.cy = std::min(std::ceil(result.cy), maximum_size().cy);
             }
+            if ((flags() & text_widget_flags::CutOff) == text_widget_flags::CutOff)
+                result.cx = 1.0;
+            // todo: ellipsis
             if (result.cx == 0.0 && (flags() & text_widget_flags::TakesSpaceWhenEmpty) == text_widget_flags::TakesSpaceWhenEmpty)
                 result.cx = 1.0;
             return units_converter(*this).from_device_units(result);

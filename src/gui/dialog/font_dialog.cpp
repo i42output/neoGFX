@@ -118,7 +118,7 @@ namespace neogfx
     }
 
     font_dialog::font_dialog(const neogfx::font& aCurrentFont) :
-        dialog{ "Select Font", window_style::Modal | window_style::TitleBar | window_style::Close },
+        dialog{ "Select Font", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
@@ -141,7 +141,7 @@ namespace neogfx
     }
 
     font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont) :
-        dialog{ aParent, "Select Font", window_style::Modal | window_style::TitleBar | window_style::Close },
+        dialog{ aParent, "Select Font", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont    },
         iSelectedFont{ aCurrentFont },

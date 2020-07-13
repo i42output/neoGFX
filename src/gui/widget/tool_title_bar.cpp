@@ -33,7 +33,7 @@ namespace neogfx
             update_state();
         }, 100},
         iLayout{ *this },
-        iTitle{ iLayout, aTitle },
+        iTitle{ iLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
         iPinButton{ iLayout, push_button_style::TitleBar },
         iUnpinButton{ iLayout, push_button_style::TitleBar },
         iCloseButton{ iLayout, push_button_style::TitleBar },
@@ -43,7 +43,6 @@ namespace neogfx
         layout().set_padding(neogfx::padding{});
 
         iTitle.set_size_policy(size_constraint::Expanding);
-        iTitle.set_minimum_size(size{});
         iTitle.set_alignment(alignment::Left | alignment::VCenter);
 
         iPinButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
@@ -98,7 +97,8 @@ namespace neogfx
 
     widget_type tool_title_bar::widget_type() const
     {
-        return neogfx::widget_type::NonClient;
+        return neogfx::widget_type::Client;
+        //return neogfx::widget_type::NonClient; // todo
     }
 
     bool tool_title_bar::transparent_background() const

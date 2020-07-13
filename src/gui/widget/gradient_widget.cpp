@@ -63,7 +63,7 @@ namespace neogfx
         {
         public:
             alpha_dialog(i_widget& aParent, color::component aCurrentAlpha) :
-                dialog(aParent, "Select Alpha (Opacity Level)", window_style::Modal | window_style::TitleBar | window_style::Close), iLayout{ layout() }, iLayout2{ client_layout() }, iSlider{ iLayout2 }, iSpinBox{ iLayout2 }
+                dialog(aParent, "Select Alpha (Opacity Level)", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close), iLayout{ layout() }, iLayout2{ client_layout() }, iSlider{ iLayout2 }, iSpinBox{ iLayout2 }
             {
                 init(aCurrentAlpha);
             }

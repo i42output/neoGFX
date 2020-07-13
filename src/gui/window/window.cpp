@@ -634,6 +634,8 @@ namespace neogfx
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
+        if ((style() & window_style::Dialog) == window_style::Dialog)
+            return base_type::minimum_size(aAvailableSpace);
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
             return size{ 200_dip, 200_dip };
         return base_type::minimum_size(aAvailableSpace);

@@ -1,4 +1,4 @@
-// color_dialog.cpp
+ // color_dialog.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -743,7 +743,7 @@ namespace neogfx
     }
 
     color_dialog::color_dialog(const color& aCurrentColor) :
-        dialog{ "Select Color"_t, window_style::Modal | window_style::TitleBar | window_style::Close },
+        dialog{ "Select Color"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iCurrentChannel{ ChannelHue },
         iCurrentColor{ aCurrentColor },
         iSelectedColor{ aCurrentColor.to_hsv() },
@@ -785,7 +785,7 @@ namespace neogfx
     }
 
     color_dialog::color_dialog(i_widget& aParent, const color& aCurrentColor) :
-        dialog{ aParent, "Select Color"_t, window_style::Modal | window_style::TitleBar | window_style::Close },
+        dialog{ aParent, "Select Color"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iCurrentChannel{ChannelHue },
         iCurrentColor{aCurrentColor },
         iSelectedColor{aCurrentColor.to_hsv() },

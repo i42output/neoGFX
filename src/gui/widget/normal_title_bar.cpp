@@ -29,7 +29,7 @@ namespace neogfx
         widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, service<i_app>().default_window_icon() },
-        iTitle{ iLayout, aTitle },
+        iTitle{ iLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
         iMinimizeButton{ iLayout, push_button_style::TitleBar },
         iMaximizeButton{ iLayout, push_button_style::TitleBar },
         iRestoreButton{ iLayout, push_button_style::TitleBar },
@@ -131,7 +131,6 @@ namespace neogfx
         else
             icon_widget().set_fixed_size(iconSize.min(icon_widget().image().extents()));
         title_widget().set_size_policy(size_constraint::Expanding);
-        title_widget().set_minimum_size(size{});
         title_widget().set_alignment(alignment::Left | alignment::VCenter);
         iMinimizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iMaximizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
