@@ -1145,29 +1145,29 @@ namespace neogfx
                 if (infos.entity_record(entity).debug)
                     std::cerr << "Rendering debug entity..." << std::endl;
 #endif
-                auto const& info = infos.entity_record(entity);
+                auto const& info = infos.entity_record_no_lock(entity);
                 if (info.destroyed)
                     continue;
-                auto const& meshRenderer = meshRenderers.entity_record(entity);
+                auto const& meshRenderer = meshRenderers.entity_record_no_lock(entity);
                 maxLayer = std::max(maxLayer, meshRenderer.layer);
                 if (drawables.size() <= maxLayer)
                     drawables.resize(maxLayer + 1);
-                auto const& meshFilter = meshFilters.has_entity_record(entity) ?
-                    meshFilters.entity_record(entity) :
-                    game::current_animation_frame(animatedMeshFilters.entity_record(entity));
+                auto const& meshFilter = meshFilters.has_entity_record_no_lock(entity) ?
+                    meshFilters.entity_record_no_lock(entity) :
+                    game::current_animation_frame(animatedMeshFilters.entity_record_no_lock(entity));
                 drawables[meshRenderer.layer].emplace_back(
                     meshFilter,
                     meshRenderer,
                     optional_mat44{},
                     entity);
-                if (!game::is_render_cache_clean(aEcs, entity))
+                if (!game::is_render_cache_clean_no_lock(aEcs, entity))
                 {
-                    auto const& rigidBodyTransformation = (rigidBodies.has_entity_record(entity) ?
-                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity());
+                    auto const& rigidBodyTransformation = (rigidBodies.has_entity_record_no_lock(entity) ?
+                        to_transformation_matrix(rigidBodies.entity_record_no_lock(entity)) : mat44::identity());
                     auto const& meshFilterTransformation = (meshFilter.transformation ?
                         *meshFilter.transformation : mat44::identity());
-                    auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record(entity) ?
-                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity());
+                    auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record_no_lock(entity) ?
+                        to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44::identity());
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
                     drawables[meshRenderer.layer].back().transformation = transformation;
                 }
@@ -1698,7 +1698,7 @@ namespace neogfx
             {
                 auto& meshDrawable = *md;
                 if (meshDrawable.entity != null_entity)
-                    game::set_render_cache_invalid(aVertexProvider.cache(), meshDrawable.entity);
+                    game::set_render_cache_invalid_no_lock(aVertexProvider.cache(), meshDrawable.entity);
             }
         }
 
@@ -1709,7 +1709,7 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             thread_local game::mesh_render_cache ignore;
             ignore = {};
-            auto const& meshRenderCache = (meshDrawable.entity != null_entity ? aVertexProvider.cache().entity_record(meshDrawable.entity, true) : ignore);
+            auto const& meshRenderCache = (meshDrawable.entity != null_entity ? aVertexProvider.cache().entity_record_no_lock(meshDrawable.entity, true) : ignore);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
             auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;

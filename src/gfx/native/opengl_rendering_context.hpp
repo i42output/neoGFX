@@ -53,11 +53,11 @@ namespace neogfx
             {
                 return false;
             }
-            const game::static_component<game::mesh_render_cache>& cache() const override
+            const game::component<game::mesh_render_cache>& cache() const override
             {
                 throw not_cacheable();
             }
-            game::static_component<game::mesh_render_cache>& cache() override
+            game::component<game::mesh_render_cache>& cache() override
             {
                 throw not_cacheable();
             }

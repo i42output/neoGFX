@@ -32,7 +32,7 @@ namespace neogfx
         virtual ~i_vertex_provider() = default;
     public:
         virtual bool cacheable() const = 0;
-        virtual const game::static_component<game::mesh_render_cache>& cache() const = 0;
-        virtual game::static_component<game::mesh_render_cache>& cache() = 0;
+        virtual const game::component<game::mesh_render_cache>& cache() const = 0;
+        virtual game::component<game::mesh_render_cache>& cache() = 0;
     };
 }

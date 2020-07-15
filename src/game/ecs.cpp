@@ -71,12 +71,12 @@ namespace neogfx
             return true;
         }
 
-        const game::static_component<game::mesh_render_cache>& ecs::cache() const
+        const game::component<game::mesh_render_cache>& ecs::cache() const
         {
             return component<game::mesh_render_cache>();
         }
 
-        game::static_component<game::mesh_render_cache>& ecs::cache()
+        game::component<game::mesh_render_cache>& ecs::cache()
         {
             return component<game::mesh_render_cache>();
         }

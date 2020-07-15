@@ -83,56 +83,107 @@ namespace neogfx::game
         };
     };
 
-    inline bool is_render_cache_valid_no_lock(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    inline bool is_render_cache_valid_no_lock(component<game::mesh_render_cache> const& aCache, entity_id aEntity)
     {
         return aCache.has_entity_record_no_lock(aEntity) &&
             aCache.entity_record_no_lock(aEntity).state != cache_state::Invalid;
     }
 
-    inline bool is_render_cache_dirty_no_lock(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    inline bool is_render_cache_dirty_no_lock(component<game::mesh_render_cache> const& aCache, entity_id aEntity)
     {
         return aCache.has_entity_record_no_lock(aEntity) &&
             aCache.entity_record_no_lock(aEntity).state == cache_state::Dirty;
     }
 
-    inline bool is_render_cache_clean_no_lock(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    inline bool is_render_cache_clean_no_lock(component<game::mesh_render_cache> const& aCache, entity_id aEntity)
     {
         return aCache.has_entity_record_no_lock(aEntity) &&
             aCache.entity_record_no_lock(aEntity).state == cache_state::Clean;
     }
 
-    inline bool is_render_cache_valid(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    inline void set_render_cache_invalid_no_lock(component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    {
+        auto& cache = aCache.entity_record_no_lock(aEntity, true);
+        cache.state = cache_state::Invalid;
+    }
+
+    inline void set_render_cache_dirty_no_lock(component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    {
+        auto& cache = aCache.entity_record_no_lock(aEntity, true);
+        if (cache.state == cache_state::Clean)
+            cache.state = cache_state::Dirty;
+    }
+
+    inline void set_render_cache_clean_no_lock(component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    {
+        auto& cache = aCache.entity_record_no_lock(aEntity, true);
+        if (cache.state == cache_state::Dirty)
+            cache.state = cache_state::Clean;
+    }
+
+    inline bool is_render_cache_valid_no_lock(i_ecs const& aEcs, entity_id aEntity)
+    {
+        return is_render_cache_valid_no_lock(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline bool is_render_cache_dirty_no_lock(i_ecs const& aEcs, entity_id aEntity)
+    {
+        return is_render_cache_dirty_no_lock(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline bool is_render_cache_clean_no_lock(i_ecs const& aEcs, entity_id aEntity)
+    {
+        return is_render_cache_clean_no_lock(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline void set_render_cache_invalid_no_lock(i_ecs& aEcs, entity_id aEntity)
+    {
+        set_render_cache_invalid_no_lock(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline void set_render_cache_dirty_no_lock(i_ecs& aEcs, entity_id aEntity)
+    {
+        set_render_cache_dirty_no_lock(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline void set_render_cache_clean_no_lock(i_ecs& aEcs, entity_id aEntity)
+    {
+        set_render_cache_clean_no_lock(aEcs.component<mesh_render_cache>(), aEntity);
+    }
+
+    inline bool is_render_cache_valid(component<game::mesh_render_cache> const& aCache, entity_id aEntity)
     {
         return aCache.has_entity_record(aEntity) &&
             aCache.entity_record(aEntity).state != cache_state::Invalid;
     }
 
-    inline bool is_render_cache_dirty(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    inline bool is_render_cache_dirty(component<game::mesh_render_cache> const& aCache, entity_id aEntity)
     {
         return aCache.has_entity_record(aEntity) &&
             aCache.entity_record(aEntity).state == cache_state::Dirty;
     }
 
-    inline bool is_render_cache_clean(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    inline bool is_render_cache_clean(component<game::mesh_render_cache> const& aCache, entity_id aEntity)
     {
+
         return aCache.has_entity_record(aEntity) &&
             aCache.entity_record(aEntity).state == cache_state::Clean;
     }
 
-    inline void set_render_cache_invalid(static_component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    inline void set_render_cache_invalid(component<game::mesh_render_cache>& aCache, entity_id aEntity)
     {
         auto& cache = aCache.entity_record(aEntity, true);
         cache.state = cache_state::Invalid;
     }
 
-    inline void set_render_cache_dirty(static_component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    inline void set_render_cache_dirty(component<game::mesh_render_cache>& aCache, entity_id aEntity)
     {
         auto& cache = aCache.entity_record(aEntity, true);
         if (cache.state == cache_state::Clean)
             cache.state = cache_state::Dirty;
     }
 
-    inline void set_render_cache_clean(static_component<game::mesh_render_cache>& aCache, entity_id aEntity)
+    inline void set_render_cache_clean(component<game::mesh_render_cache>& aCache, entity_id aEntity)
     {
         auto& cache = aCache.entity_record(aEntity, true);
         if (cache.state == cache_state::Dirty)

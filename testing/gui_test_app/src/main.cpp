@@ -1157,14 +1157,14 @@ int main(int argc, char* argv[])
 
         ng::rect instancingRect;
 
-        auto entity_transformation = [&](ng::game::mesh_filter& aFilter)
+        auto entity_transformation = [&](ng::game::component<ng::game::mesh_filter>& aComponent, ng::game::component<ng::game::mesh_render_cache>& aCache, ng::game::mesh_filter& aFilter)
         {
             thread_local auto seed = ( neolib::simd_srand(std::this_thread::get_id()), 42);
             if (!aFilter.transformation)
                 aFilter.transformation = ng::mat44::identity();
             (*aFilter.transformation)[3][0] = neolib::simd_rand(instancingRect.cx - 1);
             (*aFilter.transformation)[3][1] = neolib::simd_rand(instancingRect.cy - 1);
-            ng::game::set_render_cache_dirty(*ecs, ecs->component<ng::game::mesh_filter>().entity(aFilter));
+            ng::game::set_render_cache_dirty_no_lock(aCache, aComponent.entity(aFilter));
         };
 
         std::atomic<bool> useThreadPool = false;
@@ -1181,11 +1181,16 @@ int main(int argc, char* argv[])
 
         auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
         {
+            auto& cache = ecs->component<ng::game::mesh_render_cache>();
+            auto update_function = [&](ng::game::component<ng::game::mesh_filter>& aComponent, ng::game::mesh_filter& aFilter)
+            {
+                entity_transformation(aComponent, cache, aFilter);
+            };
             instancingRect = window.pageInstancing.client_rect();
             if (useThreadPool)
-                ecs->component<ng::game::mesh_filter>().parallel_apply(entity_transformation);
+                ecs->component<ng::game::mesh_filter>().parallel_apply(update_function);
             else
-                ecs->component<ng::game::mesh_filter>().apply(entity_transformation);
+                ecs->component<ng::game::mesh_filter>().apply(update_function);
         };
 
         auto configure_ecs = [&]()

@@ -41,8 +41,8 @@ namespace neogfx
             void destroy_entity(entity_id aEntityId, bool aNotify = true) override;
         public:
             bool cacheable() const override;
-            const game::static_component<game::mesh_render_cache>& cache() const override;
-            game::static_component<game::mesh_render_cache>& cache() override;
+            const game::component<game::mesh_render_cache>& cache() const override;
+            game::component<game::mesh_render_cache>& cache() override;
         };
 
         template <typename... Systems>
