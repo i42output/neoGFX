@@ -33,7 +33,8 @@
 namespace neogfx::game
 {
     animator::animator(game::i_ecs& aEcs) :
-        system<entity_info, animation_filter, mesh_renderer, mesh_render_cache>{ aEcs }
+        system<entity_info, animation_filter, mesh_renderer, mesh_render_cache>{ aEcs },
+        iLock{ aEcs, neolib::ecs::dont_lock }
     {
         Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
         start_thread_if();
@@ -71,18 +72,22 @@ namespace neogfx::game
 
         Animate.trigger(now);
 
-        scoped_component_lock<entity_info, mesh_render_cache, animation_filter> lockAnimationFilters{ ecs() };
+        std::scoped_lock<decltype(iLock)> lock{ iLock };
 
-        for (auto entity : ecs().component<animation_filter>().entities())
+        auto& infos = ecs().component<entity_info>();
+        auto& filters = ecs().component<animation_filter>();
+        auto& cache = ecs().component<mesh_render_cache>();
+        auto const& worldClock = ecs().shared_component<game::clock>()[0];
+
+        for (auto entity : filters.entities())
         {
-            auto const& info = ecs().component<entity_info>().entity_record(entity);
+            auto const& info = infos.entity_record(entity);
             if (info.destroyed)
                 continue;
-            auto& filter = ecs().component<animation_filter>().entity_record(entity);
+            auto& filter = filters.entity_record(entity);
             if (!filter.currentFrameStartTime)
                 filter.currentFrameStartTime = info.creationTime;
             auto const& frames = (filter.animation ? filter.animation->frames : filter.sharedAnimation.ptr->frames);
-            auto const& worldClock = ecs().shared_component<game::clock>()[0];
             while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timestep) < now)
             {
                 *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timestep);
@@ -92,7 +97,7 @@ namespace neogfx::game
                     ecs().async_destroy_entity(entity, false);
                     break;
                 }
-                set_render_cache_dirty(ecs(), entity);
+                set_render_cache_dirty(cache, entity);
             }
         }
     }

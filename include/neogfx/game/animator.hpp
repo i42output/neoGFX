@@ -57,5 +57,7 @@ namespace neogfx::game
                 return sName;
             }
         };
+    private:
+        scoped_component_lock<entity_info, mesh_render_cache, animation_filter> iLock;
     };
-}
+}   
