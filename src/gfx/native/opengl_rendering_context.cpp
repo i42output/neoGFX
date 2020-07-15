@@ -1136,22 +1136,25 @@ namespace neogfx
             lock.emplace(aEcs);
             auto const& rigidBodies = aEcs.component<game::rigid_body>();
             auto const& animatedMeshFilters = aEcs.component<game::animation_filter>();
-            for (auto entity : aEcs.component<game::mesh_renderer>().entities())
+            auto const& infos = aEcs.component<game::entity_info>();
+            auto const& meshRenderers = aEcs.component<game::mesh_renderer>();
+            auto const& meshFilters = aEcs.component<game::mesh_filter>();
+            for (auto entity : meshRenderers.entities())
             {
 #ifndef NDEBUG
-                if (aEcs.component<game::entity_info>().entity_record(entity).debug)
+                if (infos.entity_record(entity).debug)
                     std::cerr << "Rendering debug entity..." << std::endl;
 #endif
-                auto const& info = aEcs.component<game::entity_info>().entity_record(entity);
+                auto const& info = infos.entity_record(entity);
                 if (info.destroyed)
                     continue;
-                auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
+                auto const& meshRenderer = meshRenderers.entity_record(entity);
                 maxLayer = std::max(maxLayer, meshRenderer.layer);
                 if (drawables.size() <= maxLayer)
                     drawables.resize(maxLayer + 1);
-                auto const& meshFilter = aEcs.component<game::mesh_filter>().has_entity_record(entity) ?
-                    aEcs.component<game::mesh_filter>().entity_record(entity) :
-                    game::current_animation_frame(aEcs.component<game::animation_filter>().entity_record(entity));
+                auto const& meshFilter = meshFilters.has_entity_record(entity) ?
+                    meshFilters.entity_record(entity) :
+                    game::current_animation_frame(animatedMeshFilters.entity_record(entity));
                 drawables[meshRenderer.layer].emplace_back(
                     meshFilter,
                     meshRenderer,
@@ -1671,7 +1674,7 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             auto& meshFilter = *meshDrawable.filter;
             bool const cached = meshDrawable.entity != null_entity &&
-                game::is_render_cache_valid(aVertexProvider.cache(), meshDrawable.entity);
+                game::is_render_cache_valid_no_lock(aVertexProvider.cache(), meshDrawable.entity);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
             auto const& faces = mesh.faces;
             vertexCount += faces.size() * 3;

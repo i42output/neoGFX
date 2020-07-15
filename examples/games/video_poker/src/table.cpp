@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/simple_physics.hpp>
+#include <neogfx/game/entity_life_span.hpp>
 #include <video_poker/table.hpp>
 #include <video_poker/poker.hpp>
 
@@ -64,8 +65,8 @@ namespace video_poker
                 neogfx::alignment::Center}
         {
             neogfx::game::scoped_component_lock<neogfx::game::mesh_renderer, neogfx::game::entity_info, neogfx::game::rigid_body> lock{ aCanvas.ecs() };
-            aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).layer = 1;
-            aCanvas.ecs().component<neogfx::game::entity_info>().entity_record(id()).lifeSpan = neogfx::game::to_step_time(aCanvas.ecs(), 10.0);
+            aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).layer = 1; 
+            aCanvas.ecs().populate(id(), neogfx::game::entity_life_span{ neogfx::game::to_step_time(aCanvas.ecs(), 10.0) });
             auto const& boundingBox = neogfx::game::bounding_rect(*aCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(id()).mesh);
             aCanvas.ecs().populate(id(), neogfx::game::rigid_body{ neogfx::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 0.9 }, 1.0, neogfx::vec3{ 0.0, aCanvas.dpi_scale(-300.0), 0.0 } });
         }

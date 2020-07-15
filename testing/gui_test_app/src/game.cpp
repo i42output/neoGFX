@@ -13,6 +13,7 @@
 #include <neogfx/game/clock.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/entity_info.hpp>
+#include <neogfx/game/entity_life_span.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/standard_archetypes.hpp>
 #include <neogfx/game/game_world.hpp>
@@ -381,8 +382,8 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                                 {},
                                 spaceshipPhysics.angle + ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }
                             },
-                            ng::game::box_collider_2d{ 0x1ull });
-                        ecs.component<ng::game::entity_info>().entity_record(missile).lifeSpan = ng::game::to_step_time(ecs, 4.0);
+                            ng::game::box_collider_2d{ 0x1ull },
+                            ng::game::entity_life_span{ ng::game::to_step_time(ecs, 4.0) });
                     };
                     for (double angle = -30.0; angle <= 30.0; angle += 10.0)
                         make_missile(angle);

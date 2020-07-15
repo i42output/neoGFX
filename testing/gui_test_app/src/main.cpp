@@ -1202,6 +1202,7 @@ int main(int argc, char* argv[])
                 if (!ecs)
                 {
                     ecs.emplace(ng::game::ecs_flags::Default | ng::game::ecs_flags::NoThreads);
+                    ecs->component<ng::game::mesh_filter>(); // todo: should animator include mesh_filter?
                     ecs->system<ng::game::animator>().start_thread();
                     sink += ~~~~ecs->system<ng::game::animator>().Animate(update_ecs_entities);
                     window.canvasInstancing.set_ecs(*ecs);

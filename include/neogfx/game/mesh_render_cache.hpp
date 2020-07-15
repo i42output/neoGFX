@@ -83,6 +83,24 @@ namespace neogfx::game
         };
     };
 
+    inline bool is_render_cache_valid_no_lock(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    {
+        return aCache.has_entity_record_no_lock(aEntity) &&
+            aCache.entity_record_no_lock(aEntity).state != cache_state::Invalid;
+    }
+
+    inline bool is_render_cache_dirty_no_lock(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    {
+        return aCache.has_entity_record_no_lock(aEntity) &&
+            aCache.entity_record_no_lock(aEntity).state == cache_state::Dirty;
+    }
+
+    inline bool is_render_cache_clean_no_lock(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
+    {
+        return aCache.has_entity_record_no_lock(aEntity) &&
+            aCache.entity_record_no_lock(aEntity).state == cache_state::Clean;
+    }
+
     inline bool is_render_cache_valid(static_component<game::mesh_render_cache> const& aCache, entity_id aEntity)
     {
         return aCache.has_entity_record(aEntity) &&
