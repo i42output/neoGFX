@@ -1666,6 +1666,8 @@ namespace neogfx
         patchDrawable.provider = &aVertexProvider;
         patchDrawable.items.clear();
 
+        auto cache = aVertexProvider.cacheable() ? &aVertexProvider.cache() : nullptr;
+
         std::size_t vertexCount = 0;
         std::size_t cachedVertexCount = 0;
         for (auto md = aFirst; md != aLast; ++md)
@@ -1674,7 +1676,7 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             auto& meshFilter = *meshDrawable.filter;
             bool const cached = meshDrawable.entity != null_entity &&
-                game::is_render_cache_valid_no_lock(aVertexProvider.cache(), meshDrawable.entity);
+                game::is_render_cache_valid_no_lock(*cache, meshDrawable.entity);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
             auto const& faces = mesh.faces;
             vertexCount += faces.size() * 3;
@@ -1698,7 +1700,7 @@ namespace neogfx
             {
                 auto& meshDrawable = *md;
                 if (meshDrawable.entity != null_entity)
-                    game::set_render_cache_invalid_no_lock(aVertexProvider.cache(), meshDrawable.entity);
+                    game::set_render_cache_invalid_no_lock(*cache, meshDrawable.entity);
             }
         }
 
@@ -1709,7 +1711,7 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             thread_local game::mesh_render_cache ignore;
             ignore = {};
-            auto const& meshRenderCache = (meshDrawable.entity != null_entity ? aVertexProvider.cache().entity_record_no_lock(meshDrawable.entity, true) : ignore);
+            auto const& meshRenderCache = (meshDrawable.entity != null_entity ? cache->entity_record_no_lock(meshDrawable.entity, true) : ignore);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
             auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;
