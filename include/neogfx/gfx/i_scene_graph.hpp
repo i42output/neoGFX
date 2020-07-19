@@ -239,11 +239,8 @@ namespace neogfx
             virtual neolib::i_optional<neolib::i_string> const& name() const = 0;
         public:
             virtual neolib::i_optional<neolib::i_string> const& uri() const = 0;
-            virtual neolib::i_optional<neolib::i_string>& uri() = 0;
             virtual neolib::i_optional<neolib::i_string> const& mime_type() const = 0;
-            virtual neolib::i_optional<neolib::i_string>& mime_type() = 0;
             virtual neolib::i_optional<i_buffer_view> const& buffer_view() const = 0;
-            virtual neolib::i_optional<i_buffer_view>& buffer_view() = 0;
         };
 
         class i_sampler
@@ -286,7 +283,6 @@ namespace neogfx
             virtual i_texture const& texture() const = 0;
             virtual i_texture& texture() = 0;
             virtual scene_graph::tex_coord tex_coord() const = 0;
-            virtual scene_graph::tex_coord& tex_coord() = 0;
         };
 
         class i_normal_texture : public i_texture_reference
@@ -295,7 +291,6 @@ namespace neogfx
             typedef i_normal_texture abstract_type;
         public:
             virtual scalar scale() const = 0;
-            virtual scalar& scale() = 0;
         };
 
         class i_occlusion_texture : public i_texture_reference
@@ -304,7 +299,6 @@ namespace neogfx
             typedef i_occlusion_texture abstract_type;
         public:
             virtual scalar strength_cutoff() const = 0;
-            virtual scalar& strength_cutoff() = 0;
         };
 
         class i_emissive_texture : public i_texture_reference
@@ -321,13 +315,10 @@ namespace neogfx
             virtual ~i_pbr_metallic_roughness() = default;
         public:
             virtual vec4 const& base_color_factor() const = 0;
-            virtual vec4& base_color_factor() = 0;
             virtual i_texture_reference const& base_color_texture() const = 0;
             virtual i_texture_reference& base_color_texture() = 0;
             virtual scalar metallic_factor() const = 0;
-            virtual scalar& metallic_factor() = 0;
             virtual scalar roughness_factor() const = 0;
-            virtual scalar& roughness_factor() = 0;
             virtual i_texture_reference const& metallic_roughness_texture() const = 0;
             virtual i_texture_reference& metallic_roughness_texture() = 0;
         };
@@ -350,11 +341,8 @@ namespace neogfx
             virtual i_emissive_texture const& emissive_texture() const = 0;
             virtual i_emissive_texture& emissive_texture() = 0;
             virtual vec3 const& emissive_factor() const = 0;
-            virtual vec3& emissive_factor() = 0;
             virtual scalar alpha_cutoff() const = 0;
-            virtual scalar& alpha_cutoff() = 0;
             virtual bool double_sided() const = 0;
-            virtual bool& double_sided() = 0;
         };
             
         class i_mesh_primitive
@@ -389,6 +377,7 @@ namespace neogfx
             virtual neolib::i_vector<scalar> const& weights() const = 0;
             virtual neolib::i_vector<scalar>& weights() = 0;
         };
+
         class i_camera
         {
         public:
@@ -417,9 +406,9 @@ namespace neogfx
         public:
             typedef i_perspective_camera abstract_type;
         public:
-            virtual neolib::i_optional<scalar> aspectRatio() const = 0;
+            virtual neolib::i_optional<scalar> const& aspectRatio() const = 0;
             virtual scalar yfov() const = 0;
-            virtual neolib::i_optional<scalar> zfar() const = 0;
+            virtual neolib::i_optional<scalar> const& zfar() const = 0;
             virtual scalar znear() const = 0;
         };
 
