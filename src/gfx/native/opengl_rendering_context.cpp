@@ -1139,6 +1139,7 @@ namespace neogfx
             auto const& infos = aEcs.component<game::entity_info>();
             auto const& meshRenderers = aEcs.component<game::mesh_renderer>();
             auto const& meshFilters = aEcs.component<game::mesh_filter>();
+            auto const& cache = aEcs.component<game::mesh_render_cache>();
             for (auto entity : meshRenderers.entities())
             {
 #ifndef NDEBUG
@@ -1160,7 +1161,7 @@ namespace neogfx
                     meshRenderer,
                     optional_mat44{},
                     entity);
-                if (!game::is_render_cache_clean_no_lock(aEcs, entity))
+                if (!game::is_render_cache_clean_no_lock(cache, entity))
                 {
                     auto const& rigidBodyTransformation = (rigidBodies.has_entity_record_no_lock(entity) ?
                         to_transformation_matrix(rigidBodies.entity_record_no_lock(entity)) : mat44::identity());

@@ -387,6 +387,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_render_target.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_scene_graph.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_standard_shader_program.hpp" />

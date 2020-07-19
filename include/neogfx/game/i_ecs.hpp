@@ -1,4 +1,4 @@
-// ecs.hpp
+// i_ecs.hpp
 /*
   neolib C++ App/Game Engine
   Copyright (c)  2020 Leigh Johnston.  All Rights Reserved.

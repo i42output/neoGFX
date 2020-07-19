@@ -1062,6 +1062,9 @@
     <ClInclude Include="..\..\..\include\neogfx\game\entity_life_span.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_scene_graph.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
