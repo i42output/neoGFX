@@ -68,6 +68,7 @@ namespace neogfx
         property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true);
         ~property_transition();
     public:
+        bool can_apply() const override;
         void apply() override;
         bool finished() const override;
     public:

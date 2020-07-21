@@ -772,6 +772,7 @@ int main(int argc, char* argv[])
 
         ng::table_view& tableView1 = window.tableView1;
         ng::table_view& tableView2 = window.tableView2;
+
         tableView1.set_minimum_size(ng::size(128, 128));
         tableView2.set_minimum_size(ng::size(128, 128));
         window.button10.clicked([&tableView1, &tableView2]()

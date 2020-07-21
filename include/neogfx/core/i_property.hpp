@@ -152,6 +152,7 @@ namespace neogfx
     public:
         struct no_calculator : std::logic_error { no_calculator() : std::logic_error("neogfx::i_property::no_calculator") {} };
         struct no_delegate : std::logic_error { no_delegate() : std::logic_error("neogfx::i_property::no_delegate") {} };
+        struct no_new_value : std::logic_error { no_new_value() : std::logic_error("neogfx::i_property::no_new_value") {} };
         // construction
     public:
         virtual ~i_property() = default;
@@ -165,11 +166,13 @@ namespace neogfx
         virtual const std::type_info& category() const = 0;
         virtual bool optional() const = 0;
         virtual property_variant get_as_variant() const = 0;
+        virtual property_variant get_new_as_variant() const = 0;
         virtual void set_from_variant(const property_variant& aValue) = 0;
         virtual bool has_delegate() const = 0;
         virtual i_property_delegate& delegate() const = 0;
         virtual void set_delegate(i_property_delegate& aDelegate) = 0;
         virtual void unset_delegate() = 0;
+        virtual void discard_change_events() = 0;
         // implementation
     protected:
         virtual const void* data() const = 0;

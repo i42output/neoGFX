@@ -270,7 +270,7 @@ namespace neogfx
                 auto const itemIndex = item_presentation_model_index{ row, col };
                 bool const currentCell = selection_model().has_current_index() && selection_model().current_index() == itemIndex;
                 rect cellRect = cell_rect(itemIndex, aGc);
-                if (cellRect.y > clipRect.bottom())
+                if (cellRect.bottom() < clipRect.y || cellRect.y > clipRect.bottom())
                     continue;
                 finished = false;
                 optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
@@ -815,9 +815,11 @@ namespace neogfx
 
     void item_view::current_index_changed(const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
     {
+        bool needUpdate = true;
         if (aCurrentIndex != std::nullopt)
         {
-            make_visible(*aCurrentIndex);
+            if (make_visible(*aCurrentIndex))
+                needUpdate = false;
             if (!selection_model().sorting() && !selection_model().filtering())
             {
                 if (aPreviousIndex != std::nullopt)
@@ -829,7 +831,8 @@ namespace neogfx
                 }
             }
         }
-        update();
+        if (needUpdate)
+            update();
     }
 
     void item_view::selection_changed(const item_selection&, const item_selection&)
@@ -862,8 +865,9 @@ namespace neogfx
         return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
     }
 
-    void item_view::make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition, const std::optional<double>& aTransitionDuration)
+    bool item_view::make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition, const std::optional<double>& aTransitionDuration)
     {
+        bool changed = false;
         auto const& transition = (aTransition == std::nullopt ? default_transition() : aTransition);
         auto const transitionDuration = (aTransitionDuration == std::nullopt ? default_transition_duration() : *aTransitionDuration);
         graphics_context gc{ *this, graphics_context::type::Unattached };
@@ -873,17 +877,18 @@ namespace neogfx
         if (intersectRect.height() < cellRect.height())
         {
             if (cellRect.top() < displayRect.top())
-                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top()), transition, transitionDuration);
+                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top()), transition, transitionDuration) || changed;
             else if (cellRect.bottom() > displayRect.bottom())
-                vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom()), transition, transitionDuration);
+                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom()), transition, transitionDuration) || changed;
         }
         if (intersectRect.width() < cellRect.width())
         {
             if (cellRect.left() < displayRect.left())
-                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left()), transition, transitionDuration);
+                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left()), transition, transitionDuration) || changed;
             else if (cellRect.right() > displayRect.right())
-                horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right()), transition, transitionDuration);
+                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right()), transition, transitionDuration) || changed;
         }
+        return changed;
     }
 
     const optional_item_presentation_model_index& item_view::editing() const

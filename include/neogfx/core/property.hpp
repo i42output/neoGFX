@@ -80,7 +80,7 @@ namespace neogfx
             parent_type& iParent;
         };
     public:
-        property(i_property_owner& aOwner, const std::string& aName) : iOwner{ aOwner }, iName { aName }, iValue{}
+        property(i_property_owner& aOwner, const std::string& aName) : iOwner{ aOwner }, iName{ aName }, iValue{}
         {
             aOwner.properties().register_property(*this);
         }
@@ -122,6 +122,12 @@ namespace neogfx
         {
             return iValue;
         }
+        property_variant get_new_as_variant() const override
+        {
+            if (iNewValue != std::nullopt)
+                return *iNewValue;
+            throw no_new_value();
+        }
         void set_from_variant(const property_variant& aValue) override
         {
             std::visit([this](auto&& arg)
@@ -146,6 +152,10 @@ namespace neogfx
         void unset_delegate() override
         {
             iDelegate = nullptr;
+        }
+        void discard_change_events() override
+        {
+            iDiscardChangeEvents = true;
         }
     public:
         const value_type& value() const
@@ -256,21 +266,36 @@ namespace neogfx
         {
             if (iValue != aValue)
             {
+                iNewValue = std::forward<T2>(aValue);
                 destroyed_flag destroyed{ *this };
-                PropertyChanged.pre_trigger();
-                if (destroyed)
-                    return *this;
-                PropertyChangedFromTo.pre_trigger();
-                if (destroyed)
-                    return *this;
-                Changed.pre_trigger();
-                if (destroyed)
-                    return *this;
-                ChangedFromTo.pre_trigger();
-                if (destroyed)
-                    return *this;
+                try
+                {
+                    PropertyChanged.pre_trigger();
+                    if (destroyed)
+                        return *this;
+                    PropertyChangedFromTo.pre_trigger();
+                    if (destroyed)
+                        return *this;
+                    Changed.pre_trigger();
+                    if (destroyed)
+                        return *this;
+                    ChangedFromTo.pre_trigger();
+                    if (destroyed)
+                        return *this;
+                }
+                catch (...)
+                {
+                    iDiscardChangeEvents = false;
+                    throw;
+                }
                 auto const previousValue = iValue;
                 iValue = std::forward<T2>(aValue);
+                iNewValue = std::nullopt;
+                if (iDiscardChangeEvents)
+                {
+                    iDiscardChangeEvents = false;
+                    return *this;
+                }
                 if (aOwnerNotify)
                     iOwner.property_changed(*this);
                 if (destroyed)
@@ -299,7 +324,9 @@ namespace neogfx
         string iName;
         calculator_function_type iCalculator;
         mutable value_type iValue;
+        std::optional<value_type> iNewValue;
         i_property_delegate* iDelegate = nullptr;
+        bool iDiscardChangeEvents = false;
     };
 
     namespace property_category

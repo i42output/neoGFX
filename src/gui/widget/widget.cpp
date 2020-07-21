@@ -1025,6 +1025,8 @@ namespace neogfx
 
     bool widget::update(const rect& aUpdateRect)
     {
+        if (debug() == this)
+            std::cerr << "widget::update(" << aUpdateRect << ")" << std::endl;
         if (!can_update())
             return false;
         if (aUpdateRect.empty())

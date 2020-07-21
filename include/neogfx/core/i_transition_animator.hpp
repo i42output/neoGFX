@@ -59,6 +59,7 @@ namespace neogfx
         virtual void clear() = 0;
         virtual void reset(bool aEnable = true, bool aDisableWhenFinished = false) = 0;
         virtual void reset(easing aNewEasingFunction, bool aEnable = true, bool aDisableWhenFinished = false) = 0;
+        virtual bool can_apply() const = 0;
         virtual void apply() = 0;
     };
 

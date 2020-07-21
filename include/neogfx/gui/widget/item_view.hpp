@@ -82,7 +82,7 @@ namespace neogfx
         void disable_hot_tracking();
     public:
         bool is_visible(const item_presentation_model_index& aItemIndex) const;
-        void make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition = {}, const std::optional<double>& aTransitionDuration = {});
+        bool make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition = {}, const std::optional<double>& aTransitionDuration = {});
         const optional_item_presentation_model_index& editing() const;
         void edit(const item_presentation_model_index& aItemIndex);
         void begin_edit();
