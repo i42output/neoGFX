@@ -270,9 +270,11 @@ namespace neogfx
                 auto const itemIndex = item_presentation_model_index{ row, col };
                 bool const currentCell = selection_model().has_current_index() && selection_model().current_index() == itemIndex;
                 rect cellRect = cell_rect(itemIndex, aGc);
-                if (cellRect.bottom() < clipRect.y || cellRect.y > clipRect.bottom())
+                if (cellRect.y > clipRect.bottom())
                     continue;
                 finished = false;
+                if (cellRect.bottom() < clipRect.y)
+                    continue;
                 optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
                 if (!cellBackgroundColor)
                     cellBackgroundColor = background_color();
