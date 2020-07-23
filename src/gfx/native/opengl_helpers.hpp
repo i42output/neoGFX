@@ -255,6 +255,7 @@ namespace neogfx
             std::swap(iCapacity, temp.iCapacity);
             std::swap(iSize, temp.iSize);
             std::swap(iMemory, temp.iMemory);
+            std::swap(iReclaimedSpace, temp.iReclaimedSpace);
             iOwner->buffer_grown();
         }
     private:
