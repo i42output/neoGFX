@@ -417,6 +417,7 @@ namespace neogfx
             {
                 if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
                 {
+                    end_edit(true);
                     presentation_model().toggle_expanded(*item);
                     return;
                 }
