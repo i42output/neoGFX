@@ -584,10 +584,13 @@ namespace neogfx
     widget_part surface_window_proxy::native_window_hit_test(const point& aPosition) const
     {
         const i_widget& w = widget_for_mouse_event(aPosition, true);
-        return w.hit_test(aPosition - w.origin());
+        auto const part = w.hit_test(aPosition - w.origin());
+        if (w.part_active(part) && &part.widget == &as_widget())
+            return part;
+        return widget_part{ as_widget(), widget_part::Client };
     }
 
-    rect surface_window_proxy::native_window_widget_part_rect(widget_part aWidgetPart) const
+    rect surface_window_proxy::native_window_widget_part_rect(widget_part_e aWidgetPart) const
     {
         return as_window().widget_part_rect(aWidgetPart);
     }

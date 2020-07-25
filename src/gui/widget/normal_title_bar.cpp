@@ -116,7 +116,7 @@ namespace neogfx
 
     widget_part normal_title_bar::hit_test(const point&) const
     {
-        return widget_part::TitleBar;
+        return widget_part{ root().as_widget(), widget_part::TitleBar };
     }
 
     void normal_title_bar::init()

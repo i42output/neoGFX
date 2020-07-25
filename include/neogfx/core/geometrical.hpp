@@ -796,11 +796,25 @@ namespace neogfx
         self_type& inflate(const padding_type& padding) { return inflate(padding.left, padding.top, padding.right, padding.bottom); }
         self_type& inflate(coordinate_type dx, coordinate_type dy) { return inflate(delta_type(dx, dy)); }
         self_type& inflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { x -= left; y -= top; cx += (left + right); cy += (top + bottom); return *this; }
+        template <typename... Args>
+        self_type inflated(Args&&... aArgs) const
+        {
+            auto result = *this;
+            result.inflate(std::forward<Args>(aArgs)...);
+            return result;
+        }
         self_type& deflate(const delta_type& delta) { return inflate(-delta); }
         self_type& deflate(const size_type& size) { return inflate(-size.cx, -size.cy); }
         self_type& deflate(const padding_type& padding) { return deflate(padding.left, padding.top, padding.right, padding.bottom); }
         self_type& deflate(coordinate_type dx, coordinate_type dy) { return inflate(-dx, -dy); }
         self_type& deflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { return inflate(-left, -top, -right, -bottom); }
+        template <typename... Args>
+        self_type deflated(Args&&... aArgs) const
+        {
+            auto result = *this;
+            result.deflate(std::forward<Args>(aArgs)...);
+            return result;
+        }
         template <typename... T>
         friend self_type inflate_rect(const self_type& aRect, T&&... aAmount)
         {

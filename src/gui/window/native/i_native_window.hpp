@@ -81,5 +81,6 @@ namespace neogfx
         virtual double rendering_priority() const = 0;
         virtual const std::string& title_text() const = 0;
         virtual void set_title_text(const std::string& aTitleText) = 0;
+        virtual padding border_thickness() const = 0;
     };
 }

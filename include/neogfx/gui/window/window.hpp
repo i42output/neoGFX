@@ -174,7 +174,8 @@ namespace neogfx
     public:
         point mouse_position() const override;
     public:
-        rect widget_part_rect(widget_part aWidgetPart) const override;
+        neogfx::padding border() const override;
+        rect widget_part_rect(widget_part_e aWidgetPart) const override;
     public:
         bool has_client_widget() const override;
         const i_widget& client_widget() const override;

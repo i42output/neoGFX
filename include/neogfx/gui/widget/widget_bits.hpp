@@ -49,66 +49,66 @@ namespace neogfx
         return aLhs = static_cast<widget_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    enum class widget_part : uint32_t
+    class i_widget; 
+
+    struct widget_part
     {
-        Client,
-        NonClient,
-        NonClientOther,
-        TitleBar,
-        Grab,
-        Border,
-        BorderLeft,
-        BorderTopLeft,
-        BorderTop,
-        BorderTopRight,
-        BorderRight,
-        BorderBottomRight,
-        BorderBottom,
-        BorderBottomLeft,
-        GrowBox,
-        CloseButton,
-        MaximizeButton,
-        MinimizeButton,
-        RestoreButton,
-        Menu,
-        SystemMenu,
-        VerticalScrollbar,
-        HorizontalScrollbar,
-        Nowhere,
-        NowhereError
+        i_widget const& widget;
+        enum widget_part_e
+        {
+            Invalid             = 0x00000000,
+            Client              = 0x00000001,
+            NonClient           = 0x00000002,
+            NonClientOther      = 0x00000004,
+            TitleBar            = 0x00000008,
+            Grab                = 0x00000010,
+            Border              = 0x00000020,
+            BorderLeft          = 0x00000040,
+            BorderTopLeft       = 0x00000080,
+            BorderTop           = 0x00000100,
+            BorderTopRight      = 0x00000200,
+            BorderRight         = 0x00000400,
+            BorderBottomRight   = 0x00000800,
+            BorderBottom        = 0x00001000,
+            BorderBottomLeft    = 0x00002000,
+            GrowBox             = 0x00004000,
+            CloseButton         = 0x00008000,
+            MaximizeButton      = 0x00010000,
+            MinimizeButton      = 0x00020000,
+            RestoreButton       = 0x00040000,
+            Menu                = 0x00080000,
+            SystemMenu          = 0x00100000,
+            VerticalScrollbar   = 0x00200000,
+            HorizontalScrollbar = 0x00400000,
+            Nowhere             = 0x40000000,
+            NowhereError        = 0x80800000
+        } part;
     };
 
-    inline constexpr widget_part operator|(widget_part aLhs, widget_part aRhs)
-    {
-        return static_cast<widget_part>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-    }
-
-    inline constexpr widget_part operator&(widget_part aLhs, widget_part aRhs)
-    {
-        return static_cast<widget_part>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-    }
-
-    inline constexpr widget_part& operator|=(widget_part& aLhs, widget_part aRhs)
-    {
-        return aLhs = static_cast<widget_part>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-    }
-
-    inline constexpr widget_part& operator&=(widget_part& aLhs, widget_part aRhs)
-    {
-        return aLhs = static_cast<widget_part>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-    }
+    typedef widget_part::widget_part_e widget_part_e;
 
     inline bool capture_ok(widget_part aWidgetPart)
     {
-        switch (aWidgetPart)
+        switch (aWidgetPart.part)
         {
         case widget_part::Client:
+        case widget_part::NonClient:
         case widget_part::VerticalScrollbar:
         case widget_part::HorizontalScrollbar:
         case widget_part::CloseButton:
         case widget_part::MaximizeButton:
         case widget_part::MinimizeButton:
         case widget_part::RestoreButton: 
+            return true;
+        case widget_part::Border:
+        case widget_part::BorderLeft:
+        case widget_part::BorderTopLeft:
+        case widget_part::BorderTop:
+        case widget_part::BorderTopRight:
+        case widget_part::BorderRight:
+        case widget_part::BorderBottomRight:
+        case widget_part::BorderBottom:
+        case widget_part::BorderBottomLeft:
             return true;
         default:
             return false;
@@ -131,40 +131,33 @@ namespace neogfx
 }
 
 template <>
-const neolib::enum_enumerators_t<neogfx::widget_type> neolib::enum_enumerators_v<neogfx::widget_type>
+const neolib::enum_enumerators_t<neogfx::widget_part_e> neolib::enum_enumerators_v<neogfx::widget_part_e>
 {
-    declare_enum_string(neogfx::widget_type, Client)
-    declare_enum_string(neogfx::widget_type, NonClient)
-};
-        
-template <>
-const neolib::enum_enumerators_t<neogfx::widget_part> neolib::enum_enumerators_v<neogfx::widget_part>
-{
-    declare_enum_string(neogfx::widget_part, Client)
-    declare_enum_string(neogfx::widget_part, NonClient)
-    declare_enum_string(neogfx::widget_part, NonClientOther)
-    declare_enum_string(neogfx::widget_part, TitleBar)
-    declare_enum_string(neogfx::widget_part, Grab)
-    declare_enum_string(neogfx::widget_part, Border)
-    declare_enum_string(neogfx::widget_part, BorderLeft)
-    declare_enum_string(neogfx::widget_part, BorderTopLeft)
-    declare_enum_string(neogfx::widget_part, BorderTop)
-    declare_enum_string(neogfx::widget_part, BorderTopRight)
-    declare_enum_string(neogfx::widget_part, BorderRight)
-    declare_enum_string(neogfx::widget_part, BorderBottomRight)
-    declare_enum_string(neogfx::widget_part, BorderBottom)
-    declare_enum_string(neogfx::widget_part, BorderBottomLeft)
-    declare_enum_string(neogfx::widget_part, GrowBox)
-    declare_enum_string(neogfx::widget_part, CloseButton)
-    declare_enum_string(neogfx::widget_part, MaximizeButton)
-    declare_enum_string(neogfx::widget_part, MinimizeButton)
-    declare_enum_string(neogfx::widget_part, RestoreButton)
-    declare_enum_string(neogfx::widget_part, Menu)
-    declare_enum_string(neogfx::widget_part, SystemMenu)
-    declare_enum_string(neogfx::widget_part, VerticalScrollbar)
-    declare_enum_string(neogfx::widget_part, HorizontalScrollbar)
-    declare_enum_string(neogfx::widget_part, Nowhere)
-    declare_enum_string(neogfx::widget_part, NowhereError)
+    declare_enum_string(neogfx::widget_part_e, Client)
+    declare_enum_string(neogfx::widget_part_e, NonClient)
+    declare_enum_string(neogfx::widget_part_e, NonClientOther)
+    declare_enum_string(neogfx::widget_part_e, TitleBar)
+    declare_enum_string(neogfx::widget_part_e, Grab)
+    declare_enum_string(neogfx::widget_part_e, Border)
+    declare_enum_string(neogfx::widget_part_e, BorderLeft)
+    declare_enum_string(neogfx::widget_part_e, BorderTopLeft)
+    declare_enum_string(neogfx::widget_part_e, BorderTop)
+    declare_enum_string(neogfx::widget_part_e, BorderTopRight)
+    declare_enum_string(neogfx::widget_part_e, BorderRight)
+    declare_enum_string(neogfx::widget_part_e, BorderBottomRight)
+    declare_enum_string(neogfx::widget_part_e, BorderBottom)
+    declare_enum_string(neogfx::widget_part_e, BorderBottomLeft)
+    declare_enum_string(neogfx::widget_part_e, GrowBox)
+    declare_enum_string(neogfx::widget_part_e, CloseButton)
+    declare_enum_string(neogfx::widget_part_e, MaximizeButton)
+    declare_enum_string(neogfx::widget_part_e, MinimizeButton)
+    declare_enum_string(neogfx::widget_part_e, RestoreButton)
+    declare_enum_string(neogfx::widget_part_e, Menu)
+    declare_enum_string(neogfx::widget_part_e, SystemMenu)
+    declare_enum_string(neogfx::widget_part_e, VerticalScrollbar)
+    declare_enum_string(neogfx::widget_part_e, HorizontalScrollbar)
+    declare_enum_string(neogfx::widget_part_e, Nowhere)
+    declare_enum_string(neogfx::widget_part_e, NowhereError)
 };
 
 template <>

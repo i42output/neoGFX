@@ -93,7 +93,7 @@ namespace neogfx
 
         LRESULT convert_widget_part(widget_part aWidgetPart)
         {
-            switch (aWidgetPart)
+            switch (aWidgetPart.part)
             {
             case widget_part::TitleBar:
             case widget_part::Grab:
@@ -1031,7 +1031,7 @@ namespace neogfx
                         {
                             POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
                             ScreenToClient(hwnd, &pt);
-                            self.iClickedWidgetPart = self.surface_window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y });
+                            self.iClickedWidgetPart = self.surface_window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y }).part;
                         }
                         result = wndproc(hwnd, msg, wparam, lparam);
                         break;
@@ -1156,29 +1156,11 @@ namespace neogfx
             case WM_NCHITTEST:
                 if (CUSTOM_DECORATION)
                 {
-                    result = HTCLIENT;
                     POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
                     ScreenToClient(hwnd, &pt);
-                    RECT rc;
-                    GetClientRect(hwnd, &rc);
-                    enum { left = 1, top = 2, right = 4, bottom = 8 };
-                    int hit = 0;
-                    auto padding = self.border_thickness();
-                    if (pt.x < padding.left) hit |= left;
-                    if (pt.x > rc.right - padding.right) hit |= right;
-                    if (pt.y < padding.top) hit |= top;
-                    if (pt.y > rc.bottom - padding.bottom) hit |= bottom;
-                    if (hit & top && hit & left) result = HTTOPLEFT;
-                    else if (hit & top && hit & right) result = HTTOPRIGHT;
-                    else if (hit & bottom && hit & left) result = HTBOTTOMLEFT;
-                    else if (hit & bottom && hit & right) result = HTBOTTOMRIGHT;
-                    else if (hit & left) result = HTLEFT;
-                    else if (hit & top) result = HTTOP;
-                    else if (hit & right) result = HTRIGHT;
-                    else if (hit & bottom) result = HTBOTTOM;
-                    if (result == HTCLIENT)
-                        result = convert_widget_part(self.surface_window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y }));
-                }        
+                    auto const part = self.surface_window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y });
+                    result = convert_widget_part(part);
+                }
                 else
                     result = wndproc(hwnd, msg, wparam, lparam);
                 break;

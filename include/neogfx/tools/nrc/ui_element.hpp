@@ -455,7 +455,7 @@ namespace neogfx::nrc
                 case ui_element_type::Toolbar:
                     return ".toolbar_layout()";
                 case ui_element_type::StatusBar:
-                    return ".status_bar_layout()";
+                    return "";
                 default:
                     return ".client_layout()";
                 }

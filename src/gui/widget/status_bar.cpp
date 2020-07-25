@@ -97,48 +97,30 @@ namespace neogfx
         return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
-    status_bar::size_grip::size_grip(i_layout& aLayout) : 
+    status_bar::size_grip_widget::size_grip_widget(i_layout& aLayout) :
         image_widget{ aLayout }
     {
         set_ignore_mouse_events(false);
         set_placement(cardinal::SouthEast);
     }
 
-    neogfx::size_policy status_bar::size_grip::size_policy() const
+    neogfx::size_policy status_bar::size_grip_widget::size_policy() const
     {
         return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
-    widget_part status_bar::size_grip::hit_test(const point&) const
+    widget_part status_bar::size_grip_widget::hit_test(const point&) const
     {
-        return widget_part::BorderBottomRight;
+        return widget_part{ root().as_widget(), widget_part::BorderBottomRight };
     }
 
-    bool status_bar::size_grip::ignore_non_client_mouse_events() const
+    bool status_bar::size_grip_widget::ignore_non_client_mouse_events() const
     {
         return false;
     }
 
-    status_bar::status_bar(i_widget& aParent, style aStyle) :
-        widget{ aParent },
-        iStyle{ aStyle },
-        iLayout{ *this },
-        iNormalLayout{ iLayout },
-        iMessageLayout{ iNormalLayout },
-        iMessageWidget{ iMessageLayout },
-        iIdleLayout{ iNormalLayout },
-        iIdleWidget{ iIdleLayout },
-        iNormalWidgetContainer{ iLayout },
-        iNormalWidgetLayout{ iNormalWidgetContainer },
-        iPermanentWidgetLayout{ iLayout },
-        iKeyboardLockStatus{ iLayout },
-        iSizeGrip{ iLayout }
-    {
-        init();
-    }
-
-    status_bar::status_bar(i_layout& aLayout, style aStyle) :
-        widget{ aLayout },
+    status_bar::status_bar(i_standard_layout_container& aContainer, style aStyle) :
+        widget{ aContainer.status_bar_layout() },
         iStyle{ aStyle },
         iLayout{ *this },
         iNormalLayout{ iLayout },
@@ -246,6 +228,15 @@ namespace neogfx
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
+    widget_part status_bar::hit_test(const point& aPosition) const
+    {
+        point const gripOrigin = client_rect().bottom_right() - (iSizeGrip.origin() - origin());
+        rect const gripRect = { gripOrigin, size{ client_rect().bottom_right() - gripOrigin } };
+        if (gripRect.contains(aPosition))
+            return widget_part{ root().as_widget(), widget_part::BorderBottomRight };
+        return widget::hit_test(aPosition);
+    }
+
     bool status_bar::can_defer_layout() const
     {
         return true;
@@ -254,6 +245,21 @@ namespace neogfx
     bool status_bar::is_managing_layout() const
     {
         return true;
+    }
+
+    const i_widget& status_bar::as_widget() const
+    {
+        return *this;
+    }
+
+    i_widget& status_bar::as_widget()
+    {
+        return *this;
+    }
+
+    const i_widget& status_bar::size_grip() const
+    {
+        return iSizeGrip;
     }
 
     void status_bar::init()

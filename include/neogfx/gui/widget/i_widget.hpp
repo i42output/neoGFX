@@ -223,6 +223,10 @@ namespace neogfx
             return *newWidget;
         }
     public:
+        bool is_surface() const
+        {
+            return is_root() && root().is_surface();
+        }
         bool has_surface() const
         {
             return has_root() && root().has_surface();

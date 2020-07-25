@@ -28,14 +28,14 @@
 namespace neogfx
 {
     dock::dock(i_widget& aParent, dock_area aArea) :
-        base_type{ neogfx::decoration_style::Dock, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
+        base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
     {
         set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
 
     dock::dock(i_layout& aLayout, dock_area aArea) :
-        base_type{ neogfx::decoration_style::Dock, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
+        base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
     {
         set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
@@ -98,7 +98,7 @@ namespace neogfx
 
     bool dock::part_active(widget_part aPart) const
     {
-        switch (aPart)
+        switch (aPart.part)
         {
         case widget_part::BorderLeft:
             return area() == dock_area::Right;

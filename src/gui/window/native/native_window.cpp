@@ -40,7 +40,7 @@ namespace neogfx
         {
             aTimer.again();
             if (non_client_entered() && 
-                surface_window().native_window_hit_test(surface_window().as_window().window_manager().mouse_position(surface_window().as_window())) == widget_part::Nowhere)
+                surface_window().native_window_hit_test(surface_window().as_window().window_manager().mouse_position(surface_window().as_window())).part == widget_part::Nowhere)
             {
                 auto e1 = find_event<window_event>(window_event_type::NonClientLeave);
                 auto e2 = find_event<window_event>(window_event_type::NonClientEnter);

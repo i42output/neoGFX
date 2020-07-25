@@ -128,7 +128,7 @@ namespace neogfx
         void native_window_mouse_entered(const point& aPosition) override;
         void native_window_mouse_left() override;
         widget_part native_window_hit_test(const point& aPosition) const override;
-        rect native_window_widget_part_rect(widget_part aWidgetPart) const override;
+        rect native_window_widget_part_rect(widget_part_e aWidgetPart) const override;
         void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         void native_window_text_input(const std::string& aText) override;

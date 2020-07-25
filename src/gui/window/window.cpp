@@ -241,6 +241,8 @@ namespace neogfx
             result |= decoration_style::Popup;
         if ((aStyle & window_style::Nested) == window_style::Nested)
             result |= decoration_style::Nested;
+        if ((aStyle & window_style::Resize) == window_style::Resize)
+            result |= decoration_style::Resizable;
         return result;
     }
 
@@ -618,8 +620,8 @@ namespace neogfx
     widget_part window::hit_test(const point& aPosition) const
     {
         auto result = base_type::hit_test(aPosition);
-        if (result == widget_part::Client)
-            result = widget_part::Grab;
+        if (result.part == widget_part::Client)
+            result.part = widget_part::Grab;
         return result;
     }
 
@@ -1106,7 +1108,16 @@ namespace neogfx
         return window_manager().mouse_position(*this);
     }
 
-    rect window::widget_part_rect(widget_part aWidgetPart) const
+    padding window::border() const
+    {
+        // todo: for win32 desktop windows we need a transparent window behind for resizing
+        auto const result = is_surface() ? 
+            native_window().border_thickness() :
+            neogfx::padding{ 4.0, 4.0, 4.0, 4.0 };
+        return result;
+    }
+
+    rect window::widget_part_rect(widget_part_e aWidgetPart) const
     {
         switch (aWidgetPart)
         {
@@ -1227,7 +1238,7 @@ namespace neogfx
         bool const childHasFocus = has_focused_widget() && focused_widget().is_descendent_of(aCandidateWidget);
         if (childHasFocus && focused_widget().client_rect().contains(aClickPos - focused_widget().origin()))
             return;
-        bool const inClientArea = (aCandidateWidget.hit_test(aClickPos - aCandidateWidget.origin()) == widget_part::Client);
+        bool const inClientArea = (aCandidateWidget.hit_test(aClickPos - aCandidateWidget.origin()).part == widget_part::Client);
         bool const ignoreNonClientArea = (aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient;
         focus_reason const focusReason = (inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
         if (aCandidateWidget.enabled() && aCandidateWidget.can_set_focus(focusReason))

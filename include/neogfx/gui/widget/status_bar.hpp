@@ -20,23 +20,25 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/stack_layout.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
+#include <neogfx/gui/widget/i_status_bar.hpp>
 
 namespace neogfx
 {
-    class status_bar : public widget
+    class status_bar : public widget, public i_status_bar
     {
     public:
         enum class style : uint32_t
         {
-            DisplayNone                = 0x0000,
-            DisplayMessage            = 0x0001,
+            DisplayNone             = 0x0000,
+            DisplayMessage          = 0x0001,
             DisplayKeyboardLocks    = 0x0010,
-            DisplaySizeGrip            = 0x8000
+            DisplaySizeGrip         = 0x8000
         };
         friend constexpr style operator|(style aLhs, style aRhs)
         {
@@ -68,22 +70,21 @@ namespace neogfx
             horizontal_layout iLayout;
             std::unique_ptr<neolib::callback_timer> iUpdater;
         };
-        class size_grip : public image_widget
+        class size_grip_widget : public image_widget
         {
         public:
-            size_grip(i_layout& aLayout);
+            size_grip_widget(i_layout& aLayout);
         public:
             neogfx::size_policy size_policy() const override;
         public:
-            widget_part hit_test(const point&) const override;
+            widget_part hit_test(const point& aPosition) const override;
             bool ignore_non_client_mouse_events() const override;
         };
     public:
         struct style_conflict : std::runtime_error { style_conflict() : std::runtime_error("neogfx::status_bar::style_conflict") {} };
         struct no_message : std::runtime_error { no_message() : std::runtime_error("neogfx::status_bar::no_message") {} };
     public:
-        status_bar(i_widget& aParent, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
-        status_bar(i_layout& aLayout, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
+        status_bar(i_standard_layout_container& aContainer, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
     public:
         bool have_message() const;
         std::string message() const;
@@ -105,8 +106,15 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override;
     protected:
+        widget_part hit_test(const point& aPosition) const override;
+    protected:
         bool can_defer_layout() const override;
         bool is_managing_layout() const override;
+    protected:
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
+    protected:
+        const i_widget& size_grip() const override;
     private:
         void init();
         void update_widgets();
@@ -125,6 +133,6 @@ namespace neogfx
         horizontal_layout iPermanentWidgetLayout;
         keyboard_lock_status iKeyboardLockStatus;
         mutable std::optional<std::pair<color, texture>> iSizeGripTexture;
-        size_grip iSizeGrip;
+        size_grip_widget iSizeGrip;
     };
 }

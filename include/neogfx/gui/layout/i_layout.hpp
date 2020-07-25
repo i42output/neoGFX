@@ -26,8 +26,10 @@
 
 namespace neogfx
 {
-    class i_widget;
+    class i_layout;
     class i_spacer;
+    class i_widget;
+    class i_status_bar;
 
     typedef uint32_t layout_item_index;
     typedef std::optional<layout_item_index> optional_layout_item_index;
@@ -55,8 +57,6 @@ namespace neogfx
         ButtonBox       = 0x00000009
     };
 
-    class i_layout;
-
     struct standard_layout_not_found : std::logic_error { standard_layout_not_found() : std::logic_error{ "neogfx::standard_layout_not_found" } {} };
 
     class i_standard_layout_container
@@ -75,6 +75,8 @@ namespace neogfx
         virtual i_widget& client_widget() = 0;
         virtual void set_client(i_widget& aClient) = 0;
         virtual void set_client(std::shared_ptr<i_widget> aClient) = 0;
+        virtual void set_status_bar(i_status_bar& aStatusBar) = 0;
+        virtual void set_status_bar(std::shared_ptr<i_status_bar> aStatusBar) = 0;
     public:
         virtual bool has_layout(standard_layout aStandardLayout) const = 0;
         virtual const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const = 0;

@@ -494,6 +494,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skin.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skinnable_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skin_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_status_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page.hpp" />

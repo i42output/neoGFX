@@ -32,7 +32,7 @@ namespace neogfx
     class normal_title_bar : public widget, public i_title_bar
     {
     private:
-        template <typename WidgetType, widget_part WidgetPart>
+        template <typename WidgetType, widget_part_e WidgetPart>
         class non_client_item : public WidgetType
         {
         public:
@@ -40,7 +40,7 @@ namespace neogfx
         public:
             widget_part hit_test(const point&) const override
             {
-                return WidgetPart;
+                return widget_part{ WidgetType::root().as_widget(), WidgetPart };
             }
             bool ignore_non_client_mouse_events() const override
             {
@@ -94,7 +94,7 @@ namespace neogfx
     inline widget_part normal_title_bar::non_client_item<image_widget, widget_part::SystemMenu>::hit_test(const point&) const
     {
         if ((static_cast<const normal_title_bar&>(parent()).root().style() & window_style::SystemMenu) == window_style::SystemMenu)
-            return widget_part::SystemMenu;
-        return widget_part::TitleBar;
+            return widget_part{ root().as_widget(), widget_part::SystemMenu };
+        return widget_part{ root().as_widget(), widget_part::TitleBar };
     }
 }

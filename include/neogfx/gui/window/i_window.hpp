@@ -141,7 +141,8 @@ namespace neogfx
     public:
         virtual point mouse_position() const = 0;
     public:
-        virtual rect widget_part_rect(widget_part aWidgetPart) const = 0;
+        virtual padding border() const = 0;
+        virtual rect widget_part_rect(widget_part_e aWidgetPart) const = 0;
     public:
         virtual const i_widget& client_widget() const = 0;
         virtual i_widget& client_widget() = 0;

@@ -128,13 +128,13 @@ namespace neogfx
             void non_client_set_capture() override;
             void non_client_release_capture() override;
             void set_title_text(const std::string& aTitleText) override;
+            padding border_thickness() const override;
         protected:
             void set_destroying() override;
             void set_destroyed() override;
         private:
             static window* new_window();
             void init();
-            padding border_thickness() const;
         private:
             static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
         private:
@@ -155,7 +155,7 @@ namespace neogfx
             bool iNonClientCapturing;
             bool iReady;
             mutable padding iBorderThickness;
-            widget_part iClickedWidgetPart;
+            widget_part_e iClickedWidgetPart;
             bool iSystemMenuOpen;
         };
     }

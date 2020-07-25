@@ -238,14 +238,14 @@ namespace neogfx
     widget_part item_view::hit_test(const point& aPosition) const
     {
         if (item_display_rect().contains(aPosition))
-            return widget_part::Client;
+            return widget_part{ *this, widget_part::Client };
         else
         {
             auto result = framed_scrollable_widget::hit_test(aPosition);
-            if (result != widget_part::Client)
+            if (result.part != widget_part::Client)
                 return result;
             else
-                return widget_part::NonClient;
+                return widget_part{ *this, widget_part::NonClient };
         }
     }
 

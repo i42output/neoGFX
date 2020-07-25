@@ -826,16 +826,16 @@ namespace neogfx
     widget_part widget::part(const point& aPosition) const
     {
         if (client_rect().contains(aPosition))
-            return widget_part::Client;
+            return widget_part{ *this, widget_part::Client };
         else if (to_client_coordinates(non_client_rect()).contains(aPosition))
-            return widget_part::NonClient;
+            return widget_part{ *this, widget_part::NonClient };
         else
-            return widget_part::Nowhere;
+            return widget_part{ *this, widget_part::Nowhere };
     }
 
     widget_part widget::hit_test(const point& aPosition) const
     {
-        return widget::part(aPosition);
+        return part(aPosition);
     }
 
     bool widget::has_size_policy() const
@@ -1581,7 +1581,8 @@ namespace neogfx
     {
         auto const partUnderMouse = part(root().mouse_position() - origin());
         if (part_active(partUnderMouse))
-            switch (partUnderMouse)
+        {
+            switch (partUnderMouse.part)
             {
             case widget_part::Grab:
                 return mouse_system_cursor::Hand;
@@ -1604,6 +1605,7 @@ namespace neogfx
             case widget_part::GrowBox:
                 return mouse_system_cursor::SizeNWSE;
             }
+        }
         if (has_parent())
             return parent().mouse_cursor();
         return mouse_system_cursor::Arrow;
@@ -1631,6 +1633,13 @@ namespace neogfx
 
     const i_widget& widget::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
+        if (is_root() && (root().style() & window_style::Resize) == window_style::Resize)
+        {
+            auto const outerRect = to_client_coordinates(non_client_rect());
+            auto const innerRect = outerRect.deflated(root().border());
+            if (outerRect.contains(aPosition) && !innerRect.contains(aPosition))
+                return *this;
+        }
         if (client_rect().contains(aPosition))
         {
             const i_widget* w = &get_widget_at(aPosition);

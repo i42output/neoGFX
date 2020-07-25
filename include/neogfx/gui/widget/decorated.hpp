@@ -26,7 +26,7 @@
 #include <neogfx/gui/widget/widget_bits.hpp>
 #include <neogfx/gui/widget/normal_title_bar.hpp>
 #include <neogfx/gui/widget/tool_title_bar.hpp>
-#include <neogfx/gui/widget/i_title_bar.hpp>
+#include <neogfx/gui/widget/status_bar.hpp>
 
 namespace neogfx
 {
@@ -49,6 +49,7 @@ namespace neogfx
         Dock            = 0x00000004,
         Popup           = 0x00000008,
         Splash          = 0x00000010,
+        Resizable       = 0x01000000,
         Nested          = 0x10000000,
         NestedWindow    = Window | Nested,
         NestedTool      = Tool | Nested,
@@ -105,7 +106,7 @@ namespace neogfx
     private:
         struct tracking
         {
-            widget_part part;
+            widget_part_e part;
             point trackFrom;
         };
     public:
@@ -184,10 +185,26 @@ namespace neogfx
             if (iClient != nullptr)
                 iClientLayout->add(iClient);
         }
+        void set_status_bar(i_status_bar& aStatusBar) override
+        {
+            set_status_bar(std::shared_ptr<i_status_bar>{ std::shared_ptr<i_status_bar>{}, &aStatusBar });
+        }
+        void set_status_bar(std::shared_ptr<i_status_bar> aStatusBar)
+        {
+            iStatusBar = aStatusBar;
+            if (iStatusBarLayout->find(iStatusBar->as_widget()) == std::nullopt)
+                iStatusBarLayout->add(iStatusBar->as_widget());
+        }
         template <typename TitleBar, typename... Args>
         std::shared_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
         {
             return std::make_shared<TitleBar>(*this, std::forward<Args>(aArgs)...);
+        }
+        template <typename StatusBar, typename... Args>
+        std::shared_ptr<i_status_bar> create_status_bar(Args&&... aArgs)
+        {
+            set_status_bar(std::make_shared<StatusBar>(*this, std::forward<Args>(aArgs)...));
+            return iStatusBar;
         }
     public:
         bool is_widget() const override
@@ -205,7 +222,7 @@ namespace neogfx
     public:
         bool part_active(widget_part aPart) const override
         {
-            switch (aPart)
+            switch (aPart.part)
             {
             case widget_part::Border:
             case widget_part::BorderLeft:
@@ -216,8 +233,9 @@ namespace neogfx
             case widget_part::BorderBottomRight:
             case widget_part::BorderBottom:
             case widget_part::BorderBottomLeft:
-                return (decoration() & neogfx::decoration::Border) == neogfx::decoration::Border;
-            // todo: the rest
+                return (decoration_style() & neogfx::decoration_style::Resizable) == neogfx::decoration_style::Resizable &&
+                    (decoration() & neogfx::decoration::Border) == neogfx::decoration::Border;
+                // todo: the rest
             default:
                 return false;
             }
@@ -227,42 +245,49 @@ namespace neogfx
             if (widget_type::debug() == this)
                 std::cerr << "decorated<>::part(...) --> ";
             auto result = widget_type::part(aPosition);
-            if (result == widget_part::Client)
+            if (result.part == widget_part::Client || result.part == widget_part::NonClient)
             {
                 if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
                 {
                     enum { left = 1, top = 2, right = 4, bottom = 8 };
                     int hit = 0;
-                    auto const clientRect = as_widget().client_rect();
-                    auto const clientPadding = as_widget().padding();
-                    if (aPosition.x < clientPadding.left)
+                    auto const nonClientRect = as_widget().to_client_coordinates(as_widget().non_client_rect());
+                    auto const nonClientBorder = as_widget().is_root() ? as_widget().root().border() : as_widget().padding();
+                    if (aPosition.x < nonClientRect.left() + nonClientBorder.left)
                         hit |= left;
-                    if (aPosition.x > clientRect.right() - clientPadding.right)
+                    if (aPosition.x > nonClientRect.right() - nonClientBorder.right)
                         hit |= right;
-                    if (aPosition.y < clientPadding.top)
+                    if (aPosition.y < nonClientRect.top() + nonClientBorder.top)
                         hit |= top;
-                    if (aPosition.y > clientRect.bottom() - clientPadding.bottom)
+                    if (aPosition.y > nonClientRect.bottom() - nonClientBorder.bottom)
                         hit |= bottom;
+                    if (iStatusBar != nullptr)
+                    {
+                        point const sizeGripPos = iStatusBar->as_widget().origin() - as_widget().origin();
+                        rect const sizeGripRect = { sizeGripPos, size{ nonClientRect.bottom_right() - sizeGripPos } };
+                        if (sizeGripRect.contains(aPosition))
+                            hit |= (right | bottom);
+                    }
                     if (hit & top && hit & left)
-                        result = widget_part::BorderTopLeft;
+                        result.part = widget_part::BorderTopLeft;
                     else if (hit & top && hit & right)
-                        result = widget_part::BorderTopRight;
+                        result.part = widget_part::BorderTopRight;
                     else if (hit & bottom && hit & left)
-                        result = widget_part::BorderBottomLeft;
+                        result.part = widget_part::BorderBottomLeft;
                     else if (hit & bottom && hit & right)
-                        result = widget_part::BorderBottomRight;
+                        result.part = widget_part::BorderBottomRight;
                     else if (hit & left)
-                        result = widget_part::BorderLeft;
+                        result.part = widget_part::BorderLeft;
                     else if (hit & top)
-                        result = widget_part::BorderTop;
+                        result.part = widget_part::BorderTop;
                     else if (hit & right)
-                        result = widget_part::BorderRight;
+                        result.part = widget_part::BorderRight;
                     else if (hit & bottom)
-                        result = widget_part::BorderBottom;
+                        result.part = widget_part::BorderBottom;
                 }
             }
             if (widget_type::debug() == this)
-                std::cerr << result << std::endl;
+                std::cerr << result.part << std::endl;
             return result;
         }
     public:
@@ -343,7 +368,7 @@ namespace neogfx
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
                 {
-                    iTracking = tracking{ clickedPart, aPosition };
+                    iTracking = tracking{ clickedPart.part, aPosition };
                     if (as_widget().has_root())
                         as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
                     update_tracking(aPosition);
@@ -481,6 +506,7 @@ namespace neogfx
         std::optional<border_layout> iDockLayout;
         std::optional<vertical_layout> iStatusBarLayout;
         std::shared_ptr<i_title_bar> iTitleBar;
+        std::shared_ptr<i_status_bar> iStatusBar;
         std::shared_ptr<i_layout> iClientLayout;
         std::shared_ptr<i_widget> iClient;
         std::optional<tracking> iTracking;
