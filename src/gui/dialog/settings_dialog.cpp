@@ -230,7 +230,7 @@ namespace neogfx
         ref_ptr<i_setting_widget_factory> iUserFactory;
     };
 
-    settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory) :
+    settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, image&& aIcon) :
         dialog{ "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
@@ -238,12 +238,13 @@ namespace neogfx
         iTree{ iLayout },
         iDetails{ iLayout },
         iDetailLayout{ iDetails },
-        iBackground{ image{ ":/neogfx/resources/images/settings.png" } }
+        iIcon{ std::move(aIcon) },
+        iBackground{ iIcon }
     {
         init();
     }
 
-    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory) :
+    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, image&& aIcon) :
         dialog{ aParent, "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
@@ -251,7 +252,8 @@ namespace neogfx
         iTree{ iLayout },
         iDetails{ iLayout },
         iDetailLayout{ iDetails },
-        iBackground{ image{ ":/neogfx/resources/images/settings.png" } }
+        iIcon{ std::move(aIcon) },
+        iBackground{ iIcon }
     {
         init();
     }
@@ -265,8 +267,8 @@ namespace neogfx
     class settings_tree_presentation_model : public basic_item_presentation_model<settings_tree_item_model>
     {
     public:
-        settings_tree_presentation_model() : 
-            iIcon{ image{ ":/neogfx/resources/icons/settings.png" } }
+        settings_tree_presentation_model(const image& aIcon) : 
+            iIcon{ aIcon }
         {
         }
     public:
@@ -328,7 +330,7 @@ namespace neogfx
         iDetailLayout.set_size_policy(size_constraint::Expanding);
 
         auto treeModel = std::make_shared<settings_tree_item_model>();
-        auto treePresentationModel = std::make_shared<settings_tree_presentation_model>();
+        auto treePresentationModel = std::make_shared<settings_tree_presentation_model>(iIcon);
         iTree.set_model(treeModel);
         iTree.set_presentation_model(treePresentationModel);
 

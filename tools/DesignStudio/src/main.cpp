@@ -46,7 +46,7 @@ using namespace neolib::string_literals;
 
 int main(int argc, char* argv[])
 {
-    ds::main_app app{ argc, argv,  };
+    ds::main_app app{ argc, argv, "neoGFX Design Studio" };
 
     try
     {

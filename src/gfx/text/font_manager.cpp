@@ -145,9 +145,10 @@ namespace neogfx
     {
         FT_Error error = FT_Init_FreeType(&iFontLib);
         if (error)
-        {
             throw error_initializing_font_library();
-        }
+        error = FT_Library_SetLcdFilter(iFontLib, FT_LCD_FILTER_NONE);
+        if (error)
+            throw error_initializing_font_library();
         auto enumerate = [this](const std::string fontsDirectory)
         {
             for (boost::filesystem::directory_iterator file(fontsDirectory); file != boost::filesystem::directory_iterator(); ++file)

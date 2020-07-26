@@ -54,7 +54,8 @@ namespace neogfx::nrc
         {
             emit_preamble();
             emit("\n"
-                "  %1%(int argc, char* argv[]) :\n", fragment_name().to_std_string_view());
+                "  template <typename... Args>\n"
+                "  %1%(Args&&... aArgs) :\n", fragment_name().to_std_string_view());
             emit_ctor();
             emit("  {\n");
             emit_body();
@@ -67,10 +68,8 @@ namespace neogfx::nrc
         }
         void emit_ctor() const override
         {
-            if (iName)
-                emit("   %1%{ argc, argv, \"%2%\" }", type_name(), *iName);
-            else
-               emit("   %1%{ argc, argv }", type_name());
+            emit(
+                "   %1%{ std::forward<Args>(aArgs)... }", type_name());
             emit(",\n"
                 "   %1%{ *this }", id());
 

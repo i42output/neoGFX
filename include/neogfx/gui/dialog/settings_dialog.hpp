@@ -42,8 +42,8 @@ namespace neogfx
     class settings_dialog : public dialog
     {
     public:
-        settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {});
-        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {});
+        settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, image&& aIcon = image{ ":/neogfx/resources/images/settings.png" });
+        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, image&& aIcon = image{ ":/neogfx/resources/images/settings.png" });
         ~settings_dialog();
     private:
         void init();
@@ -55,6 +55,7 @@ namespace neogfx
         tree_view iTree;
         framed_scrollable_widget iDetails;
         vertical_layout iDetailLayout;
+        image iIcon;
         texture iBackground;
     };
 }
