@@ -45,11 +45,13 @@ namespace neogfx
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
                 iMode{ aMode }, 
                 iWithTextures{ false }, 
-                iStart{ static_cast<GLint>(iUse.vertices().size()) }, 
+                iStart{ static_cast<GLint>(vertices().size()) }, 
                 iUseBarrier{ aUseBarrier },
                 iDrawOnExit{ true }
             {
-                if (!room_for(aNeed) || aUseBarrier)
+                if (!room_for(aNeed))
+                    draw_and_execute();
+                else if (aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
                 if (!room_for(aNeed) && !need(aNeed))
@@ -61,11 +63,13 @@ namespace neogfx
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
                 iMode{ aMode },
                 iWithTextures{ false }, 
-                iStart{ static_cast<GLint>(iUse.vertices().size()) },
+                iStart{ static_cast<GLint>(vertices().size()) },
                 iUseBarrier{ aUseBarrier },
                 iDrawOnExit{ true }
             {
-                if (!room_for(aNeed) || aUseBarrier)
+                if (!room_for(aNeed))
+                    draw_and_execute();
+                else if (aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
                 if (!room_for(aNeed) && !need(aNeed))
@@ -77,11 +81,13 @@ namespace neogfx
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
                 iMode{ aMode },
                 iWithTextures{ true }, 
-                iStart{ static_cast<GLint>(iUse.vertices().size()) },
+                iStart{ static_cast<GLint>(vertices().size()) },
                 iUseBarrier{ aUseBarrier },
                 iDrawOnExit{ true }
             {
-                if (!room_for(aNeed) || aUseBarrier)
+                if (!room_for(aNeed))
+                    draw_and_execute();
+                else if (aUseBarrier)
                     execute();
                 set_transformation(optional_mat44{});
                 if (!room_for(aNeed) && !need(aNeed))
@@ -93,11 +99,13 @@ namespace neogfx
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
                 iMode{ aMode },
                 iWithTextures{ true }, 
-                iStart{ static_cast<GLint>(iUse.vertices().size()) },
+                iStart{ static_cast<GLint>(vertices().size()) },
                 iUseBarrier{ aUseBarrier },
                 iDrawOnExit{ true }
             {
-                if (!room_for(aNeed) || aUseBarrier)
+                if (!room_for(aNeed))
+                    draw_and_execute();
+                else if (aUseBarrier)
                     execute();
                 set_transformation(aTransformation);
                 if (!room_for(aNeed) && !need(aNeed))
@@ -174,14 +182,14 @@ namespace neogfx
             void push_back(const value_type& aVertex)
             {
                 if (!room_for(1))
-                    execute();
+                    draw_and_execute();
                 vertices().push_back(aVertex);
             }
             template <typename... Args>
             void emplace_back(Args&&... args)
             {
                 if (!room_for(1))
-                    execute();
+                    draw_and_execute();
                 vertices().emplace_back(std::forward<Args>(args)...);
             }
             template <typename Iter>
@@ -191,7 +199,7 @@ namespace neogfx
                     return vertices().insert(aPos, aFirst, aLast);
                 else
                 {
-                    execute();
+                    draw_and_execute();
                     if (!room_for(std::distance(aFirst, aLast)))
                         vertices().reserve(std::distance(aFirst, aLast));
                     return vertices().insert(vertices().begin(), aFirst, aLast);
@@ -218,12 +226,16 @@ namespace neogfx
                     return false;
                 }
             }
-            void execute()
+            void draw_and_execute()
             {
                 draw();
+                execute();
+                vertices().clear();
+				iStart = 0;
+            }
+            void execute()
+            {
                 iUse.execute();
-                iUse.vertices().clear();
-                iStart = 0;
             }
             struct skip
             {

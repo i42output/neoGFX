@@ -1380,7 +1380,7 @@ namespace neogfx
                 auto const& vertices = drawOp.mesh.vertices;
                 auto const& uv = drawOp.mesh.uv;
                 if (!vertexArrays.room_for(drawOp.mesh.faces.size() * 3u))
-                    vertexArrays.execute();
+                    vertexArrays.draw_and_execute();
                 for (auto const& f : drawOp.mesh.faces)
                 {
                     for (auto vi : f)
