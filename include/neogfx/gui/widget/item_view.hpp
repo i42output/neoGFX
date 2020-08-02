@@ -37,7 +37,8 @@ namespace neogfx
         Text,
         Image,
         CheckBox,
-        TreeExpander
+        TreeExpander,
+        Editor
     };
 
     class item_view : public framed_scrollable_widget, protected i_header_view_owner

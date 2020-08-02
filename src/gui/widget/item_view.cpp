@@ -959,18 +959,20 @@ namespace neogfx
         iEditing = newIndex;
         if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
             editor().set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
-        editor().set_padding(presentation_model().cell_padding(*this));
-        auto editorRect = cell_rect(newIndex, cell_part::Text);
+        auto editorRect = cell_rect(newIndex, cell_part::Editor);
         editorRect.inflate(presentation_model().cell_padding(*this));
         editor().move(editorRect.position());
         editor().resize(editorRect.extents());
         if (editor_has_text_edit())
         {
             auto& textEdit = editor_text_edit();
+            bool const childTextEdit = (&textEdit != &editor());
+            auto textEditRect = cell_rect(newIndex, cell_part::Text);
+            auto const adjust = point{ textEditRect.position() - editorRect.position() } - (childTextEdit ? textEdit.position() : point{});
+            auto const paddingAdjust = neogfx::padding{ adjust.dx, adjust.dy, 0, 0 };
+            textEdit.set_padding(paddingAdjust);
             if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
-            if (&editor() != &textEdit)
-                textEdit.set_padding(neogfx::padding{});
             optional_color textColor = presentation_model().cell_color(newIndex, color_role::Text);
             if (textColor == std::nullopt)
                 textColor = has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Text);
@@ -1199,6 +1201,23 @@ namespace neogfx
         case cell_part::Text:
             {
                 auto cellRect = cell_rect(aItemIndex);
+                auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGc);
+                auto const textHeight = std::max(glyphText.extents().cy,
+                    (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());
+                auto const textAdjust = std::floor((cellRect.height() - textHeight) / 2.0);
+                cellRect.deflate(presentation_model().cell_padding(*this).left, textAdjust, presentation_model().cell_padding(*this).right, textAdjust);
+                auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
+                if (cellCheckBoxSize)
+                    cellRect.indent(point{ cellCheckBoxSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
+                auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
+                if (cellImageSize)
+                    cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
+                return cellRect;
+            }
+            break;
+        case cell_part::Editor:
+            {
+                auto cellRect = cell_rect(aItemIndex);
                 cellRect.deflate(presentation_model().cell_padding(*this));
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
@@ -1206,12 +1225,9 @@ namespace neogfx
                 auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
                 if (cellImageSize)
                     cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
-                auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGc);
-                auto const textHeight = std::max(glyphText.extents().cy,
-                    (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());
-                cellRect.indent(point{ 0.0, (cellRect.height() - textHeight) / 2.0 });
                 return cellRect;
             }
+            break;
         }
         return rect{};
     }

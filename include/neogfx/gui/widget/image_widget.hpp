@@ -51,14 +51,12 @@ namespace neogfx
         void set_image_color(const optional_color& aImageColor);
         void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio);
         void set_placement(cardinal aPlacement);
-        void set_snap(dimension aSnap);
         void set_dpi_auto_scale(bool aDpiAutoScale);
     private:
         texture iTexture;
         optional_color iColor;
         neogfx::aspect_ratio iAspectRatio;
         cardinal iPlacement;
-        dimension iSnap;
         bool iDpiAutoScale;
     };
 }
