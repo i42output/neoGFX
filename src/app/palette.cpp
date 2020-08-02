@@ -220,8 +220,12 @@ namespace neogfx
             return iThemeColor;
         case color_role::Background:
             return iBackgroundColor;
+        case color_role::Foreground:
+            return iForegroundColor;
         case color_role::Base:
             return iBaseColor;
+        case color_role::AlternateBase:
+            return iAlternateBaseColor;
         case color_role::Text:
             return iTextColor;
         case color_role::Selection:
@@ -248,8 +252,14 @@ namespace neogfx
         case color_role::Background:
             iBackgroundColor = aColor;
             break;
+        case color_role::Foreground:
+            iForegroundColor = aColor;
+            break;
         case color_role::Base:
             iBaseColor = aColor;
+            break;
+        case color_role::AlternateBase:
+            iAlternateBaseColor = aColor;
             break;
         case color_role::Text:
             iTextColor = aColor;

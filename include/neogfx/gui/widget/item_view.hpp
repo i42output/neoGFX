@@ -114,6 +114,8 @@ namespace neogfx
     protected:
         void paint(i_graphics_context& aGc) const override;
     protected:
+        color palette_color(color_role aColorRole) const override;
+    protected:
         void capture_released() override;
         neogfx::focus_policy focus_policy() const override;
         void focus_gained(focus_reason aFocusReason) override;

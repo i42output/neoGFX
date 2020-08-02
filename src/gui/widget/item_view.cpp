@@ -376,6 +376,15 @@ namespace neogfx
         }
     }
 
+    color item_view::palette_color(color_role aColorRole) const
+    {
+        if (has_palette_color(aColorRole))
+            return framed_scrollable_widget::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+            return palette_color(color_role::AlternateBase);
+        return framed_scrollable_widget::palette_color(aColorRole);
+    }
+
     void item_view::capture_released()
     {
         iMouseTracker = std::nullopt;
