@@ -172,12 +172,6 @@ namespace neogfx
     template <typename T>
     void basic_spin_box<T>::init()
     {
-        Painted([&](i_graphics_context& gc)
-        {
-            gc.draw_rect(client_rect(true) , color::Blue);
-            gc.draw_rect(client_rect(true), color::Red);
-        });
-
         set_padding(neogfx::padding{});
         iPrimaryLayout.set_padding(neogfx::padding{});
         iPrimaryLayout.set_spacing(dip(INTERNAL_SPACING));
