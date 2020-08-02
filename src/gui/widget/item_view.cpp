@@ -286,7 +286,7 @@ namespace neogfx
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
                     if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
                         aGc.fill_rect(cellBackgroundRect, cellBackgroundColor->
-                            shade(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0.875));
+                            shaded(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0.875));
                     else
                         aGc.fill_rect(cellBackgroundRect, *cellBackgroundColor);
                 }
@@ -973,7 +973,7 @@ namespace neogfx
                 textEdit.set_padding(neogfx::padding{});
             optional_color textColor = presentation_model().cell_color(newIndex, color_role::Text);
             if (textColor == std::nullopt)
-                textColor = has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Text);
+                textColor = has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Text);
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
             auto cellFont = presentation_model().cell_font(newIndex);
             textEdit.set_default_style(text_edit::style{ cellFont ? *cellFont : presentation_model().default_font(), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
@@ -1100,7 +1100,7 @@ namespace neogfx
         switch(aPart)
         {
         case cell_part::Background:
-        case cell_part::Foreground:
+        case cell_part::Base:
             {
                 size const cellSpacing = presentation_model().cell_spacing(*this);
                 coordinate y = presentation_model().item_position(aItemIndex, *this);
@@ -1131,7 +1131,7 @@ namespace neogfx
                                 result.cx += (item_display_rect().right() - result.right());
                             }
                             break;
-                        case cell_part::Foreground:
+                        case cell_part::Base:
                             result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
                             if (lastColumn)
                                 result.cx -= cellSpacing.cx / 2.0;
@@ -1153,7 +1153,7 @@ namespace neogfx
         switch (aPart)
         {
         case cell_part::Background:
-        case cell_part::Foreground:
+        case cell_part::Base:
             {
                 auto cellRect = cell_rect(aItemIndex, aPart);
                 return cellRect;

@@ -418,19 +418,23 @@ namespace neogfx
             dimension height = 0.0;
             for (uint32_t col = 0; col < row(aIndex).cells.size(); ++col)
             {
-                auto modelIndex = to_item_model_index(item_presentation_model_index{ aIndex.row(), col });
-                if (cell_meta(aIndex).extents != std::nullopt)
-                    height = std::max(height, units_converter(aUnitsContext).from_device_units(*cell_meta(aIndex).extents).cy);
+                auto const index = item_presentation_model_index{ aIndex.row(), col };
+                auto const modelIndex = to_item_model_index(index);
+                if (cell_meta(index).extents != std::nullopt)
+                    height = std::max(height, units_converter(aUnitsContext).from_device_units(*cell_meta(index).extents).cy);
                 else
                 {
-                    std::string cellString = cell_to_string(item_presentation_model_index(aIndex.row(), col));
-                    auto const& cellFont = cell_font(aIndex);
+                    std::string cellString = cell_to_string(index);
+                    auto const& cellFont = cell_font(index);
                     auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
                     height = std::max(height, units_converter(aUnitsContext).from_device_units(size{ 0.0, std::ceil(effectiveFont.height()) }).cy *
                         (1 + std::count(cellString.begin(), cellString.end(), '\n')));
-                    auto const& maybeCellImageSize = cell_image_size(aIndex);
+                    auto const& maybeCellImageSize = cell_image_size(index);
                     if (maybeCellImageSize != std::nullopt)
                         height = std::max(height, units_converter(aUnitsContext).from_device_units(*maybeCellImageSize).cy);
+                    auto const& cellInfo = item_model().cell_info(modelIndex);
+                    if (cell_editable(index) && cellInfo.dataStep != neolib::none)
+                        height = std::max<dimension>(height, dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cy * 2.0));
                 }
             }
             return height + cell_padding(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
@@ -730,6 +734,7 @@ namespace neogfx
             {
                 cellExtents.cx = std::max(cellExtents.cx, aGc.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::INTERNAL_SPACING.cx + basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
+                cellExtents.cy = std::max<dimension>(cellExtents.cy, dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cy * 2.0));
             }
             cellExtents.cx += indent(aIndex, aGc);
             auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aGc);

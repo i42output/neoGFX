@@ -50,24 +50,30 @@ namespace neogfx
         void paint_non_client(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;
     public:
+        color palette_color(color_role aColorRole) const override;
+    public:
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
         // i_push_button
     public:
         push_button_style style() const override;
+        virtual bool has_face_color() const;
+        virtual color face_color() const;
+        virtual void set_face_color(const optional_color& aFaceColor = optional_color{});
+        virtual bool has_hover_color() const;
+        virtual color hover_color() const;
+        virtual void set_hover_color(const optional_color& aHoverColor = optional_color{});
         // push_button
     protected:
         virtual rect path_bounding_rect() const;
         virtual neogfx::path path() const;
         virtual bool spot_color() const;
-        virtual color border_mid_color() const;
+        virtual color border_color() const;
         virtual bool perform_hover_animation() const;
-        virtual bool has_hover_color() const;
-        virtual color hover_color() const;
-        virtual void set_hover_color(const optional_color& aHoverColor = optional_color());
         virtual void animate();
         virtual bool finished_animation() const;
-        virtual color animation_color() const;
+        virtual color effective_face_color() const;
+        virtual color effective_hover_color() const;
         virtual color animation_color(uint32_t aAnimationFrame) const;
     private:
         void init();
@@ -75,6 +81,7 @@ namespace neogfx
         neolib::callback_timer iAnimator;
         uint32_t iAnimationFrame;
         push_button_style iStyle;
+        optional_color iFaceColor;
         optional_color iHoverColor;
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
     };

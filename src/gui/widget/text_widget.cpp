@@ -60,8 +60,8 @@ namespace neogfx
             return widget::minimum_size(aAvailableSpace);
         else
         {
-            size extent = units_converter(*this).to_device_units(text_extent().max(size_hint_extent()));
-            size result = extent + units_converter(*this).to_device_units(padding().size());
+            size extent = units_converter{ *this }.to_device_units(text_extent().max(size_hint_extent()));
+            size result = extent + units_converter{ *this }.to_device_units(padding().size());
             if (has_maximum_size())
             {
                 result.cx = std::min(std::ceil(result.cx), maximum_size().cx);
@@ -222,7 +222,7 @@ namespace neogfx
     {
         if (has_text_color())
             return static_variant_cast<color>(iTextAppearance->ink());
-        return service<i_app>().current_style().palette().text_color_for_widget(*this);
+        return service<i_app>().current_style().palette().default_text_color_for_widget(*this);
     }
 
     void text_widget::set_text_color(const optional_color& aTextColor)

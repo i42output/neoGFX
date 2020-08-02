@@ -20,32 +20,51 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_palette.hpp"
+#include <neogfx/app/i_palette.hpp>
 
 namespace neogfx
 {
+    struct palette_proxy_t {};
+    inline const palette_proxy_t palette_proxy() { return palette_proxy_t{}; }
+    struct current_style_palette_proxy_t {};
+    inline const current_style_palette_proxy_t current_style_palette_proxy() { return current_style_palette_proxy_t{}; }
+
     class palette : public i_palette
     {
     public:
         define_declared_event(Changed, changed)
     public:
         palette();
+        palette(current_style_palette_proxy_t);
         palette(const i_palette& aOther);
         palette(const palette& aOther);
+        palette(const i_palette& aOther, palette_proxy_t);
+        palette(const palette& aOther, palette_proxy_t);
     public:
         palette& operator=(const i_palette& aOther);
+        palette& operator=(const palette& aOther);
     public:
-        bool operator==(const i_palette& aOther) const;
-        bool operator!=(const i_palette& aOther) const;
+        bool operator==(const i_palette& aOther) const override;
+        bool operator!=(const i_palette& aOther) const override;
     public:
         bool has_color(color_role aRole) const override;
         neogfx::color color(color_role aRole) const override;
         const optional_color& maybe_color(color_role aRole) const override;
         void set_color(color_role aRole, const optional_color& aColor) override;
+    public:
+        neogfx::color default_text_color_for_widget(const i_widget& aWidget) const override;
+    public:
+        bool has_proxy() const override;
+        const i_palette& proxy() const override;
+    protected:
+        virtual const i_palette* proxy_ptr() const override;
     private:
+        std::optional<const i_palette*> iProxy;
         optional_color iThemeColor;
         optional_color iBackgroundColor;
         optional_color iForegroundColor;
+        optional_color iBaseColor;
+        optional_color iAlternateBaseColor;
         optional_color iTextColor;
         optional_color iSelectionColor;
         optional_color iHoverColor;

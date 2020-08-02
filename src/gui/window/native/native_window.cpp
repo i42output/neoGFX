@@ -27,6 +27,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include "native_window.hpp"
 
 namespace neogfx

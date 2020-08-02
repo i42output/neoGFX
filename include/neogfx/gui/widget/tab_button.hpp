@@ -58,13 +58,12 @@ namespace neogfx
     protected:
         rect path_bounding_rect() const override;
         bool spot_color() const override;
-        color border_mid_color() const override;
         bool perform_hover_animation() const override;
     protected:
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         void handle_clicked() override;
     protected:
-        color foreground_color() const override;
+        color palette_color(color_role aColorRole) const override;
     protected:
         using push_button::update;
         bool update(const rect& aUpdateRect) override;

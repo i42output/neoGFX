@@ -132,6 +132,7 @@ namespace neogfx
             icon_widget().set_fixed_size(iconSize.min(icon_widget().image().extents()));
         title_widget().set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
         title_widget().set_alignment(alignment::Left | alignment::VCenter);
+        title_widget().set_font_role(neogfx::font_role::Caption);
         iMinimizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iMaximizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
         iRestoreButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });

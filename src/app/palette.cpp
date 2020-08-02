@@ -18,12 +18,18 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/app/palette.hpp>
 
 namespace neogfx
 {
-    palette::palette() : 
-        iSecondaryAccentColor{ color::Goldenrod }
+    palette::palette()
+    {
+    }
+
+    palette::palette(current_style_palette_proxy_t) :
+        iProxy{ nullptr }
     {
     }
 
@@ -31,16 +37,30 @@ namespace neogfx
         iThemeColor{ aOther.maybe_color(color_role::Theme) },
         iBackgroundColor{ aOther.maybe_color(color_role::Background) },
         iForegroundColor{ aOther.maybe_color(color_role::Foreground) },
+        iBaseColor{ aOther.maybe_color(color_role::Base) },
+        iAlternateBaseColor{ aOther.maybe_color(color_role::AlternateBase) },
         iTextColor{ aOther.maybe_color(color_role::Text) },
         iSelectionColor{ aOther.maybe_color(color_role::Selection) },
         iHoverColor{ aOther.maybe_color(color_role::Hover) },
         iPrimaryAccentColor{ aOther.maybe_color(color_role::PrimaryAccent) },
         iSecondaryAccentColor{ aOther.maybe_color(color_role::SecondaryAccent) }
     {
+        if (aOther.has_proxy())
+            iProxy.emplace(aOther.proxy_ptr());
     }
 
     palette::palette(const palette& aOther) :
-        palette(static_cast<const i_palette&>(aOther))
+        palette{ static_cast<const i_palette&>(aOther) }
+    {
+    }
+
+    palette::palette(const i_palette& aOther, palette_proxy_t) :
+        iProxy{ &aOther }
+    {
+    }
+
+    palette::palette(const palette& aOther, palette_proxy_t) :
+        palette{ static_cast<const i_palette&>(aOther), palette_proxy_t{} }
     {
     }
 
@@ -48,9 +68,15 @@ namespace neogfx
     {
         if (*this != aOther)
         {
+            if (aOther.has_proxy())
+                iProxy = aOther.proxy_ptr();
+            else
+                iProxy = std::nullopt;
             iThemeColor = aOther.maybe_color(color_role::Theme);
             iBackgroundColor = aOther.maybe_color(color_role::Background);
             iForegroundColor = aOther.maybe_color(color_role::Foreground);
+            iBaseColor = aOther.maybe_color(color_role::Base);
+            iAlternateBaseColor = aOther.maybe_color(color_role::AlternateBase);
             iTextColor = aOther.maybe_color(color_role::Text);
             iSelectionColor = aOther.maybe_color(color_role::Selection);
             iHoverColor = aOther.maybe_color(color_role::Hover);
@@ -61,12 +87,19 @@ namespace neogfx
         return *this;
     }
 
+    palette& palette::operator=(const palette& aOther)
+    {
+        return operator=(static_cast<const i_palette&>(aOther));
+    }
+
     bool palette::operator==(const i_palette& aOther) const
     {
         return
             iThemeColor == aOther.maybe_color(color_role::Theme) &&
             iBackgroundColor == aOther.maybe_color(color_role::Background) &&
             iForegroundColor == aOther.maybe_color(color_role::Foreground) &&
+            iBaseColor == aOther.maybe_color(color_role::Base) &&
+            iAlternateBaseColor == aOther.maybe_color(color_role::AlternateBase) &&
             iTextColor == aOther.maybe_color(color_role::Text) &&
             iSelectionColor == aOther.maybe_color(color_role::Selection) &&
             iHoverColor == aOther.maybe_color(color_role::Hover) &&
@@ -89,6 +122,10 @@ namespace neogfx
             return iBackgroundColor != std::nullopt;
         case color_role::Foreground:
             return iForegroundColor != std::nullopt;
+        case color_role::Base:
+            return iBaseColor != std::nullopt;
+        case color_role::AlternateBase:
+            return iAlternateBaseColor != std::nullopt;
         case color_role::Text:
             return iTextColor != std::nullopt;
         case color_role::Selection:
@@ -111,18 +148,30 @@ namespace neogfx
         case color_role::Theme:
             if (has_color(color_role::Theme))
                 return iThemeColor->with_alpha(1.0);
+            else if (has_proxy())
+                return proxy().color(color_role::Theme);
             else
                 return neogfx::color{ 0xEF, 0xEB, 0xE7 };
         case color_role::Background:
             if (has_color(color_role::Background))
                 return *iBackgroundColor;
             else
-                return color(color_role::Theme).unshade(0x20);
+                return color(color_role::Theme);
         case color_role::Foreground:
             if (has_color(color_role::Foreground))
                 return *iForegroundColor;
             else
-                return color(color_role::Theme).shade(0x20);
+                return color(color_role::Theme);
+        case color_role::Base:
+            if (has_color(color_role::Base))
+                return *iBaseColor;
+            else
+                return color(color_role::Theme).unshaded(0x1C);
+        case color_role::AlternateBase:
+            if (has_color(color_role::AlternateBase))
+                return *iAlternateBaseColor;
+            else
+                return color(color_role::Base).shaded(0x1C);
         case color_role::Text:
             if (has_color(color_role::Text))
                 return *iTextColor;
@@ -136,6 +185,8 @@ namespace neogfx
         case color_role::Selection:
             if (has_color(color_role::Selection))
                 return *iSelectionColor;
+            else if (has_proxy())
+                return proxy().color(color_role::Selection);
             else
                 return neogfx::color{ 0x2A, 0x82, 0xDA };
         case color_role::Hover:
@@ -154,7 +205,10 @@ namespace neogfx
             else
                 return color(color_role::Theme).same_lightness_as(color(color_role::Theme).light() ? neogfx::color{ 64, 64, 64 } : neogfx::color{ 192, 192, 192 });
         default:
-            return color(color_role::Theme);
+            if (has_proxy())
+                return proxy().color(aRole);
+            else
+                return color(color_role::Theme);
         }
     }
 
@@ -166,8 +220,8 @@ namespace neogfx
             return iThemeColor;
         case color_role::Background:
             return iBackgroundColor;
-        case color_role::Foreground:
-            return iForegroundColor;
+        case color_role::Base:
+            return iBaseColor;
         case color_role::Text:
             return iTextColor;
         case color_role::Selection:
@@ -194,8 +248,8 @@ namespace neogfx
         case color_role::Background:
             iBackgroundColor = aColor;
             break;
-        case color_role::Foreground:
-            iForegroundColor = aColor;
+        case color_role::Base:
+            iBaseColor = aColor;
             break;
         case color_role::Text:
             iTextColor = aColor;
@@ -215,5 +269,55 @@ namespace neogfx
         }
         if (maybe_color(aRole) != oldColor)
             Changed.trigger();
+    }
+
+    color palette::default_text_color_for_widget(const i_widget& aWidget) const
+    {
+        optional_color textColor;
+        const i_widget* w = nullptr;
+        do
+        {
+            if (w == nullptr)
+                w = &aWidget;
+            else
+                w = &w->parent();
+            if (w->has_background_color())
+            {
+                textColor = w->background_color().brightness() >= 0.509 ? color::Black : color::White;
+                break;
+            }
+            else if (w->has_base_color())
+            {
+                textColor = w->base_color().brightness() >= 0.509 ? color::Black : color::White;
+                break;
+            }
+        } while (w->has_parent());
+        auto defaultTextColor = color(color_role::Text);
+        if (textColor == std::nullopt || textColor->similar_intensity(defaultTextColor))
+            textColor = defaultTextColor;
+        return *textColor;
+    }
+
+    bool palette::has_proxy() const
+    {
+        return iProxy != std::nullopt;
+    }
+
+    const i_palette& palette::proxy() const
+    {
+        if (iProxy == std::nullopt)
+            throw no_proxy();
+        else if (!*iProxy)
+            return service<i_app>().current_style().palette();
+        else
+            return (**iProxy);
+    }
+
+    const i_palette* palette::proxy_ptr() const
+    {
+        if (iProxy == std::nullopt)
+            throw no_proxy();
+        else
+            return *iProxy;
     }
 }

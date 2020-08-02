@@ -44,7 +44,7 @@ namespace neogfx
         };
     public:
         static constexpr size INTERNAL_SPACING = { 2.0, 0.0 };
-        static constexpr size SPIN_BUTTON_MINIMUM_SIZE = { 15.0, 7.0 };
+        static constexpr size SPIN_BUTTON_MINIMUM_SIZE = { 15.0, 9.0 };
     public:
         basic_spin_box();
         basic_spin_box(i_widget& aParent);

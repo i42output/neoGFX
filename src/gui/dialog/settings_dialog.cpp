@@ -230,30 +230,30 @@ namespace neogfx
         ref_ptr<i_setting_widget_factory> iUserFactory;
     };
 
-    settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, image&& aIcon) :
+    settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons) :
         dialog{ "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
+        iIcons{ aIcons },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
         iDetailLayout{ iDetails },
-        iIcon{ std::move(aIcon) },
-        iBackground{ iIcon }
+        iBackground{ aIcons != nullptr ? texture{ aIcons->default_icon() } : texture{ image{ ":/neogfx/resources/images/settings.png" } } }
     {
         init();
     }
 
-    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, image&& aIcon) :
+    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons) :
         dialog{ aParent, "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
+        iIcons{ aIcons },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
         iDetailLayout{ iDetails },
-        iIcon{ std::move(aIcon) },
-        iBackground{ iIcon }
+        iBackground{ aIcons != nullptr ? texture{ aIcons->default_icon()  } : texture{ image{ ":/neogfx/resources/images/settings.png" } } }
     {
         init();
     }
@@ -267,8 +267,9 @@ namespace neogfx
     class settings_tree_presentation_model : public basic_item_presentation_model<settings_tree_item_model>
     {
     public:
-        settings_tree_presentation_model(const image& aIcon) : 
-            iIcon{ aIcon }
+        settings_tree_presentation_model(ref_ptr<i_setting_icons> aIcons) :
+            iIcons{ aIcons },
+            iDefaultIcon{ image{ ":/neogfx/resources/images/settings.png" } }
         {
         }
     public:
@@ -280,7 +281,9 @@ namespace neogfx
         }
         optional_texture cell_image(const item_presentation_model_index& aIndex) const override
         {
-            return iIcon;
+            if (iIcons == nullptr)
+                return iDefaultIcon;
+            return iIcons->default_icon();
         }
         optional_size cell_image_size(const item_presentation_model_index& aIndex) const override
         {
@@ -289,7 +292,8 @@ namespace neogfx
             return size{ 16.0_dip, 16.0_dip };
         }
     private:
-        texture iIcon;
+        ref_ptr<i_setting_icons> iIcons;
+        texture iDefaultIcon;
     };
 
     class setting_group_widget : public widget
@@ -330,7 +334,7 @@ namespace neogfx
         iDetailLayout.set_size_policy(size_constraint::Expanding);
 
         auto treeModel = std::make_shared<settings_tree_item_model>();
-        auto treePresentationModel = std::make_shared<settings_tree_presentation_model>(iIcon);
+        auto treePresentationModel = std::make_shared<settings_tree_presentation_model>(iIcons);
         iTree.set_model(treeModel);
         iTree.set_presentation_model(treePresentationModel);
 

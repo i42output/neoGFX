@@ -55,7 +55,7 @@ namespace neogfx
             style(
                 const optional_font& aFont,
                 const color_or_gradient& aTextColor = color_or_gradient{},
-                const color_or_gradient& aBackgroundColor = color_or_gradient{},
+                const color_or_gradient& aPaperColor = color_or_gradient{},
                 const optional_text_effect& aTextEffect = optional_text_effect{});
             style(
                 text_edit& aParent,
@@ -67,12 +67,12 @@ namespace neogfx
             const optional_font& font() const;
             const color_or_gradient& glyph_color() const;
             const color_or_gradient& text_color() const;
-            const color_or_gradient& background_color() const;
+            const color_or_gradient& paper_color() const;
             const optional_text_effect& text_effect() const;
             void set_font(const optional_font& aFont = optional_font{});
             void set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
             void set_text_color(const color_or_gradient& aColor = color_or_gradient{});
-            void set_background_color(const color_or_gradient& aColor = color_or_gradient{});
+            void set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
             void set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
         public:
             style& merge(const style& aOverridingStyle);
@@ -86,7 +86,7 @@ namespace neogfx
             optional_font iFont;
             color_or_gradient iGlyphColor;
             color_or_gradient iTextColor;
-            color_or_gradient iBackgroundColor;
+            color_or_gradient iPaperColor;
             optional_text_effect iTextEffect;
         };
         typedef std::set<style> style_list;

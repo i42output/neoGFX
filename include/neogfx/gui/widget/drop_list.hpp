@@ -55,7 +55,7 @@ namespace neogfx
             {
                 auto backgroundColor = iDropList.view().background_color().dark() ? color::Black : color::White;
                 if (backgroundColor == iDropList.view().background_color())
-                    backgroundColor = backgroundColor.shade(0x20);
+                    backgroundColor = backgroundColor.shaded(0x20);
                 return backgroundColor;
             }
             else
@@ -84,8 +84,6 @@ namespace neogfx
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-    public:
-        color background_color() const override;
     private:
         drop_list& iDropList;
         bool iChangingText;
@@ -193,7 +191,7 @@ namespace neogfx
             public:
                 view_container(i_layout& aLayout);
             public:
-                color background_color() const override;
+                color palette_color(color_role aColorRole) const override;
                 color frame_color() const override;
             };
         public:

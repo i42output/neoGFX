@@ -120,7 +120,25 @@ namespace neogfx
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
-    inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::shade(view_component aDelta) const
+    inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type& basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::shade(view_component aDelta)
+    {
+        if (light())
+            return darken(aDelta);
+        else
+            return lighten(aDelta);
+    }
+
+    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
+    inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type& basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::unshade(view_component aDelta)
+    {
+        if (light())
+            return lighten(aDelta);
+        else
+            return darken(aDelta);
+    }
+
+    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
+    inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::shaded(view_component aDelta) const
     {
         if (light())
             return darker(aDelta);
@@ -129,7 +147,7 @@ namespace neogfx
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
-    inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::unshade(view_component aDelta) const
+    inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::unshaded(view_component aDelta) const
     {
         if (light())
             return lighter(aDelta);

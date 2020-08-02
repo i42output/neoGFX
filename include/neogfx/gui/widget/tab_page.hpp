@@ -48,7 +48,7 @@ namespace neogfx
         bool transparent_background() const override;
         void paint_non_client_after(i_graphics_context& aGc) const override;
     public:
-        color background_color() const override;
+        color palette_color(color_role aColorRole) const override;
     public:
         const i_tab& tab() const override;
         i_tab& tab() override;

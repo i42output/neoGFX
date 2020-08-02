@@ -49,7 +49,7 @@ namespace neogfx
     protected:
         bool transparent_background() const override;
     protected:
-        color background_color() const override;
+        color palette_color(color_role aColorRole) const override;
     protected:
         neogfx::focus_policy focus_policy() const override;
     private:

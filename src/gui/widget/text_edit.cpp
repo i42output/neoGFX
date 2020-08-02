@@ -39,13 +39,13 @@ namespace neogfx
     text_edit::style::style(
         const optional_font& aFont,
         const color_or_gradient& aTextColor,
-        const color_or_gradient& aBackgroundColor,
+        const color_or_gradient& aPaperColor,
         const optional_text_effect& aTextEffect) :
         iParent{ nullptr },
         iUseCount{ 0 },
         iFont{ aFont },
         iTextColor{ aTextColor },
-        iBackgroundColor{ aBackgroundColor },
+        iPaperColor{ aPaperColor },
         iTextEffect{ aTextEffect }
     {
     }
@@ -57,7 +57,7 @@ namespace neogfx
         iUseCount{ 0 },
         iFont{ aOther.iFont },
         iTextColor{ aOther.iTextColor },
-        iBackgroundColor{ aOther.iBackgroundColor },
+        iPaperColor{ aOther.iPaperColor },
         iTextEffect{ aOther.iTextEffect }
     {
     }
@@ -88,9 +88,9 @@ namespace neogfx
         return iTextColor;
     }
 
-    const color_or_gradient& text_edit::style::background_color() const
+    const color_or_gradient& text_edit::style::paper_color() const
     {
-        return iBackgroundColor;
+        return iPaperColor;
     }
 
     const optional_text_effect& text_edit::style::text_effect() const
@@ -113,9 +113,9 @@ namespace neogfx
         iTextColor = aColor;
     }
 
-    void text_edit::style::set_background_color(const color_or_gradient& aColor)
+    void text_edit::style::set_paper_color(const color_or_gradient& aColor)
     {
-        iBackgroundColor = aColor;
+        iPaperColor = aColor;
     }
 
     void text_edit::style::set_text_effect(const optional_text_effect& aEffect)
@@ -129,8 +129,8 @@ namespace neogfx
             iFont = aOverridingStyle.font();
         if (aOverridingStyle.text_color() != neolib::none)
             iTextColor = aOverridingStyle.text_color();
-        if (aOverridingStyle.background_color() != neolib::none)
-            iBackgroundColor = aOverridingStyle.background_color();
+        if (aOverridingStyle.paper_color() != neolib::none)
+            iPaperColor = aOverridingStyle.paper_color();
         if (aOverridingStyle.text_effect() != std::nullopt)
             iTextEffect = aOverridingStyle.text_effect();
         return *this;
@@ -138,7 +138,7 @@ namespace neogfx
 
     bool text_edit::style::operator==(const style& aRhs) const
     {
-        return std::tie(iFont, iTextColor, iBackgroundColor, iTextEffect) == std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iBackgroundColor, aRhs.iTextEffect);
+        return std::tie(iFont, iTextColor, iPaperColor, iTextEffect) == std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
     }
 
     bool text_edit::style::operator!=(const style& aRhs) const
@@ -148,7 +148,7 @@ namespace neogfx
 
     bool text_edit::style::operator<(const style& aRhs) const
     {
-        return std::tie(iFont, iTextColor, iBackgroundColor, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iBackgroundColor, aRhs.iTextEffect);
+        return std::tie(iFont, iTextColor, iPaperColor, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
     }
 
     class text_edit::multiple_text_changes
@@ -299,8 +299,8 @@ namespace neogfx
             return;
         }
         scoped_scissor scissor{ aGc, clipRect };
-        if (iDefaultStyle.background_color() != neolib::none)
-            aGc.fill_rect(client_rect(), to_brush(iDefaultStyle.background_color()));
+        if (iDefaultStyle.paper_color() != neolib::none)
+            aGc.fill_rect(client_rect(), to_brush(iDefaultStyle.paper_color()));
         coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < columns(); ++columnIndex)
         {
@@ -1022,7 +1022,7 @@ namespace neogfx
         else if (std::holds_alternative<gradient>(default_style().text_color()))
             return static_variant_cast<const gradient&>(default_style().text_color()).at(0.0);
         else
-            return service<i_app>().current_style().palette().text_color_for_widget(*this);
+            return service<i_app>().current_style().palette().default_text_color_for_widget(*this);
     }
 
     neogfx::cursor& text_edit::cursor() const
@@ -1910,7 +1910,7 @@ namespace neogfx
     {
         style result = iDefaultStyle;
         result.merge(column_style(aColumn));
-        result.set_background_color();
+        result.set_paper_color();
         auto const& tagStyle = iText.tag(iText.begin() + from_glyph(aGlyph).first).style();
         if (std::holds_alternative<style_list::const_iterator>(tagStyle))
             result.merge(*static_variant_cast<style_list::const_iterator>(tagStyle));
@@ -1950,8 +1950,8 @@ namespace neogfx
                                     static_variant_cast<const gradient&>(style.text_color()).at(((glyphPos.x - column_rect(column_index(aColumn)).x) / column_rect(column_index(aColumn)).width())) :
                                     default_text_color() :
                             style.glyph_color(),
-                        style.background_color() != neolib::none ? 
-                            optional_text_color{ neogfx::text_color{ style.background_color() } } : 
+                        style.paper_color() != neolib::none ? 
+                            optional_text_color{ neogfx::text_color{ style.paper_color() } } : 
                             optional_text_color{},
                         style.text_effect() };
                 if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)
@@ -1981,7 +1981,7 @@ namespace neogfx
         auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
         auto cursorColor = cursor().color();
         if (cursorColor == neolib::none && cursor().style() == cursor_style::Standard)
-            cursorColor = service<i_app>().current_style().palette().text_color_for_widget(*this);
+            cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);
         if (cursorColor == neolib::none)
         {
             aGc.push_logical_operation(logical_operation::Xor);

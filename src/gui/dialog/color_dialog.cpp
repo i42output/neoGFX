@@ -37,7 +37,7 @@ namespace neogfx
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
-        return rasterize(base_type::minimum_size(aAvailableSpace) + size{ 4_mm, 3.5_mm });
+        return ceil_rasterized(base_type::minimum_size(aAvailableSpace) + size{ 4_mm, 3.5_mm });
     }
 
     size color_dialog::color_box::maximum_size(const optional_size& aAvailableSpace) const

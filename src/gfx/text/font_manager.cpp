@@ -50,10 +50,10 @@ namespace neogfx
     {
         namespace platform_specific
         {
-            font_info default_system_font_info()
+            font_info default_system_font_info(system_font_role aRole)
             {
 #ifdef WIN32
-                if (service<i_font_manager>().has_font("Segoe UI", "Regular"))
+                if (service<i_font_manager>().has_font("Segoe UI", "Regular") && (aRole == system_font_role::Caption || aRole == system_font_role::Menu || aRole == system_font_role::StatusBar))
                     return font_info{ "Segoe UI", "Regular", 9 };
                 std::wstring defaultFontFaceName = L"Microsoft Sans Serif";
                 HKEY hkeyDefaultFont;
@@ -192,11 +192,11 @@ namespace neogfx
         return iFontLib;
     }
 
-    const font_info& font_manager::default_system_font_info() const
+    const font_info& font_manager::default_system_font_info(system_font_role aRole) const
     {
-        if (iDefaultSystemFontInfo == std::nullopt)
-            iDefaultSystemFontInfo.emplace(detail::platform_specific::default_system_font_info());
-        return *iDefaultSystemFontInfo;
+        if (iDefaultSystemFontInfo[aRole] == std::nullopt)
+            iDefaultSystemFontInfo[aRole].emplace(detail::platform_specific::default_system_font_info(aRole));
+        return *iDefaultSystemFontInfo[aRole];
     }
 
     const i_fallback_font_info& font_manager::default_fallback_font_info() const
@@ -412,7 +412,7 @@ namespace neogfx
     {
         auto family = iFontFamilies.find(neolib::make_ci_string(aFamilyName));
         if (family == iFontFamilies.end())
-            family = iFontFamilies.find(neolib::make_ci_string(default_system_font_info().family_name()));
+            family = iFontFamilies.find(neolib::make_ci_string(default_system_font_info(system_font_role::Widget).family_name()));
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
         std::multimap<uint32_t, native_font_list::iterator> matches;
@@ -447,7 +447,7 @@ namespace neogfx
     {
         auto family = iFontFamilies.find(neolib::make_ci_string(aFamilyName));
         if (family == iFontFamilies.end())
-            family = iFontFamilies.find(neolib::make_ci_string(default_system_font_info().family_name()));
+            family = iFontFamilies.find(neolib::make_ci_string(default_system_font_info(system_font_role::Widget).family_name()));
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
         std::optional<std::pair<std::pair<uint32_t, font_weight>, i_native_font*>> bestNormalFont;

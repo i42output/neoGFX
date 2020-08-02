@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         app.actionShowStatusBar.checked([&]() { mainWindow.statusBar.show(); });
         app.actionShowStatusBar.unchecked([&]() { mainWindow.statusBar.hide(); });
 
-        app.current_style().palette().set_color(ng::color_role::Theme, ng::color{ 48, 48, 48 });
+        app.change_style("Dark");
         app.current_style().set_spacing(ng::size{ 4.0 });
 
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
         auto themeColorChanged = [&]()
         {
             ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, themeColor.value<ng::color>(true));
-            workspaceGridColor.set_default_value(ng::gradient{ ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Foreground).with_alpha(0.25) });
+            workspaceGridColor.set_default_value(ng::gradient{ ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Base).with_alpha(0.25) });
         };
         themeColor.changing(themeColorChanged);
         themeColor.changed(themeColorChanged);

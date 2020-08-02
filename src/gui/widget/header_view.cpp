@@ -297,7 +297,7 @@ namespace neogfx
         else if (has_presentation_model())
             return presentation_model().cell_spacing(*this).cx;
         else
-            return rasterize(1.0_mm);
+            return ceil_rasterized(1.0_mm);
     }
 
     void header_view::set_separator_width(const optional_dimension& aWidth)

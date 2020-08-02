@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <unordered_map>
 #include "i_style.hpp"
 #include "palette.hpp"
 
@@ -50,9 +51,9 @@ namespace neogfx
         const i_palette& palette() const override;
         i_palette& palette() override;
         void set_palette(const i_palette& aPalette) override;
-        const neogfx::font_info& font_info() const override;
-        void set_font_info(const neogfx::font_info& aFontInfo) override;
-        const neogfx::font& font() const override;
+        const neogfx::font_info& font_info(font_role aRole) const override;
+        void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) override;
+        const neogfx::font& font(font_role aRole) const override;
     private:
         void handle_change(style_aspect aAspect);
     private:
@@ -60,7 +61,7 @@ namespace neogfx
         padding_list iPadding;
         size iSpacing;
         neogfx::palette iPalette;
-        neogfx::font_info iFontInfo;
-        mutable optional_font iFont;
+        mutable std::unordered_map<font_role, optional_font_info> iFontInfo;
+        mutable std::unordered_map<font_role, optional_font> iFont;
     };
 }

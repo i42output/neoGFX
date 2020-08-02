@@ -123,12 +123,13 @@ namespace neogfx
         return false;
     }
 
-    color dock::background_color() const
+    color dock::palette_color(color_role aColorRole) const
     {
-        if (has_background_color())
-            return widget::background_color();
-        else
-            return container_background_color();
+        if (has_palette_color(aColorRole))
+            return widget::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+                return container_background_color();
+        return widget::palette_color(aColorRole);
     }
 
     bool dock::show(bool aVisible)

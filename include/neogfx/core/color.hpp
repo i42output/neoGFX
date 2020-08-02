@@ -330,8 +330,10 @@ namespace neogfx
         return_type& darken(view_component aDelta);
         return_type lighter(view_component aDelta) const;
         return_type darker(view_component aDelta) const;
-        return_type shade(view_component aDelta) const;
-        return_type unshade(view_component aDelta) const;
+        return_type& shade(view_component aDelta);
+        return_type& unshade(view_component aDelta);
+        return_type shaded(view_component aDelta) const;
+        return_type unshaded(view_component aDelta) const;
         return_type monochrome() const;
         return_type same_lightness_as(const self_type& aOther) const;
         return_type with_lightness(scalar aLightness) const;

@@ -129,13 +129,6 @@ namespace neogfx
         return handled;
     }
 
-    color drop_list_view::background_color() const
-    {
-        if (list_view::has_background_color())
-            return list_view::background_color();
-        return service<i_app>().current_style().palette().color(color_role::Theme);
-    }
-
     drop_list_popup::drop_list_popup(drop_list& aDropList) :
         window{ 
             aDropList,
@@ -172,9 +165,9 @@ namespace neogfx
         if (window::has_frame_color())
             return window::frame_color();
         auto viewBackgroundColor = iView.background_color();
-        auto backgroundColor = viewBackgroundColor.unshade(0x20);
+        auto backgroundColor = viewBackgroundColor.unshaded(0x20);
         if (backgroundColor == viewBackgroundColor)
-            backgroundColor = viewBackgroundColor.shade(0x20);
+            backgroundColor = viewBackgroundColor.shaded(0x20);
         return backgroundColor;
     }
 
@@ -303,14 +296,18 @@ namespace neogfx
     {
     }
 
-    color drop_list::list_proxy::view_container::background_color() const
+    color  drop_list::list_proxy::view_container::palette_color(color_role aColorRole) const
     {
-        if (has_background_color())
-            return base_type::background_color();
-        else if (container_background_color().light())
-            return parent().background_color().darker(24);
-        else
-            return parent().background_color().lighter(24);
+        if (has_palette_color(aColorRole))
+            return base_type::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+        {
+            if (container_background_color().light())
+                return parent().palette_color(aColorRole).darker(24);
+            else
+                return parent().palette_color(aColorRole).lighter(24);
+        }
+        return base_type::palette_color(aColorRole);
     }
 
     color drop_list::list_proxy::view_container::frame_color() const

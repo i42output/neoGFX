@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <unordered_map>
 #include <set>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -62,7 +63,7 @@ namespace neogfx
         ~font_manager();
     public:
         void* font_library_handle() const override;
-        const font_info& default_system_font_info() const override;
+        const font_info& default_system_font_info(system_font_role aRole) const override;
         const i_fallback_font_info& default_fallback_font_info() const override;
         i_native_font_face& create_default_font(const i_device_resolution& aDevice) override;
         bool has_fallback_font(const i_native_font_face& aExistingFont) const override;
@@ -104,7 +105,7 @@ namespace neogfx
         i_native_font_face& add_font(const ref_ptr<i_native_font_face>& aNewFont);
         void cleanup();
     private:
-        mutable std::optional<font_info> iDefaultSystemFontInfo;
+        mutable std::unordered_map<system_font_role, std::optional<font_info>> iDefaultSystemFontInfo;
         mutable std::optional<fallback_font_info> iDefaultFallbackFontInfo;
         FT_Library iFontLib;
         native_font_list iNativeFonts;

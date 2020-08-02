@@ -36,7 +36,7 @@ namespace neogfx
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
         dimension const length = units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text_widget().font().height() * (2.0 / 3.0));
-        return rasterize(service<i_skin_manager>().active_skin().preferred_size(skin_element::CheckBox, size{ length }));
+        return ceil_rasterized(service<i_skin_manager>().active_skin().preferred_size(skin_element::CheckBox, size{ length }));
     }
 
     size check_box::box::maximum_size(const optional_size& aAvailableSpace) const

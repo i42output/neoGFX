@@ -210,20 +210,13 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
 
-    color popup_menu::background_color() const
-    {
-        return window::has_background_color() ?
-            window::background_color() :
-            service<i_app>().current_style().palette().color(color_role::Theme);
-    }
-
     color popup_menu::frame_color() const
     {
         if (window::has_frame_color())
             return window::frame_color();
         color result = background_color().darker(0x30);
         if (result.similar_intensity(background_color(), 0.05))
-            result = result.shade(0x20);
+            result = result.shaded(0x20);
         return result;
     }
 

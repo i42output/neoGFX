@@ -76,7 +76,7 @@ namespace neogfx
     {
         if (has_minimum_size() || iTexture.is_empty())
             return widget::minimum_size(aAvailableSpace);
-        size result = iTexture.extents();
+        size result = units_converter{ *this }.from_device_units(iTexture.extents()) + padding().size();
         if (iDpiAutoScale)
             result *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         return to_units(*this, scoped_units::current_units(), result);
@@ -158,17 +158,6 @@ namespace neogfx
                 break;
             }
         }
-        // "Snap" feature: after layout to avoid unsightly gaps between widgets some widgets will be 1 pixel larger than others with same content so a snap of 2.0 pixels will fix this (for e.g. see spin_box.cpp)...
-        if (iSnap != 1.0) 
-        {
-            double f, i;
-            f = std::fmod(placementRect.cx, iSnap);
-            std::modf(placementRect.cx, &i);
-            placementRect.cx = i + ((f < iSnap / 2.0) ? 0.0 : iSnap);
-            f = std::fmod(placementRect.cy, iSnap);
-            std::modf(placementRect.cy, &i);
-            placementRect.cy = i + ((f < iSnap / 2.0) ? 0.0 : iSnap);
-        }
         switch (iPlacement)
         {
         case cardinal::NorthWest:
@@ -199,6 +188,20 @@ namespace neogfx
             placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
             break;
         }
+        placementRect = floor_rasterized(placementRect);
+        // "Snap" feature: after layout to avoid unsightly gaps between widgets some widgets will be 1 pixel larger than others with same content so a snap of 2.0 pixels will fix this (for e.g. see spin_box.cpp)...
+        if (iSnap != 1.0)
+        {
+            double f, i;
+            f = std::fmod(placementRect.cx, iSnap);
+            std::modf(placementRect.cx, &i);
+            placementRect.cx = i + ((f < iSnap / 2.0) ? 0.0 : iSnap);
+            f = std::fmod(placementRect.cy, iSnap);
+            std::modf(placementRect.cy, &i);
+            placementRect.cy = i + ((f < iSnap / 2.0) ? 0.0 : iSnap);
+        }
+        if (image().extents().cy == 5.0)
+            std::cout << placementRect << std::endl;
         aGc.draw_texture(placementRect, iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor ? shader_effect::Colorize : shader_effect::None);
     }
 

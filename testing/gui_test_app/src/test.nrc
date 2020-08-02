@@ -251,12 +251,12 @@
                                         maximum_size: [ 160dip max ]
                                     }
                                     size_policy: Expanding
-                                    foreground_color: LightGoldenrodYellow
+                                    base_color: LightGoldenrodYellow
                                 }
                                 push_button: {
                                     id: button1
                                     text: "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement."
-                                    foreground_color: LightGoldenrod
+                                    base_color: LightGoldenrod
                                 }
                                 push_button: {
                                     id: buttonGenerateUuid
@@ -268,12 +268,12 @@
                                 push_button: {
                                     id: button2
                                     text: "ويقفز الثعلب البني السريع فوق الكلب الكسول"
-                                    foreground_color: Goldenrod
+                                    base_color: Goldenrod
                                 }
                                 push_button: {
                                     id: button3
                                     text: "שועל חום קפיצות מעל הכלב העצלן"
-                                    foreground_color: DarkGoldenrod
+                                    base_color: DarkGoldenrod
                                 }
                                 push_button: {
                                     id: buttonJapan
@@ -282,7 +282,7 @@
                                 push_button: {
                                     id: buttonChina
                                     text: "请停止食用犬"
-                                    foreground_color: CadetBlue
+                                    base_color: CadetBlue
                                 }
                             }
                             push_button: {
@@ -424,19 +424,19 @@
                                     push_button: {
                                         id: buttonArcadeMode
                                         text: "Toggle arcade mode."
-                                        foreground_color: ForestGreen
+                                        base_color: ForestGreen
                                         size_policy: Expanding
                                     }
                                     push_button: {
                                         id: button7
                                         text: "Toggle &mute."
-                                        foreground_color: LightCoral
+                                        base_color: LightCoral
                                         size_policy: Expanding
                                     }
                                     push_button: {
                                         id: button8
                                         text: "Enable/disable\ncontacts action."
-                                        foreground_color: [ 255 235 160 ]
+                                        base_color: [ 255 235 160 ]
                                         size_policy: Expanding
                                     }
                                 }
@@ -551,7 +551,7 @@
                                     push_button: {
                                         id: button9
                                         text: "Default/Slate\nStyle"
-                                        foreground_color: Aquamarine
+                                        base_color: Aquamarine
                                     }
                                     grid_layout: {
                                         id: keypad
@@ -957,7 +957,7 @@
                             text_edit: {
                                 id: textEditEditor
                                 text_color: [ Horizontal Green White Red Yellow ]
-                                background_color: [ Vertical DarkBlue Black ]
+                                paper_color: [ Vertical DarkBlue Black ]
                             }
                             push_button: {
                                 id: buttonStyle1

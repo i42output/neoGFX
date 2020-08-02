@@ -65,7 +65,7 @@ namespace neogfx
     public:
         void paint(i_graphics_context& aGc) const override;
     public:
-        color background_color() const override;
+        color palette_color(color_role aColorRole) const override;
     public:
         virtual bool has_border_color() const;
         virtual color border_color() const;

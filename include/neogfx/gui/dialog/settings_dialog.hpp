@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/app/i_settings.hpp>
+#include <neogfx/app/settings.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/tree_view.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
@@ -42,20 +42,20 @@ namespace neogfx
     class settings_dialog : public dialog
     {
     public:
-        settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, image&& aIcon = image{ ":/neogfx/resources/images/settings.png" });
-        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, image&& aIcon = image{ ":/neogfx/resources/images/settings.png" });
+        settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {});
+        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {});
         ~settings_dialog();
     private:
         void init();
     private:
         neolib::i_settings& iSettings;
         ref_ptr<i_setting_widget_factory> iWidgetFactory;
+        ref_ptr<i_setting_icons> iIcons;
         sink iSink;
         horizontal_layout iLayout;
         tree_view iTree;
         framed_scrollable_widget iDetails;
         vertical_layout iDetailLayout;
-        image iIcon;
         texture iBackground;
     };
 }

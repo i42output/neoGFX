@@ -149,12 +149,16 @@ namespace neogfx
         aGc.draw_rounded_rect(lr, 4.0, pen{ border_color() }, brush{ fill_color() });
     }
 
-    color group_box::background_color() const
+    color group_box::palette_color(color_role aColorRole) const
     {
-        if (container_background_color().light())
-            return parent().background_color().darker(24);
-        else
-            return parent().background_color().lighter(24);
+        if (aColorRole == color_role::Background)
+        {
+            if (container_background_color().light())
+                return parent().background_color().darker(0x0C);
+            else
+                return parent().background_color().lighter(0x0C);
+        }
+        return widget::palette_color(aColorRole);
     }
 
     bool group_box::has_border_color() const
@@ -166,10 +170,7 @@ namespace neogfx
     {
         if (has_border_color())
             return *BorderColor;
-        else if (container_background_color().light())
-            return background_color().darker(24);
-        else
-            return background_color().lighter(24);
+        return background_color().shaded(0x0A);
     }
 
     void group_box::set_border_color(const optional_color& aBorderColor)
@@ -185,7 +186,7 @@ namespace neogfx
 
     color group_box::fill_color() const
     {
-        return (has_fill_color() ? *FillColor : container_background_color().light() ? border_color().lighter(24) : border_color().darker(24)).with_alpha(fill_opacity());
+        return has_fill_color() ? *FillColor : background_color().with_alpha(fill_opacity());
     }
 
     void group_box::set_fill_color(const optional_color& aFillColor)

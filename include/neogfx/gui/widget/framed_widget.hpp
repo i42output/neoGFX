@@ -201,10 +201,8 @@ namespace neogfx
         {
             if (has_frame_color())
                 return *iFrameColor;
-            else if (iStyle != frame_style::ContainerFrame)
-                return as_widget().background_color().shade(0x60);
             else
-                return (as_widget().has_foreground_color() ? as_widget().foreground_color() : as_widget().container_background_color()).darker(0x40);
+                return as_widget().background_color().shaded(0x20);
         }
         virtual void set_frame_color(const optional_color& aFrameColor = optional_color{})
         {
@@ -216,7 +214,7 @@ namespace neogfx
             if (iStyle != frame_style::ContainerFrame)
                 return frame_color();
             else
-                return (as_widget().has_foreground_color() ? as_widget().foreground_color() : as_widget().container_background_color()).lighter(0x40);
+                return (as_widget().has_base_color() ? as_widget().base_color() : as_widget().container_background_color()).lighter(0x40);
         }
     public:
         dimension line_width() const

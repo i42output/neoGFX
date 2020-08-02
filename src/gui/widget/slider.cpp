@@ -88,7 +88,7 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect rectBarBox = bar_box();
-        color ink = background_color().shade(0x80);
+        color ink = background_color().shaded(0x80);
         aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : ink));
         rectBarBox.inflate(size{ 1.0, 1.0 });
         aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : ink.mid(background_color())));
@@ -108,7 +108,7 @@ namespace neogfx
                 aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : service<i_app>().current_style().palette().color(color_role::Selection)));
         }
         rect rectIndicator = indicator_box();
-        color indicatorColor = foreground_color();
+        color indicatorColor = base_color();
         if (iDragOffset != std::nullopt)
         {
             if (indicatorColor.light(0x40))

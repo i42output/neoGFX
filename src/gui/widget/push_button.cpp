@@ -167,7 +167,7 @@ namespace neogfx
         {
             color background = (capturing() && entered() ? 
                 service<i_app>().current_style().palette().color(color_role::Selection) : 
-                background_color().shade(0x40));
+                background_color().shaded(0x40));
             background.set_alpha(0x80);
             aGc.fill_rect(client_rect(), background);
         }
@@ -175,9 +175,10 @@ namespace neogfx
 
     void push_button::paint(i_graphics_context& aGc) const
     {
-        color faceColor = animation_color();
-        color borderColor = border_mid_color().darker(0x40);
-        color innerBorderColor = border_mid_color().lighter(capturing() ? 0x20 : 0x40);
+        // todo: move to default skin
+        color faceColor = effective_face_color();
+        color outerBorderColor = background_color().darker(0x10);
+        color innerBorderColor = border_color();
         scoped_units su{ *this, units::Pixels };
         neogfx::path outline = path();
         dimension penWidth = 1.0;
@@ -188,17 +189,15 @@ namespace neogfx
         case push_button_style::Tab:
         case push_button_style::DropList:
         case push_button_style::SpinBox:
-            aGc.fill_path(outline, borderColor);
+            aGc.fill_path(outline, outerBorderColor);
             outline.deflate(penWidth, penWidth);
             aGc.fill_path(outline, innerBorderColor);
             outline.deflate(penWidth, penWidth);
             break;
         }
-        const double colorOffset = 0.2;
-        color colorStart = faceColor;
-        color colorEnd = colorStart.to_hsl().lighter(-colorOffset).to_rgb<color>();
-        if (colorStart.to_hsl().lightness() - colorEnd.to_hsl().lightness() < colorOffset)
-            colorStart = colorEnd.with_lightness(colorEnd.to_hsl().lightness() + colorOffset);
+        double const colorOffset = 0.1;
+        color colorStart = faceColor.lighter(0x0A);
+        color colorEnd = faceColor;
         switch(iStyle)
         {
         case push_button_style::Toolbar:
@@ -208,7 +207,7 @@ namespace neogfx
                 colorStart = colorStart.with_lightness(colorStart.to_hsl().lightness() + 0.1);
                 const double transitionHeight = 0.04;
                 const double transitionStart = 0.5 - transitionHeight / 2.0 +
-                    (!capturing() ? 0.0 : (rasterize(1.0_mm) / outline.bounding_rect().height()));
+                    (!capturing() ? 0.0 : (ceil_rasterized(1.0_mm) / outline.bounding_rect().height()));
                 const double transitionEnd = transitionStart + transitionHeight;
                 aGc.fill_path(outline,
                     gradient{ gradient::color_stop_list{
@@ -238,6 +237,15 @@ namespace neogfx
             focusRect.deflate(2.0, 2.0);
             aGc.draw_focus_rect(focusRect);
         }
+    }
+
+    color push_button::palette_color(color_role aColorRole) const
+    {
+        if (has_palette_color(aColorRole))
+            return button::palette_color(aColorRole);
+        if (aColorRole == color_role::Base)
+            return background_color().shaded(0x0B);
+        return button::palette_color(aColorRole);
     }
 
     void push_button::mouse_entered(const point& aPosition)
@@ -309,14 +317,33 @@ namespace neogfx
         return false;
     }
 
-    color push_button::border_mid_color() const
+    color push_button::border_color() const
     {
-        return animation_color().darker(0x20);
+        return effective_face_color().shaded(0x20);
     }
 
     bool push_button::perform_hover_animation() const
     {
         return true;
+    }
+
+    bool push_button::has_face_color() const
+    {
+        return iFaceColor != std::nullopt;
+    }
+
+    color push_button::face_color() const
+    {
+        return has_face_color() ? *iFaceColor : base_color();
+    }
+
+    void push_button::set_face_color(const optional_color& aFaceColor)
+    {
+        if (iFaceColor != aFaceColor)
+        {
+            iFaceColor = aFaceColor;
+            update();
+        }
     }
 
     bool push_button::has_hover_color() const
@@ -326,17 +353,16 @@ namespace neogfx
 
     color push_button::hover_color() const
     {
-        color hoverColor = (has_hover_color() ? *iHoverColor : service<i_app>().current_style().palette().color(color_role::Hover));
-        if (capturing())
-            return hoverColor.shade(0x40);
-        else 
-            return hoverColor;
+        return (has_hover_color() ? *iHoverColor : service<i_app>().current_style().palette().color(color_role::Hover));
     }
 
     void push_button::set_hover_color(const optional_color& aHoverColor)
     {
-        iHoverColor = aHoverColor;
-        update();
+        if (iHoverColor != aHoverColor)
+        {
+            iHoverColor = aHoverColor;
+            update();
+        }
     }
 
     void push_button::animate()
@@ -368,39 +394,54 @@ namespace neogfx
         return iAnimationFrame == 0;
     }
 
-    color push_button::animation_color() const
+    color push_button::effective_face_color() const
     {
         return animation_color(iAnimationFrame);
     }
 
+    color push_button::effective_hover_color() const
+    {
+        return capturing() ? hover_color().shaded(0x40) : hover_color();
+    }
+
     color push_button::animation_color(uint32_t aAnimationFrame) const
     {
-        color faceColor;
-        faceColor = foreground_color();
+        color faceColor = face_color();
         if (capturing())
-        {
-            if (faceColor.light(0x40))
-                faceColor.darken(0x40);
-            else
-                faceColor.lighten(0x40);
-        }
-        return (enabled() && entered() && perform_hover_animation()) || !finished_animation() ? gradient(faceColor, hover_color()).at(static_cast<coordinate>(aAnimationFrame), 0, static_cast<coordinate>(kMaxAnimationFrame)) : faceColor;
+            faceColor.shade(0x40);
+        auto animationColor = (enabled() && entered() && perform_hover_animation()) || !finished_animation() ? 
+            gradient(faceColor, effective_hover_color()).at(static_cast<coordinate>(aAnimationFrame), 0, static_cast<coordinate>(kMaxAnimationFrame)) : faceColor;
+        if (disabled())
+            animationColor.unshade(0x14);
+        else if (is_checked())
+            animationColor.unshade(0x0A);
+        return animationColor;
     }
 
     void push_button::init()
     {
-        if (iStyle == push_button_style::ItemViewHeader)
+        layout().set_padding(neogfx::padding{});
+        label().set_padding(neogfx::padding{});
+        switch(iStyle)
         {
+        case push_button_style::ItemViewHeader:
             set_padding(neogfx::padding{ 1.0_dip, 2.0_dip });
-            layout().set_padding(neogfx::padding{});
-            label().set_padding(neogfx::padding{});
             label().text_widget().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
-        }
-        else if (iStyle == push_button_style::Toolbar)
-        {
+            break;
+        case push_button_style::Toolbar:
             set_padding(neogfx::padding{ 2.0_dip, 2.0_dip });
-            layout().set_padding(neogfx::padding{});
-            label().set_padding(neogfx::padding{});
+            label().text_widget().set_font_role(neogfx::font_role::Toolbar);
+            break;
+        case push_button_style::TitleBar:
+            set_padding(neogfx::padding{ 4.0_dip, 4.0_dip });
+            label().text_widget().set_font_role(neogfx::font_role::Caption);
+            break;
+        case push_button_style::SpinBox:
+            set_padding(neogfx::padding{ 2.0_dip, 2.0_dip });
+            break;
+        default:
+            set_padding(neogfx::padding{ 4.0_dip, 4.0_dip });
+            break;
         }
     }
 }

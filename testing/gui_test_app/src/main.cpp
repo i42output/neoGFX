@@ -116,10 +116,10 @@ public:
         auto const backgroundColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background);
         if (aColorRole == iColorRole)
             return ng::color{ prng(0.0, 1.0), prng(0.0, 1.0), prng(0.0, 1.0) }.with_lightness((aColorRole == ng::color_role::Text ? textColor.light() : backgroundColor.light()) ? 0.85 : 0.15);
-        else if (aColorRole == ng::color_role::Foreground && iColorRole)
+        else if (aColorRole == ng::color_role::Base && iColorRole)
             return ng::color::Black;
         else if (aColorRole == ng::color_role::Background)
-            return backgroundColor.shade(aIndex.row() % 2 == 0 ? 0x00 : 0x08);
+            return backgroundColor.shaded(aIndex.row() % 2 == 0 ? 0x00 : 0x08);
         return {};
     }
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
             auto s2 = window.textEditEditor.default_style();
             s.set_glyph_color(window.gradientWidget.gradient());
             s2.set_glyph_color(window.gradientWidget.gradient());
-            s2.set_background_color(ng::color_or_gradient{});
+            s2.set_paper_color(ng::color_or_gradient{});
             window.textEdit.set_default_style(s);
             window.textEditEditor.set_default_style(s2);
         });
@@ -446,8 +446,8 @@ int main(int argc, char* argv[])
         {
             auto& button = window.layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
             ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
-            button.set_foreground_color(randomColor);
-            button.clicked([&, randomColor]() { window.textEdit.BackgroundColor = randomColor.same_lightness_as(app.current_style().palette().color(ng::color_role::Background)); });
+            button.set_base_color(randomColor);
+            button.clicked([&, randomColor]() { window.textEdit.set_palette_color(ng::color_role::Background, randomColor.same_lightness_as(app.current_style().palette().color(ng::color_role::Background))); });
             transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
         }
         ng::event<> startAnimation;
@@ -726,7 +726,7 @@ int main(int argc, char* argv[])
                 neolib::random prng{ app.program_elapsed_ms() / 5000 };
                 ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
                 randomColor = randomColor.to_hsv().with_brightness(brightness).to_rgb<ng::color>();
-                window.button6.set_foreground_color(randomColor);
+                window.button6.set_base_color(randomColor);
             }
         }, 16);
 

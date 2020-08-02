@@ -31,7 +31,7 @@ namespace neogfx::nrc
         text_edit(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aElementType = ui_element_type::TextEdit) :
             ui_element<>{ aParser, aParent, aElementType }
         {
-            add_data_names({ "size_hint", "tab_stop_hint", "text_color" });
+            add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
         }
     public:
         const neolib::i_string& header() const override
@@ -48,8 +48,8 @@ namespace neogfx::nrc
                 iTabStopHint = aData.get<neolib::i_string>();
             else if (aName == "text_color")
                 iTextColor = get_color(aData);
-            else if (aName == "background_color")
-                iBackgroundColor = get_color(aData);
+            else if (aName == "paper_color")
+                iPaperColor = get_color(aData);
             else
                 ui_element<>::parse(aName, aData);
         }
@@ -64,8 +64,8 @@ namespace neogfx::nrc
             }
             else if (aName == "text_color")
                 iTextColor = get_color_or_gradient(aData);
-            else if (aName == "background_color")
-                iBackgroundColor = get_color_or_gradient(aData);
+            else if (aName == "paper_color")
+                iPaperColor = get_color_or_gradient(aData);
             else
                 ui_element<>::parse(aName, aData);
         }
@@ -96,7 +96,7 @@ namespace neogfx::nrc
             }
             if (iTabStopHint)
                 emit("   %1%.set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
-            if (iTextColor || iBackgroundColor)
+            if (iTextColor || iPaperColor)
                 emit("   text_edit::style %1%DefaultStyle;\n", id());
             if (iTextColor)
             {
@@ -105,14 +105,14 @@ namespace neogfx::nrc
                 else
                     emit("   %1%DefaultStyle.set_text_color(gradient{ %2% });\n", id(), std::get<gradient>(*iTextColor));
             }
-            if (iBackgroundColor)
+            if (iPaperColor)
             {
-                if (std::holds_alternative<color>(*iBackgroundColor))
-                    emit("   %1%DefaultStyle.set_background_color(color{ %2% });\n", id(), std::get<color>(*iBackgroundColor));
+                if (std::holds_alternative<color>(*iPaperColor))
+                    emit("   %1%DefaultStyle.set_paper_color(color{ %2% });\n", id(), std::get<color>(*iPaperColor));
                 else
-                    emit("   %1%DefaultStyle.set_background_color(gradient{ %2% });\n", id(), std::get<gradient>(*iBackgroundColor));
+                    emit("   %1%DefaultStyle.set_paper_color(gradient{ %2% });\n", id(), std::get<gradient>(*iPaperColor));
             }
-            if (iTextColor || iBackgroundColor)
+            if (iTextColor || iPaperColor)
                 emit("   %1%.set_default_style(%1%DefaultStyle);\n", id());
         }
     protected:
@@ -121,6 +121,6 @@ namespace neogfx::nrc
         std::optional<size_hint> iSizeHint;
         std::optional<string> iTabStopHint;
         std::optional<color_or_gradient> iTextColor;
-        std::optional<color_or_gradient> iBackgroundColor;
+        std::optional<color_or_gradient> iPaperColor;
     };
 }

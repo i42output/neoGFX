@@ -39,7 +39,7 @@ namespace neogfx::DesignStudio
         ng::optional_color cell_color(const ng::item_presentation_model_index& aIndex, ng::color_role aColorRole) const override
         {
             if (aColorRole == ng::color_role::Background)
-                return ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).shade(aIndex.row() % 2 == 0 ? 0x00 : 0x08);
+                return ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background).shaded(aIndex.row() % 2 == 0 ? 0x00 : 0x08);
             return {};
         }
     public:

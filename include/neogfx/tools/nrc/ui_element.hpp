@@ -271,8 +271,8 @@ namespace neogfx::nrc
                 else
                     iTextFieldPlacement = get_enum<text_field_placement>(aData);
             }
-            else if (aName == "foreground_color")
-                iForegroundColor = get_color(aData);
+            else if (aName == "base_color")
+                iBaseColor = get_color(aData);
             else if (aName == "background_color")
                 iBackgroundColor = get_color(aData);
             else if (aName == "opacity")
@@ -307,8 +307,8 @@ namespace neogfx::nrc
                 emplace_2<double>("weight", iWeight);
             else if (aName == "focus_policy")
                 iFocusPolicy.first = get_enum<focus_policy>(aArrayData, iFocusPolicy.second, "Default");
-            else if (aName == "foreground_color")
-                iForegroundColor = get_color(aArrayData);
+            else if (aName == "base_color")
+                iBaseColor = get_color(aArrayData);
             else if (aName == "background_color")
                 iBackgroundColor = get_color(aArrayData);
         }
@@ -431,8 +431,8 @@ namespace neogfx::nrc
                 emit("   %1%.label().set_text(\"%2%\"_t);\n", id(), *iLabelText);
             if (iOpacity)
                 emit("   %1%.set_opacity(%2%);\n", id(), *iOpacity);
-            if (iForegroundColor)
-                emit("   %1%.set_foreground_color(color{ %2% });\n", id(), *iForegroundColor);
+            if (iBaseColor)
+                emit("   %1%.set_base_color(color{ %2% });\n", id(), *iBaseColor);
             if (iBackgroundColor)
                 emit("   %1%.set_background_color(color{ %2% });\n", id(), *iBackgroundColor);
             if (iDefaultFocus)
@@ -528,7 +528,7 @@ namespace neogfx::nrc
             if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
                 add_data_names({ "uri" });
             if ((type() & ui_element_type::HasColor) == ui_element_type::HasColor)
-                add_data_names({ "foreground_color", "background_color", "opacity", "transparency" });
+                add_data_names({ "base_color", "background_color", "opacity", "transparency" });
         }
     private:
         const i_ui_element_parser& iParser;
@@ -565,7 +565,7 @@ namespace neogfx::nrc
         std::optional<aspect_ratio> iAspectRatio;
         std::optional<cardinal> iImagePlacement;
         std::optional<double> iOpacity;
-        std::optional<color> iForegroundColor;
+        std::optional<color> iBaseColor;
         std::optional<color> iBackgroundColor;
         std::optional<string> iDefaultFocus;
     };

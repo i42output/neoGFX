@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/scrollbar.hpp>
 
@@ -319,7 +320,7 @@ namespace neogfx
                 if ((maximum() - minimum()) != 0.0)
                 {
                     g.cy = available * static_cast<dimension>(page() / (maximum() - minimum()));
-                    dimension const minimumThumbHeight = rasterize(2.0_mm);
+                    dimension const minimumThumbHeight = ceil_rasterized(2.0_mm);
                     if (g.cy < minimumThumbHeight)
                     {
                         available -= (minimumThumbHeight - g.cy);
@@ -342,7 +343,7 @@ namespace neogfx
                 if ((maximum() - minimum()) != 0.0)
                 {
                     g.cx = available * static_cast<dimension>(page() / (maximum() - minimum()));
-                    dimension const minimumThumbWidth = rasterize(2.0_mm);
+                    dimension const minimumThumbWidth = ceil_rasterized(2.0_mm);
                     if (g.cx < minimumThumbWidth)
                     {
                         available -= (minimumThumbWidth - g.cx);
@@ -564,7 +565,7 @@ namespace neogfx
     {
         if (aStyle == scrollbar_style::Invisible)
             return 0.0;
-        dimension w = rasterize(4.0_mm);
+        dimension w = ceil_rasterized(4.0_mm);
         if (aStyle == scrollbar_style::Menu || aStyle == scrollbar_style::Scroller)
         {
             dimension const padding = 3.0_dip;

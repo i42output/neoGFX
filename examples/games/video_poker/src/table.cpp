@@ -130,7 +130,7 @@ namespace video_poker
         {
             aButton.set_size_policy(neogfx::size_constraint::Expanding, neogfx::size{ 1.0 });
             aButton.set_weight(neogfx::size{ 0.0 });
-            aButton.set_foreground_color(neogfx::color::White);
+            aButton.set_base_color(neogfx::color::White);
             aButton.text_widget().set_size_hint(neogfx::size_hint{ "MAX\nBET" });
             aButton.text_widget().set_text_color(neogfx::color::Black);
             aButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 24.0 });

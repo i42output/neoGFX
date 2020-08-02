@@ -105,14 +105,18 @@ namespace neogfx
         return false;
     }
 
-    color tool_title_bar::background_color() const
+    color  tool_title_bar::palette_color(color_role aColorRole) const
     {
-        if (has_background_color())
-            return widget::background_color();
-        else if (!iStateActive)
-            return widget::container_background_color();
-        else
-            return service<i_app>().current_style().palette().color(color_role::Selection);
+        if (has_palette_color(aColorRole))
+            return  widget::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+        {
+            if (!iStateActive)
+                return widget::container_background_color();
+            else
+                return service<i_app>().current_style().palette().color(color_role::Selection);
+        }
+        return  widget::palette_color(aColorRole);
     }
 
     neogfx::focus_policy tool_title_bar::focus_policy() const

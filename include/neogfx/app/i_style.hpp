@@ -57,6 +57,17 @@ namespace neogfx
         return static_cast<style_aspect>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
+    enum class font_role : uint32_t
+    {
+        Caption,
+        Menu,
+        Toolbar,
+        StatusBar,
+        Widget
+    };
+
+    typedef std::optional<font_role> optional_font_role;
+
     class i_style
     {
     public:
@@ -75,8 +86,21 @@ namespace neogfx
         virtual const i_palette& palette() const = 0;
         virtual i_palette& palette() = 0;
         virtual void set_palette(const i_palette& aPalette) = 0;
-        virtual const font_info& font_info() const = 0;
-        virtual void set_font_info(const neogfx::font_info& aFontInfo) = 0;
-        virtual const neogfx::font& font() const = 0;
+        virtual const neogfx::font_info& font_info(font_role aRole) const = 0;
+        virtual void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) = 0;
+        virtual const neogfx::font& font(font_role aRole) const = 0;
+    public:
+        const neogfx::font_info& font_info() const
+        {
+            return font_info(font_role::Widget);
+        }
+        void set_font_info(const neogfx::font_info& aFontInfo)
+        {
+            set_font_info(font_role::Widget, aFontInfo);
+        }
+        const neogfx::font& font() const
+        {
+            return font(font_role::Widget);
+        }
     };
 }

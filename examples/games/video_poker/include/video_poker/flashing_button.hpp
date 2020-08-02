@@ -37,9 +37,9 @@ namespace video_poker
             neogfx::service<neogfx::i_rendering_engine>().unregister_frame_counter(*this, 250);
         }
     public:
-        neogfx::color animation_color() const override
+        neogfx::color face_color() const override
         {
-            neogfx::color faceColor = push_button::animation_color();
+            neogfx::color faceColor = push_button::face_color();
             faceColor = faceColor.with_lightness(
                 effectively_enabled() && 
                 (push_button::is_checked() || neogfx::service<neogfx::i_rendering_engine>().frame_counter(250) % 2 == 1) ? 0.9 : 0.5);

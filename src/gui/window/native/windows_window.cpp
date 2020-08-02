@@ -43,6 +43,8 @@
 #include <neolib/core/string_utf.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include "../../../gfx/native/opengl.hpp"
 #include "../../../gfx/native/opengl_rendering_context.hpp"
 #include "../../../hid/native/windows_keyboard.hpp"

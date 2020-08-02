@@ -894,7 +894,7 @@ namespace neogfx
         if (has_fixed_size())
             result = fixed_size();
         else if (has_minimum_size())
-            result = units_converter(*this).from_device_units(*MinimumSize);
+            result = units_converter{ *this }.from_device_units(*MinimumSize);
         else if (has_layout())
         {
             result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
@@ -1198,42 +1198,48 @@ namespace neogfx
         set_opacity(1.0 - aTransparency);
     }
 
-    bool widget::has_foreground_color() const
+    bool widget::has_palette() const
     {
-        return ForegroundColor != std::nullopt;
+        return Palette != std::nullopt;
     }
 
-    color widget::foreground_color() const
+    const i_palette& widget::palette() const
     {
-        if (has_foreground_color())
-            return *ForegroundColor;
-        else
-            return service<i_app>().current_style().palette().color(color_role::Foreground);
+        if (has_palette())
+            return *Palette.value();
+        return service<i_app>().current_style().palette();
     }
 
-    void widget::set_foreground_color(const optional_color& aForegroundColor)
+    void widget::set_palette(const i_palette& aPalette)
     {
-        ForegroundColor = aForegroundColor;
-        update();
+        if (Palette != aPalette)
+        {
+            Palette = aPalette;
+            update();
+        }
     }
 
-    bool widget::has_background_color() const
+    bool widget::has_palette_color(color_role aColorRole) const
     {
-        return BackgroundColor != std::nullopt;
+        return has_palette() && palette().has_color(aColorRole);
     }
 
-    color widget::background_color() const
+    color widget::palette_color(color_role aColorRole) const
     {
-        if (has_background_color())
-            return *BackgroundColor;
-        else
-            return service<i_app>().current_style().palette().color(color_role::Background);
+        return palette().color(aColorRole);
     }
 
-    void widget::set_background_color(const optional_color& aBackgroundColor)
+    void widget::set_palette_color(color_role aColorRole, const optional_color& aColor)
     {
-        BackgroundColor = aBackgroundColor;
-        update();
+        if (Palette == std::nullopt)
+            Palette = neogfx::palette{ current_style_palette_proxy() };
+        if (palette_color(aColorRole) != aColor)
+        {
+            auto existing = neogfx::palette{ palette() }; // todo: support indirectly changing and notifying a property so we don't have to make a copy?
+            existing.set_color(aColorRole, aColor);
+            Palette = existing;
+            update();
+        }
     }
 
     color widget::container_background_color() const
@@ -1247,6 +1253,27 @@ namespace neogfx
             return service<i_app>().current_style().palette().color(color_role::Theme);
     }
 
+    bool widget::has_font_role() const
+    {
+        return FontRole != std::nullopt;
+    }
+
+    font_role widget::font_role() const
+    {
+        if (has_font_role())
+            return *FontRole.value();
+        return neogfx::font_role::Widget;
+    }
+
+    void widget::set_font_role(const optional_font_role& aFontRole)
+    {
+        if (FontRole != aFontRole)
+        {
+            FontRole = aFontRole;
+            update();
+        }
+    }
+
     bool widget::has_font() const
     {
         return Font != std::nullopt;
@@ -1257,7 +1284,7 @@ namespace neogfx
         if (has_font())
             return *Font;
         else
-            return service<i_app>().current_style().font();
+            return service<i_app>().current_style().font(font_role());
     }
 
     void widget::set_font(const optional_font& aFont)

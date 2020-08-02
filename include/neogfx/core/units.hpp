@@ -725,33 +725,75 @@ namespace neogfx
     }
 
     template <typename T>
-    inline T rasterize(T aValue)
+    inline T ceil_rasterized(T aValue)
     {
         return from_px(std::ceil(to_px(aValue)));
     }
 
     template <typename T>
-    inline basic_delta<T> rasterize(const basic_delta<T>& aDelta)
+    inline basic_delta<T> ceil_rasterized(const basic_delta<T>& aDelta)
     {
-        return basic_delta<T>{ rasterize(aDelta.dx), rasterize(aDelta.dy) };
+        return basic_delta<T>{ ceil_rasterized(aDelta.dx), ceil_rasterized(aDelta.dy) };
     }
 
     template <typename T>
-    inline basic_size<T> rasterize(const basic_size<T>& aSize)
+    inline basic_size<T> ceil_rasterized(const basic_size<T>& aSize)
     {
-        return basic_size<T>{ rasterize(aSize.cx), rasterize(aSize.cy) };
+        return basic_size<T>{ ceil_rasterized(aSize.cx), ceil_rasterized(aSize.cy) };
     }
 
     template <typename T>
-    inline basic_point<T> rasterize(const basic_point<T>& aPoint)
+    inline basic_point<T> ceil_rasterized(const basic_point<T>& aPoint)
     {
-        return basic_point<T>{ rasterize(aPoint.x), rasterize(aPoint.y) };
+        return basic_point<T>{ ceil_rasterized(aPoint.x), ceil_rasterized(aPoint.y) };
     }
 
     template <typename T>
-    inline T rasterize(const basic_length<T>& aLength)
+    inline basic_rect<T> ceil_rasterized(const basic_rect<T>& aRect)
     {
-        return rasterize(static_cast<T>(aLength));
+        return basic_rect<T>{ ceil_rasterized(aRect.position()), ceil_rasterized(aRect.extents()) };
+    }
+
+    template <typename T>
+    inline T ceil_rasterized(const basic_length<T>& aLength)
+    {
+        return ceil_rasterized(static_cast<T>(aLength));
+    }
+
+    template <typename T>
+    inline T floor_rasterized(T aValue)
+    {
+        return from_px(std::floor(to_px(aValue)));
+    }
+
+    template <typename T>
+    inline basic_delta<T> floor_rasterized(const basic_delta<T>& aDelta)
+    {
+        return basic_delta<T>{ floor_rasterized(aDelta.dx), floor_rasterized(aDelta.dy) };
+    }
+
+    template <typename T>
+    inline basic_size<T> floor_rasterized(const basic_size<T>& aSize)
+    {
+        return basic_size<T>{ floor_rasterized(aSize.cx), floor_rasterized(aSize.cy) };
+    }
+
+    template <typename T>
+    inline basic_point<T> floor_rasterized(const basic_point<T>& aPoint)
+    {
+        return basic_point<T>{ floor_rasterized(aPoint.x), floor_rasterized(aPoint.y) };
+    }
+
+    template <typename T>
+    inline basic_rect<T> floor_rasterized(const basic_rect<T>& aRect)
+    {
+        return basic_rect<T>{ floor_rasterized(aRect.position()), floor_rasterized(aRect.extents()) };
+    }
+
+    template <typename T>
+    inline T floor_rasterized(const basic_length<T>& aLength)
+    {
+        return floor_rasterized(static_cast<T>(aLength));
     }
 
     namespace unit_literals

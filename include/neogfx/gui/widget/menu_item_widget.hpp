@@ -50,7 +50,7 @@ namespace neogfx
         void paint_non_client(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;
     public:
-        color background_color() const override;
+        color palette_color(color_role aColorRole) const override;
     public:
         bool can_capture() const override;
     public:

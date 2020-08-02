@@ -51,7 +51,7 @@ namespace neogfx
         rect line = client_rect(false);
         line.deflate(size{ 0.0_dip, 2.0_dip });
         line.cx = 1.0;
-        color ink = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));
+        color ink = (has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Base));
         aGc.fill_rect(line, ink.darker(0x40).with_alpha(0.5));
         ++line.x;
         aGc.fill_rect(line, ink.lighter(0x40).with_alpha(0.5));
@@ -166,41 +166,49 @@ namespace neogfx
     void status_bar::add_normal_widget(i_widget& aWidget)
     {
         iNormalWidgetLayout.add(aWidget);
+        aWidget.set_font_role(font_role::StatusBar);
     }
 
     void status_bar::add_normal_widget_at(widget_index aPosition, i_widget& aWidget)
     {
         iNormalWidgetLayout.add_at(aPosition, aWidget);
+        aWidget.set_font_role(font_role::StatusBar);
     }
 
     void status_bar::add_normal_widget(std::shared_ptr<i_widget> aWidget)
     {
         iNormalWidgetLayout.add(aWidget);
+        aWidget->set_font_role(font_role::StatusBar);
     }
 
     void status_bar::add_normal_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget)
     {
         iNormalWidgetLayout.add_at(aPosition, aWidget);
+        aWidget->set_font_role(font_role::StatusBar);
     }
 
     void status_bar::add_permanent_widget(i_widget& aWidget)
     {
         iPermanentWidgetLayout.add(aWidget);
+        aWidget.set_font_role(font_role::StatusBar);
     }
 
     void status_bar::add_permanent_widget_at(widget_index aPosition, i_widget& aWidget)
     {
         iPermanentWidgetLayout.add_at(aPosition, aWidget);
+        aWidget.set_font_role(font_role::StatusBar);
     }
 
     void status_bar::add_permanent_widget(std::shared_ptr<i_widget> aWidget)
     {
         iPermanentWidgetLayout.add(aWidget);
+        aWidget->set_font_role(font_role::StatusBar);
     }
 
     void status_bar::add_permanent_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget)
     {
         iPermanentWidgetLayout.add_at(aPosition, aWidget);
+        aWidget->set_font_role(font_role::StatusBar);
     }
 
     i_layout& status_bar::normal_layout()
@@ -272,6 +280,7 @@ namespace neogfx
         iMessageLayout.set_padding(neogfx::padding{});
         iMessageLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMessageWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iMessageWidget.set_font_role(neogfx::font_role::StatusBar);
         iIdleLayout.set_padding(neogfx::padding{});
         iIdleLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
@@ -280,8 +289,8 @@ namespace neogfx
         iPermanentWidgetLayout.set_padding(neogfx::padding{});
         auto update_size_grip = [this](style_aspect)
         {
-            auto ink1 = (has_foreground_color() ? foreground_color() : service<i_app>().current_style().palette().color(color_role::Foreground));
-            ink1 = ink1.shade(0x40);
+            auto ink1 = (has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Base));
+            ink1 = ink1.shaded(0x40);
             auto ink2 = ink1.darker(0x30);
             if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
             {

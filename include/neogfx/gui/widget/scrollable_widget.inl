@@ -189,7 +189,7 @@ namespace neogfx
                 rect{
                     point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(iVerticalScrollbar).bottom() },
                     size{ scrollbar_geometry(iVerticalScrollbar).width(), scrollbar_geometry(horizontal_scrollbar()).height() } },
-                scrollbarColor.shade(0x40));
+                scrollbarColor.shaded(0x40));
             aGc.set_origin(oldOrigin);
         }
     }

@@ -52,12 +52,22 @@ namespace neogfx
             update_appearance();
         }
     protected:
+        size minimum_size(const optional_size& aAvailableSpace) const
+        {
+            auto result = push_button::minimum_size(aAvailableSpace);
+            if (has_minimum_size())
+                return result;
+            double const radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
+            result = result.max(size{ std::ceil(radius * 2.0) });
+            return result;
+        }
+    protected:
         void paint(i_graphics_context& aGc) const
         {
             scoped_units su{ *this, units::Pixels };
             if (entered())
             {
-                double radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
+                double const radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
                 aGc.fill_circle(
                     to_client_coordinates(image_widget().to_window_coordinates(image_widget().client_rect().center())), radius, service<i_app>().current_style().palette().color(color_role::Text));
             }
@@ -315,14 +325,6 @@ namespace neogfx
         return is_selected();
     }
 
-    color tab_button::border_mid_color() const
-    {
-        if (is_deselected() || !container().has_tab_page(container().index_of(*this)))
-            return push_button::border_mid_color();
-        auto& tabPage = container().tab_page(container().index_of(*this)).as_widget();
-        return tabPage.background_color();
-    }
-
     bool tab_button::perform_hover_animation() const
     {
         return push_button::perform_hover_animation() && !is_selected();
@@ -344,7 +346,7 @@ namespace neogfx
             result += size{ is_selected() ? 1.0_mm : 0.0_mm, 2.0_mm };
             break;
         }
-        return rasterize(result);
+        return ceil_rasterized(result);
     }
 
     void tab_button::handle_clicked()
@@ -353,12 +355,16 @@ namespace neogfx
         select();
     }
 
-    color tab_button::foreground_color() const
+    color  tab_button::palette_color(color_role aColorRole) const
     {
-        if (has_foreground_color() || is_deselected() || !container().has_tab_page(container().index_of(*this)))
-            return push_button::foreground_color();
-        auto& tabPage = container().tab_page(container().index_of(*this)).as_widget();
-        return tabPage.background_color();
+        if (has_palette_color(aColorRole) || is_deselected() || !container().has_tab_page(container().index_of(*this)))
+            return push_button::palette_color(aColorRole);
+        if (aColorRole == color_role::Base)
+        {
+            auto& tabPage = container().tab_page(container().index_of(*this)).as_widget();
+            return tabPage.palette_color(color_role::Background);
+        }
+        return push_button::palette_color(aColorRole);
     }
 
     bool tab_button::update(const rect& aUpdateRect)

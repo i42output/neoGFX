@@ -131,7 +131,7 @@ namespace neogfx
         void render(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;
     public:
-        color background_color() const override;
+        color palette_color(color_role aColorRole) const override;
     public:
         using widget::show;
         bool show(bool aVisible) override;

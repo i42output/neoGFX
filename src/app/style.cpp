@@ -28,8 +28,7 @@ namespace neogfx
     style::style(const std::string& aName) :
         iName{ aName },
         iPadding{ 2.0, 2.0, 4.0, 4.0, 4.0 },
-        iSpacing{ 2.0, 2.0 },
-        iFontInfo{ service<i_font_manager>().default_system_font_info() }
+        iSpacing{ 2.0, 2.0 }
     {
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
@@ -38,20 +37,19 @@ namespace neogfx
         iName{ aName },
         iPadding{ aOther.all_padding() },
         iSpacing{ aOther.spacing() },
-        iPalette{ aOther.palette() },
-        iFontInfo{ aOther.font_info() }
+        iPalette{ aOther.palette() }
     {
+        iFontInfo[font_role::Caption] = aOther.font_info(font_role::Caption);
+        iFontInfo[font_role::Menu] = aOther.font_info(font_role::Menu);
+        iFontInfo[font_role::Toolbar] = aOther.font_info(font_role::Toolbar);
+        iFontInfo[font_role::StatusBar] = aOther.font_info(font_role::StatusBar);
+        iFontInfo[font_role::Widget] = aOther.font_info(font_role::Widget);
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
     style::style(const i_style& aOther) :
-        iName{ aOther.name() },
-        iPadding{ aOther.all_padding() },
-        iSpacing{ aOther.spacing() },
-        iPalette{ aOther.palette() },
-        iFontInfo{ aOther.font_info() }
+        style{ aOther.name() , aOther }
     {
-        iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
     style::style(const style& aOther) :
@@ -71,7 +69,11 @@ namespace neogfx
             iPadding = aOther.all_padding();
             iSpacing = aOther.spacing();
             iPalette = aOther.palette();
-            iFontInfo = aOther.font_info();
+            iFontInfo[font_role::Caption] = aOther.font_info(font_role::Caption);
+            iFontInfo[font_role::Menu] = aOther.font_info(font_role::Menu);
+            iFontInfo[font_role::Toolbar] = aOther.font_info(font_role::Toolbar);
+            iFontInfo[font_role::StatusBar] = aOther.font_info(font_role::StatusBar);
+            iFontInfo[font_role::Widget] = aOther.font_info(font_role::Widget);
             handle_change(style_aspect::Font);
         }
         return *this;
@@ -83,7 +85,11 @@ namespace neogfx
             iPadding == aOther.all_padding() &&
             iSpacing == aOther.spacing() &&
             iPalette == aOther.palette() &&
-            iFontInfo == aOther.font_info();
+            iFontInfo[font_role::Caption] == aOther.font_info(font_role::Caption) &&
+            iFontInfo[font_role::Menu] == aOther.font_info(font_role::Menu) &&
+            iFontInfo[font_role::Toolbar] == aOther.font_info(font_role::Toolbar) &&
+            iFontInfo[font_role::StatusBar] == aOther.font_info(font_role::StatusBar) &&
+            iFontInfo[font_role::Widget] == aOther.font_info(font_role::Widget);
     }
 
     bool style::operator!=(const i_style& aOther) const
@@ -148,26 +154,47 @@ namespace neogfx
         }
     }
 
-    const font_info& style::font_info() const
+    const font_info& style::font_info(font_role aRole) const
     {
-        return iFontInfo;
+        if (iFontInfo[aRole] == std::nullopt)
+        {
+            switch (aRole)
+            {
+            case font_role::Caption:
+                iFontInfo[aRole] = service<i_font_manager>().default_system_font_info(system_font_role::Caption);
+                break;
+            case font_role::Menu:
+                iFontInfo[aRole] = service<i_font_manager>().default_system_font_info(system_font_role::Menu);
+                break;
+            case font_role::Toolbar:
+                iFontInfo[aRole] = service<i_font_manager>().default_system_font_info(system_font_role::Toolbar);
+                break;
+            case font_role::StatusBar:
+                iFontInfo[aRole] = service<i_font_manager>().default_system_font_info(system_font_role::StatusBar);
+                break;
+            case font_role::Widget:
+                iFontInfo[aRole] = service<i_font_manager>().default_system_font_info(system_font_role::Widget);
+                break;
+            }
+        }
+        return *iFontInfo[aRole];
     }
 
-    void style::set_font_info(const neogfx::font_info& aFontInfo)
+    void style::set_font_info(font_role aRole, const neogfx::font_info& aFontInfo)
     {
-        if (iFontInfo != aFontInfo)
+        if (iFontInfo[aRole] != aFontInfo)
         {
-            iFontInfo = aFontInfo;
-            iFont.reset();
+            iFontInfo[aRole] = aFontInfo;
+            iFont[aRole].reset();
             handle_change(style_aspect::Font);
         }
     }
 
-    const font& style::font() const
+    const font& style::font(font_role aRole) const
     {
-        if (iFont == std::nullopt)
-            iFont.emplace(iFontInfo);
-        return *iFont;
+        if (iFont[aRole] == std::nullopt)
+            iFont[aRole].emplace(font_info(aRole));
+        return *iFont[aRole];
     }
 
     void style::handle_change(style_aspect aAspect)

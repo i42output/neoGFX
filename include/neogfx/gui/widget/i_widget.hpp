@@ -25,6 +25,8 @@
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
+#include <neogfx/app/i_style.hpp>
+#include <neogfx/app/palette.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
@@ -156,13 +158,16 @@ namespace neogfx
         virtual void set_opacity(double aOpacity) = 0;
         virtual double transparency() const = 0;
         virtual void set_transparency(double aTransparency) = 0;
-        virtual bool has_foreground_color() const = 0;
-        virtual color foreground_color() const = 0;
-        virtual void set_foreground_color(const optional_color& aForegroundColor = optional_color{}) = 0;
-        virtual bool has_background_color() const = 0;
-        virtual color background_color() const = 0;
-        virtual void set_background_color(const optional_color& aBackgroundColor = optional_color{}) = 0;
-        virtual color container_background_color() const = 0;
+        virtual bool has_palette() const = 0;
+        virtual const i_palette& palette() const = 0;
+        virtual void set_palette(const i_palette& aPalette) = 0;
+        virtual bool has_palette_color(color_role aColorRole) const = 0;
+        virtual color palette_color(color_role aColorRole) const = 0;
+        virtual void set_palette_color(color_role aColorRole, const optional_color& aColor) = 0;
+        virtual neogfx::color container_background_color() const = 0;
+        virtual bool has_font_role() const = 0;
+        virtual neogfx::font_role font_role() const = 0;
+        virtual void set_font_role(const optional_font_role& aFontRole) = 0;
         virtual bool has_font() const = 0;
         virtual const neogfx::font& font() const = 0;
         virtual void set_font(const optional_font& aFont) = 0;
@@ -319,5 +324,54 @@ namespace neogfx
         {
             return enable(false);
         }
+     public:
+         bool has_background_color() const
+         {
+             return has_palette_color(color_role::Background);
+         }
+         color background_color() const
+         {
+             return palette_color(color_role::Background);
+         }
+         void set_background_color(const optional_color& aBackgroundColor = optional_color{})
+         {
+             set_palette_color(color_role::Background, aBackgroundColor);
+         }
+         bool has_foreground_color() const
+         {
+             return has_palette_color(color_role::Foreground);
+         }
+         color foreground_color() const
+         {
+             return palette_color(color_role::Foreground);
+         }
+         void set_foreground_color(const optional_color& aForegroundColor = optional_color{})
+         {
+             set_palette_color(color_role::Foreground, aForegroundColor);
+         }
+         bool has_base_color() const
+         {
+             return has_palette_color(color_role::Base);
+         }
+         color base_color() const
+         {
+             return palette_color(color_role::Base);
+         }
+         void set_base_color(const optional_color& aBaseColor = optional_color{})
+         {
+             set_palette_color(color_role::Base, aBaseColor);
+         }
+         bool has_alternate_base_color() const
+         {
+             return has_palette_color(color_role::AlternateBase);
+         }
+         color alternate_base_color() const
+         {
+             return palette_color(color_role::AlternateBase);
+         }
+         void set_alternate_base_color(const optional_color& aAlternateBaseColor = optional_color{})
+         {
+             set_palette_color(color_role::AlternateBase, aAlternateBaseColor);
+         }
     };
 }

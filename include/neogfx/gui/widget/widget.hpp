@@ -23,6 +23,8 @@
 #include <neolib/task/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
+#include <neogfx/app/palette.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
@@ -194,13 +196,16 @@ namespace neogfx
         void set_opacity(double aOpacity) override;
         double transparency() const override;
         void set_transparency(double aTransparency) override;
-        bool has_foreground_color() const override;
-        color foreground_color() const override;
-        void set_foreground_color(const optional_color& aForegroundColor = optional_color{}) override;
-        bool has_background_color() const override;
-        color background_color() const override;
-        void set_background_color(const optional_color& aBackgroundColor = optional_color{}) override;
+        bool has_palette() const override;
+        const i_palette& palette() const override;
+        void set_palette(const i_palette& aPalette) override;
+        bool has_palette_color(color_role aColorRole) const override;
+        color palette_color(color_role aColorRole) const override;
+        void set_palette_color(color_role aColorRole, const optional_color& aColor) override;
         color container_background_color() const override;
+        bool has_font_role() const override;
+        neogfx::font_role font_role() const override;
+        void set_font_role(const optional_font_role& aFontRole) override;
         bool has_font() const override;
         const neogfx::font& font() const override;
         void set_font(const optional_font& aFont) override;
@@ -288,8 +293,8 @@ namespace neogfx
         define_property(property_category::other_appearance, bool, Enabled, enabled, true)
         define_property(property_category::other, neogfx::focus_policy, FocusPolicy, focus_policy, neogfx::focus_policy::NoFocus)
         define_property(property_category::other_appearance, double, Opacity, opacity, 1.0)
-        define_property(property_category::color, optional_color, ForegroundColor, foreground_color)
-        define_property(property_category::color, optional_color, BackgroundColor, background_color)
+        define_property(property_category::other_appearance, std::optional<neogfx::palette>, Palette, palette)
+        define_property(property_category::font, optional_font_role, FontRole, font_role)
         define_property(property_category::font, optional_font, Font, font)
         define_property(property_category::other, bool, IgnoreMouseEvents, ignore_mouse_events, false)
         define_property(property_category::other, bool, IgnoreNonClientMouseEvents, ignore_non_client_mouse_events, true)

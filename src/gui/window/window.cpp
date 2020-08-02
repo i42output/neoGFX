@@ -685,12 +685,13 @@ namespace neogfx
         base_type::paint(aGc);
     }
 
-    color window::background_color() const
+    color  window::palette_color(color_role aColorRole) const
     {
-        if (has_background_color())
-            return base_type::background_color();
-        else
+        if (has_palette_color(aColorRole))
+            return  widget::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
             return container_background_color();
+        return  widget::palette_color(aColorRole);
     }
 
     bool window::is_dismissing_children() const

@@ -132,6 +132,8 @@ namespace neogfx
         mutable std::shared_ptr<instance> iInstance;
     };
 
+    typedef std::optional<font_info> optional_font_info;
+
     typedef neolib::small_cookie font_id;
 
     class font : public font_info

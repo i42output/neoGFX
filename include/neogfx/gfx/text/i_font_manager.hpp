@@ -33,6 +33,15 @@ namespace neogfx
     class i_texture_atlas;
     class i_emoji_atlas;
 
+    enum class system_font_role : uint32_t
+    {
+        Caption,
+        Menu,
+        Toolbar,
+        StatusBar,
+        Widget
+    };
+
     class i_fallback_font_info
     {
     public:
@@ -53,7 +62,7 @@ namespace neogfx
         virtual ~i_font_manager() = default;
     public:
         virtual void* font_library_handle() const = 0;
-        virtual const font_info& default_system_font_info() const = 0;
+        virtual const font_info& default_system_font_info(system_font_role aRole) const = 0;
         virtual const i_fallback_font_info& default_fallback_font_info() const = 0;
         virtual i_native_font_face& create_default_font(const i_device_resolution& aDevice) = 0;
         virtual bool has_fallback_font(const i_native_font_face& aExistingFont) const = 0;

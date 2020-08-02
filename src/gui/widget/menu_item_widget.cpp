@@ -86,7 +86,7 @@ namespace neogfx
                     fillColor = service<i_app>().current_style().palette().color(color_role::Selection);
             }
             else if (fillColor.similar_intensity(background_color(), 0.05))
-                fillColor = fillColor.shade(0x20);
+                fillColor = fillColor.shaded(0x20);
             fillColor.set_alpha(0xC0);
             aGc.fill_rect(client_rect(), fillColor);
         }
@@ -101,7 +101,7 @@ namespace neogfx
             {
                 bool openSubMenu = (menu_item().type() == menu_item_type::SubMenu && menu_item().sub_menu().is_open());
                 color ink = openSubMenu ? service<i_app>().current_style().palette().color(color_role::Selection)
-                    : background_color().shade(0x80);
+                    : background_color().shaded(0x80);
                 if (iSubMenuArrow == std::nullopt || iSubMenuArrow->first != ink)
                 {
                     const char* sArrowImagePattern
@@ -165,19 +165,19 @@ namespace neogfx
             line.cx -= dpi_scale(iGap * 2.0);
             color ink = color::Black;
             if (ink.similar_intensity(background_color(), 0.05))
-                ink = ink.shade(0x20);
+                ink = ink.shaded(0x20);
             ink.set_alpha(0x40);
             aGc.fill_rect(line, ink);
         }
     }
 
-    color menu_item_widget::background_color() const
+    color menu_item_widget::palette_color(color_role aColorRole) const
     {
-        return widget::has_background_color() ?
-            widget::background_color() :
-            parent().has_background_color() ?
-                parent().background_color() :
-                service<i_app>().current_style().palette().color(color_role::Theme);
+        if (has_palette_color(aColorRole))
+            return widget::palette_color(aColorRole);
+        if (aColorRole == color_role::Background && parent().has_palette_color(aColorRole))
+            return parent().palette_color(aColorRole);
+        return widget::palette_color(aColorRole);
     }
 
     bool menu_item_widget::can_capture() const
@@ -278,6 +278,7 @@ namespace neogfx
         else
             iIcon.set_fixed_size(size{});
         iSpacer.set_minimum_size(size{ 0.0, 0.0 });
+        iText.set_font_role(font_role::Menu);
         auto text_updated = [this]()
         {
             auto m = mnemonic_from_text(iText.text());

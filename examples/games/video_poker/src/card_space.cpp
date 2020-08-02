@@ -44,12 +44,12 @@ namespace video_poker
 
     neogfx::size card_widget::minimum_size(const neogfx::optional_size& aAvailableSpace) const
     {
-        return rasterize(neogfx::from_mm(kBridgeCardSize * 0.5));
+        return ceil_rasterized(neogfx::from_mm(kBridgeCardSize * 0.5));
     }
 
     neogfx::size card_widget::maximum_size(const neogfx::optional_size& aAvailableSpace) const
     {
-        return rasterize(minimum_size(aAvailableSpace) * 2.0);
+        return ceil_rasterized(minimum_size(aAvailableSpace) * 2.0);
     }
         
     void card_widget::paint(neogfx::i_graphics_context& aGc) const
@@ -135,7 +135,7 @@ namespace video_poker
         iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
         set_ignore_mouse_events(true);
         iHoldButton.set_size_policy(neogfx::size_constraint::Minimum);
-        iHoldButton.set_foreground_color(neogfx::color::Black);
+        iHoldButton.set_base_color(neogfx::color::Black);
         iHoldButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
         iHoldButton.text_widget().set_text_appearance(neogfx::text_appearance{ neogfx::color::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black.with_alpha(0.5) } });
         iHoldButton.set_checkable();
@@ -194,7 +194,7 @@ namespace video_poker
     void card_space::update_widgets()
     {
         iCardWidget.enable(has_card() && iTable.state() == table_state::DealtFirst);
-        iHoldButton.set_foreground_color(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? neogfx::color::LightYellow1 : neogfx::color::Black.with_alpha(0.5));
+        iHoldButton.set_base_color(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? neogfx::color::LightYellow1 : neogfx::color::Black.with_alpha(0.5));
         iHoldButton.enable(has_card() && iTable.state() == table_state::DealtFirst);
         iHoldButton.set_checked(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst);
     }

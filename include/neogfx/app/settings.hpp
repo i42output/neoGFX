@@ -32,6 +32,19 @@ namespace neogfx
     using neolib::setting_constraints;
     using neolib::i_settings;
 
+    class i_setting_icons : public i_reference_counted
+    {
+    public:
+        typedef i_setting_icons abstract_type;
+    public:
+        virtual ~i_setting_icons() = default;
+    public:
+        virtual i_texture const& default_icon() const = 0;
+        virtual i_texture const& category_icon(i_string const& aCategorySubkey) const = 0;
+        virtual i_texture const& group_icon(i_string const& aGroupSubkey) const = 0;
+        virtual i_texture const& setting_icon(neolib::i_setting const& aSetting) const = 0;
+    };
+
     class settings : public neolib::settings
     {
         typedef neolib::settings base_type;

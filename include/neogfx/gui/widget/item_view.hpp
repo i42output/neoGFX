@@ -33,7 +33,7 @@ namespace neogfx
     enum class cell_part : uint32_t
     {
         Background,
-        Foreground,
+        Base,
         Text,
         Image,
         CheckBox,
@@ -154,8 +154,8 @@ namespace neogfx
         virtual void selection_changed(const item_selection& aCurrentSelection, const item_selection& aPreviousSelection);
     public:
         rect row_rect(const item_presentation_model_index& aItemIndex) const;
-        rect cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart = cell_part::Foreground) const;
-        rect cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGc, cell_part aPart = cell_part::Foreground) const;
+        rect cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart = cell_part::Base) const;
+        rect cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGc, cell_part aPart = cell_part::Base) const;
         optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
     private:
         void init();

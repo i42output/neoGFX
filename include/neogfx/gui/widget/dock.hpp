@@ -55,7 +55,7 @@ namespace neogfx
         bool part_active(widget_part aPart) const override;
     public:
         bool transparent_background() const override;
-        color background_color() const override;
+        color palette_color(color_role aColorRole) const override;
     public:
         bool show(bool aVisible) override;
     private:
