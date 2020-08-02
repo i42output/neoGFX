@@ -440,8 +440,10 @@ namespace neogfx
         size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         neogfx::padding padding() const override;
-   public:
+    public:
         void paint(i_graphics_context& aGc) const override;
+    public:
+        color palette_color(color_role aColorRole) const override;
     public:
         const neogfx::font& font() const override;
         void set_font(const optional_font& aFont) override;

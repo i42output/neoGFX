@@ -53,7 +53,7 @@ namespace neogfx
                 (base_type::cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current &&
                 iDropList.view_created()) 
             {
-                auto backgroundColor = iDropList.view().background_color().dark() ? color::Black : color::White;
+                auto backgroundColor = iDropList.view().palette_color(color_role::Void);
                 if (backgroundColor == iDropList.view().background_color())
                     backgroundColor = backgroundColor.shaded(0x20);
                 return backgroundColor;

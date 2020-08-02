@@ -40,7 +40,7 @@ namespace neogfx
             {
                 if (aColorRole == color_role::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
                 {
-                    auto backgroundColor = service<i_app>().current_style().palette().color(color_role::Theme).dark() ? color::Black : color::White;
+                    auto backgroundColor = service<i_app>().current_style().palette().color(color_role::Void);
                     if (backgroundColor == service<i_app>().current_style().palette().color(color_role::Theme))
                         backgroundColor = backgroundColor.shaded(0x20);
                     return backgroundColor;

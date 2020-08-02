@@ -113,7 +113,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
     protected:
         void paint(i_graphics_context& aGc) const override;
-    protected:
+    public:
         color palette_color(color_role aColorRole) const override;
     protected:
         void capture_released() override;

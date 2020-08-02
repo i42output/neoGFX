@@ -70,5 +70,6 @@ namespace neogfx
         optional_color iHoverColor;
         optional_color iPrimaryAccentColor;
         optional_color iSecondaryAccentColor;
+        optional_color iVoidColor;
     };
 }

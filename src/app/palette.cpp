@@ -43,7 +43,8 @@ namespace neogfx
         iSelectionColor{ aOther.maybe_color(color_role::Selection) },
         iHoverColor{ aOther.maybe_color(color_role::Hover) },
         iPrimaryAccentColor{ aOther.maybe_color(color_role::PrimaryAccent) },
-        iSecondaryAccentColor{ aOther.maybe_color(color_role::SecondaryAccent) }
+        iSecondaryAccentColor{ aOther.maybe_color(color_role::SecondaryAccent) },
+        iVoidColor{ aOther.maybe_color(color_role::Void) }
     {
         if (aOther.has_proxy())
             iProxy.emplace(aOther.proxy_ptr());
@@ -82,6 +83,7 @@ namespace neogfx
             iHoverColor = aOther.maybe_color(color_role::Hover);
             iPrimaryAccentColor = aOther.maybe_color(color_role::PrimaryAccent);
             iSecondaryAccentColor = aOther.maybe_color(color_role::SecondaryAccent);
+            iVoidColor = aOther.maybe_color(color_role::Void);
             Changed.trigger();
         }
         return *this;
@@ -105,6 +107,7 @@ namespace neogfx
             iHoverColor == aOther.maybe_color(color_role::Hover) &&
             iPrimaryAccentColor == aOther.maybe_color(color_role::PrimaryAccent) &&
             iSecondaryAccentColor == aOther.maybe_color(color_role::SecondaryAccent);
+            iVoidColor == aOther.maybe_color(color_role::Void);
     }
 
     bool palette::operator!=(const i_palette& aOther) const
@@ -136,6 +139,8 @@ namespace neogfx
             return iPrimaryAccentColor != std::nullopt;
         case color_role::SecondaryAccent:
             return iSecondaryAccentColor != std::nullopt;
+        case color_role::Void:
+            return iVoidColor != std::nullopt;
         default:
             return false;
         }
@@ -171,7 +176,7 @@ namespace neogfx
             if (has_color(color_role::AlternateBase))
                 return *iAlternateBaseColor;
             else
-                return color(color_role::Base).shaded(0x1C);
+                return color(color_role::Base).mid(color(color_role::Theme));
         case color_role::Text:
             if (has_color(color_role::Text))
                 return *iTextColor;
@@ -204,6 +209,16 @@ namespace neogfx
                 return *iSecondaryAccentColor;
             else
                 return color(color_role::Theme).same_lightness_as(color(color_role::Theme).light() ? neogfx::color{ 64, 64, 64 } : neogfx::color{ 192, 192, 192 });
+        case color_role::Void:
+            if (has_color(color_role::Void))
+                return *iVoidColor;
+            else
+            {
+                if (color(color_role::Theme).to_hsl().lightness() < 0.6)
+                    return color::Black;
+                else
+                    return color::White;
+            }
         default:
             if (has_proxy())
                 return proxy().color(aRole);
@@ -236,6 +251,8 @@ namespace neogfx
             return iPrimaryAccentColor;
         case color_role::SecondaryAccent:
             return iSecondaryAccentColor;
+        case color_role::Void:
+            return iVoidColor;
         default:
             return iThemeColor;
         }
@@ -275,6 +292,9 @@ namespace neogfx
             break;
         case color_role::SecondaryAccent:
             iSecondaryAccentColor = aColor;
+            break;
+        case color_role::Void:
+            iVoidColor = aColor;
             break;
         }
         if (maybe_color(aRole) != oldColor)

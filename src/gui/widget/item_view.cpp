@@ -381,7 +381,7 @@ namespace neogfx
         if (has_palette_color(aColorRole))
             return framed_scrollable_widget::palette_color(aColorRole);
         if (aColorRole == color_role::Background)
-            return palette_color(color_role::AlternateBase);
+            return palette_color(color_role::Base);
         return framed_scrollable_widget::palette_color(aColorRole);
     }
 

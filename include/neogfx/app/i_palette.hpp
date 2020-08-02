@@ -38,7 +38,8 @@ namespace neogfx
         Selection,
         Hover,
         PrimaryAccent,
-        SecondaryAccent
+        SecondaryAccent,
+        Void
     };
 
     class i_palette

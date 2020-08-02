@@ -339,6 +339,15 @@ namespace neogfx
             draw_cursor(aGc);
     }
 
+    color text_edit::palette_color(color_role aColorRole) const
+    {
+        if (has_palette_color(aColorRole))
+            return framed_scrollable_widget::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+            return palette_color(color_role::Base);
+        return framed_scrollable_widget::palette_color(aColorRole);
+    }
+
     const font& text_edit::font() const
     {
         return default_style().font() != std::nullopt ? *default_style().font() : framed_scrollable_widget::font();
@@ -346,7 +355,7 @@ namespace neogfx
 
     void text_edit::set_font(const optional_font& aFont)
     {
-        widget::set_font(aFont);
+        framed_scrollable_widget::set_font(aFont);
         if (!default_style().font())
             refresh_paragraph(iText.begin(), 0);
     }
