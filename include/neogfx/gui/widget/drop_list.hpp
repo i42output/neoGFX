@@ -49,17 +49,22 @@ namespace neogfx
     public:
         optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
         {
-            if (aColorRole == color_role::Background && 
-                (base_type::cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current &&
-                iDropList.view_created()) 
+            if (iDropList.view_created())
             {
-                auto backgroundColor = iDropList.view().palette_color(color_role::Void);
-                if (backgroundColor == iDropList.view().background_color())
-                    backgroundColor = backgroundColor.shaded(0x20);
-                return backgroundColor;
+                if (aColorRole == color_role::Background)
+                {
+                    if ((base_type::cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+                    {
+                        auto backgroundColor = iDropList.view().palette_color(color_role::Void);
+                        if (backgroundColor == iDropList.view().background_color())
+                            backgroundColor = backgroundColor.shaded(0x20);
+                        return backgroundColor;
+                    }
+                    else
+                        return iDropList.view().palette_color(color_role::AlternateBase);
+                }
             }
-            else
-                return base_type::cell_color(aIndex, aColorRole);
+            return {};
         }
     private:
         drop_list& iDropList;

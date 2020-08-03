@@ -113,13 +113,13 @@ public:
         // use seed to make random color based on row/index ...
         neolib::basic_random<double> prng{ (base_type::to_item_model_index(aIndex).row() << 16) + base_type::to_item_model_index(aIndex).column() };
         auto const textColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Text);
-        auto const backgroundColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Background);
+        auto const backgroundColor = ng::service<ng::i_app>().current_style().palette().color(aIndex.row() % 2 == 0 ? ng::color_role::Base : ng::color_role::AlternateBase);
         if (aColorRole == iColorRole)
             return ng::color{ prng(0.0, 1.0), prng(0.0, 1.0), prng(0.0, 1.0) }.with_lightness((aColorRole == ng::color_role::Text ? textColor.light() : backgroundColor.light()) ? 0.85 : 0.15);
         else if (aColorRole == ng::color_role::Base && iColorRole)
             return ng::color::Black;
         else if (aColorRole == ng::color_role::Background)
-            return backgroundColor.shaded(aIndex.row() % 2 == 0 ? 0x00 : 0x08);
+            return backgroundColor;
         return {};
     }
     ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override

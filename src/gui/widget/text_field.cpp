@@ -35,6 +35,15 @@ namespace neogfx
         return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
+    color text_field::input_box_container::palette_color(color_role aColorRole) const
+    {
+        if (has_palette_color(aColorRole))
+            return base_type::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+            return palette_color(color_role::Base);
+        return base_type::palette_color(aColorRole);
+    }
+
     text_field::text_field(const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
         widget{},
         iPlacement{ aPlacement },
