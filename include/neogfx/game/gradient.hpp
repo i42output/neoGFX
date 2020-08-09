@@ -28,6 +28,7 @@ namespace neogfx::game
     struct gradient
     {
         neolib::cookie_ref_ptr id;
+        std::optional<aabb_2d> boundingBox;
 
         struct meta : i_component_data::meta
         {
@@ -43,7 +44,7 @@ namespace neogfx::game
             }
             static uint32_t field_count()
             {
-                return 1;
+                return 2;
             }
             static component_data_field_type field_type(uint32_t aFieldIndex)
             {
@@ -51,6 +52,8 @@ namespace neogfx::game
                 {
                 case 0:
                     return component_data_field_type::Id;
+                case 1:
+                    return component_data_field_type::Aabb2d | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }
@@ -60,6 +63,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
+                case 1:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -69,7 +73,8 @@ namespace neogfx::game
             {
                 static const string sFieldNames[] =
                 {
-                    "Id"
+                    "Id",
+                    "Bounding Box"
                 };
                 return sFieldNames[aFieldIndex];
             }
@@ -78,6 +83,7 @@ namespace neogfx::game
 
     inline bool batchable(const gradient& lhs, const gradient& rhs)
     {
-        return lhs.id.cookie() == rhs.id.cookie();
+        return lhs.id.cookie() == rhs.id.cookie() &&
+            lhs.boundingBox == rhs.boundingBox; // todo: allow batching with different bounding boxes
     }
 }

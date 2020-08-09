@@ -430,7 +430,7 @@ namespace neogfx
     public:
         void share_object(i_ref_ptr<i_gradient>& aRef) const override
         {
-            // do nothing (objects are shared via thin wrapper "gradient" class).
+            service<i_gradient_manager>().do_find_gradient(id(), aRef);
         }
         // implementation
     private:

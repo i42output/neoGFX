@@ -69,7 +69,8 @@ namespace neogfx
     {
         return game::gradient
         {
-            neolib::cookie_ref_ptr{ service<i_gradient_manager>(), aGradient.id() }
+            neolib::cookie_ref_ptr{ service<i_gradient_manager>(), aGradient.id() }, 
+            aGradient.bounding_box() ? aGradient.bounding_box()->to_aabb_2d() : std::optional<aabb_2d>{}
         };
     }
 

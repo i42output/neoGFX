@@ -731,6 +731,7 @@ namespace neogfx
         explicit basic_rect(const point_type& coordinates) : point_type{ coordinates }, size_type{} {}
         explicit basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
         basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}
+        basic_rect(const aabb_2d& aBoundingBox) : basic_rect{ aBoundingBox.min.x, aBoundingBox.min.y, aBoundingBox.max.x, aBoundingBox.max.y } {}
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
         basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& other) : point_type{ other }, size_type{ other } {}

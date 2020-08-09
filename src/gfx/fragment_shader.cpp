@@ -243,7 +243,10 @@ namespace neogfx
 
     void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox)
     {
-        set_gradient(aContext, service<i_gradient_manager>().find_gradient(aGradient.id.cookie()), aBoundingBox);
+        gradient g = service<i_gradient_manager>().find_gradient(aGradient.id.cookie());
+        if (aGradient.boundingBox)
+            g.set_bounding_box(rect{ *aGradient.boundingBox });
+        set_gradient(aContext, g, aBoundingBox);
     }
 
     standard_texture_shader::standard_texture_shader(const std::string& aName) :

@@ -1559,16 +1559,21 @@ namespace neogfx
                                             },
                                             {}, subpixelRender });
                                 else if (std::holds_alternative<gradient>(drawOp.appearance.effect()->color()))
+                                {
+                                    gradient g = static_variant_cast<const gradient&>(drawOp.appearance.effect()->color());
+                                    if (g.bounding_box() == std::nullopt)
+                                        g.set_bounding_box(outputRect);
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
                                             game::material{
                                                 {},
-                                                to_ecs_component(static_variant_cast<const gradient&>(drawOp.appearance.effect()->color())),
+                                                to_ecs_component(g),
                                                 {},
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
                                             },
                                             {}, subpixelRender });
+                                }
                                 else
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
@@ -1607,16 +1612,21 @@ namespace neogfx
                                         },
                                         {}, false, subpixelRender });
                             else if (std::holds_alternative<gradient>(drawOp.appearance.ink()))
+                            {
+                                gradient g = static_variant_cast<const gradient&>(drawOp.appearance.ink());
+                                if (g.bounding_box() == std::nullopt)
+                                    g.set_bounding_box(outputRect);
                                 meshRenderers.push_back(
-                                    game::mesh_renderer{
-                                        game::material{
-                                            {},
-                                            to_ecs_component(static_variant_cast<const gradient&>(drawOp.appearance.ink())),
-                                            {},
-                                            to_ecs_component(glyphTexture.texture()),
-                                            shader_effect::Ignore
-                                        },
-                                        {}, false, subpixelRender });
+                                game::mesh_renderer{
+                                    game::material{
+                                        {},
+                                        to_ecs_component(g),
+                                        {},
+                                        to_ecs_component(glyphTexture.texture()),
+                                        shader_effect::Ignore
+                                    },
+                                    {}, false, subpixelRender });
+                            }
                             else
                                 meshRenderers.push_back(
                                     game::mesh_renderer{
