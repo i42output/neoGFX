@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <vector>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
@@ -325,7 +325,7 @@ namespace neogfx
         std::string const iVariableName;
     };
 
-    inline vec4f color_to_vec4f(const std::array<uint8_t, 4>& aSource)
+    inline vec4f color_to_vec4f(const avec4u8& aSource)
     {
         return vec4f{{ aSource[0] / 255.0f, aSource[1] / 255.0f, aSource[2] / 255.0f, aSource[3] / 255.0f }};
     }

@@ -23,7 +23,7 @@
 #include <neolib/core/variant.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/primitives.hpp>
 
 namespace neogfx
 {

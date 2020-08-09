@@ -66,7 +66,7 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                return add_texture(std::make_shared<opengl_texture<std::array<uint8_t, 4>>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                return add_texture(std::make_shared<opengl_texture<avec4u8>>(*this, allocate_texture_id(), aImage, aDataFormat));
             case texture_data_type::Float:
                 return add_texture(std::make_shared<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aImage, aDataFormat));
             }

@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <vector>
 #include <optional>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
 

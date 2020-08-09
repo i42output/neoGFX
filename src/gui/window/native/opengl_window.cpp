@@ -139,7 +139,7 @@ namespace neogfx
         if (target_texture().sampling() != neogfx::texture_sampling::Multisample)
         {
             scoped_render_target srt{ *this };
-            std::array<uint8_t, 4> pixel;
+            avec4u8 pixel;
             basic_point<GLint> pos{ aPosition };
             glCheck(glReadPixels(pos.x, pos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel));
             return color{ pixel[0], pixel[1], pixel[2], pixel[3] };

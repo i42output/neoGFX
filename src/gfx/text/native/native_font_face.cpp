@@ -366,14 +366,18 @@ namespace neogfx
         {
             subpixelGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
             // sub-pixel FIR filter.
-            static double coefficients[] = { 0.5 / 16.0, 4.0 / 16.0, 7.0 / 16.0, 4.0 / 16.0, 0.5 / 16.0 };
+            static double coefficients[] = { 1.5 / 16.0, 3.5 / 16.0, 6.0 / 16.0, 3.5 / 16.0, 1.5 / 16.0 };
             for (uint32_t y = 0; y < bitmap.rows; y++)
             {
                 for (uint32_t x = 0; x < bitmap.width; x++)
                 {
                     uint8_t alpha = 0;
                     for (int32_t z = -2; z <= 2; ++z)
-                        alpha += static_cast<uint8_t>(bitmap.buffer[std::max(0, std::min<int32_t>(bitmap.width - 1, x + z)) + bitmap.pitch * y] * coefficients[z + 2]);
+                    {
+                        int32_t const s = x + z;
+                        if (s >= 0 && s <= static_cast<int32_t>(bitmap.width) - 1)
+                            alpha += static_cast<uint8_t>(bitmap.buffer[s + bitmap.pitch * y] * coefficients[z + 2]);
+                    }
                     subpixelGlyphTextureData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
                 }
             }

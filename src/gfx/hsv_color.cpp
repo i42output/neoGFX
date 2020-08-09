@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/string_utils.hpp>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 
 namespace neogfx
 {

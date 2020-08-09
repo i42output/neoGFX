@@ -145,7 +145,7 @@ namespace neogfx
             auto cr = client_rect(false);
             point center{ aPosition.x / cr.width() * 2.0 - 1.0, aPosition.y / cr.height() * 2.0 - 1.0 };
             center = center.max(point{ -1.0, -1.0 }).min(point{ 1.0, 1.0 });
-            iOwner.gradient_selector().set_gradient(iOwner.gradient().with_center(center));
+            iOwner.gradient_selector().set_gradient(*iOwner.gradient().with_center(center));
         }
     private:
         void animate()
@@ -323,13 +323,13 @@ namespace neogfx
         auto update_hue_selection = [this]()
         {
             neolib::scoped_flag scope{ iIgnoreHueSliderChange };
-            iHueSlider.set_value(iGradientSelector.selected_color_stop()->second.to_hsv().hue());
+            iHueSlider.set_value(iGradientSelector.selected_color_stop()->second().to_hsv().hue());
             iHueSelection.clear();
-            auto stopIter = iGradientSelector.gradient().color_begin();
-            for (std::size_t stopIndex = 0; stopIndex < iGradientSelector.gradient().color_stop_count(); ++stopIndex, ++stopIter)
+            auto stopIter = iGradientSelector.gradient().color_stops().begin();
+            for (std::size_t stopIndex = 0; stopIndex < iGradientSelector.gradient().color_stops().size(); ++stopIndex, ++stopIter)
             {
                 auto const& colorStop = *stopIter;
-                auto d = (colorStop.second.to_hsv().hue() - iHueSlider.value());
+                auto d = (colorStop.second().to_hsv().hue() - iHueSlider.value());
                 auto const tolerance_deg = 3.0; // todo: make this configurable
                 if (std::abs(d) < tolerance_deg)
                     iHueSelection.emplace_back(stopIndex, d);
@@ -338,7 +338,7 @@ namespace neogfx
 
         iGradientSelector.GradientChanged([this, update_hue_selection]()
         { 
-            if (iGradientSelector.selected_color_stop() != iGradientSelector.gradient().color_end())
+            if (iGradientSelector.selected_color_stop() != iGradientSelector.gradient().color_stops().end())
                 update_hue_selection();
             update_widgets();
         });
@@ -351,8 +351,8 @@ namespace neogfx
         iReversePartial.Clicked([this]()
         {
             auto partiallyReversedGradient = gradient();
-            for (auto colorStop = partiallyReversedGradient.color_begin(); colorStop != partiallyReversedGradient.color_end(); ++colorStop)
-                colorStop->second = std::prev(gradient().color_end(), std::distance(partiallyReversedGradient.color_begin(), colorStop) + 1)->second;
+            for (auto colorStop = partiallyReversedGradient.color_stops().begin(); colorStop != partiallyReversedGradient.color_stops().end(); ++colorStop)
+                colorStop->second() = std::prev(gradient().color_stops().end(), std::distance(partiallyReversedGradient.color_stops().begin(), colorStop) + 1)->second();
             set_gradient(partiallyReversedGradient);
         });
 
@@ -376,10 +376,10 @@ namespace neogfx
             auto newGradient = iGradientSelector.gradient();
             for (auto const& hs : iHueSelection)
             {
-                auto& colorStop = *std::next(newGradient.color_begin(), hs.first);
-                auto newColor = colorStop.second.to_hsv();
+                auto& colorStop = *std::next(newGradient.color_stops().begin(), hs.first);
+                auto newColor = colorStop.second().to_hsv();
                 newColor.set_hue(iHueSlider.value() + hs.second);
-                colorStop.second = newColor.to_rgb<color>();
+                colorStop.second() = newColor.to_rgb<color>();
             }
             thread_local decltype(iHueSelection) hueSelectionCopy;
             hueSelectionCopy = iHueSelection;
@@ -496,10 +496,10 @@ namespace neogfx
         iDirectionDiagonalRadioButton.set_checked(gradient().direction() == gradient_direction::Diagonal);
         iDirectionRectangularRadioButton.set_checked(gradient().direction() == gradient_direction::Rectangular);
         iDirectionRadialRadioButton.set_checked(gradient().direction() == gradient_direction::Radial);
-        iTopLeftRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::TopLeft));
-        iTopRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::TopRight));
-        iBottomRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::BottomRight));
-        iBottomLeftRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(corner::BottomLeft));
+        iTopLeftRadioButton.set_checked(gradient().orientation() == gradient_orientation(corner::TopLeft));
+        iTopRightRadioButton.set_checked(gradient().orientation() == gradient_orientation(corner::TopRight));
+        iBottomRightRadioButton.set_checked(gradient().orientation() == gradient_orientation(corner::BottomRight));
+        iBottomLeftRadioButton.set_checked(gradient().orientation() == gradient_orientation(corner::BottomLeft));
         iAngleRadioButton.set_checked(std::holds_alternative<double>(gradient().orientation()));
         iAngleSpinBox.set_value(std::holds_alternative<double>(gradient().orientation()) ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);
         iAngleSlider.set_value(std::holds_alternative<double>(gradient().orientation()) ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);

@@ -1,7 +1,7 @@
-// settings.cpp
+// i_shader_array.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,15 +20,17 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/core/custom_type.hpp>
-#include <neogfx/gfx/color.hpp>
-#include <neogfx/app/i_app.hpp>
-#include <neogfx/app/settings.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 
 namespace neogfx
 {
-    settings::settings(const std::string& aFileName) :
-        base_type{ service<i_app>(), string{ aFileName } }
-    {
-    }
+    template <typename T>
+    class i_shader_array
+    {        
+    public:
+        virtual ~i_shader_array() = default;
+    public:
+        virtual i_texture const& data() const = 0;
+        virtual i_texture& data() = 0;
+    };
 }

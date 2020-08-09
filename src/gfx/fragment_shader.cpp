@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_gradient_manager.hpp>
 #include <neogfx/gfx/fragment_shader.hpp>
 
 namespace neogfx
@@ -37,37 +38,10 @@ namespace neogfx
             {
                 "vec4 gradient_color(in float n)\n"
                 "{\n"
-                "    int l = 0;\n"
-                "    int r = uGradientStopCount - 1;\n"
-                "    int found = -1;\n"
-                "    float pos = 0.0;\n"
-                "    if (n < 0.0)\n"
-                "        n = 0.0;\n"
-                "    if (n > 1.0)\n"
-                "        n = 1.0;\n"
-                "    while (found == -1)\n"
-                "    {\n"
-                "        int m = (l + r) / 2;\n"
-                "        pos = texelFetch(uGradientStopPositions, ivec2(m, 0)).r;\n"
-                "        if (l > r)\n"
-                "            found = r;\n"
-                "        else\n"
-                "        {\n"
-                "            if (pos < n)\n"
-                "                l = m + 1;\n"
-                "            else if (pos > n)\n"
-                "                r = m - 1;\n"
-                "            else\n"
-                "                found = m;\n"
-                "        }\n"
-                "    }\n"
-                "    if (pos >= n && found != 0)\n"
-                "        --found;\n"
-                "    float firstPos = texelFetch(uGradientStopPositions, ivec2(found, 0)).r;\n"
-                "    float secondPos = texelFetch(uGradientStopPositions, ivec2(found + 1, 0)).r;\n"
-                "    vec4 firstColor = texelFetch(uGradientStopColors, ivec2(found, 0));\n"
-                "    vec4 secondColor = texelFetch(uGradientStopColors, ivec2(found + 1, 0));\n"
-                "    return mix(firstColor, secondColor, (n - firstPos) / (secondPos - firstPos));\n"
+                "    n = max(min(n, 1.0), 0.0) * float(uGradientColorCount - 1);"
+                "    vec4 firstColor = texelFetch(uGradientColors, ivec2(floor(n), 0));\n"
+                "    vec4 secondColor = texelFetch(uGradientColors, ivec2(ceil(n), 0));\n"
+                "    return mix(firstColor, secondColor, n - floor(n));\n"
                 "}\n"
                 "\n"
                 "float ellipse_radius(vec2 ab, vec2 center, vec2 pt)\n"
@@ -246,7 +220,7 @@ namespace neogfx
     void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox)
     {
         enable();
-        basic_rect<float> boundingBox{ aBoundingBox };
+        basic_rect<float> boundingBox{ aGradient.bounding_box() != std::nullopt ? *aGradient.bounding_box() : aBoundingBox };
         uGradientTopLeft = vec2f{ boundingBox.top_left().x, boundingBox.top_left().y };
         uGradientBottomRight = vec2f{ boundingBox.bottom_right().x, boundingBox.bottom_right().y };
         uGradientDirection = aGradient.direction();
@@ -258,91 +232,18 @@ namespace neogfx
         uGradientExponents = vec2f{ gradientExponents.x, gradientExponents.y };
         basic_point<float> gradientCenter = (aGradient.center() != std::nullopt ? *aGradient.center() : point{});
         uGradientCenter = vec2f{ gradientCenter.x, gradientCenter.y };
-        auto& gradientArrays = gradient_shader_data(aGradient);
-        uGradientFilterSize = static_cast<int>(gradientArrays.filter.data().extents().cx);
-        uGradientStopCount = static_cast<int>(gradientArrays.stopCount);
-        gradientArrays.stops.data().bind(3);
-        gradientArrays.stopColors.data().bind(4);
-        gradientArrays.filter.data().bind(5);
-        uGradientStopPositions = sampler2DRect{ 3 };
-        uGradientStopColors = sampler2DRect{ 4 };
-        uGradientFilter = sampler2DRect{ 5 };
+        uGradientColorCount = static_cast<int>(aGradient.colors().data().extents().cx);
+        uGradientFilterSize = static_cast<int>(aGradient.filter().data().extents().cx);
+        aGradient.colors().data().bind(3);
+        aGradient.filter().data().bind(4);
+        uGradientColors = sampler2DRect{ 3 };
+        uGradientFilter = sampler2DRect{ 4 };
         uGradientEnabled = true;
     }
 
     void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox)
     {
-        // todo
-        throw std::logic_error("standard_gradient_shader::set_gradient not yet implemented");
-    }
-
-    gradient_shader_data& standard_gradient_shader::gradient_shader_data(const gradient& aGradient)
-    {
-        auto instantiate_gradient = [this, &aGradient](neogfx::gradient_shader_data& aData)
-        {
-            auto combinedStops = aGradient.combined_stops();
-            iGradientStopPositions.reserve(combinedStops.size());
-            iGradientStopColors.reserve(combinedStops.size());
-            iGradientStopPositions.clear();
-            iGradientStopColors.clear();
-            for (auto const& stop : combinedStops)
-            {
-                iGradientStopPositions.push_back(static_cast<float>(stop.first));
-                iGradientStopColors.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
-            }
-            aData.stopCount = static_cast<uint32_t>(combinedStops.size());
-            aData.stops.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopPositions.size()), 1u } }, & iGradientStopPositions[0]);
-            aData.stopColors.data().set_pixels(rect{ point{}, size_u32{ static_cast<uint32_t>(iGradientStopColors.size()), 1u } }, & iGradientStopColors[0]);
-            auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
-            aData.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, & filter[0][0]);
-        };
-        if (aGradient.use_cache())
-        {
-            auto mapResult = iGradientDataCacheMap.try_emplace(aGradient, iGradientDataCache.end());
-            auto mapEntry = mapResult.first;
-            bool newGradient = mapResult.second;
-            if (!newGradient)
-            {
-                auto queueEntry = std::find(iGradientDataCacheQueue.begin(), iGradientDataCacheQueue.end(), mapEntry);
-                if (queueEntry != std::prev(iGradientDataCacheQueue.end()))
-                {
-                    iGradientDataCacheQueue.erase(queueEntry);
-                    iGradientDataCacheQueue.push_back(mapEntry);
-                }
-            }
-            else
-            {
-                if (iGradientDataCache.size() < GRADIENT_DATA_CACHE_QUEUE_SIZE)
-                {
-                    iGradientDataCache.emplace_back();
-                    mapEntry->second = std::prev(iGradientDataCache.end());
-                }
-                else
-                {
-                    auto data = iGradientDataCacheQueue.front()->second;
-                    iGradientDataCacheMap.erase(iGradientDataCacheQueue.front());
-                    iGradientDataCacheQueue.pop_front();
-                    mapEntry->second = data;
-                }
-                iGradientDataCacheQueue.push_back(mapEntry);
-            }
-            if (newGradient)
-                instantiate_gradient(*mapEntry->second);
-            return *mapEntry->second;
-        }
-        else
-        {
-            if (iUncachedGradient == std::nullopt)
-                iUncachedGradient.emplace();
-            instantiate_gradient(*iUncachedGradient);
-            return *iUncachedGradient;
-        }
-    }
-
-    gradient_shader_data& standard_gradient_shader::gradient_shader_data(const game::gradient& aGradient)
-    {
-        // todo
-        throw std::logic_error("standard_gradient_shader::gradient_shader_data not yet implemented");
+        set_gradient(aContext, service<i_gradient_manager>().find_gradient(aGradient.id.cookie()), aBoundingBox);
     }
 
     standard_texture_shader::standard_texture_shader(const std::string& aName) :

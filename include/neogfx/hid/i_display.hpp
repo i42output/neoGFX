@@ -23,7 +23,7 @@
 #include <neolib/core/i_enum.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/core/units.hpp>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
 

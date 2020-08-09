@@ -72,6 +72,9 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override;
     protected:
+        bool transparent_background() const override;
+        color palette_color(color_role aColorRole) const override;
+    protected:
         color frame_color() const override;
     protected:
         void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;

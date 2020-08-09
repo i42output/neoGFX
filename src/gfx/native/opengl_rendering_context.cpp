@@ -373,7 +373,7 @@ namespace neogfx
 
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
     {
-        aShader.set_gradient(*this, iGradient->first, iGradient->second);
+        aShader.set_gradient(*this, *iGradient, rendering_area(false));
     }
 
     bool opengl_rendering_context::snap_to_pixel() const
@@ -491,7 +491,7 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::SetGradient:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
-                    set_gradient(static_variant_cast<const graphics_operation::set_gradient&>(*op).gradient, static_variant_cast<const graphics_operation::set_gradient&>(*op).boundingBox);
+                    set_gradient(static_variant_cast<const graphics_operation::set_gradient&>(*op).gradient);
                 break;
             case graphics_operation::operation_type::ClearGradient:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -790,9 +790,9 @@ namespace neogfx
         rendering_engine().default_shader_program().stipple_shader().clear_stipple();
     }
 
-    void opengl_rendering_context::set_gradient(const gradient& aGradient, const rect& aBoundingBox)
+    void opengl_rendering_context::set_gradient(const gradient& aGradient)
     {
-        iGradient = std::make_pair(aGradient, aBoundingBox);
+        iGradient = aGradient;
     }
 
     void opengl_rendering_context::clear_gradient()
@@ -1496,7 +1496,6 @@ namespace neogfx
             case 2: // Special effects
             case 3: // Glyph render (final pass)
                 {
-                    draw();
                     bool updateGlyphShader = true;
                     for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
                     {
@@ -1538,14 +1537,6 @@ namespace neogfx
                                 rect const outputRect = {
                                         point{ glyphOrigin } + offsetOrigin + point{ static_cast<coordinate>(offset % scanlineOffsets), static_cast<coordinate>(offset / scanlineOffsets) },
                                         glyphTexture.texture().extents() };
-                                bool haveGradient = drawOp.appearance.effect() && std::holds_alternative<gradient>(drawOp.appearance.effect()->color());
-                                if (haveGradient)
-                                {
-                                    updateGlyphShader = true;
-                                    draw();
-                                    rendering_engine().default_shader_program().gradient_shader().set_gradient(
-                                        *this, static_variant_cast<gradient>(drawOp.appearance.effect()->color()), outputRect);
-                                }
                                 auto mesh = logical_coordinates().is_gui_orientation() ? 
                                     to_ecs_component(
                                         outputRect,
@@ -1567,6 +1558,17 @@ namespace neogfx
                                                 shader_effect::Ignore
                                             },
                                             {}, subpixelRender });
+                                else if (std::holds_alternative<gradient>(drawOp.appearance.effect()->color()))
+                                    meshRenderers.push_back(
+                                        game::mesh_renderer{
+                                            game::material{
+                                                {},
+                                                to_ecs_component(static_variant_cast<const gradient&>(drawOp.appearance.effect()->color())),
+                                                {},
+                                                to_ecs_component(glyphTexture.texture()),
+                                                shader_effect::Ignore
+                                            },
+                                            {}, subpixelRender });
                                 else
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
@@ -1578,25 +1580,11 @@ namespace neogfx
                                                 shader_effect::Ignore
                                             },
                                             {}, subpixelRender });
-                                if (haveGradient)
-                                {
-                                    updateGlyphShader = true;
-                                    draw();
-                                    rendering_engine().default_shader_program().gradient_shader().clear_gradient();
-                                }
                             }
                         }
                         else
                         {
                             rect const outputRect = { point{ glyphOrigin }, glyphTexture.texture().extents() };
-                            bool haveGradient = std::holds_alternative<gradient>(drawOp.appearance.ink());
-                            if (haveGradient)
-                            {
-                                updateGlyphShader = true;
-                                draw();
-                                rendering_engine().default_shader_program().gradient_shader().set_gradient(
-                                    *this, static_variant_cast<gradient>(drawOp.appearance.ink()), outputRect);
-                            }
                             auto mesh = logical_coordinates().is_gui_orientation() ? 
                                 to_ecs_component(
                                     outputRect,
@@ -1618,6 +1606,17 @@ namespace neogfx
                                             shader_effect::Ignore
                                         },
                                         {}, false, subpixelRender });
+                            else if (std::holds_alternative<gradient>(drawOp.appearance.ink()))
+                                meshRenderers.push_back(
+                                    game::mesh_renderer{
+                                        game::material{
+                                            {},
+                                            to_ecs_component(static_variant_cast<const gradient&>(drawOp.appearance.ink())),
+                                            {},
+                                            to_ecs_component(glyphTexture.texture()),
+                                            shader_effect::Ignore
+                                        },
+                                        {}, false, subpixelRender });
                             else
                                 meshRenderers.push_back(
                                     game::mesh_renderer{
@@ -1629,18 +1628,12 @@ namespace neogfx
                                             shader_effect::Ignore
                                         },
                                         {}, false, subpixelRender });
-                            if (haveGradient)
-                            {
-                                updateGlyphShader = true;
-                                draw();
-                                rendering_engine().default_shader_program().gradient_shader().clear_gradient();
-                            }
                         }
                     }
                 }
             }
+            draw();
         }
-        draw();
     }
 
     void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)
@@ -1843,63 +1836,68 @@ namespace neogfx
                 ++next;
             }
 
+            if (item->material->gradient)
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *item->material->gradient, rendering_area(false));
+            else if (iGradient)
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *iGradient, rendering_area(false));
+            else
+                rendering_engine().default_shader_program().gradient_shader().clear_gradient();
+
+            if (item->has_texture())
             {
-                if (item->has_texture())
+                auto const& texture = *service<i_texture_manager>().find_texture(item->texture().id.cookie());
+
+                glCheck(glActiveTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
+
+                previousTexture.emplace(0);
+                glCheck(glGetIntegerv(sampling != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &*previousTexture));
+                glCheck(glBindTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(texture.native_handle())));
+                if (sampling != texture_sampling::Multisample)
                 {
-                    auto const& texture = *service<i_texture_manager>().find_texture(item->texture().id.cookie());
-
-                    glCheck(glActiveTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
-
-                    previousTexture.emplace(0);
-                    glCheck(glGetIntegerv(sampling != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &*previousTexture));
-                    glCheck(glBindTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(texture.native_handle())));
-                    if (sampling != texture_sampling::Multisample)
-                    {
-                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
+                        GL_LINEAR : 
+                        GL_NEAREST));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? 
+                        GL_LINEAR_MIPMAP_LINEAR : 
+                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
                             GL_LINEAR : 
                             GL_NEAREST));
-                        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? 
-                            GL_LINEAR_MIPMAP_LINEAR : 
-                            sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
-                                GL_LINEAR : 
-                                GL_NEAREST));
-                    }
-
-                    rendering_engine().default_shader_program().texture_shader().set_texture(texture);
-                    rendering_engine().default_shader_program().texture_shader().set_effect(batchMaterial.shaderEffect != std::nullopt ?
-                        *batchMaterial.shaderEffect : shader_effect::None);
-                    if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
-                        enable_sample_shading(1.0);
-
-                    if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
-                        vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
-
-#ifndef NDEBUG
-                    if (item->meshDrawable->entity != game::null_entity &&
-                        dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                        std::cerr << "Drawing debug entity (texture)..." << std::endl;
-
-#endif
-                    vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
-                }
-                else
-                {
-                    rendering_engine().default_shader_program().texture_shader().clear_texture();
-
-                    if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
-                        vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
-
-#ifndef NDEBUG
-                    if (item->meshDrawable->entity != game::null_entity &&
-                        dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                        std::cerr << "Drawing debug entity (non-texture)..." << std::endl;
-
-#endif
-                    vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
                 }
 
-                item = next;
+                rendering_engine().default_shader_program().texture_shader().set_texture(texture);
+                rendering_engine().default_shader_program().texture_shader().set_effect(batchMaterial.shaderEffect != std::nullopt ?
+                    *batchMaterial.shaderEffect : shader_effect::None);
+                if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
+                    enable_sample_shading(1.0);
+
+                if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
+                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
+
+#ifndef NDEBUG
+                if (item->meshDrawable->entity != game::null_entity &&
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
+                    std::cerr << "Drawing debug entity (texture)..." << std::endl;
+
+#endif
+                vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
+            else
+            {
+                rendering_engine().default_shader_program().texture_shader().clear_texture();
+
+                if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
+                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
+
+#ifndef NDEBUG
+                if (item->meshDrawable->entity != game::null_entity &&
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
+                    std::cerr << "Drawing debug entity (non-texture)..." << std::endl;
+
+#endif
+                vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
+            }
+
+            item = next;
 
             if (previousTexture != std::nullopt)
                 glCheck(glBindTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(*previousTexture)));

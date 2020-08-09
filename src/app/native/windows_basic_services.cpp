@@ -206,7 +206,7 @@ namespace neogfx
                             for (int32_t y = 0; y < cy; ++y)
                             {
                                 auto src = memStart + (bitmapInfo.bmiHeader.biHeight >= 0 ? (cy - y - 1) * cx : y * cx);
-                                auto dst = static_cast<std::array<uint8_t, 4>*>(result.data()) + y * cx;
+                                auto dst = static_cast<avec4u8*>(result.data()) + y * cx;
                                 for (int32_t x = 0; x < cx; ++x)
                                 {
                                     *dst++ = { src->rgbRed, src->rgbGreen, src->rgbBlue, 0xFF };

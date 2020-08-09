@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/color_bits.hpp>
+#include <neogfx/gfx/color_bits.hpp>
 
 namespace neogfx
 {

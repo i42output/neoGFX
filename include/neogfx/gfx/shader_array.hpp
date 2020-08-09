@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/gfx/i_shader_array.hpp>
 
 namespace neogfx
 {
@@ -41,20 +42,20 @@ namespace neogfx
         static constexpr texture_data_type DATA_TYPE = texture_data_type::Float;
     };
     template <>
-    struct crack_shader_array_data_type<std::array<uint8_t, 4>>
+    struct crack_shader_array_data_type<avec4u8>
     {
         static constexpr texture_data_format DATA_FORMAT = texture_data_format::RGBA;
         static constexpr texture_data_type DATA_TYPE = texture_data_type::UnsignedByte;
     };
     template <>
-    struct crack_shader_array_data_type<std::array<float, 4>> 
+    struct crack_shader_array_data_type<avec4f> 
     { 
         static constexpr texture_data_format DATA_FORMAT = texture_data_format::RGBA;
         static constexpr texture_data_type DATA_TYPE = texture_data_type::Float;
     };
 
     template <typename T>
-    class shader_array
+    class shader_array : public i_shader_array<T>
     {        
     public:
         shader_array(const size_u32& aInitialSize) : 
@@ -62,11 +63,11 @@ namespace neogfx
         {
         }
     public:
-        const i_texture& data() const
+        const i_texture& data() const override
         {
             return iTexture;
         }
-        i_texture& data()
+        i_texture& data() override
         {
             return iTexture;
         }

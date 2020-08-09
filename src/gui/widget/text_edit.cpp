@@ -1949,19 +1949,12 @@ namespace neogfx
                 auto const& style = glyph_style(i, aColumn);
                 auto const& glyphFont = glyph.font(iGlyphs);
                 auto nextTextAppearance = selected ?
-                    text_appearance{ 
+                    text_appearance{
                         service<i_app>().current_style().palette().color(color_role::Selection).light() ? color::Black : color::White,
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) } :
                     text_appearance{
-                        style.glyph_color() == neolib::none ?
-                            std::holds_alternative<color>(style.text_color()) ?
-                                static_variant_cast<const color&>(style.text_color()) : std::holds_alternative<gradient>(style.text_color()) ?
-                                    static_variant_cast<const gradient&>(style.text_color()).at(((glyphPos.x - column_rect(column_index(aColumn)).x) / column_rect(column_index(aColumn)).width())) :
-                                    default_text_color() :
-                            style.glyph_color(),
-                        style.paper_color() != neolib::none ? 
-                            optional_text_color{ neogfx::text_color{ style.paper_color() } } : 
-                            optional_text_color{},
+                        style.glyph_color() == neolib::none ? style.text_color() != neolib::none ? with_bounding_box(style.text_color(), column_rect(column_index(aColumn))) : default_text_color() : style.glyph_color(),
+                        style.paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.paper_color() } } :  optional_text_color{}, 
                         style.text_effect() };
                 if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)
                 {

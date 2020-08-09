@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/game/gradient.hpp>
 #include <neogfx/gfx/primitives.hpp>

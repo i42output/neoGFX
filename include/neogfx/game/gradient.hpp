@@ -22,17 +22,12 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
-#include <neogfx/game/i_component_data.hpp>
-#include <neogfx/game/color.hpp>
 
 namespace neogfx::game
 {
     struct gradient
     {
-        std::vector<color> colorStops;
-        std::vector<scalar> colorStopPositions;
-        std::vector<scalar> alphaStops;
-        std::vector<scalar> alphaStopPositions;
+        neolib::cookie_ref_ptr id;
 
         struct meta : i_component_data::meta
         {
@@ -48,18 +43,14 @@ namespace neogfx::game
             }
             static uint32_t field_count()
             {
-                return 4;
+                return 1;
             }
             static component_data_field_type field_type(uint32_t aFieldIndex)
             {
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::ComponentData | component_data_field_type::Array;
-                case 1:
-                case 2:
-                case 3:
-                    return component_data_field_type::Scalar | component_data_field_type::Array;
+                    return component_data_field_type::Id;
                 default:
                     throw invalid_field_index();
                 }
@@ -69,10 +60,6 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return color::meta::id();
-                case 1:
-                case 2:
-                case 3:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -82,10 +69,7 @@ namespace neogfx::game
             {
                 static const string sFieldNames[] =
                 {
-                    "Color Stops",
-                    "Color Stop Positions",
-                    "Alpha Stops",
-                    "Alpha Stop Positions"
+                    "Id"
                 };
                 return sFieldNames[aFieldIndex];
             }
@@ -94,10 +78,6 @@ namespace neogfx::game
 
     inline bool batchable(const gradient& lhs, const gradient& rhs)
     {
-        // todo: hash gradient for faster equality operation?
-        return lhs.colorStops == rhs.colorStops &&
-            lhs.colorStopPositions == rhs.colorStopPositions &&
-            lhs.alphaStops == rhs.alphaStops &&
-            lhs.alphaStopPositions == rhs.alphaStopPositions;
+        return lhs.id.cookie() == rhs.id.cookie();
     }
 }

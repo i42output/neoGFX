@@ -21,13 +21,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
-#include <neolib/core/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neolib/app/i_setting_value.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
-#include <neogfx/core/hsl_color.hpp>
-#include <neogfx/core/hsv_color.hpp>
-#include <neogfx/core/color_bits.hpp>
+#include <neogfx/gfx/hsl_color.hpp>
+#include <neogfx/gfx/hsv_color.hpp>
+#include <neogfx/gfx/color_bits.hpp>
 
 namespace neogfx
 {
@@ -322,7 +321,7 @@ namespace neogfx
         hsl_color to_hsl() const;
         hsv_color to_hsv() const;
         scalar intensity() const;
-        bool similar_intensity(const self_type& aOther, scalar aThreshold = 0.5);
+        bool similar_intensity(const self_type& aOther, scalar aThreshold = 0.5) const;
         return_type mid(const self_type& aOther) const;
         bool light(scalar aThreshold = 0.50) const;
         bool dark(scalar aThreshold = 0.50) const;
@@ -1037,186 +1036,11 @@ namespace neogfx
         scalar luma() const;
     };
 
-    enum class gradient_direction : uint32_t
-    {
-        Vertical,
-        Horizontal,
-        Diagonal,
-        Rectangular,
-        Radial
-    };
-
-    enum class gradient_shape : uint32_t
-    {
-        Ellipse,
-        Circle
-    };
-
-    enum class gradient_size : uint32_t
-    {
-        ClosestSide,
-        FarthestSide,
-        ClosestCorner,
-        FarthestCorner
-    };
-}
-
-template <>
-const neolib::enum_enumerators_t<neogfx::gradient_direction> neolib::enum_enumerators_v<neogfx::gradient_direction>
-{
-    declare_enum_string(neogfx::gradient_direction, Vertical)
-    declare_enum_string(neogfx::gradient_direction, Horizontal)
-    declare_enum_string(neogfx::gradient_direction, Diagonal)
-    declare_enum_string(neogfx::gradient_direction, Rectangular)
-    declare_enum_string(neogfx::gradient_direction, Radial)
-};
-
-template <>
-const neolib::enum_enumerators_t<neogfx::gradient_shape> neolib::enum_enumerators_v<neogfx::gradient_shape>
-{
-    declare_enum_string(neogfx::gradient_shape, Ellipse)
-    declare_enum_string(neogfx::gradient_shape, Circle)
-};
-
-template <>
-const neolib::enum_enumerators_t<neogfx::gradient_size> neolib::enum_enumerators_v<neogfx::gradient_size>
-{
-    declare_enum_string(neogfx::gradient_size, ClosestSide)
-    declare_enum_string(neogfx::gradient_size, FarthestSide)
-    declare_enum_string(neogfx::gradient_size, ClosestCorner)
-    declare_enum_string(neogfx::gradient_size, FarthestCorner)
-};
-
-namespace neogfx
-{
-    class gradient
-    {
-        // constants
-    public:
-        static const std::uint32_t MaxStops = 256;
-        // types
-    public:
-        typedef gradient abstract_type; // todo
-        typedef neolib::variant<corner, scalar> orientation_type;
-        typedef std::pair<scalar, sRGB_color> color_stop;
-        typedef std::vector<color_stop> color_stop_list;
-        typedef std::pair<scalar, sRGB_color::view_component> alpha_stop;
-        typedef std::vector<alpha_stop> alpha_stop_list;
-    public:
-        struct bad_position : std::logic_error { bad_position() : std::logic_error("neogfx::gradient::bad_position") {} };
-        // construction
-    public:
-        gradient();
-        gradient(const gradient& aOther);
-        explicit gradient(const sRGB_color& aColor);
-        gradient(const sRGB_color& aColor, gradient_direction aDirection);
-        gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection = gradient_direction::Vertical);
-        gradient(const color_stop_list& aColorStops, gradient_direction aDirection = gradient_direction::Vertical);
-        gradient(const color_stop_list& aColorStops, const alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
-        gradient(const gradient& aOther, const color_stop_list& aColorStops, const alpha_stop_list& aAlphaStops);
-        gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
-        // operations
-    public:
-        bool use_cache() const;
-        void set_cache_usage(bool aUseCache);
-        color_stop_list::const_iterator color_begin() const;
-        color_stop_list::const_iterator color_end() const;
-        alpha_stop_list::const_iterator alpha_begin() const;
-        alpha_stop_list::const_iterator alpha_end() const;
-        color_stop_list::iterator color_begin();
-        color_stop_list::iterator color_end();
-        alpha_stop_list::iterator alpha_begin();
-        alpha_stop_list::iterator alpha_end();
-        color_stop_list::iterator find_color_stop(scalar aPos, bool aToInsert = false);
-        color_stop_list::iterator find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false);
-        alpha_stop_list::iterator find_alpha_stop(scalar aPos, bool aToInsert = false);
-        alpha_stop_list::iterator find_alpha_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false);
-        color_stop_list::iterator insert_color_stop(scalar aPos);
-        color_stop_list::iterator insert_color_stop(scalar aPos, scalar aStart, scalar aEnd);
-        alpha_stop_list::iterator insert_alpha_stop(scalar aPos);
-        alpha_stop_list::iterator insert_alpha_stop(scalar aPos, scalar aStart, scalar aEnd);
-        void erase_stop(color_stop_list::iterator aStop);
-        void erase_stop(alpha_stop_list::iterator aStop);
-        std::size_t color_stop_count() const;
-        std::size_t alpha_stop_count() const;
-        color_stop_list combined_stops() const;
-        sRGB_color at(scalar aPos) const;
-        sRGB_color at(scalar aPos, scalar aStart, scalar aEnd) const;
-        sRGB_color color_at(scalar aPos) const;
-        sRGB_color color_at(scalar aPos, scalar aStart, scalar aEnd) const;
-        sRGB_color::view_component alpha_at(scalar aPos) const;
-        sRGB_color::view_component alpha_at(scalar aPos, scalar aStart, scalar aEnd) const;
-        gradient reversed() const;
-        template <typename T>
-        gradient with_alpha(T aAlpha, std::enable_if_t<!std::is_same_v<T, sRGB_color::view_component>, sfinae> = {})
-        {
-            return with_alpha(sRGB_color::convert<sRGB_color::view_component>(aAlpha));
-        }
-        gradient with_alpha(sRGB_color::view_component aAlpha) const;
-        template <typename T>
-        gradient with_combined_alpha(T aAlpha, std::enable_if_t<!std::is_same_v<T, sRGB_color::view_component>, sfinae> = {})
-        {
-            return with_combined_alpha(sRGB_color::convert<sRGB_color::view_component>(aAlpha));
-        }
-        gradient with_combined_alpha(sRGB_color::view_component aAlpha) const;
-        gradient_direction direction() const;
-        void set_direction(gradient_direction aDirection);
-        gradient with_direction(gradient_direction aDirection) const;
-        orientation_type orientation() const;
-        void set_orientation(orientation_type aOrientation);
-        gradient with_orientation(orientation_type aOrientation) const;
-        gradient_shape shape() const;
-        void set_shape(gradient_shape aShape);
-        gradient with_shape(gradient_shape aShape) const;
-        gradient_size size() const;
-        void set_size(gradient_size aSize);
-        gradient with_size(gradient_size aSize) const;
-        const optional_vec2& exponents() const;
-        void set_exponents(const optional_vec2& aExponents);
-        gradient with_exponents(const optional_vec2& aExponents) const;
-        const optional_point& center() const;
-        void set_center(const optional_point& aCenter);
-        gradient with_center(const optional_point& aCenter) const;
-        scalar smoothness() const;
-        void set_smoothness(scalar aSmoothness);
-        gradient with_smoothness(scalar aSmoothness) const;
-    public:
-        bool operator==(const gradient& aOther) const;
-        bool operator!=(const gradient& aOther) const;
-        bool operator<(const gradient& aOther) const;
-    public:
-        static scalar normalized_position(scalar aPos, scalar aStart, scalar aEnd);
-    public:
-        const color_stop_list& color_stops() const;
-        const alpha_stop_list& alpha_stops() const;
-    private:
-        color_stop_list& color_stops();
-        alpha_stop_list& alpha_stops();
-        void fix();
-        // attributes
-    private:
-        bool iUseCache;
-        color_stop_list iColorStops;
-        alpha_stop_list iAlphaStops;
-        gradient_direction iDirection;
-        orientation_type iOrientation;
-        gradient_shape iShape;
-        gradient_size iSize;
-        optional_vec2 iExponents;
-        optional_point iCenter;
-        scalar iSmoothness;
-    };
-
     using color = sRGB_color;
 
     typedef std::optional<color> optional_color;
-    typedef std::optional<gradient> optional_gradient;
-
-    typedef neolib::variant<color, gradient> color_or_gradient;
-    typedef std::optional<color_or_gradient> optional_color_or_gradient;
 }
 
 define_setting_type(neogfx::color)
-define_setting_type(neogfx::gradient)
 
 #include "color.inl"

@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/color.hpp>
 #include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gfx/i_gradient_manager.hpp>
 #include <neogfx/gfx/shapes.hpp>
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/mesh.hpp>
@@ -67,22 +67,10 @@ namespace neogfx
 
     inline game::gradient to_ecs_component(const gradient& aGradient)
     {
-        game::gradient result;
-        result.colorStops.reserve(aGradient.color_stop_count());
-        result.colorStopPositions.reserve(aGradient.color_stop_count());
-        result.alphaStops.reserve(aGradient.alpha_stop_count());
-        result.alphaStopPositions.reserve(aGradient.alpha_stop_count());
-        for (auto cs = aGradient.color_begin(); cs != aGradient.color_end(); ++cs)
+        return game::gradient
         {
-            result.colorStops.push_back(to_ecs_component(cs->second));
-            result.colorStopPositions.push_back(cs->first);
-        }
-        for (auto as = aGradient.alpha_begin(); as != aGradient.alpha_end(); ++as)
-        {
-            result.alphaStops.push_back(as->second / 255.0);
-            result.alphaStopPositions.push_back(as->first);
-        }
-        return result;
+            neolib::cookie_ref_ptr{ service<i_gradient_manager>(), aGradient.id() }
+        };
     }
 
     inline game::material to_ecs_component(const text_color& aTextColor)

@@ -26,6 +26,14 @@
 
 namespace neogfx
 {
+    inline color default_border_color(i_widget const& aWidget)
+    {
+        auto const result = aWidget.container_background_color().mid(aWidget.palette_color(color_role::Base));
+        if (result.similar_intensity(aWidget.container_background_color(), 0.05))
+            return result.shaded(0x20);
+        return result;
+    }
+
     const std::string& default_skin::name() const
     {
         static const std::string sName = "Default";
@@ -65,16 +73,13 @@ namespace neogfx
 
     void default_skin::draw_scrollbar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const
     {
-        auto const& widget = aItem.as_widget();
         scoped_units su(aGc, units::Pixels);
         rect const g = aItem.element_rect(skin_element::Scrollbar);
         auto const width = aScrollbar.width();
         point oldOrigin = aGc.origin();
-        aGc.set_origin(point(0.0, 0.0));
-        color baseColor = aScrollbar.container().scrollbar_color(aScrollbar);
-        color backgroundColor = baseColor.shaded(0x40);
-        if (widget.transparent_background())
-            backgroundColor = widget.container_background_color();
+        aGc.set_origin({});
+        color scrollbarColor = aScrollbar.container().scrollbar_color(aScrollbar).shaded(0x30);
+        color backgroundColor = scrollbarColor.unshaded(0x30);
         if (aScrollbar.style() == scrollbar_style::Normal)
             aGc.fill_rect(g, backgroundColor);
         else if (aScrollbar.style() == scrollbar_style::Menu)
@@ -161,12 +166,10 @@ namespace neogfx
             coordinate w = 1.0;
             for (coordinate y = 0.0; y < rectUpButton.height(); ++y)
             {
-                aGc.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), baseColor.light() ?
-                    baseColor.darker(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element()== scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00) :
-                    baseColor.lighter(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00));
-                aGc.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)), baseColor.light() ?
-                    baseColor.darker(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00) :
-                    baseColor.lighter(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
+                aGc.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), 
+                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element()== scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00) );
+                aGc.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)),
+                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
                 x -= 1.0;
                 w += 2.0;
             }
@@ -177,20 +180,17 @@ namespace neogfx
             coordinate h = 1.0;
             for (coordinate x = 0.0; x < rectUpButton.width(); ++x)
             {
-                aGc.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)), baseColor.light() ?
-                    baseColor.darker(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00) :
-                    baseColor.lighter(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00));
-                aGc.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)), baseColor.light() ?
-                    baseColor.darker(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00) :
-                    baseColor.lighter(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
+                aGc.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)),
+                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00));
+                aGc.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)),
+                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
                 y -= 1.0;
                 h += 2.0;
             }
         }
         if (aScrollbar.style() == scrollbar_style::Normal)
-            aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.type() == scrollbar_type::Vertical ? padding : 0.0, aScrollbar.type() == scrollbar_type::Vertical ? 0.0 : padding), baseColor.light() ?
-                baseColor.darker(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00) :
-                baseColor.lighter(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00));
+            aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.type() == scrollbar_type::Vertical ? padding : 0.0, aScrollbar.type() == scrollbar_type::Vertical ? 0.0 : padding),
+                scrollbarColor.shaded(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00));;
         aGc.set_origin(oldOrigin);
     }
 
@@ -203,22 +203,18 @@ namespace neogfx
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(widget.base_color().shaded(0x20));
         if (widget.capturing() && widget.capture_position() && aItem.element_rect(skin_element::ClickableArea).contains(*widget.capture_position()))
             widget.base_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color fillColor = widget.enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.root().mouse_position() - widget.origin()) ?
+        color const fillColor = widget.enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.root().mouse_position() - widget.origin()) ?
             hoverColor : widget.base_color();
         aGc.fill_rect(boxRect, fillColor.with_combined_alpha(enabledAlphaCoefficient));
-        color borderColor1 = widget.container_background_color().mid(widget.container_background_color().mid(widget.background_color()));
-        if (borderColor1.similar_intensity(widget.container_background_color(), 0.03125))
-            borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
-        aGc.draw_rect(boxRect, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), 1.0 });
-        boxRect.deflate(1.0, 1.0);
-        aGc.draw_rect(boxRect, pen{ borderColor1.mid(widget.background_color()).with_combined_alpha(enabledAlphaCoefficient), 1.0 });
-        boxRect.deflate(2.0, 2.0);
+        color borderColor = default_border_color(widget);
+        aGc.draw_rect(boxRect, pen{ borderColor.with_combined_alpha(enabledAlphaCoefficient), 1.0 });
+        boxRect.deflate(3.0_dip, 3.0_dip);
         if (aCheckedState != std::nullopt && *aCheckedState == true)
         {
             scoped_snap_to_pixel snap{ aGc, false };
             /* todo: draw tick image eye candy */
-            aGc.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0));
-            aGc.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0));
+            aGc.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip));
+            aGc.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip));
         }
         else if (aCheckedState == std::nullopt)
             aGc.fill_rect(boxRect, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));
@@ -230,22 +226,16 @@ namespace neogfx
         scoped_units su{ widget, units::Pixels };
         rect discRect = aItem.element_rect(skin_element::RadioButton);
         auto enabledAlphaCoefficient = widget.effectively_enabled() ? 1.0 : 0.25;
-        color borderColor1 = widget.container_background_color().mid(widget.container_background_color().mid(widget.background_color()));
-        if (borderColor1.similar_intensity(widget.container_background_color(), 0.03125))
-            borderColor1.dark() ? borderColor1.lighten(0x40) : borderColor1.darken(0x40);
-        size const scaledPixel{ 1.0_dip, 1.0_dip };
-        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        aGc.draw_circle(discRect.center(), discRect.width() / 2.0, pen{ borderColor1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
-        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-        aGc.draw_circle(discRect.center(), discRect.width() / 2.0, pen{ borderColor1.mid(widget.background_color()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
-        discRect.deflate(scaledPixel.cx, scaledPixel.cy);
+        color borderColor = default_border_color(widget);
+        aGc.fill_circle(discRect.center(), discRect.width() / 2.0, borderColor.with_combined_alpha(enabledAlphaCoefficient));
+        discRect.deflate(1.0_dip, 1.0_dip);
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(widget.base_color().shaded(0x20));
         if (widget.capturing())
             widget.base_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
         color fillColor = widget.effectively_enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ? 
             hoverColor : widget.base_color();
         aGc.fill_circle(discRect.center(), discRect.width() / 2.0, fillColor.with_combined_alpha(enabledAlphaCoefficient));
-        discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
+        discRect.deflate(3.0_dip, 3.0_dip);
         if (aCheckedState != std::nullopt && *aCheckedState == true)
             aGc.fill_circle(discRect.center(), discRect.width() / 2.0, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));
     }

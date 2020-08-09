@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
@@ -148,7 +148,7 @@ namespace neogfx
             color_dialog& iOwner;
             vertical_layout iLayout;
             std::optional<image> iImage;
-            mutable std::array<std::array<std::array<uint8_t, 4>, 256>, 256> iPixels;
+            mutable std::array<std::array<avec4u8, 256>, 256> iPixels;
             image_widget iCanvas;
             mutable texture iTexture;
             bool iTracking;

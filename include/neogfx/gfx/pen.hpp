@@ -20,6 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/color.hpp>
+#include <neogfx/gfx/gradient.hpp>
 
 namespace neogfx
 {

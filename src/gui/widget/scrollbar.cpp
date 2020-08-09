@@ -565,12 +565,7 @@ namespace neogfx
     {
         if (aStyle == scrollbar_style::Invisible)
             return 0.0;
-        dimension w = ceil_rasterized(4.0_mm);
-        if (aStyle == scrollbar_style::Menu || aStyle == scrollbar_style::Scroller)
-        {
-            dimension const padding = 3.0_dip;
-            w -= padding * 2.0;
-        }
+        dimension w = ceil_rasterized(aStyle == scrollbar_style::Normal ? 4.0_mm : 3.0_mm);
         if (to_px<uint32_t>(w) % 2u == 0u)
             w = from_px<dimension>(to_px<uint32_t>(w) + 1u);
         return w;

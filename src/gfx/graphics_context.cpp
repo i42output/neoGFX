@@ -395,7 +395,7 @@ namespace neogfx
 
     void graphics_context::set_gradient(const gradient& aGradient, const rect& aBoundingBox)
     {
-        native_context().enqueue(graphics_operation::set_gradient{ aGradient, to_device_units(aBoundingBox) + iOrigin });
+        native_context().enqueue(graphics_operation::set_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox) + iOrigin) });
     }
 
     void graphics_context::set_pixel(const point& aPoint, const color& aColor) const

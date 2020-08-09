@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
 
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/app/i_palette.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>

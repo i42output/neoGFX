@@ -182,14 +182,12 @@ namespace neogfx
             horizontal_scrollbar().render(aGc);
         if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == scrollbar_style::Normal)
         {
-            point oldOrigin = aGc.origin();
-            aGc.set_origin(point(0.0, 0.0));
-            auto scrollbarColor = as_widget().background_color();
-            aGc.fill_rect(
-                rect{
+            point const oldOrigin = aGc.origin();
+            aGc.set_origin(point{});
+            auto const spareSquare = rect{
                     point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(iVerticalScrollbar).bottom() },
-                    size{ scrollbar_geometry(iVerticalScrollbar).width(), scrollbar_geometry(horizontal_scrollbar()).height() } },
-                scrollbarColor.shaded(0x40));
+                    size{ scrollbar_geometry(iVerticalScrollbar).width(), scrollbar_geometry(horizontal_scrollbar()).height() } };
+            aGc.fill_rect(spareSquare, scrollbar_color(vertical_scrollbar()));
             aGc.set_origin(oldOrigin);
         }
     }
@@ -419,15 +417,19 @@ namespace neogfx
         switch (aScrollbar.type())
         {
         case scrollbar_type::Vertical:
-            if (vertical_scrollbar().style() == scrollbar_style::Normal)
+            if (aScrollbar.style() == scrollbar_style::Normal)
                 return rect{ sbrect.top_right(), size{ aScrollbar.width(), sbrect.cy } };
+            else if (aScrollbar.style() == scrollbar_style::Scroller)
+                return rect{ sbrect.bottom_left(),  size{ sbrect.width(), aScrollbar.width() * 2.0  } };
             else // scrollbar_style::Menu
-                return sbrect + point{ 0.0, -vertical_scrollbar().width() } + size{ 0.0, vertical_scrollbar().width() * 2.0 };
+                return sbrect + point{ 0.0, -aScrollbar.width() } + size{ 0.0, aScrollbar.width() * 2.0 };
         case scrollbar_type::Horizontal: 
-            if (horizontal_scrollbar().style() == scrollbar_style::Normal)
+            if (aScrollbar.style() == scrollbar_style::Normal)
                 return rect{ sbrect.bottom_left(), size{ sbrect.cx , aScrollbar.width() } };
+            else if (aScrollbar.style() == scrollbar_style::Scroller)
+                return rect{ sbrect.top_right(),  size{ aScrollbar.width() * 2.0, sbrect.height() } };
             else // scrollbar_style::Menu
-                return sbrect + point{ -horizontal_scrollbar().width(), 0.0 } + size{ horizontal_scrollbar().width() * 2.0, 0.0 };
+                return sbrect + point{ -aScrollbar.width(), 0.0 } + size{ aScrollbar.width() * 2.0, 0.0 };
         default:
             return rect{};
         }
@@ -466,7 +468,7 @@ namespace neogfx
     template <typename Base>
     inline color scrollable_widget<Base>::scrollbar_color(const i_scrollbar&) const
     {
-        return as_widget().background_color();
+        return as_widget().palette_color(color_role::Foreground);
     }
 
     template <typename Base>

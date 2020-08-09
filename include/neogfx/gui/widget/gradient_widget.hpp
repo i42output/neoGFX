@@ -21,7 +21,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
 #include <neogfx/app/i_resource.hpp>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/gui/dialog/color_dialog.hpp>
@@ -48,7 +48,8 @@ namespace neogfx
         gradient_widget(gradient_dialog& aParent, i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
     public:
         const neogfx::gradient& gradient() const;
-        void set_gradient(const neogfx::gradient& aGradient);
+        void set_gradient(const i_gradient& aGradient);
+        void set_gradient(const i_ref_ptr<i_gradient>& aGradient);
         const std::optional<color_dialog::custom_color_list>& custom_colors() const;
         std::optional<color_dialog::custom_color_list>& custom_colors();
     public:

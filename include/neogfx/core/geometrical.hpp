@@ -985,6 +985,42 @@ namespace neogfx
         return ret;
     }
 
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline bool operator<(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
+    {
+        return std::tie(left.position(), left.extents()) < std::tie(right.position(), right.extents());
+    }
+
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline bool operator==(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
+    {
+        return left.position() == right.position() && left.extents() == right.extents();
+    }
+
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline bool operator<=(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
+    {
+        return left < right || left == right;
+    }
+
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline bool operator>(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
+    {
+        return right < left;
+    }
+
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline bool operator>=(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
+    {
+        return right < left || left == right;
+    }
+
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline bool nearly_equal(basic_rect<CoordinateType, CoordinateSystem> const& lhs, basic_rect<CoordinateType, CoordinateSystem> const& rhs, scalar epsilon = 0.00001)
+    {
+        return nearly_equal(lhs.position(), rhs.position(), epsilon) && nearly_equal(lhs.extents(), rhs.extents(), epsilon);
+    }
+
     template <typename CoordinateType>
     class basic_line
     {

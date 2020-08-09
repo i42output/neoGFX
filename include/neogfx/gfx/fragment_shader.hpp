@@ -83,24 +83,8 @@ namespace neogfx
         }
     };
 
-    constexpr uint32_t GRADIENT_FILTER_SIZE = 15;
-    struct gradient_shader_data
-    {
-        //todo: use a mini atlas for the this
-        uint32_t stopCount;
-        shader_array<float> stops = { size_u32{gradient::MaxStops, 1} };
-        shader_array<std::array<float, 4>> stopColors = { size_u32{gradient::MaxStops, 1} };
-        shader_array<float> filter = { size_u32{GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE} };
-    };
-
     class standard_gradient_shader : public standard_fragment_shader<i_gradient_shader>
     {
-    private:
-        typedef std::list<neogfx::gradient_shader_data> gradient_data_cache_t;
-        typedef std::map<gradient, gradient_data_cache_t::iterator> gradient_data_cache_map_t;
-        typedef std::deque<gradient_data_cache_map_t::iterator> gradient_data_cache_queue_t;
-    private:
-        static constexpr std::size_t GRADIENT_DATA_CACHE_QUEUE_SIZE = 64;
     public:
         standard_gradient_shader(const std::string& aName = "standard_gradient_shader");
     public:
@@ -109,16 +93,6 @@ namespace neogfx
         void clear_gradient() override;
         void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) override;
         void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox) override;
-    private:
-        neogfx::gradient_shader_data& gradient_shader_data(const gradient& aGradient);
-        neogfx::gradient_shader_data& gradient_shader_data(const game::gradient& aGradient);
-    private:
-        std::vector<float> iGradientStopPositions;
-        std::vector<std::array<float, 4>> iGradientStopColors;
-        gradient_data_cache_t iGradientDataCache;
-        gradient_data_cache_map_t iGradientDataCacheMap;
-        gradient_data_cache_queue_t iGradientDataCacheQueue;
-        std::optional<neogfx::gradient_shader_data> iUncachedGradient;
     private:
         cache_uniform(uGradientTopLeft)
         cache_uniform(uGradientBottomRight)
@@ -129,10 +103,9 @@ namespace neogfx
         cache_uniform(uGradientShape)
         cache_uniform(uGradientExponents)
         cache_uniform(uGradientCenter)
+        cache_uniform(uGradientColorCount)
+        cache_uniform(uGradientColors)
         cache_uniform(uGradientFilterSize)
-        cache_uniform(uGradientStopCount)
-        cache_uniform(uGradientStopPositions)
-        cache_uniform(uGradientStopColors)
         cache_uniform(uGradientFilter)
         cache_uniform(uGradientEnabled)
     };

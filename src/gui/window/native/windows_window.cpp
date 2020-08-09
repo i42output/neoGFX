@@ -1,4 +1,5 @@
 // windows_window.cpp
+// Parts of this source file based on GLFW, Copyright (c) 2002-2006 Marcus Geelnard, Copyright (c) 2006-2019 Camilla Löwy <elmindreda@glfw.org>
 // Parts of this source file based on Simple DirectMedia Layer, Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 /*
   neogfx C++ App/Game Engine
@@ -17,6 +18,34 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+//========================================================================
+// GLFW 3.3 Win32 - www.glfw.org
+//------------------------------------------------------------------------
+// Copyright (c) 2002-2006 Marcus Geelnard
+// Copyright (c) 2006-2019 Camilla Löwy <elmindreda@glfw.org>
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//    claim that you wrote the original software. If you use this software
+//    in a product, an acknowledgment in the product documentation would
+//    be appreciated but is not required.
+//
+// 2. Altered source versions must be plainly marked as such, and must not
+//    be misrepresented as being the original software.
+//
+// 3. This notice may not be removed or altered from any source
+//    distribution.
+//
+//========================================================================
+// Please use C89 style variable declarations in this file because VS 2010
+//========================================================================
 /*
   Simple DirectMedia Layer
   Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
@@ -1348,11 +1377,43 @@ namespace neogfx
             HWND hwnd = iHandle;
             ::SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);
 
-    //        if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
-    //            SetClassLongPtr(hwnd, GCL_STYLE, GetClassLongPtr(hwnd, GCL_STYLE) | CS_DROPSHADOW); // doesn't work well with OpenGL
-            
-            ::SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-        }
+#if 0
+            BOOL enabled = FALSE;
+            if (SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled)
+            {
+                HRGN region = CreateRectRgn(0, 0, -1, -1);
+                DWM_BLURBEHIND bb = { 0 };
+                bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
+                bb.hRgnBlur = region;
+                bb.fEnable = TRUE;
+
+                if (SUCCEEDED(DwmEnableBlurBehindWindow(iHandle, &bb)))
+                {
+                    // Decorated windows don't repaint the transparent background
+                    // leaving a trail behind animations
+                    // HACK: Making the window layered with a transparency color key
+                    //       seems to fix this.  Normally, when specifying
+                    //       a transparency color key to be used when composing the
+                    //       layered window, all pixels painted by the window in this
+                    //       color will be transparent.  That doesn't seem to be the
+                    //       case anymore, at least when used with blur behind window
+                    //       plus negative region.
+                    LONG exStyle = GetWindowLongW(iHandle, GWL_EXSTYLE);
+                    exStyle |= WS_EX_LAYERED;
+                    SetWindowLongW(iHandle, GWL_EXSTYLE, exStyle);
+
+                    // Using a color key not equal to black to fix the trailing
+                    // issue.  When set to black, something is making the hit test
+                    // not resize with the window frame.
+                    SetLayeredWindowAttributes(iHandle,
+                        RGB(255, 0, 255), 255, LWA_COLORKEY);
+                }
+
+                DeleteObject(region);
+            }
+#endif
+
+         }
 
          void window::set_destroying()
         {

@@ -124,7 +124,6 @@ namespace neogfx
         struct set_gradient
         {
             gradient gradient;
-            rect boundingBox;
         };
 
         struct set_pixel

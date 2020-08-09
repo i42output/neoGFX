@@ -227,7 +227,7 @@ namespace neogfx
         void pop_logical_operation();
         void line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition);
         void line_stipple_off();
-        void set_gradient(const gradient& aGradient, const rect& aBoundingBox);
+        void set_gradient(const gradient& aGradient);
         void clear_gradient();
         bool is_subpixel_rendering_on() const;
         void subpixel_rendering_on();
@@ -286,7 +286,7 @@ namespace neogfx
         scoped_render_target iSrt;
         optional_vec2 iOffset;
         bool iSnapToPixel;
-        std::optional<std::pair<gradient, rect>> iGradient;
+        std::optional<gradient> iGradient;
         use_shader_program iUseDefaultShaderProgram; // must be last
     private:
         static standard_batching& as_vertex_provider()

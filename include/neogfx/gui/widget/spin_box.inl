@@ -89,6 +89,22 @@ namespace neogfx
     }
 
     template <typename T>
+    bool basic_spin_box<T>::transparent_background() const
+    {
+        return false;
+    }
+
+    template <typename T>
+    color basic_spin_box<T>::palette_color(color_role aColorRole) const
+    {
+        if (has_palette_color(aColorRole))
+            return base_type::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+            return palette_color(color_role::Base);
+        return base_type::palette_color(aColorRole);
+    }
+
+    template <typename T>
     color basic_spin_box<T>::frame_color() const
     {
         if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))

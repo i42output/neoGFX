@@ -21,7 +21,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
 #include <neogfx/app/i_resource.hpp>
-#include <neogfx/core/color.hpp>
+#include <neogfx/gfx/color.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/widget/button.hpp>
 

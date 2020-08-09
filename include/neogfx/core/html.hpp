@@ -23,10 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/quick_string.hpp>
 #include <neolib/core/variant.hpp>
 #include <neolib/core/vecarray.hpp>
-#include "geometrical.hpp"
-#include "hsl_color.hpp"
-#include "hsv_color.hpp"
-#include "color.hpp"
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/gfx/hsl_color.hpp>
+#include <neogfx/gfx/hsv_color.hpp>
+#include <neogfx/gfx/color.hpp>
 
 namespace neogfx
 {

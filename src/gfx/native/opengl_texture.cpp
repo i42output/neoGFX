@@ -135,7 +135,7 @@ namespace neogfx
                 std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
                 if (aColor != std::nullopt)
                 {
-                    if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
+                    if constexpr (std::is_same_v<value_type, avec4u8>)
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                             for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
                                 data[y * iStorageSize.cx + x + 0] = 
@@ -227,7 +227,7 @@ namespace neogfx
             case color_format::RGBA8:
                 {
                     std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
-                    if constexpr (std::is_same_v<value_type, std::array<uint8_t, 4>>)
+                    if constexpr (std::is_same_v<value_type, avec4u8>)
                     {
                         const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
@@ -411,7 +411,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::set_pixel(const point& aPosition, const color& aColor)
     {
-        std::array<uint8_t, 4> pixel{ aColor.red(), aColor.green(), aColor.blue(), aColor.alpha() };
+        avec4u8 pixel{ aColor.red(), aColor.green(), aColor.blue(), aColor.alpha() };
         set_pixels(rect{ aPosition, size{1.0, 1.0} }, &pixel);
     }
 
@@ -682,7 +682,7 @@ namespace neogfx
         if (sampling() != neogfx::texture_sampling::Multisample)
         {
             scoped_render_target srt{ *this };
-            std::array<uint8_t, 4> pixel;
+            avec4u8 pixel;
             basic_point<GLint> pos{ aPosition };
             glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &pixel));
             return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
@@ -693,6 +693,6 @@ namespace neogfx
 
     template class opengl_texture<uint8_t>;
     template class opengl_texture<float>;
-    template class opengl_texture<std::array<uint8_t, 4>>;
+    template class opengl_texture<avec4u8>;
     template class opengl_texture<std::array<float, 4>>;
 }

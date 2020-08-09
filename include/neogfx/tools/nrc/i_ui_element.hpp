@@ -394,11 +394,11 @@ namespace neogfx::nrc
             std::ostringstream result;
             // todo: full gradient specification support
             result << "gradient::color_stop_list{ ";
-            for (auto s = aArgument.color_begin(); s != aArgument.color_end(); ++s)
+            for (auto s = aArgument.color_stops().begin(); s != aArgument.color_stops().end(); ++s)
             {
-                if (s != aArgument.color_begin())
+                if (s != aArgument.color_stops().begin())
                     result << ", ";
-                result << "gradient::color_stop{ " << s->first << ", color{ " << convert_emit_argument(s->second) << " } }";
+                result << "gradient::color_stop{ " << s->first() << ", color{ " << convert_emit_argument(s->second()) << " } }";
             }
             result << " }, " << enum_to_string<gradient_direction>("gradient_direction", aArgument.direction());
             return result.str();

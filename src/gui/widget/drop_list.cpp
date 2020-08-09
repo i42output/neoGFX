@@ -534,6 +534,19 @@ namespace neogfx
                 iEditor.set_text(aText);
             }
         protected:
+            bool transparent_background() const override
+            {
+                return false;
+            }
+            color palette_color(color_role aColorRole) const override
+            {
+                if (has_palette_color(aColorRole))
+                    return base_type::palette_color(aColorRole);
+                if (aColorRole == color_role::Background)
+                    return palette_color(color_role::Base);
+                return base_type::palette_color(aColorRole);
+            }
+        protected:
             color frame_color() const override
             {
                 return iEditor.frame_color();
