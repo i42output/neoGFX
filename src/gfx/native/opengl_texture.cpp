@@ -156,7 +156,7 @@ namespace neogfx
                                         aColor->alpha<float>()
                                     };
                 }
-                glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), data.empty() ? nullptr : &data[0]));
+                glCheck(glTexImage2D(to_gl_enum(sampling()), 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), data.empty() ? nullptr : &data[0]));
                 if (sampling() == texture_sampling::NormalMipmap)
                 {
                     glCheck(glGenerateMipmap(GL_TEXTURE_2D));
@@ -378,19 +378,10 @@ namespace neogfx
             GLint previousPackAlignment;
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
-            if (sampling() != texture_sampling::Data)
-            {
-                glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
-                    static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y), static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy),
-                    std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
-            }
-            else
-            {
-                glCheck(glTexImage2D(to_gl_enum(sampling()), 0,
-                    std::get<0>(to_gl_enum(iDataFormat, kDataType)),
-                    static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy), 0,
-                    std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
-            }
+            glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
+                static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y), 
+                static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy),
+                std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
             if (sampling() == texture_sampling::NormalMipmap)
             {
                 glCheck(glGenerateMipmap(to_gl_enum(sampling())));

@@ -18,7 +18,6 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/shader_array.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/gradient_manager.hpp>
 
@@ -30,8 +29,6 @@ namespace neogfx
         static gradient_manager sGradientManager;
         return sGradientManager;
     }
-
-    constexpr uint32_t GRADIENT_FILTER_SIZE = 15;
 
     class gradient_object : public reference_counted<i_gradient>
     {
@@ -386,45 +383,15 @@ namespace neogfx
         }
         // shader
     public:
-        const i_shader_array<avec4u8>& colors() const override
+        const i_gradient_sampler& colors() const override
         {
-            if (iColors.first == std::nullopt)
-                iColors.first.emplace(size_u32{gradient::MaxStops, 1});
             iFixer();
-            if (!iColors.second)
-            {
-                iColors.second = true;
-                avec4u8 colorValues[MaxStops];
-                auto const cx = static_cast<uint32_t>(iColors.first->data().extents().cx);
-                for (uint32_t x = 0u; x < cx; ++x)
-                {
-                    auto const color = at(x, 0u, cx - 1u);
-                    colorValues[x] = avec4u8{ color.red(), color.green(), color.blue(), color.alpha() };
-                }
-                iColors.first->data().set_pixels(rect{ point{}, size_u32{ MaxStops, 1u } }, &colorValues[0]);
-            }
-            return *iColors.first;
+            return service<i_gradient_manager>().sampler(*this);
         }
-        i_shader_array<avec4u8>& colors() override
+        const i_gradient_filter& filter() const override
         {
-            return const_cast<i_shader_array<avec4u8>&>(to_const(*this).colors());
-        }
-        const i_shader_array<float>& filter() const override
-        {
-            if (iFilter.first == std::nullopt)
-                iFilter.first.emplace(size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE });
             iFixer();
-            if (!iFilter.second)
-            {
-                iFilter.second = true;
-                auto const filterValues = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(smoothness() * 10.0));
-                iFilter.first->data().set_pixels(rect{ point{}, size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filterValues[0][0]);
-            }
-            return *iFilter.first;
-        }
-        i_shader_array<float>& filter() override
-        {
-            return const_cast<i_shader_array<float>&>(to_const(*this).filter());
+            return service<i_gradient_manager>().filter(*this);
         }
         // object
     public:
@@ -462,7 +429,6 @@ namespace neogfx
                 else
                     alpha_stops()[0].first() = 0.0;
             }
-            iColors.second = false;
         }
         // state
     private:
@@ -477,21 +443,91 @@ namespace neogfx
         optional_point iCenter;
         scalar iSmoothness = 0.0;
         optional_rect iBoundingBox;
-        mutable std::pair<std::optional<shader_array<avec4u8>>, bool> iColors;
         mutable std::pair<std::optional<shader_array<float>>, bool> iFilter;  
         mutable bool iNeedFixing = true;
         bool iInFixer = false;
         std::function<void()> iFixer = [&]() { fix(); };
     };
 
-    neolib::cookie item_cookie(const gradient_manager::gradient_list_entry& aEntry)
+    neolib::cookie item_cookie(gradient_manager::gradient_list_entry const& aEntry)
     {
         return aEntry.first->id();
+    }
+
+    gradient_manager::gradient_manager() :
+        iSamplers{ size_u32{ gradient::MaxStops, MaxSamplers } }
+    {
+        for (uint32_t row = 0; row < MaxSamplers; ++row)
+            iFreeSamplers.emplace_back(iSamplers, row);
+        for (uint32_t filter = 0; filter < MaxFilters; ++filter)
+            iFreeFilters.emplace_back();
     }
 
     void gradient_manager::clear_gradients()
     {
         gradients().clear();
+    }
+
+    i_gradient_sampler const& gradient_manager::sampler(i_gradient const& aGradient)
+    {
+        thread_local std::pair<gradient::color_stop_list, gradient::alpha_stop_list> key;
+        key.first = aGradient.color_stops();
+        key.second = aGradient.alpha_stops();
+        auto allocated = iAllocatedSamplers.find(key);
+        if (allocated == iAllocatedSamplers.end())
+        {
+            if (!iFreeSamplers.empty())
+            {
+                allocated = iAllocatedSamplers.insert(std::make_pair(key, iFreeSamplers.back())).first;
+                iFreeSamplers.pop_back();
+            }
+            else
+            {
+                allocated = iAllocatedSamplers.insert(std::make_pair(key, iSamplerQueue.front()->second)).first;
+                iAllocatedSamplers.erase(iSamplerQueue.front());
+                iSamplerQueue.pop_front();
+            }
+            avec4u8 colorValues[i_gradient::MaxStops];
+            auto const cx = static_cast<uint32_t>(iSamplers.data().extents().cx);
+            for (uint32_t x = 0u; x < cx; ++x)
+            {
+                auto const color = aGradient.at(x, 0u, cx - 1u);
+                colorValues[x] = avec4u8{ color.red(), color.green(), color.blue(), color.alpha() };
+            }
+            iSamplers.data().set_pixels(rect{ basic_point<uint32_t>{ 0u, allocated->second.sampler_row() }, size_u32{ i_gradient::MaxStops, 1u } }, &colorValues[0]);
+        }
+        auto existingQueueEntry = std::find(iSamplerQueue.begin(), iSamplerQueue.end(), allocated);
+        if (existingQueueEntry != iSamplerQueue.end())
+            iSamplerQueue.erase(existingQueueEntry);
+        iSamplerQueue.push_back(allocated);
+        return allocated->second;
+    }
+
+    i_gradient_filter const& gradient_manager::filter(i_gradient const& aGradient)
+    {
+        scalar const key{ aGradient.smoothness()};
+        auto allocated = iAllocatedFilters.find(key);
+        if (allocated == iAllocatedFilters.end())
+        {
+            if (!iFreeFilters.empty())
+            {
+                allocated = iAllocatedFilters.insert(std::make_pair(key, iFreeFilters.back())).first;
+                iFreeFilters.pop_back();
+            }
+            else
+            {
+                allocated = iAllocatedFilters.insert(std::make_pair(key, iFilterQueue.front()->second)).first;
+                iAllocatedFilters.erase(iFilterQueue.front());
+                iFilterQueue.pop_front();
+            }
+            auto const filterValues = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
+            allocated->second.sampler().data().set_pixels(rect{ point{}, size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filterValues[0][0]);
+        }
+        auto existingQueueEntry = std::find(iFilterQueue.begin(), iFilterQueue.end(), allocated);
+        if (existingQueueEntry != iFilterQueue.end())
+            iFilterQueue.erase(existingQueueEntry);
+        iFilterQueue.push_back(allocated);
+        return allocated->second;
     }
 
     void gradient_manager::add_ref(gradient_id aId)
@@ -547,47 +583,47 @@ namespace neogfx
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id()));
     }
 
-    void gradient_manager::do_create_gradient(const i_gradient& aOther, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(i_gradient const& aOther, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aOther));
     }
 
-    void gradient_manager::do_create_gradient(const i_string& aCssDeclaration, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(i_string const& aCssDeclaration, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aCssDeclaration));
     }
 
-    void gradient_manager::do_create_gradient(const sRGB_color& aColor, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(sRGB_color const& aColor, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColor));
     }
 
-    void gradient_manager::do_create_gradient(const sRGB_color& aColor, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(sRGB_color const& aColor, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColor, aDirection));
     }
 
-    void gradient_manager::do_create_gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(sRGB_color const& aColor1, sRGB_color const& aColor2, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColor1, aColor2, aDirection));
     }
 
-    void gradient_manager::do_create_gradient(const i_gradient::color_stop_list& aColorStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(i_gradient::color_stop_list const& aColorStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColorStops, aDirection));
     }
 
-    void gradient_manager::do_create_gradient(const i_gradient::color_stop_list& aColorStops, const i_gradient::alpha_stop_list& aAlphaStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColorStops, aAlphaStops, aDirection));
     }
 
-    void gradient_manager::do_create_gradient(const i_gradient& aOther, const i_gradient::color_stop_list& aColorStops, const i_gradient::alpha_stop_list& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aOther, aColorStops, aAlphaStops));
     }
 
-    void gradient_manager::do_create_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColors, aDirection));
     }

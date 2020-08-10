@@ -25,6 +25,27 @@
 
 namespace neogfx
 {
+    class i_gradient_sampler
+    {
+        friend class gradient_manager;
+    public:
+        virtual ~i_gradient_sampler() = default;
+    public:
+        virtual i_shader_array<avec4u8> const& sampler() const = 0;
+        virtual uint32_t sampler_row() const = 0;
+    };
+
+    class i_gradient_filter
+    {
+        friend class gradient_manager;
+    public:
+        virtual ~i_gradient_filter() = default;
+    public:
+        virtual i_shader_array<float> const& sampler() const = 0;
+    private:
+        virtual i_shader_array<float>& sampler() = 0;
+    };
+
     class i_gradient_manager : public neolib::i_cookie_consumer
     {
         friend class gradient_object;
@@ -37,6 +58,8 @@ namespace neogfx
         // operations
     public:
         virtual void clear_gradients() = 0;
+        virtual i_gradient_sampler const& sampler(i_gradient const& aGradient) = 0;
+        virtual i_gradient_filter const& filter(i_gradient const& aGradient) = 0;
         // helpers
     public:
         neolib::ref_ptr<i_gradient> find_gradient(gradient_id aId) const
@@ -51,61 +74,61 @@ namespace neogfx
             do_create_gradient(result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const i_gradient& aOther)
+        neolib::ref_ptr<i_gradient> create_gradient(i_gradient const& aOther)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aOther, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const i_string& aCssDeclaration)
+        neolib::ref_ptr<i_gradient> create_gradient(i_string const& aCssDeclaration)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aCssDeclaration, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const sRGB_color& aColor)
+        neolib::ref_ptr<i_gradient> create_gradient(sRGB_color const& aColor)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aColor, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const sRGB_color& aColor, gradient_direction aDirection)
+        neolib::ref_ptr<i_gradient> create_gradient(sRGB_color const& aColor, gradient_direction aDirection)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aColor, aDirection, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection = gradient_direction::Vertical)
+        neolib::ref_ptr<i_gradient> create_gradient(sRGB_color const& aColor1, sRGB_color const& aColor2, gradient_direction aDirection = gradient_direction::Vertical)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aColor1, aColor2, aDirection, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const i_gradient::color_stop_list& aColorStops, gradient_direction aDirection = gradient_direction::Vertical)
+        neolib::ref_ptr<i_gradient> create_gradient(i_gradient::color_stop_list const& aColorStops, gradient_direction aDirection = gradient_direction::Vertical)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aColorStops, aDirection, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const i_gradient::color_stop_list& aColorStops, const i_gradient::alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical)
+        neolib::ref_ptr<i_gradient> create_gradient(i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aColorStops, aAlphaStops, aDirection, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const i_gradient& aOther, const i_gradient::color_stop_list& aColorStops, const i_gradient::alpha_stop_list& aAlphaStops)
+        neolib::ref_ptr<i_gradient> create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aOther, aColorStops, aAlphaStops, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical)
+        neolib::ref_ptr<i_gradient> create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection = gradient_direction::Vertical)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aColors, aDirection, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical)
+        neolib::ref_ptr<i_gradient> create_gradient(std::initializer_list<sRGB_color> const& aColors, gradient_direction aDirection = gradient_direction::Vertical)
         {
             return create_gradient(neolib::vector<sRGB_color>{aColors}, aDirection);
         }
@@ -113,14 +136,14 @@ namespace neogfx
     private:
         virtual void do_find_gradient(gradient_id aId, neolib::i_ref_ptr<i_gradient>& aResult) const = 0;
         virtual void do_create_gradient(neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const i_gradient& aOther, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const i_string& aCssDeclaration, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const sRGB_color& aColor, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const sRGB_color& aColor, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const i_gradient::color_stop_list& aColorStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const i_gradient::color_stop_list& aColorStops, const i_gradient::alpha_stop_list& aAlphaStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const i_gradient& aOther, const i_gradient::color_stop_list& aColorStops, const i_gradient::alpha_stop_list& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(i_gradient const& aOther, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(i_string const& aCssDeclaration, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(sRGB_color const& aColor, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(sRGB_color const& aColor, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(sRGB_color const& aColor1, sRGB_color const& aColor2, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(i_gradient::color_stop_list const& aColorStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
     };
 }

@@ -39,8 +39,8 @@ namespace neogfx
                 "vec4 gradient_color(in float n)\n"
                 "{\n"
                 "    n = max(min(n, 1.0), 0.0) * float(uGradientColorCount - 1);"
-                "    vec4 firstColor = texelFetch(uGradientColors, ivec2(floor(n), 0));\n"
-                "    vec4 secondColor = texelFetch(uGradientColors, ivec2(ceil(n), 0));\n"
+                "    vec4 firstColor = texelFetch(uGradientColors, ivec2(floor(n), uGradientColorRow));\n"
+                "    vec4 secondColor = texelFetch(uGradientColors, ivec2(ceil(n), uGradientColorRow));\n"
                 "    return mix(firstColor, secondColor, n - floor(n));\n"
                 "}\n"
                 "\n"
@@ -232,10 +232,11 @@ namespace neogfx
         uGradientExponents = vec2f{ gradientExponents.x, gradientExponents.y };
         basic_point<float> gradientCenter = (aGradient.center() != std::nullopt ? *aGradient.center() : point{});
         uGradientCenter = vec2f{ gradientCenter.x, gradientCenter.y };
-        uGradientColorCount = static_cast<int>(aGradient.colors().data().extents().cx);
-        uGradientFilterSize = static_cast<int>(aGradient.filter().data().extents().cx);
-        aGradient.colors().data().bind(3);
-        aGradient.filter().data().bind(4);
+        uGradientColorCount = static_cast<int>(aGradient.colors().sampler().data().extents().cx);
+        uGradientColorRow = static_cast<int>(aGradient.colors().sampler_row());
+        uGradientFilterSize = static_cast<int>(aGradient.filter().sampler().data().extents().cx);
+        aGradient.colors().sampler().data().bind(3);
+        aGradient.filter().sampler().data().bind(4);
         uGradientColors = sampler2DRect{ 3 };
         uGradientFilter = sampler2DRect{ 4 };
         uGradientEnabled = true;

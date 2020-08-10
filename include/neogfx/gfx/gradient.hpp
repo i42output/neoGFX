@@ -101,10 +101,8 @@ namespace neogfx
         void set_bounding_box(const optional_rect& aBoundingBox) override;
         // shader
     public:
-        const i_shader_array<avec4u8>& colors() const override;
-        i_shader_array<avec4u8>& colors() override;
-        const i_shader_array<float>& filter() const override;
-        i_shader_array<float>& filter() override;
+        const i_gradient_sampler& colors() const override;
+        const i_gradient_filter& filter() const override;
         // object
     private:
         void share_object(i_ref_ptr<i_gradient>& aRef) const override;

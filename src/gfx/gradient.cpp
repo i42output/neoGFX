@@ -311,22 +311,12 @@ namespace neogfx
         iBoundingBox = aBoundingBox;
     }
 
-    const i_shader_array<avec4u8>& gradient::colors() const
+    const i_gradient_sampler& gradient::colors() const
     {
         return object().colors();
     }
 
-    i_shader_array<avec4u8>& gradient::colors()
-    {
-        return object().colors();
-    }
-
-    const i_shader_array<float>& gradient::filter() const
-    {
-        return object().filter();
-    }
-
-    i_shader_array<float>& gradient::filter()
+    const i_gradient_filter& gradient::filter() const
     {
         return object().filter();
     }

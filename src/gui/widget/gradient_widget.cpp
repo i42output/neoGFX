@@ -691,8 +691,8 @@ namespace neogfx
                 {"paper", transparentColor},
                 {"ink1", frameColor},
                 {"ink2", frameColor.mid(backgroundColor)},
-                {"ink3", iCurrentColorStop == std::nullopt || &**iCurrentColorStop != &aColorStop ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection)},
-                {"ink4", iCurrentColorStop == std::nullopt || &**iCurrentColorStop != &aColorStop ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40)},
+                {"ink3", iCurrentColorStop == std::nullopt || (**iCurrentColorStop).first() != aColorStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection)},
+                {"ink4", iCurrentColorStop == std::nullopt || (**iCurrentColorStop).first() != aColorStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40)},
                 {"ink9", aColorStop.second()}} };
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
@@ -786,8 +786,8 @@ namespace neogfx
                 { "paper", transparentColor },
                 { "ink1", frameColor },
                 { "ink2", frameColor.mid(backgroundColor) },
-                { "ink3", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection) },
-                { "ink4", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40) },
+                { "ink3", iCurrentAlphaStop == std::nullopt || (**iCurrentAlphaStop).first() != aAlphaStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection) },
+                { "ink4", iCurrentAlphaStop == std::nullopt || (**iCurrentAlphaStop).first() != aAlphaStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40) },
                 { "ink9", color::White.with_alpha(aAlphaStop.second()) } } };
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
