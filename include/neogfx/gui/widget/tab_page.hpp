@@ -49,6 +49,8 @@ namespace neogfx
         void paint_non_client_after(i_graphics_context& aGc) const override;
     public:
         color palette_color(color_role aColorRole) const override;
+        color frame_color() const override;
+        color inner_frame_color() const override;
     public:
         const i_tab& tab() const override;
         i_tab& tab() override;

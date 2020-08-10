@@ -355,7 +355,7 @@ namespace neogfx
         select();
     }
 
-    color  tab_button::palette_color(color_role aColorRole) const
+    color tab_button::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole) || is_deselected() || !container().has_tab_page(container().index_of(*this)))
             return push_button::palette_color(aColorRole);
@@ -408,6 +408,7 @@ namespace neogfx
 
     void tab_button::init()
     {
+        layout().set_padding(neogfx::padding{ 2.0, 0.0, 0.0, 0.0 });
         set_size_policy(size_constraint::Minimum);
         auto update_image = [this]()
         {

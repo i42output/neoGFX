@@ -105,13 +105,27 @@ namespace neogfx
         framed_scrollable_widget::paint_non_client_after(aGc);
     }
 
-    color  tab_page::palette_color(color_role aColorRole) const
+    color tab_page::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))
             return framed_scrollable_widget::palette_color(aColorRole);
         if (aColorRole == color_role::Background)
             return container_background_color();
         return framed_scrollable_widget::palette_color(aColorRole);
+    }
+
+    color tab_page::frame_color() const
+    {
+        if (has_frame_color())
+            return framed_scrollable_widget::frame_color();
+        return tab().as_widget().palette_color(color_role::Background).darker(0x10);
+    }
+
+    color tab_page::inner_frame_color() const
+    {
+        if (has_frame_color())
+            return framed_scrollable_widget::inner_frame_color();
+        return tab().as_widget().palette_color(color_role::Base).shaded(0x20);
     }
 
     const i_tab& tab_page::tab() const
