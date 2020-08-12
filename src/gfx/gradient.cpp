@@ -23,8 +23,7 @@
 
 namespace neogfx
 {
-    gradient::gradient() :
-        iCopy{ false }
+    gradient::gradient()
     {
     }
 
@@ -41,56 +40,47 @@ namespace neogfx
     }
 
     gradient::gradient(const i_ref_ptr<i_gradient>& aObject) :
-        iObject{ aObject },
-        iCopy{ false }
+        iObject{ aObject }
     {
     }
 
     gradient::gradient(const i_string& aCssDeclaration) :
-        iObject{ service<i_gradient_manager>().create_gradient(aCssDeclaration) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aCssDeclaration) }
     {
     }
 
     gradient::gradient(const sRGB_color& aColor) :
-        iObject{ service<i_gradient_manager>().create_gradient(aColor) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aColor) }
     {
     }
 
     gradient::gradient(const sRGB_color& aColor, gradient_direction aDirection) :
-        iObject{ service<i_gradient_manager>().create_gradient(aColor, aDirection) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aColor, aDirection) }
     {
     }
 
     gradient::gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection) :
-        iObject{ service<i_gradient_manager>().create_gradient(aColor1, aColor2, aDirection) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aColor1, aColor2, aDirection) }
     {
     }
 
     gradient::gradient(const abstract_color_stop_list& aColorStops, gradient_direction aDirection) :
-        iObject{ service<i_gradient_manager>().create_gradient(aColorStops, aDirection) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aColorStops, aDirection) }
     {
     }
 
     gradient::gradient(const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops, gradient_direction aDirection) :
-        iObject{ service<i_gradient_manager>().create_gradient(aColorStops, aAlphaStops, aDirection) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aColorStops, aAlphaStops, aDirection) }
     {
     }
 
     gradient::gradient(const gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops) :
-        iObject{ service<i_gradient_manager>().create_gradient(aOther, aColorStops, aAlphaStops) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aOther, aColorStops, aAlphaStops) }
     {
     }
 
     gradient::gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection) :
-        iObject{ service<i_gradient_manager>().create_gradient(aColors, aDirection) },
-        iCopy{ false }
+        iObject{ service<i_gradient_manager>().create_gradient(aColors, aDirection) }
     {
     }
 
@@ -101,9 +91,11 @@ namespace neogfx
 
     gradient& gradient::operator=(const i_gradient& aOther)
     {
+        if (&aOther == this)
+            return *this;
         iCopy = true;
         iBoundingBox = aOther.bounding_box();
-        aOther.share_object(iObject);        
+        aOther.share_object(iObject); 
         return *this;
     }
 

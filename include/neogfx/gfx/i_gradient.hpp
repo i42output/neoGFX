@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <tuple>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/i_shader_array.hpp>
@@ -158,22 +159,33 @@ namespace neogfx
         virtual void share_object(i_ref_ptr<i_gradient>& aRef) const = 0;
         // helpers
     public:
-        bool operator==(const i_gradient& aOther) const
+        friend bool operator==(const i_gradient& aLhs, const i_gradient& aRhs)
         {
-            return is_singular() == aOther.is_singular() && !is_singular() && id() == aOther.id();
+            if (aLhs.is_singular() != aRhs.is_singular())
+                return false;
+            else if (aLhs.is_singular())
+                return false;
+            else if (aLhs.id() == aRhs.id())
+                return true;
+            else
+                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.smoothness()) ==
+                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.smoothness());
         }
-        bool operator!=(const i_gradient& aOther) const
+        friend bool operator!=(const i_gradient& aLhs, const i_gradient& aRhs)
         {
-            return !(*this == aOther);
+            return !(aLhs == aRhs);
         }
-        bool operator<(const i_gradient& aOther) const
+        friend bool operator<(const i_gradient& aLhs, const i_gradient& aRhs)
         {
-            if (is_singular() != aOther.is_singular())
-                return is_singular() < aOther.is_singular();
-            else if (is_singular())
+            if (aLhs.is_singular() != aRhs.is_singular())
+                return aLhs.is_singular() < aRhs.is_singular();
+            else if (aLhs.is_singular())
+                return false;
+            else if (aLhs.id() == aRhs.id())
                 return false;
             else
-                return id() < aOther.id();
+                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.smoothness()) <
+                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.smoothness());
         }
         neolib::ref_ptr<i_gradient> clone() const
         {

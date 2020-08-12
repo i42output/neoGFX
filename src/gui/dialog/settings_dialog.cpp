@@ -203,17 +203,17 @@ namespace neogfx
                         aSink += settingWidget->GradientChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
-                                aSetting.set_value(settingWidget->gradient());
+                                aSetting.set_value(gradient{ settingWidget->gradient() });
                         });
                         aSink += aSetting.changing([&, settingWidget]()
                         {
                             neolib::scoped_flag sf{ settingWidget->updating };
-                            settingWidget->set_gradient(aSetting.value<gradient>(true));
+                            settingWidget->set_gradient(gradient{ aSetting.value<gradient>(true) });
                         });
                         aSink += aSetting.changed([&, settingWidget]()
                         {
                             neolib::scoped_flag sf{ settingWidget->updating };
-                            settingWidget->set_gradient(aSetting.value<gradient>(true));
+                            settingWidget->set_gradient(gradient{ aSetting.value<gradient>(true) });
                         });
                         result = settingWidget;
                     }

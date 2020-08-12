@@ -113,7 +113,7 @@ namespace neogfx
         // attributes
     private:
         mutable neolib::ref_ptr<i_gradient> iObject;
-        bool iCopy;
+        bool iCopy = false;
         optional_rect iBoundingBox;
     };
 

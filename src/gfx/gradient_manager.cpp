@@ -23,11 +23,18 @@
 
 namespace neogfx
 {
+    std::unique_ptr<i_gradient_manager> sGradientManager;
+
     template <>
     i_gradient_manager& service<i_gradient_manager>()
     {
-        static gradient_manager sGradientManager;
-        return sGradientManager;
+        static bool created = (sGradientManager = std::make_unique<gradient_manager>(), true);
+        return *sGradientManager;
+    }
+
+    template<> void teardown_service<i_gradient_manager>()
+    {
+        sGradientManager.reset();
     }
 
     class gradient_object : public reference_counted<i_gradient>

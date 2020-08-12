@@ -25,6 +25,7 @@
 #include <neolib/core/string_utils.hpp>
 #include <neolib/app/power.hpp>
 #include <neogfx/gfx/image.hpp>
+#include <neogfx/gfx/i_gradient_manager.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/hid/i_hid_devices.hpp>
@@ -159,6 +160,7 @@ namespace neogfx
     app::loader::~loader()
     {
         teardown_service<i_animator>();
+        teardown_service<i_gradient_manager>();
         teardown_service<i_rendering_engine>();
         app* tp = &iApp;
         app* np = nullptr;
