@@ -671,7 +671,10 @@ int main(int argc, char* argv[])
             if (fontPicker.exec() == ng::dialog_result::Accepted)
             {
                 if (changeEditFont)
+                {
                     window.textEdit.set_font(fontPicker.selected_font());
+                    window.textEditEditor.set_font(fontPicker.selected_font());
+                }
                 else
                     ng::service<ng::i_app>().current_style().set_font_info(fontPicker.selected_font());
             }

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
+#include <neogfx/gfx/i_gradient_manager.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/shader_array.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>

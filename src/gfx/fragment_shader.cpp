@@ -18,7 +18,6 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/i_gradient_manager.hpp>
 #include <neogfx/gfx/fragment_shader.hpp>
 
 namespace neogfx

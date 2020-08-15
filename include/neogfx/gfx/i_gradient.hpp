@@ -84,8 +84,31 @@ const neolib::enum_enumerators_t<neogfx::gradient_size> neolib::enum_enumerators
 
 namespace neogfx
 {
-    class i_gradient_sampler;
-    class i_gradient_filter;
+    class i_gradient_sampler
+    {
+        friend class gradient_manager;
+    public:
+        virtual ~i_gradient_sampler() = default;
+    public:
+        virtual i_shader_array<avec4u8> const& sampler() const = 0;
+        virtual uint32_t sampler_row() const = 0;
+        virtual bool used_by(gradient_id aGradient) const = 0;
+        virtual void add_ref(gradient_id aGradient) const = 0;
+        virtual void release(gradient_id aGradient) const = 0;
+        virtual void release_all() const = 0;
+    };
+
+    class i_gradient_filter
+    {
+        friend class gradient_manager;
+    public:
+        virtual ~i_gradient_filter() = default;
+    public:
+        virtual i_shader_array<float> const& sampler() const = 0;
+    private:
+        virtual i_shader_array<float>& sampler() = 0;
+    };
+
 
     class i_gradient : public i_reference_counted
     {
