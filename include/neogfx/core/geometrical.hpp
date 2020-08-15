@@ -876,11 +876,20 @@ namespace neogfx
             else
                 return aabb_2d{ bottom_left().to_vec2(), top_right().to_vec2() };
         }
+        basic_vector<coordinate_type, 4> to_vec4() const
+        {
+            return basic_vector<coordinate_type, 4>{ top_left().x, top_left().y, bottom_right().x, bottom_right().y };
+        }
     public:
         template <typename T>
-        basic_rect<T, CoordinateSystem> as() const
+        std::enable_if_t<!std::is_same_v<T, coordinate_type>, basic_rect<T, CoordinateSystem>> as() const
         {
             return basic_rect<T, CoordinateSystem>{ *this };
+        }
+        template <typename T>
+        std::enable_if_t<std::is_same_v<T, coordinate_type>, self_type const&> as() const
+        {
+            return *this;
         }
     public:
         size_type epsilon = size_type{ zero };

@@ -27,8 +27,10 @@ namespace neogfx
     {
         auto& coord = add_attribute<vec3f>("VertexPosition"_s, 0u);
         auto& color = add_attribute<vec4f>("VertexColor"_s, 1u);
+        auto& function = add_attribute<vec4f>("VertexFunction"_s, 3u);
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
         add_out_variable<vec4f>("Color"_s, 1u).link(color);
+        add_out_variable<vec4f>("Function"_s, 3u).link(function);
     }
 
     bool standard_vertex_shader::has_standard_vertex_matrices() const
@@ -135,7 +137,7 @@ namespace neogfx
         {
             static const string code =
             {
-                "void standard_texture_vertex_shader(inout vec3 coord, inout vec4 color, inout vec2 texCoord)\n"
+                "void standard_texture_vertex_shader(inout vec3 coord, inout vec4 color, inout vec2 texCoord, inout vec4 function)\n"
                 "{\n"
                 "    standard_vertex_shader(coord, color);\n"
                 "}\n"_s

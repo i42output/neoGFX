@@ -222,6 +222,18 @@ namespace neogfx
                 }
             }
         }
+
+        template <typename ColorContainer, typename T>
+        inline vec4f to_function(ColorContainer const& aColor, T const& aValue)
+        {
+            if (std::holds_alternative<gradient>(aColor))
+            {
+                auto const& value = static_variant_cast<const gradient&>(aColor).bounding_box();
+                if (value != std::nullopt)
+                    return value->as<float>().to_vec4();
+            }
+            return aValue.as<float>().to_vec4();
+        }
     }
 
     opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
@@ -373,7 +385,7 @@ namespace neogfx
 
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
     {
-        aShader.set_gradient(*this, *iGradient, rendering_area(false));
+        aShader.set_gradient(*this, *iGradient);
     }
 
     bool opengl_rendering_context::snap_to_pixel() const
@@ -878,7 +890,7 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), rect{ aFrom, aTo });
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto v1 = aFrom.to_vec3();
         auto v2 = aTo.to_vec3();
@@ -896,6 +908,8 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
+        auto const function = to_function(aPen.color(), basic_rect<float>{ aFrom, aTo });
+
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
@@ -903,7 +917,9 @@ namespace neogfx
                     static_variant_cast<color>(aPen.color()).green<float>(),
                     static_variant_cast<color>(aPen.color()).blue<float>(),
                     static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{} });
+                vec4f{},
+                {},
+                function });
 
         emit_any_stipple(*this, vertexArrays);
     }
@@ -916,7 +932,7 @@ namespace neogfx
         std::optional<disable_multisample> disableMultisample;
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), aRect);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto adjustedRect = aRect;
         if (snap_to_pixel())
@@ -938,6 +954,8 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
+        auto const function = to_function(aPen.color(), aRect);
+
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
@@ -945,7 +963,9 @@ namespace neogfx
                     static_variant_cast<color>(aPen.color()).green<float>(),
                     static_variant_cast<color>(aPen.color()).blue<float>(),
                     static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{} });
+                vec4f{},
+                {},
+                function });
 
         emit_any_stipple(*this, vertexArrays);
     }
@@ -955,7 +975,7 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), aRect);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto adjustedRect = aRect;
         if (snap_to_pixel())
@@ -976,6 +996,8 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
+        auto const function = to_function(aPen.color(), aRect);
+
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
@@ -983,7 +1005,9 @@ namespace neogfx
                     static_variant_cast<color>(aPen.color()).green<float>(),
                     static_variant_cast<color>(aPen.color()).blue<float>(),
                     static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{} });
+                vec4f{},
+                {},
+                function });
 
         emit_any_stipple(*this, vertexArrays);
     }
@@ -995,8 +1019,7 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), 
-                rect{ aCenter - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto vertices = circle_vertices(aCenter, aRadius, aStartAngle, mesh_type::Outline);
 
@@ -1010,6 +1033,8 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
+        auto const function = to_function(aPen.color(), basic_rect<float>{ aCenter - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
+
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
@@ -1017,7 +1042,9 @@ namespace neogfx
                     static_variant_cast<color>(aPen.color()).green<float>(),
                     static_variant_cast<color>(aPen.color()).blue<float>(),
                     static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{} });
+                vec4f{},
+                {},
+                function });
 
         emit_any_stipple(*this, vertexArrays);
     }
@@ -1029,8 +1056,7 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()),
-                rect{ aCenter - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto vertices = arc_vertices(aCenter, aRadius, aStartAngle, aEndAngle, aCenter, mesh_type::Outline);
 
@@ -1044,6 +1070,8 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
+        auto const function = to_function(aPen.color(), basic_rect<float>{ aCenter - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
+
         for (auto const& v : triangles)
             vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
@@ -1051,7 +1079,9 @@ namespace neogfx
                     static_variant_cast<color>(aPen.color()).green<float>(),
                     static_variant_cast<color>(aPen.color()).blue<float>(),
                     static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{} });
+                vec4f{},
+                {},
+                function });
 
         emit_any_stipple(*this, vertexArrays);
     }
@@ -1063,7 +1093,9 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), aPath.bounding_rect());
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
+
+        auto const function = to_function(aPen.color(), aPath.bounding_rect());
 
         for (auto const& subPath : aPath.sub_paths())
         {
@@ -1081,7 +1113,9 @@ namespace neogfx
                                 static_variant_cast<color>(aPen.color()).green<float>(),
                                 static_variant_cast<color>(aPen.color()).blue<float>(),
                                 static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                            vec4f{} });
+                            vec4f{},
+                            {},
+                            function });
                 }
             }
         }
@@ -1092,7 +1126,7 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), bounding_rect(aMesh));
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto const& vertices = aMesh.vertices;
 
@@ -1106,6 +1140,8 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
+        auto const function = to_function(aPen.color(), bounding_rect(aMesh));
+
         for (auto const& v : triangles)
             vertexArrays.push_back({ v + aPosition, std::holds_alternative<color>(aPen.color()) ?
                 vec4f{{
@@ -1113,7 +1149,9 @@ namespace neogfx
                     static_variant_cast<color>(aPen.color()).green<float>(),
                     static_variant_cast<color>(aPen.color()).blue<float>(),
                     static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{} });
+                vec4f{},
+                {},
+                function });
     }
 
     void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation)
@@ -1202,7 +1240,7 @@ namespace neogfx
         auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
         
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
@@ -1210,6 +1248,7 @@ namespace neogfx
             for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
+                auto const function = to_function(drawOp.fill, drawOp.rect);
                 auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles, drawOp.zpos);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
@@ -1219,7 +1258,9 @@ namespace neogfx
                                 static_variant_cast<const color&>(drawOp.fill).green<float>(),
                                 static_variant_cast<const color&>(drawOp.fill).blue<float>(),
                                 static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                            vec4f{} });
+                            vec4f{},
+                            {},
+                            function });
             }
         }
     }
@@ -1234,12 +1275,14 @@ namespace neogfx
             return;
 
         if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), aRect);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
         auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::TriangleFan);
         
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
+
+            auto const function = to_function(aFill, aRect);
 
             for (auto const& v : vertices)
             {
@@ -1249,7 +1292,9 @@ namespace neogfx
                         static_variant_cast<const color&>(aFill).green<float>(),
                         static_variant_cast<const color&>(aFill).blue<float>(),
                         static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{}}); 
+                    vec4f{},
+                    {},
+                    function});
             }
         }
     }
@@ -1261,13 +1306,14 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
-                rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
         auto vertices = circle_vertices(aCenter, aRadius, 0.0, mesh_type::TriangleFan);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
+
+            auto const function = to_function(aFill, rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
             for (auto const& v : vertices)
             {
@@ -1277,7 +1323,9 @@ namespace neogfx
                         static_variant_cast<const color&>(aFill).green<float>(),
                         static_variant_cast<const color&>(aFill).blue<float>(),
                         static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{}});
+                    vec4f{},
+                    {},
+                    function });
             }
         }
     }
@@ -1289,13 +1337,14 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
-                rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
         auto vertices = arc_vertices(aCenter, aRadius, aStartAngle, aEndAngle, aCenter, mesh_type::TriangleFan);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
+
+            auto const function = to_function(aFill, rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
             for (auto const& v : vertices)
             {
@@ -1305,7 +1354,9 @@ namespace neogfx
                         static_variant_cast<const color&>(aFill).green<float>(),
                         static_variant_cast<const color&>(aFill).blue<float>(),
                         static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{}});
+                    vec4f{},
+                    {},
+                    function });
             }
         }
     }
@@ -1321,14 +1372,15 @@ namespace neogfx
             if (subPath.size() > 2)
             {
                 if (std::holds_alternative<gradient>(aFill))
-                     rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), 
-                        aPath.bounding_rect());
+                    rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
                 GLenum mode;
                 auto vertices = path_vertices(aPath, subPath, 0.0, mode);
 
                 {
                     use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, mode, vertices.size() };
+
+                    auto const function = to_function(aFill, aPath.bounding_rect());
 
                     for (auto const& v : vertices)
                     {
@@ -1338,7 +1390,9 @@ namespace neogfx
                                 static_variant_cast<const color&>(aFill).green<float>(),
                                 static_variant_cast<const color&>(aFill).blue<float>(),
                                 static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                            vec4f{}});
+                            vec4f{},
+                            {},
+                            function });
                     }
                 }
             }
@@ -1354,22 +1408,7 @@ namespace neogfx
         auto& firstOp = static_variant_cast<const graphics_operation::fill_shape&>(*aFillShapeOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-        {
-            auto const& vertices = firstOp.mesh.vertices;
-            vec3 min = vertices[0].xyz;
-            vec3 max = min;
-            for (auto const& v : vertices)
-            {
-                min.x = std::min(min.x, v.x + firstOp.position.x);
-                max.x = std::max(max.x, v.x + firstOp.position.x);
-                min.y = std::min(min.y, v.y + firstOp.position.y);
-                max.y = std::max(max.y, v.y + firstOp.position.y);
-            }
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill),
-                rect{
-                    point{ min.x, min.y },
-                    size{ max.x - min.x, max.y - min.y } });
-        }
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES };
@@ -1379,6 +1418,20 @@ namespace neogfx
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(*op);
                 auto const& vertices = drawOp.mesh.vertices;
                 auto const& uv = drawOp.mesh.uv;
+                vec3 min, max;
+                if (std::holds_alternative<gradient>(drawOp.fill))
+                {
+                    min = vertices[0].xyz;
+                    max = min;
+                    for (auto const& v : vertices)
+                    {
+                        min.x = std::min(min.x, v.x + firstOp.position.x);
+                        max.x = std::max(max.x, v.x + firstOp.position.x);
+                        min.y = std::min(min.y, v.y + firstOp.position.y);
+                        max.y = std::max(max.y, v.y + firstOp.position.y);
+                    }
+                }
+                auto const function = to_function(drawOp.fill, rect{ point{ min.x, min.y }, size{ max.x - min.x, max.y - min.y } });
                 if (!vertexArrays.room_for(drawOp.mesh.faces.size() * 3u))
                     vertexArrays.draw_and_execute();
                 for (auto const& f : drawOp.mesh.faces)
@@ -1395,7 +1448,8 @@ namespace neogfx
                                     static_variant_cast<const color&>(drawOp.fill).blue<float>(),
                                     static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
                                 vec4f{},
-                            uv[vi]});
+                            uv[vi],
+                            function });
                     }
                 }
             }
@@ -1726,6 +1780,11 @@ namespace neogfx
             std::optional<neolib::cookie> textureId;
             auto add_item = [&](vec2u32& cacheIndices, auto const& mesh, auto const& material, auto const& faces)
             {
+                auto const function = material.gradient != std::nullopt ?
+                    vec4{
+                        material.gradient->boundingBox->min.x, material.gradient->boundingBox->min.y,
+                        material.gradient->boundingBox->max.x, material.gradient->boundingBox->max.y }.as<float>() :
+                    vec4f{};
                 if (meshRenderCache.state != game::cache_state::Clean)
                 {
                     if (patch_drawable::has_texture(meshRenderer, material))
@@ -1757,10 +1816,11 @@ namespace neogfx
                             auto const& rgba = (material.color != std::nullopt ? material.color->rgba.as<float>() : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
                             auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
                                 (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents) : vec2{});
+                            auto const& xyzw = function;
                             if (nextIndex == vertices.size())
-                                vertices.emplace_back(xyz, rgba, uv);
+                                vertices.emplace_back(xyz, rgba, uv, xyzw );
                             else
-                                vertices[nextIndex] = { xyz, rgba, uv };
+                                vertices[nextIndex] = { xyz, rgba, uv, xyzw };
                             ++nextIndex;
                             if (material.color != std::nullopt)
                                 vertices.back().rgba[3] *= static_cast<float>(iOpacity);
@@ -1847,9 +1907,9 @@ namespace neogfx
             }
 
             if (item->material->gradient)
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *item->material->gradient, rendering_area(false));
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *item->material->gradient);
             else if (iGradient)
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *iGradient, rendering_area(false));
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *iGradient);
             else
                 rendering_engine().default_shader_program().gradient_shader().clear_gradient();
 

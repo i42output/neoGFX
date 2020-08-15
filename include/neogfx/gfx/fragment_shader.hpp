@@ -55,12 +55,15 @@ namespace neogfx
         {
             add_in_variable<vec3f>("Coord"_s, 0u);
             auto& fragColor = add_in_variable<vec4f>("Color"_s, 1u);
+            add_in_variable<vec2f>("TexCoord"_s, 2u);
+            auto& fragFunction = add_in_variable<vec4f>("Function"_s, 3u);
             add_out_variable<vec4f>("FragColor"_s, 0u).link(fragColor);
+            add_out_variable<vec4f>("FragFunction"_s, 1u).link(fragFunction);
         }
     public:
         bool supports(vertex_buffer_type aBufferType) const override
         {
-            return (aBufferType & (vertex_buffer_type::Vertices | vertex_buffer_type::Color)) != vertex_buffer_type::Invalid;
+            return (aBufferType & (vertex_buffer_type::Vertices | vertex_buffer_type::Color | vertex_buffer_type::Function)) != vertex_buffer_type::Invalid;
         }
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
@@ -71,7 +74,7 @@ namespace neogfx
                 {
                     static const string code =
                     {
-                        "void standard_fragment_shader(inout vec4 color)\n"
+                        "void standard_fragment_shader(inout vec4 color, inout vec4 function)\n"
                         "{\n"
                         "}\n"_s
                     };
@@ -91,11 +94,9 @@ namespace neogfx
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_gradient() override;
-        void set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox) override;
-        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox) override;
+        void set_gradient(i_rendering_context& aContext, const gradient& aGradient) override;
+        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient) override;
     private:
-        cache_uniform(uGradientTopLeft)
-        cache_uniform(uGradientBottomRight)
         cache_uniform(uGradientDirection)
         cache_uniform(uGradientAngle)
         cache_uniform(uGradientStartFrom)

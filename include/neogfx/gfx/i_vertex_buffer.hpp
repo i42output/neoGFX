@@ -34,14 +34,15 @@ namespace neogfx
         Vertices    = 0x00000001,
         UV          = 0x00000002,
         Color       = 0x00000004,
+        Function    = 0x00000008,
         // todo
         Custom1     = 0x00010000,
         Custom2     = 0x00020000,
         Custom3     = 0x00040000,
         Custom4     = 0x00080000,
         Persist     = 0x10000000,
-        Default     = Vertices | UV | Color,
-        DefaultECS  = Vertices | UV | Color | Persist
+        Default     = Vertices | UV | Color | Function,
+        DefaultECS  = Vertices | UV | Color | Function | Persist
     };
 
     inline const std::string& standard_vertex_attribute_name(vertex_buffer_type aType)
@@ -61,6 +62,11 @@ namespace neogfx
         case vertex_buffer_type::UV:
         {
             static const std::string sName = "VertexTextureCoord";
+            return sName;
+        }
+        case vertex_buffer_type::Function:
+        {
+            static const std::string sName = "VertexFunction";
             return sName;
         }
         default:

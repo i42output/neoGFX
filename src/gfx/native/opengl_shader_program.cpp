@@ -86,14 +86,30 @@ namespace neogfx
             glCheck(glCompileShader(shaderHandle));
             GLint result;
             glCheck(glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &result));
+            auto dump = [&](const std::string& why)
+            {
+                std::cerr << why << std::endl;
+                int32_t lineNumber = 1;
+                std::istringstream iss{ code.to_std_string() };
+                std::string line;
+                while (std::getline(iss, line))
+                    std::cerr << lineNumber++ << ": " << line << std::endl;
+            };
             if (GL_FALSE == result)
             {
+                dump("Shader compilation error; shader code dump:-");
                 GLint buflen;
                 glCheck(glGetShaderiv(shaderHandle, GL_INFO_LOG_LENGTH, &buflen));
                 std::vector<GLchar> buf(buflen);
                 glCheck(glGetShaderInfoLog(shaderHandle, static_cast<GLsizei>(buf.size()), NULL, &buf[0]));
                 std::string error(&buf[0]);
                 throw failed_to_create_shader_program(error);
+            }
+            else
+            {
+#ifndef NDEBUG
+                dump("Shader code dump:-");
+#endif
             }
             if (std::find(attachedShaderHandles.begin(), attachedShaderHandles.end(), 
                 shaderHandle) == attachedShaderHandles.end())

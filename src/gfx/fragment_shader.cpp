@@ -59,10 +59,10 @@ namespace neogfx
                 "    return sqrt(x * x + y * y);\n"
                 "}\n"
                 "\n"
-                "vec4 color_at(vec2 viewPos)\n"
+                "vec4 color_at(vec2 viewPos, vec4 boundingBox)\n"
                 "{\n"
-                "    vec2 s = uGradientBottomRight - uGradientTopLeft;\n"
-                "    vec2 pos = viewPos - uGradientTopLeft;\n"
+                "    vec2 s = boundingBox.zw - boundingBox.xy;\n"
+                "    vec2 pos = viewPos - boundingBox.xy;\n"
                 "    pos.x = max(min(pos.x, s.x - 1.0), 0.0);\n"
                 "    pos.y = max(min(pos.y, s.y - 1.0), 0.0);\n"
                 "    float uGradientPos;\n"
@@ -115,10 +115,10 @@ namespace neogfx
                 "        pos -= ab;\n"
                 "        vec2 center = ab * uGradientCenter;\n"
                 "        float d = distance(center, pos);\n"
-                "        vec2 c1 = uGradientTopLeft - uGradientTopLeft - ab;\n"
-                "        vec2 c2 = vec2(uGradientTopLeft.x, uGradientBottomRight.y) - uGradientTopLeft - ab;\n"
-                "        vec2 c3 = uGradientBottomRight - uGradientTopLeft - ab;\n"
-                "        vec2 c4 = vec2(uGradientBottomRight.x, uGradientTopLeft.y) - uGradientTopLeft - ab;\n"
+                "        vec2 c1 = boundingBox.xy - boundingBox.xy - ab;\n"
+                "        vec2 c2 = boundingBox.xw - boundingBox.xy - ab;\n"
+                "        vec2 c3 = boundingBox.zw - boundingBox.xy - ab;\n"
+                "        vec2 c4 = boundingBox.zy - boundingBox.xy - ab;\n"
                 "        vec2 cc = c1;\n"
                 "        if (distance(center, c2) < distance(center, cc))\n"
                 "            cc = c2;\n"
@@ -182,14 +182,14 @@ namespace neogfx
                 "    return gradient_color(uGradientPos);\n"
                 "}\n"
                 "\n"
-                "void standard_gradient_shader(inout vec4 color)\n"
+                "void standard_gradient_shader(inout vec4 color, inout vec4 function)\n"
                 "{\n"
                 "    if (uGradientEnabled)\n"
                 "    {\n"
                 "        int d = uGradientFilterSize / 2;\n"
                 "        if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)\n"
                 "        {\n"
-                "            color = color_at(Coord.xy);\n"  
+                "            color = color_at(Coord.xy, function);\n"  
                 "        }\n"
                 "        else\n"
                 "        {\n"
@@ -198,7 +198,7 @@ namespace neogfx
                 "            {\n"
                 "                for (int fx = -d; fx <= d; ++fx)\n"
                 "                {\n"
-                "                    sum += (color_at(Coord.xy + vec2(fx, fy)) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
+                "                    sum += (color_at(Coord.xy + vec2(fx, fy), function) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
                 "                }\n"
                 "            }\n"
                 "            color = sum;\n" 
@@ -217,12 +217,9 @@ namespace neogfx
         uGradientEnabled = false;
     }
 
-    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient, const rect& aBoundingBox)
+    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient)
     {
         enable();
-        basic_rect<float> boundingBox{ aGradient.bounding_box() != std::nullopt ? *aGradient.bounding_box() : aBoundingBox };
-        uGradientTopLeft = vec2f{ boundingBox.top_left().x, boundingBox.top_left().y };
-        uGradientBottomRight = vec2f{ boundingBox.bottom_right().x, boundingBox.bottom_right().y };
         uGradientDirection = aGradient.direction();
         uGradientAngle = std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f;
         uGradientStartFrom = std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1;
@@ -242,19 +239,16 @@ namespace neogfx
         uGradientEnabled = true;
     }
 
-    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, const rect& aBoundingBox)
+    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient)
     {
         gradient g = service<i_gradient_manager>().find_gradient(aGradient.id.cookie());
-        if (aGradient.boundingBox)
-            g.set_bounding_box(rect{ *aGradient.boundingBox });
-        set_gradient(aContext, g, aBoundingBox);
+        set_gradient(aContext, g);
     }
 
     standard_texture_shader::standard_texture_shader(const std::string& aName) :
         standard_fragment_shader<i_texture_shader>{ aName }
     {
         disable();
-        add_in_variable<vec2f>("TexCoord"_s, 2u);
         set_uniform("tex"_s, sampler2D{ 1 });
         set_uniform("texMS"_s, sampler2DMS{ 2 });
         uTextureEffect = shader_effect::None;
@@ -272,7 +266,7 @@ namespace neogfx
         {
             static const string code 
             {
-                "void standard_texture_shader(inout vec4 color)\n"
+                "void standard_texture_shader(inout vec4 color, inout vec4 function)\n"
                 "{\n"
                 "    if (uTextureEnabled)\n"
                 "    {\n"
@@ -389,7 +383,7 @@ namespace neogfx
                 "}\n"
                 "\n"
                 "\n"
-                "void standard_glyph_shader(inout vec4 color)\n"
+                "void standard_glyph_shader(inout vec4 color, inout vec4 function)\n"
                 "{\n"
                 "    if (uGlyphEnabled)\n"
                 "    {\n"
@@ -466,7 +460,7 @@ namespace neogfx
         {
             static const string code
             {
-                "void standard_stipple_shader(inout vec4 color)\n"
+                "void standard_stipple_shader(inout vec4 color, inout vec4 function)\n"
                 "{\n"
                 "    if (uStippleEnabled)\n"
                 "    {\n"
