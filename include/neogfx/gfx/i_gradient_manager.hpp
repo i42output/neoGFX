@@ -33,6 +33,10 @@ namespace neogfx
     public:
         virtual i_shader_array<avec4u8> const& sampler() const = 0;
         virtual uint32_t sampler_row() const = 0;
+        virtual bool used_by(gradient_id aGradient) const = 0;
+        virtual void add_ref(gradient_id aGradient) const = 0;
+        virtual void release(gradient_id aGradient) const = 0;
+        virtual void release_all() const = 0;
     };
 
     class i_gradient_filter

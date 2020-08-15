@@ -166,8 +166,16 @@ namespace neogfx
         }
         color_stop_list& color_stops() override
         {
-            iFixer();
-            iNeedFixing = true;
+            if (iSampler)
+            {
+                iSampler->release(id());
+                iSampler = nullptr;
+            }
+            if (!iInFixer)
+            {
+                iFixer();
+                iColorStopsNeedFixing = true;
+            }
             return iColorStops;
         }
         alpha_stop_list const& alpha_stops() const override
@@ -177,8 +185,16 @@ namespace neogfx
         }
         alpha_stop_list& alpha_stops() override
         {
-            iFixer();
-            iNeedFixing = true;
+            if (iSampler)
+            {
+                iSampler->release(id());
+                iSampler = nullptr;
+            }
+            if (!iInFixer)
+            {
+                iFixer();
+                iAlphaStopsNeedFixing = true;
+            }
             return iAlphaStops;
         }
         color_stop_list::iterator find_color_stop(scalar aPos, bool aToInsert = false) override
@@ -378,7 +394,6 @@ namespace neogfx
         void set_smoothness(scalar aSmoothness) override
         {
             iSmoothness = aSmoothness;
-            iFilter.second = false;
         }
         const optional_rect& bounding_box() const override
         {
@@ -393,11 +408,12 @@ namespace neogfx
         const i_gradient_sampler& colors() const override
         {
             iFixer();
-            return service<i_gradient_manager>().sampler(*this);
+            if (iSampler && iSampler->used_by(id()))
+                return *iSampler;
+            return *(iSampler = &service<i_gradient_manager>().sampler(*this));
         }
         const i_gradient_filter& filter() const override
         {
-            iFixer();
             return service<i_gradient_manager>().filter(*this);
         }
         // object
@@ -410,31 +426,38 @@ namespace neogfx
     private:
         void fix() 
         {
-            if (!iNeedFixing || iInFixer)
+            if (iInFixer)
                 return;
-            iNeedFixing = false;
             neolib::scoped_flag sf{ iInFixer };
-            if (color_stops().empty())
-                color_stops() = color_stop_list{ color_stop{ 0.0, sRGB_color::Black }, color_stop{ 1.0, sRGB_color::Black } };
-            else if (color_stops().size() == 1)
+            if (iColorStopsNeedFixing)
             {
-                auto stop = color_stops().back();
-                color_stops().push_back(stop);
-                if (color_stops()[0].first() < 1.0)
-                    color_stops()[1].first() = 1.0;
-                else
-                    color_stops()[0].first() = 0.0;
+                iColorStopsNeedFixing = false;
+                if (color_stops().empty())
+                    color_stops() = color_stop_list{ color_stop{ 0.0, sRGB_color::Black }, color_stop{ 1.0, sRGB_color::Black } };
+                else if (color_stops().size() == 1)
+                {
+                    auto stop = color_stops().back();
+                    color_stops().push_back(stop);
+                    if (color_stops()[0].first() < 1.0)
+                        color_stops()[1].first() = 1.0;
+                    else
+                        color_stops()[0].first() = 0.0;
+                }
             }
-            if (alpha_stops().empty())
-                alpha_stops() = alpha_stop_list{ { 0.0, 255_u8 }, { 1.0, 255_u8 } };
-            else if (alpha_stops().size() == 1)
+            if (iAlphaStopsNeedFixing)
             {
-                auto stop = alpha_stops().back();
-                alpha_stops().push_back(stop);
-                if (alpha_stops()[0].first() < 1.0)
-                    alpha_stops()[1].first() = 1.0;
-                else
-                    alpha_stops()[0].first() = 0.0;
+                iAlphaStopsNeedFixing = false;
+                if (alpha_stops().empty())
+                    alpha_stops() = alpha_stop_list{ { 0.0, 255_u8 }, { 1.0, 255_u8 } };
+                else if (alpha_stops().size() == 1)
+                {
+                    auto stop = alpha_stops().back();
+                    alpha_stops().push_back(stop);
+                    if (alpha_stops()[0].first() < 1.0)
+                        alpha_stops()[1].first() = 1.0;
+                    else
+                        alpha_stops()[0].first() = 0.0;
+                }
             }
         }
         // state
@@ -450,8 +473,9 @@ namespace neogfx
         optional_point iCenter;
         scalar iSmoothness = 0.0;
         optional_rect iBoundingBox;
-        mutable std::pair<std::optional<shader_array<float>>, bool> iFilter;  
-        mutable bool iNeedFixing = true;
+        mutable const i_gradient_sampler* iSampler = nullptr;
+        mutable bool iColorStopsNeedFixing = true;
+        mutable bool iAlphaStopsNeedFixing = true;
         bool iInFixer = false;
         std::function<void()> iFixer = [&]() { fix(); };
     };
@@ -494,6 +518,7 @@ namespace neogfx
                 iAllocatedSamplers.erase(iSamplerQueue.front());
                 iSamplerQueue.pop_front();
             }
+            allocated->second.release_all();
             avec4u8 colorValues[i_gradient::MaxStops];
             auto const cx = static_cast<uint32_t>(iSamplers.data().extents().cx);
             for (uint32_t x = 0u; x < cx; ++x)
@@ -507,6 +532,7 @@ namespace neogfx
         if (existingQueueEntry != iSamplerQueue.end())
             iSamplerQueue.erase(existingQueueEntry);
         iSamplerQueue.push_back(allocated);
+        allocated->second.add_ref(aGradient.id());
         return allocated->second;
     }
 

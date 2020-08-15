@@ -195,7 +195,6 @@ namespace neogfx
             outline.deflate(penWidth, penWidth);
             break;
         }
-        double const colorOffset = 0.1;
         color colorStart = faceColor.lighter(0x0A);
         color colorEnd = faceColor;
         switch(iStyle)
@@ -203,19 +202,7 @@ namespace neogfx
         case push_button_style::Toolbar:
         case push_button_style::TitleBar:
             if (!spot_color())
-            {
-                colorStart = colorStart.with_lightness(colorStart.to_hsl().lightness() + 0.1);
-                const double transitionHeight = 0.04;
-                const double transitionStart = 0.5 - transitionHeight / 2.0 +
-                    (!capturing() ? 0.0 : (ceil_rasterized(1.0_mm) / outline.bounding_rect().height()));
-                const double transitionEnd = transitionStart + transitionHeight;
-                gradient const fill{ gradient::color_stop_list{
-                        gradient::color_stop{ 0.0, colorStart },
-                        gradient::color_stop{ transitionStart, colorEnd.to_hsl().lighter(colorOffset * 0.6).to_rgb<color>() },
-                        gradient::color_stop{ transitionEnd, colorEnd.to_hsl().lighter(colorOffset * 0.2).to_rgb<color>() },
-                        gradient::color_stop{ 1.0, colorEnd } } };
-                aGc.fill_path(outline, fill);
-            }
+                aGc.fill_path(outline, gradient{ colorStart.with_lightness(colorStart.to_hsl().lightness() + 0.1), colorEnd });
             else
                 aGc.fill_path(outline, faceColor);
             break;

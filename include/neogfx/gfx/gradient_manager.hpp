@@ -44,9 +44,29 @@ namespace neogfx
         {
             return iRow;
         }
+    public:
+        bool used_by(gradient_id aGradient) const override
+        {
+            return iReferences.find(aGradient) != iReferences.end();
+        }
+        void add_ref(gradient_id aGradient) const override
+        {
+            iReferences.insert(aGradient);
+        }
+        void release(gradient_id aGradient) const override
+        {
+            auto existing = iReferences.find(aGradient);
+            if (existing != iReferences.end())
+                iReferences.erase(existing);
+        }
+        void release_all() const override
+        {
+            iReferences.clear();
+        }
     private:
         i_shader_array<avec4u8> const* iSampler;
         uint32_t iRow;
+        mutable std::unordered_set<gradient_id> iReferences;
     };
 
     constexpr uint32_t GRADIENT_FILTER_SIZE = 15;
@@ -81,7 +101,8 @@ namespace neogfx
         typedef ref_ptr<i_gradient> gradient_pointer;
         typedef std::pair<gradient_pointer, uint32_t> gradient_list_entry;
         typedef neolib::jar<gradient_list_entry> gradient_list;
-        typedef std::map<std::pair<gradient::color_stop_list, gradient::alpha_stop_list>, gradient_sampler> sampler_map_t;
+        typedef std::pair<gradient::color_stop_list, gradient::alpha_stop_list> sampler_key_t;
+        typedef std::map<sampler_key_t, gradient_sampler> sampler_map_t;
         typedef std::map<scalar, gradient_filter> filter_map_t;
         // constants
     public:
