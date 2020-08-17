@@ -198,22 +198,22 @@ namespace neogfx
                     }
                     else if (aSetting.value().type_name() == "neogfx::gradient")
                     {
-                        auto settingWidget = std::make_shared<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<gradient>());
+                        auto settingWidget = std::make_shared<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<unique_gradient>());
                         settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
                         aSink += settingWidget->GradientChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
-                                aSetting.set_value(gradient{ settingWidget->gradient() });
+                                aSetting.set_value(unique_gradient{ settingWidget->gradient() });
                         });
                         aSink += aSetting.changing([&, settingWidget]()
                         {
                             neolib::scoped_flag sf{ settingWidget->updating };
-                            settingWidget->set_gradient(gradient{ aSetting.value<gradient>(true) });
+                            settingWidget->set_gradient(unique_gradient{ aSetting.value<unique_gradient>(true) });
                         });
                         aSink += aSetting.changed([&, settingWidget]()
                         {
                             neolib::scoped_flag sf{ settingWidget->updating };
-                            settingWidget->set_gradient(gradient{ aSetting.value<gradient>(true) });
+                            settingWidget->set_gradient(unique_gradient{ aSetting.value<unique_gradient>(true) });
                         });
                         result = settingWidget;
                     }

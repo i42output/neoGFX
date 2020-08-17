@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
-#include <neolib/app/i_setting_value.hpp>
+#include <neolib/app/i_settings.hpp>
 #include <neogfx/gfx/i_gradient.hpp>
 
 namespace neogfx
@@ -297,4 +297,10 @@ namespace neogfx
     }
 }
 
-define_setting_type(neogfx::gradient)
+define_setting_type_as(neogfx::unique_gradient, neogfx::gradient)
+
+template <>
+struct neolib::as_setting<neogfx::gradient>
+{
+    typedef neogfx::unique_gradient type;
+};
