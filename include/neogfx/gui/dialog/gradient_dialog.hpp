@@ -36,8 +36,8 @@ namespace neogfx
         gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient);
         ~gradient_dialog();
     public:
-        const neogfx::gradient& gradient() const;
-        void set_gradient(const neogfx::gradient& aGradient);
+        neogfx::gradient gradient() const;
+        void set_gradient(const i_gradient& aGradient);
         const gradient_widget& gradient_selector() const;
         gradient_widget& gradient_selector();
     private:

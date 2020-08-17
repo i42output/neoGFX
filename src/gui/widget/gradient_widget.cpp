@@ -137,7 +137,7 @@ namespace neogfx
         set_gradient(aGradient);
     }
 
-    const gradient& gradient_widget::gradient() const
+    gradient gradient_widget::gradient() const
     {
         return iSelection;
     }
@@ -173,14 +173,14 @@ namespace neogfx
     {
         if (iCurrentColorStop)
             return *iCurrentColorStop;
-        return gradient().color_stops().end();
+        return iSelection.color_stops().end();
     }
 
     gradient::alpha_stop_list::const_iterator gradient_widget::selected_alpha_stop() const
     {
         if (iCurrentAlphaStop)
             return *iCurrentAlphaStop;
-        return gradient().alpha_stops().end();
+        return iSelection.alpha_stops().end();
     }
 
     size_policy gradient_widget::size_policy() const
@@ -201,7 +201,7 @@ namespace neogfx
         rect rectContents = contents_rect();
         color frameColor = background_color().shaded(0x20);
         draw_alpha_background(aGc, rectContents, dip(ALPHA_PATTERN_SIZE));
-        neogfx::gradient selection = iSelection;
+        neogfx::gradient selection = gradient();
         selection.set_direction(gradient_direction::Horizontal);
         aGc.fill_rect(rectContents, selection);
         rectContents.inflate(size{ dip(BORDER_THICKNESS) });
@@ -290,6 +290,7 @@ namespace neogfx
                     stop.second() = color.with_alpha(1.0);
                     if (color.alpha() != 0xFF)
                     {
+                        iCurrentAlphaStop = std::nullopt;
                         auto as = iSelection.find_alpha_stop(stop.first());
                         if (as == iSelection.alpha_stops().end() || as->first() != stop.first())
                             as = iSelection.insert_alpha_stop(stop.first());
@@ -365,6 +366,7 @@ namespace neogfx
                             stop.second() = color.with_alpha(1.0);
                             if (color.alpha() != 0xFF)
                             {
+                                iCurrentAlphaStop = std::nullopt;
                                 auto as = iSelection.find_alpha_stop(stop.first());
                                 if (as == iSelection.alpha_stops().end() || as->first() != stop.first())
                                     as = iSelection.insert_alpha_stop(stop.first());
@@ -552,9 +554,11 @@ namespace neogfx
 
     gradient_widget::stop_iterator gradient_widget::stop_at(const point& aPosition)
     {
+        iCurrentColorStop = std::nullopt;
         for (auto i = iSelection.color_stops().begin(); i != iSelection.color_stops().end(); ++i)
             if (color_stop_rect(*i).contains(aPosition))
                 return i;
+        iCurrentAlphaStop = std::nullopt;
         for (auto i = iSelection.alpha_stops().begin(); i != iSelection.alpha_stops().end(); ++i)
             if (alpha_stop_rect(*i).contains(aPosition))
                 return i;

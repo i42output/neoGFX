@@ -26,7 +26,8 @@
 
 namespace neogfx
 {
-    class gradient : public reference_counted<i_gradient>
+    template <gradient_sharing Sharing>
+    class basic_gradient : public reference_counted<i_gradient>
     {
         // types
     public:
@@ -39,21 +40,21 @@ namespace neogfx
         typedef alpha_stop_list::abstract_type abstract_alpha_stop_list;
         // construction
     public:
-        gradient();
-        gradient(const gradient& aOther);
-        gradient(const i_gradient& aOther);
-        gradient(const i_ref_ptr<i_gradient>& aObject);
-        explicit gradient(const i_string& aCssDeclaration);
-        explicit gradient(const sRGB_color& aColor);
-        gradient(const sRGB_color& aColor, gradient_direction aDirection);
-        gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection = gradient_direction::Vertical);
-        gradient(const abstract_color_stop_list& aColorStops, gradient_direction aDirection = gradient_direction::Vertical);
-        gradient(const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
-        gradient(const gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops);
-        gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
-        gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
+        basic_gradient();
+        basic_gradient(const basic_gradient& aOther);
+        basic_gradient(const i_gradient& aOther);
+        basic_gradient(const i_ref_ptr<i_gradient>& aObject);
+        explicit basic_gradient(const i_string& aCssDeclaration);
+        explicit basic_gradient(const sRGB_color& aColor);
+        basic_gradient(const sRGB_color& aColor, gradient_direction aDirection);
+        basic_gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection = gradient_direction::Vertical);
+        basic_gradient(const abstract_color_stop_list& aColorStops, gradient_direction aDirection = gradient_direction::Vertical);
+        basic_gradient(const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
+        basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops);
+        basic_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
+        basic_gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
     public:
-        gradient& operator=(const i_gradient& aOther);
+        basic_gradient& operator=(const i_gradient& aOther);
     public:
         void clone(neolib::i_ref_ptr<i_gradient> & aResult) const override;
         // meta
@@ -66,6 +67,10 @@ namespace neogfx
         abstract_color_stop_list& color_stops() override;
         abstract_alpha_stop_list const& alpha_stops() const override;
         abstract_alpha_stop_list& alpha_stops() override;
+        abstract_color_stop_list::const_iterator find_color_stop(scalar aPos, bool aToInsert = false) const override;
+        abstract_color_stop_list::const_iterator find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) const override;
+        abstract_alpha_stop_list::const_iterator find_alpha_stop(scalar aPos, bool aToInsert = false) const override;
+        abstract_alpha_stop_list::const_iterator find_alpha_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) const override;
         abstract_color_stop_list::iterator find_color_stop(scalar aPos, bool aToInsert = false) override;
         abstract_color_stop_list::iterator find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) override;
         abstract_alpha_stop_list::iterator find_alpha_stop(scalar aPos, bool aToInsert = false) override;
@@ -113,9 +118,12 @@ namespace neogfx
         // attributes
     private:
         mutable neolib::ref_ptr<i_gradient> iObject;
-        bool iCopy = false;
         optional_rect iBoundingBox;
     };
+
+    using shared_gradient = basic_gradient<gradient_sharing::Shared>;
+    using unique_gradient = basic_gradient<gradient_sharing::Unique>;
+    using gradient = shared_gradient;
 
     typedef std::optional<gradient> optional_gradient;
     typedef neolib::variant<color, gradient> color_or_gradient;
@@ -263,6 +271,28 @@ namespace neogfx
         aGradient.set_center(center);
         aGradient.set_smoothness(smoothness);
         aStream.imbue(previousImbued);
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const color_or_gradient& aColorOrGradient)
+    {
+        if (std::holds_alternative<color>(aColorOrGradient))
+            aStream << static_variant_cast<color const&>(aColorOrGradient) << std::endl;
+        else if (std::holds_alternative<gradient>(aColorOrGradient))
+            aStream << static_variant_cast<gradient const&>(aColorOrGradient) << std::endl;
+        else
+            aStream << "(none)" << std::endl;
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const optional_color_or_gradient& aOptionalColorOrGradient)
+    {
+        if (aOptionalColorOrGradient != std::nullopt)
+            aStream << *aOptionalColorOrGradient << std::endl;
+        else
+            aStream << "(none)" << std::endl;
         return aStream;
     }
 }

@@ -47,7 +47,7 @@ namespace neogfx
         gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
         gradient_widget(gradient_dialog& aParent, i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
     public:
-        const neogfx::gradient& gradient() const;
+        neogfx::gradient gradient() const;
         void set_gradient(const i_gradient& aGradient);
         void set_gradient(const i_ref_ptr<i_gradient>& aGradient);
         const std::optional<color_dialog::custom_color_list>& custom_colors() const;
@@ -86,7 +86,7 @@ namespace neogfx
         dimension border_spacer_thickness() const;
     private:
         bool iInGradientDialog;
-        neogfx::gradient iSelection;
+        unique_gradient iSelection;
         std::optional<point> iClicked;
         std::optional<gradient::color_stop_list::iterator> iCurrentColorStop;
         std::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;

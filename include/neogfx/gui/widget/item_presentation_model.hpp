@@ -553,7 +553,7 @@ namespace neogfx
                     return (cell_format(aIndex) % std::get<type>(item_model().cell_data(modelIndex))).str();
                 else
                     return "";
-            }, item_model().cell_data(modelIndex).for_visitor());
+            }, item_model().cell_data(modelIndex));
         }
         item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const override
         {

@@ -50,7 +50,7 @@ namespace neogfx
         template <typename T>
         i_shader_variable& add_attribute(const i_string& aName, shader_variable_location aLocation)
         {
-            return add_attribute(aName, aLocation, static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type>()));
+            return add_attribute(aName, aLocation, static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()));
         }    
     public:
         virtual bool has_standard_vertex_matrices() const = 0;

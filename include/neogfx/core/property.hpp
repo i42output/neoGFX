@@ -133,7 +133,7 @@ namespace neogfx
             std::visit([this](auto&& arg)
             {
                 *this = std::forward<decltype(arg)>(arg);
-            }, aValue.for_visitor());
+            }, aValue);
         }
         bool has_delegate() const override
         {
@@ -177,7 +177,7 @@ namespace neogfx
                     // [[unreachable]]
                     throw invalid_type();
                 }
-            }, delegate().get(*this).for_visitor());
+            }, delegate().get(*this));
             return *dptr;
         }
         template <typename T2>

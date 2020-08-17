@@ -231,12 +231,12 @@ namespace neogfx
     {
     }
 
-    const gradient& gradient_dialog::gradient() const
+    gradient gradient_dialog::gradient() const
     {
         return gradient_selector().gradient();
     }
 
-    void gradient_dialog::set_gradient(const neogfx::gradient& aGradient)
+    void gradient_dialog::set_gradient(const i_gradient& aGradient)
     {
         gradient_selector().set_gradient(aGradient);
     }
@@ -345,7 +345,7 @@ namespace neogfx
 
         iReverse.Clicked([this]()
         {
-            set_gradient(gradient().reversed());
+            set_gradient(*gradient().reversed());
         });
 
         iReversePartial.Clicked([this]()

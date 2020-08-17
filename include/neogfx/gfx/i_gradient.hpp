@@ -109,10 +109,16 @@ namespace neogfx
         virtual i_shader_array<float>& sampler() = 0;
     };
 
+    enum class gradient_sharing
+    {
+        Shared,
+        Unique
+    };
 
     class i_gradient : public i_reference_counted
     {
-        friend class gradient;
+        template <gradient_sharing>
+        friend class basic_gradient;
         // exceptions
     public:
         struct bad_position : std::logic_error { bad_position() : std::logic_error("neogfx::i_gradient::bad_position") {} };
@@ -140,6 +146,10 @@ namespace neogfx
         virtual color_stop_list& color_stops() = 0;
         virtual alpha_stop_list const& alpha_stops() const = 0;
         virtual alpha_stop_list& alpha_stops() = 0;
+        virtual color_stop_list::const_iterator find_color_stop(scalar aPos, bool aToInsert = false) const = 0;
+        virtual color_stop_list::const_iterator find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) const = 0;
+        virtual alpha_stop_list::const_iterator find_alpha_stop(scalar aPos, bool aToInsert = false) const = 0;
+        virtual alpha_stop_list::const_iterator find_alpha_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) const = 0;
         virtual color_stop_list::iterator find_color_stop(scalar aPos, bool aToInsert = false) = 0;
         virtual color_stop_list::iterator find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) = 0;
         virtual alpha_stop_list::iterator find_alpha_stop(scalar aPos, bool aToInsert = false) = 0;

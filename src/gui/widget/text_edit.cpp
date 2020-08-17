@@ -101,26 +101,36 @@ namespace neogfx
     void text_edit::style::set_font(const optional_font& aFont)
     {
         iFont = aFont;
+        if (iParent)
+            iParent->update();
     }
 
     void text_edit::style::set_glyph_color(const color_or_gradient& aColor)
     {
         iGlyphColor = aColor;
+        if (iParent)
+            iParent->update();
     }
 
     void text_edit::style::set_text_color(const color_or_gradient& aColor)
     {
         iTextColor = aColor;
+        if (iParent)
+            iParent->update();
     }
 
     void text_edit::style::set_paper_color(const color_or_gradient& aColor)
     {
         iPaperColor = aColor;
+        if (iParent)
+            iParent->update();
     }
 
     void text_edit::style::set_text_effect(const optional_text_effect& aEffect)
     {
         iTextEffect = aEffect;
+        if (iParent)
+            iParent->update();
     }
 
     text_edit::style& text_edit::style::merge(const style& aOverridingStyle)
@@ -133,6 +143,8 @@ namespace neogfx
             iPaperColor = aOverridingStyle.paper_color();
         if (aOverridingStyle.text_effect() != std::nullopt)
             iTextEffect = aOverridingStyle.text_effect();
+        if (iParent)
+            iParent->update();
         return *this;
     }
 

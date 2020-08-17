@@ -190,8 +190,8 @@ namespace neogfx
                     neolib::scoped_flag sf{ iUpdatingProperty };
                     auto const value = mix(mix_value(), aFrom, aTo);
                     property().set_from_variant(value);
-                }, to().for_visitor());
-            }, from().for_visitor());
+                }, to());
+            }, from());
         }
         else
         {

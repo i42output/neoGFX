@@ -197,6 +197,36 @@ namespace neogfx
             }
             return iAlphaStops;
         }
+        color_stop_list::const_iterator find_color_stop(scalar aPos, bool aToInsert = false) const override
+        {
+            auto colorStop = std::lower_bound(color_stops().begin(), color_stops().end(), color_stop{ aPos, sRGB_color{} },
+                [](const color_stop& aLeft, const color_stop& aRight)
+            {
+                return aLeft.first() < aRight.first();
+            });
+            if (colorStop == color_stops().end() && !aToInsert)
+                --colorStop;
+            return colorStop;
+        }
+        color_stop_list::const_iterator find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) const override
+        {
+            return find_color_stop(normalized_position(aPos, aStart, aEnd), aToInsert);
+        }
+        alpha_stop_list::const_iterator find_alpha_stop(scalar aPos, bool aToInsert = false) const override
+        {
+            auto alphaStop = std::lower_bound(alpha_stops().begin(), alpha_stops().end(), alpha_stop{ aPos, 255_u8 },
+                [](const alpha_stop& aLeft, const alpha_stop& aRight)
+            {
+                return aLeft.first() < aRight.first();
+            });
+            if (alphaStop == alpha_stops().end() && !aToInsert)
+                --alphaStop;
+            return alphaStop;
+        }
+        alpha_stop_list::const_iterator find_alpha_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert = false) const override
+        {
+            return find_alpha_stop(normalized_position(aPos, aStart, aEnd), aToInsert);
+        }
         color_stop_list::iterator find_color_stop(scalar aPos, bool aToInsert = false) override
         {
             auto colorStop = std::lower_bound(color_stops().begin(), color_stops().end(), color_stop{ aPos, sRGB_color{} },

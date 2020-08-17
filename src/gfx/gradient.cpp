@@ -23,273 +23,357 @@
 
 namespace neogfx
 {
-    gradient::gradient()
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient()
     {
     }
 
-    gradient::gradient(const gradient& aOther) : 
-        gradient{ static_cast<const i_gradient&>(aOther) }
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const basic_gradient& aOther) :
+        basic_gradient{ static_cast<const i_gradient&>(aOther) }
     {
     }
 
-    gradient::gradient(const i_gradient& aOther) :
-        iCopy{ true },
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const i_gradient& aOther) :
         iBoundingBox{ aOther.bounding_box() }
     {
-        aOther.share_object(iObject);
+        if constexpr (Sharing == gradient_sharing::Shared)
+            aOther.share_object(iObject);
+        else
+            iObject = aOther.clone();
     }
 
-    gradient::gradient(const i_ref_ptr<i_gradient>& aObject) :
-        iObject{ aObject }
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const i_ref_ptr<i_gradient>& aObject)
     {
+        if constexpr (Sharing == gradient_sharing::Shared)
+            iObject = aObject;
+        else
+            iObject = aObject->clone();
     }
 
-    gradient::gradient(const i_string& aCssDeclaration) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const i_string& aCssDeclaration) :
         iObject{ service<i_gradient_manager>().create_gradient(aCssDeclaration) }
     {
     }
 
-    gradient::gradient(const sRGB_color& aColor) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const sRGB_color& aColor) :
         iObject{ service<i_gradient_manager>().create_gradient(aColor) }
     {
     }
 
-    gradient::gradient(const sRGB_color& aColor, gradient_direction aDirection) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const sRGB_color& aColor, gradient_direction aDirection) :
         iObject{ service<i_gradient_manager>().create_gradient(aColor, aDirection) }
     {
     }
 
-    gradient::gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const sRGB_color& aColor1, const sRGB_color& aColor2, gradient_direction aDirection) :
         iObject{ service<i_gradient_manager>().create_gradient(aColor1, aColor2, aDirection) }
     {
     }
 
-    gradient::gradient(const abstract_color_stop_list& aColorStops, gradient_direction aDirection) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const abstract_color_stop_list& aColorStops, gradient_direction aDirection) :
         iObject{ service<i_gradient_manager>().create_gradient(aColorStops, aDirection) }
     {
     }
 
-    gradient::gradient(const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops, gradient_direction aDirection) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops, gradient_direction aDirection) :
         iObject{ service<i_gradient_manager>().create_gradient(aColorStops, aAlphaStops, aDirection) }
     {
     }
 
-    gradient::gradient(const gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops) :
         iObject{ service<i_gradient_manager>().create_gradient(aOther, aColorStops, aAlphaStops) }
     {
     }
 
-    gradient::gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection) :
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection) :
         iObject{ service<i_gradient_manager>().create_gradient(aColors, aDirection) }
     {
     }
 
-    gradient::gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection) :
-        gradient{ neolib::vector<sRGB_color>{aColors}, aDirection }
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection) :
+        basic_gradient{ neolib::vector<sRGB_color>{aColors}, aDirection }
     {
     }
 
-    gradient& gradient::operator=(const i_gradient& aOther)
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>& basic_gradient<Sharing>::operator=(const i_gradient& aOther)
     {
         if (&aOther == this)
             return *this;
-        iCopy = true;
         iBoundingBox = aOther.bounding_box();
-        aOther.share_object(iObject); 
+        if constexpr (Sharing == gradient_sharing::Shared)
+            aOther.share_object(iObject);
+        else
+            iObject = aOther.clone();
         return *this;
     }
 
-    void gradient::clone(neolib::i_ref_ptr<i_gradient>& aResult) const
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::clone(neolib::i_ref_ptr<i_gradient>& aResult) const
     {
-        aResult = neolib::make_ref<gradient>(*this);
+        aResult = service<i_gradient_manager>().create_gradient(*this);
     }
 
-    gradient_id gradient::id() const
+    template <gradient_sharing Sharing>
+    gradient_id basic_gradient<Sharing>::id() const
     {
         return object().id();
     }
 
-    bool gradient::is_singular() const
+    template <gradient_sharing Sharing>
+    bool basic_gradient<Sharing>::is_singular() const
     {
         return iObject == nullptr;
     }
 
-    gradient::abstract_color_stop_list const& gradient::color_stops() const
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_color_stop_list const& basic_gradient<Sharing>::color_stops() const
     {
         return object().color_stops();
     }
 
-    gradient::abstract_color_stop_list& gradient::color_stops()
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_color_stop_list& basic_gradient<Sharing>::color_stops()
     {
         return object().color_stops();
     }
 
-    gradient::abstract_alpha_stop_list const& gradient::alpha_stops() const
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list const& basic_gradient<Sharing>::alpha_stops() const
     {
         return object().alpha_stops();
     }
 
-    gradient::abstract_alpha_stop_list& gradient::alpha_stops()
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list& basic_gradient<Sharing>::alpha_stops()
     {
         return object().alpha_stops();
     }
 
-    gradient::abstract_color_stop_list::iterator gradient::find_color_stop(scalar aPos, bool aToInsert)
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_color_stop_list::const_iterator basic_gradient<Sharing>::find_color_stop(scalar aPos, bool aToInsert) const
     {
         return object().find_color_stop(aPos, aToInsert);
     }
 
-    gradient::abstract_color_stop_list::iterator gradient::find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert)
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::abstract_color_stop_list::const_iterator basic_gradient<Sharing>::find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert) const
     {
         return object().find_color_stop(aPos, aStart, aEnd, aToInsert);
     }
 
-    gradient::abstract_alpha_stop_list::iterator gradient::find_alpha_stop(scalar aPos, bool aToInsert)
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list::const_iterator basic_gradient<Sharing>::find_alpha_stop(scalar aPos, bool aToInsert) const
     {
         return object().find_alpha_stop(aPos, aToInsert);
     }
 
-    gradient::abstract_alpha_stop_list::iterator gradient::find_alpha_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert)
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list::const_iterator basic_gradient<Sharing>::find_alpha_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert) const
     {
         return object().find_alpha_stop(aPos, aStart, aEnd, aToInsert);
     }
 
-    gradient::abstract_color_stop_list::iterator gradient::insert_color_stop(scalar aPos)
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_color_stop_list::iterator basic_gradient<Sharing>::find_color_stop(scalar aPos, bool aToInsert)
+    {
+        return object().find_color_stop(aPos, aToInsert);
+    }
+
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_color_stop_list::iterator basic_gradient<Sharing>::find_color_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert)
+    {
+        return object().find_color_stop(aPos, aStart, aEnd, aToInsert);
+    }
+
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list::iterator basic_gradient<Sharing>::find_alpha_stop(scalar aPos, bool aToInsert)
+    {
+        return object().find_alpha_stop(aPos, aToInsert);
+    }
+
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list::iterator basic_gradient<Sharing>::find_alpha_stop(scalar aPos, scalar aStart, scalar aEnd, bool aToInsert)
+    {
+        return object().find_alpha_stop(aPos, aStart, aEnd, aToInsert);
+    }
+
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_color_stop_list::iterator basic_gradient<Sharing>::insert_color_stop(scalar aPos)
     {
         return object().insert_color_stop(aPos);
     }
 
-    gradient::abstract_color_stop_list::iterator gradient::insert_color_stop(scalar aPos, scalar aStart, scalar aEnd)
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_color_stop_list::iterator basic_gradient<Sharing>::insert_color_stop(scalar aPos, scalar aStart, scalar aEnd)
     {
         return object().insert_color_stop(aPos, aStart, aEnd);
     }
 
-    gradient::abstract_alpha_stop_list::iterator gradient::insert_alpha_stop(scalar aPos)
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list::iterator basic_gradient<Sharing>::insert_alpha_stop(scalar aPos)
     {
         return object().insert_alpha_stop(aPos);
     }
 
-    gradient::abstract_alpha_stop_list::iterator gradient::insert_alpha_stop(scalar aPos, scalar aStart, scalar aEnd)
+    template <gradient_sharing Sharing>
+    typename basic_gradient<Sharing>::abstract_alpha_stop_list::iterator basic_gradient<Sharing>::insert_alpha_stop(scalar aPos, scalar aStart, scalar aEnd)
     {
         return object().insert_alpha_stop(aPos, aStart, aEnd);
     }
 
-    sRGB_color gradient::at(scalar aPos) const
+    template <gradient_sharing Sharing>
+    sRGB_color basic_gradient<Sharing>::at(scalar aPos) const
     {
         return object().at(aPos);
     }
 
-    sRGB_color gradient::at(scalar aPos, scalar aStart, scalar aEnd) const
+    template <gradient_sharing Sharing>
+    sRGB_color basic_gradient<Sharing>::at(scalar aPos, scalar aStart, scalar aEnd) const
     {
         return object().at(aPos, aStart, aEnd);
     }
 
-    sRGB_color gradient::color_at(scalar aPos) const
+    template <gradient_sharing Sharing>
+    sRGB_color basic_gradient<Sharing>::color_at(scalar aPos) const
     {
         return object().color_at(aPos);
     }
 
-    sRGB_color gradient::color_at(scalar aPos, scalar aStart, scalar aEnd) const
+    template <gradient_sharing Sharing>
+    sRGB_color basic_gradient<Sharing>::color_at(scalar aPos, scalar aStart, scalar aEnd) const
     {
         return object().color_at(aPos, aStart, aEnd);
     }
 
-    sRGB_color::view_component gradient::alpha_at(scalar aPos) const
+    template <gradient_sharing Sharing>
+    sRGB_color::view_component basic_gradient<Sharing>::alpha_at(scalar aPos) const
     {
         return object().alpha_at(aPos);
     }
 
-    sRGB_color::view_component gradient::alpha_at(scalar aPos, scalar aStart, scalar aEnd) const
+    template <gradient_sharing Sharing>
+    sRGB_color::view_component basic_gradient<Sharing>::alpha_at(scalar aPos, scalar aStart, scalar aEnd) const
     {
         return object().alpha_at(aPos, aStart, aEnd);
     }
 
-    void gradient::reverse()
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::reverse()
     {
         object().reverse();
     }
 
-    void gradient::set_alpha(sRGB_color::view_component aAlpha)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_alpha(sRGB_color::view_component aAlpha)
     {
         object().set_alpha(aAlpha);
     }
 
-    void gradient::set_combined_alpha(sRGB_color::view_component aAlpha)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_combined_alpha(sRGB_color::view_component aAlpha)
     {
         object().set_combined_alpha(aAlpha);
     }
 
-    gradient_direction gradient::direction() const
+    template <gradient_sharing Sharing>
+    gradient_direction basic_gradient<Sharing>::direction() const
     {
         return object().direction();
     }
 
-    void gradient::set_direction(gradient_direction aDirection)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_direction(gradient_direction aDirection)
     {
         object().set_direction(aDirection);
     }
 
-    gradient_orientation gradient::orientation() const
+    template <gradient_sharing Sharing>
+    gradient_orientation basic_gradient<Sharing>::orientation() const
     {
         return object().orientation();
     }
 
-    void gradient::set_orientation(gradient_orientation aOrientation)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_orientation(gradient_orientation aOrientation)
     {
         object().set_orientation(aOrientation);
     }
 
-    gradient_shape gradient::shape() const
+    template <gradient_sharing Sharing>
+    gradient_shape basic_gradient<Sharing>::shape() const
     {
         return object().shape();
     }
 
-    void gradient::set_shape(gradient_shape aShape)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_shape(gradient_shape aShape)
     {
         object().set_shape(aShape);
     }
 
-    gradient_size gradient::size() const
+    template <gradient_sharing Sharing>
+    gradient_size basic_gradient<Sharing>::size() const
     {
         return object().size();
     }
 
-    void gradient::set_size(gradient_size aSize)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_size(gradient_size aSize)
     {
         object().set_size(aSize);
     }
 
-    const optional_vec2& gradient::exponents() const
+    template <gradient_sharing Sharing>
+    const optional_vec2& basic_gradient<Sharing>::exponents() const
     {
         return object().exponents();
     }
 
-    void gradient::set_exponents(const optional_vec2& aExponents)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_exponents(const optional_vec2& aExponents)
     {
         object().set_exponents(aExponents);
     }
 
-    const optional_point& gradient::center() const
+    template <gradient_sharing Sharing>
+    const optional_point& basic_gradient<Sharing>::center() const
     {
         return object().center();
     }
 
-    void gradient::set_center(const optional_point& aCenter)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_center(const optional_point& aCenter)
     {
         object().set_center(aCenter);
     }
 
-    scalar gradient::smoothness() const
+    template <gradient_sharing Sharing>
+    scalar basic_gradient<Sharing>::smoothness() const
     {
         return object().smoothness();
     }
 
-    void gradient::set_smoothness(scalar aSmoothness)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_smoothness(scalar aSmoothness)
     {
         object().set_smoothness(aSmoothness);
     }
 
-    const optional_rect& gradient::bounding_box() const
+    template <gradient_sharing Sharing>
+    const optional_rect& basic_gradient<Sharing>::bounding_box() const
     {
         if (iBoundingBox != std::nullopt)
             return iBoundingBox;
@@ -298,42 +382,54 @@ namespace neogfx
         return iBoundingBox;
     }
 
-    void gradient::set_bounding_box(const optional_rect& aBoundingBox)
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_bounding_box(const optional_rect& aBoundingBox)
     {
         iBoundingBox = aBoundingBox;
     }
 
-    const i_gradient_sampler& gradient::colors() const
+    template <gradient_sharing Sharing>
+    const i_gradient_sampler& basic_gradient<Sharing>::colors() const
     {
         return object().colors();
     }
 
-    const i_gradient_filter& gradient::filter() const
+    template <gradient_sharing Sharing>
+    const i_gradient_filter& basic_gradient<Sharing>::filter() const
     {
         return object().filter();
     }
 
-    void gradient::share_object(i_ref_ptr<i_gradient>& aRef) const
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::share_object(i_ref_ptr<i_gradient>& aRef) const
     {
-        aRef = iObject;
+        if constexpr (Sharing == gradient_sharing::Shared)
+            aRef = iObject;
+        else
+            aRef = iObject->clone();
     }
 
-    const i_gradient& gradient::object() const
+    template <gradient_sharing Sharing>
+    const i_gradient& basic_gradient<Sharing>::object() const
     {
         if (is_singular())
             iObject = service<i_gradient_manager>().create_gradient();
         return *iObject;
     }
 
-    i_gradient& gradient::object()
+    template <gradient_sharing Sharing>
+    i_gradient& basic_gradient<Sharing>::object()
     {
         if (is_singular())
             return const_cast<i_gradient&>(to_const(*this).object());
-        if (iCopy)
+        if constexpr (Sharing == gradient_sharing::Shared)
         {
-            iCopy = false;
-            iObject = iObject->clone();
+            if (iObject->reference_count() > 2)
+                iObject = iObject->clone();
         }
         return *iObject;
     }
+
+    template class basic_gradient<gradient_sharing::Shared>;
+    template class basic_gradient<gradient_sharing::Unique>;
 }

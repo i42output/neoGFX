@@ -218,7 +218,7 @@ namespace neogfx
                     return (boost::basic_format<char>{"%1%"} % arg).str();
                 else
                     return "";
-            }, for_visitor());
+            }, *this);
         }
     };
 

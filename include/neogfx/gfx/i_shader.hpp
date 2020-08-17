@@ -499,12 +499,12 @@ namespace neogfx
         template <typename T>
         i_shader_variable& add_in_variable(const i_string& aName, shader_variable_location aLocation)
         {
-            return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::In,  static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type>()) });
+            return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::In,  static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()) });
         }
         template <typename T>
         i_shader_variable& add_out_variable(const i_string& aName, shader_variable_location aLocation)
         {
-            return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::Out,  static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type>()) });
+            return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::Out,  static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()) });
         }
     };
 
