@@ -109,40 +109,40 @@ namespace neogfx
         };
     }
 
-    gradient_widget::gradient_widget(const neogfx::gradient& aGradient) :
+    gradient_widget::gradient_widget(i_gradient const& aGradient) :
         iInGradientDialog{ false }, iTracking{ false }
     {
         set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 
-    gradient_widget::gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient) :
+    gradient_widget::gradient_widget(i_widget& aParent, i_gradient const& aGradient) :
         widget{ aParent }, iInGradientDialog{ false }, iTracking{ false }
     {
         set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 
-    gradient_widget::gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient) :
+    gradient_widget::gradient_widget(i_layout& aLayout, i_gradient const& aGradient) :
         widget{ aLayout }, iInGradientDialog{ false }, iTracking{ false }
     {
         set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 
-    gradient_widget::gradient_widget(gradient_dialog&, i_layout& aLayout, const neogfx::gradient& aGradient) :
+    gradient_widget::gradient_widget(gradient_dialog&, i_layout& aLayout, i_gradient const& aGradient) :
         widget{ aLayout }, iInGradientDialog{ true }, iTracking{ false }
     {
         set_padding(neogfx::padding{});
         set_gradient(aGradient);
     }
 
-    gradient gradient_widget::gradient() const
+    i_gradient const& gradient_widget::gradient() const
     {
         return iSelection;
     }
 
-    void gradient_widget::set_gradient(const i_gradient& aGradient)
+    void gradient_widget::set_gradient(i_gradient const& aGradient)
     {
         if (iSelection != aGradient)
         {
@@ -154,7 +154,7 @@ namespace neogfx
         }
     }
 
-    void gradient_widget::set_gradient(const i_ref_ptr<i_gradient>& aGradient)
+    void gradient_widget::set_gradient(i_ref_ptr<i_gradient> const& aGradient)
     {
         set_gradient(*aGradient);
     }
@@ -188,7 +188,7 @@ namespace neogfx
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
-    size gradient_widget::minimum_size(const optional_size& aAvailableSpace) const
+    size gradient_widget::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
@@ -218,7 +218,7 @@ namespace neogfx
             draw_alpha_stop(aGc, **iCurrentAlphaStop);
     }
 
-    void gradient_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void gradient_widget::mouse_button_pressed(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers)
     {
         widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         iClicked = aPosition;
@@ -271,7 +271,7 @@ namespace neogfx
         }
     }
 
-    void gradient_widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void gradient_widget::mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers)
     {
         widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
@@ -323,7 +323,7 @@ namespace neogfx
         }
     }
 
-    void gradient_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
+    void gradient_widget::mouse_button_released(mouse_button aButton, point const& aPosition)
     {
         widget::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Right)
@@ -331,7 +331,7 @@ namespace neogfx
             auto moreAction = std::make_shared<action>("More..."_t);
             moreAction->Triggered([this]()
             {
-                auto const originalGradient = gradient();
+                neogfx::gradient const originalGradient = gradient();
                 gradient_dialog gd{ *this, gradient() };
                 if (iCustomColors != std::nullopt)
                     gd.gradient_selector().custom_colors() = iCustomColors;
@@ -473,7 +473,7 @@ namespace neogfx
         update();
     }
 
-    void gradient_widget::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void gradient_widget::mouse_moved(point const& aPosition, key_modifiers_e aKeyModifiers)
     {
         widget::mouse_moved(aPosition, aKeyModifiers);
         if (iTracking)
@@ -541,7 +541,7 @@ namespace neogfx
         return r;
     }
 
-    gradient_widget::stop_const_iterator gradient_widget::stop_at(const point& aPosition) const
+    gradient_widget::stop_const_iterator gradient_widget::stop_at(point const& aPosition) const
     {
         for (auto i = iSelection.color_stops().begin(); i != iSelection.color_stops().end(); ++i)
             if (color_stop_rect(*i).contains(aPosition))
@@ -552,7 +552,7 @@ namespace neogfx
         return stop_const_iterator{};
     }
 
-    gradient_widget::stop_iterator gradient_widget::stop_at(const point& aPosition)
+    gradient_widget::stop_iterator gradient_widget::stop_at(point const& aPosition)
     {
         iCurrentColorStop = std::nullopt;
         for (auto i = iSelection.color_stops().begin(); i != iSelection.color_stops().end(); ++i)
@@ -565,7 +565,7 @@ namespace neogfx
         return stop_iterator{};
     }
 
-    void gradient_widget::set_current_color_stop(const std::optional<gradient::color_stop_list::iterator>& aStop)
+    void gradient_widget::set_current_color_stop(std::optional<gradient::color_stop_list::iterator> const& aStop)
     {
         if (iCurrentColorStop != aStop)
         {
@@ -577,7 +577,7 @@ namespace neogfx
         }
     }
 
-    void gradient_widget::set_current_alpha_stop(const std::optional<gradient::alpha_stop_list::iterator>& aStop)
+    void gradient_widget::set_current_alpha_stop(std::optional<gradient::alpha_stop_list::iterator> const& aStop)
     {
         if (iCurrentAlphaStop != aStop)
         {
@@ -589,7 +589,7 @@ namespace neogfx
         }
     }
 
-    rect gradient_widget::color_stop_rect(const neogfx::gradient::color_stop& aColorStop) const
+    rect gradient_widget::color_stop_rect(neogfx::gradient::color_stop const& aColorStop) const
     {
         rect result = contents_rect();
         result.x = result.left() + std::floor((result.width() - 1.0) * aColorStop.first()) - std::floor(dip(STOP_WIDTH) / 2);
@@ -599,7 +599,7 @@ namespace neogfx
         return result;
     }
 
-    rect gradient_widget::alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const
+    rect gradient_widget::alpha_stop_rect(neogfx::gradient::alpha_stop const& aAlphaStop) const
     {
         rect result = contents_rect();
         result.x = result.left() + std::floor((result.width() - 1.0) * aAlphaStop.first()) - std::floor(dip(STOP_WIDTH) / 2);
@@ -609,7 +609,7 @@ namespace neogfx
         return result;
     }
 
-    void gradient_widget::draw_color_stop(i_graphics_context& aGc, const neogfx::gradient::color_stop& aColorStop) const
+    void gradient_widget::draw_color_stop(i_graphics_context& aGc, neogfx::gradient::color_stop const& aColorStop) const
     {
         rect r = color_stop_rect(aColorStop);
         draw_alpha_background(aGc, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, dip(SMALL_ALPHA_PATTERN_SIZE));
@@ -704,7 +704,7 @@ namespace neogfx
         aGc.draw_texture(r.top_left(), stopGlyphTexture->second);
     }
 
-    void gradient_widget::draw_alpha_stop(i_graphics_context& aGc, const neogfx::gradient::alpha_stop& aAlphaStop) const
+    void gradient_widget::draw_alpha_stop(i_graphics_context& aGc, neogfx::gradient::alpha_stop const& aAlphaStop) const
     {
         rect r = alpha_stop_rect(aAlphaStop);
         draw_alpha_background(aGc, rect{ r.top_left() + point{ 2.0, 2.0 }, dpi_select(size{ 7.0, 7.0 }, size{ 18.0, 18.0 }) }, dip(SMALL_ALPHA_PATTERN_SIZE));

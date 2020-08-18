@@ -373,7 +373,7 @@ namespace neogfx
             if (iIgnoreHueSliderChange)
                 return;
             neolib::scoped_flag scope{ iIgnoreHueSliderChange };
-            auto newGradient = iGradientSelector.gradient();
+            neogfx::gradient newGradient = iGradientSelector.gradient();
             for (auto const& hs : iHueSelection)
             {
                 auto& colorStop = *std::next(newGradient.color_stops().begin(), hs.first);

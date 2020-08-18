@@ -42,14 +42,14 @@ namespace neogfx
         typedef neolib::variant<neogfx::gradient::color_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
         typedef neolib::variant<neogfx::gradient::color_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
     public:
-        gradient_widget(const neogfx::gradient& aGradient = neogfx::gradient{});
-        gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient = neogfx::gradient{});
-        gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
-        gradient_widget(gradient_dialog& aParent, i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
+        gradient_widget(i_gradient const& aGradient = neogfx::gradient{});
+        gradient_widget(i_widget& aParent, i_gradient const& aGradient = neogfx::gradient{});
+        gradient_widget(i_layout& aLayout, i_gradient const& aGradient = neogfx::gradient{});
+        gradient_widget(gradient_dialog& aParent, i_layout& aLayout, i_gradient const& aGradient = neogfx::gradient{});
     public:
-        neogfx::gradient gradient() const;
-        void set_gradient(const i_gradient& aGradient);
-        void set_gradient(const i_ref_ptr<i_gradient>& aGradient);
+        i_gradient const& gradient() const;
+        void set_gradient(i_gradient const& aGradient);
+        void set_gradient(i_ref_ptr<i_gradient> const& aGradient);
         const std::optional<color_dialog::custom_color_list>& custom_colors() const;
         std::optional<color_dialog::custom_color_list>& custom_colors();
     public:
@@ -57,25 +57,25 @@ namespace neogfx
         gradient::alpha_stop_list::const_iterator selected_alpha_stop() const;
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size()) const override;
     public:
         void paint(i_graphics_context& aGc) const override;
     public:
-        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_released(mouse_button aButton, const point& aPosition) override;
-        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_pressed(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_released(mouse_button aButton, point const& aPosition) override;
+        void mouse_moved(point const& aPosition, key_modifiers_e aKeyModifiers) override;
         neogfx::mouse_cursor mouse_cursor() const override;
     private:
         rect contents_rect() const;
-        stop_const_iterator stop_at(const point& aPosition) const;
-        stop_iterator stop_at(const point& aPosition);
-        void set_current_color_stop(const std::optional<gradient::color_stop_list::iterator>& aStop);
-        void set_current_alpha_stop(const std::optional<gradient::alpha_stop_list::iterator>& aStop);
-        rect color_stop_rect(const neogfx::gradient::color_stop& aColorStop) const;
-        rect alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const;
-        void draw_color_stop(i_graphics_context& aGc, const neogfx::gradient::color_stop& aColorStop) const;
-        void draw_alpha_stop(i_graphics_context& aGc, const neogfx::gradient::alpha_stop& aAlphaStop) const;
+        stop_const_iterator stop_at(point const& aPosition) const;
+        stop_iterator stop_at(point const& aPosition);
+        void set_current_color_stop(std::optional<gradient::color_stop_list::iterator> const& aStop);
+        void set_current_alpha_stop(std::optional<gradient::alpha_stop_list::iterator> const& aStop);
+        rect color_stop_rect(neogfx::gradient::color_stop const& aColorStop) const;
+        rect alpha_stop_rect(neogfx::gradient::alpha_stop const& aAlphaStop) const;
+        void draw_color_stop(i_graphics_context& aGc, neogfx::gradient::color_stop const& aColorStop) const;
+        void draw_alpha_stop(i_graphics_context& aGc, neogfx::gradient::alpha_stop const& aAlphaStop) const;
     private:
         dimension stop_width() const;
         dimension stop_height() const;
