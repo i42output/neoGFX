@@ -374,8 +374,16 @@ int main(int argc, char* argv[])
         {
             auto s = window.textEdit.default_style();
             auto s2 = window.textEditEditor.default_style();
-            s.set_glyph_color(window.gradientWidget.gradient());
-            s2.set_glyph_color(window.gradientWidget.gradient());
+            if (!window.editOutline.is_checked())
+            {
+                s.set_glyph_color(window.gradientWidget.gradient());
+                s2.set_glyph_color(window.gradientWidget.gradient());
+            }
+            else
+            {
+                s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, window.gradientWidget.gradient() });
+                s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, window.gradientWidget.gradient() });
+            }
             s2.set_paper_color(ng::color_or_gradient{});
             window.textEdit.set_default_style(s);
             window.textEditEditor.set_default_style(s2);

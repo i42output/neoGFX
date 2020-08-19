@@ -145,10 +145,19 @@ namespace neogfx::nrc
             add_data_names({ "rows", "columns" });
         }
     protected:
+        void emit_ctor() const override
+        {
+            if (!iRows && !iColumns)
+                base_type::emit_ctor();
+            else
+            {
+                emit(",\n"
+                    "   %1%{ %2%%3%, %4%, %5% }", id(), parent().id(), layout(), iRows ? *iRows : 1u, iColumns ? *iColumns : 1u);
+                ui_element<>::emit_ctor();
+            }
+        }
         void emit_body() const override
         {
-            if (iRows || iColumns)
-                emit("   %1%.set_dimensions(%2%, %3%);\n", id(), iRows ? *iRows : 1u, iColumns ? *iColumns : 1u);
             base_type::emit_body();
         }
     public:
