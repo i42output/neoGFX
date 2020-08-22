@@ -182,7 +182,7 @@ namespace neogfx
                 return *iTextColor;
             else
             {
-                if (color(color_role::Theme).to_hsl().lightness() < 0.6)
+                if (color(color_role::Theme).to_hsv().value() < 0.6)
                     return color::White;
                 else
                     return color::Black;

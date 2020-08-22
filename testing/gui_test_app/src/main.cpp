@@ -658,17 +658,17 @@ int main(int argc, char* argv[])
                 sCustomColors = ng::color_dialog::custom_color_list{};
                 std::fill(sCustomColors->begin(), sCustomColors->end(), ng::color::White);
             }
-            auto oldColor = ng::service<ng::i_app>().change_style("Keypad").palette().color(ng::color_role::Theme);
-            ng::color_dialog colorPicker(window, ng::service<ng::i_app>().change_style("Keypad").palette().color(ng::color_role::Theme));
+            auto oldColor = ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Theme);
+            ng::color_dialog colorPicker(window, ng::service<ng::i_app>().current_style().palette().color(ng::color_role::Theme));
             colorPicker.set_custom_colors(*sCustomColors);
             colorPicker.SelectionChanged([&]()
             {
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, colorPicker.selected_color());
+                ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, colorPicker.selected_color());
             });
             if (colorPicker.exec() == ng::dialog_result::Accepted)
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, colorPicker.selected_color());
+                ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, colorPicker.selected_color());
             else
-                ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, oldColor);
+                ng::service<ng::i_app>().current_style().palette().set_color(ng::color_role::Theme, oldColor);
             *sCustomColors = colorPicker.custom_colors();
         });
 
