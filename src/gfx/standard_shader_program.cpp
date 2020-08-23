@@ -32,6 +32,7 @@ namespace neogfx
             iDefaultShader = static_cast<i_fragment_shader&>(add_shader(neolib::make_ref<standard_fragment_shader<>>().as<i_shader>()));
             iGradientShader = static_cast<i_gradient_shader&>(add_shader(neolib::make_ref<standard_gradient_shader>().as<i_shader>()));
             iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
+            iFilterShader = static_cast<i_filter_shader&>(add_shader(neolib::make_ref<standard_filter_shader>().as<i_shader>()));
             iGlyphShader = static_cast<i_glyph_shader&>(add_shader(neolib::make_ref<standard_glyph_shader>().as<i_shader>()));
             iStippleShader = static_cast<i_stipple_shader&>(add_shader(neolib::make_ref<standard_stipple_shader>().as<i_shader>()));
         }
@@ -64,6 +65,20 @@ namespace neogfx
     i_texture_shader& standard_shader_program::texture_shader()
     {
         return *iTextureShader;
+    }
+
+    const i_filter_shader& standard_shader_program::filter_shader() const
+    {
+        if (iFilterShader != nullptr)
+            return *iFilterShader;
+        throw no_filter_shader();
+    }
+
+    i_filter_shader& standard_shader_program::filter_shader()
+    {
+        if (iFilterShader != nullptr)
+            return *iFilterShader;
+        throw no_filter_shader();
     }
 
     const i_glyph_shader& standard_shader_program::glyph_shader() const

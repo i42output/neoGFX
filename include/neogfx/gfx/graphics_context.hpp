@@ -104,7 +104,7 @@ namespace neogfx
         void clear_depth_buffer() const override;
         void clear_stencil_buffer() const override;
         void blit(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect) const override;
-        void blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, uint32_t aParameter1 = 5, double aParameter2 = 1.0) const override;
+        void blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) const override;
         void clear_gradient() override;
         void set_gradient(const gradient& aGradient, const rect& aBoundingBox) override;
         void set_pixel(const point& aPoint, const color& aColor) const override;
@@ -180,7 +180,7 @@ namespace neogfx
         void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const override;
         void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const override;
         void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const override;
-        void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}) const override;
+        void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}, const std::optional<game::filter>& aFilter = {}) const override;
 
         // implementation
         // from i_rendering_context
@@ -229,5 +229,6 @@ namespace neogfx
         mutable std::optional<std::string> iPassword;
         struct glyph_text_data;
         std::unique_ptr<glyph_text_data> iGlyphTextData;
+        mutable std::optional<size> iPreviousPingPongBufferSize;
     };
 }

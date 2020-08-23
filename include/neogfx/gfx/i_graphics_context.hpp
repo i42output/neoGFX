@@ -127,7 +127,7 @@ namespace neogfx
         virtual void clear_depth_buffer() const = 0;
         virtual void clear_stencil_buffer() const = 0;
         virtual void blit(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect) const = 0;
-        virtual void blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, uint32_t aParameter1 = 5, double aParameter2 = 1.0) const = 0;
+        virtual void blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) const = 0;
         virtual void clear_gradient() = 0;
         virtual void set_gradient(const gradient& aGradient, const rect& aBoundingBox) = 0;
         virtual void set_pixel(const point& aPoint, const color& aColor) const = 0;
@@ -203,7 +203,7 @@ namespace neogfx
         virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}) const = 0;
+        virtual void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}, const std::optional<game::filter>& aFilter = {}) const = 0;
     };
 
     template <typename Iter>
@@ -237,7 +237,7 @@ namespace neogfx
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
         rect const effectRect{ point{}, effectExtents };
-        aPingPongBuffers.second->blur(effectRect, *aPingPongBuffers.first, effectRect, blurring_algorithm::Gaussian, 5, 1.0);
+        aPingPongBuffers.second->blur(effectRect, *aPingPongBuffers.first, effectRect, aGlowSize, blurring_algorithm::Gaussian, 5.0, 1.0);
     }
 
     template <typename Iter>

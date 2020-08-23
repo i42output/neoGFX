@@ -612,7 +612,7 @@ namespace neogfx
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
-                    draw_mesh(args.mesh, args.material, args.transformation);
+                    draw_mesh(args.mesh, args.material, args.transformation, args.filter);
                 }
                 break;
             }
@@ -1611,6 +1611,8 @@ namespace neogfx
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
                                             },
+                                            {},
+                                            0,
                                             {}, subpixelRender });
                                 else if (std::holds_alternative<gradient>(drawOp.appearance.effect()->color()))
                                 {
@@ -1626,6 +1628,8 @@ namespace neogfx
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
                                             },
+                                            {},
+                                            0,
                                             {}, subpixelRender });
                                 }
                                 else
@@ -1638,6 +1642,8 @@ namespace neogfx
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
                                             },
+                                            {},
+                                            0,
                                             {}, subpixelRender });
                             }
                         }
@@ -1664,7 +1670,9 @@ namespace neogfx
                                             to_ecs_component(glyphTexture.texture()),
                                             shader_effect::Ignore
                                         },
-                                        {}, false, subpixelRender });
+                                        {}, 
+                                        0,
+                                        {}, subpixelRender });
                             else if (std::holds_alternative<gradient>(drawOp.appearance.ink()))
                             {
                                 gradient g = static_variant_cast<const gradient&>(drawOp.appearance.ink());
@@ -1679,7 +1687,9 @@ namespace neogfx
                                         to_ecs_component(glyphTexture.texture()),
                                         shader_effect::Ignore
                                     },
-                                    {}, false, subpixelRender });
+                                    {}, 
+                                    0,
+                                    {}, subpixelRender });
                             }
                             else
                                 meshRenderers.push_back(
@@ -1691,7 +1701,9 @@ namespace neogfx
                                             to_ecs_component(glyphTexture.texture()),
                                             shader_effect::Ignore
                                         },
-                                        {}, false, subpixelRender });
+                                        {}, 
+                                        {},
+                                        {}, subpixelRender });
                         }
                     }
                 }
@@ -1700,9 +1712,9 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation)
+    void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter)
     {
-        draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aTransformation);
+        draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, 0, aFilter }, aTransformation);
     }
     
     void opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
@@ -1780,11 +1792,15 @@ namespace neogfx
             std::optional<neolib::cookie> textureId;
             auto add_item = [&](vec2u32& cacheIndices, auto const& mesh, auto const& material, auto const& faces)
             {
-                auto const function = material.gradient != std::nullopt ?
+                auto const function = material.gradient != std::nullopt && material.gradient->boundingBox ?
                     vec4{
                         material.gradient->boundingBox->min.x, material.gradient->boundingBox->min.y,
                         material.gradient->boundingBox->max.x, material.gradient->boundingBox->max.y }.as<float>() :
-                    vec4f{};
+                    meshRenderer.filter != std::nullopt && meshRenderer.filter->boundingBox ?
+                        vec4{
+                            meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
+                            meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y }.as<float>() :
+                        vec4f{};
                 if (meshRenderCache.state != game::cache_state::Clean)
                 {
                     if (patch_drawable::has_texture(meshRenderer, material))
@@ -1912,6 +1928,14 @@ namespace neogfx
                 rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *iGradient);
             else
                 rendering_engine().default_shader_program().gradient_shader().clear_gradient();
+
+            if (item->meshDrawable->renderer->filter)
+            {
+                auto const& filter = *item->meshDrawable->renderer->filter;
+                rendering_engine().default_shader_program().filter_shader().set_filter(filter.type, filter.arg1, filter.arg2, filter.arg3, filter.arg4);
+            }
+            else
+                rendering_engine().default_shader_program().filter_shader().clear_filter();
 
             if (item->has_texture())
             {

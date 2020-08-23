@@ -29,6 +29,7 @@
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
+#include <neogfx/game/filter.hpp>
 
 namespace neogfx
 {
@@ -250,6 +251,7 @@ namespace neogfx
             game::mesh mesh;
             game::material material;
             mat44 transformation;
+            std::optional<game::filter> filter;
         };
 
         typedef neolib::variant <

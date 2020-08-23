@@ -26,6 +26,7 @@
 namespace neogfx
 {
     struct no_gradient_shader : std::logic_error { no_gradient_shader() : std::logic_error{ "neogfx::no_gradient_shader" } {} };
+    struct no_filter_shader : std::logic_error { no_filter_shader() : std::logic_error{ "neogfx::no_filter_shader" } {} };
     struct no_glyph_shader : std::logic_error { no_glyph_shader() : std::logic_error{ "neogfx::no_glyph_shader" } {} };
     struct no_stipple_shader : std::logic_error { no_stipple_shader() : std::logic_error{ "neogfx::no_stipple_shader" } {} };
 
@@ -39,6 +40,8 @@ namespace neogfx
         virtual i_gradient_shader& gradient_shader() = 0;
         virtual const i_texture_shader& texture_shader() const = 0;
         virtual i_texture_shader& texture_shader() = 0;
+        virtual const i_filter_shader& filter_shader() const = 0;
+        virtual i_filter_shader& filter_shader() = 0;
         virtual const i_glyph_shader& glyph_shader() const = 0;
         virtual i_glyph_shader& glyph_shader() = 0;
         virtual const i_stipple_shader& stipple_shader() const = 0;

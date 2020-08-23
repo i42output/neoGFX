@@ -65,7 +65,14 @@ namespace neogfx
         ColorizeMaximum    = 2,
         ColorizeSpot       = 3,
         Monochrome         = 4,
-        Ignore             = 5
+        Filter             = 10,
+        Ignore             = 99
+    };
+
+    enum class shader_filter
+    {
+        None            = 0,
+        GaussianBlur    = 1
     };
 
     enum class blurring_algorithm

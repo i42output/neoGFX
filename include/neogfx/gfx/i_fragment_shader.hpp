@@ -60,6 +60,15 @@ namespace neogfx
         virtual void set_effect(shader_effect aEffect) = 0;
     };
 
+    class i_filter_shader : public i_fragment_shader
+    {
+    public:
+        typedef i_filter_shader abstract_type;
+    public:
+        virtual void clear_filter() = 0;
+        virtual void set_filter(shader_filter aFilter, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) = 0;
+    };
+
     class i_glyph_shader : public i_fragment_shader
     {
     public:

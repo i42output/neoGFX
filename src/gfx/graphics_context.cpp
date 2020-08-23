@@ -207,9 +207,10 @@ namespace neogfx
 
     graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor) const
     {
-        auto buffer1 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer1(aExtents, aSampling));
+        size previousExtents;
+        auto buffer1 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling));
         {
-            scoped_scissor ss{ *buffer1, rect{ point{}, aExtents} };
+            scoped_scissor ss{ *buffer1, rect{ point{}, previousExtents } };
             if (aClearColor != std::nullopt)
             {
                 buffer1->clear(*aClearColor);
@@ -218,9 +219,9 @@ namespace neogfx
             }
         }
         buffer1->render_target().deactivate_target();
-        auto buffer2 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer2(aExtents, aSampling));
+        auto buffer2 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling));
         {
-            scoped_scissor ss{ *buffer2, rect{ point{}, aExtents} };
+            scoped_scissor ss{ *buffer2, rect{ point{}, previousExtents } };
             if (aClearColor != std::nullopt)
             {
                 buffer2->clear(*aClearColor);
@@ -896,14 +897,41 @@ namespace neogfx
         draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
     }
 
-    void graphics_context::blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParameter2) const
+    void blur(const i_graphics_context& aDestination, const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
-        // todo
-        scoped_scissor ss{ *this, aDestinationRect };
-        dimension const w = aParameter1;
-        for (coordinate y = -w; y <= w; y += 1.0)
-            for (coordinate x = -w; x <= w; x += 1.0)
-                blit(aDestinationRect + point{ x, y }, aSource, aSourceRect);
+        scoped_blending_mode sbm{ aDestination, neogfx::blending_mode::Blit };
+        scoped_scissor ss{ aDestination, aDestinationRect };
+        auto mesh = logical_coordinates().is_gui_orientation() ?
+            to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
+        auto const& source = aSource.render_target();
+        for (auto& uv : mesh.uv)
+            uv = (aSourceRect.top_left() / source.extents()).to_vec2() + uv.scale((aSourceRect.extents() / source.extents()).to_vec2());
+        aDestination.draw_mesh(
+            mesh,
+            game::material
+            {
+                {},
+                {},
+                {},
+                to_ecs_component(aSource.render_target().target_texture()),
+                shader_effect::Filter
+            },
+            optional_mat44{},
+            to_ecs_component(aAlgorithm, aParameter1, aParameter2));
+    }
+
+    void graphics_context::blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2) const
+    {
+        int32_t passes = static_cast<int32_t>(aRadius);
+        if (passes % 2 == 0)
+            ++passes;
+        for (int32_t pass = 0; pass < passes; ++pass)
+        {
+            if (pass % 2 == 0)
+                neogfx::blur(*this, aDestinationRect, aSource, aSourceRect, aAlgorithm, aParameter1, aParameter2);
+            else
+                neogfx::blur(aSource, aSourceRect, *this, aDestinationRect, aAlgorithm, aParameter1, aParameter2);
+        }
     }
 
     glyph_text graphics_context::to_glyph_text(const std::string& aText, const font& aFont) const
@@ -1195,10 +1223,10 @@ namespace neogfx
         auto adjustedMesh = aMesh;
         for (auto& uv : adjustedMesh.uv)
             uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2());
-         draw_texture(adjustedMesh, aTexture, aColor, aShaderEffect);
+        draw_texture(adjustedMesh, aTexture, aColor, aShaderEffect);
     }
 
-    void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation) const
+    void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation, const std::optional<game::filter>& aFilter) const
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
@@ -1209,7 +1237,8 @@ namespace neogfx
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 0.0 },
-                    { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * (aTransformation != std::nullopt ? *aTransformation : mat44::identity())
+                    { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * (aTransformation != std::nullopt ? *aTransformation : mat44::identity()),
+                aFilter
             });
     }
 

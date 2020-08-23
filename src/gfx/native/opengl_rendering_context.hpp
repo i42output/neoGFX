@@ -254,7 +254,7 @@ namespace neogfx
         void fill_path(const path& aPath, const brush& aFill);
         void fill_shapes(const graphics_operation::batch& aFillShapeOps);
         void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
-        void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
+        void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter = {});
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
         void draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);

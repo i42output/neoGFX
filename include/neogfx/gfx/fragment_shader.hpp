@@ -133,6 +133,26 @@ namespace neogfx
         cache_uniform(uTextureEffect)
     };
 
+    class standard_filter_shader : public standard_fragment_shader<i_filter_shader>
+    {
+    public:
+        standard_filter_shader(const std::string& aName = "standard_filter_shader");
+    public:
+        bool supports(vertex_buffer_type aBufferType) const override;
+    public:
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+    public:
+        void clear_filter() override;
+        void set_filter(shader_filter aFilter, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) override;
+    private:
+        cache_uniform(uFilterEnabled)
+        cache_uniform(uFilterType)
+        cache_uniform(uFilterArguments)
+        cache_uniform(uFilterKernelSize)
+        cache_uniform(uFilterKernel)
+        std::map<std::pair<shader_filter, vec4>, std::optional<shader_array<float>>> iFilterKernel;
+    };
+
     class standard_glyph_shader : public standard_fragment_shader<i_glyph_shader>
     {
     public:

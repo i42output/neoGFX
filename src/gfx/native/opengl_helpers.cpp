@@ -50,6 +50,7 @@ namespace neogfx
             if (!iRenderingContext.gradient_set())
                 iCurrentProgram.as<i_standard_shader_program>().gradient_shader().clear_gradient();
             iCurrentProgram.as<i_standard_shader_program>().texture_shader().clear_texture();
+            iCurrentProgram.as<i_standard_shader_program>().filter_shader().clear_filter();
             iCurrentProgram.as<i_standard_shader_program>().glyph_shader().clear_glyph();
             iCurrentProgram.as<i_standard_shader_program>().stipple_shader().clear_stipple();
         }

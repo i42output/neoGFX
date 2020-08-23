@@ -414,8 +414,7 @@ namespace neogfx
         case texture_sampling::Normal:
         case texture_sampling::Nearest:
         case texture_sampling::Data:
-            throw std::logic_error("neogfx::opengl_texture::get_pixel: function not yet implemented");
-            break;
+            return read_pixel(aPosition);
         default:
             throw unsupported_sampling_type_for_function();
         }

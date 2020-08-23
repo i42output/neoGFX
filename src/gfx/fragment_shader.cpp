@@ -265,32 +265,49 @@ namespace neogfx
         {
             static const string code 
             {
+                "vec4 texel_at(vec2 texCoord, int sampleId)\n"
+                "{\n"
+                "    vec4 texel = vec4(0.0);\n"
+                "    if (uTextureMultisample < 5)\n" // Scaled
+                "    {\n"
+                "        texel = texture(tex, texCoord).rgba;\n"
+                "    }\n"
+                "    else\n"
+                "    {\n"
+                "        texel = texelFetch(texMS, ivec2(texCoord * uTextureExtents), sampleId).rgba;\n"
+                "    }\n"
+                "    switch(uTextureDataFormat)\n"
+                "    {\n"
+                "    case 1:\n" // RGBA
+                "    default:\n"
+                "        break;\n"
+                "    case 2:\n" // Red
+                "        texel = vec4(1.0, 1.0, 1.0, texel.r);\n"
+                "        break;\n"
+                "    case 3:\n" // SubPixel
+                "        texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
+                "        break;\n"
+                "    }\n"
+                "    return texel;\n"
+                "}\n"
+                "vec4 texel_at(vec2 texCoord)\n"
+                "{\n"
+                "    return texel_at(texCoord, gl_SampleID);\n"
+                "}\n"
+                "vec4 combined_texel_at(vec2 texCoord)\n"
+                "{\n"
+                "    vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);\n"
+                "    for (int i = 0; i < gl_NumSamples; ++i)\n"
+                "    {\n"
+                "        sum += texel_at(texCoord, i);\n"
+                "    }\n"
+                "    return sum / float(gl_NumSamples);\n"
+                "}\n"
                 "void standard_texture_shader(inout vec4 color, inout vec4 function)\n"
                 "{\n"
                 "    if (uTextureEnabled)\n"
                 "    {\n"
-                "        vec4 texel = vec4(0.0);\n"
-                "        if (uTextureMultisample < 5)\n" // Scaled
-                "        {\n"
-                "            texel = texture(tex, TexCoord).rgba;\n"
-                "        }\n"
-                "        else\n"
-                "        {\n"
-                "            ivec2 TexCoord = ivec2(TexCoord * uTextureExtents);\n"
-                "            texel = texelFetch(texMS, TexCoord, gl_SampleID).rgba;\n"
-                "        }\n"
-                "        switch(uTextureDataFormat)\n"
-                "        {\n"
-                "        case 1:\n" // RGBA
-                "        default:\n"
-                "            break;\n"
-                "        case 2:\n" // Red
-                "            texel = vec4(1.0, 1.0, 1.0, texel.r);\n"
-                "            break;\n"
-                "        case 3:\n" // SubPixel
-                "            texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);\n"
-                "            break;\n"
-                "        }\n"
+                "        vec4 texel = texel_at(TexCoord);\n"
                 "        switch(uTextureEffect)\n"
                 "        {\n"
                 "        case 0:\n" // effect: None
@@ -317,7 +334,9 @@ namespace neogfx
                 "                color = vec4(gray, gray, gray, texel.a) * color;\n"
                 "            }\n"
                 "            break;\n"
-                "        case 5:\n" // effect: Ignore
+                "        case 10:\n" // effect: Filter
+                "            break;\n"
+                "        case 99:\n" // effect: Ignore
                 "            break;\n"
                 "        }\n"
                 "    }\n"
@@ -353,6 +372,88 @@ namespace neogfx
         uTextureEffect = aEffect;
         if (aEffect == shader_effect::Ignore)
             uTextureEnabled = false;
+    }
+
+    standard_filter_shader::standard_filter_shader(const std::string& aName) :
+        standard_fragment_shader<i_filter_shader>{ aName }
+    {
+        disable();
+    }
+
+    bool standard_filter_shader::supports(vertex_buffer_type aBufferType) const
+    {
+        return enabled() && (aBufferType & vertex_buffer_type::UV) != vertex_buffer_type::Invalid;
+    }
+
+    void standard_filter_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    {
+        standard_fragment_shader<i_filter_shader>::generate_code(aProgram, aLanguage, aOutput);
+        if (aLanguage == shader_language::Glsl)
+        {
+            static const string code
+            {
+                "void standard_filter_shader(inout vec4 color, inout vec4 function)\n"
+                "{\n"
+                "    if (uFilterEnabled)\n"
+                "    {\n"
+                "        switch(uFilterType)\n"
+                "        {\n"
+                "        case 0:\n" // filter: None
+                "            break;\n"
+                "        case 1:\n" // effect: GaussianBlur
+                "           {\n"
+                "               int d = uFilterKernelSize / 2;\n"
+                "               if (texelFetch(uFilterKernel, ivec2(d, d)).r != 1.0)\n"
+                "               {\n"
+                "                   vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);\n"
+                "                   for (int fy = -d; fy <= d; ++fy)\n"
+                "                   {\n"
+                "                       for (int fx = -d; fx <= d; ++fx)\n"
+                "                       {\n"
+                "                           vec4 texel = texel_at(TexCoord + vec2(fx, fy) / uTextureExtents);\n" 
+                "                           sum += (texel * texelFetch(uFilterKernel, ivec2(fx + d, fy + d)).r);\n"
+                "                       }\n"
+                "                   }\n"
+                "                   color = sum;\n"
+                "               }\n"
+                "            }\n"
+                "            break;\n"
+                "        }\n"
+                "    }\n"
+                "}\n"_s
+            };
+            aOutput += code;
+        }
+        else
+            throw unsupported_shader_language();
+    }
+
+    void standard_filter_shader::clear_filter()
+    {
+        uFilterEnabled = false;
+    }
+
+    void standard_filter_shader::set_filter(shader_filter aFilter, scalar aArgument1, scalar aArgument2, scalar aArgument3, scalar aArgument4)
+    {
+        enable();
+        uFilterEnabled = true;
+        uFilterType = aFilter;
+        auto const arguments = vec4{ aArgument1, aArgument2, aArgument3, aArgument4 };
+        uFilterArguments = arguments.as<float>();
+        auto kernel = iFilterKernel.find(std::make_pair(aFilter, arguments));
+        if (kernel == iFilterKernel.end())
+        {
+            if (aFilter == shader_filter::GaussianBlur)
+            {
+                kernel = iFilterKernel.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
+                auto const kernelValues = dynamic_gaussian_filter<float>(static_cast<uint32_t>(aArgument1), static_cast<float>(aArgument2));
+                kernel->second.emplace(size{ aArgument1, aArgument1 });
+                kernel->second->data().set_pixels(rect{ point{0.0, 0.0}, size{aArgument1, aArgument1} }, &kernelValues[0][0]);
+            }
+        }
+        uFilterKernelSize = static_cast<i32>(kernel->second->data().extents().cx);
+        kernel->second->data().bind(5);
+        uFilterKernel = sampler2DRect{ 5 };
     }
 
     standard_glyph_shader::standard_glyph_shader(const std::string& aName) :

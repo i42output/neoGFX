@@ -290,15 +290,15 @@ namespace neogfx
         }
     }
 
-    i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, texture_sampling aSampling)
+    i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
-        auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer1s, aExtents, aSampling);
+        auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer1s, aExtents, aPreviousExtents, aSampling);
         return bufferTexture;
     }
 
-    i_texture& opengl_renderer::ping_pong_buffer2(const size& aExtents, texture_sampling aSampling)
+    i_texture& opengl_renderer::ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
-        auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer2s, aExtents, aSampling);
+        auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer2s, aExtents, aPreviousExtents, aSampling);
         return bufferTexture;
     }
 
@@ -394,13 +394,20 @@ namespace neogfx
         return 0;
     }    
     
-    i_texture& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, texture_sampling aSampling)
+    i_texture& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents));
         if (existing != aBufferList.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
-            return existing->second;
+        {
+            aPreviousExtents = existing->second.second;
+            existing->second.second = aExtents;
+            return existing->second.first;
+        }
         auto const sizeMultiple = 1024;
         basic_size<int32_t> idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / sizeMultiple) + 1) * sizeMultiple, (((static_cast<int32_t>(aExtents.cy) - 1) / sizeMultiple) + 1) * sizeMultiple };
-        return aBufferList.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
+        auto newBuffer = aBufferList.emplace(std::make_pair(aSampling, idealSize), std::make_pair(texture{ idealSize, 1.0, aSampling }, aExtents)).first;
+        newBuffer->second.second = aExtents;
+        aPreviousExtents = idealSize;
+        return newBuffer->second.first;
     }
 }

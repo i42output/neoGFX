@@ -29,6 +29,7 @@
 #include <neogfx/game/color.hpp>
 #include <neogfx/game/gradient.hpp>
 #include <neogfx/game/material.hpp>
+#include <neogfx/game/filter.hpp>
 #include <neogfx/game/animation_filter.hpp>
 #include <neogfx/game/rigid_body.hpp>
 
@@ -92,6 +93,19 @@ namespace neogfx
             return game::material{ {}, to_ecs_component(std::get<gradient>(aBrush)) };
         else
             return game::material{ game::color{} };
+    }
+
+    inline std::optional<game::filter> to_ecs_component(blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
+    {
+        switch (aAlgorithm)
+        {
+        case blurring_algorithm::None:
+            return {};
+        case blurring_algorithm::Gaussian:
+            return game::filter{ shader_filter::GaussianBlur, aParameter1, aParameter2 };
+        default:
+            return {};
+        }
     }
 
     inline game::texture to_ecs_component(const i_texture& aTexture)

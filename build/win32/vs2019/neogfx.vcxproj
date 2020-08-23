@@ -343,6 +343,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\entity_archetype.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity_info.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity_life_span.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\filter.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\font.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\game_world.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\image.hpp" />

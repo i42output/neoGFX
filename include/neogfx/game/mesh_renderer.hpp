@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/material.hpp>
+#include <neogfx/game/filter.hpp>
 #include <neogfx/game/patch.hpp>
 
 namespace neogfx::game
@@ -34,6 +35,7 @@ namespace neogfx::game
         material material;
         patches patches;
         i32 layer;
+        std::optional<game::filter> filter;
         bool barrier;
 
         struct meta : i_component_data::meta
@@ -63,6 +65,8 @@ namespace neogfx::game
                 case 2:
                     return component_data_field_type::Int32;
                 case 3:
+                    return component_data_field_type::ComponentData | component_data_field_type::Optional;
+                case 4:
                     return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
@@ -76,8 +80,11 @@ namespace neogfx::game
                     return material::meta::id();
                 case 1:
                     return patch::meta::id();
-                case 2:
                 case 3:
+                    return neolib::uuid{};
+                case 2:
+                    return filter::meta::id();
+                case 4:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -90,6 +97,7 @@ namespace neogfx::game
                     "Material",
                     "Patches",
                     "Layer",
+                    "Filter",
                     "Barrier"
                 };
                 return sFieldNames[aFieldIndex];
@@ -113,6 +121,6 @@ namespace neogfx::game
 
     inline bool batchable(const mesh_renderer& lhs, const mesh_renderer& rhs)
     {
-        return batchable(lhs.material, rhs.material) && !lhs.barrier && !rhs.barrier;
+        return batchable(lhs.material, rhs.material) && batchable(lhs.filter, rhs.filter) && !lhs.barrier && !rhs.barrier;
     }
 }
