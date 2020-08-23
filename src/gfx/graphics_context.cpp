@@ -899,8 +899,6 @@ namespace neogfx
 
     void blur(const i_graphics_context& aDestination, const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
-        scoped_blending_mode sbm{ aDestination, neogfx::blending_mode::Blit };
-        scoped_scissor ss{ aDestination, aDestinationRect };
         auto mesh = logical_coordinates().is_gui_orientation() ?
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
         auto const& source = aSource.render_target();
@@ -922,6 +920,10 @@ namespace neogfx
 
     void graphics_context::blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2) const
     {
+        scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Blit };
+        scoped_scissor ss1{ *this, aDestinationRect };
+        scoped_blending_mode sbm2{ aSource, neogfx::blending_mode::Blit };
+        scoped_scissor ss2{ aSource, aSourceRect };
         int32_t passes = static_cast<int32_t>(aRadius);
         if (passes % 2 == 0)
             ++passes;

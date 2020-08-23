@@ -378,6 +378,11 @@ int main(int argc, char* argv[])
             {
                 s.set_glyph_color(window.gradientWidget.gradient());
                 s2.set_glyph_color(window.gradientWidget.gradient());
+                if (window.editGlow.is_checked())
+                {
+                    s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), window.effectAux1Slider.value() });
+                    s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), window.effectAux1Slider.value() });
+                }
             }
             else
             {
