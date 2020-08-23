@@ -175,11 +175,6 @@ namespace neogfx
         return iRenderTarget;
     }
 
-    const i_render_target& graphics_context::render_target()
-    {
-        return iRenderTarget;
-    }
-
     rect graphics_context::rendering_area(bool aConsiderScissor) const
     {
         return native_context().rendering_area(aConsiderScissor);
@@ -208,30 +203,32 @@ namespace neogfx
     graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor) const
     {
         size previousExtents;
-        auto buffer1 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling));
+        auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
+        auto gcBuffer1 = std::make_unique<graphics_context>(buffer1);
         {
-            scoped_scissor ss{ *buffer1, rect{ point{}, previousExtents } };
+            scoped_scissor ss{ *gcBuffer1, rect{ point{}, previousExtents } };
             if (aClearColor != std::nullopt)
             {
-                buffer1->clear(*aClearColor);
-                buffer1->clear_depth_buffer();
-                buffer1->clear_stencil_buffer();
+                gcBuffer1->clear(*aClearColor);
+                gcBuffer1->clear_depth_buffer();
+                gcBuffer1->clear_stencil_buffer();
             }
         }
-        buffer1->render_target().deactivate_target();
-        auto buffer2 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling));
+        gcBuffer1->render_target().deactivate_target();
+        auto& buffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
+        auto gcBuffer2 = std::make_unique<graphics_context>(buffer2);
         {
-            scoped_scissor ss{ *buffer2, rect{ point{}, previousExtents } };
+            scoped_scissor ss{ *gcBuffer2, rect{ point{}, previousExtents } };
             if (aClearColor != std::nullopt)
             {
-                buffer2->clear(*aClearColor);
-                buffer2->clear_depth_buffer();
-                buffer2->clear_stencil_buffer();
+                gcBuffer2->clear(*aClearColor);
+                gcBuffer2->clear_depth_buffer();
+                gcBuffer2->clear_stencil_buffer();
             }
         }
-        buffer2->render_target().deactivate_target();
+        gcBuffer2->render_target().deactivate_target();
         render_target().activate_target();
-        return ping_pong_buffers_t{ std::move(buffer1), std::move(buffer2) };
+        return ping_pong_buffers_t{ std::move(gcBuffer1), std::move(gcBuffer2) };
     }
     
     delta graphics_context::to_device_units(const delta& aValue) const
@@ -899,7 +896,7 @@ namespace neogfx
 
     void blur(const i_graphics_context& aDestination, const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
-        auto mesh = logical_coordinates().is_gui_orientation() ?
+        auto mesh = aDestination.logical_coordinates().is_gui_orientation() ?
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
         auto const& source = aSource.render_target();
         for (auto& uv : mesh.uv)

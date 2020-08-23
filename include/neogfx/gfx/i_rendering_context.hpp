@@ -41,7 +41,6 @@ namespace neogfx
     public:
         virtual i_rendering_engine& rendering_engine() = 0;
         virtual const i_render_target& render_target() const = 0;
-        virtual const i_render_target& render_target() = 0;
         virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
         virtual const graphics_operation::queue& queue() const = 0;
         virtual graphics_operation::queue& queue() = 0;

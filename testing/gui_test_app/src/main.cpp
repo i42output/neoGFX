@@ -707,9 +707,13 @@ int main(int argc, char* argv[])
             if (colorPicker.exec() == ng::dialog_result::Accepted)
             {
                 sInk = colorPicker.selected_color();
-                window.textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::color::White, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} }, true);
-                window.textField1.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::color::White, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} }, true);
-                window.textField2.input_box().set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::color::White, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} }, true);
+                auto s = window.textEdit.default_style();
+                s.set_glyph_color(sInk);
+                window.textEdit.set_default_style(s);
+                auto s2 = window.textField1.input_box().default_style();
+                s2.set_glyph_color(sInk);
+                window.textField1.input_box().set_default_style(s2);
+                window.textField2.input_box().set_default_style(s2);
             }
             sCustomColors = colorPicker.custom_colors();
         });

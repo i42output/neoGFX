@@ -193,7 +193,6 @@ namespace neogfx
     public:
         i_rendering_engine& rendering_engine() override;
         const i_render_target& render_target() const override;
-        const i_render_target& render_target() override;
         rect rendering_area(bool aConsiderScissor = true) const override;
     public:
         const graphics_operation::queue& queue() const override;

@@ -98,6 +98,7 @@ namespace neogfx
         void set_gradient(i_rendering_context& aContext, const gradient& aGradient) override;
         void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient) override;
     private:
+        cache_uniform(uGradientGuiCoordinates)
         cache_uniform(uGradientDirection)
         cache_uniform(uGradientAngle)
         cache_uniform(uGradientStartFrom)

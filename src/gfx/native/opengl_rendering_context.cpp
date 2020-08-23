@@ -315,11 +315,6 @@ namespace neogfx
         return iTarget;
     }
 
-    const i_render_target& opengl_rendering_context::render_target()
-    {
-        return iTarget;
-    }
-
     rect opengl_rendering_context::rendering_area(bool aConsiderScissor) const
     {
         if (scissor_rect() == std::nullopt || !aConsiderScissor)

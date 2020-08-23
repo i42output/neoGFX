@@ -64,11 +64,15 @@ namespace neogfx
                 "    vec2 pos = viewPos - boundingBox.xy;\n"
                 "    pos.x = max(min(pos.x, s.x - 1.0), 0.0);\n"
                 "    pos.y = max(min(pos.y, s.y - 1.0), 0.0);\n"
-                "    float uGradientPos;\n"
+                "    float gradientPos;\n"
                 "    if (uGradientDirection == 0)\n" /* vertical */
-                "        uGradientPos = pos.y / s.y;\n"
+                "    {\n"
+                "        gradientPos = pos.y / s.y;\n"
+                "        if (!uGradientGuiCoordinates)\n"
+                "            gradientPos = 1.0 - gradientPos;\n"
+                "    }\n"
                 "    else if (uGradientDirection == 1)\n" /* horizontal */
-                "        uGradientPos = pos.x / s.x;\n"
+                "        gradientPos = pos.x / s.x;\n"
                 "    else if (uGradientDirection == 2)\n" /* diagonal */
                 "    {\n"
                 "        vec2 center = s / 2.0;\n"
@@ -96,7 +100,7 @@ namespace neogfx
                 "        mat2 rot = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));\n"
                 "        pos = rot * pos;\n"
                 "        pos = pos + center;\n"
-                "        uGradientPos = pos.y / s.y;\n"
+                "        gradientPos = pos.y / s.y;\n"
                 "    }\n"
                 "    else if (uGradientDirection == 3)\n" /* rectangular */
                 "    {\n"
@@ -106,7 +110,7 @@ namespace neogfx
                 "        float horz = pos.x / s.x;\n"
                 "        if (horz > 0.5)\n"
                 "            horz = 1.0 - horz;\n"
-                "        uGradientPos = min(vert, horz) * 2.0;\n"
+                "        gradientPos = min(vert, horz) * 2.0;\n"
                 "    }\n"
                 "    else\n" /* radial */
                 "    {\n"
@@ -174,11 +178,11 @@ namespace neogfx
                 "            }\n"
                 "        }\n"
                 "        if (d < r)\n"
-                "            uGradientPos = d / r;\n"
+                "            gradientPos = d / r;\n"
                 "        else\n"
-                "            uGradientPos = 1.0;\n"
+                "            gradientPos = 1.0;\n"
                 "    }\n"
-                "    return gradient_color(uGradientPos);\n"
+                "    return gradient_color(gradientPos);\n"
                 "}\n"
                 "\n"
                 "void standard_gradient_shader(inout vec4 color, inout vec4 function)\n"
@@ -219,6 +223,7 @@ namespace neogfx
     void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient)
     {
         enable();
+        uGradientGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
         uGradientDirection = aGradient.direction();
         uGradientAngle = std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f;
         uGradientStartFrom = std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1;
