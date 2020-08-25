@@ -417,6 +417,7 @@ namespace neogfx
             return;
 
         set_blending_mode(blending_mode());
+        apply_scissor();
 
         for (auto batchStart = queue().begin(); batchStart != queue().end();)
         {
