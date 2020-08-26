@@ -100,12 +100,12 @@ namespace neogfx
             iOwner(aOwner),
             iAnimationTimer{ service<async_task>(), [this](neolib::callback_timer& aTimer)
             {
-                iSink += surface().closed([&aTimer]() { aTimer.cancel(); });
                 aTimer.again();
                 animate();
             }, 10, true },
             iTracking{ false }
         {
+            iSink += surface().closed([this]() { iAnimationTimer.cancel(); });
             set_padding(neogfx::padding{});
         }
     public:
