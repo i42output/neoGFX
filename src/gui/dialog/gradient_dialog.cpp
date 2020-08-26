@@ -78,6 +78,13 @@ namespace neogfx
             }
             colorStops.emplace_back(s->end, vec3{ s->endRgba.xyz });
             alphaStops.emplace_back(s->end, static_cast<color::component>(s->endRgba[3] * 0xFF));
+            for (auto i = alphaStops.begin(); alphaStops.size() > 2 && i != std::prev(std::prev(alphaStops.end()));)
+            {
+                if (i->second() == std::next(i)->second() && i->second() == std::next(std::next(i))->second())
+                    i = std::prev(alphaStops.erase(std::next(i)));
+                else
+                    ++i;
+            }
             return gradient{ aGradient, colorStops, alphaStops };
         }
     }

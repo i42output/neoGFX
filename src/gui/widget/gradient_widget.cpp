@@ -35,12 +35,13 @@ namespace neogfx
         static const dimension SMALL_ALPHA_PATTERN_SIZE = 3;
         static const dimension BORDER_THICKNESS = 1;
         static const dimension BORDER_SPACER_THICKNESS = 1;
-        static const dimension BAR_CONTENTS_HEIGHT = 16;
+        static const dimension BAR_CONTENTS_HEIGHT = 26;
         static const dimension BAR_HEIGHT = BAR_CONTENTS_HEIGHT + (BORDER_THICKNESS * 2) + (BORDER_SPACER_THICKNESS * 2);
         static const dimension STOP_POINTER_HEIGHT = 6;
         static const dimension STOP_WIDTH = 11;
         static const dimension STOP_HEIGHT = STOP_WIDTH + STOP_POINTER_HEIGHT;
-        static const dimension CONTROL_HEIGHT = BAR_HEIGHT + STOP_HEIGHT * 2;
+        static const dimension STOP_OFFSET = STOP_WIDTH / 2 + STOP_POINTER_HEIGHT;
+        static const dimension CONTROL_HEIGHT = BAR_HEIGHT + STOP_WIDTH * 2;
     }
 
     void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
@@ -208,6 +209,24 @@ namespace neogfx
         aGc.draw_rect(rectContents, pen(frameColor.mid(background_color()), dip(BORDER_THICKNESS)));
         rectContents.inflate(size{ dip(BORDER_THICKNESS) });
         aGc.draw_rect(rectContents, pen(frameColor, dip(BORDER_THICKNESS)));
+        if (iCurrentColorStop != std::nullopt)
+        {
+            auto const r = color_stop_rect(**iCurrentColorStop);
+            aGc.line_stipple_on(1.0_dip, 0x5555, 0.0);
+            aGc.push_logical_operation(neogfx::logical_operation::Xor);
+            aGc.draw_line(point{ std::floor(r.center().x), r.top() }, point{ std::floor(r.center().x), contents_rect().top() }, color::White);
+            aGc.line_stipple_off();
+            aGc.pop_logical_operation();
+        }
+        else if (iCurrentAlphaStop != std::nullopt)
+        {
+            auto const r = alpha_stop_rect(**iCurrentAlphaStop);
+            aGc.line_stipple_on(1.0_dip, 0x5555, 0.0);
+            aGc.push_logical_operation(neogfx::logical_operation::Xor);
+            aGc.draw_line(point{ std::floor(r.center().x), r.bottom() }, point{ std::floor(r.center().x), contents_rect().bottom() }, color::White);
+            aGc.line_stipple_off();
+            aGc.pop_logical_operation();
+        }
         for (gradient::color_stop_list::const_iterator i = iSelection.color_stops().begin(); i != iSelection.color_stops().end(); ++i)
             draw_color_stop(aGc, *i);
         for (gradient::alpha_stop_list::const_iterator i = iSelection.alpha_stops().begin(); i != iSelection.alpha_stops().end(); ++i)
@@ -533,7 +552,7 @@ namespace neogfx
     rect gradient_widget::contents_rect() const
     {
         rect r = client_rect(false);
-        r.translate(point{ std::floor(dip(STOP_WIDTH) / 2), dip(STOP_HEIGHT) });
+        r.translate(point{ std::floor(dip(STOP_WIDTH) / 2), dip(STOP_WIDTH) });
         r.cx = r.width() - dip(STOP_WIDTH);
         r.cy = dip(BAR_HEIGHT);
         r.deflate(size{ dip(BORDER_THICKNESS) });
@@ -593,7 +612,7 @@ namespace neogfx
     {
         rect result = contents_rect();
         result.x = result.left() + std::floor((result.width() - 1.0) * aColorStop.first()) - std::floor(dip(STOP_WIDTH) / 2);
-        result.y = result.bottom() + dip(BORDER_THICKNESS + BORDER_SPACER_THICKNESS);
+        result.y = result.bottom() + dip(BORDER_THICKNESS + BORDER_SPACER_THICKNESS - STOP_OFFSET) + 1.0_dip;
         result.cx = dip(STOP_WIDTH);
         result.cy = dip(STOP_HEIGHT);
         return result;
@@ -603,7 +622,7 @@ namespace neogfx
     {
         rect result = contents_rect();
         result.x = result.left() + std::floor((result.width() - 1.0) * aAlphaStop.first()) - std::floor(dip(STOP_WIDTH) / 2);
-        result.y = result.top() - dip(BORDER_THICKNESS + BORDER_SPACER_THICKNESS + STOP_HEIGHT);
+        result.y = result.top() - dip(BORDER_THICKNESS + BORDER_SPACER_THICKNESS + (STOP_HEIGHT - STOP_OFFSET));
         result.cx = dip(STOP_WIDTH);
         result.cy = dip(STOP_HEIGHT);
         return result;
@@ -689,14 +708,15 @@ namespace neogfx
         color transparentColor{ 255, 255, 255, 0 };
         color backgroundColor = background_color();
         color frameColor = background_color().shaded(0x20);
+        bool const selected = (iCurrentColorStop != std::nullopt && (**iCurrentColorStop).first() == aColorStop.first());
         image stopGlyph{
             dpi_select(stopGlpyhPattern, stopGlpyhHighDpiPattern),
             {
                 {"paper", transparentColor},
                 {"ink1", frameColor},
                 {"ink2", frameColor.mid(backgroundColor)},
-                {"ink3", iCurrentColorStop == std::nullopt || (**iCurrentColorStop).first() != aColorStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection)},
-                {"ink4", iCurrentColorStop == std::nullopt || (**iCurrentColorStop).first() != aColorStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40)},
+                {"ink3", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection)},
+                {"ink4", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40)},
                 {"ink9", aColorStop.second()}} };
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
@@ -784,14 +804,15 @@ namespace neogfx
         color transparentColor{ 255, 255, 255, 0 };
         color backgroundColor = background_color();
         color frameColor = background_color().shaded(0x20);
+        bool const selected = (iCurrentAlphaStop != std::nullopt && (**iCurrentAlphaStop).first() == aAlphaStop.first());
         image stopGlyph{
             dpi_select(stopGlpyhPattern, stopGlpyhHighDpiPattern),
             {
                 { "paper", transparentColor },
                 { "ink1", frameColor },
                 { "ink2", frameColor.mid(backgroundColor) },
-                { "ink3", iCurrentAlphaStop == std::nullopt || (**iCurrentAlphaStop).first() != aAlphaStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection) },
-                { "ink4", iCurrentAlphaStop == std::nullopt || (**iCurrentAlphaStop).first() != aAlphaStop.first() ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40) },
+                { "ink3", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection) },
+                { "ink4", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40) },
                 { "ink9", color::White.with_alpha(aAlphaStop.second()) } } };
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
