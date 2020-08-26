@@ -24,11 +24,12 @@ namespace neogfx
 {
     message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
         dialog{ aTitle, window_style::Dialog | window_style::Modal | window_style::TitleBar | (dialog_button_box::has_reject_role(aButtons) ? window_style::Close : window_style::Invalid)},
-        iLayout1{ client_layout() },
-        iIcon{ iLayout1, aIcon },
+        iLayout1{ client_layout(), alignment::Left | alignment::Top },
         iLayout2{ iLayout1 },
-        iText{ iLayout2, aText, text_widget_type::MultiLine },
-        iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
+        iIcon{ iLayout2, aIcon },
+        iLayout3{ iLayout1 },
+        iText{ iLayout3, aText, text_widget_type::MultiLine },
+        iDetailedText{ iLayout3, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
     {
         init();
         button_box().add_buttons(aButtons);
@@ -36,11 +37,12 @@ namespace neogfx
 
     message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
         dialog{ aParent, aTitle, window_style::Dialog | window_style::Modal | window_style::TitleBar | (dialog_button_box::has_reject_role(aButtons) ? window_style::Close : window_style::Invalid) },
-        iLayout1{ client_layout() },
-        iIcon{ iLayout1, aIcon },
+        iLayout1{ client_layout(), alignment::Left | alignment::Top },
         iLayout2{ iLayout1 },
-        iText{ iLayout2, aText, text_widget_type::MultiLine },
-        iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
+        iIcon{ iLayout2, aIcon },
+        iLayout3{ iLayout1 },
+        iText{ iLayout3, aText, text_widget_type::MultiLine },
+        iDetailedText{ iLayout3, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
     {
         init();
         button_box().add_buttons(aButtons);
@@ -264,9 +266,11 @@ namespace neogfx
 
     void message_box::init()
     {
-        iLayout1.set_padding(neogfx::padding{});
-        iLayout2.set_alignment(neogfx::alignment::Left);
+        iLayout1.set_padding(neogfx::padding{ 16.0_dip, 16.0_dip } - client_layout().padding());
+        iLayout1.set_spacing(size{ 16.0_dip, 16.0_dip });
         iLayout2.set_padding(neogfx::padding{});
+        iLayout3.set_alignment(neogfx::alignment::Left);
+        iLayout3.set_padding(neogfx::padding{});
 
         size maxTextSize{ service<i_window_manager>().desktop_rect(root()).width() / 3.0, size::max_dimension() };
         text().set_maximum_size(maxTextSize);

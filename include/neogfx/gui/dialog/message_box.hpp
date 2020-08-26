@@ -77,8 +77,9 @@ namespace neogfx
         void init();
     private:
         horizontal_layout iLayout1;
-        image_widget iIcon;
         vertical_layout iLayout2;
+        image_widget iIcon;
+        vertical_layout iLayout3;
         text_widget iText;
         text_widget iDetailedText;
         std::optional<standard_button> iResponse;
