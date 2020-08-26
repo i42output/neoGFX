@@ -164,7 +164,7 @@ namespace neogfx
         typedef double auxiliary_parameter;
         typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
     public:
-        text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) :
+        text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}) :
             iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }
         {
         }
@@ -176,30 +176,39 @@ namespace neogfx
             iType = aOther.iType;
             iColor = aOther.iColor;
             iWidth = aOther.iWidth;
+            iOffset = aOther.iOffset;
             iAux1 = aOther.iAux1;
             return *this;
         }
     public:
         bool operator==(const text_effect& aOther) const
         {
-            return iType == aOther.iType && iColor == aOther.iColor && iWidth == aOther.iWidth && iAux1 == aOther.iAux1;
+            return iType == aOther.iType && iColor == aOther.iColor && iWidth == aOther.iWidth && iOffset == aOther.iOffset && iAux1 == aOther.iAux1;
         }
         bool operator!=(const text_effect& aOther) const
         {
-            return iType != aOther.iType || iColor != aOther.iColor || iWidth != aOther.iWidth || iAux1 != aOther.iAux1;
+            return !(*this == aOther);
         }
         bool operator<(const text_effect& aRhs) const
         {
-            return std::tie(iType, iColor, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColor, aRhs.iWidth, aRhs.iAux1);
+            return std::tie(iType, iColor, iWidth, iOffset, iAux1) < std::tie(aRhs.iType, aRhs.iColor, aRhs.iWidth, aRhs.iOffset, aRhs.iAux1);
         }
     public:
         text_effect_type type() const
         {
             return iType;
         }
-        const text_color& color() const
+        text_color color() const
         {
-            return iColor;
+            if (iColor != neolib::none)
+                return iColor;
+            switch (type())
+            {
+            case text_effect_type::Shadow:
+                return color::Black.with_alpha(0.5);
+            default:
+                return color::White;
+            }
         }
         dimension width() const
         {
@@ -215,6 +224,23 @@ namespace neogfx
             case text_effect_type::Glow:
             case text_effect_type::Shadow:
                 return 4.0;
+            }
+        }
+        vec3 offset() const
+        {
+            if (iOffset != std::nullopt)
+                return *iOffset;
+            switch (type())
+            {
+            case text_effect_type::None:
+            default:
+                return {};
+            case text_effect_type::Outline:
+                return {};
+            case text_effect_type::Glow:
+                return {};
+            case text_effect_type::Shadow:
+                return { std::max(1.0, width() / 2.0), std::max(1.0, width() / 2.0) };
             }
         }
         double aux1() const
@@ -235,7 +261,7 @@ namespace neogfx
         }
         text_effect with_alpha(color::component aAlpha) const
         {
-            return text_effect{ iType, iColor.with_alpha(aAlpha), iWidth, iAux1 };
+            return text_effect{ iType, iColor.with_alpha(aAlpha), iWidth, iOffset, iAux1 };
         }
         text_effect with_alpha(double aAlpha) const
         {
@@ -245,6 +271,7 @@ namespace neogfx
         text_effect_type iType;
         text_color iColor;
         optional_dimension iWidth;
+        optional_vec3 iOffset;
         optional_auxiliary_parameter iAux1;
     };
     typedef std::optional<text_effect> optional_text_effect;

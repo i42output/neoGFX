@@ -426,6 +426,9 @@ namespace neogfx
         case push_button_style::SpinBox:
             set_padding(neogfx::padding{ 2.0_dip, 2.0_dip });
             break;
+        case push_button_style::Normal:
+            set_padding(neogfx::padding{ 8.0_dip, 4.0_dip });
+            break;
         default:
             set_padding(neogfx::padding{ 4.0_dip, 4.0_dip });
             break;

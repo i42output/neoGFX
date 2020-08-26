@@ -380,8 +380,13 @@ int main(int argc, char* argv[])
                 s2.set_glyph_color(window.gradientWidget.gradient());
                 if (window.editGlow.is_checked())
                 {
-                    s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), window.effectAux1Slider.value() });
-                    s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), window.effectAux1Slider.value() });
+                    s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+                    s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+                }
+                else if (window.editShadow.is_checked())
+                {
+                    s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+                    s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
                 }
             }
             else
@@ -588,10 +593,10 @@ int main(int argc, char* argv[])
             window.effectWidthSlider.set_value(5);
             window.effectAux1Slider.set_value(1);
             auto s = window.textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), window.effectAux1Slider.value() });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
             window.textEdit.set_default_style(s);
             s = window.textEditEditor.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), window.effectAux1Slider.value() });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
             window.textEditEditor.set_default_style(s);
         });
         window.effectWidthSlider.ValueChanged([&]()
@@ -600,7 +605,7 @@ int main(int argc, char* argv[])
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ window.editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, textEffect->color(), window.effectWidthSlider.value(), textEffect->aux1() });
+            s.set_text_effect(ng::text_effect{ window.editGlow.is_checked() ? ng::text_effect_type::Glow : window.editShadow.is_checked() ? ng::text_effect_type::Shadow : ng::text_effect_type::Outline, textEffect->color(), window.effectWidthSlider.value(), {}, textEffect->aux1() });
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
@@ -616,7 +621,7 @@ int main(int argc, char* argv[])
             auto& textEffect = s.text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->color(), textEffect->width(), window.effectAux1Slider.value() });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->color(), textEffect->width(), {}, window.effectAux1Slider.value() });
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
@@ -625,7 +630,7 @@ int main(int argc, char* argv[])
         window.editShadow.checked([&]()
         {
             auto s = window.textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, ng::color::Black });
+            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, {} });
             window.textEdit.set_default_style(s);
         });
         window.radioSliderFont.checked([&window, &app]()

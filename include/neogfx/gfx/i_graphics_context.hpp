@@ -265,7 +265,9 @@ namespace neogfx
     inline void draw_glyph_text(const i_graphics_context& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
         if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Glow)
-            draw_glyph_text_glow(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
+            draw_glyph_text_glow(aGc, aPoint + aAppearance.effect()->offset(), aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
+        else if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Shadow)
+            draw_glyph_text_glow(aGc, aPoint + aAppearance.effect()->offset(), aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
         draw_glyph_text_normal(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance);
     }
 
