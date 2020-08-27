@@ -181,6 +181,7 @@ namespace neogfx
         iReversePartial{ iLayout3_1, image{ ":/neogfx/resources/icons/reversepartial.png" } },
         iHueSlider{ iLayout3_1 },
         iImport{ iLayout3_1, image{ ":/neogfx/resources/icons/open.png" } },
+        iDelete{ iLayout3_1, image{ ":/neogfx/resources/icons/delete.png" } },
         iLayout3_2{ iLayout3, alignment::Top },
         iDirectionGroupBox{ iLayout3_2, "Direction"_t },
         iDirectionHorizontalRadioButton{ iDirectionGroupBox.item_layout(), "Horizontal"_t },
@@ -264,8 +265,10 @@ namespace neogfx
         iLayout2.set_padding(neogfx::padding{});
         iLayout3.set_padding(neogfx::padding{});
         iLayout5.set_alignment(alignment::Top);
+        iReverse.set_size_policy(size_constraint::Minimum);
         iReverse.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
         iReverse.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
+        iReversePartial.set_size_policy(size_constraint::Minimum);
         iReversePartial.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
         iReversePartial.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iHueSlider.set_minimum(0.0);
@@ -279,7 +282,11 @@ namespace neogfx
             hues.emplace_back(pos, color::from_hsv(pos * 360.0, 1.0, 1.0));
         }
         iHueSlider.set_bar_color(neogfx::gradient{ hues, gradient_direction::Horizontal });
+        iImport.set_size_policy(size_constraint::Minimum);
         iImport.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
+        iDelete.set_size_policy(size_constraint::Minimum);
+        iDelete.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
+        iDelete.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);
         iSmoothnessSpinBox.set_step(0.1);
@@ -411,6 +418,11 @@ namespace neogfx
             }
         });
 
+        iDelete.Clicked([this]()
+        {
+            set_gradient(neogfx::gradient{});
+        });
+
         iSmoothnessSpinBox.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSpinBox.value() / 100.0)); });
         iSmoothnessSlider.ValueChanged([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSlider.value() / 100.0)); });
 
@@ -496,6 +508,8 @@ namespace neogfx
         if (iUpdatingWidgets)
             return;
         neolib::scoped_flag sf{ iUpdatingWidgets };
+        static neogfx::gradient const sDefaultGradient{ color::Black };
+        iDelete.enable(iGradientSelector.gradient() != sDefaultGradient);
         iSmoothnessSpinBox.set_value(gradient().smoothness() * 100.0);
         iSmoothnessSlider.set_value(gradient().smoothness() * 100.0);
         iDirectionHorizontalRadioButton.set_checked(gradient().direction() == gradient_direction::Horizontal);

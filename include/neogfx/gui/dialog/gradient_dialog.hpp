@@ -55,6 +55,7 @@ namespace neogfx
         push_button iReversePartial;
         double_slider iHueSlider;
         push_button iImport;
+        push_button iDelete;
         horizontal_layout iLayout3_2;
         group_box iDirectionGroupBox;
         radio_button iDirectionHorizontalRadioButton;
