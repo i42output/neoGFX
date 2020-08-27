@@ -473,6 +473,7 @@ namespace neogfx
     inline void basic_spin_box<T>::set_format(const std::string& aFormat)
     {
         iFormat = aFormat;
+        update_size_hint();
         update();
     }
 
