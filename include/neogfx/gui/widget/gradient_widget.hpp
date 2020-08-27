@@ -68,6 +68,7 @@ namespace neogfx
         neogfx::mouse_cursor mouse_cursor() const override;
     private:
         rect contents_rect() const;
+        bool is_stop_at(point const& aPosition) const;
         stop_const_iterator stop_at(point const& aPosition) const;
         stop_iterator stop_at(point const& aPosition);
         void set_current_color_stop(std::optional<gradient::color_stop_list::iterator> const& aStop);

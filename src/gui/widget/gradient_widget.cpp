@@ -243,16 +243,7 @@ namespace neogfx
         iClicked = aPosition;
         if (aButton == mouse_button::Left)
         {
-            if (contents_rect().contains(aPosition))
-            {
-                if (iCurrentColorStop != std::nullopt)
-                    (**iCurrentColorStop).second() = iSelection.color_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-                else if (iCurrentAlphaStop != std::nullopt)
-                    (**iCurrentAlphaStop).second() = iSelection.alpha_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-                update();
-                GradientChanged.trigger();
-            }
-            else
+            if (is_stop_at(aPosition))
             {
                 auto stopIter = stop_at(aPosition);
                 if (std::holds_alternative<gradient::color_stop_list::iterator>(stopIter))
@@ -269,22 +260,31 @@ namespace neogfx
                     iTracking = true;
                     update();
                 }
-                else
+            }
+            else
+            {
+                if (contents_rect().contains(aPosition))
                 {
-                    if (aPosition.y < contents_rect().top())
-                    {
-                        set_current_alpha_stop(iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
-                        set_current_color_stop(std::nullopt);
-                        update();
-                        GradientChanged.trigger();
-                    }
-                    else if (aPosition.y >= contents_rect().bottom())
-                    {
-                        set_current_color_stop(iSelection.insert_color_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
-                        set_current_alpha_stop(std::nullopt);
-                        update();
-                        GradientChanged.trigger();
-                    }
+                    if (iCurrentColorStop != std::nullopt)
+                        (**iCurrentColorStop).second() = iSelection.color_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
+                    else if (iCurrentAlphaStop != std::nullopt)
+                        (**iCurrentAlphaStop).second() = iSelection.alpha_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
+                    update();
+                    GradientChanged.trigger();
+                }
+                else if (aPosition.y < contents_rect().top())
+                {
+                    set_current_alpha_stop(iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
+                    set_current_color_stop(std::nullopt);
+                    update();
+                    GradientChanged.trigger();
+                }
+                else if (aPosition.y >= contents_rect().bottom())
+                {
+                    set_current_color_stop(iSelection.insert_color_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
+                    set_current_alpha_stop(std::nullopt);
+                    update();
+                    GradientChanged.trigger();
                 }
             }
         }
@@ -535,15 +535,15 @@ namespace neogfx
     neogfx::mouse_cursor gradient_widget::mouse_cursor() const
     {
         point mousePos = root().mouse_position() - origin();
-        if (contents_rect().contains(mousePos))
+        if (stop_at(mousePos) != neolib::none)
+            return mouse_system_cursor::Arrow;
+        else if (contents_rect().contains(mousePos))
         {
             if (iCurrentColorStop != std::nullopt || iCurrentAlphaStop != std::nullopt)
                 return mouse_system_cursor::Crosshair;
             else
                 return mouse_system_cursor::Arrow;
         }
-        else if (stop_at(mousePos) != neolib::none)
-            return mouse_system_cursor::Arrow;
         else if (mousePos.x >= contents_rect().left() && mousePos.x < contents_rect().right())
             return mouse_system_cursor::Hand;
         return widget::mouse_cursor();
@@ -558,6 +558,11 @@ namespace neogfx
         r.deflate(size{ dip(BORDER_THICKNESS) });
         r.deflate(size{ dip(BORDER_THICKNESS) });
         return r;
+    }
+
+    bool gradient_widget::is_stop_at(point const& aPosition) const
+    {
+        return stop_at(aPosition) != neolib::none;
     }
 
     gradient_widget::stop_const_iterator gradient_widget::stop_at(point const& aPosition) const
