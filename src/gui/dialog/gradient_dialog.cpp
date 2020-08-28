@@ -446,7 +446,7 @@ namespace neogfx
         iTile.check_box().checked([this]() 
         { 
             if (gradient().tile() == std::nullopt)
-                set_gradient(gradient().with_tile(gradient_tile{})); 
+                set_gradient(gradient().with_tile(gradient_tile{ size{ 2, 2 } }));
         });
         iTile.check_box().unchecked([this]() 
         { 
@@ -566,7 +566,7 @@ namespace neogfx
             return;
         neolib::scoped_flag sf{ iUpdatingWidgets };
         static neogfx::gradient const sDefaultGradient{ color::Black };
-        iDelete.enable(iGradientSelector.gradient() != sDefaultGradient);
+        iDelete.enable(gradient() != sDefaultGradient);
         iTile.check_box().set_checked(gradient().tile() != std::nullopt);
         if (gradient().tile() != std::nullopt)
         {

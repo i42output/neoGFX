@@ -461,6 +461,8 @@ namespace neogfx
             if (aNotify && (!text().empty() || value() != minimum()))
                 ValueChanged.trigger();
         }
+        else if (!iDontSetText && iTextBox.text().empty())
+            iTextBox.set_text(value_to_string());
     }
 
     template <typename T>

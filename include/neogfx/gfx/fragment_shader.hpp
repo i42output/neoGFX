@@ -106,6 +106,8 @@ namespace neogfx
         cache_uniform(uGradientShape)
         cache_uniform(uGradientExponents)
         cache_uniform(uGradientCenter)
+        cache_uniform(uGradientTile)
+        cache_uniform(uGradientTileParams)
         cache_uniform(uGradientColorCount)
         cache_uniform(uGradientColorRow)
         cache_uniform(uGradientColors)

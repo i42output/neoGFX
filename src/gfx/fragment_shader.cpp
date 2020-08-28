@@ -62,6 +62,23 @@ namespace neogfx
                 "{\n"
                 "    vec2 s = boundingBox.zw - boundingBox.xy;\n"
                 "    vec2 pos = viewPos - boundingBox.xy;\n"
+                "    if (uGradientTile)\n"
+                "    {\n"
+                "        if (uGradientDirection != 1)\n" /* vertical */
+                "        {\n"
+                "            float adjust = 0;\n"
+                "            if (uGradientTileParams.z == 1)\n"
+                "                adjust = -float((uGradientTileParams.y - int(boundingBox.y) % uGradientTileParams.y) % uGradientTileParams.y);\n"
+                "            pos.y = floor(float(int(pos.y + adjust) % uGradientTileParams.y) / float(uGradientTileParams.y) * s.y);\n"
+                "        }\n"
+                "        if (uGradientDirection != 0)\n" /* horizontal */
+                "        {\n"
+                "            float adjust = 0;\n"
+                "            if (uGradientTileParams.z == 1)\n"
+                "                adjust = -float((uGradientTileParams.x - int(boundingBox.x) % uGradientTileParams.x) % uGradientTileParams.x);\n"
+                "            pos.x = floor(float(int(pos.x + adjust) % uGradientTileParams.x) / float(uGradientTileParams.x) * s.x);\n"
+                "        }\n"
+                "    }\n"
                 "    pos.x = max(min(pos.x, s.x - 1.0), 0.0);\n"
                 "    pos.y = max(min(pos.y, s.y - 1.0), 0.0);\n"
                 "    float gradientPos;\n"
@@ -233,6 +250,11 @@ namespace neogfx
         uGradientExponents = vec2f{ gradientExponents.x, gradientExponents.y };
         basic_point<float> gradientCenter = (aGradient.center() != std::nullopt ? *aGradient.center() : point{});
         uGradientCenter = vec2f{ gradientCenter.x, gradientCenter.y };
+        uGradientTile = (aGradient.tile() != std::nullopt);
+        if (aGradient.tile() != std::nullopt)
+            uGradientTileParams = vec3{ aGradient.tile()->extents.cx, aGradient.tile()->extents.cy, aGradient.tile()->aligned ? 1.0 : 0.0 }.as<int32_t>();
+        else
+            uGradientTileParams = vec3i32{};
         uGradientColorCount = static_cast<int>(aGradient.colors().sampler().data().extents().cx);
         uGradientColorRow = static_cast<int>(aGradient.colors().sampler_row());
         uGradientFilterSize = static_cast<int>(aGradient.filter().sampler().data().extents().cx);

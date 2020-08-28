@@ -415,7 +415,7 @@ namespace neogfx
                             ++next;
                         double p1 = (iter->first() + (prev)->first()) / 2.0;
                         double p2 = (iter->first() + (next)->first()) / 2.0;
-                        color c = iter->second();
+                        auto const c = iter->second();
                         set_current_color_stop(std::nullopt);
                         if (iter != prev && iter != next)
                             iSelection.color_stops().erase(iter);
@@ -447,6 +447,7 @@ namespace neogfx
                 }
                 else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
                 {
+                    auto iter = static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
                     auto selectAlphaAction = std::make_shared<action>("Select stop alpha (opacity level)..."_t);
                     selectAlphaAction->Triggered([this, stopIter]()
                     {
@@ -458,6 +459,28 @@ namespace neogfx
                             update();
                             GradientChanged.trigger();
                         }
+                    });
+                    auto splitStopAction = std::make_shared<action>("Split stop"_t);
+                    splitStopAction->Triggered([this, iter]()
+                    {
+                        auto prev = iter;
+                        if (prev != iSelection.alpha_stops().begin())
+                            --prev;
+                        auto next = iter;
+                        if (next != iSelection.alpha_stops().end() - 1)
+                            ++next;
+                        double p1 = (iter->first() + (prev)->first()) / 2.0;
+                        double p2 = (iter->first() + (next)->first()) / 2.0;
+                        auto const a = iter->second();
+                        set_current_alpha_stop(std::nullopt);
+                        if (iter != prev && iter != next)
+                            iSelection.alpha_stops().erase(iter);
+                        if (iter != prev)
+                            iSelection.insert_alpha_stop(p1)->second() = a;
+                        if (iter != next)
+                            iSelection.insert_alpha_stop(p2)->second() = a;
+                        update();
+                        GradientChanged.trigger();
                     });
                     auto deleteStopAction = std::make_shared<action>("Delete stop");
                     deleteStopAction->Triggered([this, stopIter]()
@@ -473,6 +496,7 @@ namespace neogfx
                     iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
                     iMenu->menu().add_action(selectAlphaAction);
                     iMenu->menu().add_action(deleteStopAction);
+                    iMenu->menu().add_action(splitStopAction);
                     if (!iInGradientDialog)
                         iMenu->menu().add_action(moreAction);
                     iMenu->exec();
