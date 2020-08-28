@@ -117,8 +117,7 @@ namespace neogfx
     public:
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ dx, dy }; }
         basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ dx, dy, 0.0 }; }
-        bool operator==(const basic_delta& other) const { return dx == other.dx && dy == other.dy; }
-        bool operator!=(const basic_delta& other) const { return !operator==(other); }
+        auto operator<=>(const basic_delta&) const = default;
         basic_delta& operator+=(const basic_delta& other) { dx += other.dx; dy += other.dy; return *this; }
         basic_delta& operator-=(const basic_delta& other) { dx -= other.dx; dy -= other.dy; return *this; }
         basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; return *this; }
@@ -204,8 +203,7 @@ namespace neogfx
         basic_vector<dimension_type, 3> to_vec3() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
         delta_type to_delta() const { return delta_type(cx, cy); }
         bool empty() const { return cx == 0 || cy == 0; }
-        bool operator==(const basic_size& other) const { return cx == other.cx && cy == other.cy; }
-        bool operator!=(const basic_size& other) const { return !operator==(other); }
+        auto operator<=>(const basic_size&) const = default;
         basic_size operator-() const { throw_on_bad_size(*this); return basic_size{ -cx, -cy }; }
         basic_size& operator+=(const basic_size& other) { throw_on_bad_size(other);  cx += other.cx; cy += other.cy; return *this; }
         basic_size& operator+=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx += other.dx; cy += other.dy; return *this; }
@@ -302,30 +300,6 @@ namespace neogfx
     }
 
     template <typename CoordinateType>
-    inline bool operator<(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
-    {
-        return std::tie(left.cx, left.cy) < std::tie(right.cx, right.cy);
-    }
-
-    template <typename CoordinateType>
-    inline bool operator<=(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
-    {
-        return std::tie(left.cx, left.cy) <= std::tie(right.cx, right.cy);
-    }
-
-    template <typename CoordinateType>
-    inline bool operator>(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
-    {
-        return std::tie(left.cx, left.cy) > std::tie(right.cx, right.cy);
-    }
-
-    template <typename CoordinateType>
-    inline bool operator>=(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
-    {
-        return std::tie(left.cx, left.cy) >= std::tie(right.cx, right.cy);
-    }
-
-    template <typename CoordinateType>
     inline bool nearly_equal(basic_size<CoordinateType> const& lhs, basic_size<CoordinateType> const& rhs, scalar epsilon = 0.00001)
     {
         return nearly_equal(lhs.cx, rhs.cx, epsilon) && nearly_equal(lhs.cy, rhs.cy, epsilon);
@@ -354,8 +328,7 @@ namespace neogfx
     public:
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ x, y }; }
         basic_vector<coordinate_type, 3> to_vec3(coordinate_type z = 0.0) const { return basic_vector<coordinate_type, 3>{ x, y, z }; }
-        bool operator==(const basic_point& other) const { return x == other.x && y == other.y; }
-        bool operator!=(const basic_point& other) const { return !operator==(other); }
+        auto operator<=>(const basic_point&) const = default;
         basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; return *this; }
         basic_point& operator-=(const basic_point& other) { x -= other.x; y -= other.y; return *this; }
         basic_point& operator*=(const basic_point& other) { x *= other.x; y *= other.y; return *this; }
@@ -540,36 +513,6 @@ namespace neogfx
         basic_size<CoordinateType> ret = left;
         ret /= basic_size<CoordinateType>{ right.x, right.y };
         return ret;
-    }
-
-    template <typename CoordinateType>
-    inline bool operator<(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
-    {
-        return std::tie(left.x, left.y) < std::tie(right.x, right.y);
-    }
-
-    template <typename CoordinateType>
-    inline bool operator==(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
-    {
-        return left.x == right.x && left.y == right.y;
-    }
-
-    template <typename CoordinateType>
-    inline bool operator<=(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
-    {
-        return left < right || left == right;
-    }
-
-    template <typename CoordinateType>
-    inline bool operator>(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
-    {
-        return right < left;
-    }
-
-    template <typename CoordinateType>
-    inline bool operator>=(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
-    {
-        return right < left || left == right;
     }
 
     template <typename CoordinateType>

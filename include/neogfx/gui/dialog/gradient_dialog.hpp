@@ -63,6 +63,12 @@ namespace neogfx
         radio_button iDirectionDiagonalRadioButton;
         radio_button iDirectionRectangularRadioButton;
         radio_button iDirectionRadialRadioButton;
+        group_box iTile;
+        label iTileWidthLabel;
+        uint32_spin_box iTileWidth;
+        label iTileHeightLabel;
+        uint32_spin_box iTileHeight;
+        check_box iTileAligned;
         group_box iSmoothnessGroupBox;
         double_spin_box iSmoothnessSpinBox;
         double_slider iSmoothnessSlider;

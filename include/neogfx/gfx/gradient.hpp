@@ -100,6 +100,8 @@ namespace neogfx
         void set_exponents(const optional_vec2 & aExponents) override;
         const optional_point& center() const override;
         void set_center(const optional_point & aCenter) override;
+        const std::optional<gradient_tile>& tile() const override;
+        void set_tile(const std::optional<gradient_tile>& aTile) override;
         scalar smoothness() const override;
         void set_smoothness(scalar aSmoothness) override;
         const optional_rect& bounding_box() const override;

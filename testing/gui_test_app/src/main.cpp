@@ -412,7 +412,7 @@ int main(int argc, char* argv[])
         });
         window.buttonChina.clicked([&window]() 
         { 
-            window.set_title_text(u8"请停止食用犬"); 
+            window.set_title_text("请停止食用犬"); 
             if (window.buttonChina.has_maximum_size())
                 window.buttonChina.set_maximum_size({});
             else 

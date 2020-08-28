@@ -41,6 +41,13 @@ namespace neogfx
         Radial
     };
 
+    struct gradient_tile
+    {
+        size extents;
+        bool aligned;
+        auto operator<=>(const gradient_tile&) const = default;
+    };
+
     enum class gradient_shape : uint32_t
     {
         Ellipse,
@@ -179,6 +186,8 @@ namespace neogfx
         virtual void set_exponents(const optional_vec2& aExponents) = 0;
         virtual const optional_point& center() const = 0;
         virtual void set_center(const optional_point& aCenter) = 0;
+        virtual const std::optional<gradient_tile>& tile() const = 0;
+        virtual void set_tile(const std::optional<gradient_tile>& aTile) = 0;
         virtual scalar smoothness() const = 0;
         virtual void set_smoothness(scalar aSmoothness) = 0;
         virtual const optional_rect& bounding_box() const = 0;
@@ -201,8 +210,8 @@ namespace neogfx
             else if (aLhs.id() == aRhs.id())
                 return true;
             else
-                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.smoothness()) ==
-                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.smoothness());
+                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) ==
+                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
         }
         friend bool operator!=(const i_gradient& aLhs, const i_gradient& aRhs)
         {
@@ -217,8 +226,8 @@ namespace neogfx
             else if (aLhs.id() == aRhs.id())
                 return false;
             else
-                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.smoothness()) <
-                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.smoothness());
+                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) <
+                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
         }
         neolib::ref_ptr<i_gradient> clone() const
         {
@@ -288,6 +297,12 @@ namespace neogfx
         {
             auto result = clone();
             result->set_center(aCenter);
+            return result;
+        }
+        neolib::ref_ptr<i_gradient> with_tile(const std::optional<gradient_tile>& aTile) const
+        {
+            auto result = clone();
+            result->set_tile(aTile);
             return result;
         }
         neolib::ref_ptr<i_gradient> with_smoothness(scalar aSmoothness) const

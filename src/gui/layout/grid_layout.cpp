@@ -344,8 +344,12 @@ namespace neogfx
         std::vector<dimension> maxColWidth(iDimensions.cx);
         for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
         {
+            if (!is_row_visible(row))
+                continue;
             for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
             {
+                if (!is_column_visible(col))
+                    continue;
                 auto i = iCells.find(cell_coordinates{ col, row });
                 if (i != iCells.end())
                 {

@@ -417,6 +417,14 @@ namespace neogfx
             if (iCenter != optional_point{})
                 iCenter = iCenter->min(point{ 1.0, 1.0 }).max(point{ -1.0, -1.0 });
         }
+        const std::optional<gradient_tile>& tile() const override
+        {
+            return iTile;
+        }
+        void set_tile(const std::optional<gradient_tile>& aTile) override
+        {
+            iTile = aTile;
+        }
         scalar smoothness() const override
         {
             return iSmoothness;
@@ -501,6 +509,7 @@ namespace neogfx
         gradient_size iSize = gradient_size::FarthestCorner;
         optional_vec2 iExponents;
         optional_point iCenter;
+        std::optional<gradient_tile> iTile;
         scalar iSmoothness = 0.0;
         optional_rect iBoundingBox;
         mutable const i_gradient_sampler* iSampler = nullptr;

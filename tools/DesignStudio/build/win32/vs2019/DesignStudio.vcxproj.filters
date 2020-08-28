@@ -107,5 +107,8 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\settings.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\resources\win32\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

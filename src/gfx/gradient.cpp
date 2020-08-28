@@ -361,6 +361,18 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
+    const std::optional<gradient_tile>& basic_gradient<Sharing>::tile() const
+    {
+        return object().tile();
+    }
+
+    template <gradient_sharing Sharing>
+    void basic_gradient<Sharing>::set_tile(const std::optional<gradient_tile>& aTile)
+    {
+        object().set_tile(aTile);
+    }
+
+    template <gradient_sharing Sharing>
     scalar basic_gradient<Sharing>::smoothness() const
     {
         return object().smoothness();

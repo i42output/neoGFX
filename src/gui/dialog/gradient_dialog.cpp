@@ -189,6 +189,12 @@ namespace neogfx
         iDirectionDiagonalRadioButton{ iDirectionGroupBox.item_layout(), "Diagonal"_t },
         iDirectionRectangularRadioButton{ iDirectionGroupBox.item_layout(), "Rectangular"_t },
         iDirectionRadialRadioButton{ iDirectionGroupBox.item_layout(), "Radial"_t },
+        iTile{ iLayout3_2, "Tile"_t },
+        iTileWidthLabel{ iTile.with_item_layout<grid_layout>(3, 2).add_span(grid_layout::cell_coordinates{0, 2}, grid_layout::cell_coordinates{1, 2}), "Width:"_t },
+        iTileWidth{ iTile.item_layout() },
+        iTileHeightLabel{ iTile.item_layout(), "Height:"_t },
+        iTileHeight{ iTile.item_layout() },
+        iTileAligned{ iTile.item_layout(), "Aligned"_t },
         iSmoothnessGroupBox{ iLayout3_2, "Smoothness (%)"_t },
         iSmoothnessSpinBox{ iSmoothnessGroupBox.item_layout() },
         iSmoothnessSlider{ iSmoothnessGroupBox.item_layout() },
@@ -287,6 +293,15 @@ namespace neogfx
         iDelete.set_size_policy(size_constraint::Minimum);
         iDelete.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
         iDelete.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
+        iTile.set_checkable(true);
+        iTile.item_layout().set_alignment(alignment::Right);
+        iTileWidth.set_minimum(2);
+        iTileWidth.set_maximum(9999);
+        iTileWidth.set_step(1);
+        iTileHeight.set_minimum(2);
+        iTileHeight.set_maximum(9999);
+        iTileHeight.set_step(1);
+        iTileAligned.set_size_policy(size_constraint::Expanding);
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);
         iSmoothnessSpinBox.set_step(0.1);
@@ -510,6 +525,23 @@ namespace neogfx
         neolib::scoped_flag sf{ iUpdatingWidgets };
         static neogfx::gradient const sDefaultGradient{ color::Black };
         iDelete.enable(iGradientSelector.gradient() != sDefaultGradient);
+        iTile.check_box().set_checked(gradient().tile() != std::nullopt);
+        if (gradient().tile() != std::nullopt)
+        {
+            iTileWidth.set_value(static_cast<uint32_t>(gradient().tile()->extents.cx));
+            iTileHeight.set_value(static_cast<uint32_t>(gradient().tile()->extents.cy));
+        }
+        else
+        {
+            iTileWidth.text_box().set_text("");
+            iTileHeight.text_box().set_text("");
+        }
+        iTileAligned.set_checked(gradient().tile() != std::nullopt ? gradient().tile()->aligned : false);
+        iTileWidthLabel.enable(gradient().tile() != std::nullopt);
+        iTileWidth.enable(gradient().tile() != std::nullopt);
+        iTileHeightLabel.enable(gradient().tile() != std::nullopt);
+        iTileHeight.enable(gradient().tile() != std::nullopt);
+        iTileAligned.enable(gradient().tile() != std::nullopt);
         iSmoothnessSpinBox.set_value(gradient().smoothness() * 100.0);
         iSmoothnessSlider.set_value(gradient().smoothness() * 100.0);
         iDirectionHorizontalRadioButton.set_checked(gradient().direction() == gradient_direction::Horizontal);
@@ -570,6 +602,10 @@ namespace neogfx
         case gradient_direction::Vertical:
         case gradient_direction::Horizontal:
         case gradient_direction::Rectangular:
+            iTileWidthLabel.show(gradient().direction() != gradient_direction::Vertical);
+            iTileWidth.show(gradient().direction() != gradient_direction::Vertical);
+            iTileHeightLabel.show(gradient().direction() != gradient_direction::Horizontal);
+            iTileHeight.show(gradient().direction() != gradient_direction::Horizontal);
             iOrientationGroupBox.hide();
             iSizeGroupBox.hide();
             iShapeGroupBox.hide();
@@ -577,6 +613,10 @@ namespace neogfx
             iCenterGroupBox.hide();
             break;
         case gradient_direction::Diagonal:
+            iTileWidthLabel.show();
+            iTileWidth.show();
+            iTileHeightLabel.show();
+            iTileHeight.show();
             iOrientationGroupBox.show();
             iAngleGroupBox.show(std::holds_alternative<double>(gradient().orientation()));
             iSizeGroupBox.hide();
@@ -585,6 +625,10 @@ namespace neogfx
             iCenterGroupBox.hide();
             break;
         case gradient_direction::Radial:
+            iTileWidthLabel.show();
+            iTileWidth.show();
+            iTileHeightLabel.show();
+            iTileHeight.show();
             iOrientationGroupBox.hide();
             iSizeGroupBox.show();
             iShapeGroupBox.show();
