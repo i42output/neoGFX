@@ -3,7 +3,9 @@
 
 # Introduction
 neoGFX is a C++ app/game engine and development platform targeted at app and game developers that wish to leverage modern GPUs for performant application user interfaces and game graphics.
-neoGFX is still a work in progress (incomplete) so is not yet suitable for making apps or games. Currently neogfx has only been built for and tested on Windows.
+neoGFX is still a work in progress (incomplete) so is not yet suitable for making apps or games. Currently neoGFX has only been built for and tested on Windows.
+
+neoGFX uses C++20 features; although C++20 compiler support is currently patchy this isn't a problem given the expected neoGFX 1.0 release date of Q4, 2021.  
 
 # Features (when version 1.0 released)
 - clean modern C++ design including full exception safety supporting various widget allocation patterns (stack, member variable or free store);
