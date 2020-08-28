@@ -35,6 +35,7 @@ namespace neogfx
     };
 
     std::string operator "" _t(const char* aTranslatableString, std::size_t aStringLength);
+    std::string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength);
 
     const std::string& translate(const std::string& aTranslatableString);
 

@@ -64,6 +64,7 @@ namespace neogfx
             iSize{ aOther.size() },
             iExponents{ aOther.exponents() },
             iCenter{ aOther.center() },
+            iTile{ aOther.tile() },
             iSmoothness{ aOther.smoothness() },
             iBoundingBox{ aOther.bounding_box() }
         {
@@ -118,6 +119,7 @@ namespace neogfx
             iSize{ aOther.size() },
             iExponents{ aOther.exponents() },
             iCenter{ aOther.center() },
+            iTile{ aOther.tile() },
             iSmoothness{ aOther.smoothness() },
             iBoundingBox{ aOther.bounding_box() }
         {

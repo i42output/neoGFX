@@ -106,7 +106,7 @@ namespace neogfx
             iSelectionColor == aOther.maybe_color(color_role::Selection) &&
             iHoverColor == aOther.maybe_color(color_role::Hover) &&
             iPrimaryAccentColor == aOther.maybe_color(color_role::PrimaryAccent) &&
-            iSecondaryAccentColor == aOther.maybe_color(color_role::SecondaryAccent);
+            iSecondaryAccentColor == aOther.maybe_color(color_role::SecondaryAccent) &&
             iVoidColor == aOther.maybe_color(color_role::Void);
     }
 

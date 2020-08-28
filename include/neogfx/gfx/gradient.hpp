@@ -184,6 +184,10 @@ namespace neogfx
         if (aGradient.center())
             aStream << aGradient.center()->x << ", " << aGradient.center()->y;
         aStream << ")";
+        aStream << ", (";
+        if (aGradient.tile())
+            aStream << aGradient.tile()->extents.cx << ", " << aGradient.tile()->extents.cy << ", " << aGradient.tile()->aligned;
+        aStream << ")";
         aStream << ", " << aGradient.smoothness();
         aStream << "]";
         return aStream;
@@ -262,6 +266,19 @@ namespace neogfx
         else
             aStream.clear();
         aStream >> ignore;
+        aStream >> ignore;
+        std::optional<gradient_tile> tile;
+        if (aStream >> tempScalar)
+        {
+            scalar cy;
+            bool aligned;
+            aStream >> cy;
+            aStream >> aligned;
+            tile = gradient_tile{ neogfx::size{ tempScalar, cy }, aligned };
+        }
+        else
+            aStream.clear();
+        aStream >> ignore;
         scalar smoothness;
         aStream >> smoothness;
         aStream >> ignore;
@@ -271,6 +288,7 @@ namespace neogfx
         aGradient.set_size(size);
         aGradient.set_exponents(exponents);
         aGradient.set_center(center);
+        aGradient.set_tile(tile);
         aGradient.set_smoothness(smoothness);
         aStream.imbue(previousImbued);
         return aStream;

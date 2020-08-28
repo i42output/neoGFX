@@ -38,6 +38,7 @@ namespace neogfx
     public:
         neogfx::gradient gradient() const;
         void set_gradient(const i_gradient& aGradient);
+        void set_gradient(const i_ref_ptr<i_gradient>& aGradient);
         const gradient_widget& gradient_selector() const;
         gradient_widget& gradient_selector();
     private:

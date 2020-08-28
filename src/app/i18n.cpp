@@ -63,6 +63,11 @@ namespace neogfx
         return translate(std::string{ aTranslatableString, aStringLength });
     }
 
+    std::string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength)
+    {
+        return translate(std::string{ reinterpret_cast<const char*>(aTranslatableString), aStringLength });
+    }
+
     const std::string& translate(const std::string& aTranslatableString)
     {
         return translate(aTranslatableString, translation_context::context());
