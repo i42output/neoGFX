@@ -54,7 +54,7 @@ namespace neogfx
         basic_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
         basic_gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
     public:
-        basic_gradient& operator=(const i_gradient& aOther);
+        basic_gradient& operator=(const i_gradient& aOther) override;
     public:
         void clone(neolib::i_ref_ptr<i_gradient> & aResult) const override;
         // meta
@@ -148,8 +148,8 @@ namespace neogfx
         if (std::holds_alternative<gradient>(aColorOrGradient))
         {
             auto const& g = static_variant_cast<gradient const&>(aColorOrGradient);
-            if (!aOnlyIfTiled || g.tile() != std::nullopt)
-            return g.with_bounding_box(aBoundingBox);
+            if (!aOnlyIfTiled || (g.tile() != std::nullopt && !g.tile()->aligned))
+                return g.with_bounding_box(aBoundingBox);
         }
         return aColorOrGradient;
     }

@@ -143,6 +143,9 @@ namespace neogfx
     public:
         virtual ~i_gradient() = default;
         virtual void clone(neolib::i_ref_ptr<i_gradient>& aResult) const = 0;
+        // assignment
+    public:
+        virtual i_gradient& operator=(const i_gradient& aOther) = 0;
         // meta
     public:
         virtual gradient_id id() const = 0;

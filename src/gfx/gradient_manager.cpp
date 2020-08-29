@@ -143,6 +143,14 @@ namespace neogfx
             alpha_stops() = tempAlphas;
             fix();
         }
+        // assignment
+    public:
+        gradient_object& operator=(const gradient_object& aOther) = default;
+        gradient_object& operator=(const i_gradient& aOther) override
+        {
+            *this = gradient_object{ aOther.id() };
+            return *this;
+        }
         // operations
     public:
         void clone(neolib::i_ref_ptr<i_gradient>& aResult) const override
