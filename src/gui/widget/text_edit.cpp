@@ -1965,7 +1965,7 @@ namespace neogfx
                         service<i_app>().current_style().palette().color(color_role::Selection).light() ? color::Black : color::White,
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) } :
                     text_appearance{
-                        style.glyph_color() == neolib::none ? style.text_color() != neolib::none ? with_bounding_box(style.text_color(), column_rect(column_index(aColumn))) : default_text_color() : style.glyph_color(),
+                        with_bounding_box(style.glyph_color() == neolib::none ? style.text_color() != neolib::none ? with_bounding_box(style.text_color(), column_rect(column_index(aColumn))) : default_text_color() : style.glyph_color(), client_rect(), true),
                         style.paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.paper_color() } } :  optional_text_color{}, 
                         style.text_effect() };
                 if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)

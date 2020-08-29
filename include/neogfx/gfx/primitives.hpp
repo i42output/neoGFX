@@ -352,6 +352,18 @@ namespace neogfx
             return iOnlyCalculateEffect;
         }
     public:
+        text_appearance with_ink(const text_color& aInk) const
+        {
+            return text_appearance{ aInk, iPaper, iEffect };
+        }
+        text_appearance with_paper(const optional_text_color& aPaper) const
+        {
+            return text_appearance{ iInk, aPaper, iEffect };
+        }
+        text_appearance with_effect(const optional_text_effect& aEffect) const
+        {
+            return text_appearance{ iInk, iPaper, aEffect };
+        }
         text_appearance with_alpha(color::component aAlpha) const
         {
             return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_color{ iPaper->with_alpha(aAlpha) } : optional_text_color{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };

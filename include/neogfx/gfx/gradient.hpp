@@ -143,10 +143,14 @@ namespace neogfx
             apply_bounding_box(*aColorOrGradient, aBoundingBox);
     }
 
-    inline color_or_gradient with_bounding_box(color_or_gradient const& aColorOrGradient, rect const& aBoundingBox)
+    inline color_or_gradient with_bounding_box(color_or_gradient const& aColorOrGradient, rect const& aBoundingBox, bool aOnlyIfTiled = false)
     {
         if (std::holds_alternative<gradient>(aColorOrGradient))
-            return static_variant_cast<gradient const&>(aColorOrGradient).with_bounding_box(aBoundingBox);
+        {
+            auto const& g = static_variant_cast<gradient const&>(aColorOrGradient);
+            if (!aOnlyIfTiled || g.tile() != std::nullopt)
+            return g.with_bounding_box(aBoundingBox);
+        }
         return aColorOrGradient;
     }
 
