@@ -36,6 +36,7 @@ namespace neogfx::DesignStudio
         register_group("environment.workspace"_s, "Workspace"_t);
         register_group("environment.keyboard"_s, "Keyboard"_t);
         register_group("environment.tabs_and_windows"_s, "Tabs and Windows"_t);
+        register_group("environment.toolbars"_s, "Toolbars"_t);
         register_category("text_editor"_s, "Text Editor"_t);
         register_group("text_editor.general"_s, "General"_t);
         register_group("text_editor.advanced"_s, "Advanced"_t);
@@ -49,6 +50,10 @@ namespace neogfx::DesignStudio
         register_category("team"_s, "Team"_t);
         register_category("plugins"_s, "Plugins"_t);
 
+        auto& toolbarIconSize = register_setting<toolbar_icon_size>("environment.toolbars.icon_size"_s, toolbar_icon_size::Size32x32, "Icon size: %?%"_t);
+        register_friendly_text(toolbarIconSize, "Size16x16"_s, "16dp x 16dp"_s);
+        register_friendly_text(toolbarIconSize, "Size32x32"_s, "32dp x 32dp"_s);
+        register_friendly_text(toolbarIconSize, "Size64x64"_s, "64dp x 64dp"_s);
         register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
         register_setting<workspace_grid>("environment.workspace.grid_type"_s, workspace_grid::Lines, "Grid type : %?% Grid size: %environment.workspace.grid_size:?%"_t);
         register_setting<uint32_t>("environment.workspace.grid_size"_s, 20, ng::setting_constraints<uint32_t>{ false, false, 2, 64, 2 });

@@ -281,6 +281,7 @@ namespace neogfx
             {
                 { "px", length_units::Pixels },
                 { "dip", length_units::ScaledPixels },
+                { "dp", length_units::ScaledPixels },
                 { "pt", length_units::Points },
                 { "pc", length_units::Picas },
                 { "em", length_units::Ems },
@@ -808,6 +809,11 @@ namespace neogfx
             return dip(static_cast<default_geometry_value_type>(aValue));
         }
 
+        inline basic_length<default_geometry_value_type> operator ""_dp(long double aValue)
+        {
+            return dip(static_cast<default_geometry_value_type>(aValue));
+        }
+
         inline basic_length<default_geometry_value_type> operator ""_pt(long double aValue)
         {
             return pt(static_cast<default_geometry_value_type>(aValue));
@@ -849,6 +855,11 @@ namespace neogfx
         }
 
         inline basic_length<default_geometry_value_type> operator ""_dip(unsigned long long int aValue)
+        {
+            return dip(static_cast<default_geometry_value_type>(aValue));
+        }
+
+        inline basic_length<default_geometry_value_type> operator ""_dp(unsigned long long int aValue)
         {
             return dip(static_cast<default_geometry_value_type>(aValue));
         }

@@ -31,6 +31,13 @@ namespace neogfx::DesignStudio
         Quads   = 0x00000001,
         Points  = 0x00000002
     };
+
+    enum class toolbar_icon_size : int32_t
+    {
+        Size16x16 = 0x00000000,
+        Size32x32 = 0x00000001,
+        Size64x64 = 0x00000002
+    };
 }
 
 template <>
@@ -41,7 +48,15 @@ const neolib::enum_enumerators_t<neogfx::DesignStudio::workspace_grid> neolib::e
     declare_enum_string(neogfx::DesignStudio::workspace_grid, Points)
 };
 
-namespace neogfx::DesignStudio 
+template <>
+const neolib::enum_enumerators_t<neogfx::DesignStudio::toolbar_icon_size> neolib::enum_enumerators_v<neogfx::DesignStudio::toolbar_icon_size>
+{
+    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size16x16)
+    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size32x32)
+    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size64x64)
+};
+
+namespace neogfx::DesignStudio
 {
     class settings : public neogfx::settings
     {

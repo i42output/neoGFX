@@ -75,7 +75,8 @@ namespace neogfx
     public:
         typedef i_setting_widget_factory abstract_type;
     public:
-        default_setting_widget_factory(ref_ptr<i_setting_widget_factory> aUserFactory) :
+        default_setting_widget_factory(neolib::i_settings const& aSettings, ref_ptr<i_setting_widget_factory> aUserFactory) :
+            iSettings{ aSettings },
             iUserFactory{ aUserFactory }
         {
         }
@@ -155,7 +156,7 @@ namespace neogfx
                         auto const& e = aSetting.value().get<neolib::i_enum>();
                         auto enumModel = std::make_shared<basic_item_model<neolib::i_enum::underlying_type>>();
                         for (auto& ee : e.enumerators())
-                            enumModel->insert_item(enumModel->end(), ee.first(), ee.second().to_std_string());
+                            enumModel->insert_item(enumModel->end(), ee.first(), iSettings.friendly_text(aSetting, ee.second()).to_std_string());
                         settingWidget->set_model(enumModel);
                         aSink += settingWidget->selection_changed([&, settingWidget, enumModel](const optional_item_model_index& aCurrentIndex)
                         {
@@ -227,13 +228,14 @@ namespace neogfx
             return result;
         }
     private:
+        neolib::i_settings const& iSettings;
         ref_ptr<i_setting_widget_factory> iUserFactory;
     };
 
     settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons) :
         dialog{ "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
-        iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
+        iWidgetFactory{ make_ref<default_setting_widget_factory>(aSettings, aWidgetFactory) },
         iIcons{ aIcons },
         iLayout{ client_layout() },
         iTree{ iLayout },
@@ -247,7 +249,7 @@ namespace neogfx
     settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons) :
         dialog{ aParent, "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
-        iWidgetFactory{ make_ref<default_setting_widget_factory>(aWidgetFactory) },
+        iWidgetFactory{ make_ref<default_setting_widget_factory>(aSettings, aWidgetFactory) },
         iIcons{ aIcons },
         iLayout{ client_layout() },
         iTree{ iLayout },

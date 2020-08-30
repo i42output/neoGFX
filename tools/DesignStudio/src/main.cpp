@@ -85,10 +85,30 @@ int main(int argc, char* argv[])
 
         ds::settings settings;
 
+        auto& toolbarIconSize = settings.setting("environment.toolbars.icon_size"_s);
         auto& themeColor = settings.setting("environment.general.theme"_s);
         auto& workspaceGridType = settings.setting("environment.workspace.grid_type"_s);
         auto& workspaceGridSize = settings.setting("environment.workspace.grid_size"_s);
         auto& workspaceGridColor = settings.setting("environment.workspace.grid_color"_s);
+
+        auto toolbarIconSizeChanged = [&]()
+        {
+            switch (toolbarIconSize.value<ds::toolbar_icon_size>(true))
+            {
+            case ds::toolbar_icon_size::Size16x16:
+                mainWindow.standardToolbar.set_button_image_extents(ng::size{ 16.0_dip, 16.0_dip });
+                break;
+            case ds::toolbar_icon_size::Size32x32:
+                mainWindow.standardToolbar.set_button_image_extents(ng::size{ 32.0_dip, 32.0_dip });
+                break;
+            case ds::toolbar_icon_size::Size64x64:
+                mainWindow.standardToolbar.set_button_image_extents(ng::size{ 64.0_dip, 64.0_dip });
+                break;
+            }
+        };
+        toolbarIconSize.changing(toolbarIconSizeChanged);
+        toolbarIconSize.changed(toolbarIconSizeChanged);
+        toolbarIconSizeChanged();
 
         auto themeColorChanged = [&]()
         {

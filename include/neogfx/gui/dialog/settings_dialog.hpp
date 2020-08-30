@@ -49,6 +49,7 @@ namespace neogfx
         void init();
     private:
         neolib::i_settings& iSettings;
+
         ref_ptr<i_setting_widget_factory> iWidgetFactory;
         ref_ptr<i_setting_icons> iIcons;
         sink iSink;
