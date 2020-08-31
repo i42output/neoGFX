@@ -135,9 +135,13 @@ namespace neogfx
             AxisPolicy::cy(result) += AxisPolicy::cy(padding());
             AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
         }
-        if (AxisPolicy::cx(result) == 0.0 && AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding)
+        if (AxisPolicy::cx(result) == 0.0 &&
+            (AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding ||
+            AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Maximum))
             AxisPolicy::cx(result) = size::max_dimension();
-        if (AxisPolicy::cy(result) == 0.0 && AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding)
+        if (AxisPolicy::cy(result) == 0.0 &&
+            (AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding ||
+                AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum))
             AxisPolicy::cy(result) = size::max_dimension();
         return result;
     }

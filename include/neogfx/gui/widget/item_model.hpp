@@ -652,6 +652,6 @@ namespace neogfx
     typedef basic_item_model<void*> item_model;
     typedef basic_item_model<void*, 0, item_cell_data, item_tree_container_traits<void*, item_cell_data, 0>> item_tree_model;
 
-    template <typename T>
-    using basic_item_tree_model = basic_item_model<T, 0, item_cell_data, item_tree_container_traits<T, item_cell_data, 0>>;
+    template <typename T, uint32_t Columns = 0>
+    using basic_item_tree_model = basic_item_model<T, Columns, item_cell_data, item_tree_container_traits<T, item_cell_data, Columns>>;
 }

@@ -42,6 +42,8 @@ namespace neogfx::DesignStudio
     public:
         typedef i_element abstract_type;
     public:
+        typedef neolib::i_vector<i_ref_ptr<i_element>> children_t;
+    public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::DesignStudio::i_element::no_parent" } {} };
     public:
         virtual element_group group() const = 0;
@@ -51,7 +53,12 @@ namespace neogfx::DesignStudio
         virtual bool has_parent() const = 0;
         virtual const i_element& parent() const = 0;
         virtual i_element& parent() = 0;
-        virtual const neolib::i_vector<i_ref_ptr<i_element>>& children() const = 0;
-        virtual neolib::i_vector<i_ref_ptr<i_element>>& children() = 0;
+        virtual const children_t& children() const = 0;
+        virtual children_t& children() = 0;
+    public:
+        children_t::const_iterator begin() const { return children().begin(); }
+        children_t::iterator begin() { return children().begin(); }
+        children_t::const_iterator end() const { return children().end(); }
+        children_t::iterator end() { return children().end(); }
     };
 }

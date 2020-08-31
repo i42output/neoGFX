@@ -19,8 +19,9 @@
 
 #pragma once
 
-#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/view/i_model.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -31,5 +32,8 @@ namespace neogfx::DesignStudio
     public:
         virtual const ng::i_string& name() const = 0;
         virtual const ng::i_string& namespace_() const = 0;
+    public:
+        virtual const i_element& root() const = 0;
+        virtual i_element& root() = 0;
     };
 }

@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/view/view_container.hpp>
 #include <neogfx/gui/widget/dock.hpp>
 #include <neogfx/gui/widget/dockable.hpp>
-#include <neogfx/gui/widget/tree_view.hpp>
+#include <neogfx/gui/widget/table_view.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/core/css.hpp>
@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
+#include <neogfx/tools/DesignStudio/element.hpp>
 #include "new_project_dialog.hpp"
 #include "DesignStudio.ui.hpp"
 
@@ -65,8 +66,8 @@ int main(int argc, char* argv[])
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right };
 
-        auto objects = ng::make_dockable<ng::tree_view>("Objects"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
-        auto properties = ng::make_dockable<ng::tree_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        auto objects = ng::make_dockable<ng::table_view>("Objects"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        auto properties = ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
         objects.dock(rightDock);
         properties.dock(rightDock);
 
@@ -132,6 +133,14 @@ int main(int argc, char* argv[])
         workspaceGridSize.changed(workspaceGridChanged);
 
         ds::project_manager pm;
+        ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
+        objectModel.set_column_name(0, "Object"_t);
+        objectModel.set_column_name(1, "Type"_t);
+        ng::basic_item_presentation_model<decltype(objectModel)> objectPresentationModel;
+        auto& objectTree = objects.docked_widget<ng::table_view>();
+        objectTree.set_model(objectModel);
+        objectTree.set_presentation_model(objectPresentationModel);
+        objectTree.column_header().set_expand_last_column(true);
 
         workspace.view_stack().Painting([&](ng::i_graphics_context& aGc)
         {
@@ -186,7 +195,28 @@ int main(int argc, char* argv[])
 
         update_ui();
 
-        auto project_updated = [&](ds::i_project&) { update_ui(); };
+        auto project_updated = [&](ds::i_project&) 
+        { 
+            update_ui(); 
+            if (pm.project_active())
+            {
+                if (objectModel.empty() || objectModel.item(objectModel.sbegin()) != &pm.active_project().root())
+                {
+                    objectModel.clear();
+                    std::function<void(ng::i_item_model::iterator, ds::i_element&)> addNode = [&](ng::i_item_model::iterator aPosition, ds::i_element& aElement)
+                    {
+                        auto node = aElement.has_parent() ? 
+                            objectModel.append_item(aPosition, &aElement, aElement.id().to_std_string()) :
+                            objectModel.insert_item(aPosition, &aElement, aElement.id().to_std_string());
+                        for (auto& child : aElement)
+                            addNode(node, *child);
+                    };
+                    addNode(objectModel.send(), pm.active_project().root());
+                }
+            }
+            else
+                objectModel.clear();
+        };
 
         ng::sink sink;
         sink += pm.ProjectAdded(project_updated);

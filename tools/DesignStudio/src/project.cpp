@@ -23,7 +23,7 @@
 namespace neogfx::DesignStudio
 {
     project::project(const std::string& aName, const std::string& aNamespace) :
-        iName{ aName }, iNamespace{ aNamespace }
+        iName{ aName }, iNamespace{ aNamespace }, iApp{ element_group::App, "app", aName }
     {
     }
 
@@ -35,5 +35,15 @@ namespace neogfx::DesignStudio
     const ng::i_string& project::namespace_() const
     {
         return iNamespace;
+    }
+
+    const i_element& project::root() const
+    {
+        return iApp;
+    }
+
+    i_element& project::root()
+    {
+        return iApp;
     }
 }

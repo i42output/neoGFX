@@ -769,6 +769,8 @@ namespace neogfx
 
     void widget::resize(const size& aSize)
     {
+        if (debug() == this)
+            std::cerr << "widget::resize(" << aSize << ")" << std::endl;
         if (Size != units_converter(*this).to_device_units(aSize))
         {
             update();
@@ -947,6 +949,10 @@ namespace neogfx
         }
         else
             result = size::max_size();
+        if (size_policy().horizontal_size_policy() == size_constraint::Maximum)
+            result.cx = size::max_size().cx;
+        if (size_policy().vertical_size_policy() == size_constraint::Maximum)
+            result.cy = size::max_size().cy;
         if (debug() == this)
             std::cerr << "widget::maximum_size(...) --> " << result << std::endl;
         return result;
@@ -1164,9 +1170,22 @@ namespace neogfx
             aGc.fill_rect(update_rect(), background_color());
     }
 
-    void widget::paint_non_client_after(i_graphics_context&) const
+    void widget::paint_non_client_after(i_graphics_context& aGc) const
     {
-        // do nothing
+        if (debug() == this)
+        {
+            aGc.draw_rect(to_client_coordinates(non_client_rect()), color::White);
+            aGc.line_stipple_on(1.0, 0x5555);
+            aGc.draw_rect(to_client_coordinates(non_client_rect()), color::Red);
+            aGc.line_stipple_off();
+        }
+        else if (has_layout() && debug() == &layout())
+        {
+            aGc.draw_rect(rect{ layout().position(), layout().extents() }, color::White);
+            aGc.line_stipple_on(1.0, 0x5555);
+            aGc.draw_rect(rect{ layout().position(), layout().extents() }, color::Blue);
+            aGc.line_stipple_off();
+        }
     }
 
     void widget::paint(i_graphics_context& aGc) const

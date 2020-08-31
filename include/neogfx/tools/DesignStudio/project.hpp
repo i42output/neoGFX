@@ -22,6 +22,7 @@
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/view/model.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
+#include <neogfx/tools/DesignStudio/element.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -34,8 +35,12 @@ namespace neogfx::DesignStudio
     public:
         const ng::i_string& name() const override;
         const ng::i_string& namespace_() const override;
+    public:
+        const i_element& root() const override;
+        i_element& root() override;
     private:
         ng::string iName;
         ng::string iNamespace;
+        element<> iApp;
     };
 }

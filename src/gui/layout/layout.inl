@@ -175,9 +175,11 @@ namespace neogfx
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
         {
             size result;
-            if (AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding)
+            if (AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding ||
+                AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Maximum)
                 AxisPolicy::cx(result) = size::max_dimension();
-            if (AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding)
+            if (AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding ||
+                AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum)
                 AxisPolicy::cy(result) = size::max_dimension();
             return result;
         }
@@ -201,8 +203,6 @@ namespace neogfx
                 AxisPolicy::cx(result) += AxisPolicy::cx(itemMaxSize);
             else if (AxisPolicy::cx(itemMaxSize) == size::max_dimension())
                 AxisPolicy::cx(result) = size::max_dimension();
-            if (result == size::max_size())
-                return result;
         }
         if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(result) != 0.0)
         {
@@ -216,9 +216,13 @@ namespace neogfx
             AxisPolicy::cy(result) += AxisPolicy::cy(padding());
             AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
         }
-        if (AxisPolicy::cx(result) == 0.0 && AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding)
+        if (AxisPolicy::cx(result) == 0.0 && 
+            (AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding ||
+            AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Maximum))
             AxisPolicy::cx(result) = size::max_dimension();
-        if (AxisPolicy::cy(result) == 0.0 && AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding)
+        if (AxisPolicy::cy(result) == 0.0 &&
+            (AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding ||
+            AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum))
             AxisPolicy::cy(result) = size::max_dimension();
         if (debug() == this)
             std::cerr << "layout(" << this << ")::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
@@ -323,6 +327,8 @@ namespace neogfx
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
+            if (debug() == &item.subject())
+                std::cerr << "Consideration by layout::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
             auto itemMinSize = item.minimum_size(availableSize);
             auto itemMaxSize = item.maximum_size(availableSize);
             size s;

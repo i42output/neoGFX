@@ -556,8 +556,12 @@ namespace neogfx
                 continue;
             if (i.effective_size_policy().horizontal_size_policy() == size_constraint::Expanding)
                 result.set_horizontal_size_policy(size_constraint::Expanding);
+            else if (i.effective_size_policy().horizontal_size_policy() == size_constraint::Maximum)
+                result.set_horizontal_size_policy(size_constraint::Maximum);
             if (i.effective_size_policy().vertical_size_policy() == size_constraint::Expanding)
                 result.set_vertical_size_policy(size_constraint::Expanding);
+            else if (i.effective_size_policy().vertical_size_policy() == size_constraint::Maximum)
+                result.set_vertical_size_policy(size_constraint::Maximum);
         }
         return result;
     }

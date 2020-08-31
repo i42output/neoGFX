@@ -37,6 +37,8 @@ namespace neogfx::DesignStudio
         typedef element<Base> self_type;
         typedef neolib::reference_counted<Base> base_type;
     public:
+        using i_element::no_parent;
+    public:
         typedef abstract_t<Base> abstract_type;
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
     public:
@@ -72,8 +74,7 @@ namespace neogfx::DesignStudio
         }
         const neolib::i_string& id() const override
         {
-            return *iId;
-            return anonymous_id();
+            return iId;
         }
     public:
         bool has_parent() const override
@@ -103,5 +104,6 @@ namespace neogfx::DesignStudio
         element_group iGroup;
         neolib::string iType;
         neolib::string iId;
+        children_t iChildren;
     };
 }

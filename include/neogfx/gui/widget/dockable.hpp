@@ -51,6 +51,17 @@ namespace neogfx
         i_widget& docked_widget() override;
     protected:
         color frame_color() const override;
+    public:
+        template <typename WidgetType>
+        const WidgetType& docked_widget() const
+        {
+            return static_cast<const WidgetType&>(docked_widget());
+        }
+        template <typename WidgetType>
+        WidgetType& docked_widget()
+        {
+            return static_cast<WidgetType&>(docked_widget());
+        }
     private:
         neolib::string iTitle;
         dock_area iAcceptableDocks;
