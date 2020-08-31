@@ -265,7 +265,7 @@ namespace neogfx
         for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !finished; ++row)
         {
             finished = true;
-            for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+            for (uint32_t col = 0u; col < presentation_model().columns(); ++col)
             {
                 auto const itemIndex = item_presentation_model_index{ row, col };
                 bool const currentCell = selection_model().has_current_index() && selection_model().current_index() == itemIndex;
@@ -277,20 +277,25 @@ namespace neogfx
                     continue;
                 optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
                 if (!cellBackgroundColor)
-                    cellBackgroundColor = background_color();
+                    cellBackgroundColor = selection_model().is_selected(itemIndex) ? 
+                        service<i_app>().current_style().palette().color(color_role::Selection).to_hsv().with_saturation(0.2).to_rgb<color>() : 
+                        service<i_app>().current_style().palette().color(presentation_model().alternating_row_color() ? row % 2 == 0 ? color_role::Base : color_role::AlternateBase : color_role::Base);
                 optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Text);
-                if (textColor == std::nullopt)
-                    textColor = service<i_app>().current_style().palette().color(color_role::Text);
+                if (!textColor)
+                    textColor = selection_model().is_selected(itemIndex) ? 
+                        cellBackgroundColor->dark() ? color::White : color::Black :
+                        service<i_app>().current_style().palette().color(color_role::Text);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
                     if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
-                        aGc.fill_rect(cellBackgroundRect, cellBackgroundColor->
-                            shaded(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ? 0x80 : 0x60).with_alpha(0.875));
+                        aGc.fill_rect(cellBackgroundRect,
+                            cellBackgroundColor->with_alpha(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ?
+                                0xFF : 0x80));
                     else
                         aGc.fill_rect(cellBackgroundRect, *cellBackgroundColor);
                 }
-                if (model().is_tree() && model().has_children(presentation_model().to_item_model_index(itemIndex)))
+                if (model().is_tree() && col == 0u && model().has_children(presentation_model().to_item_model_index(itemIndex)))
                 {
                     auto const expanderRect = cell_rect(itemIndex, aGc, cell_part::TreeExpander);
                     scoped_scissor scissor(aGc, clipRect.intersection(expanderRect));
@@ -1116,7 +1121,8 @@ namespace neogfx
                 size const cellSpacing = presentation_model().cell_spacing(*this);
                 coordinate y = presentation_model().item_position(aItemIndex, *this);
                 dimension const h = presentation_model().item_height(aItemIndex, *this);
-                coordinate x = presentation_model().indent(aItemIndex, gc);
+                coordinate const indent = presentation_model().indent(aItemIndex, gc);
+                coordinate x = indent;
                 if (aPart == cell_part::Background && aItemIndex.column() == 0)
                     x = 0.0;
                 for (uint32_t col = 0; col < presentation_model().columns(); ++col)
@@ -1148,6 +1154,8 @@ namespace neogfx
                                 result.cx -= cellSpacing.cx / 2.0;
                             break;
                         }
+                        if (aPart != cell_part::Background)
+                            result.cx -= indent;
                         return result;
                     }
                     x += column_width(col);

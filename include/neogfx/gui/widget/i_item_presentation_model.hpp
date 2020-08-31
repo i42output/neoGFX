@@ -255,6 +255,8 @@ namespace neogfx
         virtual void set_cell_spacing(const optional_size& aSpacing, const i_units_context& aUnitsContext) = 0;
         virtual neogfx::padding cell_padding(const i_units_context& aUnitsContext) const = 0;
         virtual void set_cell_padding(const optional_padding& aPadding, const i_units_context& aUnitsContext) = 0;
+        virtual bool alternating_row_color() const = 0;
+        virtual void set_alternating_row_color(bool aAlternatingColor) = 0;
     public:
         virtual dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const = 0;
         virtual double total_height(const i_units_context& aUnitsContext) const = 0;

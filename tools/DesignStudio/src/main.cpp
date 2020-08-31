@@ -134,12 +134,15 @@ int main(int argc, char* argv[])
 
         ds::project_manager pm;
         ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
-        objectModel.set_column_name(0, "Object"_t);
-        objectModel.set_column_name(1, "Type"_t);
+        objectModel.set_column_name(0u, "Object"_t);
+        objectModel.set_column_name(1u, "Type"_t);
         ng::basic_item_presentation_model<decltype(objectModel)> objectPresentationModel;
         auto& objectTree = objects.docked_widget<ng::table_view>();
+        objectTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         objectTree.set_model(objectModel);
         objectTree.set_presentation_model(objectPresentationModel);
+        objectPresentationModel.set_column_read_only(1u);
+        objectPresentationModel.set_alternating_row_color(true);
         objectTree.column_header().set_expand_last_column(true);
 
         workspace.view_stack().Painting([&](ng::i_graphics_context& aGc)
@@ -208,6 +211,7 @@ int main(int argc, char* argv[])
                         auto node = aElement.has_parent() ? 
                             objectModel.append_item(aPosition, &aElement, aElement.id().to_std_string()) :
                             objectModel.insert_item(aPosition, &aElement, aElement.id().to_std_string());
+                        objectModel.insert_cell_data(node, 1u, aElement.type().to_std_string());
                         for (auto& child : aElement)
                             addNode(node, *child);
                     };

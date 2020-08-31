@@ -92,6 +92,27 @@ namespace neogfx
         return iHue == undefined_hue();
     }
 
+    hsv_color hsv_color::with_hue(double aNewHue) const
+    {
+        hsv_color result = *this;
+        result.iHue = aNewHue;
+        return result;
+    }
+
+    hsv_color hsv_color::with_saturation(double aNewSaturation) const
+    {
+        hsv_color result = *this;
+        result.iSaturation = aNewSaturation;
+        return result;
+    }
+
+    hsv_color hsv_color::with_value(double aNewValue) const
+    {
+        hsv_color result = *this;
+        result.iValue = aNewValue;
+        return result;
+    }
+
     hsv_color hsv_color::with_brightness(double aNewBrightness) const
     {
         return brighter(0.0, aNewBrightness);

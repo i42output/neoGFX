@@ -47,6 +47,9 @@ namespace neogfx
         void set_alpha(double aAlpha);
         bool hue_undefined() const;
     public:
+        hsv_color with_hue(double aNewHue) const;
+        hsv_color with_saturation(double aNewSaturation) const;
+        hsv_color with_value(double aNewValue) const;
         hsv_color with_brightness(double aNewLightness) const;
         hsv_color brighter(double aDelta) const;
         hsv_color brighter(double aCoeffecient, double aDelta) const;

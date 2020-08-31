@@ -46,6 +46,8 @@ namespace neogfx
         void set_alpha(double aAlpha);
         bool hue_undefined() const;
     public:
+        hsl_color with_hue(double aNewHue) const;
+        hsl_color with_saturation(double aNewSaturation) const;
         hsl_color with_lightness(double aNewLightness) const;
         hsl_color lighter(double aDelta) const;
         hsl_color lighter(double aCoeffecient, double aDelta) const;

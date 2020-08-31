@@ -82,6 +82,20 @@ namespace neogfx
         return iHue == undefined_hue();
     }
 
+    hsl_color hsl_color::with_hue(double aNewHue) const
+    {
+        hsl_color result = *this;
+        result.iHue = aNewHue;
+        return result;
+    }
+
+    hsl_color hsl_color::with_saturation(double aNewSaturation) const
+    {
+        hsl_color result = *this;
+        result.iSaturation = aNewSaturation;
+        return result;
+    }
+
     hsl_color hsl_color::with_lightness(double aNewLightness) const
     {
         return lighter(0.0, aNewLightness);

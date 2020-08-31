@@ -25,6 +25,8 @@ namespace neogfx::DesignStudio
     project::project(const std::string& aName, const std::string& aNamespace) :
         iName{ aName }, iNamespace{ aNamespace }, iApp{ element_group::App, "app", aName }
     {
+        auto foo = ng::make_ref<element<>>(iApp, element_group::Layout, "vertical_layout", "fooLayout");
+        ng::make_ref<element<>>(*foo, element_group::Widget, "widget", "fooWidget");
     }
 
     const ng::i_string& project::name() const

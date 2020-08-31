@@ -100,11 +100,11 @@ namespace neogfx
         using typename base_type::bad_index;
         using typename base_type::no_mapped_row;
     public:
-        basic_item_presentation_model() : iItemModel{ nullptr }, iSortable{ false }, iInitializing{ false }, iFiltering{ false }
+        basic_item_presentation_model() : iItemModel{ nullptr }, iSortable{ false }, iAlternatingRowColor{ false }, iInitializing{ false }, iFiltering{ false }
         {
             init();
         }
-        basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = false) : iItemModel{ nullptr }, iSortable{ aSortable }, iInitializing{ false }, iFiltering{ false }
+        basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = false) : iItemModel{ nullptr }, iSortable{ aSortable }, iAlternatingRowColor{ false }, iInitializing{ false }, iFiltering{ false }
         {
             init();
             set_item_model(aItemModel, aSortable);
@@ -411,6 +411,14 @@ namespace neogfx
                 iCellPadding = aPadding;
             else
                 iCellPadding = units_converter(aUnitsContext).to_device_units(*aPadding);
+        }
+        bool alternating_row_color() const override
+        {
+            return iAlternatingRowColor;
+        }
+        void set_alternating_row_color(bool aAlternatingColor) override
+        {
+            iAlternatingRowColor = aAlternatingColor;
         }
     public:
         dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const override
@@ -1212,6 +1220,7 @@ namespace neogfx
         mutable optional_font iDefaultFont;
         mutable std::optional<i_scrollbar::value_type> iTotalHeight;
         mutable neolib::segmented_array<optional_position, 256> iPositions;
+        bool iAlternatingRowColor;
         std::deque<sort> iSortOrder;
         std::vector<filter> iFilters;
         sink iSink;

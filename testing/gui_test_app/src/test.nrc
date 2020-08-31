@@ -678,20 +678,20 @@
                             id: layoutItemViews
                             table_view: {
                                 id: tableView1
-                                minimum_size: [ 128 128 ]
+                                minimum_size: [ 128dip 128dip ]
                             }
                             table_view: {
                                 id: tableView2
-                                minimum_size: [ 128 128 ]
+                                minimum_size: [ 128dip 128dip ]
                             }
                             horizontal_layout: {
                                 tree_view: {
                                     id: treeView1
-                                    minimum_size: [ 128 128 ]
+                                    minimum_size: [ 128dip 128dip ]
                                 }
                                 tree_view: {
                                     id: treeView2
-                                    minimum_size: [ 128 128 ]
+                                    minimum_size: [ 128dip 128dip ]
                                 }
                             }
                             push_button: {
