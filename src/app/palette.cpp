@@ -335,17 +335,17 @@ namespace neogfx
 
     const i_palette& palette::proxy() const
     {
-        if (iProxy == std::nullopt)
+        if (!has_proxy())
             throw no_proxy();
-        else if (!*iProxy)
+        else if (!proxy_ptr())
             return service<i_app>().current_style().palette();
         else
-            return (**iProxy);
+            return (*proxy_ptr());
     }
 
     const i_palette* palette::proxy_ptr() const
     {
-        if (iProxy == std::nullopt)
+        if (!has_proxy())
             throw no_proxy();
         else
             return *iProxy;
