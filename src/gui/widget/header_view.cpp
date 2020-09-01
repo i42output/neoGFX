@@ -436,49 +436,55 @@ namespace neogfx
                 if (iButtonSinks[i][0].empty())
                     iButtonSinks[i][0] = button.Clicked([&, i]()
                     {
-                        root().window_manager().save_mouse_cursor();
-                        root().window_manager().set_mouse_cursor(mouse_system_cursor::Wait);
-                        presentation_model().sort_by(i);
-                        root().window_manager().restore_mouse_cursor(root());
+                        if (presentation_model().sortable())
+                        {
+                            root().window_manager().save_mouse_cursor();
+                            root().window_manager().set_mouse_cursor(mouse_system_cursor::Wait);
+                            presentation_model().sort_by(i);
+                            root().window_manager().restore_mouse_cursor(root());
+                        }
                     }, *this);
                 if (iButtonSinks[i][1].empty())
                     iButtonSinks[i][1] = button.right_clicked([&, i]()
                     {
-                        context_menu menu{ *this, root().mouse_position() + root().window_position() };
-                        action sortAscending{ "Sort Ascending"_t };
-                        action sortDescending{ "Sort Descending"_t };
-                        action applySort{ "Apply Sort"_t };
-                        action resetSort{ "Reset Sort"_t };
-                        menu.menu().add_action(sortAscending).set_checkable(true);
-                        menu.menu().add_action(sortDescending).set_checkable(true);
-                        menu.menu().add_action(applySort);
-                        menu.menu().add_action(resetSort);
-                        if (presentation_model().sorting_by() != std::nullopt)
+                        if (presentation_model().sortable())
                         {
-                            auto const& sortingBy = *presentation_model().sorting_by();
-                            if (sortingBy.first == i)
+                            context_menu menu{ *this, root().mouse_position() + root().window_position() };
+                            action sortAscending{ "Sort Ascending"_t };
+                            action sortDescending{ "Sort Descending"_t };
+                            action applySort{ "Apply Sort"_t };
+                            action resetSort{ "Reset Sort"_t };
+                            menu.menu().add_action(sortAscending).set_checkable(true);
+                            menu.menu().add_action(sortDescending).set_checkable(true);
+                            menu.menu().add_action(applySort);
+                            menu.menu().add_action(resetSort);
+                            if (presentation_model().sorting_by() != std::nullopt)
                             {
-                                if (sortingBy.second == i_item_presentation_model::sort_direction::Ascending)
-                                    sortAscending.check();
-                                else if (sortingBy.second == i_item_presentation_model::sort_direction::Descending)
-                                    sortDescending.check();
+                                auto const& sortingBy = *presentation_model().sorting_by();
+                                if (sortingBy.first == i)
+                                {
+                                    if (sortingBy.second == i_item_presentation_model::sort_direction::Ascending)
+                                        sortAscending.check();
+                                    else if (sortingBy.second == i_item_presentation_model::sort_direction::Descending)
+                                        sortDescending.check();
+                                }
                             }
+                            sortAscending.checked([this, &sortDescending, i]()
+                            {
+                                presentation_model().sort_by(i, i_item_presentation_model::sort_direction::Ascending);
+                                sortDescending.uncheck();
+                            });
+                            sortDescending.checked([this, &sortAscending, i]()
+                            {
+                                presentation_model().sort_by(i, i_item_presentation_model::sort_direction::Descending);
+                                sortAscending.uncheck();
+                            });
+                            resetSort.triggered([&]()
+                            {
+                                presentation_model().reset_sort();
+                            });
+                            menu.exec();
                         }
-                        sortAscending.checked([this, &sortDescending, i]()
-                        {
-                            presentation_model().sort_by(i, i_item_presentation_model::sort_direction::Ascending);
-                            sortDescending.uncheck();
-                        });
-                        sortDescending.checked([this, &sortAscending, i]()
-                        {
-                            presentation_model().sort_by(i, i_item_presentation_model::sort_direction::Descending);
-                            sortAscending.uncheck();
-                        });
-                        resetSort.triggered([&]()
-                        {
-                            presentation_model().reset_sort();
-                        });
-                        menu.exec();
                     }, *this);
             }
             else if (!expand_last_column())

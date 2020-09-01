@@ -44,9 +44,11 @@ namespace neogfx::DesignStudio
         i_project& active_project() const override;
         void activate_project(const i_project& aProject) override;
         void deactivate_project() override;
+        i_project& open_project(const ng::i_string& aProjectFile) override;
         i_project& create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace) override;
         void close_project(const i_project& aProject) override;
     public:
+        using i_project_manager::open_project;
         using i_project_manager::create_project;
     private:
         project_list::container_type::const_iterator find_project(const i_project& aProject) const;

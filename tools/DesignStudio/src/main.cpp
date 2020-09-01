@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/core/css.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
+#include <neogfx/app/file_dialog.hpp>
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
@@ -227,6 +228,13 @@ int main(int argc, char* argv[])
         sink += pm.ProjectRemoved(project_updated);
         sink += pm.ProjectActivated(project_updated);
         sink += app.actionFileClose.triggered([&]() { if (pm.project_active()) pm.close_project(pm.active_project()); });
+
+        app.action_file_open().triggered([&]()
+        {
+            auto projectFile = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Project", {}, { "*.nrc" }, "Project Files" });
+            if (projectFile)
+                pm.open_project((*projectFile)[0]);
+        });
 
         app.action_file_new().triggered([&]()
         {

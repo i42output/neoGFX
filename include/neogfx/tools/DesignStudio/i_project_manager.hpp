@@ -36,6 +36,7 @@ namespace neogfx::DesignStudio
     public:
         struct project_not_found : std::logic_error { project_not_found() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::project_not_found" } {} };
         struct no_active_project : std::logic_error { no_active_project() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::no_active_project" } {} };
+        struct invalid_project_file : std::runtime_error { invalid_project_file(const std::string& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project_manager::invalid_project_file: " + aReason } {} };
     public:
         using project_list = neolib::i_vector<ng::i_ref_ptr<i_project>>;
     public:
@@ -47,10 +48,15 @@ namespace neogfx::DesignStudio
         virtual i_project& active_project() const = 0;
         virtual void activate_project(const i_project& aProject) = 0;
         virtual void deactivate_project() = 0;
+        virtual i_project& open_project(const ng::i_string& aProjectFile) = 0;
         virtual i_project& create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace) = 0;
         virtual void close_project(const i_project& aProject) = 0;
         // helpers
     public:
+        i_project& open_project(const std::string& aProjectFile)
+        {
+            return open_project(ng::string{ aProjectFile });
+        }
         i_project& create_project(const std::string& aProjectName, const std::string& aProjectNamespace)
         {
             return create_project(ng::string{ aProjectName }, ng::string{ aProjectNamespace });
