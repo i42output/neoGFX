@@ -141,6 +141,14 @@ namespace neogfx
                 iItemModelSink += item_model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
                 iItemModelSink += item_model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
                 iItemModelSink += item_model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
+                iItemModelSink += item_model().cleared([this]() 
+                {  
+                    iColumns.clear();
+                    iRows.clear();
+                    reset_maps();
+                    reset_meta();
+                    reset_sort();
+                });
                 iItemModelSink += item_model().destroying([this]() 
                 { 
                     iItemModel = nullptr;

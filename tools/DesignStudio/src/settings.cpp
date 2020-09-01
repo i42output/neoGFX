@@ -50,9 +50,11 @@ namespace neogfx::DesignStudio
         register_category("team"_s, "Team"_t);
         register_category("plugins"_s, "Plugins"_t);
 
-        auto& toolbarIconSize = register_setting<toolbar_icon_size>("environment.toolbars.icon_size"_s, toolbar_icon_size::Size32x32, "Icon size: %?%"_t);
+        auto& toolbarIconSize = register_setting<toolbar_icon_size>("environment.toolbars.icon_size"_s, toolbar_icon_size::Size24x24, "Icon size: %?%"_t);
         register_friendly_text(toolbarIconSize, "Size16x16"_s, "16dp x 16dp"_s);
+        register_friendly_text(toolbarIconSize, "Size24x24"_s, "24dp x 24dp"_s);
         register_friendly_text(toolbarIconSize, "Size32x32"_s, "32dp x 32dp"_s);
+        register_friendly_text(toolbarIconSize, "Size48x48"_s, "48dp x 48dp"_s);
         register_friendly_text(toolbarIconSize, "Size64x64"_s, "64dp x 64dp"_s);
         register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
         register_setting<workspace_grid>("environment.workspace.grid_type"_s, workspace_grid::Lines, "Grid type : %?% Grid size: %environment.workspace.grid_size:?%"_t);

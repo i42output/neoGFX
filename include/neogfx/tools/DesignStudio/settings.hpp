@@ -35,8 +35,10 @@ namespace neogfx::DesignStudio
     enum class toolbar_icon_size : int32_t
     {
         Size16x16 = 0x00000000,
-        Size32x32 = 0x00000001,
-        Size64x64 = 0x00000002
+        Size24x24 = 0x00000001,
+        Size32x32 = 0x00000002,
+        Size48x48 = 0x00000003,
+        Size64x64 = 0x00000004
     };
 }
 
@@ -52,7 +54,9 @@ template <>
 const neolib::enum_enumerators_t<neogfx::DesignStudio::toolbar_icon_size> neolib::enum_enumerators_v<neogfx::DesignStudio::toolbar_icon_size>
 {
     declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size16x16)
+    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size24x24)
     declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size32x32)
+    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size48x48)
     declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size64x64)
 };
 

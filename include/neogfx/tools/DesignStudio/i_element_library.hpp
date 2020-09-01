@@ -39,24 +39,16 @@ namespace neogfx::DesignStudio
         struct unknown_element_type : std::logic_error { unknown_element_type() : std::logic_error{ "neogfx::DesignStudio::i_element_library::unknown_element_type" } {} };
         // meta
     public:
-        virtual const elements_t& root_elements() const = 0;
         virtual const elements_t& elements() const = 0;
         // factory
     public:
-        virtual void create_element(const neolib::i_string& aElementType, neolib::i_ref_ptr<i_element>& aResult) = 0;
-        virtual void create_element(i_element& aParent, const neolib::i_string& aElementType, neolib::i_ref_ptr<i_element>& aResult) = 0;
+        virtual void create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
         // helpers
     public:
-        neolib::ref_ptr<i_element> create_element(const neolib::i_string& aElementType)
+        neolib::ref_ptr<i_element> create_element(i_element& aParent, const std::string& aElementType, const std::string& aElementId)
         {
             neolib::ref_ptr<i_element> result;
-            create_element(aElementType, result);
-            return result;
-        }
-        neolib::ref_ptr<i_element> create_element(i_element& aParent, const neolib::i_string& aElementType)
-        {
-            neolib::ref_ptr<i_element> result;
-            create_element(aParent, aElementType, result);
+            create_element(aParent, string{ aElementType }, string{ aElementId }, result);
             return result;
         }
         // interface

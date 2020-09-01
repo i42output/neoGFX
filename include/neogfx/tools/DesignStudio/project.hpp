@@ -41,6 +41,6 @@ namespace neogfx::DesignStudio
     private:
         ng::string iName;
         ng::string iNamespace;
-        element<> iApp;
+        element<project> iProject;
     };
 }

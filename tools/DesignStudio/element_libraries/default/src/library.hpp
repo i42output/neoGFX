@@ -40,12 +40,10 @@ namespace neogfx::DesignStudio
         default_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);
         // meta
     public:
-        const elements_t& root_elements() const override;
         const elements_t& elements() const override;
         // factory
     public:
-        void create_element(const neolib::i_string& aElementType, neolib::i_ref_ptr<i_element>& aResult) override;
-        void create_element(i_element& aParent, const neolib::i_string& aElementType, neolib::i_ref_ptr<i_element>& aResult) override;
+        void create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) override;
         // meta
     public:
         static const neolib::uuid& library_id() { static const neolib::uuid sId = neolib::make_uuid("9B9E93DF-DC52-406D-BDBE-07EC7758BB66"); return sId; }
@@ -57,7 +55,6 @@ namespace neogfx::DesignStudio
     private:
         neolib::i_application& iApplication;
         std::string iPluginPath;
-        elements_t iRootElements;
         elements_t iElements;
     };
 }

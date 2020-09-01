@@ -213,6 +213,7 @@ namespace neogfx
         define_declared_event(ItemAdded, item_added, const item_model_index&)
         define_declared_event(ItemChanged, item_changed, const item_model_index&)
         define_declared_event(ItemRemoved, item_removed, const item_model_index&)
+        define_declared_event(Cleared, cleared)
     public:
         typedef ContainerTraits container_traits;
         typedef typename container_traits::value_type value_type;
@@ -541,8 +542,8 @@ namespace neogfx
         }
         void clear() override
         {
-            while (!empty())
-                erase(begin());
+            iItems.clear();
+            Cleared.trigger();
         }
         i_item_model::iterator erase(i_item_model::const_iterator aPosition) override
         {

@@ -32,7 +32,10 @@ namespace neogfx::DesignStudio
 {
     enum class element_group : uint32_t
     {
+        Unknown,
+        Project,
         App,
+        Action,
         Widget,
         Layout
     };

@@ -70,3 +70,8 @@ namespace neogfx::game
         bool iEcsPaused;
     };
 }
+
+namespace neogfx
+{
+    using game::canvas;
+}

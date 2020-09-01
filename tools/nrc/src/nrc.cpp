@@ -58,17 +58,17 @@ int main(int argc, char* argv[])
         "i42 Software",
         neolib::version{ 1, 0, 0, 0 },
         "Copyright (c) 2019, 2020 Leigh Johnston",
-        {}, {}, {}, ".nel"
+        {}, {}, {}, ".nrl"
     };
     neolib::application app{ appInfo };
 
     std::cout << "------ " << appInfo.name() << " ------" << std::endl;
     std::cout << appInfo.copyright() << std::endl << std::endl;
 
-    std::cout << "Loading neoGFX element libraries..." << std::endl;
+    std::cout << "Loading neoGFX resource libraries..." << std::endl;
     app.plugin_manager().load_plugins();
     for (auto const& plugin : app.plugin_manager().plugins())
-        std::cout << "Element library '" << plugin->name() << "' loaded." << std::endl;
+        std::cout << "Resource library '" << plugin->name() << "' loaded." << std::endl;
 
     std::cout << std::endl;
 

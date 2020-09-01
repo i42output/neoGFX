@@ -48,7 +48,25 @@ using namespace neolib::string_literals;
 
 int main(int argc, char* argv[])
 {
-    ds::main_app app{ argc, argv, "neoGFX Design Studio" };
+    neolib::application_info appInfo
+    {
+        argc, argv,
+        "neoGFX Design Studio",
+        "i42 Software",
+        neolib::version{ 1, 0, 0, 0, "pre-release" },
+        "Copyright (c) 2020 Leigh Johnston",
+        {}, {}, {}, ".nel"
+    };
+
+    std::cout << "------ " << appInfo.name() << " ------" << std::endl;
+    std::cout << appInfo.copyright() << std::endl << std::endl;
+
+    ds::main_app app{ appInfo };
+
+    std::cout << "Loading element libraries..." << std::endl;
+    app.plugin_manager().load_plugins();
+    for (auto const& plugin : app.plugin_manager().plugins())
+        std::cout << "Element library '" << plugin->name() << "' loaded." << std::endl;
 
     try
     {
@@ -100,8 +118,14 @@ int main(int argc, char* argv[])
             case ds::toolbar_icon_size::Size16x16:
                 mainWindow.standardToolbar.set_button_image_extents(ng::size{ 16.0_dip, 16.0_dip });
                 break;
+            case ds::toolbar_icon_size::Size24x24:
+                mainWindow.standardToolbar.set_button_image_extents(ng::size{ 24.0_dip, 24.0_dip });
+                break;
             case ds::toolbar_icon_size::Size32x32:
                 mainWindow.standardToolbar.set_button_image_extents(ng::size{ 32.0_dip, 32.0_dip });
+                break;
+            case ds::toolbar_icon_size::Size48x48:
+                mainWindow.standardToolbar.set_button_image_extents(ng::size{ 48.0_dip, 48.0_dip });
                 break;
             case ds::toolbar_icon_size::Size64x64:
                 mainWindow.standardToolbar.set_button_image_extents(ng::size{ 64.0_dip, 64.0_dip });
@@ -209,12 +233,29 @@ int main(int argc, char* argv[])
                     objectModel.clear();
                     std::function<void(ng::i_item_model::iterator, ds::i_element&)> addNode = [&](ng::i_item_model::iterator aPosition, ds::i_element& aElement)
                     {
-                        auto node = aElement.has_parent() ? 
-                            objectModel.append_item(aPosition, &aElement, aElement.id().to_std_string()) :
-                            objectModel.insert_item(aPosition, &aElement, aElement.id().to_std_string());
-                        objectModel.insert_cell_data(node, 1u, aElement.type().to_std_string());
-                        for (auto& child : aElement)
-                            addNode(node, *child);
+                        switch (aElement.group())
+                        {
+                        case ds::element_group::Unknown:
+                            break;
+                        case ds::element_group::Project:
+                            for (auto& child : aElement)
+                                addNode(aPosition, *child);
+                            break;
+                        case ds::element_group::App:
+                        case ds::element_group::Widget:
+                        case ds::element_group::Layout:
+                            {
+                                auto node = aElement.parent().group() != ds::element_group::Project ?
+                                    objectModel.append_item(aPosition, &aElement, aElement.id().to_std_string()) :
+                                    objectModel.insert_item(aPosition, &aElement, aElement.id().to_std_string());
+                                objectModel.insert_cell_data(node, 1u, aElement.type().to_std_string());
+                                for (auto& child : aElement)
+                                    addNode(node, *child);
+                            }
+                            break;
+                        case ds::element_group::Action:
+                            break;
+                        }
                     };
                     addNode(objectModel.send(), pm.active_project().root());
                 }
@@ -231,9 +272,12 @@ int main(int argc, char* argv[])
 
         app.action_file_open().triggered([&]()
         {
+            ng::service<ng::i_window_manager>().save_mouse_cursor();
+            ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait);
             auto projectFile = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Project", {}, { "*.nrc" }, "Project Files" });
             if (projectFile)
                 pm.open_project((*projectFile)[0]);
+            ng::service<ng::i_window_manager>().restore_mouse_cursor(mainWindow);
         });
 
         app.action_file_new().triggered([&]()

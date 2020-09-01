@@ -37,6 +37,7 @@ namespace neogfx::DesignStudio
         struct project_not_found : std::logic_error { project_not_found() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::project_not_found" } {} };
         struct no_active_project : std::logic_error { no_active_project() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::no_active_project" } {} };
         struct invalid_project_file : std::runtime_error { invalid_project_file(const std::string& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project_manager::invalid_project_file: " + aReason } {} };
+        struct element_type_not_found : std::runtime_error { element_type_not_found(const std::string& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project_manager::element_type_not_found: " + aReason } {} };
     public:
         using project_list = neolib::i_vector<ng::i_ref_ptr<i_project>>;
     public:

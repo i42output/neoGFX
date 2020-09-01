@@ -19,6 +19,8 @@
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neolib/file/json.hpp>
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 
@@ -77,6 +79,23 @@ namespace neogfx::DesignStudio
 
     i_project& project_manager::open_project(const ng::i_string& aProjectFile)
     {
+        std::vector<ref_ptr<i_element_library>> elementLibraries;
+        for (auto const& plugin : service<i_app>().plugin_manager().plugins())
+        {
+            ref_ptr<i_element_library> elementLibrary;
+            plugin->discover(elementLibrary);
+            if (elementLibrary)
+                elementLibraries.push_back(elementLibrary);
+        }
+        auto find_library = [&](const std::string& aType) -> ref_ptr<i_element_library>
+        {
+            for (auto const& library : elementLibraries)
+            {
+                if (library->elements().find(string{ aType }) != library->elements().end())
+                    return library;
+            }
+            return {};
+        };
         boost::filesystem::path const inputFileName{ aProjectFile.to_std_string() };
         neolib::fjson const input{ inputFileName.string() };
         if (!input.has_root())
@@ -92,87 +111,53 @@ namespace neogfx::DesignStudio
             else if (item.name() == "ui")
             {
                 std::map<std::string, uint32_t> counters;
-                std::function<void(i_element& aParent, neolib::fjson_value const& aNode)> add_node = [&](i_element& aParent, neolib::fjson_value const& aNode)
+                std::function<void(i_element&, neolib::fjson_value const&)> add_node = [&](i_element& aParent, neolib::fjson_value const& aNode)
                 {
-                    static std::map<std::string, std::function<neolib::ref_ptr<i_element>(i_element&, const std::string&)>> factory =
+                    if (aParent.has_parent())
                     {
-                        { "menu", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "menu", aId); } },
-                        { "window", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "window", aId); } },
-                        { "dialog", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "dialog", aId); } },
-                        { "widget", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "widget", aId); } },
-                        { "text_widget", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "text_widget", aId); } },
-                        { "image_widget", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "image_widget", aId); } },
-                        { "menu_bar", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "menu_bar", aId); } },
-                        { "toolbar", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "toolbar", aId); } },
-                        { "status_bar", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "status_bar", aId); } },
-                        { "tab_page_container", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "tab_page_container", aId); } },
-                        { "tab_page", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "tab_page", aId); } },
-                        { "canvas", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "canvas", aId); } },
-                        { "push_button", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "push_button", aId); } },
-                        { "check_box", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "check_box", aId); } },
-                        { "radio_button", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "radio_button", aId); } },
-                        { "label", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "label", aId); } },
-                        { "text_edit", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "text_edit", aId); } },
-                        { "line_edit", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "line_edit", aId); } },
-                        { "text_field", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "text_field", aId); } },
-                        { "drop_list", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "drop_list", aId); } },
-                        { "table_view", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "table_view", aId); } },
-                        { "tree_view", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "tree_view", aId); } },
-                        { "group_box", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "group_box", aId); } },
-                        { "slider", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "slider", aId); } },
-                        { "double_slider", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "double_slider", aId); } },
-                        { "spin_box", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "spin_box", aId); } },
-                        { "double_spin_box", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "double_spin_box", aId); } },
-                        { "slider_box", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "slider_box", aId); } },
-                        { "double_slider_box", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "double_slider_box", aId); } },
-                        { "gradient_widget", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Widget, "gradient_widget", aId); } },
-                        { "vertical_layout", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "vertical_layout", aId); } },
-                        { "horizontal_layout", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "horizontal_layout", aId); } },
-                        { "grid_layout", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "grid_layout", aId); } },
-                        { "flow_layout", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "flow_layout", aId); } },
-                        { "stack_layout", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "stack_layout", aId); } },
-                        { "border_layout", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "border_layout", aId); } },
-                        { "spacer", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "spacer", aId); } },
-                        { "vertical_spacer", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "vertical_spacer", aId); } },
-                        { "horizontal_spacer", [](i_element& aParent, const std::string& aId) { return ng::make_ref<element<>>(aParent, element_group::Layout, "horizontal_spacer", aId); } }
-                    };
-                    neolib::ref_ptr<i_element> newNode;
-                    auto existing = factory.find(aNode.name());
-                    if (existing != factory.end())
-                    {
-                        switch (aNode.type())
+                        auto elementLibrary = find_library(aNode.name());
+                        if (elementLibrary)
                         {
-                        case neolib::json_type::Object:
-                            if (aNode.as<neolib::fjson_object>().has("id"))
-                                newNode = existing->second(aParent, aNode.as<neolib::fjson_object>().at("id").text());
-                            else
-                                newNode = existing->second(aParent, aNode.name() + boost::lexical_cast<std::string>(++counters[aNode.name()]));
-                            for (auto const& e : aNode)
-                                add_node(*newNode, e);
-                            break;
+                            ref_ptr<i_element> newNode;
+                            switch (aNode.type())
+                            {
+                            case neolib::json_type::Object:
+                                if (aNode.as<neolib::fjson_object>().has("id"))
+                                    newNode = elementLibrary->create_element(aParent, aNode.name(), aNode.as<neolib::fjson_object>().at("id").text());
+                                else
+                                    newNode = elementLibrary->create_element(aParent, aNode.name(), aNode.name() + boost::lexical_cast<std::string>(++counters[aNode.name()]));
+                                for (auto const& e : aNode)
+                                    add_node(*newNode, e);
+                                break;
+                            }
                         }
                     }
-                    else if (!aParent.has_parent())
+                    else
                     {
                         switch (aNode.type())
                         {
                         case neolib::json_type::Object:
                             for (auto const& child : aNode)
                             {
-                                existing = factory.find(child.name());
-                                if (existing != factory.end())
+                                ref_ptr<i_element> newNode;
+                                switch (child.type())
                                 {
-                                    switch (child.type())
+                                case neolib::json_type::Object:
+                                    if (child.as<neolib::fjson_object>().has("id"))
                                     {
-                                    case neolib::json_type::Object:
-                                        if (child.as<neolib::fjson_object>().has("id"))
-                                            newNode = existing->second(aParent, child.as<neolib::fjson_object>().at("id").text());
-                                        else
-                                            newNode = existing->second(aParent, child.name() + boost::lexical_cast<std::string>(++counters[child.name()]));
-                                        for (auto const& e : child)
-                                            add_node(*newNode, e);
-                                        break;
+                                        auto elementLibrary = find_library(child.name());
+                                        if (elementLibrary)
+                                            newNode = elementLibrary->create_element(aParent, child.name(), child.as<neolib::fjson_object>().at("id").text());
                                     }
+                                    else
+                                    {
+                                        auto elementLibrary = find_library(child.name());
+                                        if (elementLibrary)
+                                            newNode = elementLibrary->create_element(aParent, child.name(), child.name() + boost::lexical_cast<std::string>(++counters[child.name()]));
+                                    }
+                                    for (auto const& e : child)
+                                        add_node(*newNode, e);
+                                    break;
                                 }
                             }
                             break;

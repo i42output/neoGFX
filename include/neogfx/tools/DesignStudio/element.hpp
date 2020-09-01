@@ -27,11 +27,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/vector.hpp>
 #include <neolib/core/string.hpp>
 #include <neogfx/core/units.hpp>
+#include <neogfx/app/app.hpp>
+#include <neogfx/app/action.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
 {
-    template <typename Base = i_element>
+    template <typename Type>
+    inline element_group default_element_group()
+    {
+        if constexpr (std::is_base_of_v<app, Type>)
+            return element_group::App;
+        else if constexpr (std::is_base_of_v<action, Type>)
+            return element_group::Action;
+        else if constexpr (std::is_base_of_v<i_widget, Type>)
+            return element_group::Widget;
+        else if constexpr (std::is_base_of_v<i_layout, Type>)
+            return element_group::Layout;
+        else
+            return element_group::Unknown;
+    }
+
+    template <typename Type, typename Base = i_element>
     class element : public neolib::reference_counted<Base>
     {
         typedef element<Base> self_type;
@@ -42,20 +61,20 @@ namespace neogfx::DesignStudio
         typedef abstract_t<Base> abstract_type;
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
     public:
-        element(element_group aGroup, const std::string& aType) :
+        element(const std::string& aType, element_group aGroup = default_element_group<Type>()) :
             iParent{ nullptr }, iGroup{ aGroup }, iType{ aType }
         {
         }
-        element(element_group aGroup, const std::string& aType, const std::string& aId) :
+        element(const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
             iParent{ nullptr }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
         {
         }
-        element(i_element& aParent, element_group aGroup, const std::string& aType) :
+        element(i_element& aParent, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
             iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }
         {
             parent().children().push_back(neolib::ref_ptr<i_element>{ this });
         }
-        element(i_element& aParent, element_group aGroup, const std::string& aType, const std::string& aId) :
+        element(i_element& aParent, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
             iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
         {
             parent().children().push_back(neolib::ref_ptr<i_element>{ this });
