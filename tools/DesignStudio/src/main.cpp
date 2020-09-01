@@ -231,6 +231,7 @@ int main(int argc, char* argv[])
                 if (objectModel.empty() || objectModel.item(objectModel.sbegin()) != &pm.active_project().root())
                 {
                     objectModel.clear();
+                    objectModel.updating().trigger();
                     std::function<void(ng::i_item_model::iterator, ds::i_element&)> addNode = [&](ng::i_item_model::iterator aPosition, ds::i_element& aElement)
                     {
                         switch (aElement.group())
@@ -258,6 +259,7 @@ int main(int argc, char* argv[])
                         }
                     };
                     addNode(objectModel.send(), pm.active_project().root());
+                    objectModel.updated().trigger();
                 }
             }
             else

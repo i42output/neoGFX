@@ -239,6 +239,8 @@ namespace neogfx
         declare_event(item_added, const item_model_index&)
         declare_event(item_changed, const item_model_index&)
         declare_event(item_removed, const item_model_index&)
+        declare_event(updating)
+        declare_event(updated)
         declare_event(cleared)
     public:
         typedef neolib::generic_iterator iterator;

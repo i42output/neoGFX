@@ -134,20 +134,45 @@ namespace neogfx
             iSortable = aSortable;
             if (iItemModel != &aItemModel)
             {
-                neolib::scoped_flag sf{ iInitializing };
+                auto reset_model = [this](bool aHardReset = true)
+                {
+                    if (aHardReset)
+                    {
+                        neolib::scoped_flag sf{ iInitializing };
+                        iColumns.clear();
+                        for (item_model_index::column_type col = 0; col < item_model().columns(); ++col)
+                            iColumns.emplace_back(col);
+                        iRows.clear();
+                        for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
+                            item_added(item_model_index{ row });
+                    }
+                    reset_maps();
+                    reset_meta();
+                    reset_sort();
+                    ItemModelChanged.trigger(item_model());
+                };
                 iItemModelSink.clear();
                 iItemModel = &aItemModel;
                 iItemModelSink += item_model().column_info_changed([this](item_model_index::column_type aColumnIndex) { item_model_column_info_changed(aColumnIndex); });
                 iItemModelSink += item_model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
                 iItemModelSink += item_model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
                 iItemModelSink += item_model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
-                iItemModelSink += item_model().cleared([this]() 
+                iItemModelSink += item_model().updating([this]()
+                {
+                    iInitializing = true;
+                });
+                iItemModelSink += item_model().updated([this, reset_model]()
+                {
+                    iInitializing = false;
+                    reset_model(false);
+                });
+                iItemModelSink += item_model().cleared([this]()
                 {  
-                    iColumns.clear();
                     iRows.clear();
                     reset_maps();
                     reset_meta();
                     reset_sort();
+                    ItemModelChanged.trigger(item_model());
                 });
                 iItemModelSink += item_model().destroying([this]() 
                 { 
@@ -158,16 +183,7 @@ namespace neogfx
                     reset_meta();
                     reset_sort();
                 });
-                iColumns.clear();
-                for (item_model_index::column_type col = 0; col < item_model().columns(); ++col)
-                    iColumns.emplace_back(col);
-                iRows.clear();
-                for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
-                    item_added(item_model_index{ row });
-                reset_maps();
-                reset_meta();
-                reset_sort();
-                ItemModelChanged.trigger(item_model());
+                reset_model();
             }
         }
         item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const override
@@ -1234,6 +1250,7 @@ namespace neogfx
         sink iSink;
         bool iInitializing;
         bool iFiltering;
+        bool iModelUpdating;
     };
 
     typedef basic_item_presentation_model<item_model> item_presentation_model;
