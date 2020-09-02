@@ -28,6 +28,13 @@ namespace neogfx::DesignStudio
 {
     project_manager::project_manager()
     {
+        for (auto const& plugin : service<i_app>().plugin_manager().plugins())
+        {
+            ref_ptr<i_element_library> elementLibrary;
+            plugin->discover(elementLibrary);
+            if (elementLibrary)
+                iElementLibraries.push_back(elementLibrary);
+        }
     }
 
     project_manager::~project_manager()
@@ -79,29 +86,12 @@ namespace neogfx::DesignStudio
 
     i_project& project_manager::open_project(const ng::i_string& aProjectFile)
     {
-        std::vector<ref_ptr<i_element_library>> elementLibraries;
-        for (auto const& plugin : service<i_app>().plugin_manager().plugins())
-        {
-            ref_ptr<i_element_library> elementLibrary;
-            plugin->discover(elementLibrary);
-            if (elementLibrary)
-                elementLibraries.push_back(elementLibrary);
-        }
-        auto find_library = [&](const std::string& aType) -> ref_ptr<i_element_library>
-        {
-            for (auto const& library : elementLibraries)
-            {
-                if (library->elements().find(string{ aType }) != library->elements().end())
-                    return library;
-            }
-            return {};
-        };
         boost::filesystem::path const inputFileName{ aProjectFile.to_std_string() };
         neolib::fjson const input{ inputFileName.string() };
         if (!input.has_root())
             throw invalid_project_file("bad root node");
         auto const& ns = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
-        auto newProject = ng::make_ref<project>(inputFileName.stem().string(), ns);
+        auto newProject = ng::make_ref<project>(*find_library("project")->create_element("project", inputFileName.stem().string()), inputFileName.stem().string(), ns);
         for (auto const& item : input.root())
         {
             if (item.name() == "resource")
@@ -176,7 +166,7 @@ namespace neogfx::DesignStudio
 
     i_project& project_manager::create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace)
     {
-        auto newProject = ng::make_ref<project>(aProjectName.to_std_string(), aProjectNamespace.to_std_string());
+        auto newProject = ng::make_ref<project>(*find_library("project")->create_element("project", aProjectName), aProjectName.to_std_string(), aProjectNamespace.to_std_string());
         iProjects.push_back(newProject);
         ProjectAdded.trigger(*newProject);
         activate_project(*newProject);
@@ -204,5 +194,15 @@ namespace neogfx::DesignStudio
             if (*p == &aProject)
                 return p;
         throw project_not_found();
+    }
+
+    ref_ptr<i_element_library> project_manager::find_library(const std::string& aElementType) const
+    {
+        for (auto const& library : iElementLibraries)
+        {
+            if (library->elements().find(string{ aElementType }) != library->elements().end())
+                return library;
+        }
+        return {};
     }
 }

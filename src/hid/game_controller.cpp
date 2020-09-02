@@ -25,7 +25,7 @@ namespace neogfx
 {
     game_controller::game_controller(hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId, const button_map_type& aButtonMap) :
         hid_device<i_game_controller>{ hid_device_type::Input, hid_device_class::GameController, aSubclass, aProductId, aInstanceId },
-        iUpdater{ service<async_task>(), [this](neolib::callback_timer& aTimer)
+        iUpdater{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             update_state();

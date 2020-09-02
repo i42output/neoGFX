@@ -179,7 +179,7 @@ namespace neogfx
     dialog_result dialog::exec()
     {
         destroyed_flag destroyed{ surface() };
-        event_processing_context epc(service<async_task>(), "neogfx::dialog");
+        event_processing_context epc(service<i_async_task>(), "neogfx::dialog");
         while (iResult == std::nullopt)
         {
             service<i_app>().process_events(epc);
@@ -252,7 +252,7 @@ namespace neogfx
 
     void dialog::init()
     {
-        iUpdater.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
+        iUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             if (iButtonBox)

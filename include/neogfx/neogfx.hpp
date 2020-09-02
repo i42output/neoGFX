@@ -25,13 +25,17 @@
 using namespace boost::multiprecision;
 
 #include <neolib/core/stdint.hpp>
+#include <neolib/core/uuid.hpp>
 #include <neolib/core/lifetime.hpp>
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/enum.hpp>
 #include <neolib/core/string.hpp>
 #include <neolib/core/string_utils.hpp>
+#include <neolib/task/i_async_task.hpp>
+#include <neolib/app/services.hpp>
 #include <neogfx/app/i18n.hpp>
-#include <neogfx/core/async_task.hpp>
+
+namespace services = neolib::services;
 
 namespace neogfx
 {
@@ -65,14 +69,14 @@ namespace neogfx
     using neolib::to_string;
     using namespace neolib::string_literals;
 
+    using neolib::uuid;
+
+    using neolib::i_async_task;
+
+    using namespace neolib::services;
+
     using neolib::operator<<;
     using neolib::operator>>;
-
-    template <typename Component>
-    Component& service();
-
-    template <typename Component>
-    void teardown_service();
 
     // convert strings with different traits and/or character types to std::string
     template <typename CharT, typename Traits, typename Allocator>

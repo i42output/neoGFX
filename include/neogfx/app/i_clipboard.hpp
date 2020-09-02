@@ -46,7 +46,7 @@ namespace neogfx
         virtual void select_all(i_clipboard& aClipboard) = 0;
     };
 
-    class i_clipboard
+    class i_clipboard : public i_service
     {
     public:
         declare_event(updated)
@@ -73,5 +73,7 @@ namespace neogfx
         virtual void paste() = 0;
         virtual void delete_selected() = 0;
         virtual void select_all() = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0x441eee78, 0x6c80, 0x464b, 0xb733, { 0x18, 0x91, 0x90, 0xa8, 0x39, 0xb9 } }; return sIid; }
     };
 }

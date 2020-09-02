@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    class i_skin_manager
+    class i_skin_manager : public i_service
     {
     public:
         declare_event(skin_registered, i_skin&)
@@ -46,5 +46,7 @@ namespace neogfx
         virtual const i_skin& active_skin() const = 0;
         virtual i_skin& active_skin() = 0;
         virtual void activate_skin(i_skin& aSkin) = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xd764030b, 0x4b1, 0x411c, 0xa36c, { 0x74, 0xcf, 0xb4, 0x7a, 0x8a, 0x55 } }; return sIid; }
     };
 }

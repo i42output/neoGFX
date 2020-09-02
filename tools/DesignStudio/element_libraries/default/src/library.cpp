@@ -53,6 +53,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/layout/stack_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include "library.hpp"
 
@@ -63,6 +65,7 @@ namespace neogfx::DesignStudio
         iPluginPath{ aPluginPath },
         iElements
         {
+            { "project" },
             { "app" },
             { "action" },
             { "menu" },
@@ -110,11 +113,28 @@ namespace neogfx::DesignStudio
         return iElements;
     }
 
+    void default_element_library::create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
+    {
+        static const std::map<std::string, std::function<i_element* (const neolib::i_string&)>> sFactoryMethods =
+        {
+            #define MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, #Type, aElementId }; } },
+            MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(project)
+        };
+        auto method = sFactoryMethods.find(aElementType);
+        if (method != sFactoryMethods.end())
+        {
+            aResult.reset((method->second)(aElementId));
+            return;
+        }
+        throw unknown_element_type();
+    }
+
     void default_element_library::create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
         static const std::map<std::string, std::function<i_element*(i_element&, const neolib::i_string&)>> sFactoryMethods =
         {
-            #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ aParent, #Type, aElementId }; } },
+            #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Type, aElementId }; } },
+            MAKE_ELEMENT_FACTORY_FUNCTION(project)
             MAKE_ELEMENT_FACTORY_FUNCTION(app)
             MAKE_ELEMENT_FACTORY_FUNCTION(action)
             MAKE_ELEMENT_FACTORY_FUNCTION(window)
@@ -161,5 +181,31 @@ namespace neogfx::DesignStudio
             return;
         }
         throw unknown_element_type();
+    }
+
+    i_texture const& default_element_library::element_icon(const neolib::i_string& aElementType) const
+    {
+        static std::map<std::string, std::function<void(texture&)>> sIconResources =
+        {
+            { 
+                "app", 
+                [](texture& aTexture)
+                {
+                    aTexture = texture{ size{ 128, 128 } };
+                    graphics_context gc{ aTexture };
+                    gc.draw_line(point{ 0.0, 0.0 }, point{ 10.0, 10.0 }, color::Yellow);
+                }
+            }
+        };
+        auto existing = sIconResources.find(aElementType.to_std_string());
+        if (existing != sIconResources.end())
+        {
+            if (iIcons.find(aElementType.to_std_string()) == iIcons.end())
+                existing->second(iIcons[aElementType.to_std_string()]);
+            return iIcons[aElementType.to_std_string()];
+        }
+        if (iIcons.find("default") == iIcons.end())
+            iIcons["default"] = texture{ size{32.0, 32.0} };
+        return iIcons["default"];
     }
 }

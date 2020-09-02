@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    class i_game_controllers
+    class i_game_controllers : public i_service
     {
     public:
         declare_event(controller_connected, i_game_controller&)
@@ -47,5 +47,18 @@ namespace neogfx
     public:
         virtual const i_string& product_name(const hid_device_uuid& aProductId) const = 0;
         virtual const button_map_type& button_map(const hid_device_uuid& aProductId) const = 0;
+    public:
+        virtual controller_list::iterator add_device(i_game_controller& aController) = 0;
+        virtual controller_list::iterator remove_device(i_game_controller& aController) = 0;
+    public:
+        template <typename Controller, typename... Args>
+        ref_ptr<Controller> add_controller(Args&&... aArgs)
+        {
+            auto newController = make_ref<Controller>(std::forward<Args>(aArgs)...);
+            add_device(*newController);
+            return newController;
+        }
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xda529547, 0xbddd, 0x4f52, 0x9f0, { 0xa5, 0xec, 0xee, 0x8e, 0x6e, 0x7f } }; return sIid; }
     };
 }

@@ -31,11 +31,11 @@ namespace neogfx
         class basic_services : public i_basic_services
         {
         public:
-            basic_services(async_task& aAppThread);
+            basic_services(i_async_task& aAppThread);
             ~basic_services();
         public:
             neogfx::platform platform() const override;
-            async_task& app_task() override;
+            i_async_task& app_task() override;
             void system_beep() override;
             void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const override;
             uint32_t display_count() const override;
@@ -45,7 +45,7 @@ namespace neogfx
             bool has_system_menu_bar() const override;
             i_shared_menu_bar& system_menu_bar() override;
         private:
-            async_task& iAppTask;
+            i_async_task& iAppTask;
             mutable std::optional<uint32_t> iDisplayCount;
             mutable std::vector<std::unique_ptr<i_display>> iDisplays;
         };

@@ -33,7 +33,7 @@ namespace neogfx
     class widget::layout_timer : public pause_rendering, neolib::callback_timer
     {
     public:
-        layout_timer(i_window& aWindow, async_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
+        layout_timer(i_window& aWindow, i_async_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
             pause_rendering{ aWindow }, neolib::callback_timer{ aIoTask, aCallback, 0 }
         {
         }
@@ -640,7 +640,7 @@ namespace neogfx
         {
             if (has_root() && !iLayoutTimer)
             {
-                iLayoutTimer = std::make_unique<layout_timer>(root(), service<async_task>(), [this](neolib::callback_timer&)
+                iLayoutTimer = std::make_unique<layout_timer>(root(), service<i_async_task>(), [this](neolib::callback_timer&)
                 {
                     if (root().has_native_window())
                     {

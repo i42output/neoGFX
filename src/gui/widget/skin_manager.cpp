@@ -22,10 +22,10 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/skin_manager.hpp>
 
+template<> neogfx::i_skin_manager& services::start_service<neogfx::i_skin_manager>() { return neogfx::skin_manager::instance(); }
+
 namespace neogfx
 {
-    template<> i_skin_manager& service<i_skin_manager>() { return skin_manager::instance(); }
-
     skin_manager::skin_manager() :
         iActiveSkin{ nullptr }
     {

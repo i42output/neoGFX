@@ -31,10 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
 {
+    class project;
+
     template <typename Type>
     inline element_group default_element_group()
     {
@@ -46,6 +49,8 @@ namespace neogfx::DesignStudio
             return element_group::Widget;
         else if constexpr (std::is_base_of_v<i_layout, Type>)
             return element_group::Layout;
+        else if constexpr (std::is_base_of_v<project, Type>)
+            return element_group::Project;
         else
             return element_group::Unknown;
     }
@@ -61,21 +66,21 @@ namespace neogfx::DesignStudio
         typedef abstract_t<Base> abstract_type;
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
     public:
-        element(const std::string& aType, element_group aGroup = default_element_group<Type>()) :
-            iParent{ nullptr }, iGroup{ aGroup }, iType{ aType }
+        element(const i_element_library& aLibrary, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
+            iLibrary{ aLibrary }, iParent { nullptr }, iGroup{ aGroup }, iType{ aType }
         {
         }
-        element(const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
-            iParent{ nullptr }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
+        element(const i_element_library& aLibrary, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
+            iLibrary{ aLibrary }, iParent{ nullptr }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
         {
         }
-        element(i_element& aParent, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
-            iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }
+        element(const i_element_library& aLibrary, i_element& aParent, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
+            iLibrary{ aLibrary }, iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }
         {
             parent().children().push_back(neolib::ref_ptr<i_element>{ this });
         }
-        element(i_element& aParent, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
-            iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
+        element(const i_element_library& aLibrary, i_element& aParent, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
+            iLibrary{ aLibrary }, iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
         {
             parent().children().push_back(neolib::ref_ptr<i_element>{ this });
         }
@@ -83,6 +88,10 @@ namespace neogfx::DesignStudio
         {
         }
     public:
+        const i_element_library& library() const override
+        {
+            return iLibrary;
+        }
         element_group group() const override
         {
             return iGroup;
@@ -119,6 +128,7 @@ namespace neogfx::DesignStudio
             return iChildren;
         }
     public:
+        const i_element_library& iLibrary;
         i_element* iParent;
         element_group iGroup;
         neolib::string iType;

@@ -37,7 +37,7 @@ namespace neogfx
         Gnome
     };
 
-    class i_basic_services
+    class i_basic_services : public i_service
     {
     public:
         struct bad_display_index : std::logic_error { bad_display_index() : std::logic_error("neogfx::i_basic_services::bad_display_index") {} };
@@ -46,7 +46,7 @@ namespace neogfx
         virtual ~i_basic_services() = default;
     public:
         virtual neogfx::platform platform() const = 0;
-        virtual async_task& app_task() = 0;
+        virtual i_async_task& app_task() = 0;
         virtual void system_beep() = 0;
         virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
         virtual uint32_t display_count() const = 0;
@@ -55,5 +55,7 @@ namespace neogfx
         virtual i_native_clipboard& system_clipboard() = 0;
         virtual bool has_system_menu_bar() const = 0;
         virtual i_shared_menu_bar& system_menu_bar() = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0x86d1e3fa, 0xbf79, 0x4940, 0xa648, { 0xaf, 0xad, 0xbf, 0xf2, 0x9c, 0xcd } }; return sIid; }
     };
 }

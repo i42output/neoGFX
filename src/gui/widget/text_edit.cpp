@@ -192,7 +192,7 @@ namespace neogfx
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
-        iAnimator{ service<async_task>(), [this](neolib::callback_timer&)
+        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&)
         {
             iAnimator.again();
             animate();
@@ -211,7 +211,7 @@ namespace neogfx
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
-        iAnimator{ service<async_task>(), [this](neolib::callback_timer&)
+        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&)
         {
             iAnimator.again();
             animate();
@@ -230,7 +230,7 @@ namespace neogfx
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
-        iAnimator{ service<async_task>(), [this](neolib::callback_timer&)
+        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&)
         {
             iAnimator.again();
             animate();
@@ -1059,7 +1059,7 @@ namespace neogfx
         {
             if (!capturing())
                 set_capture();
-            iDragger.emplace(service<async_task>(), [this](neolib::callback_timer& aTimer)
+            iDragger.emplace(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.again();
                 set_cursor_position(root().mouse_position() - origin(), false);

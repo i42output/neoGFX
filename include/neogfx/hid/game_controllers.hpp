@@ -47,16 +47,8 @@ namespace neogfx
     public:
         const button_map_type& button_map(const hid_device_uuid& aProductId) const override;
     public:
-        controller_list::iterator add_device(const ref_ptr<i_game_controller>& aController);
-        controller_list::iterator remove_device(const ref_ptr<i_game_controller>& aController);
-    public:
-        template <typename Controller, typename... Args>
-        ref_ptr<Controller> add_controller(Args&&... aArgs)
-        {
-            auto newController = make_ref<Controller>(std::forward<Args>(aArgs)...);
-            add_device(newController);
-            return newController;
-        }
+        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator add_device(i_game_controller& aController) override;
+        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator remove_device(i_game_controller& aController) override;
     private:
         controller_list iControllers;
         mutable std::map<hid_device_uuid, button_map_type> iButtonMaps;

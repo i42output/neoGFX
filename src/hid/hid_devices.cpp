@@ -42,24 +42,21 @@ namespace neogfx
         return iDevices;
     }
 
-    hid_devices::device_list::iterator hid_devices::add_device(const neolib::ref_ptr<i_hid_device>& aDevice)
+    void hid_devices::add_device(i_hid_device& aDevice)
     {
-        auto newDevice = iDevices.insert(iDevices.end(), aDevice);
-        DeviceConnected.trigger(*aDevice);
-        return newDevice;
+        auto newDevice = iDevices.insert(iDevices.end(), ref_ptr<i_hid_device>(aDevice));
+        DeviceConnected.trigger(aDevice);
     }
 
-    hid_devices::device_list::iterator hid_devices::remove_device(const neolib::ref_ptr<i_hid_device>& aDevice)
+    void hid_devices::remove_device(i_hid_device& aDevice)
     {
-        neolib::ref_ptr<i_hid_device> detached{ aDevice };
+        ref_ptr<i_hid_device> detached{ aDevice };
         auto existing = std::find(iDevices.begin(), iDevices.end(), detached);
         if (existing != iDevices.end())
         {
             auto next = iDevices.erase(existing);
             DeviceDisconnected.trigger(*detached);
-            return next;
         }
-        return iDevices.end();
     }
 
     const i_string& hid_devices::product_name(hid_device_class aClass, const hid_device_uuid& aProductId) const

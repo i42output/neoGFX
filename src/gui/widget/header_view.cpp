@@ -57,7 +57,7 @@ namespace neogfx
     {
     public:
         updater(header_view& aParent) :
-            neolib::callback_timer{ service<async_task>(), [this, &aParent](neolib::callback_timer&)
+            neolib::callback_timer{ service<i_async_task>(), [this, &aParent](neolib::callback_timer&)
             {
                 destroyed_flag destroyed{ *this };
                 destroyed_flag surfaceDestroyed{ aParent.surface() };
@@ -71,7 +71,7 @@ namespace neogfx
                 if (iRow == 0)
                     aParent.update_buttons();
                 uint64_t since = neolib::thread::program_elapsed_ms();
-                event_processing_context epc{ service<async_task>(), "neogfx::header_view::updater" };
+                event_processing_context epc{ service<i_async_task>(), "neogfx::header_view::updater" };
                 graphics_context gc{ aParent, graphics_context::type::Unattached };
                 for (uint32_t c = 0; c < 1000 && iRow < aParent.presentation_model().rows(); ++c, ++iRow)
                 {

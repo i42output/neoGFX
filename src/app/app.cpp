@@ -36,23 +36,18 @@
 #include <neogfx/core/i_transition_animator.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
-template<> neolib::async_task& neolib::service<neolib::async_task>()
+template<> neolib::i_async_task& services::start_service<neolib::i_async_task>()
+{
+    return neogfx::app::instance();
+}
+
+template<> neogfx::i_app& services::start_service<neogfx::i_app>()
 {
     return neogfx::app::instance();
 }
 
 namespace neogfx
 {
-    template<> async_task& service<async_task>()
-    {
-        return app::instance();
-    }
-
-    template<> i_app& service<i_app>()
-    { 
-        return app::instance(); 
-    }
-
     program_options::program_options(int argc, char* argv[])
     {
         boost::program_options::options_description description{ "Allowed options" };

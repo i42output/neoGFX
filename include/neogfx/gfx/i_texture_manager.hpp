@@ -30,7 +30,7 @@ namespace neogfx
 {
     class i_native_texture;
 
-    class i_texture_manager : public neolib::i_cookie_consumer
+    class i_texture_manager : public neolib::i_cookie_consumer, public i_service
     {
         friend class texture_atlas;
     public:
@@ -47,5 +47,7 @@ namespace neogfx
     private:
         virtual void add_sub_texture(i_sub_texture& aSubTexture) = 0;
         virtual void remove_sub_texture(i_sub_texture& aSubTexture) = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xbc995572, 0x980e, 0x40cd, 0xa13e,{ 0x83, 0x66, 0xc1, 0x73, 0x50, 0xf4 } }; return sIid; }
     };
 }

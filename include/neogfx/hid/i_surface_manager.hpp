@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_display;
 
-    class i_surface_manager
+    class i_surface_manager : public i_service
     {
     public:
         declare_event(dpi_changed, i_surface&)
@@ -57,5 +57,7 @@ namespace neogfx
     public:
         virtual bool is_surface_attached(void* aNativeSurfaceHandle) const = 0;
         virtual i_surface& attached_surface(void* aNativeSurfaceHandle) = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xf189b8a1, 0x37d3, 0x4288, 0x9654, { 0xf8, 0xd, 0x19, 0xf1, 0xe, 0x2d } }; return sIid; }
     };
 }

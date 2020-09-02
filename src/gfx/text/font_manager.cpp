@@ -33,14 +33,14 @@
 #include "../../gfx/text/native/native_font_face.hpp"
 #include "../../gfx/text/native/native_font.hpp"
 
+template <>
+neogfx::i_font_manager& services::start_service<neogfx::i_font_manager>()
+{
+    return services::service<neogfx::i_rendering_engine>().font_manager();
+}
+
 namespace neogfx
 {
-    template <>
-    i_font_manager& service<i_font_manager>()
-    {
-        return service<i_rendering_engine>().font_manager();
-    }
-
     neolib::small_cookie item_cookie(const font_manager::id_cache_entry& aEntry)
     {
         return aEntry.id();

@@ -32,7 +32,7 @@ namespace neogfx
         struct currently_idle : std::logic_error { currently_idle() : std::logic_error("neogfx::event_processing_context::currently_idle") {} };
     public:
         event_processing_context(const std::string& aName = std::string{});
-        event_processing_context(async_task& aParent, const std::string& aName = std::string{});
+        event_processing_context(i_async_task& aParent, const std::string& aName = std::string{});
     public:
         const std::string& name() const override;
     public:

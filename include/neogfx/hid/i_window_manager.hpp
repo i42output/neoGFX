@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_window;
 
-    class i_window_manager
+    class i_window_manager : public i_service
     {
     public:
         struct window_not_found : std::logic_error { window_not_found() : std::logic_error("neogfx::i_surface_manager::window_not_found") {} };
@@ -58,5 +58,7 @@ namespace neogfx
         virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
         virtual void restore_mouse_cursor(const i_window& aWindow) = 0;
         virtual void update_mouse_cursor(const i_window& aWindow) = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0x6246e0a9, 0x85d7, 0x4feb, 0xa273, { 0x7d, 0xb1, 0x4d, 0xed, 0x12, 0x12 } }; return sIid; }
     };
 }

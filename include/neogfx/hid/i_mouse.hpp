@@ -138,7 +138,7 @@ namespace neogfx
         Raw
     };
 
-    class i_mouse : public i_hid_device
+    class i_mouse : public i_hid_device, public i_service
     {
     public:
         typedef i_mouse abstract_type;
@@ -164,5 +164,7 @@ namespace neogfx
         {
             return (button_state() & aButton) == aButton;
         }
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xe974988, 0xcfe0, 0x46e8, 0xaad0, { 0xaf, 0xaa, 0x7a, 0x92, 0x7a, 0xf6 } }; return sIid; }
     };
 }

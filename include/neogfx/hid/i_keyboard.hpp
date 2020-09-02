@@ -633,7 +633,7 @@ namespace neogfx
         return static_cast<keyboard_locks>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    class i_keyboard : public i_hid_device
+    class i_keyboard : public i_hid_device, public i_service
     {
     public:
         typedef i_keyboard abstract_type;
@@ -660,6 +660,8 @@ namespace neogfx
         virtual key_code_e scan_code_to_key_code(scan_code_e aScanCode) const = 0;
     public:
         virtual void update_keymap() = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0x878ef7c6, 0x8d4b, 0x4c0d, 0x81dd, { 0x70, 0xd1, 0x74, 0x3c, 0x6b, 0x82 } }; return sIid; }
     };
 
     class key_sequence

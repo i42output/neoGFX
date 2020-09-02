@@ -152,7 +152,7 @@ namespace neogfx
             auto const deviceProductName = neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(pdidInstance->tszProductName));
             self.iEnumerationResults.push_back(deviceInstanceId);
             self.iProductNames[deviceProductId] = deviceProductName;
-            for (auto const& existingDevice : service<neogfx::game_controllers>().controllers())
+            for (auto const& existingDevice : service<i_game_controllers>().controllers())
                 if (existingDevice->instance_id() == deviceInstanceId)
                     return DIENUM_CONTINUE;
             if (SUCCEEDED(self.iDirectInput->CreateDevice(pdidInstance->guidInstance, &directinputDevice, NULL)))
@@ -161,7 +161,7 @@ namespace neogfx
                 {
                     if (self.is_xinput_controller(pdidInstance->guidProduct))
                     {
-                        service<neogfx::game_controllers>().add_controller<xinput_controller>(
+                        service<i_game_controllers>().add_controller<xinput_controller>(
                             directinputDevice,
                             hid_device_subclass::Gamepad,
                             deviceProductId,
@@ -169,7 +169,7 @@ namespace neogfx
                     }
                     else
                     {
-                        service<neogfx::game_controllers>().add_controller<directinput_controller>(
+                        service<i_game_controllers>().add_controller<directinput_controller>(
                             directinputDevice,
                             hid_device_subclass::Gamepad,
                             deviceProductId,
@@ -186,7 +186,7 @@ namespace neogfx
         }
 
         game_controllers::game_controllers() :
-            iUpdater{ service<async_task>(), [this](neolib::callback_timer& aTimer)
+            iUpdater{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.again();
                 if (iEnumerationRequested)
@@ -261,7 +261,7 @@ namespace neogfx
                         controller.clear_port();
                 }
                 else
-                    existing = remove_device(*existing);
+                    existing = remove_device(**existing);
             }
 
             if (!controllers().empty() && !have_controller_for(game_player::One))

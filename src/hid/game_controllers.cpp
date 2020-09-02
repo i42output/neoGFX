@@ -54,15 +54,15 @@ namespace neogfx
         return iButtonMaps[aProductId];
     }
 
-    game_controllers::controller_list::iterator game_controllers::add_device(const ref_ptr<i_game_controller>& aController)
+    abstract_t<game_controllers::controller_list>::iterator game_controllers::add_device(i_game_controller& aController)
     {
-        auto newController = iControllers.insert(iControllers.end(), aController);
-        service<hid_devices>().add_device(aController);
-        ControllerConnected.trigger(*aController);
+        auto newController = iControllers.insert(iControllers.end(), ref_ptr<i_game_controller>{ aController });
+        service<i_hid_devices>().add_device(aController);
+        ControllerConnected.trigger(aController);
         return newController;
     }
 
-    game_controllers::controller_list::iterator game_controllers::remove_device(const ref_ptr<i_game_controller>& aController)
+    abstract_t<game_controllers::controller_list>::iterator game_controllers::remove_device(i_game_controller& aController)
     {
         neolib::ref_ptr<i_game_controller> detached{ aController };
         auto existing = std::find(iControllers.begin(), iControllers.end(), detached);
@@ -70,7 +70,7 @@ namespace neogfx
         {
             auto next = iControllers.erase(existing);
             ControllerDisconnected.trigger(*detached);
-            service<hid_devices>().remove_device(*detached);
+            service<i_hid_devices>().remove_device(*detached);
             return next;
         }
         return iControllers.end();

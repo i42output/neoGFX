@@ -24,6 +24,7 @@
 #include <neolib/core/i_set.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/plugin/i_plugin.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
@@ -42,9 +43,17 @@ namespace neogfx::DesignStudio
         virtual const elements_t& elements() const = 0;
         // factory
     public:
+        virtual void create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
         virtual void create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
+        virtual i_texture const& element_icon(const neolib::i_string& aElementType) const = 0;
         // helpers
     public:
+        neolib::ref_ptr<i_element> create_element(const std::string& aElementType, const std::string& aElementId)
+        {
+            neolib::ref_ptr<i_element> result;
+            create_element(string{ aElementType }, string{ aElementId }, result);
+            return result;
+        }
         neolib::ref_ptr<i_element> create_element(i_element& aParent, const std::string& aElementType, const std::string& aElementId)
         {
             neolib::ref_ptr<i_element> result;

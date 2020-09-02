@@ -22,8 +22,8 @@
 
 namespace neogfx::DesignStudio
 {
-    project::project(const std::string& aName, const std::string& aNamespace) :
-        iName{ aName }, iNamespace{ aNamespace }, iProject{ "project", aName, element_group::Project }
+    project::project(i_element& aRoot, const std::string& aName, const std::string& aNamespace) :
+        iRoot{ aRoot }, iName { aName }, iNamespace{ aNamespace }
     {
     }
 
@@ -39,11 +39,11 @@ namespace neogfx::DesignStudio
 
     const i_element& project::root() const
     {
-        return iProject;
+        return *iRoot;
     }
 
     i_element& project::root()
     {
-        return iProject;
+        return *iRoot;
     }
 }

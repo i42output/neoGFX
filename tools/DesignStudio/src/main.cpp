@@ -41,6 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
+#include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include "new_project_dialog.hpp"
 #include "DesignStudio.ui.hpp"
 
@@ -161,7 +162,15 @@ int main(int argc, char* argv[])
         ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
         objectModel.set_column_name(0u, "Object"_t);
         objectModel.set_column_name(1u, "Type"_t);
-        ng::basic_item_presentation_model<decltype(objectModel)> objectPresentationModel;
+        class object_presentation_model : public ng::basic_item_presentation_model<decltype(objectModel)>
+        {
+        public:
+            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
+            {
+                auto const& e = *item_model().item(to_item_model_index(aIndex));
+                return e.library().element_icon(e.type());
+            }
+        } objectPresentationModel;
         auto& objectTree = objects.docked_widget<ng::table_view>();
         objectTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         objectTree.set_model(objectModel);

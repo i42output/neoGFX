@@ -31,9 +31,6 @@
 
 namespace neogfx
 {
-    template <>
-    i_font_manager& service<i_font_manager>();
-
     // case insensitive text
     typedef std::basic_string<char, neolib::ci_char_traits<std::char_traits<char> > > ci_string;
 

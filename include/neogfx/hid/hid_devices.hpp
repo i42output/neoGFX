@@ -39,18 +39,10 @@ namespace neogfx
     public:
         void enumerate_devices() override;
         const device_list& devices() const override;
-        device_list::iterator add_device(const ref_ptr<i_hid_device>& aDevice);
-        device_list::iterator remove_device(const ref_ptr<i_hid_device>& aDevice);
+        void add_device(i_hid_device& aDevice) override;
+        void remove_device(i_hid_device& aDevice) override;
     public:
         const i_string& product_name(hid_device_class aClass, const hid_device_uuid& aProductId) const override;
-    public:
-        template <typename Device>
-        ref_ptr<Device> add_device()
-        {
-            auto newDevice = make_ref<Device>();
-            add_device(newDevice);
-            return newDevice;
-        }
     private:
         device_list iDevices;
     };

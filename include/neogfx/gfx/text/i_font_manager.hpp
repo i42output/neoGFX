@@ -51,7 +51,7 @@ namespace neogfx
         virtual const std::string& fallback_for(const std::string& aFontFamilyName) const = 0;
     };
 
-    class i_font_manager : public neolib::i_small_cookie_consumer
+    class i_font_manager : public neolib::i_small_cookie_consumer, public i_service
     {
         friend class native_font;
     public:
@@ -106,5 +106,7 @@ namespace neogfx
                 }
             return false;
         }
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0x83bbaf78, 0x66a8, 0x4862, 0x9221, { 0x4c, 0xfd, 0x93, 0xfb, 0xf3, 0xe7 } }; return sIid; }
     };
 }

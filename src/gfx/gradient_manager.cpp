@@ -21,22 +21,22 @@
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/gradient_manager.hpp>
 
+std::unique_ptr<neogfx::i_gradient_manager> sGradientManager;
+
+template <>
+neogfx::i_gradient_manager& services::start_service<neogfx::i_gradient_manager>()
+{
+    static bool created = (sGradientManager = std::make_unique<neogfx::gradient_manager>(), true);
+    return *sGradientManager;
+}
+
+template<> void services::teardown_service<neogfx::i_gradient_manager>()
+{
+    sGradientManager.reset();
+}
+
 namespace neogfx
 {
-    std::unique_ptr<i_gradient_manager> sGradientManager;
-
-    template <>
-    i_gradient_manager& service<i_gradient_manager>()
-    {
-        static bool created = (sGradientManager = std::make_unique<gradient_manager>(), true);
-        return *sGradientManager;
-    }
-
-    template<> void teardown_service<i_gradient_manager>()
-    {
-        sGradientManager.reset();
-    }
-
     class gradient_object : public reference_counted<i_gradient>
     {
         // types

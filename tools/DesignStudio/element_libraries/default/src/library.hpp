@@ -26,6 +26,7 @@
 #include <neolib/core/string.hpp>
 #include <neolib/app/i_application.hpp>
 #include <neolib/app/version.hpp>
+#include <neogfx/gfx/texture.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 
 namespace neogfx::DesignStudio
@@ -43,7 +44,9 @@ namespace neogfx::DesignStudio
         const elements_t& elements() const override;
         // factory
     public:
+        void create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) override;
         void create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) override;
+        i_texture const& element_icon(const neolib::i_string& aElementType) const override;
         // meta
     public:
         static const neolib::uuid& library_id() { static const neolib::uuid sId = neolib::make_uuid("9B9E93DF-DC52-406D-BDBE-07EC7758BB66"); return sId; }
@@ -56,5 +59,6 @@ namespace neogfx::DesignStudio
         neolib::i_application& iApplication;
         std::string iPluginPath;
         elements_t iElements;
+        mutable std::map<std::string, texture> iIcons;
     };
 }

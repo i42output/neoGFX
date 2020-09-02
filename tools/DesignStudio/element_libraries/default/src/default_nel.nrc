@@ -1,0 +1,6 @@
+{
+    namespace: "neogfx::DesignStudio::default_nel"
+
+    resource: {
+    }
+}

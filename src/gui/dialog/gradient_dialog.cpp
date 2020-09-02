@@ -98,7 +98,7 @@ namespace neogfx
         preview_box(gradient_dialog& aOwner) :
             base_type(aOwner.iPreviewGroupBox.item_layout()),
             iOwner(aOwner),
-            iAnimationTimer{ service<async_task>(), [this](neolib::callback_timer& aTimer)
+            iAnimationTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.again();
                 animate();

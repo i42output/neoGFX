@@ -40,6 +40,8 @@ namespace neogfx::DesignStudio
         Layout
     };
 
+    class i_element_library;
+
     class i_element : public i_reference_counted
     {
     public:
@@ -49,6 +51,7 @@ namespace neogfx::DesignStudio
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::DesignStudio::i_element::no_parent" } {} };
     public:
+        virtual const i_element_library& library() const = 0;
         virtual element_group group() const = 0;
         virtual const neolib::i_string& type() const = 0;
         virtual const neolib::i_string& id() const = 0;

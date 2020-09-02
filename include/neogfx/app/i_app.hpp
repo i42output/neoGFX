@@ -64,7 +64,7 @@ namespace neogfx
         virtual bool nest() const = 0;
     };
 
-    class i_app : public neolib::i_application, public i_action_container
+    class i_app : public neolib::i_application, public i_action_container, public i_service
     {
     public:
         declare_event(execution_started)
@@ -124,5 +124,7 @@ namespace neogfx
         virtual bool process_events() = 0;
         virtual bool process_events(i_event_processing_context& aContext) = 0;
         virtual i_event_processing_context& event_processing_context() = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xa8bd88d7, 0xbd19, 0x4501, 0xb199, { 0x84, 0x84, 0x55, 0xfc, 0x80, 0x45 } }; return sIid; }
     };
 }

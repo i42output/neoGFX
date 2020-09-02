@@ -25,10 +25,14 @@
 #include "native/i_native_surface.hpp"
 #include "../gui/window/native/i_native_window.hpp"
 
+template <> neogfx::i_surface_manager& services::start_service<neogfx::i_surface_manager>() 
+{ 
+    static neogfx::surface_manager sSurfaceManager{ service<neogfx::i_basic_services>(), service<neogfx::i_rendering_engine>() }; 
+    return sSurfaceManager;
+}
+
 namespace neogfx
 {
-    template <> i_surface_manager& service<i_surface_manager>() { static surface_manager sSurfaceManager{ service<i_basic_services>(), service<i_rendering_engine>() }; return sSurfaceManager; }
-
     surface_manager::surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine) :
         iBasicServices(aBasicServices), iRenderingEngine(aRenderingEngine), iRenderingSurfaces(false)
     {

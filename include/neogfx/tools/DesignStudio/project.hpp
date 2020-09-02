@@ -31,7 +31,7 @@ namespace neogfx::DesignStudio
     public:
         typedef i_project abstract_type;
     public:
-        project(const std::string& aName, const std::string& aNamespace);
+        project(i_element& aRoot, const std::string& aName, const std::string& aNamespace);
     public:
         const ng::i_string& name() const override;
         const ng::i_string& namespace_() const override;
@@ -39,8 +39,8 @@ namespace neogfx::DesignStudio
         const i_element& root() const override;
         i_element& root() override;
     private:
+        ref_ptr<i_element> iRoot;
         ng::string iName;
         ng::string iNamespace;
-        element<project> iProject;
     };
 }

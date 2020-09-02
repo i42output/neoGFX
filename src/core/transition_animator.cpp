@@ -23,19 +23,19 @@
 #include <neolib/core/scoped.hpp>
 #include <neogfx/core/transition_animator.hpp>
 
+template<> neogfx::i_animator& services::start_service<neogfx::i_animator>()
+{
+    static neogfx::animator sAnimator{};
+    return sAnimator;
+}
+
+template<> void services::teardown_service<neogfx::i_animator>()
+{
+    services::service<neogfx::i_animator>().stop();
+}
+
 namespace neogfx
 {
-    template<> i_animator& service<i_animator>() 
-    { 
-        static animator sAnimator{}; 
-        return sAnimator; 
-    }
-
-    template<> void teardown_service<i_animator>()
-    {
-        service<i_animator>().stop();
-    }
-
     transition::transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled) :
         iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }, iPaused{ false }
     {
@@ -243,7 +243,7 @@ namespace neogfx
     }
 
     animator::animator() :
-        iTimer { service<async_task>(), [this](neolib::callback_timer& aTimer)
+        iTimer { service<i_async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             next_frame();

@@ -65,7 +65,7 @@ namespace neogfx
 
     class transition;
 
-    class i_animator
+    class i_animator : public i_service
     {
         friend class neogfx::transition;
     public:
@@ -77,6 +77,8 @@ namespace neogfx
         virtual double animation_time() const = 0;
     protected:
         virtual transition_id allocate_id() = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0x182ccd2e, 0xd7dd, 0x4a6c, 0x9ac, { 0x72, 0xfd, 0x81, 0x24, 0x7a, 0xe9 } }; return sIid; }
     };
 
     template <typename T>
