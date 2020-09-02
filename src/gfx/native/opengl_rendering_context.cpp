@@ -252,6 +252,7 @@ namespace neogfx
         iSink += render_target().target_deactivating([this]() 
         { 
             flush(); 
+            glCheck(glDisable(GL_SCISSOR_TEST));
         });
     }
 
@@ -272,6 +273,7 @@ namespace neogfx
         iSink += render_target().target_deactivating([this]()
         {
             flush();
+            glCheck(glDisable(GL_SCISSOR_TEST));
         });
     }
 
@@ -293,6 +295,7 @@ namespace neogfx
         iSink += render_target().target_deactivating([this]()
         {
             flush();
+            glCheck(glDisable(GL_SCISSOR_TEST));
         });
     }
 
@@ -406,8 +409,6 @@ namespace neogfx
 
     void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
     {
-        scoped_render_target srt{ render_target() };
-
         queue().push_back(aOperation);
     }
 

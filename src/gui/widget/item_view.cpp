@@ -432,8 +432,8 @@ namespace neogfx
                 if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
                 {
                     end_edit(true);
-                    presentation_model().toggle_expanded(*item);
-                    return;
+                    if (presentation_model().toggle_expanded(*item))
+                        return;
                 }
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                     iClickedCheckBox = item;
@@ -479,8 +479,8 @@ namespace neogfx
             {
                 if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
                 {
-                    presentation_model().toggle_expanded(*item);
-                    return;
+                    if (presentation_model().toggle_expanded(*item))
+                        return;
                 }
                 bool actioned = false;
                 if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
@@ -895,14 +895,14 @@ namespace neogfx
         {
             if (cellRect.top() < displayRect.top())
                 changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top()), transition, transitionDuration) || changed;
-            else if (cellRect.bottom() > displayRect.bottom())
+            else if (cellRect.bottom() > displayRect.bottom() && cellRect.height() <= displayRect.height())
                 changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom()), transition, transitionDuration) || changed;
         }
         if (intersectRect.width() < cellRect.width())
         {
             if (cellRect.left() < displayRect.left())
                 changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left()), transition, transitionDuration) || changed;
-            else if (cellRect.right() > displayRect.right())
+            else if (cellRect.right() > displayRect.right() && cellRect.width() <= displayRect.width())
                 changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right()), transition, transitionDuration) || changed;
         }
         return changed;

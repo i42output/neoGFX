@@ -309,10 +309,12 @@ namespace neogfx
                 ColumnInfoChanged.trigger(aColumnIndex);
             }
         }
-        void toggle_expanded(const item_presentation_model_index& aIndex) override
+        bool toggle_expanded(const item_presentation_model_index& aIndex) override
         {
             if constexpr (container_traits::is_tree)
             {
+                if (!item_model().has_children(to_item_model_index(aIndex)))
+                    return false;
                 item_presentation_model_index const indexFirstColumn{ aIndex.row() };
                 if (!cell_meta(indexFirstColumn).expanded)
                     ItemExpanding.trigger(aIndex);
@@ -329,7 +331,10 @@ namespace neogfx
                     ItemExpanded.trigger(aIndex);
                 else
                     ItemCollapsed.trigger(aIndex);
+                return true;
             }
+            else
+                return false;
         }
         const button_checked_state& checked_state(const item_presentation_model_index& aIndex) override
         {

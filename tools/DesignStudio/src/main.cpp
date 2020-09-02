@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/string.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -165,10 +166,26 @@ int main(int argc, char* argv[])
         class object_presentation_model : public ng::basic_item_presentation_model<decltype(objectModel)>
         {
         public:
+            object_presentation_model()
+            {
+            }
+        public:
+            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
+            {
+                if (aIndex.column() == 0)
+                    return ng::size{ 16.0_dip, 16.0_dip };
+                else
+                    return {};
+            }
             ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
             {
-                auto const& e = *item_model().item(to_item_model_index(aIndex));
-                return e.library().element_icon(e.type());
+                if (aIndex.column() == 0)
+                {
+                    auto const& e = *item_model().item(to_item_model_index(aIndex));
+                    return e.library().element_icon(e.type());
+                }
+                else
+                    return {};
             }
         } objectPresentationModel;
         auto& objectTree = objects.docked_widget<ng::table_view>();
@@ -273,6 +290,9 @@ int main(int argc, char* argv[])
             }
             else
                 objectModel.clear();
+            for (uint32_t row = 0; row < objectPresentationModel.rows(); ++row)
+                for (uint32_t col = 0; col < objectPresentationModel.columns(); ++col)
+                    ;// objectPresentationModel.cell_image({ row, col });
         };
 
         ng::sink sink;

@@ -191,9 +191,36 @@ namespace neogfx::DesignStudio
                 "app", 
                 [](texture& aTexture)
                 {
-                    aTexture = texture{ size{ 128, 128 } };
-                    graphics_context gc{ aTexture };
-                    gc.draw_line(point{ 0.0, 0.0 }, point{ 10.0, 10.0 }, color::Yellow);
+                    texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
+                    graphics_context gc{ newTexture };
+                    gc.fill_circle(point{ 64.0, 64.0 }, 60.0, color::Gray);
+                    gc.fill_circle(point{ 64.0, 64.0 }, 50.0, color::Black);
+                    gc.fill_circle(point{ 64.0, 64.0 }, 40.0, color::Gray);
+                    aTexture = newTexture;
+                }
+            },
+            {
+                "vertical_layout",
+                [](texture& aTexture)
+                {
+                    texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
+                    graphics_context gc{ newTexture };
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    aTexture = newTexture;
+                }
+            },
+            {
+                "horizontal_layout",
+                [](texture& aTexture)
+                {
+                    texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
+                    graphics_context gc{ newTexture };
+                    gc.draw_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    aTexture = newTexture;
                 }
             }
         };
