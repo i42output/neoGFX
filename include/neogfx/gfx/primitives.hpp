@@ -64,7 +64,8 @@ namespace neogfx
         ColorizeAverage    = Colorize,
         ColorizeMaximum    = 2,
         ColorizeSpot       = 3,
-        Monochrome         = 4,
+        ColorizeAlpha      = 4,
+        Monochrome         = 5,
         Filter             = 10,
         Ignore             = 99
     };

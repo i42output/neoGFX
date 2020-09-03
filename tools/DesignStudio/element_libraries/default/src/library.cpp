@@ -190,7 +190,7 @@ namespace neogfx::DesignStudio
         {
             texture result{ aSource.extents(), 1.0, ng::texture_sampling::Multisample };
             graphics_context gc{ result };
-            gc.draw_texture(point{}, aSource, service<i_app>().current_style().palette().color(color_role::Text));
+            gc.draw_texture(point{}, aSource, service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
             return result;
         };
         auto black_outline = [](const texture& aSource) -> texture
@@ -237,6 +237,13 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "push_button",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/button.png" };
+                }
+            },
+            {
                 "table_view",
                 [text_colored](texture& aTexture)
                 {
@@ -248,6 +255,27 @@ namespace neogfx::DesignStudio
                 [text_colored](texture& aTexture)
                 {
                     aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/list.png" });
+                }
+            },
+            {
+                "drop_list",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/droplist.png" };
+                }
+            },
+            {
+                "tab_page",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/tabpage.png" };
+                }
+            },
+            {
+                "tab_page_container",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/tabpagecontainer.png" };
                 }
             },
             {

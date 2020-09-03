@@ -357,7 +357,13 @@ namespace neogfx
                 "        case 3:\n" // effect: ColorizeSpot
                 "            color = vec4(1.0, 1.0, 1.0, texel.a) * color;\n"
                 "            break;\n"
-                "        case 4:\n" // effect: Monochrome
+                "        case 4:\n" // effect: ColorizeAlpha
+                "            {\n"
+                "                float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
+                "                color = vec4(1.0, 1.0, 1.0, texel.a * avg) * color;\n"
+                "            }\n"
+                "            break;\n"
+                "        case 5:\n" // effect: Monochrome
                 "            {\n"
                 "                float gray = dot(color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));\n"
                 "                color = vec4(gray, gray, gray, texel.a) * color;\n"
