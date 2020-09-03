@@ -268,14 +268,14 @@ namespace neogfx::DesignStudio
                 "tab_page",
                 [text_colored](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/tabpage.png" };
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpage.png" });
                 }
             },
             {
                 "tab_page_container",
                 [text_colored](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/tabpagecontainer.png" };
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpagecontainer.png" });
                 }
             },
             {
