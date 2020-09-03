@@ -3,6 +3,9 @@
 
     resource: {
         file: resources/button.png
+        file: resources/check.png
+        file: resources/radio.png
+        file: resources/label.png
         file: resources/droplist.png
         file: resources/list.png
         file: resources/table.png

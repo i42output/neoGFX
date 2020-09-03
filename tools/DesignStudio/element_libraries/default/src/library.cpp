@@ -219,6 +219,7 @@ namespace neogfx::DesignStudio
         {
             { 
                 "app", 
+                // todo: store the result of this render to a .png file asset
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
@@ -241,6 +242,27 @@ namespace neogfx::DesignStudio
                 [text_colored](texture& aTexture)
                 {
                     aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/button.png" };
+                }
+            },
+            {
+                "check_box",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/check.png" };
+                }
+            },
+            {
+                "radio_button",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/radio.png" };
+                }
+            },
+            {
+                "label",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/label.png" };
                 }
             },
             {
@@ -280,6 +302,7 @@ namespace neogfx::DesignStudio
             },
             {
                 "vertical_layout",
+                // todo: store the result of this render to a .png file asset
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
@@ -292,6 +315,7 @@ namespace neogfx::DesignStudio
             },
             {
                 "horizontal_layout",
+                // todo: store the result of this render to a .png file asset
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
@@ -304,6 +328,7 @@ namespace neogfx::DesignStudio
             },
             {
                 "grid_layout",
+                // todo: store the result of this render to a .png file asset
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
