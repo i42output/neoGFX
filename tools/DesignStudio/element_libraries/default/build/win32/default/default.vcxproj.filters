@@ -37,8 +37,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\default.nrc">
+    <CustomBuild Include="..\..\..\src\default_nel.nrc">
       <Filter>Resource Files</Filter>
-    </None>
+    </CustomBuild>
   </ItemGroup>
 </Project>

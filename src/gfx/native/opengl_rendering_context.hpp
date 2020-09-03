@@ -282,7 +282,6 @@ namespace neogfx
         font iLastDrawGlyphFallbackFont;
         std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
         sink iSink;
-        scoped_render_target iSrt;
         optional_vec2 iOffset;
         bool iSnapToPixel;
         std::optional<gradient> iGradient;

@@ -73,10 +73,12 @@ namespace neogfx
     class scoped_render_target
     {
     public:
+        scoped_render_target();
         scoped_render_target(const i_render_target& aRenderTarget);
+        scoped_render_target(const i_rendering_context& aRenderingContext);
         ~scoped_render_target();
     private:
-        const i_render_target& iRenderTarget;
+        const i_render_target* iRenderTarget;
         const i_render_target* iPreviouslyActivatedTarget;
     };
 }

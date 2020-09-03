@@ -21,29 +21,42 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
-    scoped_render_target::scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ aRenderTarget }, iPreviouslyActivatedTarget{ nullptr }
+    scoped_render_target::scoped_render_target() : iRenderTarget{ nullptr }, iPreviouslyActivatedTarget{ nullptr }
     {
         iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();
-        if (iPreviouslyActivatedTarget != &iRenderTarget)
+    }
+
+    scoped_render_target::scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ &aRenderTarget }, iPreviouslyActivatedTarget{ nullptr }
+    {
+        iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();
+        if (iPreviouslyActivatedTarget != iRenderTarget)
         {
-            if (iPreviouslyActivatedTarget != nullptr)
+            if (iPreviouslyActivatedTarget)
                 iPreviouslyActivatedTarget->deactivate_target();
-            iRenderTarget.activate_target();
+            iRenderTarget->activate_target();
         }
+    }
+
+    scoped_render_target::scoped_render_target(const i_rendering_context& aRenderingContext) :
+        scoped_render_target{ aRenderingContext.render_target() }
+    {
     }
 
     scoped_render_target::~scoped_render_target()
     {
-        if (iPreviouslyActivatedTarget != &iRenderTarget)
+        if (iRenderTarget && iPreviouslyActivatedTarget != iRenderTarget)
         {
-            if (iRenderTarget.target_active())
-                iRenderTarget.deactivate_target();
-            if (iPreviouslyActivatedTarget != nullptr)
+            if (iRenderTarget->target_active())
+                iRenderTarget->deactivate_target();
+            if (iPreviouslyActivatedTarget)
                 iPreviouslyActivatedTarget->activate_target();
         }
+        else if (!iRenderTarget && iPreviouslyActivatedTarget)
+            iPreviouslyActivatedTarget->activate_target();
     }
 }

@@ -48,6 +48,15 @@ namespace neogfx
     class i_widget;
     class i_render_target;
 
+    class i_graphics_context;
+
+    struct ping_pong_buffers
+    {
+        scoped_render_target srt;
+        std::unique_ptr<i_graphics_context> buffer1;
+        std::unique_ptr<i_graphics_context> buffer2;
+    };
+        
     // todo: move to i_string
 
     class i_graphics_context : public i_rendering_context, public i_device_metrics, public i_units_context
@@ -72,7 +81,6 @@ namespace neogfx
             typedef neolib::vecarray<line, 8> lines_t;
             lines_t lines;
         };
-        typedef std::pair<std::unique_ptr<i_graphics_context>, std::unique_ptr<i_graphics_context>> ping_pong_buffers_t;
         // exceptions
     public:
         struct unattached : std::logic_error { unattached() : std::logic_error("neogfx::i_graphics_context::unattached") {} };
@@ -82,7 +90,7 @@ namespace neogfx
         virtual ~i_graphics_context() = default;
         // operations
     public:
-        virtual ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const = 0;
+        virtual neogfx::ping_pong_buffers ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const = 0;
     public:
         virtual delta to_device_units(const delta& aValue) const = 0;
         virtual size to_device_units(const size& aValue) const = 0;
@@ -218,36 +226,36 @@ namespace neogfx
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow_pass_1(const i_graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
+    inline void draw_glyph_text_glow_pass_1(const neogfx::ping_pong_buffers& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
     {
-        scoped_render_target srt{ aPingPongBuffers.first->render_target() };
+        scoped_render_target srt{ *aPingPongBuffers.buffer1 };
         point const effectOffset{ aGlowSize, aGlowSize };
         vec3 pos{ effectOffset.x, effectOffset.y, 0.0 };
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aPingPongBuffers.first->draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aGlowColor);
+            aPingPongBuffers.buffer1->draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aGlowColor);
             pos.x += iterGlyph->advance().cx;
         }
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow_pass_2(const i_graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
+    inline void draw_glyph_text_glow_pass_2(const neogfx::ping_pong_buffers& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
     {
-        scoped_render_target srt{ aPingPongBuffers.second->render_target() };
+        scoped_render_target srt{ *aPingPongBuffers.buffer2 };
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
         rect const effectRect{ point{}, effectExtents };
-        aPingPongBuffers.second->blur(effectRect, *aPingPongBuffers.first, effectRect, aGlowSize, blurring_algorithm::Gaussian, 5.0, 1.0);
+        aPingPongBuffers.buffer2->blur(effectRect, *aPingPongBuffers.buffer1, effectRect, aGlowSize, blurring_algorithm::Gaussian, 5.0, 1.0);
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow_pass_3(const i_graphics_context& aGc, const i_graphics_context::ping_pong_buffers_t& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
+    inline void draw_glyph_text_glow_pass_3(const i_graphics_context& aGc, const neogfx::ping_pong_buffers& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
     {
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
         rect const effectRect{ point{}, effectExtents };
         rect const outputRect{ point{ aPoint } -effectOffset, effectExtents };
-        aGc.blit(outputRect, *aPingPongBuffers.second, effectRect);
+        aGc.blit(outputRect, *aPingPongBuffers.buffer2, effectRect);
     }
 
     template <typename Iter>

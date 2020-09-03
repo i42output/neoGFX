@@ -2,5 +2,8 @@
     namespace: "neogfx::DesignStudio::default_nel"
 
     resource: {
+        file: resources/list.png
+        file: resources/table.png
+        file: resources/menu.png
     }
 }

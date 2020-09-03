@@ -269,6 +269,7 @@ int main(int argc, char* argv[])
                                 addNode(aPosition, *child);
                             break;
                         case ds::element_group::App:
+                        case ds::element_group::Menu:
                         case ds::element_group::Widget:
                         case ds::element_group::Layout:
                             {

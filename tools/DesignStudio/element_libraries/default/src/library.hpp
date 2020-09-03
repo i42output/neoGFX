@@ -59,6 +59,6 @@ namespace neogfx::DesignStudio
         neolib::i_application& iApplication;
         std::string iPluginPath;
         elements_t iElements;
-        mutable std::map<std::string, texture> iIcons;
+        mutable std::map<color, std::map<std::string, texture>> iIcons;
     };
 }

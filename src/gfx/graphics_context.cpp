@@ -140,7 +140,8 @@ namespace neogfx
     graphics_context::graphics_context(const graphics_context& aOther) :
         iType{ aOther.iType },
         iRenderTarget{ aOther.iRenderTarget },
-        iNativeGraphicsContext{ aOther.iNativeGraphicsContext != nullptr ? aOther.native_context().clone() : nullptr },
+        iSrt{ aOther.iRenderTarget },
+        iNativeGraphicsContext{ aOther.active() ? aOther.native_context().clone() : nullptr },
         iDefaultFont{ aOther.iDefaultFont },
         iOrigin{ aOther.origin() },
         iExtents{ aOther.extents() },
@@ -158,6 +159,7 @@ namespace neogfx
 
     graphics_context::~graphics_context()
     {
+        flush();
     }
 
     std::unique_ptr<i_rendering_context> graphics_context::clone() const
@@ -197,10 +199,11 @@ namespace neogfx
 
     void graphics_context::flush()
     {
-        native_context().flush();
+        if (attached() && active())
+            native_context().flush();
     }
 
-    graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor) const
+    ping_pong_buffers graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor) const
     {
         size previousExtents;
         auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
@@ -228,7 +231,7 @@ namespace neogfx
         }
         gcBuffer2->render_target().deactivate_target();
         render_target().activate_target();
-        return ping_pong_buffers_t{ std::move(gcBuffer1), std::move(gcBuffer2) };
+        return neogfx::ping_pong_buffers{ {}, std::move(gcBuffer1), std::move(gcBuffer2) };
     }
     
     delta graphics_context::to_device_units(const delta& aValue) const
@@ -742,12 +745,21 @@ namespace neogfx
         return iType == type::Attached;
     }
 
+    bool graphics_context::active() const
+    {
+        return iNativeGraphicsContext != nullptr;
+    }
+
     i_rendering_context& graphics_context::native_context() const
     {
         if (attached())
         {
-            if (iNativeGraphicsContext == nullptr)
+            if (!active())
+            {
+                if (iSrt == std::nullopt)
+                    iSrt.emplace(render_target());
                 iNativeGraphicsContext = iRenderTarget.create_graphics_context(iBlendingMode);
+            }
             return *iNativeGraphicsContext;
         }
         throw unattached();

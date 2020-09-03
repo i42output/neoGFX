@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/app/app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
@@ -45,6 +46,8 @@ namespace neogfx::DesignStudio
             return element_group::App;
         else if constexpr (std::is_base_of_v<action, Type>)
             return element_group::Action;
+        else if constexpr (std::is_base_of_v<i_menu, Type>)
+            return element_group::Menu;
         else if constexpr (std::is_base_of_v<i_widget, Type>)
             return element_group::Widget;
         else if constexpr (std::is_base_of_v<i_layout, Type>)

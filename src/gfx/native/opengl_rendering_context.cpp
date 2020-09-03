@@ -238,12 +238,11 @@ namespace neogfx
 
     opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
-        iTarget{aTarget}, 
+        iTarget{ aTarget }, 
         iWidget{ nullptr },
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
-        iSrt{ iTarget },
         iSnapToPixel{ false },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
@@ -264,7 +263,6 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
-        iSrt{ iTarget },
         iSnapToPixel{ false },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
@@ -286,7 +284,6 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ aOther.iSubpixelRendering },
-        iSrt{ iTarget },
         iSnapToPixel{ false },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
@@ -417,6 +414,7 @@ namespace neogfx
         if (queue().empty())
             return;
 
+        scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());
         apply_scissor();
 

@@ -59,7 +59,7 @@ namespace neogfx
         void apply_gradient(i_gradient_shader& aShader) override;
         // i_graphics_context
     public:
-        ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const override;
+        neogfx::ping_pong_buffers ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const override;
     public:
         delta to_device_units(const delta& aValue) const override;
         size to_device_units(const size& aValue) const override;
@@ -202,6 +202,7 @@ namespace neogfx
         const i_device_metrics& device_metrics() const override;
     protected:
         bool attached() const;
+        bool active() const;
         i_rendering_context& native_context() const;
         // helpers
         // own
@@ -212,6 +213,7 @@ namespace neogfx
     private:
         type iType;
         const i_render_target& iRenderTarget;
+        mutable std::optional<scoped_render_target> iSrt;
         mutable std::unique_ptr<i_rendering_context> iNativeGraphicsContext;
         mutable font iDefaultFont;
         mutable point iOrigin;

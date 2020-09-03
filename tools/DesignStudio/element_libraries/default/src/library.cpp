@@ -185,6 +185,36 @@ namespace neogfx::DesignStudio
 
     i_texture const& default_element_library::element_icon(const neolib::i_string& aElementType) const
     {
+        auto& icons = iIcons[service<i_app>().current_style().palette().color(color_role::Text)];
+        auto text_colored = [](const texture& aSource) -> texture
+        {
+            texture result{ aSource.extents(), 1.0, ng::texture_sampling::Multisample };
+            graphics_context gc{ result };
+            gc.draw_texture(point{}, aSource, service<i_app>().current_style().palette().color(color_role::Text));
+            return result;
+        };
+        auto black_outline = [](const texture& aSource) -> texture
+        {
+            texture result{ aSource.extents(), 1.0, ng::texture_sampling::Multisample };
+            rect const r{ point{}, size{aSource.extents()} };
+            graphics_context gc{ result };
+            // todo: provide an easier way to blur any drawing primitive
+            {
+                auto pingPongBuffers = gc.ping_pong_buffers(aSource.extents());
+                {
+                    scoped_render_target srt{ *pingPongBuffers.buffer1 };
+                    pingPongBuffers.buffer1->draw_texture(point{}, aSource, color::Black);
+                }
+                {
+                    scoped_render_target srt{ *pingPongBuffers.buffer2 };
+                    pingPongBuffers.buffer2->blur(r, *pingPongBuffers.buffer1, r, 10.0, blurring_algorithm::Gaussian, 5.0, 1.0);
+                }
+                scoped_render_target srt{ gc };
+                gc.blit(r, *pingPongBuffers.buffer2, r);
+            }
+            gc.draw_texture(point{}, aSource);
+            return result;
+        };
         static std::map<std::string, std::function<void(texture&)>> sIconResources =
         {
             { 
@@ -200,14 +230,35 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "menu",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/menu.png" });
+                }
+            },
+            {
+                "table_view",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/table.png" });
+                }
+            },
+            {
+                "list_view",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/list.png" });
+                }
+            },
+            {
                 "vertical_layout",
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
                     aTexture = newTexture;
                 }
             },
@@ -217,9 +268,27 @@ namespace neogfx::DesignStudio
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue, 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    aTexture = newTexture;
+                }
+            },
+            {
+                "grid_layout",
+                [](texture& aTexture)
+                {
+                    texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
+                    graphics_context gc{ newTexture };
+                    gc.draw_rect(rect{ point{ 4.0, 4.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 4.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0 + 24.0 + 16.0, 4.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0 + 24.0 * 2 + 16.0 * 2, 4.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 4.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0 + 24.0 + 16.0, 4.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0 + 24.0 * 2 + 16.0 * 2, 4.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
                     aTexture = newTexture;
                 }
             }
@@ -227,12 +296,12 @@ namespace neogfx::DesignStudio
         auto existing = sIconResources.find(aElementType.to_std_string());
         if (existing != sIconResources.end())
         {
-            if (iIcons.find(aElementType.to_std_string()) == iIcons.end())
-                existing->second(iIcons[aElementType.to_std_string()]);
-            return iIcons[aElementType.to_std_string()];
+            if (icons.find(aElementType.to_std_string()) == icons.end())
+                existing->second(icons[aElementType.to_std_string()]);
+            return icons[aElementType.to_std_string()];
         }
-        if (iIcons.find("default") == iIcons.end())
-            iIcons["default"] = texture{ size{32.0, 32.0} };
-        return iIcons["default"];
+        if (icons.find("default") == icons.end())
+            icons["default"] = texture{ size{32.0, 32.0} };
+        return icons["default"];
     }
 }

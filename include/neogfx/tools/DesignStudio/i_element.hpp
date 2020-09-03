@@ -35,6 +35,7 @@ namespace neogfx::DesignStudio
         Unknown,
         Project,
         App,
+        Menu,
         Action,
         Widget,
         Layout
