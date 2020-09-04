@@ -88,6 +88,11 @@ namespace neogfx
 
             iModel = &aModel;
 
+            iSink += presentation_model().item_model_changed([this](const i_item_model&)
+            {
+                iCurrentIndex = std::nullopt;
+                reindex();
+            });
             iSink += presentation_model().item_removed([this](const item_presentation_model_index&)
             {
                 if (has_current_index())
