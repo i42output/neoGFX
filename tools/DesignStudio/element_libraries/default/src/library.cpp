@@ -253,6 +253,13 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "menu_bar",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/menubar.png" });
+                }
+            },
+            {
                 "menu",
                 [text_colored](texture& aTexture)
                 {

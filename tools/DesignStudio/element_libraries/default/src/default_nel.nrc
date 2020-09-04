@@ -15,6 +15,7 @@
         file: resources/list.png
         file: resources/table.png
         file: resources/tree.png
+        file: resources/menubar.png
         file: resources/menu.png
         file: resources/toolbar.png
         file: resources/tabpage.png
