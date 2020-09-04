@@ -20,5 +20,8 @@
         file: resources/toolbar.png
         file: resources/tabpage.png
         file: resources/tabpagecontainer.png
+        file: resources/lineedit.png
+        file: resources/textedit.png
+        file: resources/slider.png
     }
 }

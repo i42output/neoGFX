@@ -344,6 +344,41 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "line_edit",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
+                }
+            },
+            {
+                "text_field",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
+                }
+            },
+            {
+                "text_edit",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/textedit.png" });
+                }
+            },
+            {
+                "slider",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                }
+            },
+            {
+                "double_slider",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                }
+            },
+            {
                 "vertical_layout",
                 // todo: store the result of this render to a .png file asset
                 [](texture& aTexture)
