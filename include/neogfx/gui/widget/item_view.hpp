@@ -183,6 +183,7 @@ namespace neogfx
         bool iBeginningEdit;
         bool iEndingEdit;
         optional_item_presentation_model_index iHoverCell;
+        optional_item_presentation_model_index iClickedItem;
         optional_item_presentation_model_index iClickedCheckBox;
         optional_item_model_index iSavedModelIndex;
         basic_size<i_scrollbar::value_type> iOldPositionForScrollbarVisibility;

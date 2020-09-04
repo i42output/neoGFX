@@ -440,9 +440,10 @@ namespace neogfx
                 bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 select(*item, aKeyModifiers);
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
+                if (itemWasCurrent && itemIsCurrent)
+                    iClickedItem = item;
                 if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
-                    (presentation_model().cell_editable_when_focused(*item) || 
-                        (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item))))
+                    (presentation_model().cell_editable_when_focused(*item)))
                     edit(*item);
             }            
             if (capturing())
@@ -510,6 +511,14 @@ namespace neogfx
     void item_view::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
         framed_scrollable_widget::mouse_button_released(aButton, aPosition);
+        if (iClickedItem != std::nullopt)
+        {
+            auto item = item_at(aPosition);
+            bool doCheck = (item == iClickedItem && cell_rect(*item, cell_part::Text).contains(aPosition));
+            iClickedItem = std::nullopt;
+            if (doCheck && (presentation_model().cell_editable_on_input_event(*item)))
+                edit(*item);
+        }
         if (iClickedCheckBox != std::nullopt)
         {
             auto item = item_at(aPosition);

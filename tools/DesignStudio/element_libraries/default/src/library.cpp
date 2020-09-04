@@ -232,6 +232,13 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "toolbar",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/toolbar.png" });
+                }
+            },
+            {
                 "status_bar",
                 [text_colored](texture& aTexture)
                 {
@@ -250,6 +257,13 @@ namespace neogfx::DesignStudio
                 [text_colored](texture& aTexture)
                 {
                     aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/menu.png" });
+                }
+            },
+            {
+                "group_box",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/group.png" };
                 }
             },
             {
