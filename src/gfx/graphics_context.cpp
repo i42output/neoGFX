@@ -908,6 +908,7 @@ namespace neogfx
 
     void blur(const i_graphics_context& aDestination, const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
+        scoped_render_target srt{ aDestination };
         auto mesh = aDestination.logical_coordinates().is_gui_orientation() ?
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
         auto const& source = aSource.render_target();
