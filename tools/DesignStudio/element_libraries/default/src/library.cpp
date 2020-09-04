@@ -218,16 +218,31 @@ namespace neogfx::DesignStudio
         static std::map<std::string, std::function<void(texture&)>> sIconResources =
         {
             { 
-                "app", 
-                // todo: store the result of this render to a .png file asset
-                [](texture& aTexture)
+                "app",
+                [text_colored](texture& aTexture)
                 {
-                    texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
-                    graphics_context gc{ newTexture };
-                    gc.fill_circle(point{ 64.0, 64.0 }, 60.0, color::Gray);
-                    gc.fill_circle(point{ 64.0, 64.0 }, 50.0, color::Black);
-                    gc.fill_circle(point{ 64.0, 64.0 }, 40.0, color::Gray);
-                    aTexture = newTexture;
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" });
+                }
+            },
+            {
+                "window",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/window.png" });
+                }
+            },
+            {
+                "status_bar",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/statusbar.png" });
+                }
+            },
+            {
+                "widget",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/widget.png" });
                 }
             },
             {
@@ -270,6 +285,13 @@ namespace neogfx::DesignStudio
                 [text_colored](texture& aTexture)
                 {
                     aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/table.png" });
+                }
+            },
+            {
+                "tree_view",
+                [text_colored](texture& aTexture)
+                {
+                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/tree.png" });
                 }
             },
             {

@@ -2,6 +2,10 @@
     namespace: "neogfx::DesignStudio::default_nel"
 
     resource: {
+        file: resources/app.png
+        file: resources/widget.png
+        file: resources/window.png
+        file: resources/statusbar.png
         file: resources/button.png
         file: resources/check.png
         file: resources/radio.png
@@ -9,6 +13,7 @@
         file: resources/droplist.png
         file: resources/list.png
         file: resources/table.png
+        file: resources/tree.png
         file: resources/menu.png
         file: resources/tabpage.png
         file: resources/tabpagecontainer.png
