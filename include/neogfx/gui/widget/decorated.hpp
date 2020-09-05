@@ -107,6 +107,7 @@ namespace neogfx
         struct tracking
         {
             widget_part_e part;
+            size startSize;
             point trackFrom;
         };
     public:
@@ -368,7 +369,7 @@ namespace neogfx
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
                 {
-                    iTracking = tracking{ clickedPart.part, widget_type::to_window_coordinates(aPosition) };
+                    iTracking = tracking{ clickedPart.part, as_widget().extents(), widget_type::to_window_coordinates(aPosition) };
                     if (as_widget().has_root())
                         as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
                     update_tracking(aPosition);
@@ -441,35 +442,34 @@ namespace neogfx
             if (iTracking)
             {
                 auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
-                iTracking->trackFrom += delta;
-                auto const currentSize = as_widget().extents();
                 as_widget().set_fixed_size({}, false);
+                auto const currentSize = as_widget().extents();
                 optional_size newSize;
                 switch (iTracking->part)
                 {
                 case widget_part::BorderLeft:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy });
                     break;
                 case widget_part::BorderTopLeft:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy - delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTop:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx, currentSize.cy - delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTopRight:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy - delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy - delta.dy });
                     break;
                 case widget_part::BorderRight:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy });
                     break;
                 case widget_part::BorderBottomRight:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx + delta.dx, currentSize.cy + delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottom:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx, currentSize.cy + delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottomLeft:
-                    newSize = as_widget().minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy + delta.dy });
+                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy + delta.dy });
                     break;
                 }
                 if (widget_type::debug() == this)

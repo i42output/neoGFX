@@ -140,15 +140,18 @@ namespace neogfx
         void do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult) override;
         void do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) override;
     private:
+        shader_array<avec4u8>& samplers();
+        std::vector<gradient_sampler>& free_samplers();
+        std::vector<gradient_filter>& free_filters();
         void cleanup();
     private:
         gradient_list iGradients;
-        shader_array<avec4u8> iSamplers;
+        std::optional<shader_array<avec4u8>> iSamplers;
         sampler_map_t iAllocatedSamplers;
-        std::vector<gradient_sampler> iFreeSamplers;
+        std::optional<std::vector<gradient_sampler>> iFreeSamplers;
         std::deque<sampler_map_t::const_iterator> iSamplerQueue;
         filter_map_t iAllocatedFilters;
-        std::vector<gradient_filter> iFreeFilters;
+        std::optional<std::vector<gradient_filter>> iFreeFilters;
         std::deque<filter_map_t::const_iterator> iFilterQueue;
     };
 }

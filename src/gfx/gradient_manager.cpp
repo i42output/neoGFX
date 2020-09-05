@@ -534,13 +534,8 @@ namespace neogfx
         return aEntry.first->id();
     }
 
-    gradient_manager::gradient_manager() :
-        iSamplers{ size_u32{ gradient::MaxStops, MaxSamplers } }
+    gradient_manager::gradient_manager()
     {
-        for (uint32_t row = 0; row < MaxSamplers; ++row)
-            iFreeSamplers.emplace_back(iSamplers, row);
-        for (uint32_t filter = 0; filter < MaxFilters; ++filter)
-            iFreeFilters.emplace_back();
     }
 
     void gradient_manager::clear_gradients()
@@ -556,10 +551,10 @@ namespace neogfx
         auto allocated = iAllocatedSamplers.find(key);
         if (allocated == iAllocatedSamplers.end())
         {
-            if (!iFreeSamplers.empty())
+            if (!free_samplers().empty())
             {
-                allocated = iAllocatedSamplers.insert(std::make_pair(key, iFreeSamplers.back())).first;
-                iFreeSamplers.pop_back();
+                allocated = iAllocatedSamplers.insert(std::make_pair(key, free_samplers().back())).first;
+                free_samplers().pop_back();
             }
             else
             {
@@ -569,13 +564,13 @@ namespace neogfx
             }
             allocated->second.release_all();
             avec4u8 colorValues[i_gradient::MaxStops];
-            auto const cx = static_cast<uint32_t>(iSamplers.data().extents().cx);
+            auto const cx = static_cast<uint32_t>(samplers().data().extents().cx);
             for (uint32_t x = 0u; x < cx; ++x)
             {
                 auto const color = aGradient.at(x, 0u, cx - 1u);
                 colorValues[x] = avec4u8{ color.red(), color.green(), color.blue(), color.alpha() };
             }
-            iSamplers.data().set_pixels(rect{ basic_point<uint32_t>{ 0u, allocated->second.sampler_row() }, size_u32{ i_gradient::MaxStops, 1u } }, &colorValues[0]);
+            samplers().data().set_pixels(rect{ basic_point<uint32_t>{ 0u, allocated->second.sampler_row() }, size_u32{ i_gradient::MaxStops, 1u } }, &colorValues[0]);
         }
         auto existingQueueEntry = std::find(iSamplerQueue.begin(), iSamplerQueue.end(), allocated);
         if (existingQueueEntry != iSamplerQueue.end())
@@ -591,10 +586,10 @@ namespace neogfx
         auto allocated = iAllocatedFilters.find(key);
         if (allocated == iAllocatedFilters.end())
         {
-            if (!iFreeFilters.empty())
+            if (!free_filters().empty())
             {
-                allocated = iAllocatedFilters.insert(std::make_pair(key, iFreeFilters.back())).first;
-                iFreeFilters.pop_back();
+                allocated = iAllocatedFilters.insert(std::make_pair(key, free_filters().back())).first;
+                free_filters().pop_back();
             }
             else
             {
@@ -708,6 +703,35 @@ namespace neogfx
     void gradient_manager::do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColors, aDirection));
+    }
+
+    shader_array<avec4u8>& gradient_manager::samplers()
+    {
+        if (iSamplers == std::nullopt)
+            iSamplers.emplace(size_u32{ gradient::MaxStops, MaxSamplers });
+        return *iSamplers;
+    }
+
+    std::vector<gradient_sampler>& gradient_manager::free_samplers()
+    {
+        if (iFreeSamplers == std::nullopt)
+        {
+            iFreeSamplers.emplace();
+            for (uint32_t row = 0; row < MaxSamplers; ++row)
+                free_samplers().emplace_back(samplers(), row);
+        }
+        return *iFreeSamplers;
+    }
+
+    std::vector<gradient_filter>& gradient_manager::free_filters()
+    {
+        if (iFreeFilters == std::nullopt)
+        {
+            iFreeFilters.emplace();
+            for (uint32_t filter = 0; filter < MaxFilters; ++filter)
+                free_filters().emplace_back();
+        }
+        return *iFreeFilters;
     }
 
     void gradient_manager::cleanup()

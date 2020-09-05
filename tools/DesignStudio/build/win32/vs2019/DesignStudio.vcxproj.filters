@@ -110,5 +110,8 @@
     <ClInclude Include="..\..\..\src\resources\win32\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Tools_Debug\GeneratedFiles\DesignStudio.ui.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
