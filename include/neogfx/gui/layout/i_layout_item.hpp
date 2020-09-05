@@ -33,6 +33,7 @@ namespace neogfx
     struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::not_a_widget") {} };
     struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::no_parent_layout") {} };
     struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::no_layout_owner") {} };
+    struct no_layout_manager : std::logic_error { no_layout_manager() : std::logic_error("neogfx::no_layout_manager") {} };
     struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
     struct ancestor_layout_type_not_found : std::logic_error { ancestor_layout_type_not_found() : std::logic_error{ "neogfx::ancestor_layout_type_not_found" } {} };
 
@@ -62,6 +63,9 @@ namespace neogfx
         virtual const i_widget& layout_owner() const = 0;
         virtual i_widget& layout_owner() = 0;
         virtual void set_layout_owner(i_widget* aOwner) = 0;
+        virtual bool has_layout_manager() const = 0;
+        virtual const i_widget& layout_manager() const = 0;
+        virtual i_widget& layout_manager() = 0;
         virtual bool is_proxy() const = 0;
         virtual const i_layout_item_proxy& proxy_for_layout() const = 0;
         virtual i_layout_item_proxy& proxy_for_layout() = 0;

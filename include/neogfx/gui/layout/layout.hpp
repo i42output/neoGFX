@@ -38,6 +38,7 @@ namespace neogfx
 
     class layout : public layout_item<object<i_layout>>
     {
+        typedef layout_item<object<i_layout>> base_type;
     public:
         define_declared_event(LayoutCompleted, layout_completed)
         define_declared_event(AlignmentChanged, alignment_changed)
@@ -113,9 +114,7 @@ namespace neogfx
         bool high_dpi() const override;
         dimension dpi_scale_factor() const override;
     public:
-        bool has_padding() const override;
         neogfx::padding padding() const override;
-        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
     public:
         bool has_spacing() const override;
         size spacing() const override;
@@ -138,22 +137,9 @@ namespace neogfx
         void set_position(const point& aPosition) override;
         size extents() const override;
         void set_extents(const size& aExtents) override;
-        bool has_size_policy() const override;
         neogfx::size_policy size_policy() const override;
-        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        using i_layout::set_size_policy;
-        bool has_weight() const override;
-        size weight() const override;
-        void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
-        bool has_minimum_size() const override;
-        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
         void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
-        bool has_maximum_size() const override;
-        size maximum_size(const optional_size& aAvailableSpace = {}) const override;
         void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
-        bool has_fixed_size() const override;
-        size fixed_size() const override;
-        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
@@ -187,19 +173,11 @@ namespace neogfx
     private:
         i_layout* iParent;
         mutable i_widget* iOwner;
-        optional_padding iPadding;
         optional_size iSpacing;
         bool iAlwaysUseSpacing;
         neogfx::alignment iAlignment;
         bool iIgnoreVisibility;
         bool iEnabled;
-        point iPosition;
-        size iExtents;
-        optional_size_policy iSizePolicy;
-        optional_size iWeight;
-        optional_size iMinimumSize;
-        optional_size iMaximumSize;
-        optional_size iFixedSize;
         item_list iItems;
         bool iLayoutStarted;
         bool iInvalidated;

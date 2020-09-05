@@ -162,6 +162,23 @@ namespace neogfx
             subject().set_layout_owner(aOwner);
     }
 
+    bool layout_item_proxy::has_layout_manager() const
+    {
+        return subject().has_layout_manager();
+    }
+
+    const i_widget& layout_item_proxy::layout_manager() const
+    {
+        if (has_layout_manager())
+            return subject().layout_manager();
+        throw no_layout_manager();
+    }
+
+    i_widget& layout_item_proxy::layout_manager()
+    {
+        return const_cast<i_widget&>(to_const(*this).layout_manager());
+    }
+
     bool layout_item_proxy::is_proxy() const
     {
         return true;

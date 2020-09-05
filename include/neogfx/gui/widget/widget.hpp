@@ -32,6 +32,7 @@ namespace neogfx
 {
     class widget : public layout_item<object<i_widget>>
     {
+        typedef layout_item<object<i_widget>> base_type;
     public:
         define_declared_event(VisibilityChanged, visibility_changed)
         define_declared_event(PositionChanged, position_changed)
@@ -94,9 +95,6 @@ namespace neogfx
         const i_layout& layout() const override;
         i_layout& layout() override;
         bool can_defer_layout() const override;
-        bool has_layout_manager() const override;
-        const i_widget& layout_manager() const override;
-        i_widget& layout_manager() override;
         bool is_managing_layout() const override;
         void layout_items(bool aDefer = false) override;
         void layout_items_started() override;
@@ -115,24 +113,10 @@ namespace neogfx
         void set_position(const point& aPosition) override;
         size extents() const override;
         void set_extents(const size& aSize) override;
-        bool has_size_policy() const override;
         neogfx::size_policy size_policy() const override;
-        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        bool has_weight() const override;
-        size weight() const override;
-        void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
-        bool has_minimum_size() const override;
         size minimum_size(const optional_size& aAvailableSpace = {}) const override;
-        void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
-        bool has_maximum_size() const override;
         size maximum_size(const optional_size& aAvailableSpace = {}) const override;
-        void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
-        bool has_fixed_size() const override;
-        size fixed_size() const override;
-        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
-        bool has_padding() const override;
         neogfx::padding padding() const override;
-        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
         // i_skinnable_item
     public:
         bool is_widget() const override;
@@ -263,11 +247,11 @@ namespace neogfx
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
         // helpers
     public:
-        using i_widget::set_size_policy;
-        using i_widget::show;
-        using i_widget::hide;
-        using i_widget::enable;
-        using i_widget::disable;
+        using base_type::set_size_policy;
+        using base_type::show;
+        using base_type::hide;
+        using base_type::enable;
+        using base_type::disable;
         // state
     private:
         bool iSingular;

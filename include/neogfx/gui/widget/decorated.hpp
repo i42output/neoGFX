@@ -368,7 +368,7 @@ namespace neogfx
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
                 {
-                    iTracking = tracking{ clickedPart.part, aPosition };
+                    iTracking = tracking{ clickedPart.part, widget_type::to_window_coordinates(aPosition) };
                     if (as_widget().has_root())
                         as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
                     update_tracking(aPosition);
@@ -426,6 +426,7 @@ namespace neogfx
                 iDockLayout.emplace(has_layout(standard_layout::Toolbar) ? 
                     toolbar_layout(layout_position::Center) : non_client_layout());
                 iDockLayout->set_padding(neogfx::padding{});
+//                iDockLayout->center().set_minimum_size(size{ 16.0, 16.0 }); // to prevent docks from sticking together.
             }
             if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
             {
@@ -439,7 +440,8 @@ namespace neogfx
         {
             if (iTracking)
             {
-                auto const delta = aPosition - iTracking->trackFrom;
+                auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
+                iTracking->trackFrom += delta;
                 auto const currentSize = as_widget().extents();
                 as_widget().set_fixed_size({}, false);
                 optional_size newSize;
@@ -470,6 +472,8 @@ namespace neogfx
                     newSize = as_widget().minimum_size().max(size{ currentSize.cx - delta.dx, currentSize.cy + delta.dy });
                     break;
                 }
+                if (widget_type::debug() == this)
+                    std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
                 as_widget().set_fixed_size(newSize, false);
                 if (as_widget().has_layout_manager())
                 {

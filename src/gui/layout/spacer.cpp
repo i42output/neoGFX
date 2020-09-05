@@ -155,7 +155,7 @@ namespace neogfx
 
     size spacer::extents() const
     {
-        return units_converter(*this).from_device_units(iExtents);
+        return units_converter(*this).from_device_units(Size);
     }
 
     bool spacer::high_dpi() const
@@ -175,142 +175,29 @@ namespace neogfx
 
     point spacer::position() const
     {
-        return units_converter(*this).from_device_units(iPosition);
+        return units_converter(*this).from_device_units(Position);
     }
 
     void spacer::set_position(const point& aPosition)
     {
-        iPosition = units_converter(*this).to_device_units(aPosition);
+        Position = units_converter(*this).to_device_units(aPosition);
     }
 
     void spacer::set_extents(const size& aExtents)
     {
-        iExtents = units_converter(*this).to_device_units(aExtents);
-    }
-
-    bool spacer::has_size_policy() const
-    {
-        return iSizePolicy != std::nullopt;
+        Size = units_converter(*this).to_device_units(aExtents);
     }
 
     size_policy spacer::size_policy() const
     {
         if (has_size_policy())
-            return *iSizePolicy;
+            return *SizePolicy;
         neogfx::size_policy result{size_constraint::Minimum};
         if ((iExpansionPolicy & neogfx::expansion_policy::ExpandHorizontally) == neogfx::expansion_policy::ExpandHorizontally)
             result.set_horizontal_size_policy(size_constraint::Expanding);
         if ((iExpansionPolicy & neogfx::expansion_policy::ExpandVertically) == neogfx::expansion_policy::ExpandVertically)
             result.set_vertical_size_policy(size_constraint::Expanding);
         return result;
-    }
-
-    void spacer::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-    {
-        if (iSizePolicy != aSizePolicy)
-        {
-            iSizePolicy = aSizePolicy;
-            if (has_layout_owner() && aUpdateLayout)
-                layout_owner().layout_root(true);
-        }
-    }
-
-    bool spacer::has_weight() const
-    {
-        return iWeight != std::nullopt;
-    }
-
-    size spacer::weight() const
-    {
-        if (has_weight())
-            return *iWeight;
-        else
-            return size{ 1.0 };
-    }
-
-    void spacer::set_weight(const optional_size& aWeight, bool aUpdateLayout)
-    {
-        if (iWeight != aWeight)
-        {
-            iWeight = aWeight;
-            if (has_layout_owner() && aUpdateLayout)
-                layout_owner().layout_root(true);
-        }
-    }
-
-    bool spacer::has_minimum_size() const
-    {
-        return has_fixed_size() || iMinimumSize != std::nullopt;
-    }
-
-    size spacer::minimum_size(const optional_size&) const
-    {
-        if (has_fixed_size())
-            return fixed_size();
-        else if (has_minimum_size())
-            return units_converter(*this).from_device_units(*iMinimumSize);
-        else
-            return size{};
-    }
-
-    void spacer::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
-    {
-        optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
-        if (iMinimumSize != newMinimumSize)
-        {
-            iMinimumSize = newMinimumSize;
-            if (has_layout_owner() && aUpdateLayout)
-                layout_owner().layout_root(true);
-        }
-    }
-
-    bool spacer::has_maximum_size() const
-    {
-        return has_fixed_size() || iMaximumSize != std::nullopt;
-    }
-
-    size spacer::maximum_size(const optional_size&) const
-    {
-        if (has_fixed_size())
-            return fixed_size();
-        else if (has_maximum_size())
-            return units_converter(*this).from_device_units(*iMaximumSize);
-        else
-            return size::max_size();
-    }
-
-    void spacer::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
-    {
-        optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
-        if (iMaximumSize != newMaximumSize)
-        {
-            iMaximumSize = newMaximumSize;
-            if (has_layout_owner() && aUpdateLayout)
-                layout_owner().layout_root(true);
-        }
-    }
-
-    bool spacer::has_fixed_size() const
-    {
-        return iFixedSize != std::nullopt;
-    }
-
-    size spacer::fixed_size() const
-    {
-        if (has_fixed_size())
-            return units_converter(*this).from_device_units(*iFixedSize);
-        throw no_fixed_size();
-    }
-
-    void spacer::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-    {
-        optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
-        if (iFixedSize != newFixedSize)
-        {
-            iFixedSize = newFixedSize;
-            if (has_layout_owner() && aUpdateLayout)
-                layout_owner().layout_root(true);
-        }
     }
 
     bool spacer::has_padding() const

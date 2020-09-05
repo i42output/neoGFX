@@ -226,7 +226,7 @@ namespace neogfx::nrc
             if (aName == "weight")
                 iWeight.emplace(get_scalar<double>(aData));
             else if (aName == "size_policy")
-                iSizePolicy = get_enum<size_constraint>(aData);
+                SizePolicy = get_enum<size_constraint>(aData);
             else if (aName == "alignment")
                 iAlignment = get_enum<alignment>(aData);
             else if (aName == "size")
@@ -290,7 +290,7 @@ namespace neogfx::nrc
                 return;
             }
             if (aName == "size_policy" && !aArrayData.empty())
-                iSizePolicy = size_policy::from_string(
+                SizePolicy = size_policy::from_string(
                     aArrayData[0u].get<neolib::i_string>().to_std_string(),
                     aArrayData[std::min<std::size_t>(1u, aArrayData.size() - 1u)].get<neolib::i_string>().to_std_string());
             else if (aName == "alignment")
@@ -373,8 +373,8 @@ namespace neogfx::nrc
         }
         void emit_body() const override
         {
-            if (iSizePolicy)
-                emit("   %1%.set_size_policy(%2%);\n", id(), *iSizePolicy);
+            if (SizePolicy)
+                emit("   %1%.set_size_policy(%2%);\n", id(), *SizePolicy);
             if (iAlignment)
                 emit("   %1%.set_alignment(%2%);\n", id(), enum_to_string("alignment", *iAlignment));
             if (iFixedSize)
@@ -544,7 +544,7 @@ namespace neogfx::nrc
         children_t iChildren;
         neolib::set<neolib::string> iRefs;
         std::optional<widget_type> iWidgetType;
-        std::optional<size_policy> iSizePolicy;
+        std::optional<size_policy> SizePolicy;
         std::optional<alignment> iAlignment;
         std::optional<basic_size<length>> iFixedSize;
         std::optional<basic_size<length>> iMinimumSize;

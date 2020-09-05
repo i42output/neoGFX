@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <iostream>
 #include <neolib/core/i_enum.hpp>
 #include <neogfx/core/units.hpp>
 
@@ -191,7 +192,22 @@ namespace neogfx
         optional_size iAspectRatio;
     };
 
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const size_policy& aPolicy)
+    {
+        aStream << "{" << aPolicy.horizontal_size_policy() << " " << aPolicy.vertical_size_policy() << " " << aPolicy.aspect_ratio() << "}";
+        return aStream;
+    }
+
     typedef std::optional<size_policy> optional_size_policy;
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const optional_size_policy& aPolicy)
+    {
+        if (aPolicy != std::nullopt)
+            return aStream << *aPolicy;
+        return aStream << "{ nullopt }";
+    }
 
     class i_geometry : public i_units_context
     {

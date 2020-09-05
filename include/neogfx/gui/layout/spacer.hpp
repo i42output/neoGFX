@@ -69,22 +69,7 @@ namespace neogfx
         void set_position(const point& aPosition) override;
         size extents() const override;
         void set_extents(const size& aExtents) override;
-        bool has_size_policy() const override;
         neogfx::size_policy size_policy() const override;
-        using i_geometry::set_size_policy;
-        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        bool has_weight() const override;
-        size weight() const override;
-        void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
-        bool has_minimum_size() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
-        bool has_maximum_size() const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
-        bool has_fixed_size() const override;
-        size fixed_size() const override;
-        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
         neogfx::padding padding() const override;
         bool has_padding() const override;
@@ -98,15 +83,7 @@ namespace neogfx
         bool visible() const override;
     private:
         i_layout* iParentLayout;
-        point iPosition;
-        size iExtents;
-        optional_size_policy iSizePolicy;
-        optional_size iMinimumSize;
-        optional_size iMaximumSize;
-        optional_size iFixedSize;
-        optional_padding iPadding;
         neogfx::expansion_policy iExpansionPolicy;
-        optional_size iWeight;
     };
 
     class horizontal_spacer : public spacer

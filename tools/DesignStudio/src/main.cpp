@@ -87,8 +87,10 @@ int main(int argc, char* argv[])
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right };
 
+        auto toolbox = ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame);
         auto objects = ng::make_dockable<ng::table_view>("Objects"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
         auto properties = ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        toolbox.dock(leftDock);
         objects.dock(rightDock);
         properties.dock(rightDock);
 

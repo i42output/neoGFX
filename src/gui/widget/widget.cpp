@@ -456,35 +456,6 @@ namespace neogfx
         return false;
     }
 
-    bool widget::has_layout_manager() const
-    {
-        const i_widget* w = this;
-        while (w->has_parent())
-        {
-            w = &w->parent();
-            if (w->is_managing_layout())
-                return true;
-        }
-        return false;
-    }
-
-    const i_widget& widget::layout_manager() const
-    {
-        const i_widget* w = this;
-        while (w->has_parent())
-        {
-            w = &w->parent();
-            if (w->is_managing_layout())
-                return *w;
-        }
-        throw no_managing_layout();
-    }
-
-    i_widget& widget::layout_manager()
-    {
-        return const_cast<i_widget&>(to_const(*this).layout_manager());
-    }
-
     bool widget::is_managing_layout() const
     {
         return false;
@@ -840,54 +811,12 @@ namespace neogfx
         return part(aPosition);
     }
 
-    bool widget::has_size_policy() const
-    {
-        return SizePolicy != std::nullopt;
-    }
-
     size_policy widget::size_policy() const
     {
         if (has_size_policy())
             return *SizePolicy;
         else
             return size_constraint::Expanding;
-    }
-
-    void widget::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-    {
-        if (SizePolicy != aSizePolicy)
-        {
-            SizePolicy = aSizePolicy;
-            if (aUpdateLayout && has_layout_manager())
-                layout_manager().layout_items(true);
-        }
-    }
-
-    bool widget::has_weight() const
-    {
-        return Weight != std::nullopt;
-    }
-
-    size widget::weight() const
-    {
-        if (has_weight())
-            return *Weight;
-        return size{ 1.0 };
-    }
-
-    void widget::set_weight(const optional_size& aWeight, bool aUpdateLayout)
-    {
-        if (Weight != aWeight)
-        {
-            Weight.assign(aWeight, aUpdateLayout);
-            if (aUpdateLayout && has_layout_manager())
-                layout_manager().layout_items(true);
-        }
-    }
-
-    bool widget::has_minimum_size() const
-    {
-        return has_fixed_size() || MinimumSize != std::nullopt;
     }
 
     size widget::minimum_size(const optional_size& aAvailableSpace) const
@@ -910,24 +839,6 @@ namespace neogfx
         if (debug() == this)
             std::cerr << "widget::minimum_size(...) --> " << result << std::endl;
         return result;
-    }
-
-    void widget::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
-    {
-        optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
-        if (MinimumSize != newMinimumSize)
-        {
-            if (debug() == this)
-                std::cerr << "widget::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
-            MinimumSize.assign(newMinimumSize, aUpdateLayout);
-            if (aUpdateLayout && has_layout_manager())
-                layout_manager().layout_items(true);
-        }
-    }
-
-    bool widget::has_maximum_size() const
-    {
-        return has_fixed_size() || MaximumSize != std::nullopt;
     }
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
@@ -958,64 +869,10 @@ namespace neogfx
         return result;
     }
 
-    void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
-    {
-        optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
-        if (MaximumSize != newMaximumSize)
-        {
-            if (debug() == this)
-                std::cerr << "widget::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
-            MaximumSize.assign(newMaximumSize, aUpdateLayout);
-            if (aUpdateLayout && has_layout_manager())
-                layout_manager().layout_items(true);
-        }
-    }
-
-    bool widget::has_fixed_size() const
-    {
-        return FixedSize != std::nullopt;
-    }
-
-    size widget::fixed_size() const
-    {
-        if (has_fixed_size())
-            return units_converter(*this).from_device_units(*FixedSize);
-        throw no_fixed_size();
-    }
-
-    void widget::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-    {
-        optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
-        if (FixedSize != newFixedSize)
-        {
-            if (debug() == this)
-                std::cerr << "widget::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << std::endl;
-            FixedSize.assign(newFixedSize, aUpdateLayout);
-            if (aUpdateLayout && has_layout_manager())
-                layout_manager().layout_items(true);
-        }
-    }
-
-    bool widget::has_padding() const
-    {
-        return Padding != std::nullopt;
-    }
-
     padding widget::padding() const
     {
         auto const& adjustedPadding = (has_padding() ? *Padding : service<i_app>().current_style().padding(is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
         return units_converter(*this).from_device_units(adjustedPadding);
-    }
-
-    void widget::set_padding(const optional_padding& aPadding, bool aUpdateLayout)
-    {
-        auto newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding{});
-        if (Padding != newPadding)
-        {
-            Padding = newPadding;
-            if (aUpdateLayout && has_layout_manager())
-                layout_manager().layout_items(true);
-        }
     }
 
     void widget::layout_as(const point& aPosition, const size& aSize)

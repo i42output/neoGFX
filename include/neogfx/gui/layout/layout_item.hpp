@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable.hpp>
 
@@ -43,6 +44,176 @@ namespace neogfx
             base_type::set_destroying();
         }
         // implementation
+    public:
+        bool has_layout_manager() const override
+        {
+            if (!as_layout_item().has_layout_owner())
+                return false;
+            const i_widget* w = &as_layout_item().layout_owner();
+            if (w->is_managing_layout())
+                return true;
+            while (w->has_parent())
+            {
+                w = &w->parent();
+                if (w->is_managing_layout())
+                    return true;
+            };
+            return false;
+        }
+        const i_widget& layout_manager() const override
+        {
+            const i_widget* w = &as_layout_item().layout_owner();
+            if (w->is_managing_layout())
+                return *w;
+            while (w->has_parent())
+            {
+                w = &w->parent();
+                if (w->is_managing_layout())
+                    return *w;
+            };
+            throw no_layout_manager();
+        }
+        i_widget& layout_manager() override
+        {
+            return const_cast<i_widget&>(to_const(*this).layout_manager());
+        }
+    public:
+        bool has_size_policy() const override
+        {
+            return SizePolicy != std::nullopt;
+        }
+        using i_geometry::set_size_policy;
+        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override
+        {
+            if (SizePolicy != aSizePolicy)
+            {
+                if (base_type::debug() == this)
+                    std::cerr << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << std::endl;
+                SizePolicy = aSizePolicy;
+                if (as_layout_item().has_parent_layout())
+                    as_layout_item().parent_layout().invalidate();
+                if (aUpdateLayout && as_layout_item().has_layout_manager())
+                    as_layout_item().layout_manager().layout_items(true);
+            }
+        }
+        bool has_weight() const override
+        {
+            return Weight != std::nullopt;
+        }
+        size weight() const override
+        {
+            if (has_weight())
+                return *Weight;
+            return size{ 1.0 };
+        }
+        void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) override
+        {
+            if (Weight != aWeight)
+            {
+                if (base_type::debug() == this)
+                    std::cerr << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << std::endl;
+                Weight.assign(aWeight, aUpdateLayout);
+                if (as_layout_item().has_parent_layout())
+                    as_layout_item().parent_layout().invalidate();
+                if (aUpdateLayout && as_layout_item().has_layout_manager())
+                    as_layout_item().layout_manager().layout_items(true);
+            }
+        }
+        bool has_minimum_size() const override
+        {
+            return as_layout_item().has_fixed_size() || MinimumSize != std::nullopt;
+        }
+        size minimum_size(const optional_size&) const override
+        {
+            if (as_layout_item().has_fixed_size())
+                return fixed_size();
+            else if (has_minimum_size())
+                return units_converter(*this).from_device_units(*MinimumSize);
+            else
+                return size{};
+        }
+        void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override
+        {
+            optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+            if (MinimumSize != newMinimumSize)
+            {
+                if (base_type::debug() == this)
+                    std::cerr << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
+                MinimumSize.assign(newMinimumSize, aUpdateLayout);
+                if (as_layout_item().has_parent_layout())
+                    as_layout_item().parent_layout().invalidate();
+                if (aUpdateLayout && has_layout_manager())
+                    layout_manager().layout_items(true);
+            }
+        }
+        bool has_maximum_size() const override
+        {
+            return as_layout_item().has_fixed_size() || MaximumSize != std::nullopt;
+        }
+        size maximum_size(const optional_size&) const override
+        {
+            if (has_fixed_size())
+                return fixed_size();
+            else if (has_maximum_size())
+                return units_converter(*this).from_device_units(*MaximumSize);
+            else
+                return size::max_size();
+        }
+        void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override
+        {
+            optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+            if (MaximumSize != newMaximumSize)
+            {
+                if (base_type::debug() == this)
+                    std::cerr << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
+                MaximumSize.assign(newMaximumSize, aUpdateLayout);
+                if (as_layout_item().has_parent_layout())
+                    as_layout_item().parent_layout().invalidate();
+                if (aUpdateLayout && has_layout_manager())
+                    layout_manager().layout_items(true);
+            }
+        }
+        bool has_fixed_size() const override
+        {
+            return FixedSize != std::nullopt;
+        }
+        size fixed_size() const override
+        {
+            if (has_fixed_size())
+                return units_converter(*this).from_device_units(*FixedSize);
+            throw base_type::no_fixed_size();
+        }
+        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true)
+        {
+            optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
+            if (FixedSize != newFixedSize)
+            {
+                if (base_type::debug() == this)
+                    std::cerr << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << std::endl;
+                FixedSize.assign(newFixedSize, aUpdateLayout);
+                if (as_layout_item().has_parent_layout())
+                    as_layout_item().parent_layout().invalidate();
+                if (aUpdateLayout && has_layout_manager())
+                    layout_manager().layout_items(true);
+            }
+        }
+    public:
+        bool has_padding() const override
+        {
+            return Padding != std::nullopt;
+        }
+        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override
+        {
+            auto newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding{});
+            if (Padding != newPadding)
+            {
+                Padding = newPadding;
+                if (as_layout_item().has_parent_layout())
+                    as_layout_item().parent_layout().invalidate();
+                if (aUpdateLayout && has_layout_manager())
+                    layout_manager().layout_items(true);
+            }
+        }
     public:
         void fix_weightings() override
         {
@@ -71,7 +242,7 @@ namespace neogfx
                 item.set_weight({});
             }
         }
-        void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
+        void anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
             auto& self = static_cast<i_layout_item&>(*this);
@@ -79,6 +250,15 @@ namespace neogfx
                 self.as_layout().invalidate();
             else if (self.has_parent_layout())
                 self.parent_layout().invalidate();
+        }
+    private:
+        i_layout_item const& as_layout_item() const
+        {
+            return *this;
+        }
+        i_layout_item& as_layout_item()
+        {
+            return *this;
         }
         // properties / anchors
     public:

@@ -68,7 +68,6 @@ namespace neogfx
         struct widget_cannot_capture : std::logic_error { widget_cannot_capture() : std::logic_error("neogfx::i_widget::widget_cannot_capture") {} };
         struct widget_not_focused : std::logic_error { widget_not_focused() : std::logic_error("neogfx::i_widget::widget_not_focused") {} };
         struct widget_cannot_defer_layout : std::logic_error { widget_cannot_defer_layout() : std::logic_error("neogfx::i_widget::widget_cannot_defer_layout") {} };
-        struct no_managing_layout : std::logic_error { no_managing_layout() : std::logic_error("neogfx::i_widget::no_managing_layout") {} };
         struct layout_already_set : std::logic_error { layout_already_set() : std::logic_error("neogfx::i_widget::layout_already_set") {} };
         struct no_layout : std::logic_error { no_layout() : std::logic_error("neogfx::i_widget::no_layout") {} };
     public:

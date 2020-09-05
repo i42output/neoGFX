@@ -43,8 +43,6 @@ namespace neogfx
         iAlignment{ aAlignment },
         iIgnoreVisibility{ false },
         iEnabled{ false },
-        iMinimumSize{},
-        iMaximumSize{},
         iLayoutStarted{ false },
         iInvalidated{ false }
     {
@@ -58,8 +56,6 @@ namespace neogfx
         iAlignment{ aAlignment },
         iIgnoreVisibility{ false },
         iEnabled{ false },
-        iMinimumSize{},
-        iMaximumSize{},
         iLayoutStarted{ false },
         iInvalidated{ false }
     {
@@ -70,16 +66,14 @@ namespace neogfx
     layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
         iParent{ nullptr },
         iOwner{ aParent.has_layout_owner() ? &aParent.layout_owner() : nullptr },
-        iPadding{ neogfx::padding{} },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iIgnoreVisibility{ false },
         iEnabled{ false },
-        iMinimumSize{},
-        iMaximumSize{},
         iLayoutStarted{ false },
         iInvalidated{ false }
     {
+        Padding = neogfx::padding{};
         aParent.add(*this);
         enable();
     }
@@ -367,26 +361,10 @@ namespace neogfx
             service<i_surface_manager>().display().metrics().ppi());
     }
 
-    bool layout::has_padding() const
-    {
-        return iPadding != std::nullopt;
-    }
-
     padding layout::padding() const
     {
-        auto const& adjustedPadding = (has_padding() ? *iPadding : service<i_app>().current_style().padding(padding_role::Layout) * dpi_scale_factor());
+        auto const& adjustedPadding = (has_padding() ? *Padding : service<i_app>().current_style().padding(padding_role::Layout) * dpi_scale_factor());
         return units_converter(*this).from_device_units(adjustedPadding);
-    }
-
-    void layout::set_padding(const optional_padding& aPadding, bool aUpdateLayout)
-    {
-        optional_padding newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding());
-        if (iPadding != newPadding)
-        {
-            iPadding = newPadding;
-            if (aUpdateLayout)
-                invalidate();
-        }
     }
 
     bool layout::has_spacing() const
@@ -522,33 +500,28 @@ namespace neogfx
 
     point layout::position() const
     {
-        return units_converter(*this).from_device_units(iPosition);
+        return units_converter(*this).from_device_units(Position);
     }
     
     void layout::set_position(const point& aPosition)
     {
-        iPosition = units_converter(*this).to_device_units(aPosition);
+        Position = units_converter(*this).to_device_units(aPosition);
     }
 
     size layout::extents() const
     {
-        return units_converter(*this).from_device_units(iExtents);
+        return units_converter(*this).from_device_units(Size);
     }
 
     void layout::set_extents(const size& aExtents)
     {
-        iExtents = units_converter(*this).to_device_units(aExtents);
-    }
-
-    bool layout::has_size_policy() const
-    {
-        return iSizePolicy != std::nullopt;
+        Size = units_converter(*this).to_device_units(aExtents);
     }
 
     size_policy layout::size_policy() const
     {
         if (has_size_policy())
-            return *iSizePolicy;
+            return *SizePolicy;
         neogfx::size_policy result{ size_constraint::Minimum, size_constraint::Minimum };
         for (auto& i : items())
         {
@@ -566,119 +539,27 @@ namespace neogfx
         return result;
     }
 
-    void layout::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-    {
-        if (iSizePolicy != aSizePolicy)
-        {
-            iSizePolicy = aSizePolicy;
-            if (aUpdateLayout)
-                invalidate();
-        }
-    }
-
-    bool layout::has_weight() const
-    {
-        return iWeight != std::nullopt;
-    }
-
-    size layout::weight() const
-    {
-        if (has_weight())
-            return *iWeight;
-        else
-            return size{ 1.0 };
-    }
-
-    void layout::set_weight(const optional_size& aWeight, bool aUpdateLayout)
-    {
-        if (iWeight != aWeight)
-        {
-            iWeight = aWeight;
-            if (aUpdateLayout)
-                invalidate();
-        }
-    }
-
-    bool layout::has_minimum_size() const
-    {
-        return has_fixed_size() || iMinimumSize != std::nullopt;
-    }
-
-    size layout::minimum_size(const optional_size& aAvailableSpace) const
-    {
-        size result;
-        if (has_fixed_size())
-            result = fixed_size();
-        else if (has_minimum_size())
-            result = units_converter(*this).from_device_units(*iMinimumSize);
-        if (debug() == this)
-            std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
-        return result;
-    }
-
     void layout::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
     {
         optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
-        if (iMinimumSize != newMinimumSize)
+        if (MinimumSize != newMinimumSize)
         {
             if (debug() == this)
                 std::cerr << typeid(*this).name() << "::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
-            iMinimumSize = newMinimumSize;
+            MinimumSize = newMinimumSize;
             if (aUpdateLayout)
                 invalidate();
         }
-    }
-
-    bool layout::has_maximum_size() const
-    {
-        return has_fixed_size() || iMaximumSize != std::nullopt;
-    }
-
-    size layout::maximum_size(const optional_size& aAvailableSpace) const
-    {
-        size result = size::max_size();
-        if (has_fixed_size())
-            result = fixed_size();
-        else if (has_maximum_size())
-            result = units_converter(*this).from_device_units(*iMaximumSize);
-        if (debug() == this)
-            std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
-        return result;
     }
 
     void layout::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
     {
         optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
-        if (iMaximumSize != newMaximumSize)
+        if (MaximumSize != newMaximumSize)
         {
             if (debug() == this)
                 std::cerr << typeid(*this).name() << "::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
-            iMaximumSize = newMaximumSize;
-            if (aUpdateLayout)
-                invalidate();
-        }
-    }
-
-    bool layout::has_fixed_size() const
-    {
-        return iFixedSize != std::nullopt;
-    }
-
-    size layout::fixed_size() const
-    {
-        if (has_fixed_size())
-            return units_converter(*this).from_device_units(*iFixedSize);
-        throw no_fixed_size();
-    }
-
-    void layout::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-    {
-        optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
-        if (iFixedSize != newFixedSize)
-        {
-            if (debug() == this)
-                std::cerr << typeid(*this).name() << "::set_maximum_size(" << newFixedSize << ", " << aUpdateLayout << ")" << std::endl;
-            iFixedSize = newFixedSize;
+            MaximumSize = newMaximumSize;
             if (aUpdateLayout)
                 invalidate();
         }
