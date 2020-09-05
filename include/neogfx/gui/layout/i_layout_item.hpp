@@ -36,6 +36,7 @@ namespace neogfx
     struct no_layout_manager : std::logic_error { no_layout_manager() : std::logic_error("neogfx::no_layout_manager") {} };
     struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
     struct ancestor_layout_type_not_found : std::logic_error { ancestor_layout_type_not_found() : std::logic_error{ "neogfx::ancestor_layout_type_not_found" } {} };
+    struct cannot_fix_weightings : std::logic_error { cannot_fix_weightings() : std::logic_error{ "neogfx::cannot_fix_weightings" } {} };
 
     class i_layout_item : public i_geometry, public i_anchorable
     {

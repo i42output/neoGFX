@@ -133,7 +133,7 @@ namespace neogfx
     size layout::do_minimum_size(const optional_size& aAvailableSpace) const
     {
         if (debug() == this)
-            std::cerr << "layout(" << this << ")::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
+            std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
         if (itemsVisible != 0)
@@ -163,7 +163,7 @@ namespace neogfx
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
         }
         if (debug() == this)
-            std::cerr << "layout(" << this << ")::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+            std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
@@ -171,7 +171,7 @@ namespace neogfx
     size layout::do_maximum_size(const optional_size& aAvailableSpace) const
     {
         if (debug() == this)
-            std::cerr << "layout(" << this << ")::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
+            std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
         {
             size result;
@@ -225,7 +225,7 @@ namespace neogfx
             AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum))
             AxisPolicy::cy(result) = size::max_dimension();
         if (debug() == this)
-            std::cerr << "layout(" << this << ")::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+            std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
@@ -233,7 +233,7 @@ namespace neogfx
     void layout::do_layout_items(const point& aPosition, const size& aSize)
     {
         if (debug() == this)
-            std::cerr << "layout::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+            std::cerr << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
         set_position(aPosition);
         set_extents(aSize);
         auto itemsVisibleIncludingSpacers = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
@@ -328,7 +328,7 @@ namespace neogfx
             if (!item.visible() && !ignore_visibility())
                 continue;
             if (debug() == &item.subject())
-                std::cerr << "Consideration by layout::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                std::cerr << "Consideration by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
             auto itemMinSize = item.minimum_size(availableSize);
             auto itemMaxSize = item.maximum_size(availableSize);
             size s;

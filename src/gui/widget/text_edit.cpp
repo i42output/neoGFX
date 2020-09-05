@@ -293,7 +293,21 @@ namespace neogfx
     {
         auto result = framed_scrollable_widget::padding();
         if (default_style().text_effect())
-            result += default_style().text_effect()->width();
+        {
+            scalar scale = 1.0;
+            switch (default_style().text_effect()->type())
+            {
+            case text_effect_type::None:
+            default:
+                scale = 1.0;
+            case text_effect_type::Outline:
+                scale = 1.0;
+            case text_effect_type::Glow:
+            case text_effect_type::Shadow:
+                scale = 0.5;
+            }
+            result += default_style().text_effect()->width() * scale;
+        }
         return result;
     }
 

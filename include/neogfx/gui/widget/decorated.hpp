@@ -346,6 +346,8 @@ namespace neogfx
         }
         i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) override
         {
+            if (aStandardLayout == standard_layout::Dock && aPosition != layout_position::Center && !iDockLayout->center().has_minimum_size())
+                iDockLayout->center().set_minimum_size(size{ 64.0, 64.0 }); // to prevent docks from sticking together.
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     protected:
@@ -372,7 +374,6 @@ namespace neogfx
                     iTracking = tracking{ clickedPart.part, as_widget().extents(), widget_type::to_window_coordinates(aPosition) };
                     if (as_widget().has_root())
                         as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
-                    update_tracking(aPosition);
                 }
             }
         }
@@ -427,7 +428,6 @@ namespace neogfx
                 iDockLayout.emplace(has_layout(standard_layout::Toolbar) ? 
                     toolbar_layout(layout_position::Center) : non_client_layout());
                 iDockLayout->set_padding(neogfx::padding{});
-//                iDockLayout->center().set_minimum_size(size{ 16.0, 16.0 }); // to prevent docks from sticking together.
             }
             if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
             {
@@ -441,8 +441,8 @@ namespace neogfx
         {
             if (iTracking)
             {
-                auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
                 as_widget().set_fixed_size({}, false);
+                auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
                 auto const currentSize = as_widget().extents();
                 optional_size newSize;
                 switch (iTracking->part)
@@ -472,18 +472,13 @@ namespace neogfx
                     newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy + delta.dy });
                     break;
                 }
-                if (widget_type::debug() == this)
-                    std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
-                as_widget().set_fixed_size(newSize, false);
-                if (as_widget().has_layout_manager())
-                {
-                    as_widget().layout_manager().layout_items();
-                    // todo: not sure I am happy with this, assumes border layout...
-                    if ((decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock)
-                    {
-                        as_widget().set_fixed_size({}, false);
-                        fix_weightings();
-                    }
+                if (newSize != currentSize)
+                {                
+                    if (widget_type::debug() == this)
+                        std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
+                    fix_weightings();
+                    as_widget().set_fixed_size(newSize, false);
+                    fix_weightings();
                 }
             }
         }

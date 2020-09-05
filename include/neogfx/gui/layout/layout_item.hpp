@@ -251,10 +251,32 @@ namespace neogfx
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
             if (base_type::debug() == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
+            i_layout_item const* cause = nullptr;
+            size correction;
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
-                item.set_weight(calculate_relative_weight(layout, item), false);
+                if (item.has_fixed_size() && item.extents() != item.fixed_size())
+                {
+                    if (cause == nullptr)
+                        cause = &item;
+                    else
+                        throw cannot_fix_weightings();
+                    correction = item.extents() / item.fixed_size() / (layout.count() - 1);
+                }
+            }
+            for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+            {
+                auto& item = layout.item_at(itemIndex);
+                if (cause == nullptr)
+                    item.set_weight(calculate_relative_weight(layout, item), false);
+                else
+                {
+                    if (&item != cause)
+                        item.set_weight(item.weight() * correction);
+                    else
+                        item.set_weight(item.weight() * (item.fixed_size() / item.extents()));
+                }
                 if (base_type::debug() == this)
                     std::cerr << "(" << typeid(item).name() << ")" << item.extents() << ":" << item.weight() << ", ";
                 item.set_fixed_size({}, false);

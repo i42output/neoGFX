@@ -609,9 +609,6 @@ int main(int argc, char* argv[])
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
-            auto column = window.textEdit.column(0);
-            column.set_padding(window.effectWidthSlider.value());
-            window.textEdit.set_column(0, column);
             window.textEditSmall.set_text(oss.str());
         });
         window.effectAux1Slider.ValueChanged([&]()
