@@ -371,7 +371,7 @@ namespace neogfx
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
                 {
-                    iTracking = tracking{ clickedPart.part, as_widget().extents(), widget_type::to_window_coordinates(aPosition) };
+                    iTracking = tracking{ clickedPart.part, resizing_context().extents(), widget_type::to_window_coordinates(aPosition) };
                     if (as_widget().has_root())
                         as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
                 }
@@ -437,48 +437,61 @@ namespace neogfx
 
             iInitialized = true;
         }
+        i_layout_item& resizing_context()
+        {
+            return (decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock ?
+                static_cast<i_layout_item&>(as_widget().parent_layout()) : static_cast<i_layout_item&>(as_widget());
+        }
         void update_tracking(const point& aPosition)
         {
             if (iTracking)
             {
-                as_widget().set_fixed_size({}, false);
+                i_layout_item& resizingContext = resizing_context();
                 auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
-                auto const currentSize = as_widget().extents();
+                auto const currentSize = resizingContext.extents();
                 optional_size newSize;
                 switch (iTracking->part)
                 {
                 case widget_part::BorderLeft:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy });
                     break;
                 case widget_part::BorderTopLeft:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy - delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTop:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy - delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy - delta.dy });
                     break;
                 case widget_part::BorderTopRight:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy - delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy - delta.dy });
                     break;
                 case widget_part::BorderRight:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy });
                     break;
                 case widget_part::BorderBottomRight:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy + delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottom:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy + delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy + delta.dy });
                     break;
                 case widget_part::BorderBottomLeft:
-                    newSize = as_widget().minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy + delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy + delta.dy });
                     break;
                 }
                 if (newSize != currentSize)
                 {                
                     if (widget_type::debug() == this)
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
-                    fix_weightings();
-                    as_widget().set_fixed_size(newSize, false);
-                    fix_weightings();
+                    if ((decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock)
+                    {
+                        resizingContext.set_fixed_size({}, false);
+                        fix_weightings();
+                        resizingContext.set_fixed_size(newSize, false);
+                        fix_weightings();
+                        if (as_widget().has_layout_manager())
+                            as_widget().layout_manager().layout_items();
+                    }
+                    else
+                        resizingContext.set_fixed_size(newSize, false);
                 }
             }
         }

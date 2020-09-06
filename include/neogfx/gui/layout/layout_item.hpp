@@ -252,7 +252,9 @@ namespace neogfx
             if (base_type::debug() == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
             i_layout_item const* cause = nullptr;
-            size correction;
+            size totalSize;
+            size remainingSize;
+            size remainingWeight;
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
@@ -262,24 +264,44 @@ namespace neogfx
                         cause = &item;
                     else
                         throw cannot_fix_weightings();
-                    correction = item.extents() / item.fixed_size() / (layout.count() - 1);
+                }
+                totalSize += item.extents();
+            }
+            if (cause == nullptr)
+            {
+                for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+                {
+                    auto& item = layout.item_at(itemIndex);
+                    item.set_weight(calculate_relative_weight(layout, item), false);
+                }
+            }
+            else
+            {
+                remainingSize = totalSize;
+                for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+                {
+                    auto& item = layout.item_at(itemIndex);
+                    if (item.size_policy() != size_constraint::Expanding)
+                    {
+                        item.set_weight(item.extents() / totalSize, false);
+                        remainingSize -= item.extents();
+                    }
+                    else
+                        remainingWeight += item.weight();
+                }
+                for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+                {
+                    auto& item = layout.item_at(itemIndex);
+                    if (item.size_policy() == size_constraint::Expanding)
+                        item.set_weight(item.weight() / remainingWeight * remainingSize / totalSize, false);
                 }
             }
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
-                if (cause == nullptr)
-                    item.set_weight(calculate_relative_weight(layout, item), false);
-                else
-                {
-                    if (&item != cause)
-                        item.set_weight(item.weight() * correction);
-                    else
-                        item.set_weight(item.weight() * (item.fixed_size() / item.extents()));
-                }
+                item.set_fixed_size({}, false);
                 if (base_type::debug() == this)
                     std::cerr << "(" << typeid(item).name() << ")" << item.extents() << ":" << item.weight() << ", ";
-                item.set_fixed_size({}, false);
             }
             if (base_type::debug() == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings() done" << std::endl;
