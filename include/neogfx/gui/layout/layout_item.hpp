@@ -283,8 +283,9 @@ namespace neogfx
                     auto& item = layout.item_at(itemIndex);
                     if (item.size_policy() != size_constraint::Expanding)
                     {
-                        item.set_weight(item.extents() / totalSize, false);
-                        remainingSize -= item.extents();
+                        auto const& itemExtents = (cause != &item ? item.extents() : item.fixed_size());
+                        item.set_weight(itemExtents / totalSize, false);
+                        remainingSize -= itemExtents;
                     }
                     else
                         remainingWeight += item.weight();

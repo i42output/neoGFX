@@ -346,8 +346,6 @@ namespace neogfx
         }
         i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) override
         {
-            if (aStandardLayout == standard_layout::Dock && aPosition != layout_position::Center && !iDockLayout->center().has_minimum_size())
-                iDockLayout->center().set_minimum_size(size{ 64.0, 64.0 }); // to prevent docks from sticking together.
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     protected:
