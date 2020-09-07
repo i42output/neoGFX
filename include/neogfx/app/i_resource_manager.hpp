@@ -24,6 +24,8 @@
 
 namespace neogfx
 {
+    struct embedded_resource_not_found : std::runtime_error { embedded_resource_not_found(const std::string& aResource) : std::runtime_error{ "neogfx::embedded_resource_not_found: " + aResource } {} };
+
     class i_resource_manager
     {
     public:

@@ -114,8 +114,10 @@ namespace neogfx
             if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             {
                 auto const delta = aPosition.x - iTrackFrom.x;
-                auto& minimizingWidget = (!resizeBothPanes || delta < 0.0 ) ? firstWidget : secondWidget;
-                auto& maximizingWidget = (!resizeBothPanes || delta > 0.0 ) ? firstWidget : secondWidget;
+                if (delta == 0.0)
+                    return;
+                auto& minimizingWidget = (!resizeBothPanes || delta < 0.0) ? firstWidget : secondWidget;
+                auto& maximizingWidget = (!resizeBothPanes || delta > 0.0) ? firstWidget : secondWidget;
                 auto const& minimizingWidgetSizeBeforeTracking = (!resizeBothPanes || delta < 0.0) ? iSizeBeforeTracking.first : iSizeBeforeTracking.second;
                 auto const& maximizingWidgetSizeBeforeTracking = (!resizeBothPanes || delta > 0.0) ? iSizeBeforeTracking.first : iSizeBeforeTracking.second;
                 std::optional<scoped_fixed_size_suppression> sfss{ minimizingWidget };
@@ -133,6 +135,8 @@ namespace neogfx
             else
             {
                 auto const delta = aPosition.y - iTrackFrom.y;
+                if (delta == 0.0)
+                    return;
                 auto& minimizingWidget = (!resizeBothPanes || delta < 0.0) ? firstWidget : secondWidget;
                 auto& maximizingWidget = (!resizeBothPanes || delta > 0.0) ? firstWidget : secondWidget;
                 auto const& minimizingWidgetSizeBeforeTracking = (!resizeBothPanes || delta < 0.0) ? iSizeBeforeTracking.first : iSizeBeforeTracking.second;
@@ -143,12 +147,13 @@ namespace neogfx
                 if (&minimizingWidget != &maximizingWidget)
                 {
                     auto const adjusted = std::max(minSize.cy, minimizingWidgetSizeBeforeTracking.cy - std::abs(delta));
-                    minimizingWidget.set_fixed_size(size{ minimizingWidgetSizeBeforeTracking.cx, adjusted}, false);
+                    minimizingWidget.set_fixed_size(size{ minimizingWidgetSizeBeforeTracking.cx, adjusted }, false);
                     maximizingWidget.set_fixed_size(size{ maximizingWidgetSizeBeforeTracking.cx, maximizingWidgetSizeBeforeTracking.cy + minimizingWidgetSizeBeforeTracking.cy - adjusted }, false);
                 }
                 else
                     minimizingWidget.set_fixed_size(size{ minimizingWidgetSizeBeforeTracking.cx, std::max(minSize.cy, minimizingWidgetSizeBeforeTracking.cy + delta) }, false);
             }
+            fix_weightings();
             layout_items();
             panes_resized();
         }
@@ -178,7 +183,6 @@ namespace neogfx
 
     void splitter::panes_resized()
     {
-        fix_weightings();
     }
 
     void splitter::reset_pane_sizes_requested(const std::optional<uint32_t>&)

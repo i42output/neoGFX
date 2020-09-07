@@ -251,7 +251,7 @@ namespace neogfx
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
             if (base_type::debug() == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
-            i_layout_item const* cause = nullptr;
+            bool causeWasExplicitResize = false;
             size totalSize;
             size remainingSize;
             size remainingWeight;
@@ -259,15 +259,10 @@ namespace neogfx
             {
                 auto& item = layout.item_at(itemIndex);
                 if (item.has_fixed_size() && item.extents() != item.fixed_size())
-                {
-                    if (cause == nullptr)
-                        cause = &item;
-                    else
-                        throw cannot_fix_weightings();
-                }
+                    causeWasExplicitResize = true;
                 totalSize += item.extents();
             }
-            if (cause == nullptr)
+            if (!causeWasExplicitResize)
             {
                 for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
                 {
@@ -283,7 +278,8 @@ namespace neogfx
                     auto& item = layout.item_at(itemIndex);
                     if (item.size_policy() != size_constraint::Expanding)
                     {
-                        auto const& itemExtents = (cause != &item ? item.extents() : item.fixed_size());
+                        auto const& itemExtents = (item.has_fixed_size() && item.extents() != item.fixed_size() ?
+                            item.fixed_size() : item.extents());
                         item.set_weight(itemExtents / totalSize, false);
                         remainingSize -= itemExtents;
                     }
@@ -300,7 +296,8 @@ namespace neogfx
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
-                item.set_fixed_size({}, false);
+                if (item.has_fixed_size() && item.extents() != item.fixed_size() && item.size_policy() == size_constraint::MinimumExpanding)
+                    item.set_fixed_size({}, false);
                 if (base_type::debug() == this)
                     std::cerr << "(" << typeid(item).name() << ")" << item.extents() << ":" << item.weight() << ", ";
             }

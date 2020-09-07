@@ -348,7 +348,7 @@ namespace neogfx
         {
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
-    protected:
+    public:
         void fix_weightings() override
         {
             widget_type::fix_weightings();
@@ -397,6 +397,9 @@ namespace neogfx
 
             if ((decoration_style() & neogfx::decoration_style::Window) == neogfx::decoration_style::Window && !as_widget().is_root())
                 return; // surface not yet created
+
+            as_widget().set_size_policy(size_constraint::MinimumExpanding);
+            as_widget().set_weight(size{ 1.0 });
 
             iNonClientLayout.emplace(*this);
             non_client_layout().set_padding(neogfx::padding{});

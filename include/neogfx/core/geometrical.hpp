@@ -128,6 +128,8 @@ namespace neogfx
         basic_delta round() const { return basic_delta(std::round(dx), std::round(dy)); }
         basic_delta min(const basic_delta& other) const { return basic_delta{ std::min(dx, other.dx), std::min(dy, other.dy) }; }
         basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy) }; }
+        basic_delta with_dx(coordinate_type dx) const { return basic_delta{ dx, dy }; }
+        basic_delta with_dy(coordinate_type dy) const { return basic_delta{ dx, dy }; }
         // attributes
     public:
         coordinate_type dx;
@@ -221,6 +223,8 @@ namespace neogfx
         basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
         basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
+        basic_size with_cx(dimension_type cx) const { return basic_size{ cx, cy }; }
+        basic_size with_cy(dimension_type cy) const { return basic_size{ cx, cy }; }
     private:
         void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx == max_dimension()) || (rhs.cy != 0.0 && cy == max_dimension())) throw bad_size(); }
         // helpers
@@ -347,6 +351,8 @@ namespace neogfx
         basic_point round() const { return basic_point(std::round(x), std::round(y)); }
         basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y) }; }
         basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y) }; }
+        basic_point with_x(coordinate_type x) const { return basic_point{ x, y }; }
+        basic_point with_y(coordinate_type y) const { return basic_point{ x, y }; }
         // attributes
     public:
         coordinate_type x;

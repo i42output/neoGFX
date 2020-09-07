@@ -33,6 +33,9 @@
     <ClCompile Include="x64\Tools\GeneratedFiles\default_nel.res.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\default_nel.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\library.hpp">

@@ -230,9 +230,9 @@ namespace neogfx
         iRows.set_size_policy(neogfx::size_policy{ size_constraint::Expanding });
         iTop.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMiddle.set_size_policy(size_constraint::Expanding);
-        iLeft.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
+        iLeft.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding });
         iCenter.set_size_policy(size_constraint::Expanding);
-        iRight.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
+        iRight.set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding });
         iBottom.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
 
         set_alive();

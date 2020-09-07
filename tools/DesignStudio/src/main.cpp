@@ -94,6 +94,10 @@ int main(int argc, char* argv[])
         objects.dock(rightDock);
         properties.dock(rightDock);
 
+        toolbox.parent_layout().set_fixed_size(toolbox.extents().with_cx(192));
+        objects.parent_layout().set_fixed_size(toolbox.extents().with_cx(192));
+        toolbox.fix_weightings();
+
         leftDock.hide();
         rightDock.hide();
 

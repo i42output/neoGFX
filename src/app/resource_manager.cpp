@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/io/uri.hpp>
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/app/module_resource.hpp>
 #include <neogfx/app/resource.hpp>
@@ -55,6 +56,8 @@ namespace neogfx
             if (!ptr.expired())
                 return ptr.lock();
         }
+        if (neolib::uri{ aUri }.scheme().empty() && iResources.find(aUri.substr(0, aUri.rfind('#'))) == iResources.end())
+            throw embedded_resource_not_found(aUri);
         i_resource::pointer newResource = std::make_shared<resource>(*this, aUri);
         iResources[aUri] = i_resource::weak_pointer(newResource);
         return newResource;

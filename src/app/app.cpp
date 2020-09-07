@@ -306,6 +306,7 @@ namespace neogfx
 
     app::~app()
     {
+        plugin_manager().unload_plugins();
         service<i_keyboard>().ungrab_keyboard(*this);
         resource_manager::instance().clean();
     }
