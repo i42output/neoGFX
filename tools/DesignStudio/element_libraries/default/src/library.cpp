@@ -108,6 +108,10 @@ namespace neogfx::DesignStudio
     {
     }
 
+    default_element_library::~default_element_library()
+    {
+    }
+
     const default_element_library::elements_t& default_element_library::elements() const
     {
         return iElements;
@@ -179,6 +183,58 @@ namespace neogfx::DesignStudio
         {
             aResult.reset((method->second)(aParent, aElementId));
             return;
+        }
+        throw unknown_element_type();
+    }
+
+    element_group default_element_library::element_group(const neolib::i_string& aElementType) const
+    {
+        static const std::map<std::string, DesignStudio::element_group> sElementGroups =
+        {
+            { "project", DesignStudio::element_group::Project },
+            { "app", DesignStudio::element_group::App },
+            { "action", DesignStudio::element_group::Action },
+            { "window", DesignStudio::element_group::Widget },
+            { "widget", DesignStudio::element_group::Widget },
+            { "text_widget", DesignStudio::element_group::Widget },
+            { "image_widget", DesignStudio::element_group::Widget },
+            { "status_bar", DesignStudio::element_group::Widget },
+            { "menu_bar", DesignStudio::element_group::Menu },
+            { "menu", DesignStudio::element_group::Menu },
+            { "toolbar", DesignStudio::element_group::Widget },
+            { "tab_page_container", DesignStudio::element_group::Widget },
+            { "tab_page", DesignStudio::element_group::Widget },
+            { "canvas", DesignStudio::element_group::Widget },
+            { "push_button", DesignStudio::element_group::Widget },
+            { "check_box", DesignStudio::element_group::Widget },
+            { "radio_button", DesignStudio::element_group::Widget },
+            { "label", DesignStudio::element_group::Widget },
+            { "text_edit", DesignStudio::element_group::Widget },
+            { "line_edit", DesignStudio::element_group::Widget },
+            { "text_field", DesignStudio::element_group::Widget },
+            { "drop_list", DesignStudio::element_group::Widget },
+            { "table_view", DesignStudio::element_group::Widget },
+            { "tree_view", DesignStudio::element_group::Widget },
+            { "group_box", DesignStudio::element_group::Widget },
+            { "slider", DesignStudio::element_group::Widget },
+            { "double_slider", DesignStudio::element_group::Widget },
+            { "spin_box", DesignStudio::element_group::Widget },
+            { "double_spin_box", DesignStudio::element_group::Widget },
+            { "gradient_widget", DesignStudio::element_group::Widget },
+            { "vertical_layout", DesignStudio::element_group::Layout },
+            { "horizontal_layout", DesignStudio::element_group::Layout },
+            { "grid_layout", DesignStudio::element_group::Layout },
+            { "flow_layout", DesignStudio::element_group::Layout },
+            { "stack_layout", DesignStudio::element_group::Layout },
+            { "border_layout", DesignStudio::element_group::Layout },
+            { "spacer", DesignStudio::element_group::Layout },
+            { "vertical_spacer", DesignStudio::element_group::Layout },
+            { "horizontal_spacer", DesignStudio::element_group::Layout }
+        };
+        auto group = sElementGroups.find(aElementType);
+        if (group != sElementGroups.end())
+        {
+            return group->second;
         }
         throw unknown_element_type();
     }

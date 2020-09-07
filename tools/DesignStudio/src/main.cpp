@@ -162,6 +162,89 @@ int main(int argc, char* argv[])
         workspaceGridSize.changed(workspaceGridChanged);
 
         ds::project_manager pm;
+
+        typedef std::pair<ds::i_element_library*, ng::string> tool_t;
+        ng::basic_item_tree_model<std::variant<ds::element_group, tool_t>> toolboxModel;
+        auto toolboxApp = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::App, "Application");
+        auto toolboxMenu = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Menu, "Menu");
+        auto toolboxAction = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Action, "Action");
+        auto toolboxLayout = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Layout, "Layout");
+        auto toolboxWidget = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Widget, "Widget");
+        auto stringify_tool = [](const ng::i_string& aInput) -> std::string
+        {
+            std::string result;
+            auto bits = neolib::tokens(aInput.to_std_string(), "_"s);
+            for (auto const& bit : bits)
+            {
+                if (!result.empty())
+                    result += ' ';
+                result += std::toupper(bit[0]);
+                result += bit.substr(1);
+            }
+            return result;
+        };
+        for (auto const& plugin : ng::service<ng::i_app>().plugin_manager().plugins())
+        {
+            ng::ref_ptr<ds::i_element_library> elementLibrary;
+            plugin->discover(elementLibrary);
+            if (elementLibrary)
+                for (auto const& tool : elementLibrary->elements())
+                    switch (elementLibrary->element_group(tool))
+                    {
+                    default:
+                    case ds::element_group::Unknown:
+                    case ds::element_group::Project:
+                        break;
+                    case ds::element_group::App:
+                        toolboxModel.append_item(toolboxApp, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    case ds::element_group::Menu:
+                        toolboxModel.append_item(toolboxMenu, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    case ds::element_group::Action:
+                        toolboxModel.append_item(toolboxAction, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    case ds::element_group::Widget:
+                        toolboxModel.append_item(toolboxWidget, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    case ds::element_group::Layout:
+                        toolboxModel.append_item(toolboxLayout, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    }
+        }
+        class toolbox_presentation_model : public ng::basic_item_presentation_model<decltype(toolboxModel)>
+        {
+        public:
+            toolbox_presentation_model()
+            {
+            }
+        public:
+            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
+            {
+                auto const& tool = item_model().item(to_item_model_index(aIndex));
+                if (std::holds_alternative<ds::element_group>(tool))
+                    return {};
+                else
+                    return ng::size{ 24.0_dip, 24.0_dip };
+            }
+            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
+            {
+                auto const& tool = item_model().item(to_item_model_index(aIndex));
+                if (std::holds_alternative<ds::element_group>(tool))
+                    return {};
+                else
+                {
+                    auto const& t = std::get<tool_t>(item_model().item(to_item_model_index(aIndex)));
+                    return t.first->element_icon(t.second);
+                }
+            }
+        } toolboxPresentationModel;
+        auto& toolboxTree = toolbox.docked_widget<ng::tree_view>();
+        toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
+        toolboxTree.set_model(toolboxModel);
+        toolboxTree.set_presentation_model(toolboxPresentationModel);
+        toolboxPresentationModel.set_column_read_only(0u);
+
         ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
         objectModel.set_column_name(0u, "Object"_t);
         objectModel.set_column_name(1u, "Type"_t);
@@ -293,9 +376,6 @@ int main(int argc, char* argv[])
             }
             else
                 objectModel.clear();
-            for (uint32_t row = 0; row < objectPresentationModel.rows(); ++row)
-                for (uint32_t col = 0; col < objectPresentationModel.columns(); ++col)
-                    ;// objectPresentationModel.cell_image({ row, col });
         };
 
         ng::sink sink;

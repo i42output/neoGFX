@@ -56,7 +56,9 @@ namespace neogfx::DesignStudio
         {
             if (aId == i_element_library::iid())
             {
-                aObject = new library_type{ iApplication, "file:///" + boost::dll::this_line_location().string() };
+                if (!iLibrary)
+                    iLibrary = neolib::make_ref<library_type>(iApplication, "file:///" + boost::dll::this_line_location().string());
+                aObject = &*iLibrary;
                 return true;
             }
             return false;
@@ -108,5 +110,6 @@ namespace neogfx::DesignStudio
         neolib::version iVersion;
         neolib::string iCopyright;
         bool iLoaded;
+        ref_ptr<i_element_library> iLibrary;
     };
 }

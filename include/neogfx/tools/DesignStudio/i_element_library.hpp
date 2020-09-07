@@ -45,6 +45,7 @@ namespace neogfx::DesignStudio
     public:
         virtual void create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
         virtual void create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
+        virtual DesignStudio::element_group element_group(const neolib::i_string& aElementType) const = 0;
         virtual i_texture const& element_icon(const neolib::i_string& aElementType) const = 0;
         // helpers
     public:
