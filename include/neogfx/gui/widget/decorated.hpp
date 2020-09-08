@@ -448,6 +448,8 @@ namespace neogfx
             if (iTracking)
             {
                 i_layout_item& resizingContext = resizing_context();
+                if (resizingContext.is_layout() && resizingContext.as_layout().invalidated())
+                    resizingContext.layout_owner().layout_items();
                 auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
                 auto const currentSize = resizingContext.extents();
                 optional_size newSize;

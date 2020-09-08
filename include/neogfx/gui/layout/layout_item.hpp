@@ -296,7 +296,7 @@ namespace neogfx
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
-                if (item.has_fixed_size() && item.extents() != item.fixed_size() && item.size_policy() == size_constraint::MinimumExpanding)
+                if (item.has_fixed_size() && item.size_policy() == size_constraint::MinimumExpanding)
                     item.set_fixed_size({}, false);
                 if (base_type::debug() == this)
                     std::cerr << "(" << typeid(item).name() << ")" << item.extents() << ":" << item.weight() << ", ";

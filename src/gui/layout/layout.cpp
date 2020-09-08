@@ -471,7 +471,11 @@ namespace neogfx
         if (!enabled())
             return;
         if (invalidated())
+        {
+            if (!aDeferLayout && has_layout_owner() && layout_owner().is_managing_layout())
+                layout_owner().layout_items(aDeferLayout);
             return;
+        }
         iInvalidated = true;
         if (has_parent_layout())
             parent_layout().invalidate();

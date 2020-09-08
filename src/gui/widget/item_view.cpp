@@ -131,8 +131,13 @@ namespace neogfx
             return;
         iPresentationModelSink.clear();
         iPresentationModel = aPresentationModel;
-        if (has_presentation_model() && has_model())
-            presentation_model().set_item_model(model(), presentation_model().sortable());
+        if (has_presentation_model())
+        {
+            if (presentation_model().has_item_model())
+                set_model(presentation_model().item_model());
+            else if (has_model())
+                presentation_model().set_item_model(model(), presentation_model().sortable());
+        }
         if (has_presentation_model() && has_selection_model())
             selection_model().set_presentation_model(*aPresentationModel);
         if (has_presentation_model())
@@ -150,7 +155,6 @@ namespace neogfx
             iPresentationModelSink += presentation_model().items_filtered([this]() { items_filtered(); });
         }
         presentation_model_changed();
-        update_scrollbar_visibility();
         update();
     }
 

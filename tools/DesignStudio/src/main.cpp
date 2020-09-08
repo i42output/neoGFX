@@ -243,11 +243,11 @@ int main(int argc, char* argv[])
                 }
             }
         } toolboxPresentationModel;
+        toolboxPresentationModel.set_item_model(toolboxModel);
+        toolboxPresentationModel.set_column_read_only(0u);
         auto& toolboxTree = toolbox.docked_widget<ng::tree_view>();
         toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
-        toolboxTree.set_model(toolboxModel);
         toolboxTree.set_presentation_model(toolboxPresentationModel);
-        toolboxPresentationModel.set_column_read_only(0u);
 
         ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
         objectModel.set_column_name(0u, "Object"_t);
@@ -277,12 +277,12 @@ int main(int argc, char* argv[])
                     return {};
             }
         } objectPresentationModel;
-        auto& objectTree = objects.docked_widget<ng::table_view>();
-        objectTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
-        objectTree.set_model(objectModel);
-        objectTree.set_presentation_model(objectPresentationModel);
+        objectPresentationModel.set_item_model(objectModel);
         objectPresentationModel.set_column_read_only(1u);
         objectPresentationModel.set_alternating_row_color(true);
+        auto& objectTree = objects.docked_widget<ng::table_view>();
+        objectTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
+        objectTree.set_presentation_model(objectPresentationModel);
         objectTree.column_header().set_expand_last_column(true);
 
         workspace.view_stack().Painting([&](ng::i_graphics_context& aGc)

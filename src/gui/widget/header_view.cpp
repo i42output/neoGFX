@@ -315,6 +315,8 @@ namespace neogfx
 
     dimension header_view::section_width(uint32_t aSectionIndex, bool aForHeaderButton) const
     {
+        if (iSectionWidths.empty())
+            return 0.0;
         if (!expand_last_column() || aSectionIndex != iSectionWidths.size() - 1)
         {
             auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].manual != std::nullopt ?
