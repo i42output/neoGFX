@@ -458,7 +458,7 @@ namespace neogfx
 
     bool layout::visible() const
     {
-        return true;
+        return enabled();
     }
 
     bool layout::invalidated() const

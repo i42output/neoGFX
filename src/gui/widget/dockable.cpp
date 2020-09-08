@@ -68,6 +68,8 @@ namespace neogfx
         if (is_docked())
             undock();
         aDock.add(ref_ptr{ static_cast<i_dockable&>(*this) });
+        if (has_layout_manager())
+            layout_manager().layout_items();
         iDock = &aDock;
         Docked.trigger(aDock);
     }

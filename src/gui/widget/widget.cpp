@@ -1208,8 +1208,6 @@ namespace neogfx
                     mouse_left();
             }
             VisibilityChanged.trigger();
-            if (has_parent_layout())
-                parent_layout().invalidate();
             if (effectively_hidden())
             {
                 if (has_root() && root().has_focused_widget() &&
@@ -1219,7 +1217,11 @@ namespace neogfx
                 }
             }
             else
+            {
+                if (has_parent_layout())
+                    parent_layout().invalidate();
                 update();
+            }
             return true;
         }
         return false;

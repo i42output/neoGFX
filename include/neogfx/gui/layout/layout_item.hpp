@@ -258,6 +258,8 @@ namespace neogfx
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
+                if (!item.visible())
+                    continue;
                 if (item.has_fixed_size() && item.extents() != item.fixed_size())
                     causeWasExplicitResize = true;
                 totalSize += item.extents();
@@ -267,6 +269,8 @@ namespace neogfx
                 for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
                 {
                     auto& item = layout.item_at(itemIndex);
+                    if (!item.visible())
+                        continue;
                     item.set_weight(calculate_relative_weight(layout, item), false);
                 }
             }
@@ -276,6 +280,8 @@ namespace neogfx
                 for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
                 {
                     auto& item = layout.item_at(itemIndex);
+                    if (!item.visible())
+                        continue;
                     if (item.size_policy() != size_constraint::Expanding)
                     {
                         auto const& itemExtents = (item.has_fixed_size() && item.extents() != item.fixed_size() ?
@@ -289,6 +295,8 @@ namespace neogfx
                 for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
                 {
                     auto& item = layout.item_at(itemIndex);
+                    if (!item.visible())
+                        continue;
                     if (item.size_policy() == size_constraint::Expanding)
                         item.set_weight(item.weight() / remainingWeight * remainingSize / totalSize, false);
                 }
@@ -296,6 +304,8 @@ namespace neogfx
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
+                if (!item.visible())
+                    continue;
                 if (item.has_fixed_size() && item.size_policy() == size_constraint::MinimumExpanding)
                     item.set_fixed_size({}, false);
                 if (base_type::debug() == this)
@@ -304,7 +314,7 @@ namespace neogfx
             if (base_type::debug() == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings() done" << std::endl;
         }
-        void clear_weightings() override
+        void clear_weightings(bool aFixSizes = false) override
         {
             auto& self = static_cast<i_layout_item&>(*this);
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
@@ -312,6 +322,10 @@ namespace neogfx
             {
                 auto& item = layout.item_at(itemIndex);
                 item.set_weight({});
+                if (!item.visible())
+                    continue;
+                if (aFixSizes && item.size_policy() == size_constraint::MinimumExpanding)
+                    item.set_fixed_size(item.extents());
             }
         }
         void anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override

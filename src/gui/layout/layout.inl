@@ -197,7 +197,8 @@ namespace neogfx
             if (!item.is_spacer() && (AxisPolicy::cx(itemMaxSize) == 0.0 || AxisPolicy::cy(itemMaxSize) == 0.0))
                 ++itemsZeroSized;
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), 
-                AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding || AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum ? 
+                AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding || 
+                AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum ? 
                     AxisPolicy::cy(itemMaxSize) : AxisPolicy::cy(item.minimum_size(availableSpaceForChildren)));
             if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(itemMaxSize) != size::max_dimension())
                 AxisPolicy::cx(result) += AxisPolicy::cx(itemMaxSize);

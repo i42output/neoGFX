@@ -99,7 +99,7 @@ namespace neogfx
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
         void fix_weightings() override;
-        void clear_weightings() override;
+        void clear_weightings(bool aFixSizes = false) override;
     public:
         const i_layout_item& subject() const override;
         i_layout_item& subject() override;

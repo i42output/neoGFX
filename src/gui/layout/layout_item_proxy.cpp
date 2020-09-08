@@ -221,9 +221,9 @@ namespace neogfx
         subject().fix_weightings();
     }
 
-    void layout_item_proxy::clear_weightings()
+    void layout_item_proxy::clear_weightings(bool aFixSizes)
     {
-        subject().clear_weightings();
+        subject().clear_weightings(aFixSizes);
     }
 
     bool layout_item_proxy::high_dpi() const

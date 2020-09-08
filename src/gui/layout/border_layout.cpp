@@ -183,10 +183,10 @@ namespace neogfx
         invalidate(false);
     }
 
-    void border_layout::clear_weightings()
+    void border_layout::clear_weightings(bool aFixSizes)
     {
-        iRows.clear_weightings();
-        iMiddle.clear_weightings();
+        iRows.clear_weightings(aFixSizes);
+        iMiddle.clear_weightings(aFixSizes);
         invalidate(false);
     }
 

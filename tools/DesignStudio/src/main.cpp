@@ -84,19 +84,16 @@ int main(int argc, char* argv[])
         app.change_style("Dark");
         app.current_style().set_spacing(ng::size{ 4.0 });
 
-        ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left };
-        ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right };
+        ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ 192.0 } };
+        ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ 192.0 } };
 
         auto toolbox = ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame);
         auto objects = ng::make_dockable<ng::table_view>("Objects"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
         auto properties = ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+
         toolbox.dock(leftDock);
         objects.dock(rightDock);
         properties.dock(rightDock);
-
-        toolbox.parent_layout().set_fixed_size(toolbox.extents().with_cx(192));
-        objects.parent_layout().set_fixed_size(toolbox.extents().with_cx(192));
-        toolbox.fix_weightings();
 
         leftDock.hide();
         rightDock.hide();

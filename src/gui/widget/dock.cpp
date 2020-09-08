@@ -27,16 +27,22 @@
 
 namespace neogfx
 {
-    dock::dock(i_widget& aParent, dock_area aArea) :
+    dock::dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize) :
         base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
     {
+        if (aInitialSize)
+            parent_layout().set_fixed_size(aInitialSize);
+        parent_layout().set_weight(size{ 1.0 });
         set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
 
-    dock::dock(i_layout& aLayout, dock_area aArea) :
+    dock::dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize) :
         base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
     {
+        if (aInitialSize)
+            parent_layout().set_fixed_size(aInitialSize);
+        parent_layout().set_weight(size{ 1.0 });
         set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
@@ -135,8 +141,19 @@ namespace neogfx
     bool dock::show(bool aVisible)
     {
         bool result = widget::show(aVisible);
+        // todo: multiple docks in the same layout?
         if (!visible())
-            parent_layout().parent_layout().clear_weightings(); // todo: multiple docks in the same layout?
+        {
+            parent_layout().parent_layout().clear_weightings(true);
+            parent_layout().disable();
+            parent_layout().parent_layout().fix_weightings();
+        }
+        else
+        {
+            parent_layout().parent_layout().clear_weightings(true);
+            parent_layout().enable();
+            parent_layout().parent_layout().fix_weightings();
+        }
         return result;
     }
 }
