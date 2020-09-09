@@ -329,35 +329,35 @@ namespace neogfx::DesignStudio
                 "group_box",
                 [colored_icon](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/group.png" };
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/group.png" });
                 }
             },
             {
                 "push_button",
                 [colored_icon](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/button.png" };
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/button.png" });
                 }
             },
             {
                 "check_box",
                 [colored_icon](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/check.png" };
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/check.png" });
                 }
             },
             {
                 "radio_button",
                 [colored_icon](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/radio.png" };
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/radio.png" });
                 }
             },
             {
                 "label",
                 [colored_icon](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/label.png" };
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/label.png" });
                 }
             },
             {
@@ -385,7 +385,7 @@ namespace neogfx::DesignStudio
                 "drop_list",
                 [colored_icon](texture& aTexture)
                 {
-                    aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/droplist.png" };
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/droplist.png" });
                 }
             },
             {
@@ -449,6 +449,13 @@ namespace neogfx::DesignStudio
                 [colored_icon](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/horizontalspacer.png" }, color::PowderBlue.lighter(0x20));
+                }
+            },
+            {
+                "stack_layout",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/stackedlayout.png" }, color::PowderBlue.lighter(0x20));
                 }
             },
             {
