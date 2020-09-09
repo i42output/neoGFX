@@ -438,6 +438,13 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "spacer",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/spacer.png" }, color::PowderBlue.lighter(0x20));
+                }
+            },
+            {
                 "vertical_spacer",
                 [colored_icon](texture& aTexture)
                 {
@@ -452,6 +459,20 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "border_layout",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/borderlayout.png" }, color::PowderBlue.lighter(0x20));
+                }
+            },
+            {
+                "flow_layout",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/flowlayout.png" }, color::PowderBlue.lighter(0x20));
+                }
+            },
+            {
                 "stack_layout",
                 [colored_icon](texture& aTexture)
                 {
@@ -461,46 +482,46 @@ namespace neogfx::DesignStudio
             {
                 "vertical_layout",
                 // todo: create a .png asset for this...
-                [](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    aTexture = newTexture;
+                    gc.fill_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, color::White);
+                    aTexture = colored_icon(newTexture, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "horizontal_layout",
                 // todo: create a .png asset for this...
-                [](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    aTexture = newTexture;
+                    gc.fill_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, color::White);
+                    aTexture = colored_icon(newTexture, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "grid_layout",
                 // todo: create a .png asset for this...
-                [](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 12.0, 12.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    aTexture = newTexture;
+                    gc.fill_rect(rect{ point{ 12.0, 12.0 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
+                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
+                    aTexture = colored_icon(newTexture, color::PowderBlue.lighter(0x20));
                 }
             }
         };
