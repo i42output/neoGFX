@@ -157,14 +157,14 @@ namespace neogfx
     {
         if (!is_alive())
             return;
+        iRows.invalidate(true);
+        iTop.invalidate(true);
+        iMiddle.invalidate(true);
+        iLeft.invalidate(true);
+        iCenter.invalidate(true);
+        iRight.invalidate(true);
+        iBottom.invalidate(true);
         layout::invalidate(aDeferLayout);
-        iRows.invalidate(aDeferLayout);
-        iTop.invalidate(aDeferLayout);
-        iMiddle.invalidate(aDeferLayout);
-        iLeft.invalidate(aDeferLayout);
-        iCenter.invalidate(aDeferLayout);
-        iRight.invalidate(aDeferLayout);
-        iBottom.invalidate(aDeferLayout);
     }
 
     void border_layout::layout_items(const point& aPosition, const size& aSize)

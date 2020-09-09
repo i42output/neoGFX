@@ -3,6 +3,7 @@
 
     resource: {
         file: resources/app.png
+        file: resources/canvas.png
         file: resources/widget.png
         file: resources/window.png
         file: resources/statusbar.png
