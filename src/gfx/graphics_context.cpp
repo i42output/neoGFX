@@ -209,28 +209,27 @@ namespace neogfx
         auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
         auto gcBuffer1 = std::make_unique<graphics_context>(buffer1);
         {
-            scoped_scissor ss{ *gcBuffer1, rect{ point{}, previousExtents } };
             if (aClearColor != std::nullopt)
             {
+                scoped_render_target srt{ *gcBuffer1 };
+                scoped_scissor ss{ *gcBuffer1, rect{ point{}, previousExtents }.inflate(1.0) };
                 gcBuffer1->clear(*aClearColor);
                 gcBuffer1->clear_depth_buffer();
                 gcBuffer1->clear_stencil_buffer();
             }
         }
-        gcBuffer1->render_target().deactivate_target();
         auto& buffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
         auto gcBuffer2 = std::make_unique<graphics_context>(buffer2);
         {
-            scoped_scissor ss{ *gcBuffer2, rect{ point{}, previousExtents } };
             if (aClearColor != std::nullopt)
             {
+                scoped_render_target srt{ *gcBuffer2 };
+                scoped_scissor ss{ *gcBuffer2, rect{ point{}, previousExtents }.inflate(1.0) };
                 gcBuffer2->clear(*aClearColor);
                 gcBuffer2->clear_depth_buffer();
                 gcBuffer2->clear_stencil_buffer();
             }
         }
-        gcBuffer2->render_target().deactivate_target();
-        render_target().activate_target();
         return neogfx::ping_pong_buffers{ {}, std::move(gcBuffer1), std::move(gcBuffer2) };
     }
     

@@ -24,5 +24,7 @@
         file: resources/lineedit.png
         file: resources/textedit.png
         file: resources/slider.png
+        file: resources/verticalspacer.png
+        file: resources/horizontalspacer.png
     }
 }

@@ -242,21 +242,16 @@ namespace neogfx::DesignStudio
     i_texture const& default_element_library::element_icon(const neolib::i_string& aElementType) const
     {
         auto& icons = iIcons[service<i_app>().current_style().palette().color(color_role::Text)];
-        auto text_colored = [](const texture& aSource) -> texture
+        auto colored_icon = [](const texture& aSource, const optional_color& aColor = {}) -> texture
         {
             texture result{ aSource.extents(), 1.0, ng::texture_sampling::Multisample };
             graphics_context gc{ result };
-            gc.draw_texture(point{}, aSource, service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
-            return result;
-        };
-        auto black_outline = [](const texture& aSource) -> texture
-        {
-            texture result{ aSource.extents(), 1.0, ng::texture_sampling::Multisample };
-            rect const r{ point{}, size{aSource.extents()} };
-            graphics_context gc{ result };
-            // todo: provide an easier way to blur any drawing primitive
+            if (aColor)
             {
-                auto pingPongBuffers = gc.ping_pong_buffers(aSource.extents());
+                // draw a black outline for a non-text color icon...
+                // todo: provide an easier way to blur any drawing primitive
+                rect const r{ point{}, size{aSource.extents()} };
+                auto pingPongBuffers = gc.ping_pong_buffers(aSource.extents(), ng::texture_sampling::Multisample);
                 {
                     scoped_render_target srt{ *pingPongBuffers.buffer1 };
                     pingPongBuffers.buffer1->draw_texture(point{}, aSource, color::Black);
@@ -268,221 +263,236 @@ namespace neogfx::DesignStudio
                 scoped_render_target srt{ gc };
                 gc.blit(r, *pingPongBuffers.buffer2, r);
             }
-            gc.draw_texture(point{}, aSource);
+            scoped_render_target srt{ gc };
+            gc.draw_texture(point{}, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
             return result;
         };
         static std::map<std::string, std::function<void(texture&)>> sIconResources =
         {
             { 
                 "app",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" });
                 }
             },
             {
                 "window",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/window.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/window.png" });
                 }
             },
             {
                 "toolbar",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/toolbar.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/toolbar.png" });
                 }
             },
             {
                 "status_bar",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/statusbar.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/statusbar.png" });
                 }
             },
             {
                 "canvas",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/canvas.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/canvas.png" });
                 }
             },
             {
                 "widget",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/widget.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/widget.png" });
                 }
             },
             {
                 "menu_bar",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/menubar.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/menubar.png" });
                 }
             },
             {
                 "menu",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/menu.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/menu.png" });
                 }
             },
             {
                 "group_box",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/group.png" };
                 }
             },
             {
                 "push_button",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/button.png" };
                 }
             },
             {
                 "check_box",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/check.png" };
                 }
             },
             {
                 "radio_button",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/radio.png" };
                 }
             },
             {
                 "label",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/label.png" };
                 }
             },
             {
                 "table_view",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/table.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/table.png" });
                 }
             },
             {
                 "tree_view",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/tree.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/tree.png" });
                 }
             },
             {
                 "list_view",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/list.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/list.png" });
                 }
             },
             {
                 "drop_list",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
                     aTexture = image{ ":/neogfx/DesignStudio/default_nel/resources/droplist.png" };
                 }
             },
             {
                 "tab_page",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpage.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpage.png" });
                 }
             },
             {
                 "tab_page_container",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpagecontainer.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpagecontainer.png" });
                 }
             },
             {
                 "line_edit",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
                 }
             },
             {
                 "text_field",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
                 }
             },
             {
                 "text_edit",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/textedit.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/textedit.png" });
                 }
             },
             {
                 "slider",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
                 }
             },
             {
                 "double_slider",
-                [text_colored](texture& aTexture)
+                [colored_icon](texture& aTexture)
                 {
-                    aTexture = text_colored(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                }
+            },
+            {
+                "vertical_spacer",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/verticalspacer.png" }, color::PowderBlue.lighter(0x20));
+                }
+            },
+            {
+                "horizontal_spacer",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/horizontalspacer.png" }, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "vertical_layout",
-                // todo: store the result of this render to a .png file asset
+                // todo: create a .png asset for this...
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 4.0, 4.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 4.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 4.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
                     aTexture = newTexture;
                 }
             },
             {
                 "horizontal_layout",
-                // todo: store the result of this render to a .png file asset
+                // todo: create a .png asset for this...
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 4.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
                     aTexture = newTexture;
                 }
             },
             {
                 "grid_layout",
-                // todo: store the result of this render to a .png file asset
+                // todo: create a .png asset for this...
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
-                    gc.draw_rect(rect{ point{ 4.0, 4.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 4.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 + 16.0, 4.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 * 2 + 16.0 * 2, 4.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0, 4.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 + 16.0, 4.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
-                    gc.draw_rect(rect{ point{ 4.0 + 24.0 * 2 + 16.0 * 2, 4.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0, 12.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
+                    gc.draw_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, pen{ color::PowderBlue.darker(0x20), 4.0 }, color::PowderBlue.lighter(0x20));
                     aTexture = newTexture;
                 }
             }
