@@ -277,6 +277,13 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "action",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/action.png" });
+                }
+            },
+            {
                 "window",
                 [colored_icon](texture& aTexture)
                 {
@@ -361,6 +368,20 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "text_widget",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/text.png" });
+                }
+            },
+            {
+                "image_widget",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/image.png" });
+                }
+            },
+            {
                 "table_view",
                 [colored_icon](texture& aTexture)
                 {
@@ -424,6 +445,20 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "spin_box",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/spinbox.png" });
+                }
+            },
+            {
+                "double_spin_box",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/spinbox.png" });
+                }
+            },
+            {
                 "slider",
                 [colored_icon](texture& aTexture)
                 {
@@ -435,6 +470,13 @@ namespace neogfx::DesignStudio
                 [colored_icon](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                }
+            },
+            {
+                "gradient_widget",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gradient.png" });
                 }
             },
             {

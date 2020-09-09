@@ -3,6 +3,7 @@
 
     resource: {
         file: resources/app.png
+        file: resources/action.png
         file: resources/canvas.png
         file: resources/widget.png
         file: resources/window.png
@@ -16,6 +17,9 @@
         file: resources/list.png
         file: resources/table.png
         file: resources/tree.png
+        file: resources/tree.png
+        file: resources/image.png
+        file: resources/text.png
         file: resources/menubar.png
         file: resources/menu.png
         file: resources/toolbar.png
@@ -23,7 +27,9 @@
         file: resources/tabpagecontainer.png
         file: resources/lineedit.png
         file: resources/textedit.png
+        file: resources/spinbox.png
         file: resources/slider.png
+        file: resources/gradient.png
         file: resources/borderlayout.png
         file: resources/flowlayout.png
         file: resources/stackedlayout.png
