@@ -94,12 +94,12 @@ namespace neogfx
                     {
                         auto settingWidget = std::make_shared<setting_widget<check_box>>(aLayout);
                         settingWidget->set_checked(aSetting.value().get<bool>());
-                        aSink += settingWidget->Checked([&]()
+                        aSink += settingWidget->Checked([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
                                 aSetting.set_value(true);
                         });
-                        aSink += settingWidget->Unchecked([&]()
+                        aSink += settingWidget->Unchecked([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
                                 aSetting.set_value(false);

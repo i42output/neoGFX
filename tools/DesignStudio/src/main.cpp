@@ -72,8 +72,6 @@ int main(int argc, char* argv[])
 
     try
     {
-        ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
-
         ds::main_window mainWindow{ app };
 
         app.actionShowStandardToolbar.checked([&]() { mainWindow.standardToolbar.show(); });
@@ -110,11 +108,23 @@ int main(int argc, char* argv[])
 
         ds::settings settings;
 
+        auto& subpixelRendering = settings.setting("environment.fonts_and_colors.subpixel"_s);
         auto& toolbarIconSize = settings.setting("environment.toolbars.icon_size"_s);
         auto& themeColor = settings.setting("environment.general.theme"_s);
         auto& workspaceGridType = settings.setting("environment.workspace.grid_type"_s);
         auto& workspaceGridSize = settings.setting("environment.workspace.grid_size"_s);
         auto& workspaceGridColor = settings.setting("environment.workspace.grid_color"_s);
+
+        auto subpixelRenderingChanged = [&]()
+        {
+            if (subpixelRendering.value<bool>(true))
+                ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
+            else
+                ng::service<ng::i_rendering_engine>().subpixel_rendering_off();
+        };
+        subpixelRendering.changing(subpixelRenderingChanged);
+        subpixelRendering.changed(subpixelRenderingChanged);
+        subpixelRenderingChanged();
 
         auto toolbarIconSizeChanged = [&]()
         {
