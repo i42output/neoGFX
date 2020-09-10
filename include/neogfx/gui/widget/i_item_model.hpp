@@ -232,7 +232,7 @@ namespace neogfx
 
     typedef std::optional<item_cell_info> optional_item_cell_info;
 
-    class i_item_model
+    class i_item_model : public i_property_owner
     {
     public:
         declare_event(column_info_changed, item_model_index::column_type)

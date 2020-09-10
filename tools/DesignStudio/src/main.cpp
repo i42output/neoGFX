@@ -82,8 +82,23 @@ int main(int argc, char* argv[])
         app.change_style("Dark");
         app.current_style().set_spacing(ng::size{ 4.0 });
 
-        ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ 192.0 } };
-        ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ 192.0 } };
+        ds::settings settings;
+
+        auto& autoscaleDocks = settings.setting("environment.tabs_and_windows.autoscale_docks"_s);
+        auto& leftDockWidth = settings.setting("environment.tabs_and_windows.left_dock_width"_s);
+        auto& rightDockWidth = settings.setting("environment.tabs_and_windows.right_dock_width"_s);
+
+        ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() } };
+        ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() } };
+
+        ng::get_property(leftDock.parent_layout(), "Size").property_changed([&](const ng::property_variant& aValue)
+        {
+            leftDockWidth.set_value(std::get<ng::size>(aValue).cx);
+        });
+        ng::get_property(rightDock.parent_layout(), "Size").property_changed([&](const ng::property_variant& aValue)
+        {
+            rightDockWidth.set_value(std::get<ng::size>(aValue).cx);
+        });
 
         auto toolbox = ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame);
         auto objects = ng::make_dockable<ng::table_view>("Objects"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
@@ -105,8 +120,6 @@ int main(int argc, char* argv[])
 
         ng::texture backgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } };
         ng::texture backgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } };
-
-        ds::settings settings;
 
         auto& subpixelRendering = settings.setting("environment.fonts_and_colors.subpixel"_s);
         auto& toolbarIconSize = settings.setting("environment.toolbars.icon_size"_s);

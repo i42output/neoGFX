@@ -43,7 +43,7 @@ namespace neogfx::game
         typedef const void* const_iterator; // todo
         typedef void* iterator; // todo
     private:
-        class node : public neolib::lifetime
+        class node : public neolib::lifetime<>
         {
         private:
             typedef neolib::vecarray<entity_id, BucketSize, -1> entity_list;

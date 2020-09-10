@@ -21,8 +21,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
-#include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/event.hpp>
+#include <neogfx/core/i_property.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/hid/mouse.hpp>
@@ -45,7 +46,7 @@ namespace neogfx
 
     typedef window_style surface_style;
 
-    class i_surface : public i_device_metrics
+    class i_surface : public i_device_metrics, public i_property_owner
     {
     public:
         declare_event(dpi_changed)

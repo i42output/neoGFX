@@ -164,5 +164,11 @@ namespace neogfx
                 return (dynamic_cast<const Context&>(owner()).*calculator)(std::forward<Args>(aArgs)...);
         }
     };
+
+    template <typename PropertyOwner>
+    inline i_property& get_property(PropertyOwner& Owner, const std::string& aPropertyName)
+    {
+        return *static_cast<i_property_owner&>(Owner).properties().property_map().find(string{ aPropertyName })->second();
+    }
 }
 

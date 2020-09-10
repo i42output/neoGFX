@@ -33,7 +33,7 @@
 namespace neogfx
 {
     template <typename T, typename Category, class Context, typename Calculator = T(*)()>
-    class property : public i_property, public neolib::lifetime
+    class property : public i_property, public neolib::lifetime<>
     {
         typedef property<T, Category, Context, Calculator> self_type;
     public:

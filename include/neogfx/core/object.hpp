@@ -29,10 +29,10 @@
 
 namespace neogfx
 {
-    template <typename... Bases>
-    class object : public neolib::object<i_property_owner, i_properties, Bases...>
+    template <typename Base = i_object>
+    class object : public neolib::object<Base>, public i_properties
     {
-        typedef neolib::object<i_property_owner, i_properties, Bases...> base_type;
+        typedef neolib::object<Base> base_type;
     public:
         using base_type::base_type;
     public:

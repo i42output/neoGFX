@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
-
+#include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/app/i_palette.hpp>
 #include <neogfx/gfx/text/font.hpp>
@@ -148,7 +148,7 @@ namespace neogfx
     };
     typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
-    class i_item_presentation_model
+    class i_item_presentation_model : public i_property_owner
     {
     public:
         declare_event(visual_appearance_changed)

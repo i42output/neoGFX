@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
+#include <neogfx/core/i_property.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include "../../../hid/native/i_native_surface.hpp"

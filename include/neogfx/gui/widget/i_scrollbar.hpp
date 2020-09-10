@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
+#include <neogfx/core/i_property.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/easing.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
@@ -58,7 +59,7 @@ namespace neogfx
 
     class i_scrollbar_container;
 
-    class i_scrollbar
+    class i_scrollbar : public i_property_owner
     {
     public:
         typedef double value_type;

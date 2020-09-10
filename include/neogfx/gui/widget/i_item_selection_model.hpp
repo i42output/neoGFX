@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/i_map.hpp>
 #include <neogfx/core/i_event.hpp>
+#include <neogfx/core/i_property.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 
 namespace neogfx
@@ -199,7 +200,7 @@ namespace neogfx
         mutable std::optional<item_presentation_model_index> iIndex;
     };
 
-    class i_item_selection_model
+    class i_item_selection_model : public i_property_owner
     {
     public:
         declare_event(current_index_changed, const optional_item_presentation_model_index& /* aCurrentIndex */, const optional_item_presentation_model_index& /* aPreviousIndex */)
