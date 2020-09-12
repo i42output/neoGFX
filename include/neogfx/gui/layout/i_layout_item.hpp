@@ -74,8 +74,8 @@ namespace neogfx
     public:
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
-        virtual void fix_weightings() = 0;
-        virtual void clear_weightings(bool aFixSizes = false) = 0;
+        virtual void fix_weightings(optional_size_policy const& aFixWeightsPolicy = size_constraint::MinimumExpanding) = 0;
+        virtual void clear_weightings(optional_size_policy const& aFixSizesPolicy = {}) = 0;
     public:
         virtual bool visible() const = 0;
     public:

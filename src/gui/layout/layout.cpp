@@ -525,7 +525,7 @@ namespace neogfx
     size_policy layout::size_policy() const
     {
         if (has_size_policy())
-            return *SizePolicy;
+            return base_type::size_policy();
         neogfx::size_policy result{ size_constraint::Minimum, size_constraint::Minimum };
         for (auto& i : items())
         {

@@ -91,6 +91,28 @@ int main(int argc, char* argv[])
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() } };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() } };
 
+        auto autoscaleDocksChanged = [&]()
+        {
+            if (!autoscaleDocks.value<bool>(true))
+            {
+                leftDock.set_decoration_style(leftDock.decoration_style() & ~ng::decoration_style::DontFixWeights);
+                rightDock.set_decoration_style(rightDock.decoration_style() & ~ng::decoration_style::DontFixWeights);
+                leftDock.clear_weightings(ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::MinimumExpanding });
+                rightDock.clear_weightings(ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::MinimumExpanding });
+                leftDock.template ancestor_layout<ng::border_layout>().clear_weightings(ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::MinimumExpanding });
+            }
+            else
+            {
+                leftDock.set_decoration_style(leftDock.decoration_style() | ng::decoration_style::DontFixWeights);
+                rightDock.set_decoration_style(rightDock.decoration_style() | ng::decoration_style::DontFixWeights);
+                leftDock.fix_weightings(ng::size_constraint::MinimumExpanding);
+                rightDock.fix_weightings(ng::size_constraint::MinimumExpanding);
+                leftDock.template ancestor_layout<ng::border_layout>().fix_weightings();
+            }
+        };
+        autoscaleDocks.changing(autoscaleDocksChanged);
+        autoscaleDocks.changed(autoscaleDocksChanged);
+        autoscaleDocksChanged();
         ng::get_property(leftDock.parent_layout(), "Size").property_changed([&](const ng::property_variant& aValue)
         {
             leftDockWidth.set_value(std::get<ng::size>(aValue).cx);

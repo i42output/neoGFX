@@ -186,6 +186,8 @@ namespace neogfx
 
     size_policy gradient_widget::size_policy() const
     {
+        if (has_size_policy())
+            return widget::size_policy();
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 

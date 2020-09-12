@@ -44,8 +44,8 @@ namespace neogfx
         push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
         // button
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
     public:
         void paint_non_client(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;

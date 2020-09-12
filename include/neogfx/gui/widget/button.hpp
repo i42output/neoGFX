@@ -61,6 +61,9 @@ namespace neogfx
         // widget
     public:
         neogfx::size_policy size_policy() const override;
+        using widget::set_size_policy;
+        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
+        size maximum_size(const optional_size&) const override;
         neogfx::padding padding() const override;
         // i_button
     public:
@@ -82,6 +85,7 @@ namespace neogfx
         void set_image(const std::string& aImageUri);
         void set_image(const neogfx::image& aImage);
         void set_image(const texture& aImage);
+        void set_image_extents(const size& aImageExtents);
         const neogfx::label& label() const;
         neogfx::label& label();
         const neogfx::text_widget& text_widget() const;

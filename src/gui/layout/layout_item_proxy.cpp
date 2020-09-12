@@ -32,13 +32,23 @@ namespace neogfx
     }
 
     layout_item_proxy::layout_item_proxy(std::shared_ptr<i_layout_item> aItem) :
-        iSubject{ aItem }, iSubjectIsProxy{ aItem->is_proxy() }, iMinimumSize{ static_cast<uint32_t>(-1), {} }, iMaximumSize{ static_cast<uint32_t>(-1), {} }
+        iSubject{ aItem }, 
+        iSubjectIsProxy{ aItem->is_proxy() }, 
+        iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
+        iWeight{ static_cast<uint32_t>(-1), {} },
+        iMinimumSize{ static_cast<uint32_t>(-1), {} },
+        iMaximumSize{ static_cast<uint32_t>(-1), {} }
     {
         set_alive();
     }
 
     layout_item_proxy::layout_item_proxy(const layout_item_proxy& aOther) :
-        iSubject{ aOther.iSubject }, iSubjectIsProxy{ aOther.iSubject->is_proxy() }, iMinimumSize{ static_cast<uint32_t>(-1), {} }, iMaximumSize{ static_cast<uint32_t>(-1), {} }
+        iSubject{ aOther.iSubject }, 
+        iSubjectIsProxy{ aOther.iSubject->is_proxy() }, 
+        iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
+        iWeight{ static_cast<uint32_t>(-1), {} },
+        iMinimumSize{ static_cast<uint32_t>(-1), {} },
+        iMaximumSize{ static_cast<uint32_t>(-1), {} }
     {
         set_alive();
     }
@@ -216,14 +226,14 @@ namespace neogfx
         subject().layout_as(adjustedPosition, adjustedSize);
     }
 
-    void layout_item_proxy::fix_weightings()
+    void layout_item_proxy::fix_weightings(optional_size_policy const& aFixWeightsPolicy)
     {
-        subject().fix_weightings();
+        subject().fix_weightings(aFixWeightsPolicy);
     }
 
-    void layout_item_proxy::clear_weightings(bool aFixSizes)
+    void layout_item_proxy::clear_weightings(optional_size_policy const& aFixSizesPolicy)
     {
-        subject().clear_weightings(aFixSizes);
+        subject().clear_weightings(aFixSizesPolicy);
     }
 
     bool layout_item_proxy::high_dpi() const
@@ -273,7 +283,13 @@ namespace neogfx
 
     size_policy layout_item_proxy::size_policy() const
     {
-        return subject().size_policy();
+        auto& cachedSizePolicy = iSizePolicy.second;
+        if (iSizePolicy.first != global_layout_id())
+        {
+            cachedSizePolicy = subject().size_policy();
+            iSizePolicy.first = global_layout_id();
+        }
+        return cachedSizePolicy;
     }
 
     void layout_item_proxy::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
@@ -288,7 +304,13 @@ namespace neogfx
 
     size layout_item_proxy::weight() const
     {
-        return subject().weight();
+        auto& cachedWeight = iWeight.second;
+        if (iWeight.first != global_layout_id())
+        {
+            cachedWeight = subject().weight();
+            iWeight.first = global_layout_id();
+        }
+        return cachedWeight;
     }
 
     void layout_item_proxy::set_weight(const optional_size& aWeight, bool aUpdateLayout)
@@ -303,12 +325,12 @@ namespace neogfx
 
     size layout_item_proxy::minimum_size(const optional_size& aAvailableSpace) const
     {
+        if (&subject() == debug())
+            std::cerr << "layout_item_proxy::minimum_size(" << aAvailableSpace << ")" << std::endl;
         if (!visible())
             return size{};
-        auto& minSize = iMinimumSize.second;
-        if (iMinimumSize.first == global_layout_id())
-            return minSize;
-        else
+        auto& cachedMinSize = iMinimumSize.second;
+        if (iMinimumSize.first != global_layout_id())
         {
             if (iMinimumSizeAnchor == std::nullopt)
             {   
@@ -319,30 +341,31 @@ namespace neogfx
                     iMinimumSizeAnchor = nullptr;
             }
             if (*iMinimumSizeAnchor == nullptr)
-                minSize = subject().minimum_size(aAvailableSpace);
+                cachedMinSize = subject().minimum_size(aAvailableSpace);
             else
-                minSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
+                cachedMinSize = (**iMinimumSizeAnchor).evaluate_constraints(aAvailableSpace);
             if (effective_size_policy().maintain_aspect_ratio())
             {
                 auto const& aspectRatio = effective_size_policy().aspect_ratio();
                 if (aspectRatio.cx < aspectRatio.cy)
                 {
-                    if (minSize.cx < minSize.cy)
-                        minSize = size{ minSize.cx, minSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+                    if (cachedMinSize.cx < cachedMinSize.cy)
+                        cachedMinSize = size{ cachedMinSize.cx, cachedMinSize.cx * (aspectRatio.cy / aspectRatio.cx) };
                     else
-                        minSize = size{ minSize.cy * (aspectRatio.cx / aspectRatio.cy), minSize.cy };
+                        cachedMinSize = size{ cachedMinSize.cy * (aspectRatio.cx / aspectRatio.cy), cachedMinSize.cy };
                 }
                 else
                 {
-                    if (minSize.cx < minSize.cy)
-                        minSize = size{ minSize.cy * (aspectRatio.cx / aspectRatio.cy), minSize.cy };
+                    if (cachedMinSize.cx < cachedMinSize.cy)
+                        cachedMinSize = size{ cachedMinSize.cy * (aspectRatio.cx / aspectRatio.cy), cachedMinSize.cy };
                     else
-                        minSize = size{ minSize.cx, minSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+                        cachedMinSize = size{ cachedMinSize.cx, cachedMinSize.cx * (aspectRatio.cy / aspectRatio.cx) };
                 }
             }
+            cachedMinSize = subject().apply_fixed_size(cachedMinSize);
             iMinimumSize.first = global_layout_id();
-            return minSize;
         }
+        return cachedMinSize;
     }
 
     void layout_item_proxy::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
@@ -359,16 +382,17 @@ namespace neogfx
 
     size layout_item_proxy::maximum_size(const optional_size& aAvailableSpace) const
     {
+        if (&subject() == debug())
+            std::cerr << "layout_item_proxy::maximum_size(" << aAvailableSpace << ")" << std::endl;
         if (!visible())
             return size::max_size();
-        if (iMaximumSize.first == global_layout_id())
-            return iMaximumSize.second;
-        else
+        auto& cachedMaxSize = iMaximumSize.second;
+        if (iMaximumSize.first != global_layout_id())
         {
-            iMaximumSize.second = subject().maximum_size(aAvailableSpace);
+            cachedMaxSize = subject().apply_fixed_size(subject().maximum_size(aAvailableSpace));
             iMaximumSize.first = global_layout_id();
-            return iMaximumSize.second;
         }
+        return cachedMaxSize;
     }
 
     void layout_item_proxy::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
@@ -383,16 +407,15 @@ namespace neogfx
         return subject().has_fixed_size();
     }
 
-    size layout_item_proxy::fixed_size() const
+    size layout_item_proxy::fixed_size(const optional_size& aAvailableSpace) const
     {
-        if (iFixedSize.first == global_layout_id())
-            return iFixedSize.second;
-        else
+        auto& cachedFixedSize = iMaximumSize.second;
+        if (iFixedSize.first != global_layout_id())
         {
-            iFixedSize.second = subject().fixed_size();
+            cachedFixedSize = subject().fixed_size(aAvailableSpace);
             iFixedSize.first = global_layout_id();
-            return iFixedSize.second;
         }
+        return cachedFixedSize;
     }
 
     void layout_item_proxy::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
@@ -419,12 +442,13 @@ namespace neogfx
 
     bool layout_item_proxy::visible() const
     {
+        auto& cachedVisible = iVisible.second;
         if (iVisible.first != global_layout_id())
         {
-            iVisible.second = subject().visible() || parent_layout().ignore_visibility();
+            cachedVisible = subject().visible() || parent_layout().ignore_visibility();
             iVisible.first = global_layout_id();
         }
-        return iVisible.second;
+        return cachedVisible;
     }
 
     bool layout_item_proxy::operator==(const layout_item_proxy& aOther) const

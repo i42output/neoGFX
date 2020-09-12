@@ -197,7 +197,7 @@ namespace neogfx
 
     size_policy drop_list_popup::size_policy() const
     {
-        if (window::has_size_policy())
+        if (has_size_policy())
             return window::size_policy();
         return size_constraint::Minimum;
     }
@@ -877,7 +877,7 @@ namespace neogfx
 
     neogfx::size_policy drop_list::size_policy() const
     {
-        if (widget::has_size_policy())
+        if (has_size_policy())
             return widget::size_policy();
         if (list_always_visible())
             return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };

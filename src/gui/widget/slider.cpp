@@ -72,7 +72,7 @@ namespace neogfx
     {
         if (has_size_policy())
             return widget::size_policy();
-        return iOrientation == slider_orientation::Horizontal ? 
+        return iOrientation == slider_orientation::Horizontal ?
             neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum } : 
             neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }

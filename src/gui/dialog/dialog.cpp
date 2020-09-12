@@ -191,7 +191,7 @@ namespace neogfx
 
     neogfx::size_policy dialog::size_policy() const
     {
-        if (window::has_size_policy())
+        if (has_size_policy())
             return window::size_policy();
         else if ((style() & window_style::Resize) == window_style::Resize)
             return size_constraint::Manual;

@@ -103,9 +103,29 @@ namespace neogfx
 
     neogfx::size_policy button::size_policy() const
     {
-        if (widget::has_size_policy())
+        if (has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
+        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
+    }
+
+    void button::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
+    {
+        widget::set_size_policy(aSizePolicy, aUpdateLayout);
+        label().set_size_policy(aSizePolicy, aUpdateLayout);
+        label().text_widget().set_size_policy(aSizePolicy, aUpdateLayout);
+        label().image_widget().set_size_policy(aSizePolicy, aUpdateLayout);
+    }
+
+    size button::maximum_size(const optional_size&) const
+    {
+        if (has_maximum_size())
+            return widget::maximum_size();
+        auto result = widget::maximum_size();
+        if (size_policy().horizontal_size_policy() != size_constraint::Minimum)
+            result.cx = size::max_dimension();
+        if (size_policy().vertical_size_policy() != size_constraint::Minimum)
+            result.cy = size::max_dimension();
+        return result;
     }
 
     padding button::padding() const
@@ -202,6 +222,12 @@ namespace neogfx
     void button::set_image(const texture& aImage)
     {
         label().set_image(aImage);
+    }
+
+    void button::set_image_extents(const size& aImageExtents)
+    {
+        image_widget().set_fixed_size(aImageExtents);
+        label().image_widget().set_size_policy(size_constraint::Fixed);
     }
 
     const neogfx::label& button::label() const
@@ -350,8 +376,8 @@ namespace neogfx
         Unchecked.set_trigger_type(event_trigger_type::Asynchronous);
         Indeterminate.set_trigger_type(event_trigger_type::Asynchronous);
 
-        layout().set_padding(neogfx::padding(0.0));
-        iLabel.set_size_policy(size_constraint::Expanding);
+        set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        layout().set_padding(0.0);
 
         set_focus_policy(focus_policy::TabFocus);
 

@@ -256,10 +256,12 @@
                                 push_button: {
                                     id: button1
                                     text: "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement."
+                                    size_policy: Expanding
                                     base_color: LightGoldenrod
                                 }
                                 push_button: {
                                     id: buttonGenerateUuid
+                                    size_policy: Expanding
                                     text: "&Generate UUID"
                                 }
                             }
@@ -414,6 +416,7 @@
                                 }
                                 push_button: {
                                     id: button6
+                                    size_policy: Expanding
                                     text: "RGB <-> HSV\ncolor space\nconversion test"
                                 }
                                 spacer: {

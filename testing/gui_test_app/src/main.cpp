@@ -852,7 +852,7 @@ int main(int argc, char* argv[])
         itemModel.set_column_max_value(1, 9999u);
         itemModel.set_column_step_value(1, 1u);
         tableView1.set_model(itemModel);
-        my_item_presentation_model ipm1{ itemModel };
+        my_item_presentation_model ipm1{ itemModel, true };
         tableView1.set_presentation_model(ipm1);
         ipm1.set_column_editable_when_focused(4);
         ipm1.set_column_editable_when_focused(5);
@@ -860,7 +860,7 @@ int main(int argc, char* argv[])
         ipm1.set_column_editable_when_focused(7);
         ipm1.set_column_editable_when_focused(8);
         tableView2.set_model(itemModel);
-        my_item_presentation_model ipm2{ itemModel };
+        my_item_presentation_model ipm2{ itemModel, true };
         ipm2.set_column_editable_when_focused(0);
         ipm2.set_column_editable_when_focused(1);
         ipm2.set_column_editable_when_focused(2);

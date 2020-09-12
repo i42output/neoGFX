@@ -101,7 +101,7 @@ namespace neogfx
 
     void widget::property_changed(i_property& aProperty)
     {
-        static auto invalidate_layout = [](i_widget& self) { if (self.has_parent_layout()) self.parent_layout().invalidate(); self.update(true); };
+        static auto invalidate_layout = [](i_widget& self) { if (self.has_parent_layout()) self.parent_layout().invalidate(); };
         static auto invalidate_canvas = [](i_widget& self) { self.update(true); };
         static auto invalidate_window_canvas = [](i_widget& self) { self.root().as_widget().update(true); };
         static auto ignore = [](i_widget&) {};
@@ -580,6 +580,8 @@ namespace neogfx
                     switch (size_policy().horizontal_size_policy())
                     {
                     case size_constraint::Fixed:
+                        desiredSize.cx = has_fixed_size() ? fixed_size().cx : minimum_size(extents()).cx;
+                        break;
                     case size_constraint::Minimum:
                         desiredSize.cx = minimum_size(extents()).cx;
                         break;
@@ -592,6 +594,8 @@ namespace neogfx
                     switch (size_policy().vertical_size_policy())
                     {
                     case size_constraint::Fixed:
+                        desiredSize.cy = has_fixed_size() ? fixed_size().cy : minimum_size(extents()).cy;
+                        break;
                     case size_constraint::Minimum:
                         desiredSize.cy = minimum_size(extents()).cy;
                         break;
@@ -813,18 +817,20 @@ namespace neogfx
 
     size_policy widget::size_policy() const
     {
+        if (debug() == this)
+            std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
         if (has_size_policy())
-            return *SizePolicy;
+            return base_type::size_policy();
         else
             return size_constraint::Expanding;
     }
 
     size widget::minimum_size(const optional_size& aAvailableSpace) const
     {
+        if (debug() == this)
+            std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << std::endl;
         size result;
-        if (has_fixed_size())
-            result = fixed_size();
-        else if (has_minimum_size())
+        if (has_minimum_size())
             result = units_converter{ *this }.from_device_units(*MinimumSize);
         else if (has_layout())
         {
@@ -837,18 +843,18 @@ namespace neogfx
         else
             result = padding().size();
         if (debug() == this)
-            std::cerr << "widget::minimum_size(...) --> " << result << std::endl;
+            std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
+        if (debug() == this)
+            std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << std::endl;
         size result;
-        if (has_fixed_size())
-            result = fixed_size();
-        else if (has_maximum_size())
+        if (has_maximum_size())
             result = units_converter(*this).from_device_units(*MaximumSize);
-        else if (size_policy() == size_constraint::Minimum || size_policy() == size_constraint::Fixed)
+        else if (size_policy() == size_constraint::Minimum)
             result = minimum_size(aAvailableSpace);
         else if (has_layout())
         {
@@ -865,7 +871,7 @@ namespace neogfx
         if (size_policy().vertical_size_policy() == size_constraint::Maximum)
             result.cy = size::max_size().cy;
         if (debug() == this)
-            std::cerr << "widget::maximum_size(...) --> " << result << std::endl;
+            std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
@@ -878,7 +884,7 @@ namespace neogfx
     void widget::layout_as(const point& aPosition, const size& aSize)
     {
         if (debug() == this)
-            std::cerr << "widget::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
+            std::cerr << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
         move(aPosition);
         if (extents() != aSize)
             resize(aSize);
@@ -889,7 +895,7 @@ namespace neogfx
     bool widget::update(const rect& aUpdateRect)
     {
         if (debug() == this)
-            std::cerr << "widget::update(" << aUpdateRect << ")" << std::endl;
+            std::cerr << typeid(*this).name() << "::update(" << aUpdateRect << ")" << std::endl;
         if (!can_update())
             return false;
         if (aUpdateRect.empty())
@@ -946,7 +952,7 @@ namespace neogfx
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
         if (debug() == this)
-            std::cerr << "widget::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
+            std::cerr << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 
         aGc.set_extents(extents());
         aGc.set_origin(origin());
@@ -976,7 +982,7 @@ namespace neogfx
             aGc.set_origin(origin());
 
             if (debug() == this)
-                std::cerr << "widget::render(...): client_rect: " << client_rect() << ", origin: " << origin() << std::endl;
+                std::cerr << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << std::endl;
 
             scoped_scissor scissor(aGc, clipRect);
 

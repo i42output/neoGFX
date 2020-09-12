@@ -55,7 +55,7 @@ namespace neogfx
     {
         iButtonImageExtents = aExtents;
         for (auto& button : iButtons)
-            button->image_widget().set_fixed_size(button_image_extents());
+            button->set_image_extents(button_image_extents());
     }
 
     uint32_t toolbar::button_count() const
@@ -97,7 +97,7 @@ namespace neogfx
         if (aButtonIndex > iButtons.size())
             throw bad_button_index();
         iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), aAction));
-        iButtons[aButtonIndex]->image_widget().set_fixed_size(button_image_extents());
+        iButtons[aButtonIndex]->set_image_extents(button_image_extents());
         return aAction;
     }
 
@@ -106,7 +106,7 @@ namespace neogfx
         if (aButtonIndex > iButtons.size())
             throw bad_button_index();
         iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), aAction));
-        iButtons[aButtonIndex]->image_widget().set_fixed_size(button_image_extents());
+        iButtons[aButtonIndex]->set_image_extents(button_image_extents());
         return *aAction;
     }
 

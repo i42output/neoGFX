@@ -216,7 +216,7 @@ namespace neogfx
         virtual bool initializing() const = 0;
         virtual bool has_item_model() const = 0;
         virtual i_item_model& item_model() const = 0;
-        virtual void set_item_model(i_item_model& aItemModel, bool aSortable = false) = 0;
+        virtual void set_item_model(i_item_model& aItemModel) = 0;
         virtual item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const = 0;
         virtual bool has_item_model_index(const item_model_index& aIndex) const = 0;
         virtual item_presentation_model_index from_item_model_index(const item_model_index& aIndex, bool aIgnoreColumn = false) const = 0;
@@ -282,6 +282,7 @@ namespace neogfx
         virtual dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
     public:
         virtual bool sortable() const = 0;
+        virtual void set_sortable(bool aSortable) = 0;
         virtual optional_sort sorting_by() const = 0;
         virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) = 0;
         virtual void reset_sort() = 0;

@@ -939,7 +939,7 @@ namespace neogfx
         iScreenPicker.set_checkable();
         iScreenPicker.set_size_policy(size_constraint::Minimum);
         iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.png" });
-        iScreenPicker.image_widget().set_fixed_size(size{ 16_dip });
+        iScreenPicker.set_image_extents(size{ 16_dip });
         iScreenPicker.enable(service<i_clipboard>().has_image());
         iSink += service<i_clipboard>().updated([this]()
         {

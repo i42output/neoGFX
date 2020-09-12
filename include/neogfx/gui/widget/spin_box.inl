@@ -85,6 +85,8 @@ namespace neogfx
     {
         if (base_type::has_size_policy())
             return base_type::size_policy();
+        else if (base_type::has_fixed_size())
+            return size_constraint::Fixed;
         return neogfx::size_policy{ text_box().size_hint() ? size_constraint::Minimum : size_constraint::Expanding, size_constraint::Minimum };
     }
 

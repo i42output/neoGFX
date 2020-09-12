@@ -276,11 +276,11 @@ namespace neogfx
         iLayout2.set_padding(neogfx::padding{});
         iLayout3.set_padding(neogfx::padding{});
         iLayout5.set_alignment(alignment::Top);
-        iReverse.set_size_policy(size_constraint::Minimum);
-        iReverse.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
+        iReverse.set_size_policy(size_constraint::Fixed);
+        iReverse.set_image_extents(size{ 16_dip, 16_dip });
         iReverse.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
-        iReversePartial.set_size_policy(size_constraint::Minimum);
-        iReversePartial.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
+        iReversePartial.set_size_policy(size_constraint::Fixed);
+        iReversePartial.set_image_extents(size{ 16_dip, 16_dip });
         iReversePartial.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iHueSlider.set_minimum(0.0);
         iHueSlider.set_maximum(360.0);
@@ -293,10 +293,10 @@ namespace neogfx
             hues.emplace_back(pos, color::from_hsv(pos * 360.0, 1.0, 1.0));
         }
         iHueSlider.set_bar_color(neogfx::gradient{ hues, gradient_direction::Horizontal });
-        iImport.set_size_policy(size_constraint::Minimum);
-        iImport.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
-        iDelete.set_size_policy(size_constraint::Minimum);
-        iDelete.image_widget().set_fixed_size(size{ 16_dip, 16_dip });
+        iImport.set_size_policy(size_constraint::Fixed);
+        iImport.set_image_extents(size{ 16_dip, 16_dip });
+        iDelete.set_size_policy(size_constraint::Fixed);
+        iDelete.set_image_extents(size{ 16_dip, 16_dip });
         iDelete.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iTile.set_checkable(true);
         iTile.item_layout().set_alignment(alignment::Right);

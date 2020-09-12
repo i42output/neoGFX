@@ -40,7 +40,7 @@ namespace neogfx
         {
         }
     public:
-        size minimum_size(const optional_size& aAvailableSpace) const override
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override
         {
             if (has_minimum_size())
                 return push_button::minimum_size(aAvailableSpace);
@@ -361,7 +361,7 @@ namespace neogfx
         for (uint32_t col = 0; col < presentation_model().columns(); ++col)
         {
             dimension oldSectionWidth = section_width(col);
-            dimension newSectionWidth = layout().get_widget_at(col).extents().cx;
+            dimension newSectionWidth = layout().get_widget_at(col).fixed_size().cx;
             if (col == 0)
                 newSectionWidth -= presentation_model().cell_spacing(*this).cx / 2.0;
             if (newSectionWidth != oldSectionWidth)
@@ -381,7 +381,6 @@ namespace neogfx
             layout().get_widget_at(col).set_fixed_size({}, false);
             layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
         }
-        layout_items();
         iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
     }
 
@@ -424,16 +423,18 @@ namespace neogfx
             if (i < presentation_model().columns())
             {
                 button.set_text(presentation_model().column_heading_text(i));
+                button.set_minimum_size({});
+                button.set_maximum_size({});
                 if (!expand_last_column() || i != presentation_model().columns() - 1)
+                {
                     button.set_size_policy(iType == header_view_type::Horizontal ?
                         neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding } :
                         neogfx::size_policy{ size_constraint::Expanding, size_constraint::Fixed });
+                }
                 else
                     button.set_size_policy(iType == header_view_type::Horizontal ?
                         neogfx::size_policy{ size_constraint::Maximum, size_constraint::Minimum } :
                         neogfx::size_policy{ size_constraint::Minimum, size_constraint::Maximum });
-                button.set_minimum_size({});
-                button.set_maximum_size({});
                 button.enable(true);
                 if (iButtonSinks[i][0].empty())
                     iButtonSinks[i][0] = button.Clicked([&, i]()

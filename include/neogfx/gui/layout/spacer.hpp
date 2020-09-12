@@ -30,6 +30,7 @@ namespace neogfx
 
     class spacer : public layout_item<object<i_spacer>>
     {
+        typedef layout_item<object<i_spacer>> base_type;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };
         struct padding_unsupported : std::logic_error { padding_unsupported() : std::logic_error("neogfx::spacer::padding_unsupported") {} };

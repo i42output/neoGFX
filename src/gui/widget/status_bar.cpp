@@ -94,6 +94,8 @@ namespace neogfx
 
     neogfx::size_policy status_bar::keyboard_lock_status::size_policy() const
     {
+        if (has_size_policy())
+            return widget::size_policy();
         return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
@@ -233,6 +235,8 @@ namespace neogfx
 
     neogfx::size_policy status_bar::size_policy() const
     {
+        if (has_size_policy())
+            return widget::size_policy();
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 

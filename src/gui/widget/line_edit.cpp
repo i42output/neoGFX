@@ -39,7 +39,7 @@ namespace neogfx
 
     neogfx::size_policy line_edit::size_policy() const
     {
-        if (text_edit::has_size_policy())
+        if (has_size_policy())
             return text_edit::size_policy();
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }

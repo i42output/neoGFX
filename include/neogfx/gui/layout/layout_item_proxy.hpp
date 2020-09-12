@@ -87,7 +87,7 @@ namespace neogfx
         size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
         void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
         bool has_fixed_size() const override;
-        size fixed_size() const override;
+        size fixed_size(const optional_size& aAvailableSpace = {}) const override;
         void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
     public:
         bool has_padding() const override;
@@ -98,8 +98,8 @@ namespace neogfx
     public:
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
-        void fix_weightings() override;
-        void clear_weightings(bool aFixSizes = false) override;
+        void fix_weightings(optional_size_policy const& aFixWeightsPolicy = size_constraint::MinimumExpanding) override;
+        void clear_weightings(optional_size_policy const& aFixSizesPolicy = {}) override;
     public:
         const i_layout_item& subject() const override;
         i_layout_item& subject() override;
@@ -112,6 +112,8 @@ namespace neogfx
         std::shared_ptr<i_layout_item> iSubject;
         bool iSubjectIsProxy;
         mutable std::pair<uint32_t, bool> iVisible;
+        mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;
+        mutable std::pair<uint32_t, size> iWeight;
         mutable std::pair<uint32_t, size> iMinimumSize;
         mutable std::pair<uint32_t, size> iMaximumSize;
         mutable std::pair<uint32_t, size> iFixedSize;

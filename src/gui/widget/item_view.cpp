@@ -91,7 +91,7 @@ namespace neogfx
             iModelSink += model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
             iModelSink += neolib::destroying(model(), [this]() { iModel = nullptr; });
             if (has_presentation_model())
-                presentation_model().set_item_model(*aModel, false);
+                presentation_model().set_item_model(*aModel);
         }
         model_changed();
         update_scrollbar_visibility();
@@ -136,7 +136,7 @@ namespace neogfx
             if (presentation_model().has_item_model())
                 set_model(presentation_model().item_model());
             else if (has_model())
-                presentation_model().set_item_model(model(), presentation_model().sortable());
+                presentation_model().set_item_model(model());
         }
         if (has_presentation_model() && has_selection_model())
             selection_model().set_presentation_model(*aPresentationModel);
@@ -1097,14 +1097,14 @@ namespace neogfx
         if (aUpdateReason == header_view_update_reason::FullUpdate)
         {
             bool wasVisible = selection_model().has_current_index() && is_visible(selection_model().current_index());
-            layout_items();
             if (wasVisible)
                 make_visible(selection_model().current_index());
+            layout_items();
         }
         else
         {
             update_scrollbar_visibility();
-            update();
+            layout_items();
         }
         if (editing() != std::nullopt)
         {

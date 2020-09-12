@@ -414,7 +414,7 @@ namespace neogfx
         {
             if (iStandardImageSize)
             {
-                image_widget().set_fixed_size(dpi_select(size{ 16.0, 16.0 }, size{ 32.0, 32.0 }));
+                set_image_extents(dpi_select(size{ 16.0, 16.0 }, size{ 32.0, 32.0 }));
                 image_widget().set_aspect_ratio(aspect_ratio::KeepExpanding);
             }
             else

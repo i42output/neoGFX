@@ -195,7 +195,7 @@ namespace neogfx
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const size_policy& aPolicy)
     {
-        aStream << "{" << aPolicy.horizontal_size_policy() << " " << aPolicy.vertical_size_policy() << " " << aPolicy.aspect_ratio() << "}";
+        aStream << "{" << aPolicy.horizontal_size_policy() << " " << aPolicy.vertical_size_policy() << " " << (aPolicy.maintain_aspect_ratio() ? aPolicy.aspect_ratio() : optional_size{}) << "}";
         return aStream;
     }
 
@@ -211,8 +211,6 @@ namespace neogfx
 
     class i_geometry : public i_units_context
     {
-    public:
-        struct no_fixed_size : std::logic_error { no_fixed_size() : std::logic_error("neogfx::i_geometry::no_fixed_size") {} };
     public:
         virtual point position() const = 0;
         virtual void set_position(const point& aPosition) = 0;
@@ -231,7 +229,7 @@ namespace neogfx
         virtual size maximum_size(const optional_size& aAvailableSpace = {}) const = 0;
         virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) = 0;
         virtual bool has_fixed_size() const = 0;
-        virtual size fixed_size() const = 0;
+        virtual size fixed_size(const optional_size& aAvailableSpace = {}) const = 0;
         virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) = 0;
     public:
         virtual bool has_padding() const = 0;
@@ -239,6 +237,15 @@ namespace neogfx
         virtual void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) = 0;
         // helpers
     public:
+        size apply_fixed_size(size const& aResult) const
+        {
+            auto newResult = aResult;
+            if (size_policy().horizontal_size_policy() == size_constraint::Fixed && has_fixed_size())
+                newResult.cx = fixed_size().cx;
+            if (size_policy().vertical_size_policy() == size_constraint::Fixed && has_fixed_size())
+                newResult.cy = fixed_size().cy;
+            return newResult;
+        }
         neogfx::size_policy effective_size_policy() const
         {
             auto effectivePolicy = size_policy();
@@ -288,24 +295,6 @@ namespace neogfx
             newSize.cy = aHeight;
             set_maximum_size(newSize, aUpdateLayout);
         }
-    };
-
-    class scoped_fixed_size_suppression
-    {
-    public:
-        scoped_fixed_size_suppression(i_geometry& aGeometry) :
-            iGeometry{ aGeometry },
-            iFixedSize{ aGeometry.has_fixed_size() ? aGeometry.fixed_size() : std::optional<size>{} }
-        {
-            iGeometry.set_fixed_size({}, false);
-        }
-        ~scoped_fixed_size_suppression()
-        {
-            iGeometry.set_fixed_size(iFixedSize, false);
-        }
-    private:
-        i_geometry& iGeometry;
-        std::optional<size> iFixedSize;
     };
 
     struct size_hint

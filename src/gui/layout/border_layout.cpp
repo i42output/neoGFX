@@ -176,17 +176,17 @@ namespace neogfx
         iRows.layout_items(aPosition, aSize);
     }
 
-    void border_layout::fix_weightings()
+    void border_layout::fix_weightings(optional_size_policy const& aFixWeightsPolicy)
     {
-        iRows.fix_weightings();
-        iMiddle.fix_weightings();
+        iRows.fix_weightings(aFixWeightsPolicy);
+        iMiddle.fix_weightings(aFixWeightsPolicy);
         invalidate(false);
     }
 
-    void border_layout::clear_weightings(bool aFixSizes)
+    void border_layout::clear_weightings(optional_size_policy const& aFixSizesPolicy)
     {
-        iRows.clear_weightings(aFixSizes);
-        iMiddle.clear_weightings(aFixSizes);
+        iRows.clear_weightings(aFixSizesPolicy);
+        iMiddle.clear_weightings(aFixSizesPolicy);
         invalidate(false);
     }
 

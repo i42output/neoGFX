@@ -76,7 +76,7 @@ namespace neogfx
 
     size_policy check_box::size_policy() const
     {
-        if (widget::has_size_policy())
+        if (has_size_policy())
             return widget::size_policy();
         return size_constraint::Minimum;
     }

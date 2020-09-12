@@ -208,16 +208,9 @@ namespace neogfx
 
     neogfx::size_policy label::size_policy() const
     {
-        if (widget::has_size_policy())
+        if (has_size_policy())
             return widget::size_policy();
         return size_constraint::Minimum;
-    }
-
-    void label::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-    {
-        widget::set_size_policy(aSizePolicy, aUpdateLayout);
-        text_widget().set_size_policy(aSizePolicy, aUpdateLayout);
-        image_widget().set_size_policy(aSizePolicy, aUpdateLayout);
     }
 
     const std::string& label::text() const

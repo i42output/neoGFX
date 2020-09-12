@@ -170,6 +170,7 @@
                                     }
                                     push_button: {
                                         id: browseProjectLocation
+                                        size_policy: Fixed
                                         .image: {
                                             uri: ":/neogfx/resources/icons/openfolder.png"
                                             size: 16dip

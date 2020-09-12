@@ -50,6 +50,7 @@ namespace neogfx
         Popup           = 0x00000008,
         Splash          = 0x00000010,
         Resizable       = 0x01000000,
+        DontFixWeights  = 0x02000000,
         Nested          = 0x10000000,
         NestedWindow    = Window | Nested,
         NestedTool      = Tool | Nested,
@@ -75,6 +76,11 @@ namespace neogfx
     inline constexpr decoration& operator&=(decoration& aLhs, decoration aRhs)
     {
         return aLhs = static_cast<decoration>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr decoration_style operator~(decoration_style aValue)
+    {
+        return static_cast<decoration_style>(~static_cast<uint32_t>(aValue));
     }
 
     inline constexpr decoration_style operator|(decoration_style aLhs, decoration_style aRhs)
@@ -349,10 +355,10 @@ namespace neogfx
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     public:
-        void fix_weightings() override
+        void fix_weightings(optional_size_policy const& aFixWeightsPolicy = size_constraint::MinimumExpanding) override
         {
-            widget_type::fix_weightings();
-            as_widget().template ancestor_layout<border_layout>().fix_weightings(); // todo: is this layout relationship assumption good idea?
+            widget_type::fix_weightings(aFixWeightsPolicy);
+            as_widget().template ancestor_layout<border_layout>().fix_weightings(aFixWeightsPolicy); // todo: is this layout relationship assumption good idea?
         }
     protected:
         void capture_released() override
@@ -398,8 +404,11 @@ namespace neogfx
             if ((decoration_style() & neogfx::decoration_style::Window) == neogfx::decoration_style::Window && !as_widget().is_root())
                 return; // surface not yet created
 
-            as_widget().set_size_policy(size_constraint::MinimumExpanding);
-            as_widget().set_weight(size{ 1.0 });
+            if (!as_widget().is_root())
+            {
+                as_widget().set_size_policy(size_constraint::MinimumExpanding);
+                as_widget().set_weight(size{ 1.0 });
+            }
 
             iNonClientLayout.emplace(*this);
             non_client_layout().set_padding(neogfx::padding{});
@@ -484,7 +493,7 @@ namespace neogfx
                 {                
                     if (widget_type::debug() == this)
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
-                    if ((decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock)
+                    if ((decoration_style() & (neogfx::decoration_style::Dock | neogfx::decoration_style::DontFixWeights)) == neogfx::decoration_style::Dock)
                     {
                         resizingContext.set_fixed_size({}, false);
                         fix_weightings();

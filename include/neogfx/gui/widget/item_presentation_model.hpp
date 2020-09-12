@@ -100,14 +100,14 @@ namespace neogfx
         using typename base_type::bad_index;
         using typename base_type::no_mapped_row;
     public:
-        basic_item_presentation_model() : iItemModel{ nullptr }, iSortable{ false }, iAlternatingRowColor{ false }, iInitializing{ false }, iFiltering{ false }
+        basic_item_presentation_model(bool aSortable = false) : iItemModel{ nullptr }, iSortable{ aSortable }, iAlternatingRowColor{ false }, iInitializing{ false }, iFiltering{ false }
         {
             init();
         }
         basic_item_presentation_model(i_item_model& aItemModel, bool aSortable = false) : iItemModel{ nullptr }, iSortable{ aSortable }, iAlternatingRowColor{ false }, iInitializing{ false }, iFiltering{ false }
         {
             init();
-            set_item_model(aItemModel, aSortable);
+            set_item_model(aItemModel);
         }
         ~basic_item_presentation_model()
         {
@@ -129,9 +129,8 @@ namespace neogfx
                 throw no_item_model();
             return static_cast<item_model_type&>(*iItemModel);
         }
-        void set_item_model(i_item_model& aItemModel, bool aSortable = false) override
+        void set_item_model(i_item_model& aItemModel) override
         {
-            iSortable = aSortable;
             if (iItemModel != &aItemModel)
             {
                 auto reset_model = [this](bool aHardReset = true)
@@ -810,6 +809,10 @@ namespace neogfx
         bool sortable() const override
         {
             return iSortable;
+        }
+        void set_sortable(bool aSortable) override
+        {
+            iSortable = aSortable;
         }
         optional_sort sorting_by() const override
         {

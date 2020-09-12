@@ -191,7 +191,7 @@ namespace neogfx
     size_policy spacer::size_policy() const
     {
         if (has_size_policy())
-            return *SizePolicy;
+            return base_type::size_policy();
         neogfx::size_policy result{size_constraint::Minimum};
         if ((iExpansionPolicy & neogfx::expansion_policy::ExpandHorizontally) == neogfx::expansion_policy::ExpandHorizontally)
             result.set_horizontal_size_policy(size_constraint::Expanding);
