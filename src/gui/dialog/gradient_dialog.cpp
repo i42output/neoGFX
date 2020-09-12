@@ -417,7 +417,9 @@ namespace neogfx
             }
             thread_local decltype(iHueSelection) hueSelectionCopy;
             hueSelectionCopy = iHueSelection;
+            auto stopIndex = iGradientSelector.selected_color_stop() - iGradientSelector.gradient().color_stops().begin();
             set_gradient(newGradient);
+            iGradientSelector.select_color_stop(std::next(iGradientSelector.gradient().color_stops().begin(), stopIndex));
             iHueSelection = hueSelectionCopy;
         });
 

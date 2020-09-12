@@ -55,6 +55,8 @@ namespace neogfx
     public:
         gradient::color_stop_list::const_iterator selected_color_stop() const;
         gradient::alpha_stop_list::const_iterator selected_alpha_stop() const;
+        void select_color_stop(gradient::color_stop_list::const_iterator aStop);
+        void select_alpha_stop(gradient::alpha_stop_list::const_iterator aStop);
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size()) const override;

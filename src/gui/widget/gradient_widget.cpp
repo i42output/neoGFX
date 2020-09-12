@@ -184,6 +184,16 @@ namespace neogfx
         return iSelection.alpha_stops().end();
     }
 
+    void gradient_widget::select_color_stop(gradient::color_stop_list::const_iterator aStop)
+    {
+        set_current_color_stop(std::next(iSelection.color_stops().begin(), aStop - iSelection.color_stops().begin()));
+    }
+
+    void gradient_widget::select_alpha_stop(gradient::alpha_stop_list::const_iterator aStop)
+    {
+        set_current_alpha_stop(std::next(iSelection.alpha_stops().begin(), aStop - iSelection.alpha_stops().begin()));
+    }
+
     size_policy gradient_widget::size_policy() const
     {
         if (has_size_policy())
