@@ -108,6 +108,8 @@ namespace neogfx
         grid_layout& layout() override;
     public:
         neogfx::size_policy size_policy() const override;
+        using widget::set_size_policy;
+        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
     public:
         const std::string& text() const;
         void set_text(const std::string& aText);

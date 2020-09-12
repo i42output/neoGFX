@@ -101,7 +101,7 @@ namespace neogfx
         service<i_app>().remove_mnemonic(*this);
     }
 
-    neogfx::size_policy button::size_policy() const
+    size_policy button::size_policy() const
     {
         if (has_size_policy())
             return widget::size_policy();
@@ -112,8 +112,6 @@ namespace neogfx
     {
         widget::set_size_policy(aSizePolicy, aUpdateLayout);
         label().set_size_policy(aSizePolicy, aUpdateLayout);
-        label().text_widget().set_size_policy(aSizePolicy, aUpdateLayout);
-        label().image_widget().set_size_policy(aSizePolicy, aUpdateLayout);
     }
 
     size button::maximum_size(const optional_size&) const

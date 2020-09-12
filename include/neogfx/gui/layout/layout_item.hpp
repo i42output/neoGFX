@@ -269,7 +269,7 @@ namespace neogfx
                 auto& item = layout.item_at(itemIndex);
                 if (!item.visible())
                     continue;
-                if (item.has_fixed_size() && item.extents() != item.fixed_size())
+                if (item.size_policy() == aFixWeightsPolicy && item.has_fixed_size() && item.extents() != item.fixed_size())
                     causeWasExplicitResize = true;
                 totalSize += item.extents();
             }
@@ -291,7 +291,7 @@ namespace neogfx
                     auto& item = layout.item_at(itemIndex);
                     if (!item.visible())
                         continue;
-                    if (item.size_policy() != size_constraint::Expanding)
+                    if (item.size_policy() == aFixWeightsPolicy)
                     {
                         auto const& itemExtents = (item.has_fixed_size() && item.extents() != item.fixed_size() ?
                             item.fixed_size() : item.extents());
@@ -306,19 +306,9 @@ namespace neogfx
                     auto& item = layout.item_at(itemIndex);
                     if (!item.visible())
                         continue;
-                    if (item.size_policy() == size_constraint::Expanding)
+                    if (item.size_policy() != aFixWeightsPolicy)
                         item.set_weight(item.weight() / remainingWeight * remainingSize / totalSize, false);
                 }
-            }
-            for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
-            {
-                auto& item = layout.item_at(itemIndex);
-                if (!item.visible())
-                    continue;
-                if (item.size_policy() != size_constraint::Expanding)
-                    item.set_size_policy(aFixWeightsPolicy);
-                if (base_type::debug() == this)
-                    std::cerr << "(" << typeid(item).name() << ")" << item.extents() << ":" << item.weight() << ", ";
             }
             if (base_type::debug() == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings() done" << std::endl;
