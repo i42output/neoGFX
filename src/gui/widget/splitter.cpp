@@ -177,7 +177,7 @@ namespace neogfx
 
     void splitter::panes_resized()
     {
-        //fix_weightings();
+        fix_weightings();
         layout_items();
     }
 

@@ -226,14 +226,14 @@ namespace neogfx
         subject().layout_as(adjustedPosition, adjustedSize);
     }
 
-    void layout_item_proxy::fix_weightings(optional_size_policy const& aFixWeightsPolicy)
+    void layout_item_proxy::fix_weightings(optional_size_policy const& aWeightedPolicy, optional_size_policy const& aFixedSizePolicy)
     {
-        subject().fix_weightings(aFixWeightsPolicy);
+        subject().fix_weightings(aWeightedPolicy, aFixedSizePolicy);
     }
 
-    void layout_item_proxy::clear_weightings(optional_size_policy const& aFixSizesPolicy)
+    void layout_item_proxy::clear_weightings(optional_size_policy const& aWeightedPolicy, optional_size_policy const& aFixedSizePolicy)
     {
-        subject().clear_weightings(aFixSizesPolicy);
+        subject().clear_weightings(aWeightedPolicy, aFixedSizePolicy);
     }
 
     bool layout_item_proxy::high_dpi() const
@@ -325,7 +325,7 @@ namespace neogfx
 
     size layout_item_proxy::minimum_size(const optional_size& aAvailableSpace) const
     {
-        if (&subject() == debug())
+        if (&subject() == debug)
             std::cerr << "layout_item_proxy::minimum_size(" << aAvailableSpace << ")" << std::endl;
         if (!visible())
             return size{};
@@ -365,6 +365,8 @@ namespace neogfx
             cachedMinSize = subject().apply_fixed_size(cachedMinSize);
             iMinimumSize.first = global_layout_id();
         }
+        if (&subject() == debug)
+            std::cerr << "layout_item_proxy::minimum_size(" << aAvailableSpace << ") -> " << cachedMinSize << std::endl;
         return cachedMinSize;
     }
 
@@ -382,7 +384,7 @@ namespace neogfx
 
     size layout_item_proxy::maximum_size(const optional_size& aAvailableSpace) const
     {
-        if (&subject() == debug())
+        if (&subject() == debug)
             std::cerr << "layout_item_proxy::maximum_size(" << aAvailableSpace << ")" << std::endl;
         if (!visible())
             return size::max_size();
@@ -392,6 +394,8 @@ namespace neogfx
             cachedMaxSize = subject().apply_fixed_size(subject().maximum_size(aAvailableSpace));
             iMaximumSize.first = global_layout_id();
         }
+        if (&subject() == debug)
+            std::cerr << "layout_item_proxy::maximum_size(" << aAvailableSpace << ") -> " << cachedMaxSize << std::endl;
         return cachedMaxSize;
     }
 

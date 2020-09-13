@@ -96,7 +96,7 @@ namespace neogfx
         {
             if (SizePolicy != aSizePolicy)
             {
-                if (base_type::debug() == this)
+                if (debug == this)
                     std::cerr << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << std::endl;
                 SizePolicy = aSizePolicy;
                 if (aUpdateLayout)
@@ -124,7 +124,7 @@ namespace neogfx
         {
             if (Weight != aWeight)
             {
-                if (base_type::debug() == this)
+                if (debug == this)
                     std::cerr << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << std::endl;
                 Weight.assign(aWeight, aUpdateLayout);
                 if (aUpdateLayout)
@@ -156,7 +156,7 @@ namespace neogfx
             optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
             if (MinimumSize != newMinimumSize)
             {
-                if (base_type::debug() == this)
+                if (debug == this)
                     std::cerr << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
                 MinimumSize.assign(newMinimumSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -188,7 +188,7 @@ namespace neogfx
             optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
             if (MaximumSize != newMaximumSize)
             {
-                if (base_type::debug() == this)
+                if (debug == this)
                     std::cerr << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
                 MaximumSize.assign(newMaximumSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -217,7 +217,7 @@ namespace neogfx
             optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size());
             if (FixedSize != newFixedSize)
             {
-                if (base_type::debug() == this)
+                if (debug == this)
                     std::cerr << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << std::endl;
                 FixedSize.assign(newFixedSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -254,11 +254,11 @@ namespace neogfx
             }
         }
     public:
-        void fix_weightings(optional_size_policy const& aFixWeightsPolicy = size_constraint::MinimumExpanding) override
+        void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
         {
             auto& self = static_cast<i_layout_item&>(*this);
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
-            if (base_type::debug() == this)
+            if (debug == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
             bool causeWasExplicitResize = false;
             size totalSize;
@@ -269,7 +269,8 @@ namespace neogfx
                 auto& item = layout.item_at(itemIndex);
                 if (!item.visible())
                     continue;
-                if (item.size_policy() == aFixWeightsPolicy && item.has_fixed_size() && item.extents() != item.fixed_size())
+                if ((item.size_policy() == aWeightedPolicy || item.size_policy() == aFixedSizePolicy) && 
+                    item.has_fixed_size() && item.extents() != item.fixed_size())
                     causeWasExplicitResize = true;
                 totalSize += item.extents();
             }
@@ -291,7 +292,7 @@ namespace neogfx
                     auto& item = layout.item_at(itemIndex);
                     if (!item.visible())
                         continue;
-                    if (item.size_policy() == aFixWeightsPolicy)
+                    if (item.size_policy() == aWeightedPolicy || item.size_policy() == aFixedSizePolicy)
                     {
                         auto const& itemExtents = (item.has_fixed_size() && item.extents() != item.fixed_size() ?
                             item.fixed_size() : item.extents());
@@ -306,14 +307,22 @@ namespace neogfx
                     auto& item = layout.item_at(itemIndex);
                     if (!item.visible())
                         continue;
-                    if (item.size_policy() != aFixWeightsPolicy)
+                    if (item.size_policy() != aWeightedPolicy && item.size_policy() != aFixedSizePolicy)
                         item.set_weight(item.weight() / remainingWeight * remainingSize / totalSize, false);
                 }
             }
-            if (base_type::debug() == this)
+            for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+            {
+                auto& item = layout.item_at(itemIndex);
+                if (!item.visible())
+                    continue;
+                if (item.size_policy() == aFixedSizePolicy)
+                    item.set_size_policy(aWeightedPolicy);
+            }
+            if (debug == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings() done" << std::endl;
         }
-        void clear_weightings(optional_size_policy const& aFixSizesPolicy = {}) override
+        void clear_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
         {
             auto& self = static_cast<i_layout_item&>(*this);
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
@@ -323,10 +332,12 @@ namespace neogfx
                 item.set_weight({});
                 if (!item.visible())
                     continue;
-                if (aFixSizesPolicy && item.size_policy() == size_constraint::MinimumExpanding)
+                if (aWeightedPolicy && aWeightedPolicy == item.size_policy())
                 {
-                    item.set_fixed_size(item.extents());
-                    item.set_size_policy(aFixSizesPolicy);
+                    if (!item.has_fixed_size())
+                        item.set_fixed_size(item.extents());
+                    if (aFixedSizePolicy)
+                        item.set_size_policy(aFixedSizePolicy);
                 }
             }
         }

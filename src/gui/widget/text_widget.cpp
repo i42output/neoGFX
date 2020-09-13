@@ -72,7 +72,7 @@ namespace neogfx
             // todo: ellipsis
             if (result.cx == 0.0 && (flags() & text_widget_flags::TakesSpaceWhenEmpty) == text_widget_flags::TakesSpaceWhenEmpty)
                 result.cx = 1.0;
-            if (debug() == this)
+            if (debug == this)
                 std::cerr << "text_widget::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
             return units_converter(*this).from_device_units(result);
         }
@@ -80,7 +80,7 @@ namespace neogfx
 
     void text_widget::paint(i_graphics_context& aGc) const
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << "text_widget::paint(...)" << std::endl;
         scoped_mnemonics sm(aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT));
         size textSize = text_extent();

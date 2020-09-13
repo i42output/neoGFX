@@ -249,7 +249,7 @@ namespace neogfx
         }
         widget_part part(const point& aPosition) const override
         {
-            if (widget_type::debug() == this)
+            if (debug == this)
                 std::cerr << "decorated<>::part(...) --> ";
             auto result = widget_type::part(aPosition);
             if (result.part == widget_part::Client || result.part == widget_part::NonClient)
@@ -293,7 +293,7 @@ namespace neogfx
                         result.part = widget_part::BorderBottom;
                 }
             }
-            if (widget_type::debug() == this)
+            if (debug == this)
                 std::cerr << result.part << std::endl;
             return result;
         }
@@ -355,10 +355,10 @@ namespace neogfx
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     public:
-        void fix_weightings(optional_size_policy const& aFixWeightsPolicy = size_constraint::MinimumExpanding) override
+        void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
         {
-            widget_type::fix_weightings(aFixWeightsPolicy);
-            as_widget().template ancestor_layout<border_layout>().fix_weightings(aFixWeightsPolicy); // todo: is this layout relationship assumption good idea?
+            widget_type::fix_weightings(aWeightedPolicy, aFixedSizePolicy);
+            as_widget().template ancestor_layout<border_layout>().fix_weightings(aWeightedPolicy, aFixedSizePolicy); // todo: is this layout relationship assumption good idea?
         }
     protected:
         void capture_released() override
@@ -491,7 +491,7 @@ namespace neogfx
                 }
                 if (newSize != currentSize)
                 {                
-                    if (widget_type::debug() == this)
+                    if (debug == this)
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
                     if ((decoration_style() & (neogfx::decoration_style::Dock | neogfx::decoration_style::DontFixWeights)) == neogfx::decoration_style::Dock)
                     {

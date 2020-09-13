@@ -744,7 +744,7 @@ namespace neogfx
 
     void widget::resize(const size& aSize)
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << "widget::resize(" << aSize << ")" << std::endl;
         if (Size != units_converter(*this).to_device_units(aSize))
         {
@@ -817,7 +817,7 @@ namespace neogfx
 
     size_policy widget::size_policy() const
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
         if (has_size_policy())
             return base_type::size_policy();
@@ -827,7 +827,7 @@ namespace neogfx
 
     size widget::minimum_size(const optional_size& aAvailableSpace) const
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << std::endl;
         size result;
         if (has_minimum_size())
@@ -842,14 +842,14 @@ namespace neogfx
         }
         else
             result = padding().size();
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << std::endl;
         size result;
         if (has_maximum_size())
@@ -870,7 +870,7 @@ namespace neogfx
             result.cx = size::max_size().cx;
         if (size_policy().vertical_size_policy() == size_constraint::Maximum)
             result.cy = size::max_size().cy;
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
     }
@@ -883,7 +883,7 @@ namespace neogfx
 
     void widget::layout_as(const point& aPosition, const size& aSize)
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
         move(aPosition);
         if (extents() != aSize)
@@ -894,7 +894,7 @@ namespace neogfx
 
     bool widget::update(const rect& aUpdateRect)
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::update(" << aUpdateRect << ")" << std::endl;
         if (!can_update())
             return false;
@@ -951,7 +951,7 @@ namespace neogfx
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 
         aGc.set_extents(extents());
@@ -981,7 +981,7 @@ namespace neogfx
             aGc.set_extents(client_rect().extents());
             aGc.set_origin(origin());
 
-            if (debug() == this)
+            if (debug == this)
                 std::cerr << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << std::endl;
 
             scoped_scissor scissor(aGc, clipRect);
@@ -1035,14 +1035,14 @@ namespace neogfx
 
     void widget::paint_non_client_after(i_graphics_context& aGc) const
     {
-        if (debug() == this)
+        if (debug == this)
         {
             aGc.draw_rect(to_client_coordinates(non_client_rect()), color::White);
             aGc.line_stipple_on(1.0, 0x5555);
             aGc.draw_rect(to_client_coordinates(non_client_rect()), color::Red);
             aGc.line_stipple_off();
         }
-        else if (has_layout() && debug() == &layout())
+        else if (has_layout() && debug == &layout())
         {
             aGc.draw_rect(rect{ layout().position(), layout().extents() }, color::White);
             aGc.line_stipple_on(1.0, 0x5555);

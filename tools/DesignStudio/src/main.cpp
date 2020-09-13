@@ -97,17 +97,17 @@ int main(int argc, char* argv[])
             {
                 leftDock.set_decoration_style(leftDock.decoration_style() & ~ng::decoration_style::DontFixWeights);
                 rightDock.set_decoration_style(rightDock.decoration_style() & ~ng::decoration_style::DontFixWeights);
-                leftDock.clear_weightings(ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::MinimumExpanding });
-                rightDock.clear_weightings(ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::MinimumExpanding });
-                leftDock.template ancestor_layout<ng::border_layout>().clear_weightings(ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::MinimumExpanding });
+                leftDock.clear_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding }, ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::Expanding });
+                rightDock.clear_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding }, ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::Expanding });
+                leftDock.template ancestor_layout<ng::border_layout>().clear_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding }, ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::Expanding });
             }
             else
             {
                 leftDock.set_decoration_style(leftDock.decoration_style() | ng::decoration_style::DontFixWeights);
                 rightDock.set_decoration_style(rightDock.decoration_style() | ng::decoration_style::DontFixWeights);
-                leftDock.fix_weightings(ng::size_constraint::MinimumExpanding);
-                rightDock.fix_weightings(ng::size_constraint::MinimumExpanding);
-                leftDock.template ancestor_layout<ng::border_layout>().fix_weightings();
+                leftDock.fix_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding });
+                rightDock.fix_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding });
+                leftDock.template ancestor_layout<ng::border_layout>().fix_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding });
             }
         };
         autoscaleDocks.changing(autoscaleDocksChanged);

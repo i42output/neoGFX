@@ -548,7 +548,7 @@ namespace neogfx
         optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
         if (MinimumSize != newMinimumSize)
         {
-            if (debug() == this)
+            if (debug == this)
                 std::cerr << typeid(*this).name() << "::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
             MinimumSize = newMinimumSize;
             if (aUpdateLayout)
@@ -561,7 +561,7 @@ namespace neogfx
         optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
         if (MaximumSize != newMaximumSize)
         {
-            if (debug() == this)
+            if (debug == this)
                 std::cerr << typeid(*this).name() << "::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
             MaximumSize = newMaximumSize;
             if (aUpdateLayout)
@@ -663,7 +663,7 @@ namespace neogfx
 
     void layout::remove(item_list::iterator aItem)
     {
-        if (debug() == this)
+        if (debug == this)
             std::cerr << typeid(*this).name() << "::remove(" << std::distance(iItems.begin(), aItem) << ")" << std::endl;
         {
             item_list toRemove;

@@ -39,9 +39,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -812,12 +809,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Tools\GeneratedFiles\gradient.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Debug\GeneratedFiles\gradient.frag.hpp">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader_program.hpp">
       <Filter>Header Files</Filter>

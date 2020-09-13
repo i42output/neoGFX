@@ -144,15 +144,15 @@ namespace neogfx
         // todo: multiple docks in the same layout?
         if (!visible())
         {
-            parent_layout().parent_layout().clear_weightings(neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
+            parent_layout().parent_layout().clear_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
             parent_layout().disable();
-            parent_layout().parent_layout().fix_weightings(size_constraint::MinimumExpanding);
+            parent_layout().parent_layout().fix_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
         }
         else
         {
-            parent_layout().parent_layout().clear_weightings(neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
+            parent_layout().parent_layout().clear_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
             parent_layout().enable();
-            parent_layout().parent_layout().fix_weightings(size_constraint::MinimumExpanding);
+            parent_layout().parent_layout().fix_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
         }
         return result;
     }

@@ -42,12 +42,6 @@ namespace neogfx
     class i_layout_item : public i_property_owner, public i_geometry, public i_anchorable
     {
     public:
-        static i_layout_item*& debug()
-        {
-            static i_layout_item* sDebug = nullptr;
-            return sDebug;
-        }
-    public:
         virtual ~i_layout_item() = default;
     public:
         virtual bool is_layout() const = 0;
@@ -74,8 +68,8 @@ namespace neogfx
     public:
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
-        virtual void fix_weightings(optional_size_policy const& aFixWeightsPolicy = size_constraint::MinimumExpanding) = 0;
-        virtual void clear_weightings(optional_size_policy const& aFixSizesPolicy = {}) = 0;
+        virtual void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) = 0;
+        virtual void clear_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) = 0;
     public:
         virtual bool visible() const = 0;
     public:
