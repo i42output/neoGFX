@@ -294,8 +294,8 @@ namespace neogfx
         iRowLayout.set_spacing(aSpacing, false);
         for (auto& r : iRows)
             r->set_spacing(aSpacing, false);
-        if (has_layout_owner() && aUpdateLayout)
-            layout_owner().layout_root(true);
+        if (aUpdateLayout)
+            update_layout();
     }
 
     grid_layout& grid_layout::add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns)
@@ -307,8 +307,7 @@ namespace neogfx
     grid_layout& grid_layout::add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo)
     {
         iSpans.push_back(std::make_pair(aFrom, aTo));
-        if (has_layout_owner())
-            layout_owner().layout_root(true);
+        update_layout();
         return *this;
     }
 

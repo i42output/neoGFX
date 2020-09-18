@@ -355,10 +355,38 @@ namespace neogfx
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     public:
-        void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
+        void fix_resizing_context_weightings(bool aUpdateLayout = true)
         {
-            widget_type::fix_weightings(aWeightedPolicy, aFixedSizePolicy);
-            as_widget().template ancestor_layout<border_layout>().fix_weightings(aWeightedPolicy, aFixedSizePolicy); // todo: is this layout relationship assumption good idea?
+            if (resizing_context().has_parent_layout() && (decoration_style() & neogfx::decoration_style::DontFixWeights) != neogfx::decoration_style::DontFixWeights)
+                resizing_context().parent_layout().fix_weightings(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding }, neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding });
+            if (aUpdateLayout)
+            {
+                if (resizing_context().has_parent_layout())
+                    resizing_context().parent_layout().update_layout(false);
+            }
+        }
+        void clear_resizing_context_weightings(bool aUpdateLayout = true)
+        {
+            if (resizing_context().has_parent_layout())
+                resizing_context().parent_layout().clear_weightings(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding }, neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding });
+            if (aUpdateLayout)
+            {
+                if (resizing_context().has_parent_layout())
+                    resizing_context().parent_layout().update_layout(false);
+            }
+        }
+        void set_autoscale(bool aEnableAutoscale)
+        {
+            if (aEnableAutoscale)
+            {
+                set_decoration_style(decoration_style() & ~decoration_style::DontFixWeights);
+                fix_resizing_context_weightings();
+            }
+            else
+            {
+                set_decoration_style(decoration_style() | decoration_style::DontFixWeights);
+                clear_resizing_context_weightings();
+            }
         }
     protected:
         void capture_released() override
@@ -493,17 +521,9 @@ namespace neogfx
                 {                
                     if (debug == this)
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
-                    if ((decoration_style() & (neogfx::decoration_style::Dock | neogfx::decoration_style::DontFixWeights)) == neogfx::decoration_style::Dock)
-                    {
-                        resizingContext.set_fixed_size({}, false);
-                        fix_weightings();
-                        resizingContext.set_fixed_size(newSize, false);
-                        fix_weightings();
-                        if (as_widget().has_layout_manager())
-                            as_widget().layout_manager().layout_items();
-                    }
-                    else
-                        resizingContext.set_fixed_size(newSize, false);
+                    clear_resizing_context_weightings(false);
+                    resizingContext.set_fixed_size(newSize, false);
+                    fix_resizing_context_weightings();
                 }
             }
         }

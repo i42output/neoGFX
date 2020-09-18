@@ -164,10 +164,6 @@ namespace neogfx
             AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
         }
-        if (AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Fixed && has_fixed_size())
-            AxisPolicy::cx(result) = AxisPolicy::cx(fixed_size());
-        if (AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Fixed && has_fixed_size())
-            AxisPolicy::cy(result) = AxisPolicy::cy(fixed_size());
         if (debug == this)
             std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
@@ -234,10 +230,6 @@ namespace neogfx
                     AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum))
                 AxisPolicy::cy(result) = size::max_dimension();
         }
-        if (AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Fixed && has_fixed_size())
-            AxisPolicy::cx(result) = AxisPolicy::cx(fixed_size());
-        if (AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Fixed && has_fixed_size())
-            AxisPolicy::cy(result) = AxisPolicy::cy(fixed_size());
         if (debug == this)
             std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
         return result;
@@ -301,9 +293,9 @@ namespace neogfx
                 auto& disposition = itemDispositions[&item];
                 if (disposition != Unknown && disposition != Weighted)
                     continue;
-                auto minSize = AxisPolicy::cx(item.minimum_size(availableSize));
-                auto maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
-                auto weightedSize = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
+                auto const minSize = AxisPolicy::cx(item.minimum_size(availableSize));
+                auto const maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
+                auto const weightedSize = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
                 if (minSize < weightedSize && maxSize > weightedSize)
                 {
                     disposition = Weighted;
@@ -316,7 +308,7 @@ namespace neogfx
                 else
                 {
                     disposition = maxSize <= weightedSize ? TooSmall : Unweighted;
-                    leftover -= AxisPolicy::cx(disposition == TooSmall ? item.maximum_size(availableSize) : item.minimum_size(availableSize));
+                    leftover -= disposition == TooSmall ? maxSize : minSize;
                     if (leftover < 0.0)
                         leftover = 0.0;
                     totalExpanderWeight -= item.weight();
@@ -343,8 +335,8 @@ namespace neogfx
                 continue;
             if (debug == &item.subject())
                 std::cerr << "Consideration by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
-            auto itemMinSize = item.minimum_size(availableSize);
-            auto itemMaxSize = item.maximum_size(availableSize);
+            auto const itemMinSize = item.minimum_size(availableSize);
+            auto const itemMaxSize = item.maximum_size(availableSize);
             size s;
             AxisPolicy::cy(s) = std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSize)), AxisPolicy::cy(itemMaxSize));
             auto disposition = itemDispositions[&item];

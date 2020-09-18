@@ -32,7 +32,10 @@ namespace neogfx
     {
         if (aInitialSize)
             parent_layout().set_fixed_size(aInitialSize);
-        parent_layout().set_weight(size{ 1.0 });
+        if ((aArea & dock_area::Horizontal) != dock_area::None)
+            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding });
+        else
+            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
         set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
@@ -42,7 +45,10 @@ namespace neogfx
     {
         if (aInitialSize)
             parent_layout().set_fixed_size(aInitialSize);
-        parent_layout().set_weight(size{ 1.0 });
+        if ((aArea & dock_area::Horizontal) != dock_area::None)
+            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding });
+        else
+            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
         set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
@@ -144,15 +150,15 @@ namespace neogfx
         // todo: multiple docks in the same layout?
         if (!visible())
         {
-            parent_layout().parent_layout().clear_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
+            clear_resizing_context_weightings(false);
             parent_layout().disable();
-            parent_layout().parent_layout().fix_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
+            fix_resizing_context_weightings();
         }
         else
         {
-            parent_layout().parent_layout().clear_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
+            clear_resizing_context_weightings(false);
             parent_layout().enable();
-            parent_layout().parent_layout().fix_weightings(size_constraint::MinimumExpanding, neogfx::size_policy{ size_constraint::Fixed, size_constraint::MinimumExpanding });
+            fix_resizing_context_weightings();
         }
         return result;
     }

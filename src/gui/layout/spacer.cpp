@@ -148,8 +148,7 @@ namespace neogfx
         if (iExpansionPolicy != aExpansionPolicy)
         {
             iExpansionPolicy = aExpansionPolicy;
-            if (has_layout_owner())
-                layout_owner().layout_root(true);
+            update_layout();
         }
     }
 

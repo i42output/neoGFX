@@ -66,6 +66,7 @@ namespace neogfx
         virtual const i_layout_item_proxy& proxy_for_layout() const = 0;
         virtual i_layout_item_proxy& proxy_for_layout() = 0;
     public:
+        virtual void update_layout(bool aDeferLayout = true) = 0;
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
         virtual void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) = 0;

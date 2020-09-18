@@ -638,7 +638,7 @@ namespace neogfx
         }
         if (view_created())
             view().set_model(aModel);
-        layout_manager().layout_items(true);
+        update_layout();
         update();
     }
 
@@ -676,8 +676,7 @@ namespace neogfx
             selection_model().set_presentation_model(*aPresentationModel);
         if (view_created())
             view().set_presentation_model(aPresentationModel);
-        if (has_layout_manager())
-            layout_manager().layout_items(true);
+        update_layout();
         update();
     }
 

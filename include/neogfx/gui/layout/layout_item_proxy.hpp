@@ -96,6 +96,7 @@ namespace neogfx
     public:
         bool visible() const override;
     public:
+        void update_layout(bool aDeferLayout = true) override;
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
         void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override;

@@ -93,22 +93,8 @@ int main(int argc, char* argv[])
 
         auto autoscaleDocksChanged = [&]()
         {
-            if (!autoscaleDocks.value<bool>(true))
-            {
-                leftDock.set_decoration_style(leftDock.decoration_style() & ~ng::decoration_style::DontFixWeights);
-                rightDock.set_decoration_style(rightDock.decoration_style() & ~ng::decoration_style::DontFixWeights);
-                leftDock.clear_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding }, ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::Expanding });
-                rightDock.clear_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding }, ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::Expanding });
-                leftDock.template ancestor_layout<ng::border_layout>().clear_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding }, ng::size_policy{ ng::size_constraint::Fixed, ng::size_constraint::Expanding });
-            }
-            else
-            {
-                leftDock.set_decoration_style(leftDock.decoration_style() | ng::decoration_style::DontFixWeights);
-                rightDock.set_decoration_style(rightDock.decoration_style() | ng::decoration_style::DontFixWeights);
-                leftDock.fix_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding });
-                rightDock.fix_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding });
-                leftDock.template ancestor_layout<ng::border_layout>().fix_weightings(ng::size_policy{ ng::size_constraint::MinimumExpanding, ng::size_constraint::Expanding });
-            }
+            leftDock.set_autoscale(autoscaleDocks.value<bool>(true));
+            rightDock.set_autoscale(autoscaleDocks.value<bool>(true));
         };
         autoscaleDocks.changing(autoscaleDocksChanged);
         autoscaleDocks.changed(autoscaleDocksChanged);

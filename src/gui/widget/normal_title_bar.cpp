@@ -147,7 +147,7 @@ namespace neogfx
             else
                 icon_widget().set_fixed_size(iconSize.min(icon_widget().image().extents()));
             update_textures();
-            layout_manager().layout_items(true);
+            update_layout();
             update(true);
         });
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
@@ -174,7 +174,7 @@ namespace neogfx
             layoutChanged = iCloseButton.show((root().style() & window_style::Close) != window_style::Invalid) || layoutChanged;
             if (layoutChanged)
             {
-                layout_manager().layout_items(true);
+                update_layout();
                 update(true);
             }
         };

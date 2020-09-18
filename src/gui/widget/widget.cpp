@@ -213,8 +213,8 @@ namespace neogfx
 
     void widget::parent_changed()
     {
-        if (!is_root() && has_layout_manager())
-            layout_manager().layout_items(true);
+        if (!is_root())
+            update_layout();
     }
 
     bool widget::adding_child() const
@@ -1174,8 +1174,7 @@ namespace neogfx
         if (Font != aFont)
         {
             Font = aFont;
-            if (has_layout_manager())
-                layout_manager().layout_items(true);
+            update_layout();
             update();
         }
     }

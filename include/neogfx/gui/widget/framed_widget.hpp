@@ -188,8 +188,7 @@ namespace neogfx
             if (iStyle != aStyle)
             {
                 iStyle = aStyle;
-                if (as_widget().has_layout_manager())
-                    as_widget().layout_manager().layout_items(true);
+                as_widget().update_layout();
             }
         }
     public:

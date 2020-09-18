@@ -58,8 +58,8 @@ namespace neogfx
         if (iOrientation != aOrientation)
         {
             iOrientation = aOrientation;
-            if (aUpdateLayout && has_layout_manager())
-                layout_manager().layout_items(true);
+            if (aUpdateLayout)
+                update_layout();
         }
     }
 

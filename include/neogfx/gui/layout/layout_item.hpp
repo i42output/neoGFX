@@ -78,6 +78,16 @@ namespace neogfx
             return const_cast<i_widget&>(to_const(*this).layout_manager());
         }
     public:
+        void update_layout(bool aDeferLayout = true) override
+        {
+            if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
+                as_layout_item().layout_manager().layout_items(aDeferLayout);
+            else if (as_layout_item().is_layout())
+                as_layout_item().as_layout().invalidate(aDeferLayout);
+            else if (as_layout_item().has_layout_owner())
+                as_layout_item().layout_owner().layout_root(aDeferLayout);
+        }
+    public:
         bool has_size_policy() const override
         {
             return SizePolicy != std::nullopt || has_fixed_size();
@@ -100,14 +110,7 @@ namespace neogfx
                     std::cerr << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << std::endl;
                 SizePolicy = aSizePolicy;
                 if (aUpdateLayout)
-                {
-                    if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
-                        as_layout_item().layout_manager().layout_items(true);
-                    else if (as_layout_item().is_layout())
-                        as_layout_item().as_layout().invalidate();
-                    else if (as_layout_item().has_layout_owner())
-                        as_layout_item().layout_owner().layout_root(true);
-                }
+                    update_layout();
             }
         }
         bool has_weight() const override
@@ -128,14 +131,7 @@ namespace neogfx
                     std::cerr << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << std::endl;
                 Weight.assign(aWeight, aUpdateLayout);
                 if (aUpdateLayout)
-                {
-                    if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
-                        as_layout_item().layout_manager().layout_items(true);
-                    else if (as_layout_item().is_layout())
-                        as_layout_item().as_layout().invalidate();
-                    else if (as_layout_item().has_layout_owner())
-                        as_layout_item().layout_owner().layout_root(true);
-                }
+                    update_layout();
             }
         }
         bool has_minimum_size() const override
@@ -160,14 +156,7 @@ namespace neogfx
                     std::cerr << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
                 MinimumSize.assign(newMinimumSize, aUpdateLayout);
                 if (aUpdateLayout)
-                {
-                    if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
-                        as_layout_item().layout_manager().layout_items(true);
-                    else if (as_layout_item().is_layout())
-                        as_layout_item().as_layout().invalidate();
-                    else if (as_layout_item().has_layout_owner())
-                        as_layout_item().layout_owner().layout_root(true);
-                }
+                    update_layout();
             }
         }
         bool has_maximum_size() const override
@@ -192,14 +181,7 @@ namespace neogfx
                     std::cerr << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
                 MaximumSize.assign(newMaximumSize, aUpdateLayout);
                 if (aUpdateLayout)
-                {
-                    if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
-                        as_layout_item().layout_manager().layout_items(true);
-                    else if (as_layout_item().is_layout())
-                        as_layout_item().as_layout().invalidate();
-                    else if (as_layout_item().has_layout_owner())
-                        as_layout_item().layout_owner().layout_root(true);
-                }
+                    update_layout();
             }
         }
         bool has_fixed_size() const override
@@ -221,14 +203,7 @@ namespace neogfx
                     std::cerr << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << std::endl;
                 FixedSize.assign(newFixedSize, aUpdateLayout);
                 if (aUpdateLayout)
-                {
-                    if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
-                        as_layout_item().layout_manager().layout_items(true);
-                    else if (as_layout_item().is_layout())
-                        as_layout_item().as_layout().invalidate();
-                    else if (as_layout_item().has_layout_owner())
-                        as_layout_item().layout_owner().layout_root(true);
-                }
+                    update_layout();
             }
         }
     public:
@@ -243,23 +218,16 @@ namespace neogfx
             {
                 Padding = newPadding;
                 if (aUpdateLayout)
-                {
-                    if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
-                        as_layout_item().layout_manager().layout_items(true);
-                    else if (as_layout_item().is_layout())
-                        as_layout_item().as_layout().invalidate();
-                    else if (as_layout_item().has_layout_owner())
-                        as_layout_item().layout_owner().layout_root(true);
-                }
+                    update_layout();
             }
         }
     public:
         void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
         {
+            if (debug == this)
+                std::cerr << typeid(*this).name() << "::fix_weightings(" << aWeightedPolicy << ", " << aFixedSizePolicy << "): " << std::endl;
             auto& self = static_cast<i_layout_item&>(*this);
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
-            if (debug == this)
-                std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
             bool causeWasExplicitResize = false;
             size totalSize;
             size remainingSize;
@@ -317,13 +285,15 @@ namespace neogfx
                 if (!item.visible())
                     continue;
                 if (item.size_policy() == aFixedSizePolicy)
-                    item.set_size_policy(aWeightedPolicy);
+                    item.set_size_policy(aWeightedPolicy, false);
             }
             if (debug == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings() done" << std::endl;
         }
         void clear_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
         {
+            if (debug == this)
+                std::cerr << typeid(*this).name() << "::clear_weightings(" << aWeightedPolicy << ", " << aFixedSizePolicy << "): " << std::endl;
             auto& self = static_cast<i_layout_item&>(*this);
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
@@ -340,6 +310,8 @@ namespace neogfx
                         item.set_size_policy(aFixedSizePolicy);
                 }
             }
+            if (debug == this)
+                std::cerr << typeid(*this).name() << "::clear_weightings() done" << std::endl;
         }
         void anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
