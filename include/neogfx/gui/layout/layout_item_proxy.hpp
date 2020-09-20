@@ -81,10 +81,10 @@ namespace neogfx
         size weight() const override;
         void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
         bool has_minimum_size() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
         void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
         bool has_maximum_size() const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
         void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
         bool has_fixed_size() const override;
         size fixed_size(const optional_size& aAvailableSpace = {}) const override;
@@ -106,12 +106,15 @@ namespace neogfx
         i_layout_item& subject() override;
         std::shared_ptr<i_layout_item> subject_ptr() override;
     public:
+        layout_item_disposition& cached_disposition() const override;
+    public:
         bool operator==(const layout_item_proxy& aOther) const;
     private:
         bool subject_is_proxy() const;
     private:
         std::shared_ptr<i_layout_item> iSubject;
         bool iSubjectIsProxy;
+        mutable layout_item_disposition iCachedDisposition = layout_item_disposition::Unknown;
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;
         mutable std::pair<uint32_t, size> iWeight;

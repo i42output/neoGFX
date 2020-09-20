@@ -59,7 +59,7 @@ namespace neogfx
         void select_alpha_stop(gradient::alpha_stop_list::const_iterator aStop);
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(optional_size const& aAvailableSpace = optional_size()) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         void paint(i_graphics_context& aGc) const override;
     public:

@@ -1035,19 +1035,60 @@ namespace neogfx
 
     void widget::paint_non_client_after(i_graphics_context& aGc) const
     {
-        if (debug == this)
+        // todo: move to debug function/service
+        if (debug == this || debug != nullptr && has_layout() && debug->is_layout() &&
+            (debug == &layout() || static_cast<i_layout const*>(debug)->is_descendent_of(layout())))
         {
-            aGc.draw_rect(to_client_coordinates(non_client_rect()), color::White);
-            aGc.line_stipple_on(1.0, 0x5555);
-            aGc.draw_rect(to_client_coordinates(non_client_rect()), color::Red);
-            aGc.line_stipple_off();
-        }
-        else if (has_layout() && debug == &layout())
-        {
-            aGc.draw_rect(rect{ layout().position(), layout().extents() }, color::White);
-            aGc.line_stipple_on(1.0, 0x5555);
-            aGc.draw_rect(rect{ layout().position(), layout().extents() }, color::Blue);
-            aGc.line_stipple_off();
+            neogfx::font debugFont1 = service<i_app>().current_style().font().with_size(16);
+            neogfx::font debugFont2 = service<i_app>().current_style().font().with_size(8);
+            {
+                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::White, 3.0 });
+                aGc.line_stipple_on(1.0, 0x5555);
+                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::Green, 3.0 });
+                aGc.line_stipple_off();
+                if (debug == this)
+                {
+                    aGc.draw_text(position(), typeid(*this).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    std::ostringstream oss;
+                    oss << "size policy: " << size_policy();
+                    oss << " minimum size: " << minimum_size() << " maximum size: " << maximum_size();
+                    oss << " fixed size: " << (has_fixed_size() ? fixed_size() : optional_size{}) << " extents: " << extents();
+                    aGc.draw_text(position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                }
+            }
+            if (debug != this || has_layout())
+            {
+                i_layout const& debugLayout = (debug == this ? layout() : *static_cast<i_layout const*>(debug));
+                if (debug != this)
+                {
+                    aGc.draw_text(debugLayout.position(), typeid(debugLayout).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    std::ostringstream oss;
+                    oss << "size policy: " << debugLayout.size_policy();
+                    oss << " minimum size: " << debugLayout.minimum_size() << " maximum size: " << debugLayout.maximum_size();
+                    oss << " fixed size: " << (debugLayout.has_fixed_size() ? debugLayout.fixed_size() : optional_size{}) << " extents: " << debugLayout.extents();
+                    aGc.draw_text(debugLayout.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                }
+                for (layout_item_index itemIndex = 0; itemIndex < debugLayout.count(); ++itemIndex)
+                {
+                    auto const& item = debugLayout.item_at(itemIndex);
+                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::White.with_alpha(0.5));
+                    aGc.line_stipple_on(1.0, 0x5555);
+                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::Black.with_alpha(0.5));
+                    aGc.line_stipple_off();
+                    std::string text = typeid(item).name();
+                    auto* l = &item;
+                    while (l->has_parent_layout())
+                    {
+                        l = &l->parent_layout();
+                        text = typeid(*l).name() + " > "_s + text;
+                    }
+                    aGc.draw_text(item.position(), text, debugFont2, text_appearance{ color::White.with_alpha(0.5), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.5), 2.0 } });
+                }
+                aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, color::White);
+                aGc.line_stipple_on(1.0, 0x5555);
+                aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, debug == &layout() ? color::Blue : color::Purple);
+                aGc.line_stipple_off();
+            }
         }
     }
 

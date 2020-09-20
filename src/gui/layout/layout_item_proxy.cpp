@@ -76,6 +76,11 @@ namespace neogfx
         return iSubject;
     }
 
+    layout_item_disposition& layout_item_proxy::cached_disposition() const
+    {
+        return iCachedDisposition;
+    }
+
     void layout_item_proxy::anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction)
     {
         subject().anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);

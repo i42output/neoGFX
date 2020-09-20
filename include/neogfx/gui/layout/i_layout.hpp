@@ -29,6 +29,7 @@ namespace neogfx
     class i_layout;
     class i_spacer;
     class i_widget;
+    class i_title_bar;
     class i_status_bar;
 
     typedef uint32_t layout_item_index;
@@ -62,6 +63,8 @@ namespace neogfx
     class i_standard_layout_container
     {
     public:
+        struct no_title_bar : std::logic_error { no_title_bar() : std::logic_error{ "neogfx::i_standard_layout_container::no_title_bar" } {} };
+        struct no_status_bar : std::logic_error { no_status_bar() : std::logic_error{ "neogfx::i_standard_layout_container::no_status_bar" } {} };
         struct no_client_widget : std::logic_error { no_client_widget() : std::logic_error{ "neogfx::i_standard_layout_container::no_client_widget" } {} };
     public:
         virtual ~i_standard_layout_container() = default;
@@ -75,6 +78,12 @@ namespace neogfx
         virtual i_widget& client_widget() = 0;
         virtual void set_client(i_widget& aClient) = 0;
         virtual void set_client(std::shared_ptr<i_widget> aClient) = 0;
+        virtual const i_title_bar& title_bar() const = 0;
+        virtual i_title_bar& title_bar() = 0;
+        virtual void set_title_bar(i_title_bar& aTitleBar) = 0;
+        virtual void set_title_bar(std::shared_ptr<i_title_bar> aTitleBar) = 0;
+        virtual const i_status_bar& status_bar() const = 0;
+        virtual i_status_bar& status_bar() = 0;
         virtual void set_status_bar(i_status_bar& aStatusBar) = 0;
         virtual void set_status_bar(std::shared_ptr<i_status_bar> aStatusBar) = 0;
     public:
@@ -297,6 +306,17 @@ namespace neogfx
         WidgetT& get_widget_at(layout_item_index aIndex)
         {
             return static_cast<WidgetT&>(get_widget_at(aIndex));
+        }
+        bool is_descendent_of(const i_layout& aAncestor) const
+        {
+            auto* l = this;
+            while (l->has_parent_layout() && &l->layout_owner() == &aAncestor.layout_owner())
+            {
+                l = &l->parent_layout();
+                if (l == &aAncestor)
+                    return true;
+            }
+            return false;
         }
     };
 

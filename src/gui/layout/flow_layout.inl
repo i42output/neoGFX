@@ -25,6 +25,8 @@ namespace neogfx
     template <typename AxisPolicy>
     size flow_layout::do_minimum_size(const optional_size& aAvailableSpace) const
     {
+        if (has_minimum_size())
+            return layout::minimum_size(aAvailableSpace);
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         if (itemsVisible == 0)
             return size{};
@@ -72,6 +74,8 @@ namespace neogfx
     template <typename AxisPolicy>
     size flow_layout::do_maximum_size(const optional_size& aAvailableSpace) const
     {
+        if (has_maximum_size())
+            return layout::maximum_size(aAvailableSpace);
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
             return size::max_size();
         auto availableSpaceForChildren = aAvailableSpace;

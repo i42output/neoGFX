@@ -42,7 +42,7 @@ namespace neogfx
         tab_container_style style() const override;
         void set_style(tab_container_style aStyle) override;
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
     public:
         bool transparent_background() const override;
     public:

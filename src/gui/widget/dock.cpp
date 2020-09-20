@@ -103,9 +103,13 @@ namespace neogfx
 
     neogfx::size_policy dock::size_policy() const
     {
-        if (has_size_policy() || !has_weight())
+        if (has_size_policy())
             return base_type::size_policy();
-        return size_constraint::Expanding;
+        if ((area() & dock_area::Horizontal) != dock_area::None)
+            return neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding };
+        else if ((area() & dock_area::Vertical) != dock_area::None)
+            return neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding };
+        return base_type::size_policy();
     }
 
     bool dock::part_active(widget_part aPart) const

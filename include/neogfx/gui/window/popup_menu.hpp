@@ -38,7 +38,8 @@ namespace neogfx
             window_style::InitiallyHidden | 
             window_style::InitiallyRenderable |
             window_style::DropShadow |
-            window_style::Popup;
+            window_style::Popup |
+            window_style::Menu;
     public:
         struct no_menu : std::logic_error { no_menu() : std::logic_error("neogfx::popup_menu::no_menu") {} };
     public:
@@ -60,8 +61,8 @@ namespace neogfx
         double rendering_priority() const override;
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
     public:
         color frame_color() const override;
     public:

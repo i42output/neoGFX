@@ -113,7 +113,7 @@ namespace neogfx
         bool show(bool aVisible) override;
     protected:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
     public:
         bool can_dismiss(const i_widget*) const override;
         dismissal_type_e dismissal_type() const override;
@@ -263,7 +263,7 @@ namespace neogfx
         bool cancelling_selection() const;
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
     private:
         void visit(i_drop_list_input_widget& aInputWidget, push_button& aButtonWidget) override;
         void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) override;

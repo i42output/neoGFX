@@ -200,7 +200,6 @@ namespace neogfx
             message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
         });
 
-        client_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Maximum });
         iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
         iStylePicker.set_size_policy(size_constraint::Expanding);
         iSizePicker.set_size_policy(size_constraint::Expanding);

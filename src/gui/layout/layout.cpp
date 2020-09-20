@@ -545,7 +545,7 @@ namespace neogfx
 
     void layout::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
     {
-        optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+        optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size{});
         if (MinimumSize != newMinimumSize)
         {
             if (debug == this)
@@ -558,7 +558,7 @@ namespace neogfx
 
     void layout::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
     {
-        optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+        optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size{});
         if (MaximumSize != newMaximumSize)
         {
             if (debug == this)

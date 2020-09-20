@@ -52,7 +52,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  status_bar %1%;\n", id());
+            emit("  neogfx::status_bar %1%;\n", id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

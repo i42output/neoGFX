@@ -42,8 +42,8 @@ namespace neogfx
         i_action& action();
     public:
         virtual neogfx::size_policy size_policy() const;
-        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-        virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+        virtual size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const;
+        virtual size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const;
     public:
         virtual void paint(i_graphics_context& aGc) const;
     public:

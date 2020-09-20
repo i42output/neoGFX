@@ -74,6 +74,7 @@ const neolib::enum_enumerators_t<neogfx::size_constraint> neolib::enum_enumerato
     declare_enum_string(neogfx::size_constraint, Minimum)
     declare_enum_string(neogfx::size_constraint, Maximum)
     declare_enum_string(neogfx::size_constraint, Expanding)
+    declare_enum_string(neogfx::size_constraint, MinimumExpanding)
     declare_enum_string(neogfx::size_constraint, ExpandingUniform)
     declare_enum_string(neogfx::size_constraint, Manual)
 };

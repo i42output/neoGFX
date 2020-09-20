@@ -60,7 +60,7 @@ namespace neogfx
         bool spot_color() const override;
         bool perform_hover_animation() const override;
     protected:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
         void handle_clicked() override;
     protected:
         color palette_color(color_role aColorRole) const override;

@@ -437,8 +437,8 @@ namespace neogfx
         void moved() override;
         void resized() override;
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
         neogfx::padding padding() const override;
     public:
         void paint(i_graphics_context& aGc) const override;

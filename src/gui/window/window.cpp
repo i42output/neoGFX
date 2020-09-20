@@ -170,7 +170,7 @@ namespace neogfx
 
     size window::client::minimum_size(const optional_size& aAvailableSpace) const
     {
-        if (has_minimum_size() || (static_cast<const window&>(parent()).style() & window_style::Resize) != window_style::Resize)
+        if (has_minimum_size() || (root().style() & window_style::Resize) != window_style::Resize)
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         else
             return service<i_app>().current_style().padding(padding_role::Window).size();
@@ -234,15 +234,21 @@ namespace neogfx
     inline decoration_style window_style_to_decoration_style(window_style aStyle)
     {
         decoration_style result = (aStyle & window_style::NoDecoration) == window_style::NoDecoration ?
-            decoration_style::None : decoration_style::Window;
+            decoration_style::None : 
+            (aStyle & window_style::Dialog) == window_style::Dialog ? 
+                decoration_style::Dialog : decoration_style::Window;
         if ((aStyle & window_style::Tool) == window_style::Tool)
             result |= decoration_style::Tool;
         if ((aStyle & window_style::Popup) == window_style::Popup)
             result |= decoration_style::Popup;
+        if ((aStyle & window_style::Menu) == window_style::Menu)
+            result |= decoration_style::Menu;
         if ((aStyle & window_style::Nested) == window_style::Nested)
             result |= decoration_style::Nested;
         if ((aStyle & window_style::Resize) == window_style::Resize)
             result |= decoration_style::Resizable;
+        if ((aStyle & window_style::Main) == window_style::Main)
+            result |= decoration_style::DockAreas;
         return result;
     }
 
@@ -1033,7 +1039,10 @@ namespace neogfx
         update_modality(false);
 
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
+        {
+            create_title_bar();
             title_bar().set_title(title_text());
+        }
 
         set_padding({});
 

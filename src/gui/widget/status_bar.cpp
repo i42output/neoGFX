@@ -136,6 +136,7 @@ namespace neogfx
         iKeyboardLockStatus{ iLayout },
         iSizeGrip{ iLayout }
     {
+        aContainer.set_status_bar(*this);
         init();
     }
 

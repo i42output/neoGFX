@@ -41,24 +41,25 @@ namespace neogfx
         Fullscreen                  = 0x00000400,    // The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
         Main                        = 0x00000800,    // The window is a main window so may go fullscreen or change video mode
         Dialog                      = 0x00001000,
-        Popup                       = 0x00002000,    // The window is a popup (e.g. menu)
-        Tool                        = 0x00004000,    // The window shouldn't appear on the operating system taskbar
-        DropShadow                  = 0x00008000,
-        Modal                       = 0x00010000,
-        ApplicationModal            = 0x00020000,
-        NoActivate                  = 0x00040000,
-        RequiresOwnerFocus          = 0x00080000,
-        DismissOnOwnerClick         = 0x00100000,
-        DismissOnParentClick        = 0x00200000,
-        HideOnOwnerClick            = 0x00400000,
-        HideOnParentClick           = 0x00800000,
-        InitiallyHidden             = 0x01000000,
-        InitiallyCentered           = 0x02000000,    // Center on desktop or parent
-        InitiallyRenderable         = 0x04000000,
+        Popup                       = 0x00002000,    // The window is a popup
+        Menu                        = 0x00004000,
+        Tool                        = 0x00008000,    // The window shouldn't appear on the operating system taskbar
+        DropShadow                  = 0x00010000,
+        Modal                       = 0x00020000,
+        ApplicationModal            = 0x00040000,
+        NoActivate                  = 0x00080000,
+        RequiresOwnerFocus          = 0x00100000,
+        DismissOnOwnerClick         = 0x00200000,
+        DismissOnParentClick        = 0x00400000,
+        HideOnOwnerClick            = 0x00800000,
+        HideOnParentClick           = 0x01000000,
+        InitiallyHidden             = 0x02000000,
+        InitiallyCentered           = 0x04000000,    // Center on desktop or parent
+        InitiallyRenderable         = 0x08000000,
         Weak                        = 0x80000000,
-        Default                     = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | SizeGrip | Close | DropShadow | InitiallyCentered | InitiallyRenderable,
-        DefaultDialog               = (Default | Dialog) & ~InitiallyRenderable,
-        DefaultNonResizableDialog   = (Default | Dialog) & ~InitiallyRenderable & ~Resize
+        Default                     = Main | TitleBar | SystemMenu | Menu | MinimizeBox | MaximizeBox | Resize | SizeGrip | Close | DropShadow | InitiallyCentered | InitiallyRenderable,
+        DefaultDialog               = (Default | Dialog) & ~(InitiallyRenderable | Main | Menu),
+        DefaultNonResizableDialog   = DefaultDialog & ~Resize
     };
 
     inline constexpr window_style operator~(window_style aStyle)

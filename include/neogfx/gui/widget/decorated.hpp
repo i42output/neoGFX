@@ -24,6 +24,7 @@
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
+#include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/widget/normal_title_bar.hpp>
 #include <neogfx/gui/widget/tool_title_bar.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
@@ -38,22 +39,26 @@ namespace neogfx
         Menu            = 0x00020000,
         Toolbar         = 0x00040000,
         Dock            = 0x00080000,
-        StatusBar       = 0x00100000
+        DockAreas       = 0x00100000,
+        StatusBar       = 0x00200000
     };
 
     enum class decoration_style : uint32_t
     {
         None            = 0x00000000,
         Window          = 0x00000001,
-        Tool            = 0x00000002,
-        Dock            = 0x00000004,
-        Popup           = 0x00000008,
-        Splash          = 0x00000010,
+        Dialog          = 0x00000002,
+        Tool            = 0x00000004,
+        Menu            = 0x00000008,
+        Dock            = 0x00000010,
+        Popup           = 0x00000040,
+        Splash          = 0x00000080,
         Resizable       = 0x01000000,
-        DontFixWeights  = 0x02000000,
+        DockAreas       = 0x02000000,
         Nested          = 0x10000000,
         NestedWindow    = Window | Nested,
         NestedTool      = Tool | Nested,
+        NestedMenu      = Menu | Nested,
         NestedPopup     = Popup | Nested,
         NestedSplash    = Splash | Nested
     };
@@ -119,7 +124,11 @@ namespace neogfx
     public:
         template <typename... Args>
         decorated(neogfx::decoration_style aStyle, Args&&... aArgs) :
-            widget_type{ std::forward<Args>(aArgs)... }, iInitialized{ false }, iStyle{ aStyle }, iDecoration{ default_decoration(aStyle) }
+            widget_type{ std::forward<Args>(aArgs)... }, 
+            iInitialized{ false }, 
+            iStyle{ aStyle }, 
+            iDecoration{ default_decoration(aStyle) },
+            iAutoscale{ false }
         {
             init();
         }
@@ -140,15 +149,6 @@ namespace neogfx
         neogfx::decoration decoration() const
         {
             return iDecoration;
-        }
-    public:
-        const i_title_bar& title_bar() const
-        {
-            return *iTitleBar;
-        }
-        i_title_bar& title_bar()
-        {
-            return *iTitleBar;
         }
     public:
         bool has_client_widget() const override
@@ -175,7 +175,7 @@ namespace neogfx
         {
             if (!iClientLayout)
             {
-                if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
+                if ((decoration() & neogfx::decoration::DockAreas) == neogfx::decoration::DockAreas)
                     iClientLayout = std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &dock_layout(layout_position::Center) };
                 else
                 {
@@ -192,9 +192,39 @@ namespace neogfx
             if (iClient != nullptr)
                 iClientLayout->add(iClient);
         }
+        const i_title_bar& title_bar() const override
+        {
+            if (iTitleBar)
+                return *iTitleBar;
+            throw no_title_bar();
+        }
+        i_title_bar& title_bar() override
+        {
+            return const_cast<i_title_bar&>(to_const(*this).title_bar());
+        }
+        void set_title_bar(i_title_bar& aTitleBar) override
+        {
+            set_title_bar(std::shared_ptr<i_title_bar>{ std::shared_ptr<i_status_bar>{}, & aTitleBar });
+        }
+        void set_title_bar(std::shared_ptr<i_title_bar> aTitleBar)
+        {
+            iTitleBar = aTitleBar;
+            if (iTitleBarLayout->find(iTitleBar->as_widget()) == std::nullopt)
+                iTitleBarLayout->add(iTitleBar->as_widget());
+        }
+        const i_status_bar& status_bar() const override
+        {
+            if (iStatusBar)
+                return *iStatusBar;
+            throw no_status_bar();
+        }
+        i_status_bar& status_bar() override
+        {
+            return const_cast<i_status_bar&>(to_const(*this).status_bar());
+        }
         void set_status_bar(i_status_bar& aStatusBar) override
         {
-            set_status_bar(std::shared_ptr<i_status_bar>{ std::shared_ptr<i_status_bar>{}, &aStatusBar });
+            set_status_bar(std::shared_ptr<i_status_bar>{ std::shared_ptr<i_status_bar>{}, & aStatusBar });
         }
         void set_status_bar(std::shared_ptr<i_status_bar> aStatusBar)
         {
@@ -202,10 +232,19 @@ namespace neogfx
             if (iStatusBarLayout->find(iStatusBar->as_widget()) == std::nullopt)
                 iStatusBarLayout->add(iStatusBar->as_widget());
         }
+        template <typename... Args>
+        std::shared_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
+        {
+            if ((decoration_style() & neogfx::decoration_style::Tool) == neogfx::decoration_style::None)
+                return create_title_bar<normal_title_bar>(std::forward<Args>(aArgs)...);
+            else
+                return create_title_bar<tool_title_bar>(std::forward<Args>(aArgs)...);
+        }
         template <typename TitleBar, typename... Args>
         std::shared_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
         {
-            return std::make_shared<TitleBar>(*this, std::forward<Args>(aArgs)...);
+            set_title_bar(std::make_shared<TitleBar>(*this, std::forward<Args>(aArgs)...));
+            return iTitleBar;
         }
         template <typename StatusBar, typename... Args>
         std::shared_ptr<i_status_bar> create_status_bar(Args&&... aArgs)
@@ -357,7 +396,7 @@ namespace neogfx
     public:
         void fix_resizing_context_weightings(bool aUpdateLayout = true)
         {
-            if (resizing_context().has_parent_layout() && (decoration_style() & neogfx::decoration_style::DontFixWeights) != neogfx::decoration_style::DontFixWeights)
+            if (resizing_context().has_parent_layout())
                 resizing_context().parent_layout().fix_weightings(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding }, neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding });
             if (aUpdateLayout)
             {
@@ -375,18 +414,33 @@ namespace neogfx
                     resizing_context().parent_layout().update_layout(false);
             }
         }
+        bool autoscale() const
+        {
+            return iAutoscale;
+        }
         void set_autoscale(bool aEnableAutoscale)
         {
-            if (aEnableAutoscale)
+            if (iAutoscale != aEnableAutoscale)
             {
-                set_decoration_style(decoration_style() & ~decoration_style::DontFixWeights);
-                fix_resizing_context_weightings();
+                iAutoscale = aEnableAutoscale;
+                if (autoscale())
+                    fix_resizing_context_weightings();
+                else
+                    clear_resizing_context_weightings();
             }
-            else
-            {
-                set_decoration_style(decoration_style() | decoration_style::DontFixWeights);
-                clear_resizing_context_weightings();
-            }
+        }
+    protected:
+        neogfx::size_policy size_policy() const override
+        {
+            if (as_widget().has_size_policy() || as_widget().is_root())
+                return widget_type::size_policy();
+            return size_constraint::MinimumExpanding;
+        }
+        size weight() const override
+        {
+            if (as_widget().has_weight() || as_widget().is_root())
+                return widget_type::weight();
+            return size{ 1.0 };
         }
     protected:
         void capture_released() override
@@ -432,12 +486,6 @@ namespace neogfx
             if ((decoration_style() & neogfx::decoration_style::Window) == neogfx::decoration_style::Window && !as_widget().is_root())
                 return; // surface not yet created
 
-            if (!as_widget().is_root())
-            {
-                as_widget().set_size_policy(size_constraint::MinimumExpanding);
-                as_widget().set_weight(size{ 1.0 });
-            }
-
             iNonClientLayout.emplace(*this);
             non_client_layout().set_padding(neogfx::padding{});
             non_client_layout().set_spacing(size{});
@@ -445,10 +493,6 @@ namespace neogfx
             {
                 iTitleBarLayout.emplace(non_client_layout());
                 iTitleBarLayout->set_padding(neogfx::padding{});
-                if ((decoration_style() & neogfx::decoration_style::Tool) == neogfx::decoration_style::None)
-                    iTitleBar = create_title_bar<normal_title_bar>();
-                else
-                    iTitleBar = create_title_bar<tool_title_bar>();
             }
             // todo: create widgets for the following decorations
             if ((decoration() & neogfx::decoration::Menu) == neogfx::decoration::Menu)
@@ -461,10 +505,15 @@ namespace neogfx
                 iToolbarLayout.emplace(non_client_layout());
                 iToolbarLayout->set_padding(neogfx::padding{});
             }
-            if ((decoration() & neogfx::decoration::Dock) == neogfx::decoration::Dock)
+            if ((decoration() & neogfx::decoration::DockAreas) == neogfx::decoration::DockAreas)
             {
-                iDockLayout.emplace(has_layout(standard_layout::Toolbar) ? 
-                    toolbar_layout(layout_position::Center) : non_client_layout());
+                if (!iDockLayoutContainer)
+                {
+                    iDockLayoutContainer.emplace(has_layout(standard_layout::Toolbar) ?
+                        toolbar_layout(layout_position::Center) : non_client_layout());
+                    iDockLayoutContainer->set_padding(neogfx::padding{});
+                }
+                iDockLayout.emplace(*iDockLayoutContainer);
                 iDockLayout->set_padding(neogfx::padding{});
             }
             if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
@@ -485,8 +534,6 @@ namespace neogfx
             if (iTracking)
             {
                 i_layout_item& resizingContext = resizing_context();
-                if (resizingContext.is_layout() && resizingContext.as_layout().invalidated())
-                    resizingContext.layout_owner().layout_items();
                 auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
                 auto const currentSize = resizingContext.extents();
                 optional_size newSize;
@@ -523,7 +570,9 @@ namespace neogfx
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
                     clear_resizing_context_weightings(false);
                     resizingContext.set_fixed_size(newSize, false);
-                    fix_resizing_context_weightings();
+                    fix_resizing_context_weightings(autoscale());
+                    if (!autoscale())
+                        clear_resizing_context_weightings();
                 }
             }
         }
@@ -531,10 +580,16 @@ namespace neogfx
         static neogfx::decoration default_decoration(neogfx::decoration_style aStyle)
         {
             auto result = neogfx::decoration::None;
-            if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Tool)) != neogfx::decoration_style::None)
+            if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Dialog | neogfx::decoration_style::Tool)) != neogfx::decoration_style::None)
                 result |= neogfx::decoration::TitleBar;
-            if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Popup)) != neogfx::decoration_style::None)
-                result |= (neogfx::decoration::Menu | neogfx::decoration::Toolbar | neogfx::decoration::Dock | neogfx::decoration::StatusBar);
+            if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Tool)) == neogfx::decoration_style::Window)
+                result |= (neogfx::decoration::Toolbar | neogfx::decoration::StatusBar);
+            if ((aStyle & neogfx::decoration_style::Menu) == neogfx::decoration_style::Menu)
+                result |= neogfx::decoration::Menu;
+            if ((aStyle & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock)
+                result |= neogfx::decoration::Dock;
+            if ((aStyle & neogfx::decoration_style::DockAreas) == neogfx::decoration_style::DockAreas)
+                result |= neogfx::decoration::DockAreas;
             if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Dock)) != neogfx::decoration_style::None)
                 result |= neogfx::decoration::Border;
             return result;
@@ -543,10 +598,12 @@ namespace neogfx
         bool iInitialized;
         neogfx::decoration_style iStyle;
         neogfx::decoration iDecoration;
+        bool iAutoscale;
         std::optional<vertical_layout> iNonClientLayout;
         std::optional<vertical_layout> iTitleBarLayout;
         std::optional<vertical_layout> iMenuLayout;
         std::optional<border_layout> iToolbarLayout;
+        std::optional<scrollable_widget<>> iDockLayoutContainer;
         std::optional<border_layout> iDockLayout;
         std::optional<vertical_layout> iStatusBarLayout;
         std::shared_ptr<i_title_bar> iTitleBar;

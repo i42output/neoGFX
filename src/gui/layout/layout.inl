@@ -18,7 +18,6 @@
 */
 
 #include <unordered_map>
-#include <unordered_set>
 #include <neolib/core/bresenham_counter.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
@@ -28,7 +27,7 @@ namespace neogfx
     template <typename SpecializedPolicy>
     struct layout::common_axis_policy
     {
-        static uint32_t items_zero_sized(layout& aLayout, const optional_size& aAvailableSpace = optional_size())
+        static uint32_t items_zero_sized(layout& aLayout, const optional_size& aAvailableSpace = optional_size{})
         {
             uint32_t result = 0;
             bool noSpace = (aAvailableSpace == std::nullopt || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer));
@@ -256,22 +255,24 @@ namespace neogfx
         size::dimension_type leftover = AxisPolicy::cx(availableSize);
         uint32_t itemsUsingLeftover = 0;
         size totalExpanderWeight;
-        enum disposition_e { Unknown, Weighted, Unweighted, TooSmall, FixedSize };
-        std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, neolib::fast_pool_allocator<std::pair<const item* const, disposition_e>>> itemDispositions;
         for (auto const& item : items())
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
+            if (debug == &item.subject())
+                std::cerr << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+            auto& disposition = item.proxy_for_layout().cached_disposition();
+            disposition = layout_item_disposition::Unknown;
             if (AxisPolicy::size_policy_x(item.effective_size_policy()) == size_constraint::Minimum)
             {
-                itemDispositions[&item] = TooSmall;
+                disposition = layout_item_disposition::TooSmall;
                 leftover -= AxisPolicy::cx(item.minimum_size(availableSize));
                 if (leftover < 0.0)
                     leftover = 0.0;
             }
             else if (AxisPolicy::size_policy_x(item.effective_size_policy()) == size_constraint::Fixed)
             {
-                itemDispositions[&item] = FixedSize;
+                disposition = layout_item_disposition::FixedSize;
                 leftover -= AxisPolicy::cx(item.has_fixed_size() ? item.fixed_size() : item.minimum_size(availableSize));
                 if (leftover < 0.0)
                     leftover = 0.0;
@@ -290,15 +291,17 @@ namespace neogfx
             {
                 if (!item.visible() && !ignore_visibility())
                     continue;
-                auto& disposition = itemDispositions[&item];
-                if (disposition != Unknown && disposition != Weighted)
+                auto& disposition = item.proxy_for_layout().cached_disposition();
+                if (disposition != layout_item_disposition::Unknown && disposition != layout_item_disposition::Weighted)
                     continue;
+                if (debug == &item.subject())
+                    std::cerr << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
                 auto const minSize = AxisPolicy::cx(item.minimum_size(availableSize));
                 auto const maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
                 auto const weightedSize = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
                 if (minSize < weightedSize && maxSize > weightedSize)
                 {
-                    disposition = Weighted;
+                    disposition = layout_item_disposition::Weighted;
                     if (AxisPolicy::size_policy_x(item.effective_size_policy(), false) == size_constraint::ExpandingUniform)
                     {
                         if (--itemsUsingLeftover == 0)
@@ -307,8 +310,8 @@ namespace neogfx
                 }
                 else
                 {
-                    disposition = maxSize <= weightedSize ? TooSmall : Unweighted;
-                    leftover -= disposition == TooSmall ? maxSize : minSize;
+                    disposition = maxSize <= weightedSize ? layout_item_disposition::TooSmall : layout_item_disposition::Unweighted;
+                    leftover -= disposition == layout_item_disposition::TooSmall ? maxSize : minSize;
                     if (leftover < 0.0)
                         leftover = 0.0;
                     totalExpanderWeight -= item.weight();
@@ -321,8 +324,13 @@ namespace neogfx
         size::dimension_type weightedAmount = 0.0;
         if (AxisPolicy::cx(totalExpanderWeight) > 0.0)
             for (auto const& item : items())
-                if ((item.visible() || ignore_visibility()) && itemDispositions[&item] == Weighted)
+            {
+                if (!item.visible() && !ignore_visibility())
+                    continue;
+                auto& disposition = item.proxy_for_layout().cached_disposition();
+                if (disposition == layout_item_disposition::Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
+            }
         uint32_t bitsLeft = 0;
         if (itemsUsingLeftover > 0)
             bitsLeft = static_cast<int32_t>(leftover - weightedAmount);
@@ -334,17 +342,17 @@ namespace neogfx
             if (!item.visible() && !ignore_visibility())
                 continue;
             if (debug == &item.subject())
-                std::cerr << "Consideration by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                std::cerr << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
             auto const itemMinSize = item.minimum_size(availableSize);
             auto const itemMaxSize = item.maximum_size(availableSize);
             size s;
             AxisPolicy::cy(s) = std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSize)), AxisPolicy::cy(itemMaxSize));
-            auto disposition = itemDispositions[&item];
-            if (disposition == FixedSize)
+            auto disposition = item.proxy_for_layout().cached_disposition();
+            if (disposition == layout_item_disposition::FixedSize)
                 AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
-            else if (disposition == TooSmall)
+            else if (disposition == layout_item_disposition::TooSmall)
                 AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.effective_size_policy()) == size_constraint::Minimum ? itemMinSize : itemMaxSize);
-            else if (disposition == Weighted && leftover > 0.0)
+            else if (disposition == layout_item_disposition::Weighted && leftover > 0.0)
             {
                 uint32_t bit = 0;
                 if (AxisPolicy::size_policy_x(item.effective_size_policy(), false) != size_constraint::ExpandingUniform)
