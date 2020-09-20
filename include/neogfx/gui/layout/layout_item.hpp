@@ -299,15 +299,15 @@ namespace neogfx
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
-                item.set_weight({});
+                item.set_weight({}, false);
                 if (!item.visible())
                     continue;
                 if (aWeightedPolicy && aWeightedPolicy == item.size_policy())
                 {
                     if (!item.has_fixed_size())
-                        item.set_fixed_size(item.extents());
+                        item.set_fixed_size(item.extents(), false);
                     if (aFixedSizePolicy)
-                        item.set_size_policy(aFixedSizePolicy);
+                        item.set_size_policy(aFixedSizePolicy, false);
                 }
             }
             if (debug == this)

@@ -478,7 +478,7 @@ namespace neogfx
         }
         iInvalidated = true;
         if (has_parent_layout())
-            parent_layout().invalidate();
+            parent_layout().invalidate(aDeferLayout);
         if (has_layout_owner())
         {
             if (layout_owner().is_managing_layout())
@@ -491,7 +491,7 @@ namespace neogfx
                     break;
             }
             if (w != nullptr && w != iOwner && w->has_layout())
-                w->layout().invalidate();
+                w->layout().invalidate(aDeferLayout);
         }
     }
 
