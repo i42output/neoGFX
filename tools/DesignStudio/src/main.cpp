@@ -85,11 +85,16 @@ int main(int argc, char* argv[])
         ds::settings settings;
 
         auto& autoscaleDocks = settings.setting("environment.tabs_and_windows.autoscale_docks"_s);
+        auto& workspaceSize = settings.setting("environment.tabs_and_windows.workspace_size"_s);
         auto& leftDockWidth = settings.setting("environment.tabs_and_windows.left_dock_width"_s);
         auto& rightDockWidth = settings.setting("environment.tabs_and_windows.right_dock_width"_s);
+        auto& leftDockWeight = settings.setting("environment.tabs_and_windows.left_dock_weight"_s);
+        auto& rightDockWeight = settings.setting("environment.tabs_and_windows.right_dock_weight"_s);
 
-        ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() } };
-        ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() } };
+        ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() }, ng::size{ leftDockWeight.value<double>() } };
+        ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() }, ng::size{ rightDockWeight.value<double>() } };
+        // todo: tidier way of doing this...
+        mainWindow.dock_layout(ng::layout_position::Center).set_weight(ng::size{ 1.0 } - leftDock.parent_layout().weight() - rightDock.parent_layout().weight());
 
         auto autoscaleDocksChanged = [&]()
         {
@@ -99,6 +104,11 @@ int main(int argc, char* argv[])
         autoscaleDocks.changing(autoscaleDocksChanged);
         autoscaleDocks.changed(autoscaleDocksChanged);
         autoscaleDocksChanged();
+
+        ng::get_property(mainWindow, "Size").property_changed([&](const ng::property_variant& aValue)
+        {
+            workspaceSize.set_value(std::get<ng::size>(aValue));
+        });
         ng::get_property(leftDock.parent_layout(), "Size").property_changed([&](const ng::property_variant& aValue)
         {
             leftDockWidth.set_value(std::get<ng::size>(aValue).cx);
@@ -106,6 +116,16 @@ int main(int argc, char* argv[])
         ng::get_property(rightDock.parent_layout(), "Size").property_changed([&](const ng::property_variant& aValue)
         {
             rightDockWidth.set_value(std::get<ng::size>(aValue).cx);
+        });
+        ng::get_property(leftDock.parent_layout(), "Weight").property_changed([&](const ng::property_variant& aValue)
+        {
+            if (aValue != ng::none)
+                leftDockWeight.set_value(std::get<ng::size>(aValue).cx);
+        });
+        ng::get_property(rightDock.parent_layout(), "Weight").property_changed([&](const ng::property_variant& aValue)
+        {
+            if (aValue != ng::none)
+                rightDockWeight.set_value(std::get<ng::size>(aValue).cx);
         });
 
         auto toolbox = ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame);

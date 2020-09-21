@@ -37,8 +37,8 @@ namespace neogfx
     private:
         using abstract_item = abstract_t<item>;
     public:
-        dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize = {});
-        dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize = {});
+        dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize = {}, const optional_size& aInitialWeight = {});
+        dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize = {}, const optional_size& aInitialWeight = {});
     public:
         dock_area area() const override;
         void set_area(dock_area aArea) override;
@@ -47,10 +47,10 @@ namespace neogfx
     private:
         void add(const abstract_item& aItem) override;
         void remove(const abstract_item& aItem) override;
-    private:
-        void update_layout();
     public:
         neogfx::size_policy size_policy() const override;
+    public:
+        void update_layout(bool aDeferLayout = true) override;
     public:
         bool part_active(widget_part aPart) const override;
     public:

@@ -67,5 +67,6 @@ namespace neogfx::DesignStudio
         typedef neogfx::settings base_type;
     public:
         settings();
+        ~settings();
     };
 }

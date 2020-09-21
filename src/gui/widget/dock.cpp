@@ -27,11 +27,13 @@
 
 namespace neogfx
 {
-    dock::dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize) :
+    dock::dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize, const optional_size& aInitialWeight) :
         base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
     {
         if (aInitialSize)
             parent_layout().set_fixed_size(aInitialSize);
+        if (aInitialWeight)
+            parent_layout().set_weight(aInitialSize);
         if ((aArea & dock_area::Horizontal) != dock_area::None)
             parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding });
         else
@@ -40,11 +42,13 @@ namespace neogfx
         update_layout();
     }
 
-    dock::dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize) :
+    dock::dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize, const optional_size& aInitialWeight) :
         base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
     {
         if (aInitialSize)
             parent_layout().set_fixed_size(aInitialSize);
+        if (aInitialWeight)
+            parent_layout().set_weight(aInitialSize);
         if ((aArea & dock_area::Horizontal) != dock_area::None)
             parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding });
         else
@@ -63,7 +67,7 @@ namespace neogfx
         if (iArea != aArea)
         {
             iArea = aArea;
-            update_layout();
+            update_layout(false);
         }
     }
 
@@ -95,10 +99,11 @@ namespace neogfx
         iItems.erase(existing);
     }
 
-    void dock::update_layout()
+    void dock::update_layout(bool aDeferLayout)
     {
-        layout().set_padding(neogfx::padding{});
-        layout().set_spacing(padding().top_left().to_vec2());
+        layout().set_padding(neogfx::padding{}, false);
+        layout().set_spacing(padding().top_left().to_vec2(), false);
+        base_type::update_layout(aDeferLayout);
     }
 
     neogfx::size_policy dock::size_policy() const

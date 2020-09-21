@@ -28,6 +28,8 @@ using namespace boost::multiprecision;
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/lifetime.hpp>
 #include <neolib/core/reference_counted.hpp>
+#include <neolib/core/optional.hpp>
+#include <neolib/core/variant.hpp>
 #include <neolib/core/enum.hpp>
 #include <neolib/core/string.hpp>
 #include <neolib/core/string_utils.hpp>
@@ -59,6 +61,12 @@ namespace neogfx
 
     using neolib::to_abstract;
     using neolib::abstract_t;
+
+    using neolib::optional;
+
+    using neolib::variant;
+    using neolib::none;
+    using neolib::none_t;
 
     using neolib::i_enum_t;
     using neolib::enum_t;

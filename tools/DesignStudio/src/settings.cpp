@@ -57,8 +57,11 @@ namespace neogfx::DesignStudio
         register_friendly_text(toolbarIconSize, "Size48x48"_s, "48dp x 48dp"_s);
         register_friendly_text(toolbarIconSize, "Size64x64"_s, "64dp x 64dp"_s);
         register_setting<bool>("environment.tabs_and_windows.autoscale_docks"_s, false, "Autoscale docks: %?%"_t);
-        register_setting<double>("environment.tabs_and_windows.left_dock_width"_s, 128.0);
-        register_setting<double>("environment.tabs_and_windows.right_dock_width"_s, 192.0);
+        register_setting<ng::size>("environment.tabs_and_windows.workspace_size"_s, {});
+        register_setting<double>("environment.tabs_and_windows.left_dock_width"_s, 192.0);
+        register_setting<double>("environment.tabs_and_windows.right_dock_width"_s, 256.0);
+        register_setting<double>("environment.tabs_and_windows.left_dock_weight"_s, 0.3);
+        register_setting<double>("environment.tabs_and_windows.right_dock_weight"_s, 0.3);
         register_setting<bool>("environment.fonts_and_colors.subpixel"_s, false, "Subpixel text rendering: %?%"_t);
         register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
         register_setting<workspace_grid>("environment.workspace.grid_type"_s, workspace_grid::Lines, "Grid type : %?% Grid size: %environment.workspace.grid_size:?%"_t);
@@ -66,9 +69,11 @@ namespace neogfx::DesignStudio
         register_setting<gradient>("environment.workspace.grid_color"_s, gradient{ service<i_app>().current_style().palette().color(color_role::Theme).with_alpha(0.25) }, { true }, "Grid color: %?%"_t);
 
         if (modified())
-        {
             apply_changes();
-            save();
-        }
+    }
+
+    settings::~settings()
+    {
+        apply_changes();
     }
 }

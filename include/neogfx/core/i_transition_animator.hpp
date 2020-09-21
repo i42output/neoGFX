@@ -97,11 +97,11 @@ namespace neogfx
     inline T mix(double aMixValue, const std::optional<T>& aLhs, const std::optional<T>& aRhs)
     {
         if (!aLhs.has_value() && !aRhs.has_value())
-            return std::optional<T>{};
+            return T{};
         else if (aLhs.has_value() && !aRhs.has_value())
-            return aLhs;
+            return *aLhs;
         else if (!aLhs.has_value() && aRhs.has_value())
-            return aRhs;
+            return *aRhs;
         else
             return mix(aMixValue, *aLhs, *aRhs);
     }

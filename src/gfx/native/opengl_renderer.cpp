@@ -110,6 +110,8 @@ namespace neogfx
         // We explictly destroy these OpenGL objects here when context should still exist
         iVertexBuffers.clear();
         iFontManager = std::nullopt;
+        iPingPongBuffer1s = std::nullopt;
+        iPingPongBuffer2s = std::nullopt;
         iTextureManager = std::nullopt;
         iShaderPrograms.clear();
         iDefaultShaderProgram.reset();
@@ -292,13 +294,17 @@ namespace neogfx
 
     i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
-        auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer1s, aExtents, aPreviousExtents, aSampling);
+        if (!iPingPongBuffer1s)
+            iPingPongBuffer1s.emplace();
+        auto& bufferTexture = create_ping_pong_buffer(*iPingPongBuffer1s, aExtents, aPreviousExtents, aSampling);
         return bufferTexture;
     }
 
     i_texture& opengl_renderer::ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
-        auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer2s, aExtents, aPreviousExtents, aSampling);
+        if (!iPingPongBuffer2s)
+            iPingPongBuffer2s.emplace();
+        auto& bufferTexture = create_ping_pong_buffer(*iPingPongBuffer2s, aExtents, aPreviousExtents, aSampling);
         return bufferTexture;
     }
 

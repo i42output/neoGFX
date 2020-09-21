@@ -135,8 +135,8 @@ namespace neogfx
         mutable vertex_buffers_map iVertexBuffers;
         mutable std::optional<vertex_buffers_map::iterator> iLastVertexBufferUsed;
         std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
-        ping_pong_buffers_t iPingPongBuffer1s;
-        ping_pong_buffers_t iPingPongBuffer2s;
+        mutable std::optional<ping_pong_buffers_t> iPingPongBuffer1s;
+        mutable std::optional<ping_pong_buffers_t> iPingPongBuffer2s;
         ref_ptr<i_standard_shader_program> iDefaultShaderProgram;
     };
 }

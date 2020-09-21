@@ -120,25 +120,44 @@ namespace neogfx
         }
         property_variant get_as_variant() const override
         {
+            if constexpr (neolib::is_optional_v<T>)
+            {
+                if (iValue != std::nullopt)
+                    return *iValue;
+                else
+                    return neolib::none;
+            }
             return iValue;
         }
         property_variant get_new_as_variant() const override
         {
             if (iNewValue != std::nullopt)
+            {
+                if constexpr (neolib::is_optional_v<T>)
+                {
+                    if (*iNewValue != std::nullopt)
+                        return **iNewValue;
+                    else
+                        return neolib::none;
+                }
                 return *iNewValue;
+            }
             throw no_new_value();
         }
         void set_from_variant(const property_variant& aValue) override
         {
             std::visit([this](auto&& arg)
             {
-                *this = std::forward<decltype(arg)>(arg);
+                if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::monostate>)
+                    *this = value_type{};
+                else
+                    *this = std::forward<decltype(arg)>(arg);
             }, aValue);
         }
         bool has_delegate() const override
         {
             return iDelegate != nullptr;
-        }
+        }   
         i_property_delegate& delegate() const override
         {
             if (has_delegate())

@@ -24,6 +24,7 @@
 #include <type_traits>
 #include <ostream>
 #include <optional>
+#include <neolib/app/i_setting_value.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/alignment.hpp>
 
@@ -181,8 +182,10 @@ namespace neogfx
     template <typename CoordinateType>
     class basic_size 
     { 
+        typedef basic_size<CoordinateType> self_type;
         // types
     public:
+        typedef self_type abstract_type; // todo: abstract type
         typedef CoordinateType coordinate_type;
         typedef CoordinateType dimension_type;
         typedef basic_delta<dimension_type> delta_type;
@@ -1111,6 +1114,18 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, basic_point<T>& aPoint)
+    {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
+        char ignore;
+        aStream >> ignore >> aPoint.x >> aPoint.y >> ignore;
+        aStream.imbue(previousImbued);
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_size<T>& aSize)
     {
         aStream << "{" << aSize.cx << ", " << aSize.cy << "}";
@@ -1118,9 +1133,33 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, basic_size<T>& aSize)
+    {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
+        char ignore;
+        aStream >> ignore >> aSize.cx >> aSize.cy >> ignore;
+        aStream.imbue(previousImbued);
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_delta<T>& aDelta)
     {
         aStream << "{dx: " << aDelta.dx << ", dy: " << aDelta.dy << "}";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, basic_delta<T>& aDelta)
+    {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
+        std::string ignore;
+        aStream >> ignore >> aDelta.dx >> ignore >> aDelta.dy >> ignore;
+        aStream.imbue(previousImbued);
         return aStream;
     }
 
@@ -1168,7 +1207,9 @@ namespace neogfx
     }
 }
 
-namespace std 
+define_setting_type(neogfx::size)
+
+namespace std
 {
     template <> struct hash<neogfx::rect>
     {
