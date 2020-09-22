@@ -309,7 +309,7 @@ namespace neogfx
                         hit |= bottom;
                     if (iStatusBar != nullptr)
                     {
-                        point const sizeGripPos = iStatusBar->as_widget().origin() - as_widget().origin();
+                        point const sizeGripPos = as_widget().to_client_coordinates(iStatusBar->size_grip().non_client_rect().position());
                         rect const sizeGripRect = { sizeGripPos, size{ nonClientRect.bottom_right() - sizeGripPos } };
                         if (sizeGripRect.contains(aPosition))
                             hit |= (right | bottom);

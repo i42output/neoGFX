@@ -1050,9 +1050,9 @@ namespace neogfx
                 {
                     aGc.draw_text(position(), typeid(*this).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                     std::ostringstream oss;
-                    oss << "size policy: " << size_policy();
-                    oss << " minimum size: " << minimum_size() << " maximum size: " << maximum_size();
-                    oss << " fixed size: " << (has_fixed_size() ? fixed_size() : optional_size{}) << " extents: " << extents();
+                    oss << "sizepol: " << size_policy();
+                    oss << " minsize: " << minimum_size() << " maxsize: " << maximum_size();
+                    oss << " fixsize: " << (has_fixed_size() ? fixed_size() : optional_size{}) << " weight: " << weight() << " extents: " << extents();
                     aGc.draw_text(position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                 }
             }
@@ -1063,9 +1063,9 @@ namespace neogfx
                 {
                     aGc.draw_text(debugLayout.position(), typeid(debugLayout).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                     std::ostringstream oss;
-                    oss << "size policy: " << debugLayout.size_policy();
-                    oss << " minimum size: " << debugLayout.minimum_size() << " maximum size: " << debugLayout.maximum_size();
-                    oss << " fixed size: " << (debugLayout.has_fixed_size() ? debugLayout.fixed_size() : optional_size{}) << " extents: " << debugLayout.extents();
+                    oss << "sizepol: " << debugLayout.size_policy();
+                    oss << " minsize: " << debugLayout.minimum_size() << " maxsize: " << debugLayout.maximum_size();
+                    oss << " fixsize: " << (debugLayout.has_fixed_size() ? debugLayout.fixed_size() : optional_size{}) << " weight: " << debugLayout.weight() << " extents: " << debugLayout.extents();
                     aGc.draw_text(debugLayout.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                 }
                 for (layout_item_index itemIndex = 0; itemIndex < debugLayout.count(); ++itemIndex)
