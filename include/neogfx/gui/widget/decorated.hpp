@@ -127,8 +127,7 @@ namespace neogfx
             widget_type{ std::forward<Args>(aArgs)... }, 
             iInitialized{ false }, 
             iStyle{ aStyle }, 
-            iDecoration{ default_decoration(aStyle) },
-            iAutoscale{ false }
+            iDecoration{ default_decoration(aStyle) }
         {
             init();
         }
@@ -394,39 +393,12 @@ namespace neogfx
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     public:
-        void fix_resizing_context_weightings(bool aUpdateLayout = true)
+        void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
         {
             if (resizing_context().has_parent_layout())
-                resizing_context().parent_layout().fix_weightings(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding }, neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding });
-            if (aUpdateLayout)
             {
-                if (resizing_context().has_parent_layout())
-                    resizing_context().parent_layout().update_layout(false);
-            }
-        }
-        void clear_resizing_context_weightings(bool aUpdateLayout = true)
-        {
-            if (resizing_context().has_parent_layout())
-                resizing_context().parent_layout().clear_weightings(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding }, neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding });
-            if (aUpdateLayout)
-            {
-                if (resizing_context().has_parent_layout())
-                    resizing_context().parent_layout().update_layout(false);
-            }
-        }
-        bool autoscale() const
-        {
-            return iAutoscale;
-        }
-        void set_autoscale(bool aEnableAutoscale)
-        {
-            if (iAutoscale != aEnableAutoscale)
-            {
-                iAutoscale = aEnableAutoscale;
-                if (autoscale())
-                    fix_resizing_context_weightings();
-                else
-                    clear_resizing_context_weightings();
+                resizing_context().parent_layout().fix_weightings(aWeightedPolicy, aFixedSizePolicy);
+                resizing_context().parent_layout().update_layout(false);
             }
         }
     protected:
@@ -568,11 +540,8 @@ namespace neogfx
                 {                
                     if (debug == this)
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
-                    clear_resizing_context_weightings(false);
                     resizingContext.set_fixed_size(newSize, false);
-                    fix_resizing_context_weightings(autoscale());
-                    if (!autoscale())
-                        clear_resizing_context_weightings();
+                    fix_weightings();
                 }
             }
         }
@@ -598,7 +567,6 @@ namespace neogfx
         bool iInitialized;
         neogfx::decoration_style iStyle;
         neogfx::decoration iDecoration;
-        bool iAutoscale;
         std::optional<vertical_layout> iNonClientLayout;
         std::optional<vertical_layout> iTitleBarLayout;
         std::optional<vertical_layout> iMenuLayout;

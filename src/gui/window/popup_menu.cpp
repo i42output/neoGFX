@@ -194,7 +194,10 @@ namespace neogfx
     {
         if (window::has_size_policy())
             return window::size_policy();
-        return size_constraint::Minimum;
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return size_constraint::Minimum;
     }
 
     size popup_menu::minimum_size(const optional_size& aAvailableSpace) const

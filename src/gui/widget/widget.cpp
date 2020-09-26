@@ -821,6 +821,8 @@ namespace neogfx
             std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
         if (has_size_policy())
             return base_type::size_policy();
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
         else
             return size_constraint::Expanding;
     }
@@ -1042,10 +1044,6 @@ namespace neogfx
             neogfx::font debugFont1 = service<i_app>().current_style().font().with_size(16);
             neogfx::font debugFont2 = service<i_app>().current_style().font().with_size(8);
             {
-                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::White, 3.0 });
-                aGc.line_stipple_on(1.0, 0x5555);
-                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::Green, 3.0 });
-                aGc.line_stipple_off();
                 if (debug == this)
                 {
                     aGc.draw_text(position(), typeid(*this).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
@@ -1055,6 +1053,10 @@ namespace neogfx
                     oss << " fixsize: " << (has_fixed_size() ? fixed_size() : optional_size{}) << " weight: " << weight() << " extents: " << extents();
                     aGc.draw_text(position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                 }
+                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::White, 3.0 });
+                aGc.line_stipple_on(1.0, 0x5555);
+                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::Green, 3.0 });
+                aGc.line_stipple_off();
             }
             if (debug != this || has_layout())
             {
@@ -1071,10 +1073,6 @@ namespace neogfx
                 for (layout_item_index itemIndex = 0; itemIndex < debugLayout.count(); ++itemIndex)
                 {
                     auto const& item = debugLayout.item_at(itemIndex);
-                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::White.with_alpha(0.5));
-                    aGc.line_stipple_on(1.0, 0x5555);
-                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::Black.with_alpha(0.5));
-                    aGc.line_stipple_off();
                     std::string text = typeid(item).name();
                     auto* l = &item;
                     while (l->has_parent_layout())
@@ -1083,6 +1081,10 @@ namespace neogfx
                         text = typeid(*l).name() + " > "_s + text;
                     }
                     aGc.draw_text(item.position(), text, debugFont2, text_appearance{ color::White.with_alpha(0.5), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.5), 2.0 } });
+                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::White.with_alpha(0.5));
+                    aGc.line_stipple_on(1.0, 0x5555);
+                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::Black.with_alpha(0.5));
+                    aGc.line_stipple_off();
                 }
                 aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, color::White);
                 aGc.line_stipple_on(1.0, 0x5555);

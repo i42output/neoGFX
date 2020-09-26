@@ -320,11 +320,29 @@ namespace neogfx
         }
     };
 
+    inline size total_child_weight(const i_layout& aLayout)
+    {
+        size totalWeight;
+        for (layout_item_index itemIndex = 0; itemIndex < aLayout.count(); ++itemIndex)
+        {
+            auto const& item = aLayout.item_at(itemIndex);
+            if (!item.visible())
+                continue;
+            totalWeight += item.weight();
+        }
+        return totalWeight;
+    }
+
     inline size calculate_relative_weight(const i_layout& aLayout, const i_layout_item& aItem)
     {
         size totalSize;
         for (layout_item_index itemIndex = 0; itemIndex < aLayout.count(); ++itemIndex)
-            totalSize += aLayout.item_at(itemIndex).extents();
+        {
+            auto const& item = aLayout.item_at(itemIndex);
+            if (!item.visible())
+                continue;
+            totalSize += item.extents();
+        }
         auto result = aItem.extents() / totalSize;
         if (std::isnan(result.cx))
             result.cx = 1.0;

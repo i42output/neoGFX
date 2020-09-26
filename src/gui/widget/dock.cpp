@@ -28,33 +28,42 @@
 namespace neogfx
 {
     dock::dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize, const optional_size& aInitialWeight) :
-        base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea { aArea  }
+        base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, 
+        iArea { aArea },
+        iAutoscale{ false }
     {
         if (aInitialSize)
             parent_layout().set_fixed_size(aInitialSize);
         if (aInitialWeight)
-            parent_layout().set_weight(aInitialSize);
-        if ((aArea & dock_area::Horizontal) != dock_area::None)
-            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding });
-        else
-            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
-        set_padding(neogfx::padding{ 1.5_mm });
-        update_layout();
+            parent_layout().set_weight(aInitialWeight);
+        init();
     }
 
     dock::dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize, const optional_size& aInitialWeight) :
-        base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, iArea{ aArea }
+        base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal },
+        iArea{ aArea },
+        iAutoscale{ false }
     {
         if (aInitialSize)
             parent_layout().set_fixed_size(aInitialSize);
         if (aInitialWeight)
-            parent_layout().set_weight(aInitialSize);
-        if ((aArea & dock_area::Horizontal) != dock_area::None)
-            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding });
-        else
-            parent_layout().set_size_policy(neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding });
-        set_padding(neogfx::padding{ 1.5_mm });
-        update_layout();
+            parent_layout().set_weight(aInitialWeight);
+        init();
+    }
+
+    bool dock::autoscale() const
+    {
+        return iAutoscale;
+    }
+
+    void dock::set_autoscale(bool aEnableAutoscale)
+    {
+        if (iAutoscale != aEnableAutoscale)
+        {
+            iAutoscale = aEnableAutoscale;
+            resizing_context().as_layout().invalidate();
+            resizing_context().parent_layout().update_layout(false);
+        }
     }
 
     dock_area dock::area() const
@@ -106,14 +115,40 @@ namespace neogfx
         base_type::update_layout(aDeferLayout);
     }
 
+    void dock::fix_weightings(optional_size_policy const&, optional_size_policy const&)
+    {
+        if ((area() & dock_area::Horizontal) != dock_area::None)
+        {
+            base_type::fix_weightings(
+                neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding },
+                neogfx::size_policy{ size_constraint::Expanding, size_constraint::Fixed });
+        }
+        else if ((area() & dock_area::Vertical) != dock_area::None)
+        {
+            base_type::fix_weightings(
+                neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding },
+                neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding });
+        }
+    }
+
     neogfx::size_policy dock::size_policy() const
     {
         if (has_size_policy())
             return base_type::size_policy();
         if ((area() & dock_area::Horizontal) != dock_area::None)
-            return neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding };
+        {
+            if (autoscale())
+                return neogfx::size_policy{ size_constraint::Expanding, size_constraint::MinimumExpanding };
+            else
+                return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Fixed };
+        }
         else if ((area() & dock_area::Vertical) != dock_area::None)
-            return neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding };
+        {
+            if (autoscale())
+                return neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Expanding };
+            else
+                return neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding };
+        }
         return base_type::size_policy();
     }
 
@@ -156,19 +191,21 @@ namespace neogfx
     bool dock::show(bool aVisible)
     {
         bool result = widget::show(aVisible);
-        // todo: multiple docks in the same layout?
-        if (!visible())
-        {
-            clear_resizing_context_weightings(false);
-            parent_layout().disable();
-            fix_resizing_context_weightings();
-        }
-        else
-        {
-            clear_resizing_context_weightings(false);
+        if (visible())
             parent_layout().enable();
-            fix_resizing_context_weightings();
-        }
+        else
+            parent_layout().disable();
+        update_layout();
         return result;
+    }
+
+    void dock::init()
+    {
+        iParentLayoutSizePolicyDelegate.emplace(
+            get_property(parent_layout(), "SizePolicy"),
+            [this]() -> optional_size_policy { return size_policy(); },
+            [this](optional_size_policy const& aSizePolicy) { set_size_policy(aSizePolicy); });
+        set_padding(neogfx::padding{ 1.5_mm });
+        update_layout();
     }
 }

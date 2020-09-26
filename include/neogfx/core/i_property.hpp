@@ -87,8 +87,8 @@ namespace neogfx
     public:
         virtual ~i_property_delegate() = default;
     public:
-        virtual const property_variant& get(const i_property& aProperty) const = 0;
-        virtual void set(const i_property& aProperty) const = 0;
+        virtual property_variant get(const i_property& aProperty) const = 0;
+        virtual void set(const i_property& aProperty) = 0;
     };
 
     class i_property_owner : public i_object
@@ -102,7 +102,7 @@ namespace neogfx
         virtual i_properties& properties() = 0;
     };
 
-    class i_property
+    class i_property : public i_property_delegate
     {
         // types
     public:
@@ -163,6 +163,41 @@ namespace neogfx
             else
                 return (dynamic_cast<const Context&>(owner()).*calculator)(std::forward<Args>(aArgs)...);
         }
+    };
+
+    template <typename T, typename Getter = std::function<T()>, typename Setter = std::function<void(T const&)>>
+    class property_delegate : public i_property_delegate
+    {
+    public:
+        typedef T value_type;
+    public:
+        property_delegate(i_property& aSubject, Getter aGetter, Setter aSetter) :
+            iSubject{ aSubject }, iGetter{ aGetter }, iSetter{ aSetter }
+        {
+            subject().set_delegate(*this);
+        }
+        ~property_delegate()
+        {
+            subject().unset_delegate();
+        }
+    public:
+        property_variant get(i_property const&) const override
+        {
+            return iGetter();
+        }
+        void set(const i_property& aProperty) override
+        {
+            return iSetter(aProperty.get<value_type>());
+        }
+    public:
+        i_property& subject()
+        {
+            return iSubject;
+        }
+    private:
+        i_property& iSubject;
+        Getter iGetter;
+        Setter iSetter;
     };
 
     template <typename PropertyOwner>

@@ -191,7 +191,9 @@ namespace neogfx
     {
         if (has_size_policy())
             return base_type::size_policy();
-        neogfx::size_policy result{size_constraint::Minimum};
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        neogfx::size_policy result{ size_constraint::Minimum };
         if ((iExpansionPolicy & neogfx::expansion_policy::ExpandHorizontally) == neogfx::expansion_policy::ExpandHorizontally)
             result.set_horizontal_size_policy(size_constraint::Expanding);
         if ((iExpansionPolicy & neogfx::expansion_policy::ExpandVertically) == neogfx::expansion_policy::ExpandVertically)

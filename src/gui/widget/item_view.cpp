@@ -257,7 +257,10 @@ namespace neogfx
     {
         if (has_size_policy())
             return framed_scrollable_widget::size_policy();
-        return size_constraint::Expanding;
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return size_constraint::Expanding;
     }
 
     void item_view::paint(i_graphics_context& aGc) const

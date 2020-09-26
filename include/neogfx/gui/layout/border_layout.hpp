@@ -58,7 +58,6 @@ namespace neogfx
     public:
         void layout_items(const point& aPosition, const size& aSize) override;
         void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override;
-        void clear_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override;
     public:
         size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
         size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;

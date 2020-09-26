@@ -241,11 +241,6 @@ namespace neogfx
         subject().fix_weightings(aWeightedPolicy, aFixedSizePolicy);
     }
 
-    void layout_item_proxy::clear_weightings(optional_size_policy const& aWeightedPolicy, optional_size_policy const& aFixedSizePolicy)
-    {
-        subject().clear_weightings(aWeightedPolicy, aFixedSizePolicy);
-    }
-
     bool layout_item_proxy::high_dpi() const
     {
         return subject().high_dpi();
@@ -470,6 +465,16 @@ namespace neogfx
     void layout_item_proxy::set_padding(const optional_padding& aPadding, bool aUpdateLayout)
     {
         subject().set_padding(aPadding, aUpdateLayout);
+    }
+
+    void layout_item_proxy::layout_item_enabled(i_layout_item& aItem)
+    {
+        subject().layout_item_enabled(aItem);
+    }
+
+    void layout_item_proxy::layout_item_disabled(i_layout_item& aItem)
+    {
+        subject().layout_item_disabled(aItem);
     }
 
     bool layout_item_proxy::visible() const

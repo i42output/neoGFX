@@ -93,6 +93,9 @@ namespace neogfx
         bool has_padding() const override;
         neogfx::padding padding() const override;
         void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
+    protected:
+        void layout_item_enabled(i_layout_item& aItem) override;
+        void layout_item_disabled(i_layout_item& aItem) override;
     public:
         bool visible() const override;
     public:
@@ -100,7 +103,6 @@ namespace neogfx
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
         void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override;
-        void clear_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override;
     public:
         const i_layout_item& subject() const override;
         i_layout_item& subject() override;

@@ -51,7 +51,10 @@ namespace neogfx
     {
         if (widget::has_size_policy())
             return widget::size_policy();
-        return size_constraint::Minimum;
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return size_constraint::Minimum;
     }
 
     size text_widget::minimum_size(const optional_size& aAvailableSpace) const

@@ -60,7 +60,10 @@ namespace neogfx
     {
         if (has_size_policy())
             return base_type::size_policy();
-        return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum };
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return size_constraint::Minimum;
     }
 
     size color_widget::minimum_size(const optional_size& aAvailableSpace) const

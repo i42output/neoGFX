@@ -97,6 +97,15 @@ namespace neogfx
             aOwner.properties().register_property(*this);
         }
     public:
+        property_variant get(const i_property& aProperty) const override
+        {
+            return get_as_variant();
+        }
+        void set(const i_property& aProperty) override
+        {
+            set_from_variant(aProperty.get_as_variant());
+        }
+    public:
         i_property_owner& owner() const override
         {
             return iOwner;
@@ -122,12 +131,12 @@ namespace neogfx
         {
             if constexpr (neolib::is_optional_v<T>)
             {
-                if (iValue != std::nullopt)
-                    return *iValue;
+                if (value() != std::nullopt)
+                    return *value();
                 else
                     return neolib::none;
             }
-            return iValue;
+            return value();
         }
         property_variant get_new_as_variant() const override
         {
@@ -246,31 +255,31 @@ namespace neogfx
         template <typename T>
         bool operator==(const T& aRhs) const
         {
-            return iValue == aRhs;
+            return value() == aRhs;
         }
         template <typename T>
         bool operator!=(const T& aRhs) const
         {
-            return iValue != aRhs;
+            return value() != aRhs;
         }
         template <typename T>
         bool operator==(const std::optional<T>& aRhs) const
         {
-            return iValue == aRhs;
+            return value() == aRhs;
         }
         template <typename T>
         bool operator!=(const std::optional<T>& aRhs) const
         {
-            return iValue != aRhs;
+            return value() != aRhs;
         }
     protected:
         const void* data() const override
         {
-            return &iValue;
+            return &value();
         }
         void* data() override
         {
-            return &iValue;
+            return &mutable_value();
         }
         void*const* calculator_function() const override
         {
@@ -280,10 +289,14 @@ namespace neogfx
             throw no_calculator();
         }
     private:
+        value_type& mutable_value()
+        {
+            return const_cast<value_type&>(to_const(*this).value());
+        }
         template <typename T2>
         self_type& do_assign(T2&& aValue, bool aOwnerNotify = true)
         {
-            if (iValue != aValue)
+            if (mutable_value() != aValue)
             {
                 iNewValue = std::forward<T2>(aValue);
                 destroyed_flag destroyed{ *this };
@@ -307,8 +320,8 @@ namespace neogfx
                     iDiscardChangeEvents = false;
                     throw;
                 }
-                auto const previousValue = iValue;
-                iValue = std::forward<T2>(aValue);
+                auto const previousValue = mutable_value();
+                mutable_value() = std::forward<T2>(aValue);
                 iNewValue = std::nullopt;
                 if (iDiscardChangeEvents)
                 {
@@ -325,11 +338,11 @@ namespace neogfx
                 bool const discardChangedFromTo = !PropertyChangedFromTo.trigger(property_variant{ previousValue }, get_as_variant());
                 if (destroyed)
                     return *this;
-                if (!discardChanged && !Changed.trigger(iValue))
+                if (!discardChanged && !Changed.trigger(value()))
                     return *this;
                 if (destroyed)
                     return *this;
-                if (!discardChangedFromTo && !ChangedFromTo.trigger(previousValue, iValue))
+                if (!discardChangedFromTo && !ChangedFromTo.trigger(previousValue, value()))
                     return *this;
                 if (destroyed)
                     return *this;

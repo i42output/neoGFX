@@ -49,6 +49,8 @@ namespace neogfx
     {
         if (has_size_policy())
             return framed_scrollable_widget::size_policy();
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
         else
             return size_constraint::Expanding;
     }

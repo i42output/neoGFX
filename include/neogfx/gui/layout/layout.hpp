@@ -145,6 +145,9 @@ namespace neogfx
         const i_device_metrics& device_metrics() const override;
     public:
         void layout_as(const point& aPosition, const size& aSize);
+    protected:
+        void layout_item_enabled(i_layout_item& aItem) override;
+        void layout_item_disabled(i_layout_item& aItem) override;
     public:
         bool visible() const override;
     protected:
@@ -161,6 +164,7 @@ namespace neogfx
         item_list::const_iterator find_item(const i_layout_item& aItem) const;
         item_list::iterator find_item(i_layout_item& aItem);
         const item_list& items() const;
+        item_list& items();
         virtual void remove(item_list::iterator aItem);
         uint32_t spacer_count() const;
         uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;

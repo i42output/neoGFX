@@ -105,7 +105,10 @@ namespace neogfx
     {
         if (has_size_policy())
             return widget::size_policy();
-        return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
     void button::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)

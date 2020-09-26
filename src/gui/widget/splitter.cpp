@@ -53,7 +53,9 @@ namespace neogfx
     {
         if (has_size_policy())
             return widget::size_policy();
-        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
             return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
         else
             return neogfx::size_policy{size_constraint::Minimum, size_constraint::Expanding};

@@ -161,7 +161,7 @@ namespace neogfx
     void layout::set_layout_owner(i_widget* aOwner)
     {
         iOwner = aOwner;
-        for (auto& i : iItems)
+        for (auto& i : items())
             if (!i.subject().has_layout_owner())
                 i.subject().set_layout_owner(aOwner);
     }
@@ -193,7 +193,7 @@ namespace neogfx
 
     i_layout_item& layout::add(std::shared_ptr<i_layout_item> aItem)
     {
-        return add_at(static_cast<layout_item_index>(iItems.size()), aItem);
+        return add_at(static_cast<layout_item_index>(items().size()), aItem);
     }
 
     i_layout_item& layout::add_at(layout_item_index aPosition, std::shared_ptr<i_layout_item> aItem)
@@ -205,9 +205,9 @@ namespace neogfx
             else
                 throw item_already_added();
         }
-        while (aPosition > iItems.size())
+        while (aPosition > items().size())
             add_spacer_at(0);
-        auto i = iItems.insert(std::next(iItems.begin(), aPosition), item{ aItem });
+        auto i = items().insert(std::next(items().begin(), aPosition), item{ aItem });
         i->set_parent_layout(this);
         if (has_layout_owner())
             i->set_layout_owner(&layout_owner());
@@ -217,7 +217,7 @@ namespace neogfx
 
     void layout::remove_at(layout_item_index aIndex)
     {
-        remove(std::next(iItems.begin(), aIndex));
+        remove(std::next(items().begin(), aIndex));
     }
 
     bool layout::remove(i_layout_item& aItem)
@@ -236,8 +236,8 @@ namespace neogfx
 
     void layout::remove_all()
     {
-        while (!iItems.empty())
-            remove(std::prev(iItems.end()));
+        while (!items().empty())
+            remove(std::prev(items().end()));
         invalidate();
     }
 
@@ -246,7 +246,7 @@ namespace neogfx
         try
         {
             auto& compatibleDestination = dynamic_cast<layout&>(aDestination); // dynamic_cast? not a fan but heh.
-            compatibleDestination.iItems.splice(compatibleDestination.items().end(), iItems);
+            compatibleDestination.items().splice(compatibleDestination.items().end(), iItems);
             for (auto& item : compatibleDestination)
                 item.set_parent_layout(&compatibleDestination);
         }
@@ -260,7 +260,7 @@ namespace neogfx
 
     layout_item_index layout::count() const
     {
-        return static_cast<layout_item_index>(iItems.size());
+        return static_cast<layout_item_index>(items().size());
     }
 
     layout_item_index layout::index_of(const i_layout_item& aItem) const
@@ -273,28 +273,28 @@ namespace neogfx
 
     optional_layout_item_index layout::find(const i_layout_item& aItem) const
     {
-        for (auto i = iItems.begin(); i != iItems.end(); ++i)
+        for (auto i = items().begin(); i != items().end(); ++i)
         {
             auto const& item = *i;
             if (&item.subject() == &aItem)
-                return static_cast<layout_item_index>(std::distance(iItems.begin(), i));
+                return static_cast<layout_item_index>(std::distance(items().begin(), i));
         }
         return optional_layout_item_index{};
     }
 
     bool layout::is_widget_at(layout_item_index aIndex) const
     {
-        if (aIndex >= iItems.size())
+        if (aIndex >= items().size())
             throw bad_item_index();
-        auto item = std::next(iItems.begin(), aIndex);
+        auto item = std::next(items().begin(), aIndex);
         return item->is_widget();
     }
 
     const i_layout_item& layout::item_at(layout_item_index aIndex) const
     {
-        if (aIndex >= iItems.size())
+        if (aIndex >= items().size())
             throw bad_item_index();
-        auto item = std::next(iItems.begin(), aIndex);
+        auto item = std::next(items().begin(), aIndex);
         return item->subject();
     }
 
@@ -305,9 +305,9 @@ namespace neogfx
 
     const i_widget& layout::get_widget_at(layout_item_index aIndex) const
     {
-        if (aIndex >= iItems.size())
+        if (aIndex >= items().size())
             throw bad_item_index();
-        auto item = std::next(iItems.begin(), aIndex);
+        auto item = std::next(items().begin(), aIndex);
         if (item->subject().is_widget())
             return item->subject().as_widget();
         throw not_a_widget();
@@ -320,9 +320,9 @@ namespace neogfx
 
     const i_layout& layout::get_layout_at(layout_item_index aIndex) const
     {
-        if (aIndex >= iItems.size())
+        if (aIndex >= items().size())
             throw bad_item_index();
-        auto item = std::next(iItems.begin(), aIndex);
+        auto item = std::next(items().begin(), aIndex);
         if (item->subject().is_layout())
             return item->subject().as_layout();
         throw not_a_layout();
@@ -436,14 +436,19 @@ namespace neogfx
         if (!enabled())
         {
             iEnabled = true;
-            invalidate();
+            if (has_parent_layout())
+                parent_layout().layout_item_enabled(*this);
         }
     }
 
     void layout::disable()
     {
         if (enabled())
+        {
             iEnabled = false;
+            if (has_parent_layout())
+                parent_layout().layout_item_disabled(*this);
+        }
     }
 
     bool layout::enabled() const
@@ -454,6 +459,44 @@ namespace neogfx
     void layout::layout_as(const point& aPosition, const size& aSize)
     {
         layout_items(aPosition, aSize);
+    }
+
+    void layout::layout_item_enabled(i_layout_item& aItem)
+    {
+        base_type::layout_item_enabled(aItem);
+        if (aItem.has_weight())
+        {
+            auto const totalChildWeight = total_child_weight(*this);
+            auto const previousWeightCoefficients = aItem.weight();
+            aItem.set_weight(totalChildWeight * previousWeightCoefficients, false);
+            for (auto& item : items())
+            {
+                if (!item.visible())
+                    continue;
+                if (&item.subject() != &aItem)
+                    item.set_weight(item.weight() * (size{ 1.0 } - previousWeightCoefficients), false);
+            }
+        }
+        invalidate();
+    }
+    
+    void layout::layout_item_disabled(i_layout_item& aItem)
+    {
+        base_type::layout_item_disabled(aItem);
+        if (has_weight())
+        {
+            auto const totalChildWeight = total_child_weight(*this);
+            auto const previousWeightCoefficients = aItem.weight() / totalChildWeight;
+            aItem.set_weight(previousWeightCoefficients, false);
+            for (auto& item : items())
+            {
+                if (!item.visible())
+                    continue;
+                if (&item.subject() != &aItem)
+                    item.set_weight(item.weight() / previousWeightCoefficients, false);
+            }
+        }
+        invalidate();
     }
 
     bool layout::visible() const
@@ -583,68 +626,68 @@ namespace neogfx
 
     layout::item_list::const_iterator layout::cbegin() const
     {
-        return iItems.cbegin();
+        return items().cbegin();
     }
 
     layout::item_list::const_iterator layout::cend() const
     {
-        return iItems.cend();
+        return items().cend();
     }
 
     layout::item_list::const_iterator layout::begin() const
     {
-        return iItems.begin();
+        return items().begin();
     }
 
     layout::item_list::const_iterator layout::end() const
     {
-        return iItems.end();
+        return items().end();
     }
 
     layout::item_list::iterator layout::begin()
     {
-        return iItems.begin();
+        return items().begin();
     }
 
     layout::item_list::iterator layout::end()
     {
-        return iItems.end();
+        return items().end();
     }
 
     layout::item_list::const_reverse_iterator layout::rbegin() const
     {
-        return iItems.rbegin();
+        return items().rbegin();
     }
 
     layout::item_list::const_reverse_iterator layout::rend() const
     {
-        return iItems.rend();
+        return items().rend();
     }
 
     layout::item_list::reverse_iterator layout::rbegin()
     {
-        return iItems.rbegin();
+        return items().rbegin();
     }
 
     layout::item_list::reverse_iterator layout::rend()
     {
-        return iItems.rend();
+        return items().rend();
     }
 
     layout::item_list::const_iterator layout::find_item(const i_layout_item& aItem) const
     {
-        for (auto i = iItems.begin(); i != iItems.end(); ++i)
+        for (auto i = items().begin(); i != items().end(); ++i)
             if (&*i == &aItem || &i->subject() == &aItem)
                 return i;
-        return iItems.end();
+        return items().end();
     }
 
     layout::item_list::iterator layout::find_item(i_layout_item& aItem)
     {
-        for (auto i = iItems.begin(); i != iItems.end(); ++i)
+        for (auto i = items().begin(); i != items().end(); ++i)
             if (&*i == &aItem || &i->subject() == &aItem)
                 return i;
-        return iItems.end();
+        return items().end();
     }
 
     const layout::item_list& layout::items() const
@@ -652,10 +695,15 @@ namespace neogfx
         return iItems;
     }
 
+    layout::item_list& layout::items()
+    {
+        return iItems;
+    }
+
     uint32_t layout::spacer_count() const
     {
         uint32_t count = 0u;
-        for (auto const& i : iItems)
+        for (auto const& i : items())
             if (i.is_spacer())
                 ++count;
         return count;
@@ -664,7 +712,7 @@ namespace neogfx
     void layout::remove(item_list::iterator aItem)
     {
         if (debug == this)
-            std::cerr << typeid(*this).name() << "::remove(" << std::distance(iItems.begin(), aItem) << ")" << std::endl;
+            std::cerr << typeid(*this).name() << "::remove(" << std::distance(items().begin(), aItem) << ")" << std::endl;
         {
             item_list toRemove;
             toRemove.splice(toRemove.begin(), iItems, aItem);
@@ -680,14 +728,14 @@ namespace neogfx
     uint32_t layout::items_visible(item_type_e aItemType) const
     {
         uint32_t count = 0u;
-        for (auto const& i : iItems)
-            if (i.visible() || ignore_visibility())
+        for (auto const& item : items())
+            if (item.visible() || ignore_visibility())
             {
-                if ((aItemType & ItemTypeWidget) && i.is_widget())
+                if ((aItemType & ItemTypeWidget) && item.is_widget())
                     ++count;
-                else if ((aItemType & ItemTypeLayout) && i.is_layout())
+                else if ((aItemType & ItemTypeLayout) && item.is_layout())
                     ++count;
-                else if ((aItemType & ItemTypeSpacer) && i.is_spacer())
+                else if ((aItemType & ItemTypeSpacer) && item.is_spacer())
                     ++count;
             }
         return count;

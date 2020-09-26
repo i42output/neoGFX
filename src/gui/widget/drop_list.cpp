@@ -199,7 +199,10 @@ namespace neogfx
     {
         if (has_size_policy())
             return window::size_policy();
-        return size_constraint::Minimum;
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return size_constraint::Minimum;
     }
 
     size drop_list_popup::minimum_size(const optional_size&) const
@@ -878,8 +881,10 @@ namespace neogfx
     {
         if (has_size_policy())
             return widget::size_policy();
-        if (list_always_visible())
+        else if (list_always_visible())
             return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
         else
             return size_constraint::Minimum;
     }
@@ -977,7 +982,7 @@ namespace neogfx
             inputWidget.clicked([this]() { handle_clicked(); });
 
             inputWidget.set_size_policy(size_constraint::Expanding);
-            
+
             auto& inputLabelLayout = inputWidget.label().layout();
             inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
             auto& s1 = inputWidget.layout().add_spacer();

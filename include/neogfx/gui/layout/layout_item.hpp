@@ -90,10 +90,12 @@ namespace neogfx
     public:
         bool has_size_policy() const override
         {
-            return SizePolicy != std::nullopt || has_fixed_size();
+            return SizePolicy != std::nullopt;
         }
         neogfx::size_policy size_policy() const override
         {
+            if (debug == this)
+                std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
             if (SizePolicy != std::nullopt)
                 return *SizePolicy;
             else if (has_fixed_size())
@@ -279,40 +281,17 @@ namespace neogfx
                         item.set_weight(item.weight() / remainingWeight * remainingSize / totalSize, false);
                 }
             }
-            for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
-            {
-                auto& item = layout.item_at(itemIndex);
-                if (!item.visible())
-                    continue;
-                if (item.size_policy() == aFixedSizePolicy)
-                    item.set_size_policy(aWeightedPolicy, false);
-            }
             if (debug == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings() done" << std::endl;
         }
-        void clear_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
+    protected:
+        void layout_item_enabled(i_layout_item& aItem) override
         {
-            if (debug == this)
-                std::cerr << typeid(*this).name() << "::clear_weightings(" << aWeightedPolicy << ", " << aFixedSizePolicy << "): " << std::endl;
-            auto& self = static_cast<i_layout_item&>(*this);
-            auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
-            for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
-            {
-                auto& item = layout.item_at(itemIndex);
-                item.set_weight({}, false);
-                if (!item.visible())
-                    continue;
-                if (aWeightedPolicy && aWeightedPolicy == item.size_policy())
-                {
-                    if (!item.has_fixed_size())
-                        item.set_fixed_size(item.extents(), false);
-                    if (aFixedSizePolicy)
-                        item.set_size_policy(aFixedSizePolicy, false);
-                }
-            }
-            if (debug == this)
-                std::cerr << typeid(*this).name() << "::clear_weightings() done" << std::endl;
         }
+        void layout_item_disabled(i_layout_item& aItem) override
+        {
+        }
+    public:
         void anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);

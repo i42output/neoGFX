@@ -635,7 +635,10 @@ namespace neogfx
     {
         if (base_type::has_size_policy())
             return base_type::size_policy();
-        return size_constraint::Manual;
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return size_constraint::Manual;
     }
 
     size window::minimum_size(const optional_size& aAvailableSpace) const
