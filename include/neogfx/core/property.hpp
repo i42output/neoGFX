@@ -101,10 +101,6 @@ namespace neogfx
         {
             return get_as_variant();
         }
-        void set(const i_property& aProperty) override
-        {
-            set_from_variant(aProperty.get_as_variant());
-        }
     public:
         i_property_owner& owner() const override
         {
@@ -167,11 +163,15 @@ namespace neogfx
         {
             return iDelegate != nullptr;
         }   
-        i_property_delegate& delegate() const override
+        i_property_delegate const& delegate() const override
         {
             if (has_delegate())
                 return *iDelegate;
             throw no_delegate();
+        }
+        i_property_delegate& delegate() override
+        {
+            return const_cast<i_property_delegate&>(to_const(*this).delegate());
         }
         void set_delegate(i_property_delegate& aDelegate) override
         {
@@ -206,7 +206,7 @@ namespace neogfx
                     throw invalid_type();
                 }
             }, delegate().get(*this));
-            return *dptr;
+            return (iValue = *dptr);
         }
         template <typename T2>
         self_type& assign(T2&& aValue, bool aOwnerNotify = true)
@@ -275,11 +275,17 @@ namespace neogfx
     protected:
         const void* data() const override
         {
-            return &value();
+            if (!has_delegate())
+                return &value();
+            else
+                return delegate().data();
         }
         void* data() override
         {
-            return &mutable_value();
+            if (!has_delegate())
+                return &mutable_value();
+            else
+                return delegate().data();
         }
         void*const* calculator_function() const override
         {
@@ -346,8 +352,6 @@ namespace neogfx
                     return *this;
                 if (destroyed)
                     return *this;
-                if (has_delegate())
-                    delegate().set(*this);
             }
             return *this;
         }

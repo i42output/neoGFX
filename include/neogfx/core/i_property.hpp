@@ -88,7 +88,9 @@ namespace neogfx
         virtual ~i_property_delegate() = default;
     public:
         virtual property_variant get(const i_property& aProperty) const = 0;
-        virtual void set(const i_property& aProperty) = 0;
+    public:
+        virtual const void* data() const = 0;
+        virtual void* data() = 0;
     };
 
     class i_property_owner : public i_object
@@ -104,6 +106,8 @@ namespace neogfx
 
     class i_property : public i_property_delegate
     {
+        template <typename, typename>
+        friend class property_delegate;
         // types
     public:
         typedef i_property abstract_type;
@@ -132,7 +136,8 @@ namespace neogfx
         virtual property_variant get_new_as_variant() const = 0;
         virtual void set_from_variant(const property_variant& aValue) = 0;
         virtual bool has_delegate() const = 0;
-        virtual i_property_delegate& delegate() const = 0;
+        virtual i_property_delegate const& delegate() const = 0;
+        virtual i_property_delegate& delegate() = 0;
         virtual void set_delegate(i_property_delegate& aDelegate) = 0;
         virtual void unset_delegate() = 0;
         virtual void discard_change_events() = 0;
@@ -165,14 +170,14 @@ namespace neogfx
         }
     };
 
-    template <typename T, typename Getter = std::function<T()>, typename Setter = std::function<void(T const&)>>
+    template <typename T, typename Getter = std::function<T()>>
     class property_delegate : public i_property_delegate
     {
     public:
         typedef T value_type;
     public:
-        property_delegate(i_property& aSubject, Getter aGetter, Setter aSetter) :
-            iSubject{ aSubject }, iGetter{ aGetter }, iSetter{ aSetter }
+        property_delegate(i_property& aSubject, i_property& aProxy, Getter aGetter) :
+            iSubject{ aSubject }, iProxy{ aProxy }, iGetter{ aGetter }
         {
             subject().set_delegate(*this);
         }
@@ -185,19 +190,36 @@ namespace neogfx
         {
             return iGetter();
         }
-        void set(const i_property& aProperty) override
+    public:
+        const void* data() const override
         {
-            return iSetter(aProperty.get<value_type>());
+            return proxy().data();
+        }
+        void* data() override
+        {
+            return proxy().data();
         }
     public:
+        i_property const & subject() const
+        {
+            return iSubject;
+        }
         i_property& subject()
         {
             return iSubject;
         }
+        i_property const& proxy() const
+        {
+            return iProxy;
+        }
+        i_property& proxy()
+        {
+            return iProxy;
+        }
     private:
         i_property& iSubject;
+        i_property& iProxy;
         Getter iGetter;
-        Setter iSetter;
     };
 
     template <typename PropertyOwner>

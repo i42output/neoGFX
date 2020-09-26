@@ -287,8 +287,10 @@ namespace neogfx
         }
         widget_part part(const point& aPosition) const override
         {
+#ifdef NEOGFX_DEBUG
             if (debug == this)
                 std::cerr << "decorated<>::part(...) --> ";
+#endif // NEOGFX_DEBUG
             auto result = widget_type::part(aPosition);
             if (result.part == widget_part::Client || result.part == widget_part::NonClient)
             {
@@ -331,8 +333,10 @@ namespace neogfx
                         result.part = widget_part::BorderBottom;
                 }
             }
+#ifdef NEOGFX_DEBUG
             if (debug == this)
                 std::cerr << result.part << std::endl;
+#endif // NEOGFX_DEBUG
             return result;
         }
     public:
@@ -538,8 +542,10 @@ namespace neogfx
                 }
                 if (newSize != currentSize)
                 {                
+#ifdef NEOGFX_DEBUG
                     if (debug == this)
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
+#endif // NEOGFX_DEBUG
                     resizingContext.set_fixed_size(newSize, false);
                     fix_weightings();
                 }

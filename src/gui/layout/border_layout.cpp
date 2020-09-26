@@ -186,16 +186,20 @@ namespace neogfx
     size border_layout::minimum_size(const optional_size& aAvailableSpace) const
     {
         size result = iRows.minimum_size(aAvailableSpace);
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << "border_layout::minimum_size(...) --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
     size border_layout::maximum_size(const optional_size& aAvailableSpace) const
     {
         size result = iRows.maximum_size(aAvailableSpace);
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << "border_layout::maximum_size(...) --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 

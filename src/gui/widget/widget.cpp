@@ -744,8 +744,10 @@ namespace neogfx
 
     void widget::resize(const size& aSize)
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << "widget::resize(" << aSize << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         if (Size != units_converter(*this).to_device_units(aSize))
         {
             update();
@@ -817,8 +819,10 @@ namespace neogfx
 
     size_policy widget::size_policy() const
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
+#endif // NEOGFX_DEBUG
         if (has_size_policy())
             return base_type::size_policy();
         else if (has_fixed_size())
@@ -829,8 +833,10 @@ namespace neogfx
 
     size widget::minimum_size(const optional_size& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         size result;
         if (has_minimum_size())
             result = units_converter{ *this }.from_device_units(*MinimumSize);
@@ -844,15 +850,19 @@ namespace neogfx
         }
         else
             result = padding().size();
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         size result;
         if (has_maximum_size())
             result = units_converter(*this).from_device_units(*MaximumSize);
@@ -872,8 +882,10 @@ namespace neogfx
             result.cx = size::max_size().cx;
         if (size_policy().vertical_size_policy() == size_constraint::Maximum)
             result.cy = size::max_size().cy;
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
@@ -885,8 +897,10 @@ namespace neogfx
 
     void widget::layout_as(const point& aPosition, const size& aSize)
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         move(aPosition);
         if (extents() != aSize)
             resize(aSize);
@@ -896,8 +910,10 @@ namespace neogfx
 
     bool widget::update(const rect& aUpdateRect)
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::update(" << aUpdateRect << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         if (!can_update())
             return false;
         if (aUpdateRect.empty())
@@ -953,8 +969,10 @@ namespace neogfx
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
+#endif // NEOGFX_DEBUG
 
         aGc.set_extents(extents());
         aGc.set_origin(origin());
@@ -983,8 +1001,10 @@ namespace neogfx
             aGc.set_extents(client_rect().extents());
             aGc.set_origin(origin());
 
+#ifdef NEOGFX_DEBUG
             if (debug == this)
                 std::cerr << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << std::endl;
+#endif // NEOGFX_DEBUG
 
             scoped_scissor scissor(aGc, clipRect);
 
@@ -1037,6 +1057,7 @@ namespace neogfx
 
     void widget::paint_non_client_after(i_graphics_context& aGc) const
     {
+#ifdef NEOGFX_DEBUG
         // todo: move to debug function/service
         if (debug == this || debug != nullptr && has_layout() && debug->is_layout() &&
             (debug == &layout() || static_cast<i_layout const*>(debug)->is_descendent_of(layout())))
@@ -1092,6 +1113,7 @@ namespace neogfx
                 aGc.line_stipple_off();
             }
         }
+#endif // NEOGFX_DEBUG
     }
 
     void widget::paint(i_graphics_context& aGc) const

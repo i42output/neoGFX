@@ -112,6 +112,8 @@ namespace neogfx
             std::runtime_error{ "neoGFX: Functionality not yet implemented" + (aDetail.empty() ? "" : " (" + aDetail + ")") } {}
     };
 
+#ifdef NEOGFX_DEBUG
     class i_layout_item;
     extern i_layout_item* debug;
+#endif // NEOGFX_DEBUG
 }

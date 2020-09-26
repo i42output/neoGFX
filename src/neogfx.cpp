@@ -19,8 +19,10 @@
 
 #include <neogfx/neogfx.hpp>
 
+#ifdef NEOGFX_DEBUG
 namespace neogfx
 {
     i_layout_item* debug;
 }
+#endif // NEOGFX_DEBUG
 

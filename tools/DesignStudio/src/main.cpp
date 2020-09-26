@@ -96,6 +96,8 @@ int main(int argc, char* argv[])
         // todo: tidier way of doing this...
         mainWindow.dock_layout(ng::layout_position::Center).set_weight(ng::size{ 1.0 } - leftDock.parent_layout().weight() - rightDock.parent_layout().weight());
 
+        //ng::debug = &leftDock.parent_layout();
+
         auto autoscaleDocksChanged = [&]()
         {
             leftDock.set_autoscale(autoscaleDocks.value<bool>(true));

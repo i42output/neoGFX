@@ -131,8 +131,10 @@ namespace neogfx
     template <typename AxisPolicy>
     size layout::do_minimum_size(const optional_size& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
+#endif // NEOGFX_DEBUG
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
         if (has_minimum_size())
@@ -163,16 +165,20 @@ namespace neogfx
             AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
         }
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
     template <typename AxisPolicy>
     size layout::do_maximum_size(const optional_size& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
+#endif // NEOGFX_DEBUG
         size result;
         if (has_maximum_size())
             result = base_type::maximum_size(aAvailableSpace);
@@ -229,16 +235,20 @@ namespace neogfx
                     AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum))
                 AxisPolicy::cy(result) = size::max_dimension();
         }
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
     template <typename AxisPolicy>
     void layout::do_layout_items(const point& aPosition, const size& aSize)
     {
+#ifdef NEOGFX_DEBUG
         if (debug == this)
             std::cerr << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         set_position(aPosition);
         set_extents(aSize);
         auto itemsVisibleIncludingSpacers = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
@@ -259,8 +269,10 @@ namespace neogfx
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
+#ifdef NEOGFX_DEBUG
             if (debug == &item.subject())
                 std::cerr << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+#endif // NEOGFX_DEBUG
             auto& disposition = item.proxy_for_layout().cached_disposition();
             disposition = layout_item_disposition::Unknown;
             if (AxisPolicy::size_policy_x(item.effective_size_policy()) == size_constraint::Minimum)
@@ -294,8 +306,10 @@ namespace neogfx
                 auto& disposition = item.proxy_for_layout().cached_disposition();
                 if (disposition != layout_item_disposition::Unknown && disposition != layout_item_disposition::Weighted)
                     continue;
+#ifdef NEOGFX_DEBUG
                 if (debug == &item.subject())
                     std::cerr << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+#endif // NEOGFX_DEBUG
                 auto const minSize = AxisPolicy::cx(item.minimum_size(availableSize));
                 auto const maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
                 auto const weightedSize = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
@@ -341,8 +355,10 @@ namespace neogfx
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
+#ifdef NEOGFX_DEBUG
             if (debug == &item.subject())
                 std::cerr << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+#endif // NEOGFX_DEBUG
             auto const itemMinSize = item.minimum_size(availableSize);
             auto const itemMaxSize = item.maximum_size(availableSize);
             size s;

@@ -202,9 +202,8 @@ namespace neogfx
     void dock::init()
     {
         iParentLayoutSizePolicyDelegate.emplace(
-            get_property(parent_layout(), "SizePolicy"),
-            [this]() -> optional_size_policy { return size_policy(); },
-            [this](optional_size_policy const& aSizePolicy) { set_size_policy(aSizePolicy); });
+            get_property(parent_layout(), "SizePolicy"), SizePolicy,
+            [this]() -> optional_size_policy { return size_policy(); });
         set_padding(neogfx::padding{ 1.5_mm });
         update_layout();
     }
