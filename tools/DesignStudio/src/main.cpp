@@ -91,21 +91,24 @@ int main(int argc, char* argv[])
         auto& leftDockWeight = settings.setting("environment.tabs_and_windows.left_dock_weight"_s);
         auto& rightDockWeight = settings.setting("environment.tabs_and_windows.right_dock_weight"_s);
 
+        if (workspaceSize.value<ng::size>(true).cx != 0.0)
+            mainWindow.set_extents(workspaceSize.value<ng::size>(true));
+
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() }, ng::size{ leftDockWeight.value<double>() } };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() }, ng::size{ rightDockWeight.value<double>() } };
         // todo: tidier way of doing this...
         mainWindow.dock_layout(ng::layout_position::Center).set_weight(ng::size{ 1.0 } - leftDock.parent_layout().weight() - rightDock.parent_layout().weight());
-
-        //ng::debug = &leftDock.parent_layout();
+        leftDock.hide();
+        rightDock.hide();
 
         auto autoscaleDocksChanged = [&]()
         {
-            leftDock.set_autoscale(autoscaleDocks.value<bool>(true));
-            rightDock.set_autoscale(autoscaleDocks.value<bool>(true));
+            mainWindow.dock_layout(ng::layout_position::Center).parent_layout().fix_weightings();
+            mainWindow.dock_layout(ng::layout_position::Center).parent_layout().set_autoscale(autoscaleDocks.value<bool>(true) ? ng::autoscale::Active : ng::autoscale::Default);
         };
         autoscaleDocks.changing(autoscaleDocksChanged);
         autoscaleDocks.changed(autoscaleDocksChanged);
-        autoscaleDocksChanged();
+        mainWindow.dock_layout(ng::layout_position::Center).parent_layout().set_autoscale(autoscaleDocks.value<bool>(true) ? ng::autoscale::Active : ng::autoscale::Default);
 
         ng::get_property(mainWindow, "Size").property_changed([&](const ng::property_variant& aValue)
         {
@@ -137,9 +140,6 @@ int main(int argc, char* argv[])
         toolbox.dock(leftDock);
         objects.dock(rightDock);
         properties.dock(rightDock);
-
-        leftDock.hide();
-        rightDock.hide();
 
         ng::i_layout& mainLayout = mainWindow.client_layout();
         mainLayout.set_padding(ng::padding{});

@@ -74,11 +74,6 @@ namespace neogfx
     {
     }
 
-    bool table_view::can_defer_layout() const
-    {
-        return true;
-    }
-
     bool table_view::is_managing_layout() const
     {
         return true;

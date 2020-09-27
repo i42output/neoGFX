@@ -41,6 +41,7 @@ namespace neogfx
         iOwner{ nullptr },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
+        iAutoscale{ neogfx::autoscale::Default },
         iIgnoreVisibility{ false },
         iEnabled{ false },
         iLayoutStarted{ false },
@@ -54,6 +55,7 @@ namespace neogfx
         iOwner{ &aOwner },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
+        iAutoscale{ neogfx::autoscale::Default },
         iIgnoreVisibility{ false },
         iEnabled{ false },
         iLayoutStarted{ false },
@@ -68,6 +70,7 @@ namespace neogfx
         iOwner{ aParent.has_layout_owner() ? &aParent.layout_owner() : nullptr },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
+        iAutoscale{ neogfx::autoscale::Default },
         iIgnoreVisibility{ false },
         iEnabled{ false },
         iLayoutStarted{ false },
@@ -416,6 +419,21 @@ namespace neogfx
         }
     }
 
+    autoscale layout::autoscale() const
+    {
+        return iAutoscale;
+    }
+
+    void layout::set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout)
+    {
+        if (iAutoscale != aAutoscale)
+        {
+            iAutoscale = aAutoscale;
+            if (aUpdateLayout)
+                invalidate();
+        }
+    }
+
     bool layout::ignore_visibility() const
     {
         return iIgnoreVisibility || (has_parent_layout() && parent_layout().ignore_visibility());
@@ -459,6 +477,16 @@ namespace neogfx
     void layout::layout_as(const point& aPosition, const size& aSize)
     {
         layout_items(aPosition, aSize);
+    }
+
+    void layout::fix_weightings()
+    {
+        if ((autoscale() & neogfx::autoscale::Active) == neogfx::autoscale::Active)
+        {
+            neolib::scoped_object<neogfx::autoscale> so{ iAutoscale, iAutoscale & ~neogfx::autoscale::Active };
+            update_layout(false);
+        }
+        base_type::fix_weightings();
     }
 
     void layout::layout_item_enabled(i_layout_item& aItem)
@@ -563,6 +591,8 @@ namespace neogfx
     void layout::set_extents(const size& aExtents)
     {
         Size = units_converter(*this).to_device_units(aExtents);
+        if (enabled() && (autoscale() & neogfx::autoscale::LockFixedSize) == neogfx::autoscale::LockFixedSize)
+            FixedSize = extents();
     }
 
     size_policy layout::size_policy() const

@@ -40,9 +40,6 @@ namespace neogfx
         dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize = {}, const optional_size& aInitialWeight = {});
         dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize = {}, const optional_size& aInitialWeight = {});
     public:
-        bool autoscale() const;
-        void set_autoscale(bool aEnableAutoscale);
-    public:
         dock_area area() const override;
         void set_area(dock_area aArea) override;
     public:
@@ -52,9 +49,6 @@ namespace neogfx
         void remove(const abstract_item& aItem) override;
     public:
         neogfx::size_policy size_policy() const override;
-    public:
-        void update_layout(bool aDeferLayout = true) override;
-        void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override;
     public:
         bool part_active(widget_part aPart) const override;
     public:
@@ -67,7 +61,6 @@ namespace neogfx
     private:
         dock_area iArea;
         item_list iItems;
-        bool iAutoscale;
         std::optional<property_delegate<optional_size_policy>> iParentLayoutSizePolicyDelegate;
     };
 }

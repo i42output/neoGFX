@@ -322,11 +322,6 @@ namespace neogfx
         return *this;
     }
 
-    bool tab_page_container::can_defer_layout() const
-    {
-        return true;
-    }
-
     bool tab_page_container::is_managing_layout() const
     {
         return true;

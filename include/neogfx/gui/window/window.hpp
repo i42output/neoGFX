@@ -110,7 +110,6 @@ namespace neogfx
         const i_window& root() const override;
         i_window& root() override;
         void set_parent(i_widget& aParent) override;
-        bool can_defer_layout() const override;
         bool is_managing_layout() const override;
         void layout_items_completed() override;
     public:

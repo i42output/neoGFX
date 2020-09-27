@@ -75,11 +75,6 @@ namespace neogfx
     {
     }
 
-    bool list_view::can_defer_layout() const
-    {
-        return true;
-    }
-
     bool list_view::is_managing_layout() const
     {
         return true;

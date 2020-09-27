@@ -236,9 +236,9 @@ namespace neogfx
         subject().layout_as(adjustedPosition, adjustedSize);
     }
 
-    void layout_item_proxy::fix_weightings(optional_size_policy const& aWeightedPolicy, optional_size_policy const& aFixedSizePolicy)
+    void layout_item_proxy::fix_weightings()
     {
-        subject().fix_weightings(aWeightedPolicy, aFixedSizePolicy);
+        subject().fix_weightings();
     }
 
     bool layout_item_proxy::high_dpi() const

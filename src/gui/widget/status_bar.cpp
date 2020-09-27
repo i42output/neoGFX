@@ -250,11 +250,6 @@ namespace neogfx
         return widget::hit_test(aPosition);
     }
 
-    bool status_bar::can_defer_layout() const
-    {
-        return true;
-    }
-
     bool status_bar::is_managing_layout() const
     {
         return true;

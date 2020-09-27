@@ -453,7 +453,7 @@ namespace neogfx
 
     bool widget::can_defer_layout() const
     {
-        return false;
+        return is_managing_layout();
     }
 
     bool widget::is_managing_layout() const

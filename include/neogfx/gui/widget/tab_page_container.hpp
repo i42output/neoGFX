@@ -88,7 +88,6 @@ namespace neogfx
         const widget& as_widget() const override;
         widget& as_widget() override;
     protected:
-        bool can_defer_layout() const override;
         bool is_managing_layout() const override;
     private:
         void update_tab_bar_placement();

@@ -84,7 +84,6 @@ namespace neogfx
         dimension section_width(uint32_t aSectionIndex, bool aForHeaderButton = false) const;
         dimension total_width() const;
     public:
-        bool can_defer_layout() const override;
         bool is_managing_layout() const override;
     public:
         void panes_resized() override;

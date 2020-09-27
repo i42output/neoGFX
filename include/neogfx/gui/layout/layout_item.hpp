@@ -236,64 +236,20 @@ namespace neogfx
             }
         }
     public:
-        void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
+        void fix_weightings() override
         {
 #ifdef NEOGFX_DEBUG
             if (debug == this)
-                std::cerr << typeid(*this).name() << "::fix_weightings(" << aWeightedPolicy << ", " << aFixedSizePolicy << "): " << std::endl;
+                std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
 #endif // NEOGFX_DEBUG
-            auto& self = static_cast<i_layout_item&>(*this);
+            auto& self = as_layout_item();
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
-            bool causeWasExplicitResize = false;
-            size totalSize;
-            size remainingSize;
-            size remainingWeight;
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
                 if (!item.visible())
                     continue;
-                if ((item.size_policy() == aWeightedPolicy || item.size_policy() == aFixedSizePolicy) && 
-                    item.has_fixed_size() && item.extents() != item.fixed_size())
-                    causeWasExplicitResize = true;
-                totalSize += item.extents();
-            }
-            if (!causeWasExplicitResize)
-            {
-                for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
-                {
-                    auto& item = layout.item_at(itemIndex);
-                    if (!item.visible())
-                        continue;
-                    item.set_weight(calculate_relative_weight(layout, item), false);
-                }
-            }
-            else
-            {
-                remainingSize = totalSize;
-                for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
-                {
-                    auto& item = layout.item_at(itemIndex);
-                    if (!item.visible())
-                        continue;
-                    if (item.size_policy() == aWeightedPolicy || item.size_policy() == aFixedSizePolicy)
-                    {
-                        auto const& itemExtents = (item.has_fixed_size() && item.extents() != item.fixed_size() ?
-                            item.fixed_size() : item.extents());
-                        item.set_weight(itemExtents / totalSize, false);
-                        remainingSize -= itemExtents;
-                    }
-                    else
-                        remainingWeight += item.weight();
-                }
-                for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
-                {
-                    auto& item = layout.item_at(itemIndex);
-                    if (!item.visible())
-                        continue;
-                    if (item.size_policy() != aWeightedPolicy && item.size_policy() != aFixedSizePolicy)
-                        item.set_weight(item.weight() / remainingWeight * remainingSize / totalSize, false);
-                }
+                item.set_weight(calculate_relative_weight(layout, item), false);
             }
 #ifdef NEOGFX_DEBUG
             if (debug == this)

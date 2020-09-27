@@ -181,6 +181,28 @@ namespace neogfx
         }
     };
 
+    enum class autoscale : uint32_t
+    {
+        Default         = 0x00000000,
+        Active          = 0x00000001,
+        LockFixedSize   = 0x00000002
+    };
+
+    inline constexpr autoscale operator~(autoscale aLhs)
+    {
+        return static_cast<autoscale>(~static_cast<uint32_t>(aLhs));
+    }
+
+    inline constexpr autoscale operator|(autoscale aLhs, autoscale aRhs)
+    {
+        return static_cast<autoscale>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr autoscale operator&(autoscale aLhs, autoscale aRhs)
+    {
+        return static_cast<autoscale>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
     class i_layout : public i_layout_item
     {
     public:
@@ -228,6 +250,8 @@ namespace neogfx
         virtual void set_always_use_spacing(bool aAlwaysUseSpacing) = 0;
         virtual neogfx::alignment alignment() const = 0;
         virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
+        virtual neogfx::autoscale autoscale() const = 0;
+        virtual void set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout = true) = 0;
         virtual bool ignore_visibility() const = 0;
         virtual void set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout = true) = 0;
     public:
@@ -341,9 +365,9 @@ namespace neogfx
             auto const& item = aLayout.item_at(itemIndex);
             if (!item.visible())
                 continue;
-            totalSize += item.extents();
+            totalSize += (item.has_fixed_size() ? item.fixed_size() : item.extents());
         }
-        auto result = aItem.extents() / totalSize;
+        auto result = (aItem.has_fixed_size() ? aItem.fixed_size() : aItem.extents()) / totalSize;
         if (std::isnan(result.cx))
             result.cx = 1.0;
         if (std::isnan(result.cy))

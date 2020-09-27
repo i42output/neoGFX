@@ -105,11 +105,6 @@ namespace neogfx
         throw controller_not_found();
     }
 
-    bool view_container::can_defer_layout() const
-    {
-        return true;
-    }
-
     bool view_container::is_managing_layout() const
     {
         return true;

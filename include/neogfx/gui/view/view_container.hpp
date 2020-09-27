@@ -113,7 +113,6 @@ namespace neogfx
         void add_controller(std::shared_ptr<i_controller> aController) override;
         void remove_controller(i_controller& aController) override;
     public:
-        bool can_defer_layout() const override;
         bool is_managing_layout() const override;
     private:
         view_container_style iStyle;

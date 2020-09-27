@@ -134,7 +134,6 @@ namespace neogfx
     public:
         client(neogfx::scrollbar_style aScrollbarStyle);
     protected:
-        bool can_defer_layout() const override;
         bool is_managing_layout() const override;
     protected:
         neogfx::size_policy size_policy() const override;
@@ -151,11 +150,6 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         iLayout.set_padding(neogfx::padding{});
-    }
-
-    bool window::client::can_defer_layout() const
-    {
-        return true;
     }
 
     bool window::client::is_managing_layout() const
@@ -583,11 +577,6 @@ namespace neogfx
     void window::set_parent(i_widget& aParent)
     {
         iParentWindow = &aParent.root();
-    }
-
-    bool window::can_defer_layout() const
-    {
-        return true;
     }
 
     bool window::is_managing_layout() const

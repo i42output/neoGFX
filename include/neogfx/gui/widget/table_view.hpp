@@ -34,7 +34,6 @@ namespace neogfx
         table_view(i_layout& aLayout, bool aCreateDefaultModels = true, frame_style aFrameStyle = frame_style::SolidFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         ~table_view();
     public:
-        bool can_defer_layout() const;
         bool is_managing_layout() const;
     public:
         const header_view& column_header() const;

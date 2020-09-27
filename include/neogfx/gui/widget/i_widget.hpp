@@ -373,4 +373,23 @@ namespace neogfx
              set_palette_color(color_role::AlternateBase, aAlternateBaseColor);
          }
     };
+
+    // todo: make being a layout manager a property?
+    template <typename WidgetType, typename... OtherBases>
+    class layout_manager : public WidgetType, public OtherBases...
+    {
+    public:
+        typedef WidgetType widget_type;
+    public:
+        template <typename... Args>
+        layout_manager(Args&&... aArgs) :
+            widget_type{ std::forward<Args>(aArgs)... }
+        {
+        }
+    public:
+        bool is_managing_layout() const override
+        {
+            return true;
+        }
+    };
 }

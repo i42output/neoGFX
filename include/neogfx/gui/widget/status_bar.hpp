@@ -108,7 +108,6 @@ namespace neogfx
     protected:
         widget_part hit_test(const point& aPosition) const override;
     protected:
-        bool can_defer_layout() const override;
         bool is_managing_layout() const override;
     protected:
         const i_widget& as_widget() const override;

@@ -123,6 +123,8 @@ namespace neogfx
         void set_always_use_spacing(bool aAlwaysUseSpacing) override;
         neogfx::alignment alignment() const override;
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        neogfx::autoscale autoscale() const override;
+        void set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout = true) override;
         bool ignore_visibility() const override;
         void set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout = true) override;
     public:
@@ -144,7 +146,9 @@ namespace neogfx
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
     public:
-        void layout_as(const point& aPosition, const size& aSize);
+        void layout_as(const point& aPosition, const size& aSize) override;
+    public:
+        void fix_weightings() override;
     protected:
         void layout_item_enabled(i_layout_item& aItem) override;
         void layout_item_disabled(i_layout_item& aItem) override;
@@ -180,6 +184,7 @@ namespace neogfx
         optional_size iSpacing;
         bool iAlwaysUseSpacing;
         neogfx::alignment iAlignment;
+        neogfx::autoscale iAutoscale;
         bool iIgnoreVisibility;
         bool iEnabled;
         item_list iItems;

@@ -281,11 +281,6 @@ namespace neogfx
             return widget::visible();
     }
 
-    bool tab_bar::can_defer_layout() const
-    {
-        return true;
-    }
-
     bool tab_bar::is_managing_layout() const
     {
         return true;

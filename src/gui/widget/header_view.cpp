@@ -346,11 +346,6 @@ namespace neogfx
         return result;
     }
 
-    bool header_view::can_defer_layout() const
-    {
-        return true;
-    }
-
     bool header_view::is_managing_layout() const
     {
         return true;

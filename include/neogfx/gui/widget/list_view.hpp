@@ -34,7 +34,6 @@ namespace neogfx
         list_view(i_layout& aLayout, bool aCreateDefaultModels = true, frame_style aFrameStyle = frame_style::SolidFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         ~list_view();
     public:
-        bool can_defer_layout() const;
         bool is_managing_layout() const;
     protected:
         void model_changed() override;

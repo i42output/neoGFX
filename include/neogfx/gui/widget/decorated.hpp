@@ -132,6 +132,12 @@ namespace neogfx
             init();
         }
     public:
+        neogfx::autoscale autoscale() const
+        {
+            if (resizing_context().has_parent_layout())
+                return resizing_context().parent_layout().autoscale();
+            return neogfx::autoscale::Default;
+        }
         neogfx::decoration_style decoration_style() const
         {
             return iStyle;
@@ -397,11 +403,11 @@ namespace neogfx
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     public:
-        void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) override
+        void fix_weightings() override
         {
             if (resizing_context().has_parent_layout())
             {
-                resizing_context().parent_layout().fix_weightings(aWeightedPolicy, aFixedSizePolicy);
+                resizing_context().parent_layout().fix_weightings();
                 resizing_context().parent_layout().update_layout(false);
             }
         }
@@ -500,10 +506,14 @@ namespace neogfx
 
             iInitialized = true;
         }
-        i_layout_item& resizing_context()
+        i_layout_item const& resizing_context() const
         {
             return (decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock ?
-                static_cast<i_layout_item&>(as_widget().parent_layout()) : static_cast<i_layout_item&>(as_widget());
+                static_cast<i_layout_item const&>(as_widget().parent_layout()) : static_cast<i_layout_item const&>(as_widget());
+        }
+        i_layout_item& resizing_context()
+        {
+            return const_cast<i_layout_item&>(to_const(*this).resizing_context());
         }
         void update_tracking(const point& aPosition)
         {
@@ -577,7 +587,7 @@ namespace neogfx
         std::optional<vertical_layout> iTitleBarLayout;
         std::optional<vertical_layout> iMenuLayout;
         std::optional<border_layout> iToolbarLayout;
-        std::optional<scrollable_widget<>> iDockLayoutContainer;
+        std::optional<layout_manager<scrollable_widget<>>> iDockLayoutContainer;
         std::optional<border_layout> iDockLayout;
         std::optional<vertical_layout> iStatusBarLayout;
         std::shared_ptr<i_title_bar> iTitleBar;

@@ -69,7 +69,7 @@ namespace neogfx
         virtual void update_layout(bool aDeferLayout = true) = 0;
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
-        virtual void fix_weightings(optional_size_policy const& aWeightedPolicy = size_constraint::MinimumExpanding, optional_size_policy const& aFixedSizePolicy = size_constraint::Fixed) = 0;
+        virtual void fix_weightings() = 0;
     public:
         virtual void layout_item_enabled(i_layout_item& aItem) = 0;
         virtual void layout_item_disabled(i_layout_item& aItem) = 0;
