@@ -405,6 +405,7 @@ namespace neogfx
     public:
         void fix_weightings() override
         {
+            widget_type::fix_weightings();
             if (resizing_context().has_parent_layout())
             {
                 resizing_context().parent_layout().fix_weightings();
