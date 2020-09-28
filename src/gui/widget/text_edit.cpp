@@ -308,7 +308,7 @@ namespace neogfx
             }
             result += default_style().text_effect()->width() * scale;
         }
-        return result;
+        return result.floor();
     }
 
     void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0);
