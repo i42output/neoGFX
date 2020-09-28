@@ -34,6 +34,8 @@ namespace neogfx
         {
             if (iRenderingContext.gradient_set())
                 iRenderingContext.apply_gradient(iCurrentProgram.as<i_standard_shader_program>().gradient_shader());
+            else
+                iCurrentProgram.as<i_standard_shader_program>().gradient_shader().clear_gradient();
         }
     }
 
