@@ -73,6 +73,7 @@ int main(int argc, char* argv[])
     try
     {
         ds::main_window mainWindow{ app };
+        mainWindow.hide();
 
         app.actionShowStandardToolbar.checked([&]() { mainWindow.standardToolbar.show(); });
         app.actionShowStandardToolbar.unchecked([&]() { mainWindow.standardToolbar.hide(); });
@@ -390,7 +391,6 @@ int main(int argc, char* argv[])
 
         auto project_updated = [&](ds::i_project&) 
         { 
-            update_ui(); 
             if (pm.project_active())
             {
                 if (objectModel.empty() || objectModel.item(objectModel.sbegin()) != &pm.active_project().root())
@@ -430,6 +430,7 @@ int main(int argc, char* argv[])
             }
             else
                 objectModel.clear();
+            update_ui();
         };
 
         ng::sink sink;
@@ -462,6 +463,8 @@ int main(int argc, char* argv[])
         });
 
         //        ng::css css{"test.css"};
+
+        mainWindow.activate();
 
         return app.exec();
     }

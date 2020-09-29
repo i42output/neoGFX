@@ -916,6 +916,8 @@ namespace neogfx
 
     void window::activate()
     {
+        if (!visible())
+            show();
         if (has_native_window())
             native_window().activate();
     }
