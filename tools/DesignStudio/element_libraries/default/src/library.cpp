@@ -293,7 +293,14 @@ namespace neogfx::DesignStudio
         };
         static std::map<std::string, std::function<void(texture&)>> sIconResources =
         {
-            { 
+            {
+                "project",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/project.png" }, color::Coral);
+                }
+            },
+            {
                 "app",
                 [colored_icon](texture& aTexture)
                 {

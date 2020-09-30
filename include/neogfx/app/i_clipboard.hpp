@@ -42,8 +42,8 @@ namespace neogfx
         virtual void cut(i_clipboard& aClipboard) = 0;
         virtual void copy(i_clipboard& aClipboard) = 0;
         virtual void paste(i_clipboard& aClipboard) = 0;
-        virtual void delete_selected(i_clipboard& aClipboard) = 0;
-        virtual void select_all(i_clipboard& aClipboard) = 0;
+        virtual void delete_selected() = 0;
+        virtual void select_all() = 0;
     };
 
     class i_clipboard : public i_service

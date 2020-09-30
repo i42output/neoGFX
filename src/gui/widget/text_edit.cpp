@@ -750,7 +750,7 @@ namespace neogfx
         if (cursor().position() != cursor().anchor())
         {
             copy(aClipboard);
-            delete_selected(aClipboard);
+            delete_selected();
         }
     }
 
@@ -771,13 +771,13 @@ namespace neogfx
         {
             multiple_text_changes mtc{ *this };
             if (cursor().position() != cursor().anchor())
-                delete_selected(aClipboard);
+                delete_selected();
             auto len = insert_text(aClipboard.text());
             cursor().set_position(cursor().position() + len);
         }
     }
 
-    void text_edit::delete_selected(i_clipboard&)
+    void text_edit::delete_selected()
     {
         multiple_text_changes mtc{ *this };
         if (cursor().position() != cursor().anchor())
@@ -786,7 +786,7 @@ namespace neogfx
             delete_text(cursor().position(), cursor().position() + 1);
     }
 
-    void text_edit::select_all(i_clipboard&)
+    void text_edit::select_all()
     {
         cursor().set_anchor(0);
         cursor().set_position(iText.size(), false);

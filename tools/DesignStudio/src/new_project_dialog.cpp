@@ -63,5 +63,7 @@ namespace neogfx::DesignStudio
                     projectNamespace.set_focus();
             }
         });
+        projectName.set_text("Project1");
+        projectName.select_all();
     }
 }

@@ -285,7 +285,7 @@ namespace neogfx
                 optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
                 if (!cellBackgroundColor)
                     cellBackgroundColor = selection_model().is_selected(itemIndex) ? 
-                        service<i_app>().current_style().palette().color(color_role::Selection).to_hsv().with_saturation(0.2).to_rgb<color>() : 
+                        service<i_app>().current_style().palette().color(color_role::Selection).to_hsv().with_saturation(0.2).to_rgb<color>().with_alpha(has_focus() ? 1.0 : 0.5) : 
                         service<i_app>().current_style().palette().color(presentation_model().alternating_row_color() ? row % 2 == 0 ? color_role::Base : color_role::AlternateBase : color_role::Base);
                 optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Text);
                 if (!textColor)
@@ -297,8 +297,8 @@ namespace neogfx
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
                     if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
                         aGc.fill_rect(cellBackgroundRect,
-                            cellBackgroundColor->with_alpha(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ?
-                                0xFF : 0x80));
+                            cellBackgroundColor->with_combined_alpha(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ?
+                                1.0 : 0.5));
                     else
                         aGc.fill_rect(cellBackgroundRect, *cellBackgroundColor);
                 }

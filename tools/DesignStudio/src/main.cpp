@@ -404,15 +404,12 @@ int main(int argc, char* argv[])
                         case ds::element_group::Unknown:
                             break;
                         case ds::element_group::Project:
-                            for (auto& child : aElement)
-                                addNode(aPosition, *child);
-                            break;
                         case ds::element_group::App:
                         case ds::element_group::Menu:
                         case ds::element_group::Widget:
                         case ds::element_group::Layout:
                             {
-                                auto node = aElement.parent().group() != ds::element_group::Project ?
+                                auto node = aElement.group() != ds::element_group::Project ?
                                     objectModel.append_item(aPosition, &aElement, aElement.id().to_std_string()) :
                                     objectModel.insert_item(aPosition, &aElement, aElement.id().to_std_string());
                                 objectModel.insert_cell_data(node, 1u, aElement.type().to_std_string());

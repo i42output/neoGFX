@@ -482,8 +482,8 @@ namespace neogfx
         void cut(i_clipboard& aClipboard) override;
         void copy(i_clipboard& aClipboard) override;
         void paste(i_clipboard& aClipboard) override;
-        void delete_selected(i_clipboard& aClipboard) override;
-        void select_all(i_clipboard& aClipboard) override;
+        void delete_selected() override;
+        void select_all() override;
         // i_text_document
     public:
         void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) override;

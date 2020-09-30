@@ -106,12 +106,12 @@ namespace neogfx
     void clipboard::delete_selected()
     {
         if (sink_active())
-            active_sink().delete_selected(*this);
+            active_sink().delete_selected();
     }
 
     void clipboard::select_all()
     {
         if (sink_active())
-            active_sink().select_all(*this);
+            active_sink().select_all();
     }
 }
