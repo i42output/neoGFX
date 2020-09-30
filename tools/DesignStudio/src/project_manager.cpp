@@ -18,7 +18,6 @@
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
-#include <neolib/file/json.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
@@ -86,78 +85,8 @@ namespace neogfx::DesignStudio
 
     i_project& project_manager::open_project(const ng::i_string& aProjectFile)
     {
-        boost::filesystem::path const inputFileName{ aProjectFile.to_std_string() };
-        neolib::fjson const input{ inputFileName.string() };
-        if (!input.has_root())
-            throw invalid_project_file("bad root node");
-        auto const& ns = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
-        auto newProject = ng::make_ref<project>(*find_library("project")->create_element("project", inputFileName.stem().string()), inputFileName.stem().string(), ns);
-        for (auto const& item : input.root())
-        {
-            if (item.name() == "resource")
-            {
-                // todo
-            }
-            else if (item.name() == "ui")
-            {
-                std::map<std::string, uint32_t> counters;
-                std::function<void(i_element&, neolib::fjson_value const&)> add_node = [&](i_element& aParent, neolib::fjson_value const& aNode)
-                {
-                    if (aParent.has_parent())
-                    {
-                        auto elementLibrary = find_library(aNode.name());
-                        if (elementLibrary)
-                        {
-                            ref_ptr<i_element> newNode;
-                            switch (aNode.type())
-                            {
-                            case neolib::json_type::Object:
-                                if (aNode.as<neolib::fjson_object>().has("id"))
-                                    newNode = elementLibrary->create_element(aParent, aNode.name(), aNode.as<neolib::fjson_object>().at("id").text());
-                                else
-                                    newNode = elementLibrary->create_element(aParent, aNode.name(), aNode.name() + boost::lexical_cast<std::string>(++counters[aNode.name()]));
-                                for (auto const& e : aNode)
-                                    add_node(*newNode, e);
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        switch (aNode.type())
-                        {
-                        case neolib::json_type::Object:
-                            for (auto const& child : aNode)
-                            {
-                                ref_ptr<i_element> newNode;
-                                switch (child.type())
-                                {
-                                case neolib::json_type::Object:
-                                    if (child.as<neolib::fjson_object>().has("id"))
-                                    {
-                                        auto elementLibrary = find_library(child.name());
-                                        if (elementLibrary)
-                                            newNode = elementLibrary->create_element(aParent, child.name(), child.as<neolib::fjson_object>().at("id").text());
-                                    }
-                                    else
-                                    {
-                                        auto elementLibrary = find_library(child.name());
-                                        if (elementLibrary)
-                                            newNode = elementLibrary->create_element(aParent, child.name(), child.name() + boost::lexical_cast<std::string>(++counters[child.name()]));
-                                    }
-                                    for (auto const& e : child)
-                                        add_node(*newNode, e);
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                };
-                for (auto const& child : item)
-                    add_node(newProject->root(), child);
-            }
-        }
+        auto newProject = ng::make_ref<project>(*this);
+        newProject->open(aProjectFile);
         iProjects.push_back(newProject);
         ProjectAdded.trigger(*newProject);
         activate_project(*newProject);
@@ -166,7 +95,8 @@ namespace neogfx::DesignStudio
 
     i_project& project_manager::create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace)
     {
-        auto newProject = ng::make_ref<project>(*find_library("project")->create_element("project", aProjectName), aProjectName.to_std_string(), aProjectNamespace.to_std_string());
+        auto newProject = ng::make_ref<project>(*this);
+        newProject->create(aProjectName, aProjectNamespace);
         iProjects.push_back(newProject);
         ProjectAdded.trigger(*newProject);
         activate_project(*newProject);
@@ -186,6 +116,14 @@ namespace neogfx::DesignStudio
                 deactivate_project();
         }
         ProjectRemoved.trigger(*removingRef);
+    }
+
+    i_element_library& project_manager::library(const ng::i_string& aElementType) const
+    {
+        auto existing = find_library(aElementType.to_std_string());
+        if (existing)
+            return *existing;
+        throw element_type_not_found(aElementType.to_std_string());
     }
 
     project_manager::project_list::container_type::const_iterator project_manager::find_project(const i_project& aProject) const

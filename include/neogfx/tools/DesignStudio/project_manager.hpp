@@ -48,6 +48,8 @@ namespace neogfx::DesignStudio
         i_project& create_project(const ng::i_string& aProjectName, const ng::i_string& aProjectNamespace) override;
         void close_project(const i_project& aProject) override;
     public:
+        i_element_library& library(const ng::i_string& aElementType) const override;
+    public:
         using i_project_manager::open_project;
         using i_project_manager::create_project;
     private:

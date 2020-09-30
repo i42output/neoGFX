@@ -26,21 +26,33 @@
 
 namespace neogfx::DesignStudio
 {
-    class project : public ng::reference_counted<ng::model<i_project>>
+    class i_project_manager;
+
+    class project : public reference_counted<model<i_project>>
     {
+    public:
+        define_declared_event(ElementAdded, element_added, i_element&)
     public:
         typedef i_project abstract_type;
     public:
-        project(i_element& aRoot, const std::string& aName, const std::string& aNamespace);
+        project(i_project_manager& aManager);
     public:
-        const ng::i_string& name() const override;
-        const ng::i_string& namespace_() const override;
+        i_project_manager& manager() const override;
+    public:
+        void create(const i_string& aName, const i_string& aNamespace) override;
+        void open(const i_string& aPath) override;
+    public:
+        const i_string& name() const override;
+        const i_string& namespace_() const override;
     public:
         const i_element& root() const override;
         i_element& root() override;
+    public:
+        i_element& create_element(i_element& aParent, const i_string& aType, const i_string& aElementId = string{}) override;
     private:
+        i_project_manager& iManager;
         ref_ptr<i_element> iRoot;
-        ng::string iName;
-        ng::string iNamespace;
+        string iName;
+        string iNamespace;
     };
 }

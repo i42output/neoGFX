@@ -450,7 +450,11 @@ int main(int argc, char* argv[])
         {
             ds::new_project_dialog_ex dialog{ mainWindow };
             if (dialog.exec() == ng::dialog_result::Accepted)
-                pm.create_project(dialog.projectName.text(), dialog.projectNamespace.text()).set_dirty();
+            {
+                auto& project = pm.create_project(dialog.projectName.text(), dialog.projectNamespace.text());
+                project.set_dirty();
+                project.root();
+            }
         });
 
         app.actionSettings.triggered([&]()
