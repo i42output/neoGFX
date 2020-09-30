@@ -58,6 +58,13 @@ namespace neogfx::DesignStudio
             return element_group::Unknown;
     }
 
+    template <typename BaseType>
+    class element_variant
+    {
+    public:
+        typedef BaseType base_type;
+    };
+
     template <typename Type, typename Base = i_element>
     class element : public neolib::reference_counted<Base>
     {

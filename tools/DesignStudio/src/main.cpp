@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
             ng::ref_ptr<ds::i_element_library> elementLibrary;
             plugin->discover(elementLibrary);
             if (elementLibrary)
-                for (auto const& tool : elementLibrary->elements())
+                for (auto const& tool : elementLibrary->elements_ordered())
                     switch (elementLibrary->element_group(tool))
                     {
                     default:

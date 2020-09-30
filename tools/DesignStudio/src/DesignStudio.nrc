@@ -120,31 +120,32 @@
                             group_box: {
                                 text: "Project Type"
                                 radio_button: {
-                                    id: typeBlank
-                                    text: "Blank app"
+                                    id: typeEmpty
+                                    text: "Empty project"
                                 }
                                 radio_button: {
-                                    id: typeMVC
+                                    id: typeApp
+                                    text: "App"
+                                }
+                                radio_button: {
+                                    id: typeMVCApp
                                     text: "MVC (model-view-controller) app"
                                 }
                                 radio_button: {
-                                    id: typeDialog
+                                    id: typeDialogApp
                                     text: "Dialog app"
                                 }
                                 radio_button: {
                                     id: type2DGame
                                     text: "2D game"
-                                    enabled: false
                                 }
                                 radio_button: {
                                     id: type25DGame
                                     text: "2.5D (isometric) game"
-                                    enabled: false
                                 }
                                 radio_button: {
                                     id: type3DGame
                                     text: "3D game"
-                                    enabled: false
                                 }
                             }
                             vertical_spacer: {}

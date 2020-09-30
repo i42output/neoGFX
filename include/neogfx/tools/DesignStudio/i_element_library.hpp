@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/reference_counted.hpp>
+#include <neolib/core/i_vector.hpp>
 #include <neolib/core/i_set.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/plugin/i_plugin.hpp>
@@ -35,12 +36,14 @@ namespace neogfx::DesignStudio
     public:
         typedef i_element_library abstract_type;
         typedef neolib::i_set<neolib::i_string> elements_t;
+        typedef neolib::i_vector<neolib::i_string> elements_ordered_t;
         // exceptions
     public:
         struct unknown_element_type : std::logic_error { unknown_element_type() : std::logic_error{ "neogfx::DesignStudio::i_element_library::unknown_element_type" } {} };
         // meta
     public:
         virtual const elements_t& elements() const = 0;
+        virtual const elements_ordered_t& elements_ordered() const = 0;
         // factory
     public:
         virtual void create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;

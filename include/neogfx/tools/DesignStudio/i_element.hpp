@@ -67,5 +67,7 @@ namespace neogfx::DesignStudio
         children_t::iterator begin() { return children().begin(); }
         children_t::const_iterator end() const { return children().end(); }
         children_t::iterator end() { return children().end(); }
+    public:
+
     };
 }

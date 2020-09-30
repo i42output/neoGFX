@@ -3,6 +3,7 @@
 
     resource: {
         file: resources/app.png
+        file: resources/gamepad.png
         file: resources/action.png
         file: resources/canvas.png
         file: resources/widget.png

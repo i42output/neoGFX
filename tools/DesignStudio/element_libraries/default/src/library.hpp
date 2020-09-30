@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/reference_counted.hpp>
+#include <neolib/core/vector.hpp>
 #include <neolib/core/set.hpp>
 #include <neolib/core/map.hpp>
 #include <neolib/core/string.hpp>
@@ -36,6 +37,7 @@ namespace neogfx::DesignStudio
         // types
     public:
         typedef neolib::set<neolib::string> elements_t;
+        typedef neolib::vector<neolib::string> elements_ordered_t;
         // construction
     public:
         default_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);
@@ -43,6 +45,7 @@ namespace neogfx::DesignStudio
         // meta
     public:
         const elements_t& elements() const override;
+        const elements_ordered_t& elements_ordered() const override;
         // factory
     public:
         void create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) override;
@@ -60,6 +63,7 @@ namespace neogfx::DesignStudio
     private:
         neolib::i_application& iApplication;
         std::string iPluginPath;
+        elements_ordered_t iElementsOrdered;
         elements_t iElements;
         mutable std::map<color, std::map<std::string, texture>> iIcons;
     };

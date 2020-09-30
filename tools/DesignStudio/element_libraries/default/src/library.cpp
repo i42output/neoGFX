@@ -63,10 +63,15 @@ namespace neogfx::DesignStudio
     default_element_library::default_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
-        iElements
+        iElementsOrdered
         {
             { "project" },
             { "app" },
+            { "MVC_app" },
+            { "dialog_app" },
+            { "2D_game" },
+            { "2.5D_game" },
+            { "3D_game" },
             { "action" },
             { "menu" },
             { "window" },
@@ -104,7 +109,8 @@ namespace neogfx::DesignStudio
             { "spacer" },
             { "vertical_spacer" },
             { "horizontal_spacer" }
-        }
+        },
+        iElements{ elements_ordered().begin(), elements_ordered().end() }
     {
     }
 
@@ -115,6 +121,11 @@ namespace neogfx::DesignStudio
     const default_element_library::elements_t& default_element_library::elements() const
     {
         return iElements;
+    }
+
+    const default_element_library::elements_ordered_t& default_element_library::elements_ordered() const
+    {
+        return iElementsOrdered;
     }
 
     void default_element_library::create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
@@ -138,8 +149,14 @@ namespace neogfx::DesignStudio
         static const std::map<std::string, std::function<i_element*(i_element&, const neolib::i_string&)>> sFactoryMethods =
         {
             #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Type, aElementId }; } },
+            #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Name, aElementId }; } },
             MAKE_ELEMENT_FACTORY_FUNCTION(project)
-            MAKE_ELEMENT_FACTORY_FUNCTION(app)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(app, app)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(MVC_app, app)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(dialog_app, app)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2D_game, app)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2.5D_game, app)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(3D_game, app)
             MAKE_ELEMENT_FACTORY_FUNCTION(action)
             MAKE_ELEMENT_FACTORY_FUNCTION(window)
             MAKE_ELEMENT_FACTORY_FUNCTION(widget)
@@ -193,6 +210,11 @@ namespace neogfx::DesignStudio
         {
             { "project", DesignStudio::element_group::Project },
             { "app", DesignStudio::element_group::App },
+            { "MVC_app", DesignStudio::element_group::App },
+            { "dialog_app", DesignStudio::element_group::App },
+            { "2D_game", DesignStudio::element_group::App },
+            { "2.5D_game", DesignStudio::element_group::App },
+            { "3D_game", DesignStudio::element_group::App },
             { "action", DesignStudio::element_group::Action },
             { "window", DesignStudio::element_group::Widget },
             { "widget", DesignStudio::element_group::Widget },
@@ -246,6 +268,8 @@ namespace neogfx::DesignStudio
         {
             texture result{ aSource.extents(), 1.0, ng::texture_sampling::Multisample };
             graphics_context gc{ result };
+            ng::scalar const outline = 4.0;
+            auto const targetRect = aColor ? rect{ point{ outline, outline }, aSource.extents() - size{ outline * 2.0 } } : rect{ point{}, aSource.extents() };
             if (aColor)
             {
                 // draw a black outline for a non-text color icon...
@@ -254,17 +278,17 @@ namespace neogfx::DesignStudio
                 auto pingPongBuffers = gc.ping_pong_buffers(aSource.extents(), ng::texture_sampling::Multisample);
                 {
                     scoped_render_target srt{ *pingPongBuffers.buffer1 };
-                    pingPongBuffers.buffer1->draw_texture(point{}, aSource, color::Black);
+                    pingPongBuffers.buffer1->draw_texture(targetRect, aSource, color::Black);
                 }
                 {
                     scoped_render_target srt{ *pingPongBuffers.buffer2 };
-                    pingPongBuffers.buffer2->blur(r, *pingPongBuffers.buffer1, r, 10.0, blurring_algorithm::Gaussian, 5.0, 1.0);
+                    pingPongBuffers.buffer2->blur(r, *pingPongBuffers.buffer1, r, outline, blurring_algorithm::Gaussian, 5.0, 1.0);
                 }
                 scoped_render_target srt{ gc };
                 gc.blit(r, *pingPongBuffers.buffer2, r);
             }
             scoped_render_target srt{ gc };
-            gc.draw_texture(point{}, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
+            gc.draw_texture(targetRect, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
             return result;
         };
         static std::map<std::string, std::function<void(texture&)>> sIconResources =
@@ -273,7 +297,42 @@ namespace neogfx::DesignStudio
                 "app",
                 [colored_icon](texture& aTexture)
                 {
-                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" });
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" }, color::BlanchedAlmond );
+                }
+            },
+            {
+                "MVC_app",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" }, color::BlanchedAlmond);
+                }
+            },
+            {
+                "dialog_app",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" }, color::BlanchedAlmond);
+                }
+            },
+            {
+                "2D_game",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gamepad.png" }, color::BlanchedAlmond);
+                }
+            },
+            {
+                "2.5D_game",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gamepad.png" }, color::BlanchedAlmond);
+                }
+            },
+            {
+                "3D_game",
+                [colored_icon](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gamepad.png" }, color::BlanchedAlmond);
                 }
             },
             {
