@@ -220,11 +220,13 @@ int main(int argc, char* argv[])
 
         typedef std::pair<ds::i_element_library*, ng::string> tool_t;
         ng::basic_item_tree_model<std::variant<ds::element_group, tool_t>> toolboxModel;
-        auto toolboxApp = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::App, "Application");
-        auto toolboxMenu = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Menu, "Menu");
-        auto toolboxAction = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Action, "Action");
-        auto toolboxLayout = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Layout, "Layout");
-        auto toolboxWidget = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Widget, "Widget");
+        auto toolboxProject = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Project, "Project");
+        auto toolboxUserInterface = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::UserInterface, "User Interface");
+        auto toolboxApp = toolboxModel.append_item(toolboxProject, ds::element_group::App, "Application");
+        auto toolboxMenu = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Menu, "Menu");
+        auto toolboxAction = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Action, "Action");
+        auto toolboxLayout = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Layout, "Layout");
+        auto toolboxWidget = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Widget, "Widget");
         auto stringify_tool = [](const ng::i_string& aInput) -> std::string
         {
             std::string result;
@@ -238,6 +240,73 @@ int main(int argc, char* argv[])
             }
             return result;
         };
+        class toolbox_presentation_model : public ng::basic_item_presentation_model<decltype(toolboxModel)>
+        {
+        public:
+            toolbox_presentation_model()
+            {
+            }
+        public:
+            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
+            {
+                auto const& tool = item_model().item(to_item_model_index(aIndex));
+                if (std::holds_alternative<ds::element_group>(tool))
+                {
+                    switch (std::get<ds::element_group>(tool))
+                    {
+                    case ds::element_group::Project:
+                    case ds::element_group::UserInterface:
+                        return ng::size{ 24.0_dip, 24.0_dip };
+                    case ds::element_group::Code:
+                    case ds::element_group::Script:
+                    case ds::element_group::App:
+                    case ds::element_group::Menu:
+                    case ds::element_group::Action:
+                    case ds::element_group::Widget:
+                    case ds::element_group::Layout:
+                        return {};
+                    default:
+                        return {};
+                    }
+                }
+                else
+                {
+                    return ng::size{ 24.0_dip, 24.0_dip };
+                }
+            }
+            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
+            {
+                auto const& tool = item_model().item(to_item_model_index(aIndex));
+                if (std::holds_alternative<ds::element_group>(tool))
+                {
+                    switch (std::get<ds::element_group>(tool))
+                    {
+                    case ds::element_group::Project:
+                        return projectTexture;
+                    case ds::element_group::UserInterface:
+                        return userInterfaceTexture;
+                    case ds::element_group::Code:
+                    case ds::element_group::Script:
+                    case ds::element_group::App:
+                    case ds::element_group::Menu:
+                    case ds::element_group::Action:
+                    case ds::element_group::Widget:
+                    case ds::element_group::Layout:
+                        return {};
+                    default:
+                        return {};
+                    }
+                }
+                else
+                {
+                    auto const& t = std::get<tool_t>(item_model().item(to_item_model_index(aIndex)));
+                    return t.first->element_icon(t.second);
+                }
+            }
+        public:
+            ng::texture projectTexture;
+            ng::texture userInterfaceTexture;
+        } toolboxPresentationModel;
         for (auto const& plugin : ng::service<ng::i_app>().plugin_manager().plugins())
         {
             ng::ref_ptr<ds::i_element_library> elementLibrary;
@@ -248,7 +317,12 @@ int main(int argc, char* argv[])
                     {
                     default:
                     case ds::element_group::Unknown:
+                        break;
                     case ds::element_group::Project:
+                        toolboxPresentationModel.projectTexture = elementLibrary->element_icon("project"_s);
+                        break;
+                    case ds::element_group::UserInterface:
+                        toolboxPresentationModel.userInterfaceTexture = elementLibrary->element_icon("user_interface"_s);
                         break;
                     case ds::element_group::App:
                         toolboxModel.append_item(toolboxApp, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
@@ -267,33 +341,6 @@ int main(int argc, char* argv[])
                         break;
                     }
         }
-        class toolbox_presentation_model : public ng::basic_item_presentation_model<decltype(toolboxModel)>
-        {
-        public:
-            toolbox_presentation_model()
-            {
-            }
-        public:
-            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
-            {
-                auto const& tool = item_model().item(to_item_model_index(aIndex));
-                if (std::holds_alternative<ds::element_group>(tool))
-                    return {};
-                else
-                    return ng::size{ 24.0_dip, 24.0_dip };
-            }
-            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
-            {
-                auto const& tool = item_model().item(to_item_model_index(aIndex));
-                if (std::holds_alternative<ds::element_group>(tool))
-                    return {};
-                else
-                {
-                    auto const& t = std::get<tool_t>(item_model().item(to_item_model_index(aIndex)));
-                    return t.first->element_icon(t.second);
-                }
-            }
-        } toolboxPresentationModel;
         toolboxPresentationModel.set_item_model(toolboxModel);
         toolboxPresentationModel.set_column_read_only(0u);
         auto& toolboxTree = toolbox.docked_widget<ng::tree_view>();
@@ -404,6 +451,7 @@ int main(int argc, char* argv[])
                         case ds::element_group::Unknown:
                             break;
                         case ds::element_group::Project:
+                        case ds::element_group::UserInterface:
                         case ds::element_group::App:
                         case ds::element_group::Menu:
                         case ds::element_group::Widget:

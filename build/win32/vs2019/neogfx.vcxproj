@@ -426,6 +426,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\utility.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_buffer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\color_dialog.hpp" />

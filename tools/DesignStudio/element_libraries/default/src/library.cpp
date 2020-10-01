@@ -54,7 +54,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/layout/border_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/tools/DesignStudio/project.hpp>
+#include <neogfx/gfx/utility.hpp>
+#include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include "library.hpp"
 
@@ -66,6 +67,7 @@ namespace neogfx::DesignStudio
         iElementsOrdered
         {
             { "project" },
+            { "user_interface" },
             { "app" },
             { "MVC_app" },
             { "dialog_app" },
@@ -133,7 +135,8 @@ namespace neogfx::DesignStudio
         static const std::map<std::string, std::function<i_element* (const neolib::i_string&)>> sFactoryMethods =
         {
             #define MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, #Type, aElementId }; } },
-            MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(project)
+            #define MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, #Name, aElementId }; } },
+            MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(project, i_project)
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())
@@ -150,7 +153,7 @@ namespace neogfx::DesignStudio
         {
             #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Type, aElementId }; } },
             #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Name, aElementId }; } },
-            MAKE_ELEMENT_FACTORY_FUNCTION(project)
+            MAKE_ELEMENT_FACTORY_FUNCTION(user_interface)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(app, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(MVC_app, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(dialog_app, app)
@@ -209,6 +212,7 @@ namespace neogfx::DesignStudio
         static const std::map<std::string, DesignStudio::element_group> sElementGroups =
         {
             { "project", DesignStudio::element_group::Project },
+            { "user_interface", DesignStudio::element_group::UserInterface },
             { "app", DesignStudio::element_group::App },
             { "MVC_app", DesignStudio::element_group::App },
             { "dialog_app", DesignStudio::element_group::App },
@@ -264,325 +268,305 @@ namespace neogfx::DesignStudio
     i_texture const& default_element_library::element_icon(const neolib::i_string& aElementType) const
     {
         auto& icons = iIcons[service<i_app>().current_style().palette().color(color_role::Text)];
-        auto colored_icon = [](const texture& aSource, const optional_color& aColor = {}) -> texture
-        {
-            texture result{ aSource.extents(), 1.0, ng::texture_sampling::Multisample };
-            graphics_context gc{ result };
-            ng::scalar const outline = 4.0;
-            auto const targetRect = aColor ? rect{ point{ outline, outline }, aSource.extents() - size{ outline * 2.0 } } : rect{ point{}, aSource.extents() };
-            if (aColor)
-            {
-                // draw a black outline for a non-text color icon...
-                // todo: provide an easier way to blur any drawing primitive
-                rect const r{ point{}, size{aSource.extents()} };
-                auto pingPongBuffers = gc.ping_pong_buffers(aSource.extents(), ng::texture_sampling::Multisample);
-                {
-                    scoped_render_target srt{ *pingPongBuffers.buffer1 };
-                    pingPongBuffers.buffer1->draw_texture(targetRect, aSource, color::Black);
-                }
-                {
-                    scoped_render_target srt{ *pingPongBuffers.buffer2 };
-                    pingPongBuffers.buffer2->blur(r, *pingPongBuffers.buffer1, r, outline, blurring_algorithm::Gaussian, 5.0, 1.0);
-                }
-                scoped_render_target srt{ gc };
-                gc.blit(r, *pingPongBuffers.buffer2, r);
-            }
-            scoped_render_target srt{ gc };
-            gc.draw_texture(targetRect, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
-            return result;
-        };
         static std::map<std::string, std::function<void(texture&)>> sIconResources =
         {
             {
                 "project",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/project.png" }, color::Coral);
                 }
             },
             {
+                "user_interface",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/ui.png" }, color::PaleGreen);
+                }
+            },
+            {
                 "app",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" }, color::BlanchedAlmond );
                 }
             },
             {
                 "MVC_app",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" }, color::BlanchedAlmond);
                 }
             },
             {
                 "dialog_app",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/app.png" }, color::BlanchedAlmond);
                 }
             },
             {
                 "2D_game",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gamepad.png" }, color::BlanchedAlmond);
                 }
             },
             {
                 "2.5D_game",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gamepad.png" }, color::BlanchedAlmond);
                 }
             },
             {
                 "3D_game",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gamepad.png" }, color::BlanchedAlmond);
                 }
             },
             {
                 "action",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/action.png" });
                 }
             },
             {
                 "window",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/window.png" });
                 }
             },
             {
                 "toolbar",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/toolbar.png" });
                 }
             },
             {
                 "status_bar",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/statusbar.png" });
                 }
             },
             {
                 "canvas",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/canvas.png" });
                 }
             },
             {
                 "widget",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/widget.png" });
                 }
             },
             {
                 "menu_bar",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/menubar.png" });
                 }
             },
             {
                 "menu",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/menu.png" });
                 }
             },
             {
                 "group_box",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/group.png" });
                 }
             },
             {
                 "push_button",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/button.png" });
                 }
             },
             {
                 "check_box",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/check.png" });
                 }
             },
             {
                 "radio_button",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/radio.png" });
                 }
             },
             {
                 "label",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/label.png" });
                 }
             },
             {
                 "text_widget",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/text.png" });
                 }
             },
             {
                 "image_widget",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/image.png" });
                 }
             },
             {
                 "table_view",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/table.png" });
                 }
             },
             {
                 "tree_view",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/tree.png" });
                 }
             },
             {
                 "list_view",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/list.png" });
                 }
             },
             {
                 "drop_list",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/droplist.png" });
                 }
             },
             {
                 "tab_page",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpage.png" });
                 }
             },
             {
                 "tab_page_container",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/tabpagecontainer.png" });
                 }
             },
             {
                 "line_edit",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
                 }
             },
             {
                 "text_field",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/lineedit.png" });
                 }
             },
             {
                 "text_edit",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/textedit.png" });
                 }
             },
             {
                 "spin_box",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/spinbox.png" });
                 }
             },
             {
                 "double_spin_box",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/spinbox.png" });
                 }
             },
             {
                 "slider",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
                 }
             },
             {
                 "double_slider",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
                 }
             },
             {
                 "gradient_widget",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/gradient.png" });
                 }
             },
             {
                 "spacer",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/spacer.png" }, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "vertical_spacer",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/verticalspacer.png" }, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "horizontal_spacer",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/horizontalspacer.png" }, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "border_layout",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/borderlayout.png" }, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "flow_layout",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/flowlayout.png" }, color::PowderBlue.lighter(0x20));
                 }
             },
             {
                 "stack_layout",
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/stackedlayout.png" }, color::PowderBlue.lighter(0x20));
                 }
@@ -590,7 +574,7 @@ namespace neogfx::DesignStudio
             {
                 "vertical_layout",
                 // todo: create a .png asset for this...
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
@@ -603,7 +587,7 @@ namespace neogfx::DesignStudio
             {
                 "horizontal_layout",
                 // todo: create a .png asset for this...
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
@@ -616,7 +600,7 @@ namespace neogfx::DesignStudio
             {
                 "grid_layout",
                 // todo: create a .png asset for this...
-                [colored_icon](texture& aTexture)
+                [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
                     graphics_context gc{ newTexture };

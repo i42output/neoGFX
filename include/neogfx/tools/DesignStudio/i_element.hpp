@@ -34,6 +34,9 @@ namespace neogfx::DesignStudio
     {
         Unknown,
         Project,
+        UserInterface,
+        Code,
+        Script,
         App,
         Menu,
         Action,
@@ -60,8 +63,10 @@ namespace neogfx::DesignStudio
         virtual bool has_parent() const = 0;
         virtual const i_element& parent() const = 0;
         virtual i_element& parent() = 0;
+        virtual void set_parent(i_element& aParent) = 0;
         virtual const children_t& children() const = 0;
         virtual children_t& children() = 0;
+        virtual void add_child(i_element& aChild) = 0;
     public:
         children_t::const_iterator begin() const { return children().begin(); }
         children_t::iterator begin() { return children().begin(); }

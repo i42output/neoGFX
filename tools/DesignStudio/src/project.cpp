@@ -49,6 +49,7 @@ namespace neogfx::DesignStudio
         iName = inputFileName.stem().string();
         iNamespace = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
         iRoot = manager().library("project"_s).create_element("project", inputFileName.stem().string());
+        auto userInterface = manager().library("user_interface"_s).create_element(*iRoot, "user_interface", "User Interface"_t);
         for (auto const& item : input.root())
         {
             if (item.name() == "resource")
@@ -60,7 +61,7 @@ namespace neogfx::DesignStudio
                 std::map<std::string, uint32_t> counters;
                 std::function<void(i_element&, neolib::fjson_value const&)> add_node = [&](i_element& aParent, neolib::fjson_value const& aNode)
                 {
-                    if (aParent.has_parent())
+                    if (aParent.has_parent() && aParent.parent().has_parent())
                     {
                         ref_ptr<i_element> newNode;
                         switch (aNode.type())
@@ -112,7 +113,7 @@ namespace neogfx::DesignStudio
                     }
                 };
                 for (auto const& child : item)
-                    add_node(*iRoot, child);
+                    add_node(*userInterface, child);
             }
         }
     }

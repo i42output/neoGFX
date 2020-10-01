@@ -32,12 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
-#include <neogfx/tools/DesignStudio/project.hpp>
+#include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
 {
-    class project;
+    struct user_interface {};
 
     template <typename Type>
     inline element_group default_element_group()
@@ -52,8 +52,10 @@ namespace neogfx::DesignStudio
             return element_group::Widget;
         else if constexpr (std::is_base_of_v<i_layout, Type>)
             return element_group::Layout;
-        else if constexpr (std::is_base_of_v<project, Type>)
+        else if constexpr (std::is_base_of_v<i_project, Type>)
             return element_group::Project;
+        else if constexpr (std::is_base_of_v<user_interface, Type>)
+            return element_group::UserInterface;
         else
             return element_group::Unknown;
     }
@@ -77,22 +79,36 @@ namespace neogfx::DesignStudio
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
     public:
         element(const i_element_library& aLibrary, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
-            iLibrary{ aLibrary }, iParent { nullptr }, iGroup{ aGroup }, iType{ aType }
+            iLibrary{ aLibrary }, 
+            iParent { nullptr }, 
+            iGroup{ aGroup }, 
+            iType{ aType }
         {
         }
         element(const i_element_library& aLibrary, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
-            iLibrary{ aLibrary }, iParent{ nullptr }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
+            iLibrary{ aLibrary }, 
+            iParent{ nullptr }, 
+            iGroup{ aGroup }, 
+            iType{ aType }, 
+            iId{ aId }
         {
         }
         element(const i_element_library& aLibrary, i_element& aParent, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
-            iLibrary{ aLibrary }, iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }
+            iLibrary{ aLibrary }, 
+            iParent{ &aParent },
+            iGroup{ aGroup }, 
+            iType{ aType }
         {
-            parent().children().push_back(neolib::ref_ptr<i_element>{ this });
+            parent().add_child(*this);
         }
         element(const i_element_library& aLibrary, i_element& aParent, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
-            iLibrary{ aLibrary }, iParent{ &aParent }, iGroup{ aGroup }, iType{ aType }, iId{ aId }
+            iLibrary{ aLibrary }, 
+            iParent{ &aParent },
+            iGroup{ aGroup },
+            iType{ aType }, 
+            iId{ aId }
         {
-            parent().children().push_back(neolib::ref_ptr<i_element>{ this });
+            parent().add_child(*this);
         }
         ~element()
         {
@@ -129,6 +145,10 @@ namespace neogfx::DesignStudio
         {
             return const_cast<i_element&>(to_const(*this).parent());
         }
+        void set_parent(i_element& aParent) override
+        {
+            iParent = &aParent;
+        }
         const children_t& children() const override
         {
             return iChildren;
@@ -136,6 +156,16 @@ namespace neogfx::DesignStudio
         children_t& children() override
         {
             return iChildren;
+        }
+        void add_child(i_element& aChild) override
+        {
+            if (aChild.group() != element_group::App || group() != element_group::UserInterface)
+                children().push_back(neolib::ref_ptr<i_element>{ &aChild });
+            else
+            {
+                aChild.set_parent(parent());
+                parent().children().insert(std::prev(parent().children().end()), neolib::ref_ptr<i_element>{ &aChild });
+            }
         }
     public:
         const i_element_library& iLibrary;
