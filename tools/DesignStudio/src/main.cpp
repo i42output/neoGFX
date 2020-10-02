@@ -89,13 +89,18 @@ int main(int argc, char* argv[])
 
         auto& autoscaleDocks = settings.setting("environment.tabs_and_windows.autoscale_docks"_s);
         auto& workspaceSize = settings.setting("environment.tabs_and_windows.workspace_size"_s);
+        auto& workspacePosition = settings.setting("environment.tabs_and_windows.workspace_position"_s);
         auto& leftDockWidth = settings.setting("environment.tabs_and_windows.left_dock_width"_s);
         auto& rightDockWidth = settings.setting("environment.tabs_and_windows.right_dock_width"_s);
         auto& leftDockWeight = settings.setting("environment.tabs_and_windows.left_dock_weight"_s);
         auto& rightDockWeight = settings.setting("environment.tabs_and_windows.right_dock_weight"_s);
 
-        if (workspaceSize.value<ng::size>(true).cx != 0.0)
-            mainWindow.set_extents(workspaceSize.value<ng::size>(true));
+        if (!workspaceSize.is_default())
+            mainWindow.set_extents(workspaceSize.value<ng::size>());
+        if (!workspacePosition.is_default())
+            mainWindow.move(workspacePosition.value<ng::point>());
+        else
+            mainWindow.center(false);
 
         ng::dock leftDock{ mainWindow.dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() }, ng::size{ leftDockWeight.value<double>() } };
         ng::dock rightDock{ mainWindow.dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() }, ng::size{ rightDockWeight.value<double>() } };
@@ -116,6 +121,10 @@ int main(int argc, char* argv[])
         ng::get_property(mainWindow, "Size").property_changed([&](const ng::property_variant& aValue)
         {
             workspaceSize.set_value(std::get<ng::size>(aValue));
+        });
+        ng::get_property(mainWindow, "Position").property_changed([&](const ng::property_variant& aValue)
+        {
+            workspacePosition.set_value(std::get<ng::point>(aValue));
         });
         ng::get_property(leftDock.parent_layout(), "Size").property_changed([&](const ng::property_variant& aValue)
         {

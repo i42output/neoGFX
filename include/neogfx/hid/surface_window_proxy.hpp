@@ -111,6 +111,7 @@ namespace neogfx
         void native_window_focus_gained() override;
         void native_window_focus_lost() override;
         void native_window_resized() override;
+        void native_window_moved() override;
         double native_window_rendering_priority() const override;
         bool native_window_ready_to_render() const override;
         void native_window_render(const rect& aInvalidatedRect) const override;

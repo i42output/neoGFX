@@ -462,6 +462,11 @@ namespace neogfx
         as_widget().resize(native_surface().surface_size());
     }
 
+    void surface_window_proxy::native_window_moved()
+    {
+        as_widget().move(native_surface().surface_position());
+    }
+
     double surface_window_proxy::native_window_rendering_priority() const
     {
         return rendering_priority();

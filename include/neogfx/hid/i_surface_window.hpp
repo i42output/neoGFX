@@ -60,6 +60,7 @@ namespace neogfx
         virtual void native_window_focus_gained() = 0;
         virtual void native_window_focus_lost() = 0;
         virtual void native_window_resized() = 0;
+        virtual void native_window_moved() = 0;
         virtual double native_window_rendering_priority() const = 0;
         virtual bool native_window_ready_to_render() const = 0;
         virtual void native_window_render(const rect& aInvalidatedRect) const = 0;

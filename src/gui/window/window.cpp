@@ -605,9 +605,15 @@ namespace neogfx
         return base_type::device_metrics();
     }
 
+    void window::moved()
+    {
+        window_manager().move_window(*this, position());
+        base_type::moved();
+    }
+
     void window::resized()
     {
-        window_manager().resize_window(*this, widget::extents());
+        window_manager().resize_window(*this, extents());
         base_type::resized();
         update(true);
     }
@@ -761,9 +767,9 @@ namespace neogfx
     {
         layout_items();
         if (aSetMinimumSize)
-            window_manager().resize_window(*this, minimum_size());
+            resize(minimum_size());
         rect desktopRect{ window_manager().desktop_rect(*this) };
-        window_manager().move_window(*this, (desktopRect.extents() - window_manager().window_rect(*this).extents()) / 2.0);
+        move((desktopRect.extents() - window_manager().window_rect(*this).extents()) / 2.0);
     }
 
     void window::center_on_parent(bool aSetMinimumSize)
@@ -772,7 +778,7 @@ namespace neogfx
         {
             layout_items();
             if (aSetMinimumSize)
-                window_manager().resize_window(*this, minimum_size());
+                resize(minimum_size());
             rect desktopRect{ window_manager().desktop_rect(*this) };
             rect parentRect{ window_manager().window_rect(parent_window()) };
             rect ourRect{ window_manager().window_rect(*this) };
@@ -785,7 +791,7 @@ namespace neogfx
                 position.x = desktopRect.right() - ourRect.cx;
             if (position.y + ourRect.cy > desktopRect.bottom())
                 position.y = desktopRect.bottom() - ourRect.cy;
-            window_manager().move_window(*this, position.ceil());
+            move(position.ceil());
         }
         else
             center(aSetMinimumSize);

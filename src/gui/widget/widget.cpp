@@ -717,11 +717,14 @@ namespace neogfx
 
     void widget::moved()
     {
-        update(true);
-        iOrigin = std::nullopt;
-        update(true);
-        for (auto child : iChildren)
-            child->parent_moved();
+        if (!is_root())
+        {
+            update(true);
+            iOrigin = std::nullopt;
+            update(true);
+            for (auto child : iChildren)
+                child->parent_moved();
+        }
         PositionChanged.trigger();
     }
 

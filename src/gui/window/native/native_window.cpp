@@ -196,6 +196,9 @@ namespace neogfx
             case window_event_type::Resized:
                 surface_window().native_window_resized();
                 break;
+            case window_event_type::Moved:
+                surface_window().native_window_moved();
+                break;
             case window_event_type::Enter:
                 iNonClientEntered = false;
                 surface_window().native_window_mouse_entered(windowEvent.position());

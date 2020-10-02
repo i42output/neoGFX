@@ -103,8 +103,10 @@ namespace neogfx
     template <typename CoordinateType>
     class basic_delta 
     { 
+        typedef basic_delta<CoordinateType> self_type;
         // types
     public:
+        typedef self_type abstract_type; // todo: abstract type
         typedef CoordinateType coordinate_type;
         // construction
     public:
@@ -315,8 +317,10 @@ namespace neogfx
     template <typename CoordinateType>
     class basic_point
     {
+        typedef basic_point<CoordinateType> self_type;
         // types
     public:
+        typedef self_type abstract_type; // todo: abstract type
         typedef CoordinateType coordinate_type;
         // construction
     public:
@@ -536,6 +540,7 @@ namespace neogfx
         typedef basic_box_areas<DimensionType> self_type;
         // types
     public:
+        typedef self_type abstract_type; // todo: abstract type
         typedef DimensionType dimension_type;
         typedef dimension_type coordinate_type;
         typedef basic_point<coordinate_type> point_type;
@@ -655,6 +660,7 @@ namespace neogfx
         typedef basic_rect<CoordinateType, CoordinateSystem> self_type;
         // types
     public:
+        typedef self_type abstract_type; // todo: abstract type
         typedef CoordinateType coordinate_type;
         typedef coordinate_type dimension_type;
     private:
@@ -1207,7 +1213,10 @@ namespace neogfx
     }
 }
 
+define_setting_type(neogfx::delta)
 define_setting_type(neogfx::size)
+define_setting_type(neogfx::point)
+define_setting_type(neogfx::rect)
 
 namespace std
 {
