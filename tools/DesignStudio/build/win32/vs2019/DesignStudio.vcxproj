@@ -254,6 +254,7 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element_library_plugin.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\widget.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\workflow.hpp" />
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
     <ClInclude Include="x64\Debug\GeneratedFiles\DesignStudio.ui.hpp">

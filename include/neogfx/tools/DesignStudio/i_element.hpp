@@ -37,6 +37,7 @@ namespace neogfx::DesignStudio
         UserInterface,
         Code,
         Script,
+        Node,
         App,
         Menu,
         Action,

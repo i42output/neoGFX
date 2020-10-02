@@ -67,6 +67,9 @@ namespace neogfx::DesignStudio
         iElementsOrdered
         {
             { "project" },
+            { "code" },
+            { "script" },
+            { "node" },
             { "user_interface" },
             { "app" },
             { "MVC_app" },
@@ -212,6 +215,9 @@ namespace neogfx::DesignStudio
         static const std::map<std::string, DesignStudio::element_group> sElementGroups =
         {
             { "project", DesignStudio::element_group::Project },
+            { "code", DesignStudio::element_group::Code },
+            { "script", DesignStudio::element_group::Script },
+            { "node", DesignStudio::element_group::Node },
             { "user_interface", DesignStudio::element_group::UserInterface },
             { "app", DesignStudio::element_group::App },
             { "MVC_app", DesignStudio::element_group::App },
@@ -282,6 +288,27 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/ui.png" }, color::PaleGreen);
+                }
+            },
+            {
+                "code",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/logic.png" }, color::DeepSkyBlue);
+                }
+            },
+            {
+                "script",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/scripttext.png" }, color::DeepSkyBlue);
+                }
+            },
+            {
+                "node",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/node.png" }, color::DeepSkyBlue);
                 }
             },
             {

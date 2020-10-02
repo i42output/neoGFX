@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/utility.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -43,6 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/settings.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
+#include <neogfx/tools/DesignStudio/workflow.hpp>
 #include "new_project_dialog.hpp"
 #include "DesignStudio.ui.hpp"
 
@@ -135,10 +137,17 @@ int main(int argc, char* argv[])
         });
 
         auto toolbox = ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame);
-        auto objects = ng::make_dockable<ng::table_view>("Objects"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
+        auto workflow = ng::make_dockable<ng::list_view>("Workflow"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame);
+        auto objects = ng::make_dockable<ng::table_view>("Object Explorer"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
         auto properties = ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
 
+        toolbox.set_size_policy(ng::size_constraint::MinimumExpanding);
+        workflow.set_size_policy(ng::size_constraint::MinimumExpanding);
+        toolbox.set_weight(ng::size{ 3.0 });
+        workflow.set_weight(ng::size{ 1.0 });
+
         toolbox.dock(leftDock);
+        workflow.dock(leftDock);
         objects.dock(rightDock);
         properties.dock(rightDock);
 
@@ -221,6 +230,7 @@ int main(int argc, char* argv[])
         typedef std::pair<ds::i_element_library*, ng::string> tool_t;
         ng::basic_item_tree_model<std::variant<ds::element_group, tool_t>> toolboxModel;
         auto toolboxProject = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Project, "Project");
+        auto toolboxCode = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Code, "Code");
         auto toolboxUserInterface = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::UserInterface, "User Interface");
         auto toolboxApp = toolboxModel.append_item(toolboxProject, ds::element_group::App, "Application");
         auto toolboxMenu = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Menu, "Menu");
@@ -255,9 +265,9 @@ int main(int argc, char* argv[])
                     switch (std::get<ds::element_group>(tool))
                     {
                     case ds::element_group::Project:
+                    case ds::element_group::Code:
                     case ds::element_group::UserInterface:
                         return ng::size{ 24.0_dip, 24.0_dip };
-                    case ds::element_group::Code:
                     case ds::element_group::Script:
                     case ds::element_group::App:
                     case ds::element_group::Menu:
@@ -286,7 +296,9 @@ int main(int argc, char* argv[])
                     case ds::element_group::UserInterface:
                         return userInterfaceTexture;
                     case ds::element_group::Code:
+                        return codeTexture;
                     case ds::element_group::Script:
+                    case ds::element_group::Node:
                     case ds::element_group::App:
                     case ds::element_group::Menu:
                     case ds::element_group::Action:
@@ -305,6 +317,7 @@ int main(int argc, char* argv[])
             }
         public:
             ng::texture projectTexture;
+            ng::texture codeTexture;
             ng::texture userInterfaceTexture;
         } toolboxPresentationModel;
         for (auto const& plugin : ng::service<ng::i_app>().plugin_manager().plugins())
@@ -321,8 +334,17 @@ int main(int argc, char* argv[])
                     case ds::element_group::Project:
                         toolboxPresentationModel.projectTexture = elementLibrary->element_icon("project"_s);
                         break;
+                    case ds::element_group::Code:
+                        toolboxPresentationModel.codeTexture = elementLibrary->element_icon("code"_s);
+                        break;
                     case ds::element_group::UserInterface:
                         toolboxPresentationModel.userInterfaceTexture = elementLibrary->element_icon("user_interface"_s);
+                        break;
+                    case ds::element_group::Script:
+                        toolboxModel.append_item(toolboxCode, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    case ds::element_group::Node:
+                        toolboxModel.append_item(toolboxCode, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::App:
                         toolboxModel.append_item(toolboxApp, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
@@ -346,6 +368,45 @@ int main(int argc, char* argv[])
         auto& toolboxTree = toolbox.docked_widget<ng::tree_view>();
         toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         toolboxTree.set_presentation_model(toolboxPresentationModel);
+
+        ng::basic_item_model<ds::workflow_tool> workflowModel; // todo
+        auto workflowCppIde = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::CppIde, "Build");
+        auto workflowNote = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::Note, "Note");
+        class workflow_presentation_model : public ng::basic_item_presentation_model<decltype(workflowModel)>
+        {
+        public:
+            workflow_presentation_model() : 
+                cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
+                noteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
+            {
+            }
+        public:
+            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
+            {
+                return ng::size{ 32.0_dip, 32.0_dip };
+            }
+            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
+            {
+                switch (item_model().item(to_item_model_index(aIndex)))
+                {
+                case ds::workflow_tool::CppIde:
+                    return cppIdeTexture;
+                case ds::workflow_tool::Note:
+                    return noteTexture;
+                default:
+                    return {};
+                }
+            }
+        public:
+            ng::texture cppIdeTexture;
+            ng::texture noteTexture;
+        } workflowPresentationModel;
+
+        workflowPresentationModel.set_item_model(workflowModel);
+        workflowPresentationModel.set_column_read_only(0u);
+        auto& workflowTree = workflow.docked_widget<ng::list_view>();
+        workflowTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
+        workflowTree.set_presentation_model(workflowPresentationModel);
 
         ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
         objectModel.set_column_name(0u, "Object"_t);
