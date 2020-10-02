@@ -148,7 +148,7 @@ namespace neogfx
     public:
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
-        void fix_weightings() override;
+        void fix_weightings(bool aRecalculate = true) override;
     protected:
         void layout_item_enabled(i_layout_item& aItem) override;
         void layout_item_disabled(i_layout_item& aItem) override;

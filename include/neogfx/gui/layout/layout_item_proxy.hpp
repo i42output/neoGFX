@@ -102,7 +102,7 @@ namespace neogfx
         void update_layout(bool aDeferLayout = true) override;
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
-        void fix_weightings() override;
+        void fix_weightings(bool aRecalculate = true) override;
     public:
         const i_layout_item& subject() const override;
         i_layout_item& subject() override;

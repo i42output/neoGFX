@@ -236,7 +236,7 @@ namespace neogfx
             }
         }
     public:
-        void fix_weightings() override
+        void fix_weightings(bool aRecalculate = true) override
         {
 #ifdef NEOGFX_DEBUG
             if (debug == this)
@@ -249,7 +249,8 @@ namespace neogfx
                 auto& item = layout.item_at(itemIndex);
                 if (!item.visible())
                     continue;
-                item.set_weight(calculate_relative_weight(layout, item), false);
+                if (aRecalculate || !item.has_weight())
+                    item.set_weight(calculate_relative_weight(layout, item), false);
             }
 #ifdef NEOGFX_DEBUG
             if (debug == this)

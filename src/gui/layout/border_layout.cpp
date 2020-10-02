@@ -176,10 +176,10 @@ namespace neogfx
         iRows.layout_items(aPosition, aSize);
     }
 
-    void border_layout::fix_weightings()
+    void border_layout::fix_weightings(bool aRecalculate)
     {
-        iRows.fix_weightings();
-        iMiddle.fix_weightings();
+        iRows.fix_weightings(aRecalculate);
+        iMiddle.fix_weightings(aRecalculate);
         invalidate(false);
     }
 

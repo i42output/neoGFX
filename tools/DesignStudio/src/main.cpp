@@ -141,8 +141,6 @@ int main(int argc, char* argv[])
         auto objects = ng::make_dockable<ng::table_view>("Object Explorer"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
         auto properties = ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame);
 
-        toolbox.set_size_policy(ng::size_constraint::MinimumExpanding);
-        workflow.set_size_policy(ng::size_constraint::MinimumExpanding);
         toolbox.set_weight(ng::size{ 3.0 });
         workflow.set_weight(ng::size{ 1.0 });
 

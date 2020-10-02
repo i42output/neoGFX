@@ -403,12 +403,12 @@ namespace neogfx
             return const_cast<i_layout&>(to_const(*this).layout(aStandardLayout, aPosition));
         }
     public:
-        void fix_weightings() override
+        void fix_weightings(bool aRecalculate = true) override
         {
-            widget_type::fix_weightings();
+            widget_type::fix_weightings(aRecalculate);
             if (resizing_context().has_parent_layout())
             {
-                resizing_context().parent_layout().fix_weightings();
+                resizing_context().parent_layout().fix_weightings(aRecalculate);
                 resizing_context().parent_layout().update_layout(false);
             }
         }

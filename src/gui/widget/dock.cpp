@@ -155,7 +155,7 @@ namespace neogfx
             parent_layout().enable();
         else
             parent_layout().disable();
-        fix_weightings();
+        fix_weightings(false);
         update_layout();
         return result;
     }

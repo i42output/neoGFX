@@ -479,14 +479,14 @@ namespace neogfx
         layout_items(aPosition, aSize);
     }
 
-    void layout::fix_weightings()
+    void layout::fix_weightings(bool aRecalculate)
     {
         if ((autoscale() & neogfx::autoscale::Active) == neogfx::autoscale::Active)
         {
             neolib::scoped_object<neogfx::autoscale> so{ iAutoscale, iAutoscale & ~neogfx::autoscale::Active };
             update_layout(false);
         }
-        base_type::fix_weightings();
+        base_type::fix_weightings(aRecalculate);
     }
 
     void layout::layout_item_enabled(i_layout_item& aItem)
