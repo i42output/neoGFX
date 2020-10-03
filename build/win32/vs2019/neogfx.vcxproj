@@ -272,6 +272,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\i_app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_clipboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\i_drag_drop.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_event_processing_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_help.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_mnemonic.hpp" />
