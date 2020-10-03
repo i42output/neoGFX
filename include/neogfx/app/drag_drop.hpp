@@ -70,6 +70,9 @@ namespace neogfx
         define_declared_event(SourceUnregistered, source_unregistered, i_drag_drop_source&)
         define_declared_event(TargetRegistered, target_registered, i_drag_drop_target&)
         define_declared_event(TargetUnregistered, target_unregistered, i_drag_drop_target&)
+    private:
+        typedef std::vector<i_drag_drop_source*> sources_t;
+        typedef std::vector<i_drag_drop_target*> targets_t;
     public:
         drag_drop();
     public:
@@ -78,7 +81,15 @@ namespace neogfx
         void register_target(i_drag_drop_target& aTarget) override;
         void unregister_target(i_drag_drop_target& aTarget) override;
     public:
+        bool is_target_for(i_drag_drop_object const& aObject) const override;
         bool is_target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const override;
-        i_drag_drop_target& target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) override;
+        i_drag_drop_target& target_for(i_drag_drop_object const& aObject) const override;
+        i_drag_drop_target& target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const override;
+    private:
+        i_drag_drop_target* find_target(i_drag_drop_object const& aObject) const;
+        i_drag_drop_target* find_target(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const;
+    private:
+        sources_t iSources;
+        targets_t iTargets;
     };
 }

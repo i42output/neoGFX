@@ -76,12 +76,12 @@ namespace neogfx
 
     i_widget const& drag_drop_target::as_widget() const
     {
-        throw not_a_widget();
+        throw drag_drop_target_not_a_widget();
     }
 
     i_widget& drag_drop_target::as_widget()
     {
-        throw not_a_widget();
+        throw drag_drop_target_not_a_widget();
     }
 
 
@@ -91,31 +91,91 @@ namespace neogfx
 
     void drag_drop::register_source(i_drag_drop_source& aSource)
     {
-        throw std::logic_error("not yet implemented");
+        auto existing = std::find(iSources.begin(), iSources.end(), &aSource);
+        if (existing == iSources.end())
+        {
+            iSources.push_back(&aSource);
+            SourceRegistered.trigger(aSource);
+        }
     }
 
     void drag_drop::unregister_source(i_drag_drop_source& aSource)
     {
-        throw std::logic_error("not yet implemented");
+        auto existing = std::find(iSources.begin(), iSources.end(), &aSource);
+        if (existing != iSources.end())
+        {
+            iSources.erase(existing);
+            SourceUnregistered.trigger(aSource);
+        }
     }
 
     void drag_drop::register_target(i_drag_drop_target& aTarget)
     {
-        throw std::logic_error("not yet implemented");
+        auto existing = std::find(iTargets.begin(), iTargets.end(), &aTarget);
+        if (existing == iTargets.end())
+        {
+            iTargets.push_back(&aTarget);
+            TargetRegistered.trigger(aTarget);
+        }
     }
 
     void drag_drop::unregister_target(i_drag_drop_target& aTarget)
     {
-        throw std::logic_error("not yet implemented");
+        auto existing = std::find(iTargets.begin(), iTargets.end(), &aTarget);
+        if (existing != iTargets.end())
+        {
+            iTargets.erase(existing);
+            TargetUnregistered.trigger(aTarget);
+        }
+    }
+
+    bool drag_drop::is_target_for(i_drag_drop_object const& aObject) const
+    {
+        return find_target(aObject) != nullptr;
     }
 
     bool drag_drop::is_target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const
     {
-        throw std::logic_error("not yet implemented");
+        return find_target(aObject, aSurface, aPosition) != nullptr;
     }
 
-    i_drag_drop_target& drag_drop::target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition)
+    i_drag_drop_target& drag_drop::target_for(i_drag_drop_object const& aObject) const
     {
-        throw std::logic_error("not yet implemented");
+        auto existing = find_target(aObject);
+        if (existing != nullptr)
+            return *existing;
+        throw drag_drop_target_not_found();
+    }
+
+    i_drag_drop_target& drag_drop::target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const
+    {
+        auto existing = find_target(aObject, aSurface, aPosition);
+        if (existing != nullptr)
+            return *existing;
+        throw drag_drop_target_not_found();
+    }
+
+    i_drag_drop_target* drag_drop::find_target(i_drag_drop_object const& aObject) const
+    {
+        for (auto const& target : iTargets)
+            if (target->can_accept(aObject))
+                return target;
+        return nullptr;
+    }
+
+    i_drag_drop_target* drag_drop::find_target(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const
+    {
+        if (aSurface.is_window())
+        {
+            auto const& w = aSurface.as_surface_window().as_widget().get_widget_at(aPosition);
+            for (auto const& target : iTargets)
+                if (target->can_accept(aObject) &&
+                    target->is_widget() &&
+                    target->as_widget().same_surface(w) &&
+                    (&target->as_widget() == &w || w.is_ancestor_of(target->as_widget())))
+                    return target;
+            return nullptr;
+        }
+        return find_target(aObject);
     }
 }

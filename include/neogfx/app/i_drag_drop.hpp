@@ -52,12 +52,13 @@ namespace neogfx
         virtual void end_drag_drop() = 0;
     };
 
+    struct drag_drop_target_not_a_widget : std::logic_error { drag_drop_target_not_a_widget() : std::logic_error{ "neogfx::drag_drop_target_not_a_widget" } {} };
+
     class i_drag_drop_target
     {
     public:
         declare_event(object_dropped, i_drag_drop_object const&)
     public:
-        struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error{ "neogfx::i_drag_drop_target::not_a_widget" } {} };
     public:
         virtual ~i_drag_drop_target() = default;
     public:
@@ -68,6 +69,8 @@ namespace neogfx
         virtual i_widget const& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
     };
+
+    struct drag_drop_target_not_found : std::logic_error { drag_drop_target_not_found() : std::logic_error{ "neogfx::drag_drop_target_not_found" } {} };
 
     class i_drag_drop : public i_service
     {
@@ -84,8 +87,10 @@ namespace neogfx
         virtual void register_target(i_drag_drop_target& aTarget) = 0;
         virtual void unregister_target(i_drag_drop_target& aTarget) = 0;
     public:
+        virtual bool is_target_for(i_drag_drop_object const& aObject) const = 0;
         virtual bool is_target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const = 0;
-        virtual i_drag_drop_target& target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) = 0;
+        virtual i_drag_drop_target& target_for(i_drag_drop_object const& aObject) const = 0;
+        virtual i_drag_drop_target& target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x393fd9c4, 0x6db8, 0x4c04, 0x87f6, { 0x39, 0x87, 0x6a, 0x30, 0x35, 0xd4 } }; return sIid; }
     };
