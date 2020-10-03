@@ -24,17 +24,6 @@
 
 namespace neogfx
 {
-    drag_drop_object::drag_drop_object(drag_drop_object_type aType) : 
-        iType{ aType }
-    {
-    }
-
-    drag_drop_object_type drag_drop_object::ddo_type() const
-    {
-        return iType;
-    }
-
-
     drag_drop_source::drag_drop_source()
     {
     }
@@ -59,14 +48,21 @@ namespace neogfx
     {
     }
 
-    bool drag_drop_target_impl::can_accept(i_drag_drop_object const& aOobject) const
+    bool drag_drop_target_impl::can_accept(i_drag_drop_object const& aObject) const
     {
-        throw std::logic_error("not yet implemented");
+        bool canAccept = false;
+        ObjectAcceptable.trigger(aObject, canAccept);
+        return canAccept;
     }
 
-    void drag_drop_target_impl::accept(i_drag_drop_object const& aOobject)
+    bool drag_drop_target_impl::accept(i_drag_drop_object const& aObject)
     {
-        throw std::logic_error("not yet implemented");
+        if (can_accept(aObject))
+        {
+            ObjectDropped.trigger(aObject);
+            return true;
+        }
+        return false;
     }
 
     bool drag_drop_target_impl::is_widget() const

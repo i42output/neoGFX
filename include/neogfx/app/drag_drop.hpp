@@ -20,18 +20,79 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/vector.hpp>
 #include <neogfx/app/i_drag_drop.hpp>
 
 namespace neogfx
 {
-    class drag_drop_object : public i_drag_drop_object
+    template <typename DragDropObjectInterface>
+    class drag_drop_object : public DragDropObjectInterface
+    {
+        typedef drag_drop_object<DragDropObjectInterface> self_type;
+    public:
+        typedef DragDropObjectInterface object_interface;
+    public:
+        drag_drop_object(drag_drop_object_type_id aType = object_interface::otid()) :
+            iType{ aType }
+        {
+        }
+    public:
+        drag_drop_object_type_id ddo_type() const override
+        {
+            return iType;
+        }
+    public:
+        bool can_render() const override
+        {
+            return false;
+        }
+        size render_extents() const override
+        {
+            return {};
+        }
+        void render(i_graphics_context& aGc, point const& aPosition = {}) const override
+        {
+        }
+    private:
+        drag_drop_object_type_id iType;
+    };
+
+    class drag_drop_file_list : public drag_drop_object<i_drag_drop_file_list>
     {
     public:
-        drag_drop_object(drag_drop_object_type  aType);
+        template <typename... Files>
+        drag_drop_file_list(Files&&... aFiles) :
+            iFilePaths{ std::forward<Files>(aFiles)... }
+        {
+        }
     public:
-        drag_drop_object_type ddo_type() const override;
+        neolib::vector<string> const& file_paths() const override
+        {
+            return iFilePaths;
+        }
     private:
-        drag_drop_object_type iType;
+        neolib::vector<string> iFilePaths;
+    };
+
+    class drag_drop_entity : public drag_drop_object<i_drag_drop_entity>
+    {
+    public:
+        drag_drop_entity(game::i_ecs const& aEcs, game::entity_id aEntity) :
+            iEcs{ aEcs }, iEntity{ aEntity }
+        {
+        }
+    public:
+        game::i_ecs const& ecs() const override
+        {
+            return iEcs;
+        }
+        game::entity_id entity() const override
+        {
+            return iEntity;
+        }
+    private:
+        game::i_ecs const& iEcs;
+        game::entity_id iEntity;
     };
 
     class drag_drop_source : public i_drag_drop_source
@@ -56,8 +117,8 @@ namespace neogfx
     public:
         drag_drop_target_impl();
     public:
-        bool can_accept(i_drag_drop_object const& aOobject) const override;
-        void accept(i_drag_drop_object const& aOobject) override;
+        bool can_accept(i_drag_drop_object const& aObject) const override;
+        bool accept(i_drag_drop_object const& aObject) override;
     public:
         bool is_widget() const override;
         i_widget const& as_widget() const override;

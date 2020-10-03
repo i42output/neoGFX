@@ -85,7 +85,7 @@ namespace neogfx
     public:
         app(const neolib::i_application_info& aAppInfo);
         template <typename... Args>
-        app(Args... aArgs) :
+        app(Args&&... aArgs) :
             app{ static_cast<const neolib::i_application_info&>(neolib::application_info{ std::forward<Args>(aArgs)... }) } {}
         ~app();
     public:
