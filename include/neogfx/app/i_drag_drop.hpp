@@ -26,17 +26,16 @@
 
 namespace neogfx::drag_drop
 {
-    namespace type
-    {
-        const uuid FileList = { 0xfaa77f8e, 0xfabc, 0x413c, 0xacdb, { 0x5b, 0xc1, 0x74, 0xc5, 0xd2, 0xbf } };
-    }
+    typedef uuid object_type;
+
+    const object_type FileList = { 0xfaa77f8e, 0xfabc, 0x413c, 0xacdb, { 0x5b, 0xc1, 0x74, 0xc5, 0xd2, 0xbf } };
 
     class i_object
     {
     public:
         virtual ~i_object() = default;
     public:
-        virtual uuid type() const = 0;
+        virtual object_type ddo_type() const = 0;
     };
 
     class i_source
@@ -68,7 +67,7 @@ namespace neogfx::drag_drop
         virtual i_widget& as_widget() = 0;
     };
 
-    class i_manager
+    class i_drag_drop
     {
     public:
         declare_event(source_registered, i_source&)
@@ -76,7 +75,7 @@ namespace neogfx::drag_drop
         declare_event(target_registered, i_target&)
         declare_event(target_unregistered, i_target&)
     public:
-        virtual ~i_manager() = default;
+        virtual ~i_drag_drop() = default;
     public:
         virtual void register_source(i_source& aSource) = 0;
         virtual void unregister_source(i_source& aSource) = 0;

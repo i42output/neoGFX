@@ -265,6 +265,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\clipboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\drag_drop.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\event_processing_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\file_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i18n.hpp" />
