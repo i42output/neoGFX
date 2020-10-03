@@ -22,41 +22,41 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_drag_drop.hpp>
 
-namespace neogfx::drag_drop
+namespace neogfx
 {
-    class object : public i_object
+    class drag_drop_object : public i_drag_drop_object
     {
     public:
-        object(object_type aType);
+        drag_drop_object(drag_drop_object_type  aType);
     public:
-        object_type ddo_type() const override;
+        drag_drop_object_type ddo_type() const override;
     private:
-        object_type iType;
+        drag_drop_object_type iType;
     };
 
-    class source : public i_source
+    class drag_drop_source : public i_drag_drop_source
     {
     public:
-        define_declared_event(DraggingObject, dragging_object, i_object const&)
-        define_declared_event(DraggingCancelled, dragging_cancelled, i_object const&)
-        define_declared_event(ObjectDropped, object_dropped, i_object const&)
+        define_declared_event(DraggingObject, dragging_object, i_drag_drop_object const&)
+        define_declared_event(DraggingCancelled, dragging_cancelled, i_drag_drop_object const&)
+        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
-        source();
+        drag_drop_source();
     public:
         bool drag_drop_active() const override;
         void start_drag_drop() override;
         void end_drag_drop() override;
     };
 
-    class target : public i_target
+    class drag_drop_target : public i_drag_drop_target
     {
     public:
-        define_declared_event(ObjectDropped, object_dropped, i_object const&)
+        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
-        target();
+        drag_drop_target();
     public:
-        bool can_accept(i_object const& aOobject) const override;
-        void accept(i_object const& aOobject) override;
+        bool can_accept(i_drag_drop_object const& aOobject) const override;
+        void accept(i_drag_drop_object const& aOobject) override;
     public:
         bool is_widget() const override;
         i_widget const& as_widget() const override;
@@ -66,19 +66,19 @@ namespace neogfx::drag_drop
     class drag_drop : public i_drag_drop
     {
     public:
-        declare_event(source_registered, i_source&)
-        declare_event(source_unregistered, i_source&)
-        declare_event(target_registered, i_target&)
-        declare_event(target_unregistered, i_target&)
+        define_declared_event(SourceRegistered, source_registered, i_drag_drop_source&)
+        define_declared_event(SourceUnregistered, source_unregistered, i_drag_drop_source&)
+        define_declared_event(TargetRegistered, target_registered, i_drag_drop_target&)
+        define_declared_event(TargetUnregistered, target_unregistered, i_drag_drop_target&)
     public:
         drag_drop();
     public:
-        void register_source(i_source& aSource) override;
-        void unregister_source(i_source& aSource) override;
-        void register_target(i_target& aTarget) override;
-        void unregister_target(i_target& aTarget) override;
+        void register_source(i_drag_drop_source& aSource) override;
+        void unregister_source(i_drag_drop_source& aSource) override;
+        void register_target(i_drag_drop_target& aTarget) override;
+        void unregister_target(i_drag_drop_target& aTarget) override;
     public:
-        bool is_target_at(i_object const& aObject, i_surface const& aSurface, point const& aPosition) const override;
-        i_target& target_at(i_object const& aObject, i_surface const& aSurface, point const& aPosition) override;
+        bool is_target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const override;
+        i_drag_drop_target& target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) override;
     };
 }

@@ -616,6 +616,7 @@
     <ClCompile Include="..\..\..\src\app\action.cpp" />
     <ClCompile Include="..\..\..\src\app\app.cpp" />
     <ClCompile Include="..\..\..\src\app\clipboard.cpp" />
+    <ClCompile Include="..\..\..\src\app\drag_drop.cpp" />
     <ClCompile Include="..\..\..\src\app\event_processing_context.cpp" />
     <ClCompile Include="..\..\..\src\app\file_dialog.cpp" />
     <ClCompile Include="..\..\..\src\app\i18n.cpp" />

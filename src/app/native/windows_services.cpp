@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/clipboard.hpp>
+#include <neogfx/app/drag_drop.hpp>
 #include "windows_basic_services.hpp"
 #include "../../hid/native/windows_hid_devices.hpp"
 #include "../../hid/native/windows_game_controllers.hpp"
@@ -88,4 +89,10 @@ template<> neogfx::i_clipboard& services::start_service<neogfx::i_clipboard>()
 {
     static neogfx::clipboard sClipboard{ service<neogfx::i_basic_services>().system_clipboard() };
     return sClipboard;
+}
+
+template<> neogfx::i_drag_drop& services::start_service<neogfx::i_drag_drop>()
+{
+    static neogfx::drag_drop sDragDrop{};
+    return sDragDrop;
 }
