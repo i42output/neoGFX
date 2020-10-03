@@ -52,6 +52,7 @@ namespace neogfx
         color palette_color(color_role aColorRole) const override;
     protected:
         neogfx::focus_policy focus_policy() const override;
+        void focus_gained(focus_reason aFocusReason) override;
     private:
         void update_textures();
         void update_state();

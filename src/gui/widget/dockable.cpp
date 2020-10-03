@@ -96,6 +96,13 @@ namespace neogfx
         return *iDockedWidget;
     }
 
+    void dockable::focus_gained(focus_reason aFocusReason)
+    {
+        base_type::focus_gained(aFocusReason);
+        if (has_focus())
+            docked_widget().set_focus(aFocusReason);
+    }
+
     color dockable::frame_color() const
     {
         return has_frame_color() ? base_type::frame_color() : base_type::frame_color().shaded(0x08);

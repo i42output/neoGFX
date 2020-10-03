@@ -50,6 +50,8 @@ namespace neogfx
         const i_widget& docked_widget() const override;
         i_widget& docked_widget() override;
     protected:
+        void focus_gained(focus_reason aFocusReason) override;
+    protected:
         color frame_color() const override;
     public:
         template <typename WidgetType>

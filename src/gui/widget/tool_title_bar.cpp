@@ -124,11 +124,18 @@ namespace neogfx
         return neogfx::focus_policy::ClickFocus;
     }
 
+    void tool_title_bar::focus_gained(focus_reason aFocusReason)
+    {
+        widget::focus_gained(aFocusReason);
+        if (has_focus())
+            iContainer.as_widget().set_focus(aFocusReason);
+    }
+
     void tool_title_bar::update_textures()
     {
         auto ink = service<i_app>().current_style().palette().color(color_role::Text);
         auto paper = background_color();
-        const char* sCloseTexturePattern
+        static std::string const sCloseTexturePattern
         {
             "[8,8]"
             "{0,paper}"
@@ -144,7 +151,7 @@ namespace neogfx
             "21200212"
             "12000021"
         };
-        const char* sCloseHighDpiTexturePattern
+        static std::string const sCloseHighDpiTexturePattern
         {
             "[16,16]"
             "{0,paper}"
