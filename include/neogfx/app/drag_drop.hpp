@@ -48,12 +48,13 @@ namespace neogfx
         void end_drag_drop() override;
     };
 
-    class drag_drop_target : public i_drag_drop_target
+    class drag_drop_target_impl : public i_drag_drop_target
     {
     public:
+        define_declared_event(ObjectAcceptable, object_acceptable, i_drag_drop_object const&, bool&)
         define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
-        drag_drop_target();
+        drag_drop_target_impl();
     public:
         bool can_accept(i_drag_drop_object const& aOobject) const override;
         void accept(i_drag_drop_object const& aOobject) override;
@@ -61,6 +62,30 @@ namespace neogfx
         bool is_widget() const override;
         i_widget const& as_widget() const override;
         i_widget& as_widget() override;
+    };
+
+    template <typename Base>
+    class drag_drop_target : public Base, public drag_drop_target_impl
+    {
+        typedef Base base_type;
+    public:
+        using base_type::base_type;
+    public:
+        bool is_widget() const
+        {
+            return std::is_base_of_v<i_widget, base_type>;
+        }
+        i_widget const& as_widget() const override
+        {
+            if constexpr (std::is_base_of_v<i_widget, base_type>)
+                return *this;
+            else
+                throw drag_drop_target_not_a_widget();
+        }
+        i_widget& as_widget() override
+        {
+            return const_cast<i_widget&>(to_const(*this).as_widget());
+        }
     };
 
     class drag_drop : public i_drag_drop

@@ -23,6 +23,7 @@
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/drag_drop.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
@@ -129,7 +130,7 @@ namespace neogfx
         i_window& iSurrogate;
     };
 
-    class window::client : public framed_scrollable_widget
+    class window::client : public drag_drop_target<framed_scrollable_widget>
     {
     public:
         client(neogfx::scrollbar_style aScrollbarStyle);
@@ -145,7 +146,7 @@ namespace neogfx
     };
 
     window::client::client(neogfx::scrollbar_style aScrollbarStyle) :
-        framed_scrollable_widget{ aScrollbarStyle, frame_style::NoFrame },
+        drag_drop_target<framed_scrollable_widget>{ aScrollbarStyle, frame_style::NoFrame },
         iLayout{ *this }
     {
         set_padding(neogfx::padding{});
@@ -1194,6 +1195,18 @@ namespace neogfx
     i_widget& window::as_widget()
     {
         return *this;
+    }
+
+    const i_drag_drop_target& window::default_drag_drop_target() const
+    {
+        // dynamic_cast? Something, Something, Something, Dark Side
+        return dynamic_cast<const i_drag_drop_target&>(client_widget());
+    }
+
+    i_drag_drop_target& window::default_drag_drop_target()
+    {
+        // dynamic_cast? Something, Something, Something, Dark Side
+        return dynamic_cast<i_drag_drop_target&>(client_widget());
     }
 
     void window::mouse_entered(const point& aPosition)

@@ -208,6 +208,9 @@ namespace neogfx
         bool is_widget() const override;
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
+    public:
+        const i_drag_drop_target& default_drag_drop_target() const override;
+        i_drag_drop_target& default_drag_drop_target() override;
     private:
         void init();
     private:

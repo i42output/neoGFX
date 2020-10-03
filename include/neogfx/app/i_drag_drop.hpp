@@ -57,8 +57,8 @@ namespace neogfx
     class i_drag_drop_target
     {
     public:
+        declare_event(object_acceptable, i_drag_drop_object const&, bool&)
         declare_event(object_dropped, i_drag_drop_object const&)
-    public:
     public:
         virtual ~i_drag_drop_target() = default;
     public:

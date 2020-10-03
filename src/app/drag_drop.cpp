@@ -55,31 +55,31 @@ namespace neogfx
     }
 
 
-    drag_drop_target::drag_drop_target()
+    drag_drop_target_impl::drag_drop_target_impl()
     {
     }
 
-    bool drag_drop_target::can_accept(i_drag_drop_object const& aOobject) const
-    {
-        throw std::logic_error("not yet implemented");
-    }
-
-    void drag_drop_target::accept(i_drag_drop_object const& aOobject)
+    bool drag_drop_target_impl::can_accept(i_drag_drop_object const& aOobject) const
     {
         throw std::logic_error("not yet implemented");
     }
 
-    bool drag_drop_target::is_widget() const
+    void drag_drop_target_impl::accept(i_drag_drop_object const& aOobject)
+    {
+        throw std::logic_error("not yet implemented");
+    }
+
+    bool drag_drop_target_impl::is_widget() const
     {
         return false;
     }
 
-    i_widget const& drag_drop_target::as_widget() const
+    i_widget const& drag_drop_target_impl::as_widget() const
     {
         throw drag_drop_target_not_a_widget();
     }
 
-    i_widget& drag_drop_target::as_widget()
+    i_widget& drag_drop_target_impl::as_widget()
     {
         throw drag_drop_target_not_a_widget();
     }

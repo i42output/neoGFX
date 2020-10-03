@@ -36,6 +36,7 @@ namespace neogfx
     class i_nested_window;
     class i_nest;
     class i_widget;
+    class i_drag_drop_target;
 
     class i_window : public virtual i_standard_layout_container
     {
@@ -162,6 +163,9 @@ namespace neogfx
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
+    public:
+        virtual const i_drag_drop_target& default_drag_drop_target() const = 0;
+        virtual i_drag_drop_target& default_drag_drop_target() = 0;
         // helpers
     public:
         const i_surface_window* find_surface() const
