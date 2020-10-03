@@ -172,7 +172,7 @@ namespace neogfx
                 if (target->can_accept(aObject) &&
                     target->is_widget() &&
                     target->as_widget().same_surface(w) &&
-                    (&target->as_widget() == &w || w.is_ancestor_of(target->as_widget())))
+                    (&target->as_widget() == &w || target->as_widget().is_ancestor_of(w)))
                     return target;
             return nullptr;
         }
