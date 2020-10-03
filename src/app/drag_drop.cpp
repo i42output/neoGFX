@@ -24,23 +24,67 @@
 
 namespace neogfx
 {
-    drag_drop_source::drag_drop_source()
+    drag_drop_source_impl::drag_drop_source_impl() : 
+        iObject{ nullptr },
+        iSourceWidget{ nullptr }
     {
     }
 
-    bool drag_drop_source::drag_drop_active() const
+    bool drag_drop_source_impl::drag_drop_active() const
     {
-        throw std::logic_error("not yet implemented");
+        return iObject != nullptr;
     }
 
-    void drag_drop_source::start_drag_drop()
+    void drag_drop_source_impl::start_drag_drop(i_drag_drop_object const& aObject)
     {
-        throw std::logic_error("not yet implemented");
+        if (iObject != nullptr)
+            throw drag_drop_already_active();
+        iObject = &aObject;
+        DraggingObject.trigger(*iObject);
     }
 
-    void drag_drop_source::end_drag_drop()
+    void drag_drop_source_impl::cancel_drag_drop()
     {
-        throw std::logic_error("not yet implemented");
+        if (iObject == nullptr)
+            throw drag_drop_not_active();
+        auto object = iObject;
+        iObject = nullptr;
+        DraggingCancelled.trigger(*object);
+    }
+
+    void drag_drop_source_impl::end_drag_drop()
+    {
+        if (iObject == nullptr)
+            throw drag_drop_not_active();
+        auto object = iObject;
+        iObject = nullptr;
+        ObjectDropped.trigger(*object);
+    }
+
+    void drag_drop_source_impl::monitor_drag_drop_events(i_widget& aWidget)
+    {
+        iSink = aWidget.mouse_event([this](const neogfx::mouse_event& aEvent)
+        {
+            if (aEvent.type() == mouse_event_type::ButtonClicked)
+            {
+                // todo
+            }
+        });
+    }
+
+    void drag_drop_source_impl::stop_monitoring_drag_drop_events()
+    {
+        iSink.clear();
+    }
+
+    bool drag_drop_source_impl::is_drag_drop_object(point const& aPosition) const
+    {
+        return false;
+    }
+
+    i_drag_drop_object const* drag_drop_source_impl::drag_drop_object(point const& aPosition)
+    {
+        return nullptr;
     }
 
 

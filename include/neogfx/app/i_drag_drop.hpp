@@ -73,6 +73,9 @@ namespace neogfx
         }
     };
 
+    struct drag_drop_already_active : std::logic_error { drag_drop_already_active() : std::logic_error{ "neogfx::drag_drop_already_active" } {} };
+    struct drag_drop_not_active : std::logic_error { drag_drop_not_active() : std::logic_error{ "neogfx::drag_drop_not_active" } {} };
+
     class i_drag_drop_source
     {
     public:
@@ -83,8 +86,12 @@ namespace neogfx
         virtual ~i_drag_drop_source() = default;
     public:
         virtual bool drag_drop_active() const = 0;
-        virtual void start_drag_drop() = 0;
+        virtual void start_drag_drop(i_drag_drop_object const& aObject) = 0;
+        virtual void cancel_drag_drop() = 0;
         virtual void end_drag_drop() = 0;
+    public:
+        virtual void monitor_drag_drop_events(i_widget& aWidget) = 0;
+        virtual void stop_monitoring_drag_drop_events() = 0;
     };
 
     struct drag_drop_target_not_a_widget : std::logic_error { drag_drop_target_not_a_widget() : std::logic_error{ "neogfx::drag_drop_target_not_a_widget" } {} };

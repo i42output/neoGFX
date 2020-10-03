@@ -95,18 +95,43 @@ namespace neogfx
         game::entity_id iEntity;
     };
 
-    class drag_drop_source : public i_drag_drop_source
+    class drag_drop_source_impl : public i_drag_drop_source
     {
     public:
         define_declared_event(DraggingObject, dragging_object, i_drag_drop_object const&)
         define_declared_event(DraggingCancelled, dragging_cancelled, i_drag_drop_object const&)
         define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
-        drag_drop_source();
+        drag_drop_source_impl();
     public:
         bool drag_drop_active() const override;
-        void start_drag_drop() override;
+        void start_drag_drop(i_drag_drop_object const& aObject) override;
+        void cancel_drag_drop() override;
         void end_drag_drop() override;
+    public:
+        void monitor_drag_drop_events(i_widget& aWidget) override;
+        void stop_monitoring_drag_drop_events() override;
+    protected:
+        virtual bool is_drag_drop_object(point const& aPosition) const;
+        virtual i_drag_drop_object const* drag_drop_object(point const& aPosition);
+    private:
+        i_drag_drop_object const* iObject;
+        i_widget* iSourceWidget;
+        sink iSink;
+    };
+
+    template <typename Base>
+    class drag_drop_source : public Base, public drag_drop_source_impl
+    {
+        typedef Base base_type;
+    public:
+        template <typename... Args>
+        drag_drop_source(Args&&... aArgs) :
+            base_type{ std::forward<Args>(aArgs)... }
+        {
+            if constexpr (std::is_base_of_v<i_widget, base_type>)
+                base_type::monitor_drag_drop_events(*this);
+        }
     };
 
     class drag_drop_target_impl : public i_drag_drop_target
