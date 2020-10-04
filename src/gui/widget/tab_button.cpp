@@ -336,23 +336,27 @@ namespace neogfx
         return push_button::perform_hover_animation() && !is_selected();
     }
 
-    size tab_button::minimum_size(const optional_size& aAvailableSpace) const
+    padding tab_button::padding() const
     {
-        auto result = push_button::minimum_size(aAvailableSpace);
-        if (has_minimum_size())
+        neogfx::padding result = push_button::padding();
+        if (has_padding())
             return result;
         switch (container().style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
+            result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, 0.5_mm, is_selected() ? 1.0_mm : 0.5_mm });
+            break;
         case tab_container_style::TabAlignmentBottom:
-            result += size{ 2.0_mm, is_selected() ? 1.0_mm : 0.0_mm };
+            result += ceil_rasterized(neogfx::padding{ 0.5_mm, is_selected() ? 1.0_mm : 0.5_mm, 0.5_mm, 0.5_mm });
             break;
         case tab_container_style::TabAlignmentLeft:
+            result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, is_selected() ? 1.0_mm : 0.5_mm, 0.5_mm });
+            break;
         case tab_container_style::TabAlignmentRight:
-            result += size{ is_selected() ? 1.0_mm : 0.0_mm, 2.0_mm };
+            result += ceil_rasterized(neogfx::padding{ is_selected() ? 1.0_mm : 0.5_mm, 0.5_mm, 0.5_mm, 0.5_mm });
             break;
         }
-        return ceil_rasterized(result);
+        return result;
     }
 
     void tab_button::handle_clicked()

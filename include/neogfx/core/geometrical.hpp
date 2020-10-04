@@ -551,6 +551,7 @@ namespace neogfx
         basic_box_areas(dimension_type all) : left(all), top(all), right(all), bottom(all) {}
         basic_box_areas(dimension_type left, dimension_type top, dimension_type right, dimension_type bottom) : left(left), top(top), right(right), bottom(bottom) {}
         basic_box_areas(dimension_type leftRight, dimension_type topBottom) : left(leftRight), top(topBottom), right(leftRight), bottom(topBottom) {}
+        basic_box_areas(const size_type& aDimensions) : basic_box_areas{ aDimensions.cx, aDimensions.cy } {};
         template <typename DimensionType2>
         basic_box_areas(const basic_box_areas<DimensionType2>& other) :
             left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}

@@ -750,6 +750,12 @@ namespace neogfx
     }
 
     template <typename T>
+    inline basic_box_areas<T> ceil_rasterized(const basic_box_areas<T>& aAreas)
+    {
+        return basic_box_areas<T>{ ceil_rasterized(aAreas.left), ceil_rasterized(aAreas.top), ceil_rasterized(aAreas.right), ceil_rasterized(aAreas.bottom) };
+    }
+
+    template <typename T>
     inline basic_rect<T> ceil_rasterized(const basic_rect<T>& aRect)
     {
         return basic_rect<T>{ ceil_rasterized(aRect.position()), ceil_rasterized(aRect.extents()) };
