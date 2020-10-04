@@ -114,6 +114,10 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
     class i_layout_item;
-    extern i_layout_item* debug;
+    namespace debug
+    {
+        extern i_layout_item* layoutItem;
+        extern bool renderGeometryText;
+    }
 #endif // NEOGFX_DEBUG
 }

@@ -58,8 +58,14 @@ namespace neogfx
             if (has_minimum_size())
                 return result;
             double const radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
-            result = result.max(size{ std::ceil(radius * 2.0) });
+            result = result.max(size{ std::ceil(radius * 2.0) }) + padding().size();
             return result;
+        }
+        size maximum_size(const optional_size& aAvailableSpace) const
+        {
+            if (has_maximum_size())
+                return push_button::maximum_size(aAvailableSpace);
+            return minimum_size(aAvailableSpace);
         }
     protected:
         void paint(i_graphics_context& aGc) const

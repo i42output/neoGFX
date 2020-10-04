@@ -77,7 +77,7 @@ namespace neogfx
         if (!enabled())
             return;
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << "vertical_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (has_layout_owner())

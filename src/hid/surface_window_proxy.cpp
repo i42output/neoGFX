@@ -331,7 +331,7 @@ namespace neogfx
 
     void surface_window_proxy::debug(bool aEnableDebug)
     {
-        native_window().debug(aEnableDebug);
+        native_window().debug::layoutItem(aEnableDebug);
     }
 
     bool surface_window_proxy::has_clicked_widget() const

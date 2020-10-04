@@ -1176,8 +1176,8 @@ namespace neogfx
             for (auto entity : meshRenderers.entities())
             {
 #ifndef NDEBUG
-                if (infos.entity_record(entity).debug)
-                    std::cerr << "Rendering debug entity..." << std::endl;
+                if (infos.entity_record(entity).debug::layoutItem)
+                    std::cerr << "Rendering debug::layoutItem entity..." << std::endl;
 #endif
                 auto const& info = infos.entity_record_no_lock(entity);
                 if (info.destroyed)
@@ -1844,8 +1844,8 @@ namespace neogfx
             };
 #ifndef NDEBUG
             if (meshDrawable.entity != game::null_entity &&
-                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
-                std::cerr << "Adding debug entity drawable..." << std::endl;
+                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug::layoutItem)
+                std::cerr << "Adding debug::layoutItem entity drawable..." << std::endl;
 #endif
             if (!faces.empty())
                 add_item(meshRenderCache.meshVertexArrayIndices, mesh, material, faces);
@@ -1964,8 +1964,8 @@ namespace neogfx
 
 #ifndef NDEBUG
                 if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                    std::cerr << "Drawing debug entity (texture)..." << std::endl;
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
+                    std::cerr << "Drawing debug::layoutItem entity (texture)..." << std::endl;
 
 #endif
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
@@ -1979,8 +1979,8 @@ namespace neogfx
 
 #ifndef NDEBUG
                 if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                    std::cerr << "Drawing debug entity (non-texture)..." << std::endl;
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
+                    std::cerr << "Drawing debug::layoutItem entity (non-texture)..." << std::endl;
 
 #endif
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);

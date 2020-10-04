@@ -22,7 +22,11 @@
 #ifdef NEOGFX_DEBUG
 namespace neogfx
 {
-    i_layout_item* debug;
+    namespace debug
+    {
+        i_layout_item* layoutItem;
+        bool renderGeometryText;
+    }
 }
 #endif // NEOGFX_DEBUG
 

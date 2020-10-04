@@ -49,6 +49,8 @@ namespace neogfx
         typedef Layout layout_type;
         typedef horizontal_layout major_layout;
         typedef vertical_layout minor_layout;
+        static const bool is_column_major = true;
+        static const bool is_row_major = false;
         static const neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
         static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
         static const point::coordinate_type& x(const point& aPoint) { return aPoint.x; }
@@ -71,6 +73,8 @@ namespace neogfx
         typedef Layout layout_type;
         typedef vertical_layout major_layout;
         typedef horizontal_layout minor_layout;
+        static const bool is_column_major = false;
+        static const bool is_row_major = true;
         static const neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
         static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
         static const point::coordinate_type& x(const point& aPoint) { return aPoint.y; }
@@ -132,7 +136,7 @@ namespace neogfx
     size layout::do_minimum_size(const optional_size& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
 #endif // NEOGFX_DEBUG
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
@@ -166,7 +170,7 @@ namespace neogfx
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
         }
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -176,7 +180,7 @@ namespace neogfx
     size layout::do_maximum_size(const optional_size& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
 #endif // NEOGFX_DEBUG
         size result;
@@ -236,7 +240,7 @@ namespace neogfx
                 AxisPolicy::cy(result) = size::max_dimension();
         }
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -246,7 +250,7 @@ namespace neogfx
     void layout::do_layout_items(const point& aPosition, const size& aSize)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         set_position(aPosition);
@@ -270,7 +274,7 @@ namespace neogfx
             if (!item.visible() && !ignore_visibility())
                 continue;
 #ifdef NEOGFX_DEBUG
-            if (debug == &item.subject())
+            if (debug::layoutItem == &item.subject())
                 std::cerr << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
             auto& disposition = item.proxy_for_layout().cached_disposition();
@@ -307,7 +311,7 @@ namespace neogfx
                 if (disposition != layout_item_disposition::Unknown && disposition != layout_item_disposition::Weighted)
                     continue;
 #ifdef NEOGFX_DEBUG
-                if (debug == &item.subject())
+                if (debug::layoutItem == &item.subject())
                     std::cerr << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
                 auto const minSize = AxisPolicy::cx(item.minimum_size(availableSize));
@@ -351,12 +355,18 @@ namespace neogfx
         neolib::bresenham_counter<int32_t> bits(bitsLeft, itemsUsingLeftover);
         uint32_t previousBit = 0;
         point nextPos = aPosition + padding().top_left();
+        bool addSpace = false;
         for (auto& item : *this)
         {
             if (!item.visible() && !ignore_visibility())
                 continue;
+            if (addSpace)
+            {
+                addSpace = false;
+                AxisPolicy::x(nextPos) += AxisPolicy::cx(spacing());
+            }
 #ifdef NEOGFX_DEBUG
-            if (debug == &item.subject())
+            if (debug::layoutItem == &item.subject())
                 std::cerr << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
             auto const itemMinSize = item.minimum_size(availableSize);
@@ -391,8 +401,10 @@ namespace neogfx
             case alignment::Bottom:
                 AxisPolicy::y(alignmentAdjust) = AxisPolicy::cy(availableSize) - AxisPolicy::cy(s);
                 break;
-            case alignment::Center:
             case alignment::VCenter:
+                AxisPolicy::y(alignmentAdjust) = std::ceil((AxisPolicy::cy(availableSize) - AxisPolicy::cy(s)) / 2.0);
+                break;
+            case alignment::Center:
                 AxisPolicy::y(alignmentAdjust) = std::ceil((AxisPolicy::cy(availableSize) - AxisPolicy::cy(s)) / 2.0);
                 break;
             }
@@ -403,7 +415,7 @@ namespace neogfx
                 continue;
             AxisPolicy::x(nextPos) += AxisPolicy::cx(s);
             if (!item.is_spacer() || iAlwaysUseSpacing)
-                AxisPolicy::x(nextPos) += AxisPolicy::cx(spacing());
+                addSpace = true;
         }
         point lastPos = aPosition + aSize;
         lastPos.x -= padding().right;
@@ -427,11 +439,14 @@ namespace neogfx
                 AxisPolicy::cx(adjust) = std::floor((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
                 break;
             }
-            for (auto& item : *this)
+            if (adjust != size{})
             {
-                if (!item.visible() && !ignore_visibility())
-                    continue;
-                item.set_position(item.position() + adjust);
+                for (auto& item : *this)
+                {
+                    if (!item.visible() && !ignore_visibility())
+                        continue;
+                    item.layout_as(item.position() + adjust, item.extents());
+                }
             }
         }
     }

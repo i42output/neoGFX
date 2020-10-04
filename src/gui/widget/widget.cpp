@@ -711,6 +711,10 @@ namespace neogfx
 
     void widget::move(const point& aPosition)
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            std::cerr << "widget::move(" << aPosition << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         if (Position != units_converter(*this).to_device_units(aPosition))
             Position.assign(units_converter(*this).to_device_units(aPosition), false);
     }
@@ -748,7 +752,7 @@ namespace neogfx
     void widget::resize(const size& aSize)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << "widget::resize(" << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (Size != units_converter(*this).to_device_units(aSize))
@@ -823,7 +827,7 @@ namespace neogfx
     size_policy widget::size_policy() const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
 #endif // NEOGFX_DEBUG
         if (has_size_policy())
@@ -837,7 +841,7 @@ namespace neogfx
     size widget::minimum_size(const optional_size& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         size result;
@@ -854,7 +858,7 @@ namespace neogfx
         else
             result = padding().size();
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -863,7 +867,7 @@ namespace neogfx
     size widget::maximum_size(const optional_size& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         size result;
@@ -886,7 +890,7 @@ namespace neogfx
         if (size_policy().vertical_size_policy() == size_constraint::Maximum)
             result.cy = size::max_size().cy;
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -901,7 +905,7 @@ namespace neogfx
     void widget::layout_as(const point& aPosition, const size& aSize)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         move(aPosition);
@@ -914,7 +918,7 @@ namespace neogfx
     bool widget::update(const rect& aUpdateRect)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::update(" << aUpdateRect << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (!can_update())
@@ -973,7 +977,7 @@ namespace neogfx
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -1005,7 +1009,7 @@ namespace neogfx
             aGc.set_origin(origin());
 
 #ifdef NEOGFX_DEBUG
-            if (debug == this)
+            if (debug::layoutItem == this)
                 std::cerr << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -1061,14 +1065,15 @@ namespace neogfx
     void widget::paint_non_client_after(i_graphics_context& aGc) const
     {
 #ifdef NEOGFX_DEBUG
-        // todo: move to debug function/service
-        if (debug == this || debug != nullptr && has_layout() && debug->is_layout() &&
-            (debug == &layout() || static_cast<i_layout const*>(debug)->is_descendent_of(layout())))
+        // todo: move to debug::layoutItem function/service
+        if (debug::layoutItem == this || debug::layoutItem != nullptr && has_layout() && debug::layoutItem->is_layout() &&
+            (debug::layoutItem == &layout() || static_cast<i_layout const*>(debug::layoutItem)->is_descendent_of(layout())))
         {
             neogfx::font debugFont1 = service<i_app>().current_style().font().with_size(16);
             neogfx::font debugFont2 = service<i_app>().current_style().font().with_size(8);
+            if (debug::renderGeometryText)
             {
-                if (debug == this)
+                if (debug::layoutItem == this)
                 {
                     aGc.draw_text(position(), typeid(*this).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                     std::ostringstream oss;
@@ -1077,34 +1082,40 @@ namespace neogfx
                     oss << " fixsize: " << (has_fixed_size() ? fixed_size() : optional_size{}) << " weight: " << weight() << " extents: " << extents();
                     aGc.draw_text(position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                 }
-                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::White, 3.0 });
-                aGc.line_stipple_on(1.0, 0x5555);
-                aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::Green, 3.0 });
-                aGc.line_stipple_off();
             }
-            if (debug != this || has_layout())
+            aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::White, 3.0 });
+            aGc.line_stipple_on(1.0, 0x5555);
+            aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::Green, 3.0 });
+            aGc.line_stipple_off();
+            if (debug::layoutItem != this || has_layout())
             {
-                i_layout const& debugLayout = (debug == this ? layout() : *static_cast<i_layout const*>(debug));
-                if (debug != this)
+                i_layout const& debugLayout = (debug::layoutItem == this ? layout() : *static_cast<i_layout const*>(debug::layoutItem));
+                if (debug::renderGeometryText)
                 {
-                    aGc.draw_text(debugLayout.position(), typeid(debugLayout).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
-                    std::ostringstream oss;
-                    oss << "sizepol: " << debugLayout.size_policy();
-                    oss << " minsize: " << debugLayout.minimum_size() << " maxsize: " << debugLayout.maximum_size();
-                    oss << " fixsize: " << (debugLayout.has_fixed_size() ? debugLayout.fixed_size() : optional_size{}) << " weight: " << debugLayout.weight() << " extents: " << debugLayout.extents();
-                    aGc.draw_text(debugLayout.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    if (debug::layoutItem != this)
+                    {
+                        aGc.draw_text(debugLayout.position(), typeid(debugLayout).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                        std::ostringstream oss;
+                        oss << "sizepol: " << debugLayout.size_policy();
+                        oss << " minsize: " << debugLayout.minimum_size() << " maxsize: " << debugLayout.maximum_size();
+                        oss << " fixsize: " << (debugLayout.has_fixed_size() ? debugLayout.fixed_size() : optional_size{}) << " weight: " << debugLayout.weight() << " extents: " << debugLayout.extents();
+                        aGc.draw_text(debugLayout.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    }
                 }
                 for (layout_item_index itemIndex = 0; itemIndex < debugLayout.count(); ++itemIndex)
                 {
                     auto const& item = debugLayout.item_at(itemIndex);
-                    std::string text = typeid(item).name();
-                    auto* l = &item;
-                    while (l->has_parent_layout())
+                    if (debug::renderGeometryText)
                     {
-                        l = &l->parent_layout();
-                        text = typeid(*l).name() + " > "_s + text;
+                        std::string text = typeid(item).name();
+                        auto* l = &item;
+                        while (l->has_parent_layout())
+                        {
+                            l = &l->parent_layout();
+                            text = typeid(*l).name() + " > "_s + text;
+                        }
+                        aGc.draw_text(item.position(), text, debugFont2, text_appearance{ color::White.with_alpha(0.5), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.5), 2.0 } });
                     }
-                    aGc.draw_text(item.position(), text, debugFont2, text_appearance{ color::White.with_alpha(0.5), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.5), 2.0 } });
                     aGc.draw_rect(rect{ item.position(), item.extents() }, color::White.with_alpha(0.5));
                     aGc.line_stipple_on(1.0, 0x5555);
                     aGc.draw_rect(rect{ item.position(), item.extents() }, color::Black.with_alpha(0.5));
@@ -1112,7 +1123,7 @@ namespace neogfx
                 }
                 aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, color::White);
                 aGc.line_stipple_on(1.0, 0x5555);
-                aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, debug == &layout() ? color::Blue : color::Purple);
+                aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, debug::layoutItem == &layout() ? color::Blue : color::Purple);
                 aGc.line_stipple_off();
             }
         }

@@ -324,7 +324,7 @@ namespace neogfx
         if (!enabled())
             return;
 #ifdef NEOGFX_DEBUG
-        if (debug == this)
+        if (debug::layoutItem == this)
             std::cerr << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (has_layout_owner())
@@ -343,10 +343,16 @@ namespace neogfx
         iRowLayout.layout_items(availablePos, availableSize);
         std::vector<dimension> maxRowHeight(iDimensions.cy);
         std::vector<dimension> maxColWidth(iDimensions.cx);
+        bool first = true;
         for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
         {
             if (!is_row_visible(row))
                 continue;
+            if (first)
+            {
+                first = false;
+                availablePos.y = row_layout(row).position().y;
+            }
             for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
             {
                 if (!is_column_visible(col))

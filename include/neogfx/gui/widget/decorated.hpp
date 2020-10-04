@@ -294,7 +294,7 @@ namespace neogfx
         widget_part part(const point& aPosition) const override
         {
 #ifdef NEOGFX_DEBUG
-            if (debug == this)
+            if (debug::layoutItem == this)
                 std::cerr << "decorated<>::part(...) --> ";
 #endif // NEOGFX_DEBUG
             auto result = widget_type::part(aPosition);
@@ -340,7 +340,7 @@ namespace neogfx
                 }
             }
 #ifdef NEOGFX_DEBUG
-            if (debug == this)
+            if (debug::layoutItem == this)
                 std::cerr << result.part << std::endl;
 #endif // NEOGFX_DEBUG
             return result;
@@ -554,7 +554,7 @@ namespace neogfx
                 if (newSize != currentSize)
                 {                
 #ifdef NEOGFX_DEBUG
-                    if (debug == this)
+                    if (debug::layoutItem == this)
                         std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
 #endif // NEOGFX_DEBUG
                     resizingContext.set_fixed_size(newSize, false);

@@ -95,7 +95,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override
         {
 #ifdef NEOGFX_DEBUG
-            if (debug == this)
+            if (debug::layoutItem == this)
                 std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
 #endif // NEOGFX_DEBUG
             if (SizePolicy != std::nullopt)
@@ -111,7 +111,7 @@ namespace neogfx
             if (SizePolicy != aSizePolicy)
             {
 #ifdef NEOGFX_DEBUG
-                if (debug == this)
+                if (debug::layoutItem == this)
                     std::cerr << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << std::endl;
 #endif // NEOGFX_DEBUG
                 SizePolicy = aSizePolicy;
@@ -134,7 +134,7 @@ namespace neogfx
             if (Weight != aWeight)
             {
 #ifdef NEOGFX_DEBUG
-                if (debug == this)
+                if (debug::layoutItem == this)
                     std::cerr << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << std::endl;
 #endif // NEOGFX_DEBUG
                 Weight.assign(aWeight, aUpdateLayout);
@@ -161,7 +161,7 @@ namespace neogfx
             if (MinimumSize != newMinimumSize)
             {
 #ifdef NEOGFX_DEBUG
-                if (debug == this)
+                if (debug::layoutItem == this)
                     std::cerr << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
 #endif // NEOGFX_DEBUG
                 MinimumSize.assign(newMinimumSize, aUpdateLayout);
@@ -188,7 +188,7 @@ namespace neogfx
             if (MaximumSize != newMaximumSize)
             {
 #ifdef NEOGFX_DEBUG
-                if (debug == this)
+                if (debug::layoutItem == this)
                     std::cerr << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
 #endif // NEOGFX_DEBUG
                 MaximumSize.assign(newMaximumSize, aUpdateLayout);
@@ -212,7 +212,7 @@ namespace neogfx
             if (FixedSize != newFixedSize)
             {
 #ifdef NEOGFX_DEBUG
-                if (debug == this)
+                if (debug::layoutItem == this)
                     std::cerr << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << std::endl;
 #endif // NEOGFX_DEBUG
                 FixedSize.assign(newFixedSize, aUpdateLayout);
@@ -239,7 +239,7 @@ namespace neogfx
         void fix_weightings(bool aRecalculate = true) override
         {
 #ifdef NEOGFX_DEBUG
-            if (debug == this)
+            if (debug::layoutItem == this)
                 std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
 #endif // NEOGFX_DEBUG
             auto& self = as_layout_item();
@@ -253,7 +253,7 @@ namespace neogfx
                     item.set_weight(calculate_relative_weight(layout, item), false);
             }
 #ifdef NEOGFX_DEBUG
-            if (debug == this)
+            if (debug::layoutItem == this)
             {
                 std::cerr << typeid(*this).name() << "::fix_weightings: weightings: ";
                 bool first = true;
