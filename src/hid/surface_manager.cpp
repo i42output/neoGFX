@@ -22,6 +22,7 @@
 
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include "native/i_native_surface.hpp"
 #include "../gui/window/native/i_native_window.hpp"
 
@@ -146,6 +147,24 @@ namespace neogfx
         for (auto& s : iSurfaces)
             s->render_surface();
         iRenderingSurfaces = false;
+    }
+
+    i_surface* surface_manager::locate_topmost_usable_surface(const point& aPosition)
+    {
+        for (auto& s : iSurfaces)
+        {
+            if (!s->is_window())
+                continue;
+            auto& w = s->as_surface_window().as_widget();
+            if (!w.visible())
+                continue;
+            if (!w.enabled())
+                continue;
+            // todo: overlapping surfaces
+            if (w.non_client_rect().contains(aPosition))
+                return s;
+        }
+        return nullptr;
     }
 
     void surface_manager::display_error_message(const std::string& aTitle, const std::string& aMessage) const

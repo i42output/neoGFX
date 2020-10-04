@@ -103,8 +103,10 @@ namespace neogfx
         define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
         drag_drop_source_impl();
+        ~drag_drop_source_impl();
     public:
         bool drag_drop_active() const override;
+        i_drag_drop_object const& object_being_dragged() const override;
         void start_drag_drop(i_drag_drop_object const& aObject) override;
         void cancel_drag_drop() override;
         void end_drag_drop() override;
@@ -112,12 +114,18 @@ namespace neogfx
         void monitor_drag_drop_events(i_widget& aWidget) override;
         void stop_monitoring_drag_drop_events() override;
     protected:
+        scalar drag_drop_trigger_distance() const;
+        void set_drag_drop_trigger_distance(scalar aDistance);
+    protected:
         virtual bool is_drag_drop_object(point const& aPosition) const;
         virtual i_drag_drop_object const* drag_drop_object(point const& aPosition);
     private:
+        void handle_drag_drop_event(i_widget& aWidget, const neogfx::mouse_event& aEvent);
+    private:
         i_drag_drop_object const* iObject;
-        i_widget* iSourceWidget;
         sink iSink;
+        std::optional<point> iTrackStart;
+        scalar iTriggerDistance = 8.0;
     };
 
     template <typename Base>
@@ -141,6 +149,7 @@ namespace neogfx
         define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
         drag_drop_target_impl();
+        ~drag_drop_target_impl();
     public:
         bool can_accept(i_drag_drop_object const& aObject) const override;
         bool accept(i_drag_drop_object const& aObject) override;
@@ -193,12 +202,12 @@ namespace neogfx
         void unregister_target(i_drag_drop_target& aTarget) override;
     public:
         bool is_target_for(i_drag_drop_object const& aObject) const override;
-        bool is_target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const override;
+        bool is_target_at(i_drag_drop_object const& aObject, point const& aPosition) const override;
         i_drag_drop_target& target_for(i_drag_drop_object const& aObject) const override;
-        i_drag_drop_target& target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const override;
+        i_drag_drop_target& target_at(i_drag_drop_object const& aObject, point const& aPosition) const override;
     private:
         i_drag_drop_target* find_target(i_drag_drop_object const& aObject) const;
-        i_drag_drop_target* find_target(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const;
+        i_drag_drop_target* find_target(i_drag_drop_object const& aObject, point const& aPosition) const;
     private:
         sources_t iSources;
         targets_t iTargets;

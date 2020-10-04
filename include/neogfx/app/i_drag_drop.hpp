@@ -86,6 +86,7 @@ namespace neogfx
         virtual ~i_drag_drop_source() = default;
     public:
         virtual bool drag_drop_active() const = 0;
+        virtual i_drag_drop_object const& object_being_dragged() const = 0;
         virtual void start_drag_drop(i_drag_drop_object const& aObject) = 0;
         virtual void cancel_drag_drop() = 0;
         virtual void end_drag_drop() = 0;
@@ -130,9 +131,9 @@ namespace neogfx
         virtual void unregister_target(i_drag_drop_target& aTarget) = 0;
     public:
         virtual bool is_target_for(i_drag_drop_object const& aObject) const = 0;
-        virtual bool is_target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const = 0;
+        virtual bool is_target_at(i_drag_drop_object const& aObject, point const& aPosition) const = 0;
         virtual i_drag_drop_target& target_for(i_drag_drop_object const& aObject) const = 0;
-        virtual i_drag_drop_target& target_at(i_drag_drop_object const& aObject, i_surface const& aSurface, point const& aPosition) const = 0;
+        virtual i_drag_drop_target& target_at(i_drag_drop_object const& aObject, point const& aPosition) const = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x393fd9c4, 0x6db8, 0x4c04, 0x87f6, { 0x39, 0x87, 0x6a, 0x30, 0x35, 0xd4 } }; return sIid; }
     };

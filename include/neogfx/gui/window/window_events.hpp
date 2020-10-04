@@ -138,6 +138,27 @@ namespace neogfx
         {
             return static_variant_cast<neogfx::delta>(iParameter4);
         }
+    public:
+        bool is_left_button() const
+        {
+            return (mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left;
+        }
+        bool is_middle_button() const
+        {
+            return (mouse_button() & neogfx::mouse_button::Middle) == neogfx::mouse_button::Middle;
+        }
+        bool is_right_button() const
+        {
+            return (mouse_button() & neogfx::mouse_button::Right) == neogfx::mouse_button::Right;
+        }
+        bool is_x1_button() const
+        {
+            return (mouse_button() & neogfx::mouse_button::X1) == neogfx::mouse_button::X1;
+        }
+        bool is_x2_button() const
+        {
+            return (mouse_button() & neogfx::mouse_button::X2) == neogfx::mouse_button::X2;
+        }
     private:
         mouse_event_type iType;
         parameter_type iParameter1;
