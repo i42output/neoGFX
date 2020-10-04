@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/hid/i_mouse.hpp>
 #include "windows_window_manager.hpp"
@@ -32,6 +33,14 @@ namespace neogfx
 
         window_manager::~window_manager()
         {
+        }
+
+        i_window* window_manager::window_from_position(const point& aPosition) const
+        {
+            HWND hwnd = ::WindowFromPoint(POINT{ static_cast<LONG>(aPosition.x), static_cast<LONG>(aPosition.y) });
+            if (service<i_surface_manager>().is_surface_attached(hwnd))
+                return &service<i_surface_manager>().attached_surface(hwnd).as_surface_window().as_window();
+            return nullptr;
         }
 
         point window_manager::mouse_position() const

@@ -57,6 +57,8 @@ namespace neogfx
             window_manager();
             ~window_manager();
         public:
+            i_window* window_from_position(const point& aPosition) const override;
+        public:
             point mouse_position() const override;
             point mouse_position(const i_window& aWindow) const override;
             bool is_mouse_button_pressed(mouse_button aButton) const override;

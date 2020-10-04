@@ -50,6 +50,8 @@ namespace neogfx
         virtual bool window_activated() const = 0;
         virtual i_window& active_window() const = 0;
     public:
+        virtual i_window* window_from_position(const point& aPosition) const = 0;
+    public:
         virtual point mouse_position() const = 0;
         virtual point mouse_position(const i_window& aWindow) const = 0;
         virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;

@@ -61,7 +61,6 @@ namespace neogfx
         void layout_surfaces() override;
         void invalidate_surfaces() override;
         void render_surfaces() override;
-        i_surface* locate_topmost_usable_surface(const point& aPosition) override;
         void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
         void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const override;
         uint32_t display_count() const override;

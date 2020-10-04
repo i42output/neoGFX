@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/app/drag_drop.hpp>
 
 namespace neogfx
@@ -284,16 +284,15 @@ namespace neogfx
 
     i_drag_drop_target* drag_drop::find_target(i_drag_drop_object const& aObject, point const& aPosition) const
     {
-        auto surface = service<i_surface_manager>().locate_topmost_usable_surface(aPosition);
-        if (surface)
+        auto window = service<i_window_manager>().window_from_position(aPosition);
+        if (window)
         {
-            auto const& sw = surface->as_surface_window().as_widget();
-            auto const& w = sw.get_widget_at(sw.to_client_coordinates(aPosition));
+            auto const& hitWidget = window->as_widget().get_widget_at(window->as_widget().to_client_coordinates(aPosition));
             for (auto const& target : iTargets)
                 if (target->can_accept(aObject) &&
                     target->is_widget() &&
-                    target->as_widget().same_surface(w) &&
-                    (&target->as_widget() == &w || target->as_widget().is_ancestor_of(w)))
+                    target->as_widget().same_surface(hitWidget) &&
+                    (&target->as_widget() == &hitWidget || target->as_widget().is_ancestor_of(hitWidget)))
                     return target;
         }
         return nullptr;

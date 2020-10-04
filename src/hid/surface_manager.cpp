@@ -149,24 +149,6 @@ namespace neogfx
         iRenderingSurfaces = false;
     }
 
-    i_surface* surface_manager::locate_topmost_usable_surface(const point& aPosition)
-    {
-        for (auto& s : iSurfaces)
-        {
-            if (!s->is_window())
-                continue;
-            auto& w = s->as_surface_window().as_widget();
-            if (!w.visible())
-                continue;
-            if (!w.enabled())
-                continue;
-            // todo: overlapping surfaces
-            if (w.non_client_rect().contains(aPosition))
-                return s;
-        }
-        return nullptr;
-    }
-
     void surface_manager::display_error_message(const std::string& aTitle, const std::string& aMessage) const
     {
         for (auto i = iSurfaces.begin(); i != iSurfaces.end(); ++i)
