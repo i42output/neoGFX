@@ -344,16 +344,16 @@ namespace neogfx
         switch (container().style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
-            result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, 0.5_mm, is_selected() ? 1.0_mm : 0.5_mm });
+            result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, 0.5_mm, is_selected() ? 0.5_mm : 0.0_mm });
             break;
         case tab_container_style::TabAlignmentBottom:
-            result += ceil_rasterized(neogfx::padding{ 0.5_mm, is_selected() ? 1.0_mm : 0.5_mm, 0.5_mm, 0.5_mm });
+            result += ceil_rasterized(neogfx::padding{ 0.5_mm, is_selected() ? 0.5_mm : 0.0_mm, 0.5_mm, 0.5_mm });
             break;
         case tab_container_style::TabAlignmentLeft:
-            result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, is_selected() ? 1.0_mm : 0.5_mm, 0.5_mm });
+            result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, is_selected() ? 0.5_mm : 0.0_mm, 0.5_mm });
             break;
         case tab_container_style::TabAlignmentRight:
-            result += ceil_rasterized(neogfx::padding{ is_selected() ? 1.0_mm : 0.5_mm, 0.5_mm, 0.5_mm, 0.5_mm });
+            result += ceil_rasterized(neogfx::padding{ is_selected() ? 0.5_mm : 0.0_mm, 0.5_mm, 0.5_mm, 0.5_mm });
             break;
         }
         return result;
