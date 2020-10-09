@@ -31,13 +31,8 @@ namespace neogfx::nrc
         text_edit(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aElementType = ui_element_type::TextEdit) :
             ui_element<>{ aParser, aParent, aElementType }
         {
+            add_header("neogfx/gui/widget/text_edit.hpp");
             add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/text_edit.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -76,7 +71,7 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             if (type() == ui_element_type::TextEdit)
-                emit("  text_edit %1%;\n", id());
+                emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

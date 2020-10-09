@@ -582,6 +582,8 @@
     <ClInclude Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.h" />
     <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp" />
     <ClInclude Include="..\..\..\src\app\native\windows_basic_services.hpp" />
+    <ClInclude Include="..\..\..\src\app\native\windows_com.hpp" />
+    <ClInclude Include="..\..\..\src\app\native\windows_drag_drop.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp" />
@@ -623,6 +625,7 @@
     <ClCompile Include="..\..\..\src\app\module_resource.cpp" />
     <ClCompile Include="..\..\..\src\app\native\3rdparty\tinyfiledialogs.c" />
     <ClCompile Include="..\..\..\src\app\native\windows_basic_services.cpp" />
+    <ClCompile Include="..\..\..\src\app\native\windows_drag_drop.cpp" />
     <ClCompile Include="..\..\..\src\app\native\windows_services.cpp" />
     <ClCompile Include="..\..\..\src\app\palette.cpp" />
     <ClCompile Include="..\..\..\src\app\resource.cpp" />

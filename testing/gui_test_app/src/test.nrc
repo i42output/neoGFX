@@ -318,6 +318,7 @@
                                     id: textEdit
                                     focus_policy: [ Default ConsumeTabKey ]
                                     tab_stop_hint: "00000000"
+                                    drag_drop: true
                                 }
                                 slider: {
                                     id: effectWidthSlider

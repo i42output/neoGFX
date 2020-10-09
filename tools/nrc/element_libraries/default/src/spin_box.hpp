@@ -32,13 +32,8 @@ namespace neogfx::nrc
         basic_spin_box(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, SpinBoxType }
         {
+            add_header("neogfx/gui/widget/spin_box.hpp");
             add_data_names({ "minimum", "maximum", "step", "value" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/spin_box.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -63,15 +58,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            switch (type())
-            {
-            case ui_element_type::SpinBox:
-                emit("  spin_box %1%;\n", id());
-                break;
-            case ui_element_type::DoubleSpinBox:
-                emit("  double_spin_box %1%;\n", id());
-                break;
-            }
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

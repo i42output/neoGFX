@@ -31,13 +31,8 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, ui_element_type::TabPageContainer },
             iClosableTabs{ aParent.parser().get<bool>("closable_tabs", false) }
         {
+            add_header("neogfx/gui/widget/tab_page_container.hpp");
             add_data_names({ "closable_tabs" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/tab_page_container.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -54,7 +49,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  tab_page_container %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

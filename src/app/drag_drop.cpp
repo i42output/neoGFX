@@ -161,66 +161,28 @@ namespace neogfx
     }
 
 
-    drag_drop_target_impl::drag_drop_target_impl()
-    {
-        service<i_drag_drop>().register_target(*this);
-    }
-
-    drag_drop_target_impl::~drag_drop_target_impl()
-    {
-        service<i_drag_drop>().unregister_target(*this);
-    }
-
-    bool drag_drop_target_impl::can_accept(i_drag_drop_object const& aObject) const
-    {
-        bool canAccept = false;
-        ObjectAcceptable.trigger(aObject, canAccept);
-        return canAccept;
-    }
-
-    bool drag_drop_target_impl::accept(i_drag_drop_object const& aObject)
-    {
-        if (can_accept(aObject))
-        {
-            ObjectDropped.trigger(aObject);
-            return true;
-        }
-        return false;
-    }
-
-    bool drag_drop_target_impl::is_widget() const
-    {
-        return false;
-    }
-
-    i_widget const& drag_drop_target_impl::as_widget() const
-    {
-        throw drag_drop_target_not_a_widget();
-    }
-
-    i_widget& drag_drop_target_impl::as_widget()
-    {
-        throw drag_drop_target_not_a_widget();
-    }
-
-
     drag_drop::drag_drop()
     {
     }
 
     void drag_drop::register_source(i_drag_drop_source& aSource)
     {
-        auto existing = std::find(iSources.begin(), iSources.end(), &aSource);
+        auto existing = std::find_if(iSources.begin(), iSources.end(), [&](auto& rhs) { return &aSource == &*rhs; });
         if (existing == iSources.end())
         {
-            iSources.push_back(&aSource);
+            iSources.push_back(sources_t::value_type{ sources_t::value_type{}, &aSource });
             SourceRegistered.trigger(aSource);
         }
     }
 
+    void drag_drop::register_source(std::shared_ptr<i_drag_drop_source> const& aSource)
+    {
+        iSources.push_back(aSource);
+    }
+
     void drag_drop::unregister_source(i_drag_drop_source& aSource)
     {
-        auto existing = std::find(iSources.begin(), iSources.end(), &aSource);
+        auto existing = std::find_if(iSources.begin(), iSources.end(), [&](auto& rhs) { return &aSource == &*rhs; });
         if (existing != iSources.end())
         {
             iSources.erase(existing);
@@ -287,7 +249,7 @@ namespace neogfx
         auto window = service<i_window_manager>().window_from_position(aPosition);
         if (window)
         {
-            auto const& hitWidget = window->as_widget().get_widget_at(window->as_widget().to_client_coordinates(aPosition));
+            auto const& hitWidget = window->as_widget().get_widget_at(window->as_widget().to_client_coordinates(aPosition - window->window_position()));
             for (auto const& target : iTargets)
                 if (target->can_accept(aObject) &&
                     target->is_widget() &&

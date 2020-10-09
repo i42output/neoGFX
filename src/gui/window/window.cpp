@@ -133,7 +133,7 @@ namespace neogfx
     class window::client : public drag_drop_target<framed_scrollable_widget>
     {
     public:
-        client(neogfx::scrollbar_style aScrollbarStyle);
+        client(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle);
     protected:
         bool is_managing_layout() const override;
     protected:
@@ -145,8 +145,8 @@ namespace neogfx
         vertical_layout iLayout;
     };
 
-    window::client::client(neogfx::scrollbar_style aScrollbarStyle) :
-        drag_drop_target<framed_scrollable_widget>{ aScrollbarStyle, frame_style::NoFrame },
+    window::client::client(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle) :
+        drag_drop_target<framed_scrollable_widget>{ aParent, aScrollbarStyle, frame_style::NoFrame },
         iLayout{ *this }
     {
         set_padding(neogfx::padding{});
@@ -1072,7 +1072,7 @@ namespace neogfx
             }
         }
 
-        set_client(std::make_shared<client>(scrollbar_style()));
+        set_client(std::make_shared<client>(*this, scrollbar_style()));
 
         if (has_native_window())
             native_window().initialisation_complete();

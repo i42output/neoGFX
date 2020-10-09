@@ -1089,6 +1089,12 @@
     <ClInclude Include="..\..\..\include\neogfx\app\drag_drop.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\windows_drag_drop.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\windows_com.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1581,6 +1587,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\app\drag_drop.cpp">
       <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\windows_drag_drop.cpp">
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

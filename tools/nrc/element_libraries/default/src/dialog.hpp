@@ -32,18 +32,14 @@ namespace neogfx::nrc
         dialog(const i_ui_element_parser& aParser) :
             window{ aParser, ui_element_type::Dialog }
         {
+            add_header("neogfx/gui/dialog/dialog.hpp");
             add_data_names({ "standard_layout", "button_box" });
         }
         dialog(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             window{ aParser, aParent, ui_element_type::Dialog }
         {
+            add_header("neogfx/gui/dialog/dialog.hpp");
             add_data_names({ "standard_layout", "button_box" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/dialog/dialog.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -72,7 +68,7 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             if (has_parent())
-                emit("  dialog %1%;\n", id());
+                emit("  %1% %2%;\n", type_name(), id());
             else
                 emit("  %1%& %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();

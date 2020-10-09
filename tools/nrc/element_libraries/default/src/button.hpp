@@ -34,31 +34,19 @@ namespace neogfx::nrc
             iCheckable{ aParent.parser().get_optional_enum<button_checkable>("checkable") },
             iChecked{ aParent.parser().get_optional<bool>("checked") } // todo: tri-state
         {
-            add_data_names({ "checkable", "checked" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
             switch (ButtonType)
             {
             case ui_element_type::PushButton:
-            {
-                static const neolib::string sHeader = "neogfx/gui/widget/push_button.hpp";
-                return sHeader;
-            }
+                add_header("neogfx/gui/widget/push_button.hpp");
+                break;
             case ui_element_type::CheckBox:
-            {
-                static const neolib::string sHeader = "neogfx/gui/widget/check_box.hpp";
-                return sHeader;
-            }
+                add_header("neogfx/gui/widget/check_box.hpp");
+                break;
             case ui_element_type::RadioButton:
-            {
-                static const neolib::string sHeader = "neogfx/gui/widget/radio_button.hpp";
-                return sHeader;
+                add_header("neogfx/gui/widget/radio_button.hpp");
+                break;
             }
-            default:
-                throw wrong_type();
-            }
+            add_data_names({ "checkable", "checked" });
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -75,18 +63,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            switch (ButtonType)
-            {
-            case ui_element_type::PushButton:
-                emit("  push_button %1%;\n", id());
-                break;
-            case ui_element_type::CheckBox:
-                emit("  check_box %1%;\n", id());
-                break;
-            case ui_element_type::RadioButton:
-                emit("  radio_button %1%;\n", id());
-                break;
-            }
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

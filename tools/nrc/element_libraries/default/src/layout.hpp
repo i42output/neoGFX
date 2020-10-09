@@ -31,46 +31,28 @@ namespace neogfx::nrc
         basic_layout(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, LayoutType }
         {
-            add_data_names({ "spacing" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
             switch (LayoutType)
             {
             case ui_element_type::VerticalLayout:
-                {
-                    static const neolib::string sHeader = "neogfx/gui/layout/vertical_layout.hpp";
-                    return sHeader;
-                }
+                add_header("neogfx/gui/layout/vertical_layout.hpp");
+                break;
             case ui_element_type::HorizontalLayout:
-                {
-                    static const neolib::string sHeader = "neogfx/gui/layout/horizontal_layout.hpp";
-                    return sHeader;
-                }
+                add_header("neogfx/gui/layout/horizontal_layout.hpp");
+                break;
             case ui_element_type::GridLayout:
-                {
-                    static const neolib::string sHeader = "neogfx/gui/layout/grid_layout.hpp";
-                    return sHeader;
-                }
+                add_header("neogfx/gui/layout/grid_layout.hpp");
+                break;
             case ui_element_type::FlowLayout:
-                {
-                    static const neolib::string sHeader = "neogfx/gui/layout/flow_layout.hpp";
-                    return sHeader;
-                }
+                add_header("neogfx/gui/layout/flow_layout.hpp");
+                break;
             case ui_element_type::StackLayout:
-                {
-                    static const neolib::string sHeader = "neogfx/gui/layout/stack_layout.hpp";
-                    return sHeader;
-                }
+                add_header("neogfx/gui/layout/stack_layout.hpp");
+                break;
             case ui_element_type::BorderLayout:
-                {
-                    static const neolib::string sHeader = "neogfx/gui/layout/border.hpp";
-                    return sHeader;
-                }
-            default:
-                throw wrong_type();
+                add_header("neogfx/gui/layout/border.hpp");
+                break;
             }
+            add_data_names({ "spacing" });
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -91,29 +73,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            switch (LayoutType)
-            {
-            case ui_element_type::VerticalLayout:
-                emit("  vertical_layout %1%;\n", id());
-                break;
-            case ui_element_type::HorizontalLayout:
-                emit("  horizontal_layout %1%;\n", id());
-                break;
-            case ui_element_type::GridLayout:
-                emit("  grid_layout %1%;\n", id());
-                break;
-            case ui_element_type::FlowLayout:
-                emit("  flow_layout %1%;\n", id());
-                break;
-            case ui_element_type::StackLayout:
-                emit("  stack_layout %1%;\n", id());
-                break;
-            case ui_element_type::BorderLayout:
-                emit("  border_layout %1%;\n", id());
-                break;
-            default:
-                throw wrong_type();
-            }
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

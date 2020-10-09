@@ -58,13 +58,12 @@ namespace neogfx
         basic_services::basic_services(i_async_task& aAppTask) :
             iAppTask{ aAppTask }
         {
-            if (::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED) == RPC_E_CHANGED_MODE)
-                ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
+            ::OleInitialize(NULL);
         }
 
         basic_services::~basic_services()
         {
-            ::CoUninitialize();
+            ::OleUninitialize();
         }
 
         neogfx::platform basic_services::platform() const

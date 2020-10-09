@@ -260,7 +260,8 @@ namespace neogfx::nrc
 
     void ui_parser::next_header(const i_ui_element& aElement, std::set<std::string>& aHeaders) const
     {
-        aHeaders.insert(aElement.header().to_std_string());
+        for (auto const& header : aElement.headers())
+            aHeaders.insert(header);
         for (auto const& e : aElement.children())
             next_header(*e, aHeaders);
     }

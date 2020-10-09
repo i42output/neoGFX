@@ -36,13 +36,8 @@ namespace neogfx::nrc
             iShortcut{ aParent.parser().get_optional<neolib::string>("shortcut") },
             iCheckedImage{ aParent.parser().get_optional<neolib::string>("checked_image") }
         {
+            add_header("neogfx/app/action.hpp");
             add_data_names({ "checkable", "checked", "text", "image", "shortcut", "checked_image" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/app/action.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -59,7 +54,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  action %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -113,14 +108,9 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, ui_element_type::Action | ui_element_type::Reference, {} },
             iReference{ aReference }
         {
+            add_header("neogfx/app/action.hpp");
             if (aReference)
                 fragment().add_element_ref(*aReference);
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/app/action.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override

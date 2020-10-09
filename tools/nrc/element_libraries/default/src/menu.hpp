@@ -34,13 +34,8 @@ namespace neogfx::nrc
             iTitle{ aParent.parser().get_optional<neolib::string>("title") },
             iImage{ aParent.parser().get_optional<neolib::string>("image") }
         {
+            add_header("neogfx/gui/widget/menu.hpp");
             add_data_names({ "title", "image", "action" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/menu.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -65,7 +60,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  menu %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

@@ -142,31 +142,46 @@ namespace neogfx
         }
     };
 
-    class drag_drop_target_impl : public i_drag_drop_target
-    {
-    public:
-        define_declared_event(ObjectAcceptable, object_acceptable, i_drag_drop_object const&, bool&)
-        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
-    public:
-        drag_drop_target_impl();
-        ~drag_drop_target_impl();
-    public:
-        bool can_accept(i_drag_drop_object const& aObject) const override;
-        bool accept(i_drag_drop_object const& aObject) override;
-    public:
-        bool is_widget() const override;
-        i_widget const& as_widget() const override;
-        i_widget& as_widget() override;
-    };
-
     template <typename Base>
-    class drag_drop_target : public Base, public drag_drop_target_impl
+    class drag_drop_target : public Base, public i_drag_drop_target
     {
         typedef Base base_type;
     public:
-        using base_type::base_type;
+        define_declared_event(ObjectAcceptable, object_acceptable, i_drag_drop_object const&, drop_operation&)
+        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
-        bool is_widget() const
+        template <typename... Args>
+        drag_drop_target(Args&&... aArgs) : 
+            base_type{ std::forward<Args>(aArgs)... }
+        {
+            service<i_drag_drop>().register_target(*this);
+        }
+        ~drag_drop_target()
+        {
+            service<i_drag_drop>().unregister_target(*this);
+        }
+    public:
+        bool can_accept(i_drag_drop_object const& aObject) const override
+        {
+            return accepted_as(aObject) != drop_operation::None;
+        }
+        drop_operation accepted_as(i_drag_drop_object const& aObject) const override
+        {
+            drop_operation acceptableAs = drop_operation::None;
+            ObjectAcceptable.trigger(aObject, acceptableAs);
+            return acceptableAs;
+        }
+        bool accept(i_drag_drop_object const& aObject) override
+        {
+            if (can_accept(aObject))
+            {
+                ObjectDropped.trigger(aObject);
+                return true;
+            }
+            return false;
+        }
+    public:
+        bool is_widget() const override
         {
             return std::is_base_of_v<i_widget, base_type>;
         }
@@ -191,7 +206,7 @@ namespace neogfx
         define_declared_event(TargetRegistered, target_registered, i_drag_drop_target&)
         define_declared_event(TargetUnregistered, target_unregistered, i_drag_drop_target&)
     private:
-        typedef std::vector<i_drag_drop_source*> sources_t;
+        typedef std::vector<std::shared_ptr<i_drag_drop_source>> sources_t;
         typedef std::vector<i_drag_drop_target*> targets_t;
     public:
         drag_drop();
@@ -205,7 +220,8 @@ namespace neogfx
         bool is_target_at(i_drag_drop_object const& aObject, point const& aPosition) const override;
         i_drag_drop_target& target_for(i_drag_drop_object const& aObject) const override;
         i_drag_drop_target& target_at(i_drag_drop_object const& aObject, point const& aPosition) const override;
-    private:
+    protected:
+        void register_source(std::shared_ptr<i_drag_drop_source> const& aSource);
         i_drag_drop_target* find_target(i_drag_drop_object const& aObject) const;
         i_drag_drop_target* find_target(i_drag_drop_object const& aObject, point const& aPosition) const;
     private:

@@ -30,13 +30,8 @@ namespace neogfx::nrc
         text_field(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aElementType = ui_element_type::TextField) :
             ui_element<>{ aParser, aParent, aElementType }
         {
+            add_header("neogfx/gui/widget/text_field.hpp");
             add_data_names({ "label", "hint" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/text_field.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -57,7 +52,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  text_field %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

@@ -95,7 +95,25 @@ namespace neogfx::nrc
         }
         const neolib::i_string& type_name() const override
         {
+            if (iDragDrop != std::nullopt && *iDragDrop)
+            {
+                thread_local neolib::string result;
+                result = "drag_drop_target<"_s + iTypeName + ">"_s;
+                return result;
+            }
             return iTypeName;
+        }
+        void set_type_name(const neolib::i_string& aTypeName) override
+        {
+            iTypeName = aTypeName;
+        }
+        const neolib::i_vector<neolib::i_string>& headers() const override
+        {
+            return iHeaders;
+        }
+        void add_header(const std::string& aHeader)
+        {
+            iHeaders.push_back(neolib::string{ aHeader });
         }
     public:
         bool is_member_element() const override
@@ -220,6 +238,12 @@ namespace neogfx::nrc
             {
                 std::cerr << parser().source_location() << ": warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
                 return;
+            }
+            if (aName == "drag_drop")
+            {
+                iDragDrop = aData.get<bool>();
+                if (*iDragDrop)
+                    add_header("neogfx/app/drag_drop.hpp");
             }
             if (aName == "type")
                 iWidgetType = get_enum<widget_type>(aData);
@@ -516,7 +540,7 @@ namespace neogfx::nrc
             if (!has_parent() && (type() & ui_element_type::Widget) == ui_element_type::Widget)
                 add_data_names({ "type", "default_focus" });
             if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
-                add_data_names({ "enabled", "disabled", "focus_policy" });
+                add_data_names({ "drag_drop", "enabled", "disabled", "focus_policy" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
                 add_data_names({ "size_policy", "padding", "minimum_size", "maximum_size", "size", "minimum_width", "minimum_height", "maximum_width", "maximum_height", "weight" });
             if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
@@ -535,6 +559,7 @@ namespace neogfx::nrc
         i_ui_element* iParent;
         neolib::string iFragmentName;
         neolib::string iTypeName;
+        neolib::vector<neolib::string> iHeaders;
         bool iMemberElement;
         data_names_t iDataNames;
         neolib::optional<neolib::string> iId;
@@ -543,6 +568,7 @@ namespace neogfx::nrc
         ui_element_type iType;
         children_t iChildren;
         neolib::set<neolib::string> iRefs;
+        std::optional<bool> iDragDrop;
         std::optional<widget_type> iWidgetType;
         std::optional<size_policy> iSizePolicy;
         std::optional<alignment> iAlignment;

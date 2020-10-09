@@ -32,13 +32,8 @@ namespace neogfx::nrc
         toolbar(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::Toolbar }
         {
+            add_header("neogfx/gui/widget/toolbar.hpp");
             add_data_names({ "action", "button_image_extents" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/toolbar.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -67,7 +62,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  toolbar %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

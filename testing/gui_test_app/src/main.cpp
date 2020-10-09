@@ -266,6 +266,19 @@ int main(int argc, char* argv[])
 
         test::main_window window{ app };
 
+        window.textEdit.ObjectAcceptable([&](ng::i_drag_drop_object const& aObject, ng::drop_operation& aAcceptableAs)
+        {
+            if (aObject.ddo_type() == ng::i_drag_drop_file_list::otid())
+                aAcceptableAs = ng::drop_operation::Copy;
+        });
+
+        window.textEdit.ObjectDropped([&](ng::i_drag_drop_object const& aObject)
+        {
+            auto const& files = static_cast<ng::i_drag_drop_file_list const&>(aObject);
+            std::ifstream file{ files.file_paths()[0].to_std_string() };
+            window.textEdit.set_plain_text(std::string{ std::istreambuf_iterator<char>{file}, {} });
+        });
+
         app.actionArcadeMode.checked([&]() { neolib::service<neolib::i_power>().enable_turbo_mode(); });
         app.actionArcadeMode.unchecked([&]() { neolib::service<neolib::i_power>().disable_turbo_mode(); });
 

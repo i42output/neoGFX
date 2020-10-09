@@ -30,12 +30,8 @@ namespace neogfx::nrc
         status_bar(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::StatusBar }
         {
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/status_bar.hpp";
-            return sHeader;
+            add_header("neogfx/gui/widget/status_bar.hpp");
+            set_type_name("neogfx::status_bar"_s);
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -52,7 +48,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  neogfx::status_bar %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

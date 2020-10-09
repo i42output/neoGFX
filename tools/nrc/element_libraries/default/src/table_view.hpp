@@ -30,12 +30,7 @@ namespace neogfx::nrc
         table_view(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::TableView }
         {
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/table_view.hpp";
-            return sHeader;
+            add_header("neogfx/gui/widget/table_view.hpp");
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -52,7 +47,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  table_view %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

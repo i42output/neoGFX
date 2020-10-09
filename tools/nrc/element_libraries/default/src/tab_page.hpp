@@ -33,13 +33,8 @@ namespace neogfx::nrc
             iTabText{ aParent.parser().get_optional<neolib::string>("tab_text") },
             iTabImage{ aParent.parser().get_optional<neolib::string>("tab_image") }
         {
+            add_header("neogfx/gui/widget/tab_page.hpp");
             add_data_names({ "tab_text", "tab_image" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/tab_page.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -56,7 +51,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  tab_page %1%;\n", id());
+            emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

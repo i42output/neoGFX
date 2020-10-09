@@ -195,7 +195,10 @@ namespace neogfx
             iClientLayout->remove_all();
             iClient = aClient;
             if (iClient != nullptr)
+            {
                 iClientLayout->add(iClient);
+                iClient->set_parent(iClientLayout->layout_owner());
+            }
         }
         const i_title_bar& title_bar() const override
         {

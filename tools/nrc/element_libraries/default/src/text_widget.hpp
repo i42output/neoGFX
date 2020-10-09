@@ -30,18 +30,14 @@ namespace neogfx::nrc
         text_widget(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             ui_element<>{ aParser, aParent, ui_element_type::TextWidget }
         {
+            add_header("neogfx/gui/widget/text_widget.hpp");
             add_data_names({ "size_hint" });
         }
         text_widget(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t) :
             ui_element<>{ aParser, aParent, member_element, ui_element_type::TextWidget }
         {
+            add_header("neogfx/gui/widget/text_widget.hpp");
             add_data_names({ "size_hint" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/widget/text_widget.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -71,7 +67,7 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             if (!is_member_element())
-                emit("  text_widget %1%;\n", id());
+                emit("  %1% %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

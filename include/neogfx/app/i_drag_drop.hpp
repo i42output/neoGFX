@@ -73,6 +73,8 @@ namespace neogfx
         }
     };
 
+    struct failed_drag_drop_registration : std::logic_error { failed_drag_drop_registration(const std::string& aReason) : std::logic_error{ "neogfx::failed_drag_drop_registration: " + aReason } {} };
+    struct failed_drag_drop_unregistration : std::logic_error { failed_drag_drop_unregistration(const std::string& aReason) : std::logic_error{ "neogfx::failed_drag_drop_unregistration: " + aReason } {} };
     struct drag_drop_already_active : std::logic_error { drag_drop_already_active() : std::logic_error{ "neogfx::drag_drop_already_active" } {} };
     struct drag_drop_not_active : std::logic_error { drag_drop_not_active() : std::logic_error{ "neogfx::drag_drop_not_active" } {} };
 
@@ -97,15 +99,24 @@ namespace neogfx
 
     struct drag_drop_target_not_a_widget : std::logic_error { drag_drop_target_not_a_widget() : std::logic_error{ "neogfx::drag_drop_target_not_a_widget" } {} };
 
+    enum class drop_operation : uint32_t
+    {
+        None = 0x00000000,
+        Copy = 0x00000001,
+        Move = 0x00000002,
+        Link = 0x00000003
+    };
+
     class i_drag_drop_target
     {
     public:
-        declare_event(object_acceptable, i_drag_drop_object const&, bool&)
+        declare_event(object_acceptable, i_drag_drop_object const&, drop_operation&)
         declare_event(object_dropped, i_drag_drop_object const&)
     public:
         virtual ~i_drag_drop_target() = default;
     public:
         virtual bool can_accept(i_drag_drop_object const& aObject) const = 0;
+        virtual drop_operation accepted_as(i_drag_drop_object const& aObject) const = 0;
         virtual bool accept(i_drag_drop_object const& aObject) = 0;
     public:
         virtual bool is_widget() const = 0;

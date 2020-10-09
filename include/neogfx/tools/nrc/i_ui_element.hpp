@@ -82,7 +82,8 @@ namespace neogfx::nrc
     public:
         virtual const neolib::i_string& fragment_name() const = 0;
         virtual const neolib::i_string& type_name() const = 0;
-        virtual const neolib::i_string& header() const = 0;
+        virtual void set_type_name(const neolib::i_string& aTypeName) = 0;
+        virtual const neolib::i_vector<neolib::i_string>& headers() const = 0;
     public:
         virtual bool is_member_element() const = 0;
         virtual bool anonymous() const = 0;

@@ -32,13 +32,8 @@ namespace neogfx::nrc
             iName{ aParser.get_optional<neolib::string>("name") },
             iDefaultWindowIcon{ aParser.get_optional<neolib::string>("default_window_icon") }
         {
+            add_header("neogfx/app/app.hpp");
             add_data_names({ "name", "default_window_icon" });
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/app/app.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override

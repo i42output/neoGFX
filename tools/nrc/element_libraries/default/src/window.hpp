@@ -32,6 +32,7 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aElementType },
             iStyle{ aParser.get_optional_enum<window_style>("style") }
         {
+            add_header("neogfx/gui/window/window.hpp");
             add_data_names({ "title", "style", "default_size" });
             emplace_2<length>("default_size", iDefaultSize);
         }
@@ -39,14 +40,9 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, aElementType },
             iStyle{ aParser.get_optional_enum<window_style>("style") }
         {
+            add_header("neogfx/gui/window/window.hpp");
             add_data_names({ "title", "style", "default_size" });
             emplace_2<length>("default_size", iDefaultSize);
-        }
-    public:
-        const neolib::i_string& header() const override
-        {
-            static const neolib::string sHeader = "neogfx/gui/window/window.hpp";
-            return sHeader;
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -80,7 +76,7 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             if (has_parent())
-                emit("  window %1%;\n", id());
+                emit("  %1% %2%;\n", type_name(), id());
             else
                 emit("  %1%& %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
