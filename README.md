@@ -76,7 +76,7 @@ Tool Tips                       | 0       |
 Status Bar                      | 100     |
 Progress Bar                    | 0       |
 Docks							| 75      |
-Font Picker                     | 100     |
+Font Picker                     | 95      |     Font selection widget
 Colour Gradient Selector        | 95      |     Swatch library
 Colour Picker                   | 100     |     
 Date/Time                       | 0       |
@@ -87,7 +87,8 @@ tool: neoGFX Design Studio      | 10      |
 i18n                            | 40      |
 l10n                            | 0       |     UK English, US English, French, German, Chinese
 HID: Game Controllers           | 80      |     Calibration/settings UI; DirectInput button mapping
+Multi-monitor					| 50      |     DPI changes when changing or dragging between monitors
 Scene Graph						| 0		  |		
 Skins                           | 40      |
 
-Last updated: 09/10/2020
+Last updated: 10/10/2020

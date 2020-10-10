@@ -187,7 +187,10 @@ namespace neogfx
     {
         if (window::has_minimum_size())
             return window::minimum_size();
-        return ideal_size().max(iDropList.minimum_size());
+        auto result = ideal_size().max(iDropList.minimum_size());
+        if (iDropList.size_policy().horizontal_size_policy() == size_constraint::Fixed)
+            result.cx = std::max(result.cx, iDropList.fixed_size().cx);
+        return result;
     }
 
     bool drop_list_popup::can_dismiss(const i_widget*) const

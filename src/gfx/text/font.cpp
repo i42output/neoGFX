@@ -295,6 +295,13 @@ namespace neogfx
         return font_info(iInstance->iFamilyName, aStyle, optional_style_name{}, iInstance->iSize);
     }
 
+    font_info font_info::with_underline(bool aUnderline) const
+    {
+        font_info result = *this;
+        result.set_underline(aUnderline);
+        return result;
+    }
+
     font_info font_info::with_size(point_size aSize) const
     {
         return font_info(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, aSize);

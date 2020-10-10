@@ -35,6 +35,10 @@ namespace neogfx
                 return item_presentation_model::column_flags(aColumn) & ~item_cell_flags::Editable;
             }
         public:
+            optional_font cell_font(const item_presentation_model_index& aIndex) const override
+            {
+                return service<i_app>().current_style().font_info().with_size(12.0);
+            }
             optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
             {
                 if (aColorRole == color_role::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
@@ -60,7 +64,7 @@ namespace neogfx
                 if (iFonts[modelRow] == std::nullopt)
                 {
                     auto& fm = service<i_font_manager>();
-                    iFonts[modelRow] = font{ fm.font_family(modelRow), font_style::Normal, std::max(service<i_app>().current_style().font_info().size(), 12.0) };
+                    iFonts[modelRow] = font{ fm.font_family(modelRow), font_style::Normal, 12.0 };
                 }
                 return iFonts[modelRow];
             }
@@ -104,7 +108,7 @@ namespace neogfx
                     iFonts[modelRow] = font{ 
                         fm.font_family(familyModelRow), 
                         static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), 
-                        std::max(service<i_app>().current_style().font_info().size(), 12.0) };
+                        12.0 };
                 }
                 return iFonts[modelRow];
             }
@@ -182,7 +186,7 @@ namespace neogfx
         iSizePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
         iFamilyPicker.set_fixed_size(size{ 128.0_dip });
         iStylePicker.set_fixed_size(size{ 96.0_dip });
-        iSizePicker.set_fixed_size(size{ 64.0_dip });
+        iSizePicker.set_fixed_size(size{ 48.0_dip });
 
         iFamilyPicker.set_presentation_model(std::make_shared<family_picker_presentation_model>());
         iStylePicker.set_presentation_model(std::make_shared<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));

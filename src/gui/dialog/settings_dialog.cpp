@@ -300,8 +300,8 @@ namespace neogfx
         optional_font cell_font(const item_presentation_model_index& aIndex) const override
         {
             if (!item_model().has_parent(to_item_model_index(aIndex)))
-                return default_font();
-            return default_font().with_size(10).with_style(font_style::Normal);
+                return default_font().with_style(font_style::Bold);
+            return default_font().with_size(10);
         }
         optional_texture cell_image(const item_presentation_model_index& aIndex) const override
         {
@@ -332,7 +332,7 @@ namespace neogfx
             iLayout.set_padding({});
             auto reset_font = [&]()
             {
-                iTitle.text_widget().set_font(service<i_app>().current_style().font().with_size(10).with_style(font_style::Underline));
+                iTitle.text_widget().set_font(service<i_app>().current_style().font().with_size(service<i_app>().current_style().font().size() * 1.25).with_underline(true));
             };
             iSink += service<i_app>().current_style_changed([this, reset_font](style_aspect aAspect)
             {
@@ -494,7 +494,7 @@ namespace neogfx
 
         auto updateTreeFont = [=]()
         {
-            treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
+            treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14));
         };
         iSink += service<i_app>().current_style_changed([=](style_aspect aAspect)
         {

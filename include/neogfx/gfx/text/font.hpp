@@ -139,6 +139,7 @@ namespace neogfx
         virtual void disable_kerning();
     public:
         font_info with_style(font_style aStyle) const;
+        font_info with_underline(bool aUnderline) const;
         font_info with_size(point_size aSize) const;
     public:
         bool operator==(const font_info& aRhs) const;
