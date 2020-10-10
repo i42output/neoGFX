@@ -200,6 +200,7 @@ namespace neogfx
             struct no_view : std::logic_error { no_view() : std::logic_error("neogfx::drop_list::list_proxy::no_view") {} };
         public:
             list_proxy(drop_list& aDropList);
+            ~list_proxy();
         public:
             bool view_created() const;
             drop_list_view& view() const;
@@ -212,6 +213,7 @@ namespace neogfx
             mutable std::optional<drop_list_popup> iPopup;
             mutable std::optional<view_container> iViewContainer;
             mutable std::optional<drop_list_view> iView;
+            sink iSink;
         };
     public:
         drop_list(style aStyle = style::Normal);

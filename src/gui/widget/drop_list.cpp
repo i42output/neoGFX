@@ -309,6 +309,10 @@ namespace neogfx
     {
     }
 
+    drop_list::list_proxy::~list_proxy()
+    {
+    }
+
     bool drop_list::list_proxy::view_created() const
     {
         return iPopup != std::nullopt || iView != std::nullopt;
@@ -338,7 +342,7 @@ namespace neogfx
             else
             {
                 iPopup.emplace(iDropList);
-                iPopup->Closed([this]()
+                iSink = iPopup->Closed([this]()
                 {
                     iPopup = std::nullopt;
                 });
