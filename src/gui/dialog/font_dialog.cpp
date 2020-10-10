@@ -77,6 +77,9 @@ namespace neogfx
             {
                 iSink += iFamilyPickerSelectionModel.current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /*aPreviousIndex*/)
                 {
+                    std::optional<std::string> existingStyle;
+                    if (iOurSelectionModel.has_current_index())
+                        existingStyle = static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(iOurSelectionModel.current_index())));
                     item_model().clear();
                     iFonts.clear();
                     if (aCurrentIndex != std::nullopt)
@@ -84,9 +87,17 @@ namespace neogfx
                         auto fontFamilyIndex = iFamilyPickerSelectionModel.presentation_model().to_item_model_index(*aCurrentIndex).row();
                         auto& fm = service<i_font_manager>();
                         auto styleCount = fm.font_style_count(fontFamilyIndex);
+                        std::optional<uint32_t> matchingStyle;
                         for (uint32_t s = 0; s < styleCount; ++s)
+                        {
                             item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s));
-                        iOurSelectionModel.set_current_index(item_presentation_model_index{});
+                            if (existingStyle && *existingStyle == fm.font_style(fontFamilyIndex, s))
+                                matchingStyle = s;
+                        }
+                        if (!matchingStyle)
+                            iOurSelectionModel.set_current_index(item_presentation_model_index{});
+                        else
+                            iOurSelectionModel.set_current_index(item_presentation_model_index{ *matchingStyle, 0u });
                     }
                 });
             }
@@ -295,7 +306,7 @@ namespace neogfx
         else if (iFamilyPicker.selection_model().has_current_index() && iStylePicker.selection_model().has_current_index())
         {
             auto fontFamilyIndex = iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row();
-            auto fontStyleIndex = iFamilyPicker.presentation_model().to_item_model_index(iStylePicker.selection_model().current_index()).row();
+            auto fontStyleIndex = iStylePicker.presentation_model().to_item_model_index(iStylePicker.selection_model().current_index()).row();
             auto fontSize = iSelectedFont.size();
             try { fontSize = boost::lexical_cast<double>(iSizePicker.input_widget().text()); } catch (...) {}
             fontSize = std::min(std::max(fontSize, 1.0), 1638.0);

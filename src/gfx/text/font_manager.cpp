@@ -458,7 +458,8 @@ namespace neogfx
             for (uint32_t s = 0; s < f->style_count(); ++s)
             {
                 auto const matchingBits = matching_bits(static_cast<uint32_t>(f->style(s)), static_cast<uint32_t>(aStyle));
-                auto weight = font::weight_from_style_name(f->style_name(s));
+                auto const& styleName = f->style_name(s);
+                auto const weight = font::weight_from_style_name(styleName);
                 if (weight <= font_weight::Normal && (
                     bestNormalFont == std::nullopt || 
                     bestNormalFont->first.first < matchingBits ||
