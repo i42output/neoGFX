@@ -413,15 +413,7 @@ namespace neogfx
     void item_view::focus_gained(focus_reason aFocusReason)
     {
         framed_scrollable_widget::focus_gained(aFocusReason);
-        if (aFocusReason == focus_reason::ClickClient)
-        {
-            auto item = item_at(root().mouse_position() - origin());
-            if (item != std::nullopt)
-                select(*item);
-            if (editing() == std::nullopt && selection_model().has_current_index() && presentation_model().cell_editable_when_focused(selection_model().current_index()))
-                edit(selection_model().current_index());
-        }
-        else if (aFocusReason != focus_reason::Other)
+        if (aFocusReason != focus_reason::ClickClient && aFocusReason != focus_reason::Other)
         {
             if (model().rows() > 0 && !selection_model().has_current_index())
                 select(item_presentation_model_index{ 0, 0 });

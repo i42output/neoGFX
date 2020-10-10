@@ -345,6 +345,7 @@ namespace neogfx
                 iSink = iPopup->Closed([this]()
                 {
                     iPopup = std::nullopt;
+                    iSink.clear();
                 });
                 update_view_placement();
             }
