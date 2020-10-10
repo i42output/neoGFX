@@ -32,8 +32,7 @@ namespace neogfx
 {
     drop_list_view::drop_list_view(i_layout& aLayout, drop_list& aDropList) :
         list_view{ aLayout, false, frame_style::NoFrame },
-        iDropList{ aDropList },
-        iChangingText{ false }
+        iDropList{ aDropList }
     {
         set_padding(neogfx::padding{});
         if (!iDropList.editable())
@@ -47,11 +46,6 @@ namespace neogfx
     {
     }
 
-    bool drop_list_view::changing_text() const
-    {
-        return iChangingText;
-    }
-
     void drop_list_view::items_filtered()
     {
         list_view::items_filtered();
@@ -61,22 +55,6 @@ namespace neogfx
     void drop_list_view::current_index_changed(const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
     {
         list_view::current_index_changed(aCurrentIndex, aPreviousIndex);
-        if (!presentation_model().filtering() && !iDropList.handling_text_change())
-        {
-            neolib::scoped_flag sf{ iChangingText };
-            texture image;
-            std::string text;
-            if (aCurrentIndex != std::nullopt)
-            {
-                auto const& maybeImage = presentation_model().cell_image(*aCurrentIndex);
-                if (maybeImage != std::nullopt)
-                    image = *maybeImage;
-                text = presentation_model().cell_to_string(*aCurrentIndex);
-            }
-            iDropList.input_widget().set_spacing(presentation_model().cell_spacing(*this));
-            iDropList.input_widget().set_image(image);
-            iDropList.input_widget().set_text(text);
-        }
     }
 
     void drop_list_view::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -526,7 +504,6 @@ namespace neogfx
             {
                 iImage.set_image(aImage);
                 iImage.show(!aImage.is_empty());
-
             }
             const std::string& text() const override
             {
@@ -567,6 +544,7 @@ namespace neogfx
         iLayout1{ iLayout0 },
         iDownArrow{ texture{} }, 
         iListProxy{ *this },
+        iChangingText{ false },
         iHandlingTextChange{ false },
         iAcceptingSelection{ false },
         iCancellingSelection{ false }
@@ -581,6 +559,7 @@ namespace neogfx
         iLayout1{ iLayout0 },
         iDownArrow{ texture{} },
         iListProxy{ *this },
+        iChangingText{ false },
         iHandlingTextChange{ false },
         iAcceptingSelection{ false },
         iCancellingSelection{ false }
@@ -595,6 +574,7 @@ namespace neogfx
         iLayout1{ iLayout0 },
         iDownArrow{ texture{} },
         iListProxy{ *this },
+        iChangingText{ false },
         iHandlingTextChange{ false },
         iAcceptingSelection{ false },
         iCancellingSelection{ false }
@@ -679,6 +659,27 @@ namespace neogfx
             selection_model().set_presentation_model(*aPresentationModel);
         if (view_created())
             view().set_presentation_model(aPresentationModel);
+
+        iSelectionSink = selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /* aPreviousIndex */)
+        {
+            if (!presentation_model().filtering() && !handling_text_change())
+            {
+                neolib::scoped_flag sf{ iChangingText };
+                texture image;
+                std::string text;
+                if (aCurrentIndex != std::nullopt)
+                {
+                    auto const& maybeImage = presentation_model().cell_image(*aCurrentIndex);
+                    if (maybeImage != std::nullopt)
+                        image = *maybeImage;
+                    text = presentation_model().cell_to_string(*aCurrentIndex);
+                }
+                input_widget().set_spacing(presentation_model().cell_spacing(*this));
+                input_widget().set_image(image);
+                input_widget().set_text(text);
+            }
+        });
+
         update_layout();
         update();
     }
@@ -862,6 +863,11 @@ namespace neogfx
         return *iInputWidget;
     }
 
+    bool drop_list::changing_text() const
+    {
+        return iChangingText;
+    }
+
     bool drop_list::handling_text_change() const
     {
         return iHandlingTextChange;
@@ -924,7 +930,7 @@ namespace neogfx
                 neolib::scoped_flag sf{ iHandlingTextChange };
                 iSavedSelection = std::nullopt;
                 aInputWidget.text_changed().trigger();
-                if (aTextWidget.has_focus() && (!view_created() || !view().changing_text()))
+                if (aTextWidget.has_focus() && (!view_created() || !changing_text()))
                 {
                     if (!aTextWidget.text().empty())
                         show_view();

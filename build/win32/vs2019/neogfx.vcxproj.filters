@@ -1095,6 +1095,9 @@
     <ClInclude Include="..\..\..\src\app\native\windows_com.hpp">
       <Filter>Source Files\native\windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\font_widget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1590,6 +1593,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\app\native\windows_drag_drop.cpp">
       <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\font_widget.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

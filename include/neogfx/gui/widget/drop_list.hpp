@@ -78,8 +78,6 @@ namespace neogfx
         drop_list_view(i_layout& aLayout, drop_list& aDropList);
         ~drop_list_view();
     public:
-        bool changing_text() const;
-    public:
         using list_view::total_item_area;
     protected:
         void items_filtered() override;
@@ -91,7 +89,6 @@ namespace neogfx
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     private:
         drop_list& iDropList;
-        bool iChangingText;
     };
     
     class drop_list_popup : public window
@@ -258,6 +255,7 @@ namespace neogfx
         const i_drop_list_input_widget& input_widget() const;
         i_drop_list_input_widget& input_widget();
     public:
+        bool changing_text() const;
         bool handling_text_change() const;
         bool accepting_selection() const;
         bool cancelling_selection() const;
@@ -283,11 +281,13 @@ namespace neogfx
         std::shared_ptr<i_item_presentation_model> iPresentationModel;
         std::shared_ptr<i_item_selection_model> iSelectionModel;
         sink iSink;
+        sink iSelectionSink;
         mutable std::optional<std::pair<color, texture>> iDownArrowTexture;
         image_widget iDownArrow;
         list_proxy iListProxy;
         optional_item_model_index iSavedSelection;
         optional_item_model_index iSelection;
+        bool iChangingText;
         bool iHandlingTextChange;
         bool iAcceptingSelection;
         bool iCancellingSelection;

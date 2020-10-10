@@ -168,12 +168,21 @@ int main(int argc, char* argv[])
         ng::texture backgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } };
         ng::texture backgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } };
 
+        auto& font = settings.setting("environment.fonts_and_colors.font"_s);
         auto& subpixelRendering = settings.setting("environment.fonts_and_colors.subpixel"_s);
         auto& toolbarIconSize = settings.setting("environment.toolbars.icon_size"_s);
         auto& themeColor = settings.setting("environment.general.theme"_s);
         auto& workspaceGridType = settings.setting("environment.workspace.grid_type"_s);
         auto& workspaceGridSize = settings.setting("environment.workspace.grid_size"_s);
         auto& workspaceGridColor = settings.setting("environment.workspace.grid_color"_s);
+
+        auto fontChanged = [&]()
+        {
+            ng::service<ng::i_app>().current_style().set_font_info(font.value<ng::font_info>(true));
+        };
+        font.changing(fontChanged);
+        font.changed(fontChanged);
+        fontChanged();
 
         auto subpixelRenderingChanged = [&]()
         {

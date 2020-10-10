@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/jar.hpp>
 #include <neolib/core/variant.hpp>
+#include <neolib/app/i_settings.hpp>
 #include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
@@ -62,7 +63,24 @@ namespace neogfx
     {
         return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
+}
 
+template <>
+const neolib::enum_enumerators_t<neogfx::font_style> neolib::enum_enumerators_v<neogfx::font_style>
+{
+    declare_enum_string(neogfx::font_style, Invalid)
+    declare_enum_string(neogfx::font_style, Normal)
+    declare_enum_string(neogfx::font_style, Italic)
+    declare_enum_string(neogfx::font_style, Bold)
+    declare_enum_string(neogfx::font_style, Underline)
+    declare_enum_string(neogfx::font_style, BoldItalic)
+    declare_enum_string(neogfx::font_style, BoldItalicUnderline)
+    declare_enum_string(neogfx::font_style, BoldUnderline)
+    declare_enum_string(neogfx::font_style, ItalicUnderline)
+};
+
+namespace neogfx 
+{
     enum class font_weight : uint32_t
     {
         Thin = 100,
@@ -89,6 +107,7 @@ namespace neogfx
         struct unknown_style_name : std::logic_error { unknown_style_name() : std::logic_error("neogfx::font_info::unknown_style_name") {} };
         // types
     public:
+        typedef font_info abstract_type; // todo
         typedef double point_size;
     private:
         typedef std::optional<font_style> optional_style;
@@ -199,4 +218,71 @@ namespace neogfx
     };
 
     typedef std::optional<font> optional_font;
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const font_info& aFont)
+    {
+        aStream << "[";
+        aStream << aFont.family_name();
+        aStream << ",";
+        if (aFont.style_available())
+            aStream << aFont.style();
+        else
+            aStream << aFont.style_name();
+        aStream << ", ";
+        aStream << aFont.size();
+        aStream << ", ";
+        aStream << aFont.underline();
+        aStream << ", ";
+        aStream << aFont.kerning();
+        aStream << "]";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, font_info& aFont)
+    {
+        std::string familyName;
+        std::variant<font_style, std::string> style;
+        font_info::point_size size;
+        bool underline;
+        bool kerning;
+
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_only_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_only_whitespace{} });
+        char ignore;
+        aStream >> ignore;
+        aStream >> familyName;
+        std::string string;
+        aStream >> string;
+        try
+        {
+            style = neolib::string_to_enum<font_style>(string);
+        }
+        catch (...)
+        {
+            style = string;
+        }
+        aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
+        aStream >> size;
+        aStream >> underline;
+        aStream >> kerning;
+        aStream >> ignore;
+        aStream.imbue(previousImbued);
+
+        if (std::holds_alternative<font_style>(style))
+            aFont = font_info{ familyName, std::get<font_style>(style), size };
+        else
+            aFont = font_info{ familyName, std::get<std::string>(style), size };
+        aFont.set_underline(underline);
+        if (kerning)
+            aFont.enable_kerning();
+        else
+            aFont.disable_kerning();
+
+        return aStream;
+    }
 }
+
+define_setting_type_as(neogfx::font_info, neogfx::font)

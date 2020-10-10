@@ -228,8 +228,8 @@ namespace neogfx
         basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
         basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
-        basic_size with_cx(dimension_type cx) const { return basic_size{ cx, cy }; }
-        basic_size with_cy(dimension_type cy) const { return basic_size{ cx, cy }; }
+        basic_size with_cx(dimension_type d) const { return basic_size{ d, cy }; }
+        basic_size with_cy(dimension_type d) const { return basic_size{ cx, d }; }
     private:
         void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx == max_dimension()) || (rhs.cy != 0.0 && cy == max_dimension())) throw bad_size(); }
         // helpers

@@ -21,6 +21,7 @@
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gfx/color.hpp>
+#include <neogfx/gfx/text/font.hpp>
 #include <neogfx/app/settings.hpp>
 
 namespace neogfx::DesignStudio

@@ -1,4 +1,4 @@
-// font_dialog.cpp
+// font_widget.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -21,8 +21,7 @@
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
-#include <neogfx/gui/dialog/font_dialog.hpp>
-#include <neogfx/gui/dialog/message_box.hpp>
+#include <neogfx/gui/widget/font_widget.hpp>
 
 namespace neogfx
 {
@@ -117,103 +116,73 @@ namespace neogfx
         };
     }
 
-    font_dialog::font_dialog(const neogfx::font& aCurrentFont) :
-        dialog{ "Select Font", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
+    font_widget::font_widget(const neogfx::font& aCurrentFont) :
+        framed_widget<>{},
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iLayout0{ client_layout() },
-        iLayout1{ iLayout0 },
-        iFamilyLabel{ iLayout1, "Family:" },
-        iFamilyPicker{ iLayout1, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iLayout2{ iLayout0 },
-        iLayout3{ iLayout2 },
-        iLayout4{ iLayout3 },
-        iStyleLabel{ iLayout4, "Style:" },
-        iStylePicker{ iLayout4, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iLayout5{ iLayout3 },
-        iSizeLabel{ iLayout5, "Size:" },
-        iSizePicker{ iLayout5, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iSampleBox{ iLayout2, "Sample" },
-        iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
+        iLayout0{ *this },
+        iFamilyPicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
+        iStylePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
+        iSizePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter }
     {
         init();
     }
 
-    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont) :
-        dialog{ aParent, "Select Font", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
+    font_widget::font_widget(i_widget& aParent, const neogfx::font& aCurrentFont) :
+        framed_widget<>{ aParent },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iLayout0{ client_layout() },
-        iLayout1{ iLayout0 },
-        iFamilyLabel{ iLayout1, "Family:" },
-        iFamilyPicker{ iLayout1, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iLayout2{ iLayout0 },
-        iLayout3{ iLayout2 },
-        iLayout4{ iLayout3 },
-        iStyleLabel{ iLayout4, "Style:" },
-        iStylePicker{ iLayout4, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iLayout5{ iLayout3 },
-        iSizeLabel{ iLayout5, "Size:" },
-        iSizePicker{ iLayout5, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iSampleBox{ iLayout2, "Sample" },
-        iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
+        iLayout0{ *this },
+        iFamilyPicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
+        iStylePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
+        iSizePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter }
     {
         init();
     }
 
-    font_dialog::~font_dialog()
+    font_widget::font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont) :
+        framed_widget<>{ aLayout },
+        iUpdating{ false },
+        iCurrentFont{ aCurrentFont },
+        iSelectedFont{ aCurrentFont },
+        iLayout0{ *this },
+        iFamilyPicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
+        iStylePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
+        iSizePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter }
+    {
+        init();
+    }
+
+    font_widget::~font_widget()
     {
     }
 
-    font font_dialog::current_font() const
+    font font_widget::current_font() const
     {
         return iCurrentFont;
     }
 
-    font font_dialog::selected_font() const
+    font font_widget::selected_font() const
     {
         return iSelectedFont;
     }
     
-    void font_dialog::select_font(const neogfx::font& aFont)
+    void font_widget::select_font(const neogfx::font& aFont)
     {
         iSelectedFont = aFont;
         update_selected_font(*this);
     }
 
-    size font_dialog::minimum_size(const optional_size& aAvailableSpace) const
+    void font_widget::init()
     {
-        auto result = dialog::minimum_size(aAvailableSpace);
-        if (dialog::has_minimum_size())
-            return result;
-        result.cy += dpi_scale(std::min(font().height(), 16.0) * 8.0);
-        result.cx += dpi_scale(std::min(font().height(), 16.0) * 6.0);
-        return result;
-    }
-
-    void font_dialog::init()
-    {
-        button_box().option_layout().add(std::make_shared<push_button>("Subpixel Rendering..."_t)).clicked([this]()
-        {
-            message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
-        });
-
-        iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
-        iStylePicker.set_size_policy(size_constraint::Expanding);
-        iSizePicker.set_size_policy(size_constraint::Expanding);
-        iLayout1.set_weight(neogfx::size{ 0.0, 1.0 });
-        iLayout4.set_weight(neogfx::size{ 3.0, 1.0 });
-        iLayout5.set_weight(neogfx::size{ 1.0, 1.0 });
-
-        iSampleBox.set_size_policy(size_constraint::Expanding);
-        iSample.set_size_policy(size_constraint::Expanding);
-        iSample.set_minimum_size(size{ 192.0_dip, 48.0_dip });
-        iSample.set_maximum_size(size{ size::max_dimension(), 48.0_dip });
-
-        button_box().add_button(standard_button::Ok);
-        button_box().add_button(standard_button::Cancel);
+        iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
+        iStylePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
+        iSizePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
+        iFamilyPicker.set_fixed_size(size{ 128.0_dip });
+        iStylePicker.set_fixed_size(size{ 96.0_dip });
+        iSizePicker.set_fixed_size(size{ 64.0_dip });
 
         iFamilyPicker.set_presentation_model(std::make_shared<family_picker_presentation_model>());
         iStylePicker.set_presentation_model(std::make_shared<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
@@ -255,12 +224,10 @@ namespace neogfx
         for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
             iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
 
-        center_on_parent();
         update_selected_font(*this);
-        set_ready_to_render(true);
     }
 
-    void font_dialog::update_selected_font(const i_widget& aUpdatingWidget)
+    void font_widget::update_selected_font(const i_widget& aUpdatingWidget)
     {
         if (iUpdating)
             return;
@@ -311,7 +278,6 @@ namespace neogfx
             iSizePicker.selection_model().set_current_index(*fontSizeIndex);
         else
             iSizePicker.selection_model().unset_current_index();
-        iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
             SelectionChanged.trigger();
     }

@@ -29,6 +29,7 @@
 #include <neogfx/gui/widget/slider_box.hpp>
 #include <neogfx/gui/widget/color_widget.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
+#include <neogfx/gui/widget/font_widget.hpp>
 
 namespace neogfx
 {
@@ -215,6 +216,27 @@ namespace neogfx
                         {
                             neolib::scoped_flag sf{ settingWidget->updating };
                             settingWidget->set_gradient(unique_gradient{ aSetting.value<unique_gradient>(true) });
+                        });
+                        result = settingWidget;
+                    }
+                    else if (aSetting.value().type_name() == "neogfx::font")
+                    {
+                        auto settingWidget = std::make_shared<setting_widget<font_widget>>(aLayout, font{ aSetting.value().get<font_info>() });
+                        settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
+                        aSink += settingWidget->SelectionChanged([&, settingWidget]()
+                        {
+                            if (!settingWidget->updating)
+                                aSetting.set_value(static_cast<const font_info&>(settingWidget->selected_font()));
+                        });
+                        aSink += aSetting.changing([&, settingWidget]()
+                        {
+                            neolib::scoped_flag sf{ settingWidget->updating };
+                            settingWidget->select_font(aSetting.value<font_info>(true));
+                        });
+                        aSink += aSetting.changed([&, settingWidget]()
+                        {
+                            neolib::scoped_flag sf{ settingWidget->updating };
+                            settingWidget->select_font(aSetting.value<font_info>(true));
                         });
                         result = settingWidget;
                     }
@@ -470,7 +492,17 @@ namespace neogfx
 
         iDetailLayout.add_spacer();
 
-        treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
+        auto updateTreeFont = [=]()
+        {
+            treePresentationModel->set_default_font(service<i_app>().current_style().font().with_size(14).with_style(font_style::Bold));
+        };
+        iSink += service<i_app>().current_style_changed([=](style_aspect aAspect)
+        {
+            if ((aAspect & (style_aspect::Font)) != style_aspect::None)
+                updateTreeFont();
+        });
+        updateTreeFont();
+
         treePresentationModel->set_column_read_only(0);
         iTree.selection_model().set_mode(item_selection_mode::SingleSelection);
         auto update_details = [&, treeModel](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /* aPreviousIndex */)
