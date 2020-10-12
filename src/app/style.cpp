@@ -200,6 +200,6 @@ namespace neogfx
     {
         Changed.trigger(aAspect);
         if (&service<i_app>().current_style() == this)
-            service<i_app>().current_style_changed().trigger(aAspect);
+            service<i_app>().current_style_changed().async_trigger(aAspect);
     }
 }
