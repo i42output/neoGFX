@@ -207,28 +207,17 @@ namespace neogfx
         {
             update_selected_font(iFamilyPicker);
         });
-        iFamilyPicker.SelectionChanged([this](const optional_item_model_index&)
-        {
-            update_selected_font(iFamilyPicker);
-        });
 
         iStylePicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
         {
             update_selected_font(iStylePicker);
         });
-        iStylePicker.SelectionChanged([this](const optional_item_model_index&)
-        {
-            update_selected_font(iStylePicker);
-        });
 
-        iSizePicker.SelectionChanged([this](const optional_item_model_index&)
-        {
-            update_selected_font(iSizePicker);
-        });
         iSizePicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
         {
             update_selected_font(iSizePicker);
         });
+
         iSizePicker.input_widget().text_changed([this]()
         {
             update_selected_font(iSizePicker);

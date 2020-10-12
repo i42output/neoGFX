@@ -112,6 +112,7 @@ namespace neogfx
         ~basic_item_presentation_model()
         {
             set_destroying();
+            iSink.clear();
             iItemModelSink.clear();
         }
     public:

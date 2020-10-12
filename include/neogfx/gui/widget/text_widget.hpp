@@ -89,7 +89,6 @@ namespace neogfx
         void init();
         const neogfx::glyph_text& glyph_text() const;
     private:
-        sink iSink;
         std::string iText;
         mutable neogfx::glyph_text iGlyphText;
         mutable optional_size iTextExtent;
@@ -99,5 +98,6 @@ namespace neogfx
         text_widget_flags iFlags;
         neogfx::alignment iAlignment;
         optional_text_appearance iTextAppearance;
+        sink iSink;
     };
 }

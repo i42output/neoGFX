@@ -1290,6 +1290,8 @@ namespace neogfx
         set_padding(neogfx::padding{});
         iSink += service<i_app>().current_style_changed([this](style_aspect)
         {
+            if (capturing())
+                release_capture();
             if (selection_model().has_current_index())
                 make_visible(selection_model().current_index());
         });

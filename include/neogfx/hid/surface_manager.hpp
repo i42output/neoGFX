@@ -76,5 +76,6 @@ namespace neogfx
         i_rendering_engine& iRenderingEngine;
         surface_list iSurfaces;
         bool iRenderingSurfaces;
+        sink iSink;
     };
 }

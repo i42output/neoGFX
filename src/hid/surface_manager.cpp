@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/string_utils.hpp>
 
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
@@ -37,6 +38,13 @@ namespace neogfx
     surface_manager::surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine) :
         iBasicServices(aBasicServices), iRenderingEngine(aRenderingEngine), iRenderingSurfaces(false)
     {
+        iSink = service<i_app>().current_style_changed([this](style_aspect aAspect)
+        {
+            if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
+                layout_surfaces();
+            else
+                invalidate_surfaces();
+        });
     }
 
     bool surface_manager::initialising_surface() const

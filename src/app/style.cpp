@@ -21,7 +21,6 @@
 #include <neolib/file/json.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/style.hpp>
-#include <neogfx/hid/i_surface_manager.hpp>
 
 namespace neogfx
 {
@@ -201,9 +200,6 @@ namespace neogfx
     {
         Changed.trigger(aAspect);
         if (&service<i_app>().current_style() == this)
-        {
             service<i_app>().current_style_changed().trigger(aAspect);
-            service<i_surface_manager>().layout_surfaces();
-        }
     }
 }

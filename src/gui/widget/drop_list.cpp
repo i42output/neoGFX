@@ -979,7 +979,10 @@ namespace neogfx
 
         update_widgets();
 
-        iSink += service<i_app>().current_style_changed([this](style_aspect) { update_widgets(true); });
+        iSink += service<i_app>().current_style_changed([this](style_aspect) 
+        { 
+            update_widgets(true);
+        });
 
         presentation_model().set_cell_padding(neogfx::padding{ 3.0, 3.0 }, *this);
     }
@@ -994,6 +997,8 @@ namespace neogfx
             auto& inputWidget = static_cast<non_editable_input_widget&>(iInputWidget->as_widget());
 
             inputWidget.clicked([this]() { handle_clicked(); });
+            inputWidget.position_changed([this]() { if (iListProxy.view_created()) iListProxy.update_view_placement(); });
+            inputWidget.size_changed([this]() { if (iListProxy.view_created()) iListProxy.update_view_placement(); });
 
             inputWidget.set_size_policy(size_constraint::Expanding);
 
@@ -1012,6 +1017,8 @@ namespace neogfx
             iInputWidget = std::make_unique<editable_input_widget>(iLayout1);
             auto& inputWidget = static_cast<editable_input_widget&>(iInputWidget->as_widget());
 
+            inputWidget.position_changed([this]() { if (iListProxy.view_created()) iListProxy.update_view_placement(); });
+            inputWidget.size_changed([this]() { if (iListProxy.view_created()) iListProxy.update_view_placement(); });
             inputWidget.Mouse([&inputWidget, this](const neogfx::mouse_event& aEvent)
             {
                 if (aEvent.type() == mouse_event_type::ButtonReleased &&
@@ -1049,7 +1056,8 @@ namespace neogfx
             }
             input_widget().set_spacing(presentation_model().cell_spacing(*this));
             input_widget().set_image(image);
-            input_widget().set_text(text);
+            if (changed)
+                input_widget().set_text(text);
         }
 
         if (list_always_visible())
@@ -1061,6 +1069,9 @@ namespace neogfx
         {
             iDownArrow.show();
         }
+
+        if (iListProxy.view_created())
+            iListProxy.update_view_placement();
     }
 
     void drop_list::update_arrow()
