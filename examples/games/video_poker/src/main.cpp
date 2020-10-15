@@ -29,7 +29,6 @@ int main(int argc, char* argv[])
             windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
 
         auto& window = *windowObject;
-
         video_poker::table table{ window.client_layout() };
 
         return app.exec();

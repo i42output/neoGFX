@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
         auto& font = settings.setting("environment.fonts_and_colors.font"_s);
         auto& subpixelRendering = settings.setting("environment.fonts_and_colors.subpixel"_s);
         auto& toolbarIconSize = settings.setting("environment.toolbars.icon_size"_s);
-        auto& themeColor = settings.setting("environment.general.theme"_s);
+        auto& themeColor = settings.setting("environment.fonts_and_colors.theme"_s);
         auto& workspaceGridType = settings.setting("environment.workspace.grid_type"_s);
         auto& workspaceGridSize = settings.setting("environment.workspace.grid_size"_s);
         auto& workspaceGridColor = settings.setting("environment.workspace.grid_color"_s);
@@ -384,6 +384,7 @@ int main(int argc, char* argv[])
         auto& toolboxTree = toolbox.docked_widget<ng::tree_view>();
         toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         toolboxTree.set_presentation_model(toolboxPresentationModel);
+        toolboxTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
 
         ng::basic_item_model<ds::workflow_tool> workflowModel; // todo
         auto workflowCppIde = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::CppIde, "Build");
@@ -423,6 +424,7 @@ int main(int argc, char* argv[])
         auto& workflowTree = workflow.docked_widget<ng::list_view>();
         workflowTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         workflowTree.set_presentation_model(workflowPresentationModel);
+        workflowTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
 
         ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
         objectModel.set_column_name(0u, "Object"_t);

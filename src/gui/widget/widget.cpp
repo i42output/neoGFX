@@ -202,19 +202,26 @@ namespace neogfx
 
     void widget::set_parent(i_widget& aParent)
     {
-        if (is_root())
-            iParent = &aParent;
-        else if (aParent.adding_child())
-            iParent = &aParent;
-        else
-            aParent.add(*this);
-        iDeviceMetricsAvailable = std::nullopt;
+        if (iParent != &aParent)
+        {
+            if (is_root() || aParent.adding_child())
+            {
+                iParent = &aParent;
+                parent_changed();
+            }
+            else
+                aParent.add(*this);
+        }
     }
 
     void widget::parent_changed()
     {
         if (!is_root())
+        {
+            iDeviceMetricsAvailable = std::nullopt;
+            iOrigin = std::nullopt;
             update_layout();
+        }
     }
 
     bool widget::adding_child() const
@@ -1083,9 +1090,10 @@ namespace neogfx
                     aGc.draw_text(position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                 }
             }
-            aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::White, 3.0 });
+            rect const nonClientRect = to_client_coordinates(non_client_rect());
+            aGc.draw_rect(nonClientRect, pen{ color::White, 3.0 });
             aGc.line_stipple_on(1.0, 0x5555);
-            aGc.draw_rect(to_client_coordinates(non_client_rect()), pen{ color::Green, 3.0 });
+            aGc.draw_rect(nonClientRect, pen{ color::Green, 3.0 });
             aGc.line_stipple_off();
             if (debug::layoutItem != this || has_layout())
             {
@@ -1116,14 +1124,16 @@ namespace neogfx
                         }
                         aGc.draw_text(item.position(), text, debugFont2, text_appearance{ color::White.with_alpha(0.5), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.5), 2.0 } });
                     }
-                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::White.with_alpha(0.5));
+                    rect const itemRect{ item.position(), item.extents() };
+                    aGc.draw_rect(itemRect, color::White.with_alpha(0.5));
                     aGc.line_stipple_on(1.0, 0x5555);
-                    aGc.draw_rect(rect{ item.position(), item.extents() }, color::Black.with_alpha(0.5));
+                    aGc.draw_rect(itemRect, color::Black.with_alpha(0.5));
                     aGc.line_stipple_off();
                 }
-                aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, color::White);
+                rect const layoutRect{ debugLayout.position(), debugLayout.extents() };
+                aGc.draw_rect(layoutRect, color::White);
                 aGc.line_stipple_on(1.0, 0x5555);
-                aGc.draw_rect(rect{ debugLayout.position(), debugLayout.extents() }, debug::layoutItem == &layout() ? color::Blue : color::Purple);
+                aGc.draw_rect(layoutRect, debug::layoutItem == &layout() ? color::Blue : color::Purple);
                 aGc.line_stipple_off();
             }
         }

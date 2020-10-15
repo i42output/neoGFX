@@ -63,9 +63,9 @@ namespace neogfx::DesignStudio
         register_setting<double>("environment.tabs_and_windows.right_dock_width"_s, 256.0);
         register_setting<double>("environment.tabs_and_windows.left_dock_weight"_s, 0.3);
         register_setting<double>("environment.tabs_and_windows.right_dock_weight"_s, 0.3);
+        register_setting<color>("environment.fonts_and_colors.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
         register_setting<font_info>("environment.fonts_and_colors.font"_s, service<i_app>().current_style().font_info(), "Font: %?%"_t);
         register_setting<bool>("environment.fonts_and_colors.subpixel"_s, false, "Subpixel text rendering: %?%"_t);
-        register_setting<color>("environment.general.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
         register_setting<workspace_grid>("environment.workspace.grid_type"_s, workspace_grid::Lines, "Grid type : %?% Grid size: %environment.workspace.grid_size:?%"_t);
         register_setting<uint32_t>("environment.workspace.grid_size"_s, 20, ng::setting_constraints<uint32_t>{ false, false, 2, 64, 2 });
         register_setting<gradient>("environment.workspace.grid_color"_s, gradient{ service<i_app>().current_style().palette().color(color_role::Theme).with_alpha(0.25) }, { true }, "Grid color: %?%"_t);
