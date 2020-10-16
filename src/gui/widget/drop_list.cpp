@@ -140,7 +140,7 @@ namespace neogfx
 
     color drop_list_popup::frame_color() const
     {
-        if (window::has_frame_color())
+        if (has_frame_color())
             return window::frame_color();
         auto viewBackgroundColor = iView.background_color();
         auto backgroundColor = viewBackgroundColor.unshaded(0x20);

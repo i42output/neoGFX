@@ -388,13 +388,13 @@ int main(int argc, char* argv[])
 
         ng::basic_item_model<ds::workflow_tool> workflowModel; // todo
         auto workflowCppIde = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::CppIde, "Build");
-        auto workflowNote = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::Note, "Note");
+        auto workflowNote = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::StickyNote, "Note");
         class workflow_presentation_model : public ng::basic_item_presentation_model<decltype(workflowModel)>
         {
         public:
             workflow_presentation_model() : 
                 cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
-                noteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
+                stickyNoteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
             {
             }
         public:
@@ -408,15 +408,15 @@ int main(int argc, char* argv[])
                 {
                 case ds::workflow_tool::CppIde:
                     return cppIdeTexture;
-                case ds::workflow_tool::Note:
-                    return noteTexture;
+                case ds::workflow_tool::StickyNote:
+                    return stickyNoteTexture;
                 default:
                     return {};
                 }
             }
         public:
             ng::texture cppIdeTexture;
-            ng::texture noteTexture;
+            ng::texture stickyNoteTexture;
         } workflowPresentationModel;
 
         workflowPresentationModel.set_item_model(workflowModel);

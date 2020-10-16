@@ -215,7 +215,7 @@ namespace neogfx
 
     color popup_menu::frame_color() const
     {
-        if (window::has_frame_color())
+        if (has_frame_color())
             return window::frame_color();
         color result = background_color().darker(0x30);
         if (result.similar_intensity(background_color(), 0.05))

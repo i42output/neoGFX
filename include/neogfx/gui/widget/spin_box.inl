@@ -109,9 +109,12 @@ namespace neogfx
     template <typename T>
     color basic_spin_box<T>::frame_color() const
     {
-        if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
+        if (has_frame_color())
             return base_type::frame_color();
-        return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
+        else if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
+            return base_type::frame_color();
+        else
+            return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
     template <typename T>

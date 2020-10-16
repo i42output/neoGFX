@@ -686,9 +686,12 @@ namespace neogfx
 
     color text_edit::frame_color() const
     {
-        if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
+        if (has_frame_color())
             return framed_scrollable_widget::frame_color();
-        return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
+        else if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
+            return framed_scrollable_widget::frame_color();
+        else
+            return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
     bool text_edit::can_undo() const

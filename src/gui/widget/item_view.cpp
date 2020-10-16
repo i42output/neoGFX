@@ -379,8 +379,6 @@ namespace neogfx
                 if (currentCell)
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
-                    // todo: make the following optional (style-based)
-                    aGc.draw_rect(cellBackgroundRect, pen{ selection_model().current_index() == editing() ? *textColor : *cellBackgroundColor });
                     if (selection_model().current_index() != editing() && has_focus())
                         aGc.draw_focus_rect(cellBackgroundRect);
                 }
@@ -981,23 +979,24 @@ namespace neogfx
         iEditing = newIndex;
         if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
             editor().set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
+        optional_color textColor = presentation_model().cell_color(newIndex, color_role::Text);
+        if (textColor == std::nullopt)
+            textColor = has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Text);
+        static_cast<framed_widget<>&>(editor()).set_frame_color(textColor);
         auto editorRect = cell_rect(newIndex, cell_part::Editor);
-        editorRect.inflate(presentation_model().cell_padding(*this));
         editor().move(editorRect.position());
         editor().resize(editorRect.extents());
         if (editor_has_text_edit())
         {
             auto& textEdit = editor_text_edit();
+            auto const& textEditRect = to_client_coordinates(textEdit.to_window_coordinates(textEdit.client_rect()));
             bool const childTextEdit = (&textEdit != &editor());
-            auto textEditRect = cell_rect(newIndex, cell_part::Text);
-            auto const adjust = point{ textEditRect.position() - editorRect.position() } - (childTextEdit ? textEdit.position() : point{});
-            auto const paddingAdjust = neogfx::padding{ adjust.dx, adjust.dy, 0, 0 };
+            auto const& textRect = cell_rect(newIndex, cell_part::Text);
+            auto const adjust = textRect.position() - textEditRect.position();
+            auto const paddingAdjust = neogfx::padding{ adjust.dx, adjust.dy, adjust.dx, 0 };
             textEdit.set_padding(paddingAdjust);
             if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
-            optional_color textColor = presentation_model().cell_color(newIndex, color_role::Text);
-            if (textColor == std::nullopt)
-                textColor = has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Text);
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
             auto cellFont = presentation_model().cell_font(newIndex);
             textEdit.set_default_style(text_edit::style{ cellFont ? *cellFont : presentation_model().default_font(), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
@@ -1135,8 +1134,9 @@ namespace neogfx
                     x = 0.0;
                 for (uint32_t col = 0; col < presentation_model().columns(); ++col)
                 {
+                    bool const firstColumn = (col == 0);
                     bool const lastColumn = (col == presentation_model().columns() - 1);
-                    if (col != 0)
+                    if (!firstColumn)
                         x += cellSpacing.cx;
                     else
                         x += cellSpacing.cx / 2.0;
@@ -1148,20 +1148,14 @@ namespace neogfx
                         switch (aPart)
                         {
                         case cell_part::Background:
-                            if (!lastColumn)
-                                result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
-                            else
-                            {
-                                result.indent(point{ -cellSpacing.cx / 2.0, 0.0 });
-                                result.cx += (item_display_rect().right() - result.right());
-                            }
+                            result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
                             break;
                         case cell_part::Base:
                             result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
-                            if (lastColumn)
-                                result.cx -= cellSpacing.cx / 2.0;
                             break;
                         }
+                        if (lastColumn)
+                            result.cx += (item_display_rect().right() - result.right());
                         if (aPart != cell_part::Background)
                             result.cx -= indent;
                         return result;
@@ -1243,13 +1237,20 @@ namespace neogfx
         case cell_part::Editor:
             {
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.deflate(presentation_model().cell_padding(*this));
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
                     cellRect.indent(point{ cellCheckBoxSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
                 auto const& cellImageSize = presentation_model().cell_image_size(aItemIndex);
                 if (cellImageSize)
                     cellRect.indent(point{ cellImageSize->cx + presentation_model().cell_spacing(aGc).cx, 0.0 });
+                cellRect.inflate(presentation_model().cell_padding(*this));
+                cellRect.inflate(size{ 1.0_dip }); // editor frame width
+                bool const lastColumn = (aItemIndex.column() == presentation_model().columns() - 1);
+                if (lastColumn)
+                {
+                    cellRect.cx += presentation_model().cell_spacing(aGc).cx;
+                    cellRect.cx = std::min(cellRect.cx, cellRect.cx + (item_display_rect().right() - cellRect.right()));
+                }
                 return cellRect;
             }
             break;

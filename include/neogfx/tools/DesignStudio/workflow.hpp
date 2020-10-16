@@ -27,6 +27,6 @@ namespace neogfx::DesignStudio
     {
         Unknown,
         CppIde,
-        Note
+        StickyNote
     };
 }

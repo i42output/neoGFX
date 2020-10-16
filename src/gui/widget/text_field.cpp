@@ -30,18 +30,22 @@ namespace neogfx
 
     color text_field::input_box_container::frame_color() const
     {
-        if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
+        if (has_frame_color())
             return base_type::frame_color();
-        return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
+        else if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
+            return base_type::frame_color();
+        else
+            return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
     }
 
     color text_field::input_box_container::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))
             return base_type::palette_color(aColorRole);
-        if (aColorRole == color_role::Background)
+        else if (aColorRole == color_role::Background)
             return palette_color(color_role::Base);
-        return base_type::palette_color(aColorRole);
+        else
+            return base_type::palette_color(aColorRole);
     }
 
     text_field::text_field(const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
