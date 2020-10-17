@@ -201,6 +201,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\main_window.cpp" />
     <ClCompile Include="..\..\..\src\new_project_dialog.cpp" />
     <ClCompile Include="..\..\..\src\project.cpp" />
     <ClCompile Include="..\..\..\src\project_manager.cpp" />
@@ -256,6 +257,7 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element_library_plugin.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\widget.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\workflow.hpp" />
+    <ClInclude Include="..\..\..\src\main_window.hpp" />
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
     <ClInclude Include="..\..\..\src\object_model.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
