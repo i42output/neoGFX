@@ -18,13 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
 #include "main_window.hpp"
 
 namespace neogfx::DesignStudio
 {
     main_window_ex::main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager) :
         main_window{ aApp },
+        iProjectManager{ aProjectManager },
         autoscaleDocks{ aSettings.setting("environment.tabs_and_windows.autoscale_docks"_s) },
         workspaceSize{ aSettings.setting("environment.tabs_and_windows.workspace_size"_s) },
         workspacePosition{ aSettings.setting("environment.tabs_and_windows.workspace_position"_s) },
@@ -216,48 +216,7 @@ namespace neogfx::DesignStudio
         objectTree.set_presentation_model(iObjectPresentationModel);
         objectTree.column_header().set_expand_last_column(true);
 
-        iWorkspace.view_stack().Painting([&](ng::i_graphics_context& aGc)
-        {
-            auto const& cr = iWorkspace.view_stack().client_rect();
-            if (aProjectManager.projects().empty())
-            {
-                aGc.draw_texture(
-                    ng::point{ (cr.extents() - iBackgroundTexture1.extents()) / 2.0 },
-                    iBackgroundTexture1,
-                    ng::color::White.with_alpha(0.25));
-                aGc.draw_texture(
-                    ng::rect{ ng::point{ cr.bottom_right() - iBackgroundTexture2.extents() / 2.0 }, iBackgroundTexture2.extents() / 2.0 },
-                    iBackgroundTexture2,
-                    ng::color::White.with_alpha(0.25));
-            }
-            else
-            {
-                aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), iWorkspace.view_stack().client_rect());
-                ng::size const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{ workspaceGridSize.value<uint32_t>(true), workspaceGridSize.value<uint32_t>(true) });
-                ng::basic_size<int32_t> const cells = ng::size{ cr.cx / gridSize.cx, cr.cy / gridSize.cy };
-                if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Lines)
-                {
-                    for (int32_t x = 0; x <= cells.cx; ++x)
-                        aGc.draw_line(ng::point{ x * gridSize.cx, 0.0 }, ng::point{ x * gridSize.cx, cr.bottom() }, ng::color::White);
-                    for (int32_t y = 0; y <= cells.cy; ++y)
-                        aGc.draw_line(ng::point{ 0.0, y * gridSize.cy }, ng::point{ cr.right(), y * gridSize.cy }, ng::color::White);
-                }
-                else if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Quads)
-                {
-                    for (int32_t x = 0; x <= cells.cx; ++x)
-                        for (int32_t y = 0; y <= cells.cy; ++y)
-                            if ((x + y) % 2 == 0)
-                                aGc.fill_rect(ng::rect{ ng::point{ x * gridSize.cx, y * gridSize.cy }, gridSize }, ng::color::White);
-                }
-                else // Points
-                {
-                    for (int32_t x = 0; x <= cells.cx; ++x)
-                        for (int32_t y = 0; y <= cells.cy; ++y)
-                            aGc.draw_pixel(ng::point{ x * gridSize.cx, y * gridSize.cy }, ng::color::White);
-                }
-                aGc.clear_gradient();
-            }
-        });
+        iWorkspace.view_stack().Painting([&](ng::i_graphics_context& aGc) { paint_workspace(aGc); });
 
         auto update_ui = [&]()
         {
@@ -346,6 +305,49 @@ namespace neogfx::DesignStudio
         //        ng::css css{"test.css"};
 
         activate();
+    }
+
+    void main_window_ex::paint_workspace(ng::i_graphics_context& aGc)
+    {
+        auto const& cr = iWorkspace.view_stack().client_rect();
+        if (iProjectManager.projects().empty())
+        {
+            aGc.draw_texture(
+                ng::point{ (cr.extents() - iBackgroundTexture1.extents()) / 2.0 },
+                iBackgroundTexture1,
+                ng::color::White.with_alpha(0.25));
+            aGc.draw_texture(
+                ng::rect{ ng::point{ cr.bottom_right() - iBackgroundTexture2.extents() / 2.0 }, iBackgroundTexture2.extents() / 2.0 },
+                iBackgroundTexture2,
+                ng::color::White.with_alpha(0.25));
+        }
+        else
+        {
+            aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), iWorkspace.view_stack().client_rect());
+            ng::size const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{ workspaceGridSize.value<uint32_t>(true), workspaceGridSize.value<uint32_t>(true) });
+            ng::basic_size<int32_t> const cells = ng::size{ cr.cx / gridSize.cx, cr.cy / gridSize.cy };
+            if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Lines)
+            {
+                for (int32_t x = 0; x <= cells.cx; ++x)
+                    aGc.draw_line(ng::point{ x * gridSize.cx, 0.0 }, ng::point{ x * gridSize.cx, cr.bottom() }, ng::color::White);
+                for (int32_t y = 0; y <= cells.cy; ++y)
+                    aGc.draw_line(ng::point{ 0.0, y * gridSize.cy }, ng::point{ cr.right(), y * gridSize.cy }, ng::color::White);
+            }
+            else if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Quads)
+            {
+                for (int32_t x = 0; x <= cells.cx; ++x)
+                    for (int32_t y = 0; y <= cells.cy; ++y)
+                        if ((x + y) % 2 == 0)
+                            aGc.fill_rect(ng::rect{ ng::point{ x * gridSize.cx, y * gridSize.cy }, gridSize }, ng::color::White);
+            }
+            else // Points
+            {
+                for (int32_t x = 0; x <= cells.cx; ++x)
+                    for (int32_t y = 0; y <= cells.cy; ++y)
+                        aGc.draw_pixel(ng::point{ x * gridSize.cx, y * gridSize.cy }, ng::color::White);
+            }
+            aGc.clear_gradient();
+        }
     }
 }
 

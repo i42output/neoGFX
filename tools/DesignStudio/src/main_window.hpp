@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/view/view_container.hpp>
@@ -58,6 +59,9 @@ namespace neogfx::DesignStudio
     public:
         main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager);
     private:
+        void paint_workspace(ng::i_graphics_context& aGc);
+    private:
+        project_manager& iProjectManager;
         ng::dock iLeftDock;
         ng::dock iRightDock;
         ng::dockable iToolbox;
