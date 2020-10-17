@@ -385,10 +385,11 @@ int main(int argc, char* argv[])
         toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         toolboxTree.set_presentation_model(toolboxPresentationModel);
         toolboxTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
+        toolboxTree.set_focus_policy(ng::focus_policy::TabFocus);
 
         ng::basic_item_model<ds::workflow_tool> workflowModel; // todo
         auto workflowCppIde = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::CppIde, "Build");
-        auto workflowNote = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::StickyNote, "Note");
+        auto workflowNote = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::StickyNote, "Sticky");
         class workflow_presentation_model : public ng::basic_item_presentation_model<decltype(workflowModel)>
         {
             typedef ng::basic_item_presentation_model<decltype(workflowModel)> base_type;
@@ -437,6 +438,7 @@ int main(int argc, char* argv[])
         workflowTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         workflowTree.set_presentation_model(workflowPresentationModel);
         workflowTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
+        workflowTree.set_focus_policy(ng::focus_policy::TabFocus);
 
         ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
         objectModel.set_column_name(0u, "Object"_t);
