@@ -205,6 +205,7 @@
     <ClCompile Include="..\..\..\src\project.cpp" />
     <ClCompile Include="..\..\..\src\project_manager.cpp" />
     <ClCompile Include="..\..\..\src\settings.cpp" />
+    <ClCompile Include="..\..\..\src\toolbox_model.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\DesignStudio.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
@@ -256,7 +257,10 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\widget.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\workflow.hpp" />
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
+    <ClInclude Include="..\..\..\src\object_model.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
+    <ClInclude Include="..\..\..\src\toolbox_model.hpp" />
+    <ClInclude Include="..\..\..\src\workflow_model.hpp" />
     <ClInclude Include="x64\Debug\GeneratedFiles\DesignStudio.ui.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>

@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/gfx/utility.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -34,18 +33,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/dock.hpp>
 #include <neogfx/gui/widget/dockable.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
-#include <neogfx/gui/widget/item_model.hpp>
-#include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/core/css.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
-#include <neogfx/tools/DesignStudio/element.hpp>
-#include <neogfx/tools/DesignStudio/i_element_library.hpp>
-#include <neogfx/tools/DesignStudio/workflow.hpp>
 #include "new_project_dialog.hpp"
+#include "toolbox_model.hpp"
+#include "workflow_model.hpp"
+#include "object_model.hpp"
 #include "DesignStudio.ui.hpp"
 
 using namespace neolib::string_literals;
@@ -243,194 +240,19 @@ int main(int argc, char* argv[])
 
         ds::project_manager pm;
 
-        typedef std::pair<ds::i_element_library*, ng::string> tool_t;
-        ng::basic_item_tree_model<std::variant<ds::element_group, tool_t>> toolboxModel;
-        auto toolboxProject = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Project, "Project");
-        auto toolboxCode = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::Code, "Code");
-        auto toolboxUserInterface = toolboxModel.insert_item(toolboxModel.send(), ds::element_group::UserInterface, "User Interface");
-        auto toolboxApp = toolboxModel.append_item(toolboxProject, ds::element_group::App, "Application");
-        auto toolboxMenu = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Menu, "Menu");
-        auto toolboxAction = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Action, "Action");
-        auto toolboxLayout = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Layout, "Layout");
-        auto toolboxWidget = toolboxModel.append_item(toolboxUserInterface, ds::element_group::Widget, "Widget");
-        auto stringify_tool = [](const ng::i_string& aInput) -> std::string
-        {
-            std::string result;
-            auto bits = neolib::tokens(aInput.to_std_string(), "_"s);
-            for (auto const& bit : bits)
-            {
-                if (!result.empty())
-                    result += ' ';
-                result += std::toupper(bit[0]);
-                result += bit.substr(1);
-            }
-            return result;
-        };
-        class toolbox_presentation_model : public ng::basic_item_presentation_model<decltype(toolboxModel)>
-        {
-        public:
-            toolbox_presentation_model()
-            {
-            }
-        public:
-            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
-            {
-                auto const& tool = item_model().item(to_item_model_index(aIndex));
-                if (std::holds_alternative<ds::element_group>(tool))
-                {
-                    switch (std::get<ds::element_group>(tool))
-                    {
-                    case ds::element_group::Project:
-                    case ds::element_group::Code:
-                    case ds::element_group::UserInterface:
-                        return ng::size{ 24.0_dip, 24.0_dip };
-                    case ds::element_group::Script:
-                    case ds::element_group::App:
-                    case ds::element_group::Menu:
-                    case ds::element_group::Action:
-                    case ds::element_group::Widget:
-                    case ds::element_group::Layout:
-                        return {};
-                    default:
-                        return {};
-                    }
-                }
-                else
-                {
-                    return ng::size{ 24.0_dip, 24.0_dip };
-                }
-            }
-            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
-            {
-                auto const& tool = item_model().item(to_item_model_index(aIndex));
-                if (std::holds_alternative<ds::element_group>(tool))
-                {
-                    switch (std::get<ds::element_group>(tool))
-                    {
-                    case ds::element_group::Project:
-                        return projectTexture;
-                    case ds::element_group::UserInterface:
-                        return userInterfaceTexture;
-                    case ds::element_group::Code:
-                        return codeTexture;
-                    case ds::element_group::Script:
-                    case ds::element_group::Node:
-                    case ds::element_group::App:
-                    case ds::element_group::Menu:
-                    case ds::element_group::Action:
-                    case ds::element_group::Widget:
-                    case ds::element_group::Layout:
-                        return {};
-                    default:
-                        return {};
-                    }
-                }
-                else
-                {
-                    auto const& t = std::get<tool_t>(item_model().item(to_item_model_index(aIndex)));
-                    return t.first->element_icon(t.second);
-                }
-            }
-        public:
-            ng::texture projectTexture;
-            ng::texture codeTexture;
-            ng::texture userInterfaceTexture;
-        } toolboxPresentationModel;
-        for (auto const& plugin : ng::service<ng::i_app>().plugin_manager().plugins())
-        {
-            ng::ref_ptr<ds::i_element_library> elementLibrary;
-            plugin->discover(elementLibrary);
-            if (elementLibrary)
-                for (auto const& tool : elementLibrary->elements_ordered())
-                    switch (elementLibrary->element_group(tool))
-                    {
-                    default:
-                    case ds::element_group::Unknown:
-                        break;
-                    case ds::element_group::Project:
-                        toolboxPresentationModel.projectTexture = elementLibrary->element_icon("project"_s);
-                        break;
-                    case ds::element_group::Code:
-                        toolboxPresentationModel.codeTexture = elementLibrary->element_icon("code"_s);
-                        break;
-                    case ds::element_group::UserInterface:
-                        toolboxPresentationModel.userInterfaceTexture = elementLibrary->element_icon("user_interface"_s);
-                        break;
-                    case ds::element_group::Script:
-                        toolboxModel.append_item(toolboxCode, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    case ds::element_group::Node:
-                        toolboxModel.append_item(toolboxCode, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    case ds::element_group::App:
-                        toolboxModel.append_item(toolboxApp, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    case ds::element_group::Menu:
-                        toolboxModel.append_item(toolboxMenu, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    case ds::element_group::Action:
-                        toolboxModel.append_item(toolboxAction, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    case ds::element_group::Widget:
-                        toolboxModel.append_item(toolboxWidget, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    case ds::element_group::Layout:
-                        toolboxModel.append_item(toolboxLayout, tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    }
-        }
-        toolboxPresentationModel.set_item_model(toolboxModel);
-        toolboxPresentationModel.set_column_read_only(0u);
+        ds::toolbox_model toolboxModel;
+        ds::toolbox_presentation_model toolboxPresentationModel;
+        ds::populate_toolbox_model(toolboxModel, toolboxPresentationModel);
         auto& toolboxTree = toolbox.docked_widget<ng::tree_view>();
         toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         toolboxTree.set_presentation_model(toolboxPresentationModel);
         toolboxTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
         toolboxTree.set_focus_policy(ng::focus_policy::TabFocus);
 
-        ng::basic_item_model<ds::workflow_tool> workflowModel; // todo
+        ds::workflow_model workflowModel; // todo
         auto workflowCppIde = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::CppIde, "Build");
         auto workflowNote = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::StickyNote, "Sticky");
-        class workflow_presentation_model : public ng::basic_item_presentation_model<decltype(workflowModel)>
-        {
-            typedef ng::basic_item_presentation_model<decltype(workflowModel)> base_type;
-        public:
-            workflow_presentation_model() : 
-                cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
-                stickyNoteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
-            {
-            }
-        public:
-            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
-            {
-                return ng::size{ 32.0_dip, 32.0_dip };
-            }
-            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
-            {
-                switch (item_model().item(to_item_model_index(aIndex)))
-                {
-                case ds::workflow_tool::CppIde:
-                    return cppIdeTexture;
-                case ds::workflow_tool::StickyNote:
-                    return stickyNoteTexture;
-                default:
-                    return {};
-                }
-            }
-            ng::item_cell_flags cell_flags(const ng::item_presentation_model_index& aIndex) const override
-            {
-                auto result = base_type::cell_flags(aIndex);
-                switch (item_model().item(to_item_model_index(aIndex)))
-                {
-                case ds::workflow_tool::StickyNote:
-                    result |= ng::item_cell_flags::Draggable;
-                    break;
-                }
-                return result;
-            }
-        public:
-            ng::texture cppIdeTexture;
-            ng::texture stickyNoteTexture;
-        } workflowPresentationModel;
+        ds::workflow_presentation_model workflowPresentationModel;
 
         workflowPresentationModel.set_item_model(workflowModel);
         workflowPresentationModel.set_column_read_only(0u);
@@ -440,34 +262,11 @@ int main(int argc, char* argv[])
         workflowTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
         workflowTree.set_focus_policy(ng::focus_policy::TabFocus);
 
-        ng::basic_item_tree_model<ds::i_element*, 2> objectModel;
+        ds::object_model objectModel;
         objectModel.set_column_name(0u, "Object"_t);
         objectModel.set_column_name(1u, "Type"_t);
-        class object_presentation_model : public ng::basic_item_presentation_model<decltype(objectModel)>
-        {
-        public:
-            object_presentation_model()
-            {
-            }
-        public:
-            ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
-            {
-                if (aIndex.column() == 0)
-                    return ng::size{ 16.0_dip, 16.0_dip };
-                else
-                    return {};
-            }
-            ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
-            {
-                if (aIndex.column() == 0)
-                {
-                    auto const& e = *item_model().item(to_item_model_index(aIndex));
-                    return e.library().element_icon(e.type());
-                }
-                else
-                    return {};
-            }
-        } objectPresentationModel;
+        ds::object_presentation_model objectPresentationModel;
+
         objectPresentationModel.set_item_model(objectModel);
         objectPresentationModel.set_column_read_only(1u);
         objectPresentationModel.set_alternating_row_color(true);
