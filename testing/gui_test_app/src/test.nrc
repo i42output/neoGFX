@@ -239,6 +239,7 @@
                             padding: 8px
                             horizontal_layout: {
                                 id: layoutTopButtons
+                                size_policy: [Expanding Minimum]
                                 push_button: {
                                     id: button0
                                     .label: {
@@ -411,6 +412,7 @@
                             }
                             horizontal_layout: {
                                 id: layout2
+                                size_policy: [Expanding Minimum]
                                 label: {
                                     id: label1
                                     text: "Label 1:"

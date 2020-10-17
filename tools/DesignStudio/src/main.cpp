@@ -42,6 +42,9 @@ int main(int argc, char* argv[])
 
     ds::main_app app{ appInfo };
 
+    app.change_style("Dark");
+    app.current_style().set_spacing(ng::size{ 4.0 });
+
     std::cout << "Loading element libraries..." << std::endl;
     app.plugin_manager().load_plugins();
     for (auto const& plugin : app.plugin_manager().plugins())

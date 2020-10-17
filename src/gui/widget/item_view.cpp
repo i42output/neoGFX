@@ -1154,10 +1154,10 @@ namespace neogfx
                             result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
                             break;
                         }
-                        if (lastColumn)
-                            result.cx += (item_display_rect().right() - result.right());
                         if (aPart != cell_part::Background)
                             result.cx -= indent;
+                        if (lastColumn)
+                            result.cx += (item_display_rect().right() - result.right());
                         return result;
                     }
                     x += column_width(col);

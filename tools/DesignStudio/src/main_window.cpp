@@ -59,9 +59,6 @@ namespace neogfx::DesignStudio
         aApp.actionShowStatusBar.checked([&]() { statusBar.show(); });
         aApp.actionShowStatusBar.unchecked([&]() { statusBar.hide(); });
 
-        aApp.change_style("Dark");
-        aApp.current_style().set_spacing(ng::size{ 4.0 });
-
         if (!workspaceSize.is_default())
             set_extents(workspaceSize.value<ng::size>());
         if (!workspacePosition.is_default())
