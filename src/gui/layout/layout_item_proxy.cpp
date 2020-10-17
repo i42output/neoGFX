@@ -334,7 +334,7 @@ namespace neogfx
         return cachedWeight;
     }
 
-    void layout_item_proxy::set_weight(const optional_size& aWeight, bool aUpdateLayout)
+    void layout_item_proxy::set_weight(optional_size const& aWeight, bool aUpdateLayout)
     {
         subject().set_weight(aWeight, aUpdateLayout);
     }
@@ -344,7 +344,7 @@ namespace neogfx
         return subject().has_minimum_size();
     }
 
-    size layout_item_proxy::minimum_size(const optional_size& aAvailableSpace) const
+    size layout_item_proxy::minimum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
@@ -399,7 +399,7 @@ namespace neogfx
         return cachedMinSize;
     }
 
-    void layout_item_proxy::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
+    void layout_item_proxy::set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout)
     {
         subject().set_minimum_size(aMinimumSize, aUpdateLayout);
         if (aMinimumSize != std::nullopt)
@@ -411,7 +411,7 @@ namespace neogfx
         return subject().has_maximum_size();
     }
 
-    size layout_item_proxy::maximum_size(const optional_size& aAvailableSpace) const
+    size layout_item_proxy::maximum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
@@ -436,7 +436,7 @@ namespace neogfx
         return cachedMaxSize;
     }
 
-    void layout_item_proxy::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
+    void layout_item_proxy::set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout)
     {
         subject().set_maximum_size(aMaximumSize, aUpdateLayout);
         if (aMaximumSize != std::nullopt)
@@ -448,7 +448,7 @@ namespace neogfx
         return subject().has_fixed_size();
     }
 
-    size layout_item_proxy::fixed_size(const optional_size& aAvailableSpace) const
+    size layout_item_proxy::fixed_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
@@ -471,7 +471,7 @@ namespace neogfx
         return cachedFixedSize;
     }
 
-    void layout_item_proxy::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
+    void layout_item_proxy::set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout)
     {
         subject().set_fixed_size(aFixedSize, aUpdateLayout);
         if (aFixedSize != std::nullopt)
@@ -488,7 +488,7 @@ namespace neogfx
         return subject().padding();
     }
 
-    void layout_item_proxy::set_padding(const optional_padding& aPadding, bool aUpdateLayout)
+    void layout_item_proxy::set_padding(optional_padding const& aPadding, bool aUpdateLayout)
     {
         subject().set_padding(aPadding, aUpdateLayout);
     }

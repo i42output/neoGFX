@@ -54,7 +54,7 @@ namespace neogfx
         return size{ 32.0_dip, 32.0_dip };
     }
 
-    void toolbar::set_button_image_extents(const optional_size& aExtents)
+    void toolbar::set_button_image_extents(optional_size const& aExtents)
     {
         iButtonImageExtents = aExtents;
         for (auto& button : iButtons)

@@ -54,7 +54,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::nrc
 {
-    default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath) :
+    default_ui_element_library::default_ui_element_library(neolib::i_application& aApplication, std::string const& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
         iRootElements{

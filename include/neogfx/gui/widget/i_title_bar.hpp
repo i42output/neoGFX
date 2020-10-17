@@ -32,8 +32,8 @@ namespace neogfx
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
     public:
-        virtual const std::string& title() const = 0;
-        virtual void set_title(const std::string& aTitle) = 0;
+        virtual std::string const& title() const = 0;
+        virtual void set_title(std::string const& aTitle) = 0;
         // todo: get/set icon
     public:
     };

@@ -157,7 +157,7 @@ namespace neogfx
         iRenderingSurfaces = false;
     }
 
-    void surface_manager::display_error_message(const std::string& aTitle, const std::string& aMessage) const
+    void surface_manager::display_error_message(std::string const& aTitle, std::string const& aMessage) const
     {
         for (auto i = iSurfaces.begin(); i != iSurfaces.end(); ++i)
         {
@@ -172,7 +172,7 @@ namespace neogfx
         iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), 0);
     }
 
-    void surface_manager::display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const
+    void surface_manager::display_error_message(const i_native_surface& aParent, std::string const& aTitle, std::string const& aMessage) const
     {
         iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), aParent.handle());
     }

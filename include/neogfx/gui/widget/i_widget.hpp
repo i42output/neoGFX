@@ -169,7 +169,7 @@ namespace neogfx
         virtual void set_font_role(const optional_font_role& aFontRole) = 0;
         virtual bool has_font() const = 0;
         virtual const neogfx::font& font() const = 0;
-        virtual void set_font(const optional_font& aFont) = 0;
+        virtual void set_font(optional_font const& aFont) = 0;
     public:
         virtual bool visible() const = 0;
         virtual bool effectively_visible() const = 0;

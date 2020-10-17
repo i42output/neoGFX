@@ -22,30 +22,30 @@
 
 namespace neogfx
 {
-    group_box::group_box(const std::string& aText) : 
+    group_box::group_box(std::string const& aText) : 
         widget(), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
     {
         init();
     }
 
-    group_box::group_box(i_widget& aParent, const std::string& aText) :
+    group_box::group_box(i_widget& aParent, std::string const& aText) :
         widget(aParent), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
     {
         init();
     }
 
-    group_box::group_box(i_layout& aLayout, const std::string& aText) :
+    group_box::group_box(i_layout& aLayout, std::string const& aText) :
         widget(aLayout), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
     {
         init();
     }
 
-    const std::string& group_box::text() const
+    std::string const& group_box::text() const
     {
         return label().text();
     }
 
-    void group_box::set_text(const std::string& aText)
+    void group_box::set_text(std::string const& aText)
     {
         label().set_text(aText);
     }
@@ -209,7 +209,7 @@ namespace neogfx
     class group_box_item_layout : public vertical_layout
     {
     public:
-        size minimum_size(const optional_size& aAvailableSpace) const override
+        size minimum_size(optional_size const& aAvailableSpace) const override
         {
             auto result = vertical_layout::minimum_size(aAvailableSpace);
             if (result == size{})

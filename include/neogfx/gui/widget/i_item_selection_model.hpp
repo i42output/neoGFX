@@ -184,7 +184,7 @@ namespace neogfx
         {
             return iIterator;
         }
-        const item_presentation_model_index& index() const
+        item_presentation_model_index const& index() const
         {
             if (iIndex == std::nullopt)
                 iIndex = iterator()->first();
@@ -223,25 +223,25 @@ namespace neogfx
         virtual void set_mode(item_selection_mode aType) = 0;
     public:
         virtual bool has_current_index() const = 0;
-        virtual const item_presentation_model_index& current_index() const = 0;
-        virtual void set_current_index(const item_presentation_model_index& aIndex) = 0;
+        virtual item_presentation_model_index const& current_index() const = 0;
+        virtual void set_current_index(item_presentation_model_index const& aIndex) = 0;
         virtual void unset_current_index() = 0;
         virtual item_presentation_model_index relative_to_current_index(index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const = 0;
-        virtual item_presentation_model_index relative_to_index(const item_presentation_model_index& aIndex, index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const = 0;
+        virtual item_presentation_model_index relative_to_index(item_presentation_model_index const& aIndex, index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const = 0;
         virtual item_presentation_model_index next_cell() const = 0;
-        virtual item_presentation_model_index next_cell(const item_presentation_model_index& aIndex) const = 0;
+        virtual item_presentation_model_index next_cell(item_presentation_model_index const& aIndex) const = 0;
         virtual item_presentation_model_index previous_cell() const = 0;
-        virtual item_presentation_model_index previous_cell(const item_presentation_model_index& aIndex) const = 0;
+        virtual item_presentation_model_index previous_cell(item_presentation_model_index const& aIndex) const = 0;
     public:
         virtual const item_selection& selection() const = 0;
-        virtual bool is_selected(const item_presentation_model_index& aIndex) const = 0;
-        virtual bool is_selectable(const item_presentation_model_index& aIndex) const = 0;
-        virtual void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation) = 0;
+        virtual bool is_selected(item_presentation_model_index const& aIndex) const = 0;
+        virtual bool is_selectable(item_presentation_model_index const& aIndex) const = 0;
+        virtual void select(item_presentation_model_index const& aIndex, item_selection_operation aOperation) = 0;
     public:
         virtual bool sorting() const = 0;
         virtual bool filtering() const = 0;
     public:
-        virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
+        virtual bool is_editable(item_presentation_model_index const& aIndex) const = 0;
         // helpers
     public:
         optional_item_presentation_model_index current_index_maybe() const
@@ -250,7 +250,7 @@ namespace neogfx
                 return current_index();
             return {};
         }
-        void select(const item_presentation_model_index& aIndex)
+        void select(item_presentation_model_index const& aIndex)
         {
             switch (mode())
             {
@@ -267,7 +267,7 @@ namespace neogfx
                 break;
             }
         }
-        void clear(const item_presentation_model_index& aIndex)
+        void clear(item_presentation_model_index const& aIndex)
         {
             select(aIndex, item_selection_operation::Clear);
         }

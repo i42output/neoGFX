@@ -48,7 +48,7 @@ namespace neogfx
             return base_type::palette_color(aColorRole);
     }
 
-    text_field::text_field(const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
+    text_field::text_field(std::string const& aLabel, std::string const& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
         widget{},
         iPlacement{ aPlacement },
         iLayout{ *this },
@@ -64,7 +64,7 @@ namespace neogfx
         init();
     }
 
-    text_field::text_field(i_widget& aParent, const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
+    text_field::text_field(i_widget& aParent, std::string const& aLabel, std::string const& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
         widget{ aParent },
         iPlacement{ aPlacement },
         iLayout{ *this },
@@ -80,7 +80,7 @@ namespace neogfx
         init();
     }
 
-    text_field::text_field(i_layout& aLayout, const std::string& aLabel, const std::string& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
+    text_field::text_field(i_layout& aLayout, std::string const& aLabel, std::string const& aHint, text_field_placement aPlacement, frame_style aFrameStyle) :
         widget{ aLayout },
         iPlacement{ aPlacement },
         iLayout{ *this },
@@ -96,12 +96,12 @@ namespace neogfx
         init();
     }
 
-    const std::string& text_field::text() const
+    std::string const& text_field::text() const
     {
         return input_box().text();
     }
 
-    void text_field::set_text(const std::string& aText)
+    void text_field::set_text(std::string const& aText)
     {
         input_box().set_text(aText);
     }
@@ -178,12 +178,12 @@ namespace neogfx
             return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
-    size text_field::minimum_size(const optional_size& aAvailableSpace) const
+    size text_field::minimum_size(optional_size const& aAvailableSpace) const
     {
         return widget::minimum_size(aAvailableSpace);
     }
 
-    size text_field::maximum_size(const optional_size& aAvailableSpace) const
+    size text_field::maximum_size(optional_size const& aAvailableSpace) const
     {
         return widget::maximum_size(aAvailableSpace);
     }

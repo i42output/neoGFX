@@ -25,7 +25,7 @@ namespace neogfx::game
 {
     namespace shape
     {
-        text::text(i_ecs& aEcs, const i_graphics_context& aGc, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
+        text::text(i_ecs& aEcs, i_graphics_context const& aGc, std::string const& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
             entity{ aEcs, archetype().id() }
         {
             neogfx::game::scoped_component_lock<game::text_mesh> lock{ aEcs };

@@ -118,7 +118,7 @@ namespace neogfx
     public:
         bool has_spacing() const override;
         size spacing() const override;
-        void set_spacing(const optional_size& aSpacing, bool aUpdateLayout = true) override;
+        void set_spacing(optional_size const& aSpacing, bool aUpdateLayout = true) override;
         bool always_use_spacing() const override;
         void set_always_use_spacing(bool aAlwaysUseSpacing) override;
         neogfx::alignment alignment() const override;
@@ -140,8 +140,8 @@ namespace neogfx
         size extents() const override;
         void set_extents(const size& aExtents) override;
         neogfx::size_policy size_policy() const override;
-        void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
-        void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
+        void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override;
+        void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override;
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
@@ -173,9 +173,9 @@ namespace neogfx
         uint32_t spacer_count() const;
         uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
         template <typename AxisPolicy>
-        size do_minimum_size(const optional_size& aAvailableSpace) const;
+        size do_minimum_size(optional_size const& aAvailableSpace) const;
         template <typename AxisPolicy>
-        size do_maximum_size(const optional_size& aAvailableSpace) const;
+        size do_maximum_size(optional_size const& aAvailableSpace) const;
         template <typename AxisPolicy>
         void do_layout_items(const point& aPosition, const size& aSize);
     private:

@@ -74,7 +74,7 @@ namespace neogfx
     public:
         neogfx::padding padding() const override;
         bool has_padding() const override;
-        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
+        void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override;
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;

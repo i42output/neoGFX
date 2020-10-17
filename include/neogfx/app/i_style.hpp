@@ -77,7 +77,7 @@ namespace neogfx
     public:
         virtual ~i_style() = default;
     public:
-        virtual const std::string& name() const = 0;
+        virtual std::string const& name() const = 0;
         virtual const padding_list& all_padding() const = 0;
         virtual const neogfx::padding& padding(padding_role aPaddingRole) const = 0;
         virtual void set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding) = 0;

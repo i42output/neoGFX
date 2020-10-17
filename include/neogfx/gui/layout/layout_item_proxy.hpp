@@ -79,20 +79,20 @@ namespace neogfx
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
         bool has_weight() const override;
         size weight() const override;
-        void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
+        void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) override;
         bool has_minimum_size() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-        void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override;
         bool has_maximum_size() const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-        void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
+        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override;
         bool has_fixed_size() const override;
-        size fixed_size(const optional_size& aAvailableSpace = {}) const override;
-        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) override;
+        size fixed_size(optional_size const& aAvailableSpace = {}) const override;
+        void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override;
     public:
         bool has_padding() const override;
         neogfx::padding padding() const override;
-        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override;
+        void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override;
     protected:
         void layout_item_enabled(i_layout_item& aItem) override;
         void layout_item_disabled(i_layout_item& aItem) override;

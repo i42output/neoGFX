@@ -36,14 +36,14 @@ namespace neogfx
         define_declared_event(Selected, selected)
         define_declared_event(Deselected, deselected)
     public:
-        tab_page(i_tab_page_container& aContainer, const std::string& aTabText = {});
+        tab_page(i_tab_page_container& aContainer, std::string const& aTabText = {});
         tab_page(i_tab_page_container& aContainer, i_tab& aTab);
         tab_page(i_widget& aParent, i_tab& aTab);
         tab_page(i_layout& aLayout, i_tab& aTab);
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         bool transparent_background() const override;
         void paint_non_client_after(i_graphics_context& aGc) const override;

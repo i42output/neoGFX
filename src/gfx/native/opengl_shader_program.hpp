@@ -30,7 +30,7 @@ namespace neogfx
     class opengl_shader_program : public standard_shader_program
     {
     public:
-        opengl_shader_program(const std::string& aName = "standard_shader_program");
+        opengl_shader_program(std::string const& aName = "standard_shader_program");
     public:
         void compile() override;
         void link() override;

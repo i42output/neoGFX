@@ -91,9 +91,9 @@ namespace neogfx
     protected:
         virtual void column_info_changed(item_presentation_model_index::column_type aColumnIndex);
         virtual void item_model_changed(const i_item_model& aItemModel);
-        virtual void item_added(const item_presentation_model_index& aItemIndex);
-        virtual void item_changed(const item_presentation_model_index& aItemIndex);
-        virtual void item_removed(const item_presentation_model_index& aItemIndex);
+        virtual void item_added(item_presentation_model_index const& aItemIndex);
+        virtual void item_changed(item_presentation_model_index const& aItemIndex);
+        virtual void item_removed(item_presentation_model_index const& aItemIndex);
         virtual void items_sorting();
         virtual void items_sorted();
         virtual void items_filtering();

@@ -211,7 +211,7 @@ namespace neogfx
         return neogfx::padding{};
     }
 
-    void spacer::set_padding(const optional_padding&, bool)
+    void spacer::set_padding(optional_padding const&, bool)
     {
         /* do nothing */
     }

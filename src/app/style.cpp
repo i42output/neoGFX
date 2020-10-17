@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    style::style(const std::string& aName) :
+    style::style(std::string const& aName) :
         iName{ aName },
         iPadding{ 2.0, 2.0, 4.0, 4.0, 4.0 },
         iSpacing{ 2.0, 2.0 }
@@ -32,7 +32,7 @@ namespace neogfx
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
-    style::style(const std::string& aName, const i_style& aOther) :
+    style::style(std::string const& aName, const i_style& aOther) :
         iName{ aName },
         iPadding{ aOther.all_padding() },
         iSpacing{ aOther.spacing() },
@@ -96,7 +96,7 @@ namespace neogfx
         return !(*this == aOther);
     }
 
-    const std::string& style::name() const
+    std::string const& style::name() const
     {
         return iName;
     }

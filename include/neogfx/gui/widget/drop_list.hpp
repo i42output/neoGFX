@@ -47,7 +47,7 @@ namespace neogfx
             return base_type::column_flags(aColumn) & ~item_cell_flags::Editable;
         }
     public:
-        optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
+        optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const override
         {
             if (iDropList.view_created())
             {
@@ -110,7 +110,7 @@ namespace neogfx
         bool show(bool aVisible) override;
     protected:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         bool can_dismiss(const i_widget*) const override;
         dismissal_type_e dismissal_type() const override;
@@ -152,8 +152,8 @@ namespace neogfx
         virtual void set_spacing(const size& aSpacing) = 0;
         virtual const i_texture& image() const = 0;
         virtual void set_image(const i_texture& aImage) = 0;
-        virtual const std::string& text() const = 0;
-        virtual void set_text(const std::string& aText) = 0;
+        virtual std::string const& text() const = 0;
+        virtual void set_text(std::string const& aText) = 0;
     };
 
     class drop_list : public widget, private i_drop_list_input_widget::i_visitor
@@ -263,7 +263,7 @@ namespace neogfx
         bool cancelling_selection() const;
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     private:
         void visit(i_drop_list_input_widget& aInputWidget, push_button& aButtonWidget) override;
         void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) override;

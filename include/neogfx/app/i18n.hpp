@@ -26,10 +26,10 @@ namespace neogfx
     class translation_context
     {
     public:
-        translation_context(const std::string& aContext);
+        translation_context(std::string const& aContext);
         ~translation_context();
     public:
-        static const std::string& context();
+        static std::string const& context();
     private:
         static std::vector<std::string>& context_stack();
     };
@@ -37,9 +37,9 @@ namespace neogfx
     std::string operator "" _t(const char* aTranslatableString, std::size_t aStringLength);
     std::string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength);
 
-    const std::string& translate(const std::string& aTranslatableString);
+    std::string const& translate(std::string const& aTranslatableString);
 
-    const std::string& translate(const std::string& aTranslatableString, const std::string& aContext);
+    std::string const& translate(std::string const& aTranslatableString, std::string const& aContext);
 }
 
 using neogfx::operator "" _t;

@@ -216,7 +216,7 @@ namespace neogfx
             row->invalidate(aDeferLayout);
     }
 
-    size grid_layout::minimum_size(const optional_size& aAvailableSpace) const
+    size grid_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (items_visible() == 0)
             return size{};
@@ -249,7 +249,7 @@ namespace neogfx
         return result;
     }
 
-    size grid_layout::maximum_size(const optional_size& aAvailableSpace) const
+    size grid_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
             return size{};
@@ -288,7 +288,7 @@ namespace neogfx
         return result;
     }
 
-    void grid_layout::set_spacing(const optional_size& aSpacing, bool aUpdateLayout)
+    void grid_layout::set_spacing(optional_size const& aSpacing, bool aUpdateLayout)
     {
         layout::set_spacing(aSpacing, false);
         iRowLayout.set_spacing(aSpacing, false);
@@ -504,7 +504,7 @@ namespace neogfx
         return false;
     }
 
-    size::dimension_type grid_layout::row_minimum_size(cell_coordinate aRow, const optional_size& aAvailableSpace) const
+    size::dimension_type grid_layout::row_minimum_size(cell_coordinate aRow, optional_size const& aAvailableSpace) const
     {
         size::dimension_type result {};
         for (auto const& item : iCells)
@@ -517,7 +517,7 @@ namespace neogfx
         return std::ceil(result);
     }
 
-    size::dimension_type grid_layout::column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace) const
+    size::dimension_type grid_layout::column_minimum_size(cell_coordinate aColumn, optional_size const& aAvailableSpace) const
     {
         size::dimension_type result {};
         for (auto const& item : iCells)
@@ -530,7 +530,7 @@ namespace neogfx
         return std::ceil(result);
     }
 
-    size::dimension_type grid_layout::row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace) const
+    size::dimension_type grid_layout::row_maximum_size(cell_coordinate aRow, optional_size const& aAvailableSpace) const
     {
         size::dimension_type result {};
         for (auto const& item : iCells)
@@ -539,7 +539,7 @@ namespace neogfx
         return result;
     }
 
-    size::dimension_type grid_layout::column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace) const
+    size::dimension_type grid_layout::column_maximum_size(cell_coordinate aColumn, optional_size const& aAvailableSpace) const
     {
         size::dimension_type result {};
         for (auto const& item : iCells)

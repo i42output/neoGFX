@@ -48,7 +48,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(const std::string& aText, push_button_style aStyle) :
+    push_button::push_button(std::string const& aText, push_button_style aStyle) :
         button{ aText, default_push_button_alignment(aStyle) },
         iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
@@ -84,7 +84,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_widget& aParent, const std::string& aText, push_button_style aStyle) :
+    push_button::push_button(i_widget& aParent, std::string const& aText, push_button_style aStyle) :
         button{ aParent, aText, default_push_button_alignment(aStyle) },
         iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
@@ -120,7 +120,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle) :
+    push_button::push_button(i_layout& aLayout, std::string const& aText, push_button_style aStyle) :
         button{ aLayout, aText, default_push_button_alignment(aStyle) },
         iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
         iAnimationFrame{ 0 },
@@ -147,7 +147,7 @@ namespace neogfx
         init();
     }
 
-    size push_button::minimum_size(const optional_size& aAvailableSpace) const
+    size push_button::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return button::minimum_size(aAvailableSpace);
@@ -165,7 +165,7 @@ namespace neogfx
         return result;
     }
 
-    size push_button::maximum_size(const optional_size& aAvailableSpace) const
+    size push_button::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (has_maximum_size())
             return button::maximum_size(aAvailableSpace);

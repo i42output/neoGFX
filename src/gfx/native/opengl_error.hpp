@@ -50,6 +50,6 @@ namespace neogfx
 {
     struct opengl_error : std::runtime_error
     {
-        opengl_error(const std::string& aMessage) : std::runtime_error("neogfx::opengl_error: " + aMessage) {};
+        opengl_error(std::string const& aMessage) : std::runtime_error("neogfx::opengl_error: " + aMessage) {};
     };
 }

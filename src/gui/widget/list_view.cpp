@@ -99,7 +99,7 @@ namespace neogfx
         return client_rect(false);
     }
 
-    size list_view::total_item_area(const i_units_context& aUnitsContext) const
+    size list_view::total_item_area(i_units_context const& aUnitsContext) const
     {
         return has_presentation_model() ?
             size{ 

@@ -53,7 +53,7 @@ namespace neogfx
         throw wrong_item_type();
     }
 
-    size stack_layout::minimum_size(const optional_size& aAvailableSpace) const
+    size stack_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
         size result;
         if (items_visible() != 0)
@@ -73,7 +73,7 @@ namespace neogfx
         return result;
     }
 
-    size stack_layout::maximum_size(const optional_size& aAvailableSpace) const
+    size stack_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
         size result{ size::max_size() };
         for (auto const& item : items())

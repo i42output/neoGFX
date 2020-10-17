@@ -326,7 +326,7 @@ namespace neogfx
     public:
         struct failed_to_open_html : std::runtime_error { failed_to_open_html() : std::runtime_error("neogfx::html::failed_to_open_html") {} };
     public:
-        html(const std::string& aFragment);
+        html(std::string const& aFragment);
         html(std::istream& aDocument);
     private:
         void parse();

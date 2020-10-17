@@ -31,7 +31,7 @@ namespace neogfx
         set_ignore_mouse_events(true);
     }
 
-    size radio_button::disc::minimum_size(const optional_size& aAvailableSpace) const
+    size radio_button::disc::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
@@ -39,12 +39,12 @@ namespace neogfx
         return ceil_rasterized(service<i_skin_manager>().active_skin().preferred_size(skin_element::RadioButton, size{ length }));
     }
 
-    size radio_button::disc::maximum_size(const optional_size& aAvailableSpace) const
+    size radio_button::disc::maximum_size(optional_size const& aAvailableSpace) const
     {
         return minimum_size(aAvailableSpace);
     }
         
-    radio_button::radio_button(const std::string& aText) :
+    radio_button::radio_button(std::string const& aText) :
         button(aText), iDisc(*this)
     {
         set_checkable(button_checkable::BiState);
@@ -56,7 +56,7 @@ namespace neogfx
         text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    radio_button::radio_button(i_widget& aParent, const std::string& aText) :
+    radio_button::radio_button(i_widget& aParent, std::string const& aText) :
         button(aParent, aText), iDisc(*this)
     {
         set_checkable(button_checkable::BiState);
@@ -68,7 +68,7 @@ namespace neogfx
         text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    radio_button::radio_button(i_layout& aLayout, const std::string& aText) :
+    radio_button::radio_button(i_layout& aLayout, std::string const& aText) :
         button(aLayout, aText), iDisc(*this)
     {
         set_checkable(button_checkable::BiState);

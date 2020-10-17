@@ -34,14 +34,14 @@ namespace neogfx
     public:
         virtual ~i_skin() = default;
     public:
-        virtual const std::string& name() const = 0;
+        virtual std::string const& name() const = 0;
         virtual bool has_fallback() const = 0;
         virtual i_skin& fallback() = 0;
     public:
         virtual void activate() = 0;
         virtual void deactivate() = 0;
     public:
-        virtual size preferred_size(skin_element aElement, const optional_size& aDesiredSize = {}) const = 0;
+        virtual size preferred_size(skin_element aElement, optional_size const& aDesiredSize = {}) const = 0;
     public:
         virtual void draw_scrollbar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const = 0;
         virtual void draw_check_box(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;

@@ -35,9 +35,9 @@ namespace neogfx
         friend class tab_bar;
         class close_button;
     public:
-        tab_button(i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
-        tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
-        tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_tab_container& aContainer, std::string const& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_widget& aParent, i_tab_container& aContainer, std::string const& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_layout& aLayout, i_tab_container& aContainer, std::string const& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
         ~tab_button();
     public:
         const i_tab_container& container() const override;
@@ -48,8 +48,8 @@ namespace neogfx
         bool is_deselected() const override;
         void select() override;
     public:
-        const std::string& text() const override;
-        void set_text(const std::string& aText) override;
+        std::string const& text() const override;
+        void set_text(std::string const& aText) override;
         void set_image(const i_texture& aTexture) override;
         void set_image(const i_image& aImage) override;
     public:

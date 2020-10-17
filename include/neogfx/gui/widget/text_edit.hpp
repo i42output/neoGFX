@@ -36,7 +36,7 @@ namespace neogfx
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
     public:
-        define_event(TextFilter, text_filter, const std::string&, bool&)
+        define_event(TextFilter, text_filter, std::string const&, bool&)
         define_event(TextChanged, text_changed)
         define_event(DefaultStyleChanged, default_style_changed)
     private:
@@ -53,7 +53,7 @@ namespace neogfx
         public:
             style();
             style(
-                const optional_font& aFont,
+                optional_font const& aFont,
                 const color_or_gradient& aTextColor = color_or_gradient{},
                 const color_or_gradient& aPaperColor = color_or_gradient{},
                 const optional_text_effect& aTextEffect = optional_text_effect{});
@@ -64,12 +64,12 @@ namespace neogfx
             void add_ref() const;
             void release() const;
         public:
-            const optional_font& font() const;
+            optional_font const& font() const;
             const color_or_gradient& glyph_color() const;
             const color_or_gradient& text_color() const;
             const color_or_gradient& paper_color() const;
             const optional_text_effect& text_effect() const;
-            void set_font(const optional_font& aFont = optional_font{});
+            void set_font(optional_font const& aFont = optional_font{});
             void set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
             void set_text_color(const color_or_gradient& aColor = color_or_gradient{});
             void set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
@@ -437,8 +437,8 @@ namespace neogfx
         void moved() override;
         void resized() override;
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         neogfx::padding padding() const override;
     public:
         void paint(i_graphics_context& aGc) const override;
@@ -446,7 +446,7 @@ namespace neogfx
         color palette_color(color_role aColorRole) const override;
     public:
         const neogfx::font& font() const override;
-        void set_font(const optional_font& aFont) override;
+        void set_font(optional_font const& aFont) override;
     public:
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
@@ -461,7 +461,7 @@ namespace neogfx
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(const std::string& aText) override;
+        bool text_input(std::string const& aText) override;
     public:
         neogfx::scrolling_disposition scrolling_disposition() const override;
         using framed_scrollable_widget::update_scrollbar_visibility;
@@ -489,9 +489,9 @@ namespace neogfx
         void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) override;
     public:
         std::string plain_text() const override;
-        bool set_plain_text(const std::string& aPlainText) override;
+        bool set_plain_text(std::string const& aPlainText) override;
         std::string rich_text(rich_text_format aFormat = rich_text_format::Html) const override;
-        bool set_rich_text(const std::string& aRichText, rich_text_format aFormat = rich_text_format::Html) override;
+        bool set_rich_text(std::string const& aRichText, rich_text_format aFormat = rich_text_format::Html) override;
     public:
         void paste_plain_text() override;
         void paste_rich_text(rich_text_format aFormat = rich_text_format::Html) override;
@@ -502,8 +502,8 @@ namespace neogfx
         bool word_wrap() const;
         void set_word_wrap(bool aWordWrap = true);
         bool password() const;
-        const std::string& password_mask() const;
-        void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
+        std::string const& password_mask() const;
+        void set_password(bool aPassword, std::string const& aMask = "\xE2\x97\x8F");
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
         const style& default_style() const;
@@ -511,15 +511,15 @@ namespace neogfx
         color default_text_color() const;
     public:
         void clear();
-        const std::string& text() const;
-        std::size_t set_text(const std::string& aText);
-        std::size_t set_text(const std::string& aText, const style& aStyle);
-        std::size_t append_text(const std::string& aText, bool aMoveCursor = false);
-        std::size_t append_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
-        std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
-        std::size_t insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
-        std::size_t insert_text(position_type aPosition, const std::string& aText, bool aMoveCursor = false);
-        std::size_t insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor = false);
+        std::string const& text() const;
+        std::size_t set_text(std::string const& aText);
+        std::size_t set_text(std::string const& aText, const style& aStyle);
+        std::size_t append_text(std::string const& aText, bool aMoveCursor = false);
+        std::size_t append_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t insert_text(std::string const& aText, bool aMoveCursor = false);
+        std::size_t insert_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor = false);
+        std::size_t insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor = false);
         void delete_text(position_type aStart, position_type aEnd);
         std::size_t columns() const;
         void set_columns(std::size_t aColumnCount);
@@ -532,7 +532,7 @@ namespace neogfx
         const neogfx::size_hint& size_hint() const;
         void set_size_hint(const neogfx::size_hint& aSizeHint);
         dimension tab_stops() const;
-        void set_tab_stop_hint(const std::string& aTabStopHint = "0000");
+        void set_tab_stop_hint(std::string const& aTabStopHint = "0000");
         void set_tab_stops(const optional_dimension& aTabStops);
     public:
         position_type document_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
@@ -561,7 +561,7 @@ namespace neogfx
         void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
     private:
         void init();
-        std::size_t do_insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
+        std::size_t do_insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
         std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
@@ -577,8 +577,8 @@ namespace neogfx
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
         style glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const;
-        void draw_glyphs(const i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
-        void draw_cursor(const i_graphics_context& aGc) const;
+        void draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
+        void draw_cursor(i_graphics_context const& aGc) const;
         rect cursor_rect() const;
         static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
     private:

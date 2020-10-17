@@ -37,7 +37,7 @@ namespace neogfx
     }
         
     text_edit::style::style(
-        const optional_font& aFont,
+        optional_font const& aFont,
         const color_or_gradient& aTextColor,
         const color_or_gradient& aPaperColor,
         const optional_text_effect& aTextEffect) :
@@ -73,7 +73,7 @@ namespace neogfx
             iParent->iStyles.erase(iParent->iStyles.find(*this));
     }
 
-    const optional_font& text_edit::style::font() const
+    optional_font const& text_edit::style::font() const
     {
         return iFont;
     }
@@ -98,7 +98,7 @@ namespace neogfx
         return iTextEffect;
     }
 
-    void text_edit::style::set_font(const optional_font& aFont)
+    void text_edit::style::set_font(optional_font const& aFont)
     {
         iFont = aFont;
         if (iParent)
@@ -258,7 +258,7 @@ namespace neogfx
         framed_scrollable_widget::resized();
     }
 
-    size text_edit::minimum_size(const optional_size& aAvailableSpace) const
+    size text_edit::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
@@ -282,7 +282,7 @@ namespace neogfx
         return to_units(*this, su.saved_units(), result);
     }
 
-    size text_edit::maximum_size(const optional_size& aAvailableSpace) const
+    size text_edit::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (iType == MultiLine || has_maximum_size())
             return framed_scrollable_widget::maximum_size(aAvailableSpace);
@@ -379,7 +379,7 @@ namespace neogfx
         return default_style().font() != std::nullopt ? *default_style().font() : framed_scrollable_widget::font();
     }
 
-    void text_edit::set_font(const optional_font& aFont)
+    void text_edit::set_font(optional_font const& aFont)
     {
         framed_scrollable_widget::set_font(aFont);
         if (!default_style().font())
@@ -603,7 +603,7 @@ namespace neogfx
         return false;
     }
 
-    bool text_edit::text_input(const std::string& aText)
+    bool text_edit::text_input(std::string const& aText)
     {
         if (aText[0] == '\r' || aText[0] == '\n' || aText[0] == '\t') // handled in key_pressed()
         {
@@ -949,7 +949,7 @@ namespace neogfx
         return text();
     }
 
-    bool text_edit::set_plain_text(const std::string& aPlainText)
+    bool text_edit::set_plain_text(std::string const& aPlainText)
     {
         return set_text(aPlainText) != 0 || aPlainText.empty();
     }
@@ -960,7 +960,7 @@ namespace neogfx
         return text();
     }
 
-    bool text_edit::set_rich_text(const std::string& aRichText, rich_text_format aFormat)
+    bool text_edit::set_rich_text(std::string const& aRichText, rich_text_format aFormat)
     {
         // todo
         return set_text(aRichText) != 0 || aRichText.empty();
@@ -1007,12 +1007,12 @@ namespace neogfx
         return Password;
     }
 
-    const std::string& text_edit::password_mask() const
+    std::string const& text_edit::password_mask() const
     {
         return PasswordMask;
     }
 
-    void text_edit::set_password(bool aPassword, const std::string& aMask)
+    void text_edit::set_password(bool aPassword, std::string const& aMask)
     {
         if (Password != aPassword || PasswordMask != aMask)
         {
@@ -1292,7 +1292,7 @@ namespace neogfx
             iGlyphColumns[i].lines().clear();
     }
 
-    const std::string& text_edit::text() const
+    std::string const& text_edit::text() const
     {
         if (iUtf8TextCache == std::nullopt)
         {
@@ -1302,42 +1302,42 @@ namespace neogfx
         return *iUtf8TextCache;
     }
 
-    std::size_t text_edit::set_text(const std::string& aText)
+    std::size_t text_edit::set_text(std::string const& aText)
     {
         return set_text(aText, default_style());
     }
 
-    std::size_t text_edit::set_text(const std::string& aText, const style& aStyle)
+    std::size_t text_edit::set_text(std::string const& aText, const style& aStyle)
     {
         return do_insert_text(0, aText, aStyle, true, true);
     }
 
-    std::size_t text_edit::append_text(const std::string& aText, bool aMoveCursor)
+    std::size_t text_edit::append_text(std::string const& aText, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
     }
 
-    std::size_t text_edit::append_text(const std::string& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::append_text(std::string const& aText, const style& aStyle, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(const std::string& aText, bool aMoveCursor)
+    std::size_t text_edit::insert_text(std::string const& aText, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::insert_text(std::string const& aText, const style& aStyle, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(position_type aPosition, const std::string& aText, bool aMoveCursor)
+    std::size_t text_edit::insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor)
     {
         return do_insert_text(aPosition, aText, default_style(), aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor)
     {
         return do_insert_text(aPosition, aText, aStyle, aMoveCursor, false);
     }
@@ -1476,7 +1476,7 @@ namespace neogfx
         return iCalculatedTabStops->second;
     }
 
-    void text_edit::set_tab_stop_hint(const std::string& aTabStopHint)
+    void text_edit::set_tab_stop_hint(std::string const& aTabStopHint)
     {
         if (iTabStopHint != aTabStopHint)
         {
@@ -1537,7 +1537,7 @@ namespace neogfx
         });
     }
 
-    std::size_t text_edit::do_insert_text(position_type aPosition, const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
+    std::size_t text_edit::do_insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
     {
         bool accept = true;
         TextFilter.trigger(aText, accept);
@@ -1954,7 +1954,7 @@ namespace neogfx
         return result;
     }
 
-    void text_edit::draw_glyphs(const i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
+    void text_edit::draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
     {
         auto lineStart = aLine->lineStart.second;
         auto lineEnd = aLine->lineEnd.second;
@@ -2003,7 +2003,7 @@ namespace neogfx
         }
     }
 
-    void text_edit::draw_cursor(const i_graphics_context& aGc) const
+    void text_edit::draw_cursor(i_graphics_context const& aGc) const
     {
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();

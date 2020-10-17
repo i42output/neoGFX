@@ -324,12 +324,12 @@ namespace neogfx
         return iProgramOptions;
     }
 
-    const std::string& app::name() const
+    std::string const& app::name() const
     {
         return iName;
     }
 
-    void app::set_name(const std::string& aName)
+    void app::set_name(std::string const& aName)
     {
         iName = aName;
         NameChanged.trigger();
@@ -416,7 +416,7 @@ namespace neogfx
         return iCurrentStyle->second;
     }
 
-    i_style& app::change_style(const std::string& aStyleName)
+    i_style& app::change_style(std::string const& aStyleName)
     {
         style_list::iterator existingStyle = iStyles.find(aStyleName);
         if (existingStyle == iStyles.end())
@@ -444,7 +444,7 @@ namespace neogfx
         return newStyle->second;
     }
 
-    const std::string& app::translate(const std::string& aTranslatableString, const std::string& aContext) const
+    std::string const& app::translate(std::string const& aTranslatableString, std::string const& aContext) const
     {
         // todo: i18n
         return aTranslatableString;
@@ -532,25 +532,25 @@ namespace neogfx
         return *a->second;
     }
 
-    i_action& app::add_action(const std::string& aText)
+    i_action& app::add_action(std::string const& aText)
     {
         auto a = iActions.emplace(aText, std::make_shared<action>(aText));
         return *a->second;
     }
 
-    i_action& app::add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
+    i_action& app::add_action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
         auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImageUri, aDpiScaleFactor, aSampling));
         return *a->second;
     }
 
-    i_action& app::add_action(const std::string& aText, const i_texture& aImage)
+    i_action& app::add_action(std::string const& aText, const i_texture& aImage)
     {
         auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImage));
         return *a->second;
     }
 
-    i_action& app::add_action(const std::string& aText, const i_image& aImage)
+    i_action& app::add_action(std::string const& aText, const i_image& aImage)
     {
         auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImage));
         return *a->second;
@@ -566,7 +566,7 @@ namespace neogfx
             }
     }
 
-    i_action& app::find_action(const std::string& aText)
+    i_action& app::find_action(std::string const& aText)
     {
         auto a = iActions.find(aText);
         if (a == iActions.end())
@@ -807,12 +807,12 @@ namespace neogfx
         };
     }
 
-    bool app::text_input(const std::string&)
+    bool app::text_input(std::string const&)
     {
         return false;
     }
 
-    bool app::sys_text_input(const std::string& aInput)
+    bool app::sys_text_input(std::string const& aInput)
     {
         static boost::locale::generator gen;
         static std::locale loc = gen("en_US.UTF-8");

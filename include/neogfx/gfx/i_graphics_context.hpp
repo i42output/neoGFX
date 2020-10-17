@@ -155,40 +155,40 @@ namespace neogfx
         virtual void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const = 0;
         virtual void fill_path(const path& aPath, const brush& aFill) const = 0;
         virtual void fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const = 0;
-        virtual size text_extent(const std::string& aText, const font& aFont) const = 0;
-        virtual size text_extent(const std::string& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
+        virtual size text_extent(std::string const& aText, const font& aFont) const = 0;
+        virtual size text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
         virtual size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const = 0;
         virtual size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const = 0;
-        virtual size multiline_text_extent(const std::string& aText, const font& aFont) const = 0;
-        virtual size multiline_text_extent(const std::string& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
-        virtual size multiline_text_extent(const std::string& aText, const font& aFont, dimension aMaxWidth) const = 0;
-        virtual size multiline_text_extent(const std::string& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const = 0;
+        virtual size multiline_text_extent(std::string const& aText, const font& aFont) const = 0;
+        virtual size multiline_text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
+        virtual size multiline_text_extent(std::string const& aText, const font& aFont, dimension aMaxWidth) const = 0;
+        virtual size multiline_text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const = 0;
         virtual size glyph_text_extent(const glyph_text& aText) const = 0;
         virtual size glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const = 0;
         virtual size multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const = 0;
-        virtual glyph_text to_glyph_text(const std::string& aText, const font& aFont) const = 0;
+        virtual glyph_text to_glyph_text(std::string const& aText, const font& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const = 0;
         virtual glyph_text to_glyph_text(const std::u32string& aText, const font& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(const std::string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(std::string const& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(const std::u32string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual bool is_text_left_to_right(const std::string& aText, const font& aFont) const = 0;
-        virtual bool is_text_right_to_left(const std::string& aText, const font& aFont) const = 0;
-        virtual void draw_text(const point& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance) const = 0;
+        virtual bool is_text_left_to_right(std::string const& aText, const font& aFont) const = 0;
+        virtual bool is_text_right_to_left(std::string const& aText, const font& aFont) const = 0;
+        virtual void draw_text(const point& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance) const = 0;
         virtual void draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const = 0;
-        virtual void draw_text(const vec3& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance) const = 0;
+        virtual void draw_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance) const = 0;
         virtual void draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const = 0;
-        virtual void draw_multiline_text(const point& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(const point& aPoint, const std::string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(const vec3& aPoint, const std::string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(const vec3& aPoint, const std::string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
         virtual void draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const = 0;
         virtual void draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const = 0;
         virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const = 0;
@@ -203,8 +203,8 @@ namespace neogfx
         virtual void unset_mnemonic() const = 0;
         virtual bool mnemonics_shown() const = 0;
         virtual bool password() const = 0;
-        virtual const std::string& password_mask() const = 0;
-        virtual void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F") = 0;
+        virtual std::string const& password_mask() const = 0;
+        virtual void set_password(bool aPassword, std::string const& aMask = "\xE2\x97\x8F") = 0;
         virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = optional_color(), shader_effect aShaderEffect = shader_effect::None) const = 0;
@@ -215,7 +215,7 @@ namespace neogfx
     };
 
     template <typename Iter>
-    inline void draw_glyph_text_normal(const i_graphics_context& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
+    inline void draw_glyph_text_normal(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
@@ -249,7 +249,7 @@ namespace neogfx
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow_pass_3(const i_graphics_context& aGc, const neogfx::ping_pong_buffers& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
+    inline void draw_glyph_text_glow_pass_3(i_graphics_context const& aGc, const neogfx::ping_pong_buffers& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
     {
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
@@ -259,7 +259,7 @@ namespace neogfx
     }
 
     template <typename Iter>
-    inline void draw_glyph_text_glow(const i_graphics_context& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
+    inline void draw_glyph_text_glow(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
     {
         point const effectOffset{ aGlowSize, aGlowSize };
         auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
@@ -270,7 +270,7 @@ namespace neogfx
     }
 
     template <typename Iter>
-    inline void draw_glyph_text(const i_graphics_context& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
+    inline void draw_glyph_text(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
         if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Glow)
             draw_glyph_text_glow(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
@@ -282,7 +282,7 @@ namespace neogfx
     class scoped_mnemonics
     {
     public:
-        scoped_mnemonics(const i_graphics_context& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
+        scoped_mnemonics(i_graphics_context const& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
             iGc(aGc)
         {
             iGc.set_mnemonic(aShowMnemonics, aMnemonicPrefix);
@@ -298,13 +298,13 @@ namespace neogfx
     class scoped_coordinate_system
     {
     public:
-        scoped_coordinate_system(const i_graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
+        scoped_coordinate_system(i_graphics_context const& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
             iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
             apply_origin(aOrigin, aExtents);
         }
-        scoped_coordinate_system(const i_graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
+        scoped_coordinate_system(i_graphics_context const& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
             iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
@@ -335,7 +335,7 @@ namespace neogfx
     class scoped_snap_to_pixel
     {
     public:
-        scoped_snap_to_pixel(const i_graphics_context& aGc, bool aSnapToPixel = true) :
+        scoped_snap_to_pixel(i_graphics_context const& aGc, bool aSnapToPixel = true) :
             iGc{ aGc }, iPreviousSnapped{ aGc.snap_to_pixel() }
         {
             iGc.set_snap_to_pixel(aSnapToPixel);
@@ -352,7 +352,7 @@ namespace neogfx
     class scoped_opacity
     {
     public:
-        scoped_opacity(const i_graphics_context& aGc, double aOpacity) :
+        scoped_opacity(i_graphics_context const& aGc, double aOpacity) :
             iGc{ aGc }, iPreviousOpacity { aGc.opacity() }
         {
             iGc.set_opacity(iGc.opacity() * aOpacity);
@@ -369,7 +369,7 @@ namespace neogfx
     class scoped_blending_mode
     {
     public:
-        scoped_blending_mode(const i_graphics_context& aGc, neogfx::blending_mode aBlendigMode) :
+        scoped_blending_mode(i_graphics_context const& aGc, neogfx::blending_mode aBlendigMode) :
             iGc{ aGc }, iPreviousBlendingMode{ aGc.blending_mode() }
         {
             iGc.set_blending_mode(aBlendigMode);
@@ -386,7 +386,7 @@ namespace neogfx
     class scoped_scissor
     {
     public:
-        scoped_scissor(const i_graphics_context& aGc, const rect& aScissorRect) :
+        scoped_scissor(i_graphics_context const& aGc, const rect& aScissorRect) :
             iGc{ aGc }
         {
             iGc.scissor_on(aScissorRect);

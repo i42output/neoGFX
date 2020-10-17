@@ -103,7 +103,7 @@ namespace neogfx
         return iFont;
     }
 
-    const std::string& native_font_face::family_name() const
+    std::string const& native_font_face::family_name() const
     {
         return iFont.family_name();
     }
@@ -113,7 +113,7 @@ namespace neogfx
         return iStyle;
     }
 
-    const std::string& native_font_face::style_name() const
+    std::string const& native_font_face::style_name() const
     {
         return iStyleName;
     }

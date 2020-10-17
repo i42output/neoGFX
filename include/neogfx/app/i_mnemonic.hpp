@@ -34,7 +34,7 @@ namespace neogfx
         virtual i_widget& mnemonic_widget() = 0;
     };
 
-    inline std::string mnemonic_from_text(const std::string& aText, char aMnemonicPrefix = '&')
+    inline std::string mnemonic_from_text(std::string const& aText, char aMnemonicPrefix = '&')
     {
         auto u = neolib::utf8_to_utf32(aText);
         for (std::size_t i = 0; i < u.size(); ++i)

@@ -36,7 +36,7 @@ namespace neogfx
         define_declared_event(Docked, docked, i_dock&)
         define_declared_event(Undocked, undocked, i_dock&)
     public:
-        dockable(std::shared_ptr<i_widget> aDockableWidget, const std::string& aTitle = "", dock_area aAcceptableDocks = dock_area::Any);
+        dockable(std::shared_ptr<i_widget> aDockableWidget, std::string const& aTitle = "", dock_area aAcceptableDocks = dock_area::Any);
     public:
         const neolib::string& title() const override;
     public:
@@ -72,12 +72,12 @@ namespace neogfx
     };
 
     template <typename WidgetType, typename... Args>
-    inline dockable make_dockable(const std::string& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
+    inline dockable make_dockable(std::string const& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
     {
         return dockable{ std::make_shared<WidgetType>(std::forward<Args>(aArgs)...), aTitle, aAcceptableDocks };
     }
     template <typename WidgetType, typename... Args>
-    static std::shared_ptr<i_dockable> make_shared_dockable(const std::string& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
+    static std::shared_ptr<i_dockable> make_shared_dockable(std::string const& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
     {
         return std::make_shared<dockable>(std::make_shared<WidgetType>(std::forward<Args>(aArgs)...), aTitle, aAcceptableDocks);
     }

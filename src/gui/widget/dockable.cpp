@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-    dockable::dockable(std::shared_ptr<i_widget> aDockableWidget, const std::string& aTitle, dock_area aAcceptableDocks) :
+    dockable::dockable(std::shared_ptr<i_widget> aDockableWidget, std::string const& aTitle, dock_area aAcceptableDocks) :
         base_type{ neogfx::decoration_style::Tool },
         iTitle{ aTitle },
         iAcceptableDocks{ aAcceptableDocks },

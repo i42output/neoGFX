@@ -26,7 +26,7 @@
 namespace neogfx
 {
     template <typename T, typename... TaskArgs>
-    inline T modal_task(i_widget& aParent, const std::string& aTaskName, TaskArgs&&... aTaskArgs)
+    inline T modal_task(i_widget& aParent, std::string const& aTaskName, TaskArgs&&... aTaskArgs)
     {
         aParent.root().modal_enable(false);
         auto result = std::async(std::forward<TaskArgs>(aTaskArgs)...);

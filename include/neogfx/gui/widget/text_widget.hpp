@@ -54,22 +54,22 @@ namespace neogfx
         define_event(TextChanged, text_changed)
         define_event(TextGeometryChanged, text_geometry_changed)
     public:
-        text_widget(const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-        text_widget(i_widget& aParent, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-        text_widget(i_layout& aLayout, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(i_widget& aParent, std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(i_layout& aLayout, std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
         ~text_widget();
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         void paint(i_graphics_context& aGc) const override;
     public:
-        void set_font(const optional_font& aFont) override;
+        void set_font(optional_font const& aFont) override;
     public:
         bool visible() const override;
     public:
-        const std::string& text() const;
-        void set_text(const std::string& aText);
+        std::string const& text() const;
+        void set_text(std::string const& aText);
         void set_size_hint(const size_hint& aSizeHint);
         bool multi_line() const;
         text_widget_flags flags() const;

@@ -144,7 +144,7 @@ namespace neogfx
     }
 
     template <typename T>
-    const std::string& basic_spin_box<T>::text()
+    std::string const& basic_spin_box<T>::text()
     {
         return iText;
     }
@@ -172,7 +172,7 @@ namespace neogfx
     };
 
     template <typename T>
-    inline std::optional<T> basic_spin_box<T>::string_to_value(const std::string& aText) const
+    inline std::optional<T> basic_spin_box<T>::string_to_value(std::string const& aText) const
     {
         if (aText.empty())
             return std::optional<value_type>{};
@@ -208,7 +208,7 @@ namespace neogfx
         iStepDownButton.DoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
         iTextBox.set_frame_style(frame_style::NoFrame);
 
-        iSink += iTextBox.TextFilter([this](const std::string& aText, bool& aAccept)
+        iSink += iTextBox.TextFilter([this](std::string const& aText, bool& aAccept)
         {
             aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
             if (!aAccept)
@@ -471,13 +471,13 @@ namespace neogfx
     }
 
     template <typename T>
-    inline const std::string& basic_spin_box<T>::format() const
+    inline std::string const& basic_spin_box<T>::format() const
     {
         return iFormat;
     }
 
     template <typename T>
-    inline void basic_spin_box<T>::set_format(const std::string& aFormat)
+    inline void basic_spin_box<T>::set_format(std::string const& aFormat)
     {
         iFormat = aFormat;
         update_size_hint();
@@ -498,7 +498,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline const std::string& basic_spin_box<T>::valid_text_characters() const
+    inline std::string const& basic_spin_box<T>::valid_text_characters() const
     {
         if (std::is_integral<T>::value)
         {

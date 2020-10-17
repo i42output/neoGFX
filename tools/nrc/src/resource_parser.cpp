@@ -28,7 +28,7 @@ namespace neogfx::nrc
 {
     struct failed_to_read_resource_file : std::runtime_error
     {
-        failed_to_read_resource_file(const std::string& aPath) : std::runtime_error("Failed to read resource file '" + aPath + "'!") {}
+        failed_to_read_resource_file(std::string const& aPath) : std::runtime_error("Failed to read resource file '" + aPath + "'!") {}
     };
 
     resource_parser::resource_parser(const boost::filesystem::path& aInputFilename, const neolib::fjson_string& aNamespace, std::ofstream& aOutput) :

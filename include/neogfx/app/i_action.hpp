@@ -66,14 +66,14 @@ namespace neogfx
         virtual i_action& set_button_text(const optional_text& aButtonText = optional_text()) = 0;
         virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text()) = 0;
         virtual i_action& set_help_text(const optional_text& aHelpText = optional_text()) = 0;
-        virtual i_action& set_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) = 0;
+        virtual i_action& set_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) = 0;
         virtual i_action& set_image(const i_image& aImage) = 0;
         virtual i_action& set_image(const i_texture& aTexture) = 0;
-        virtual i_action& set_checked_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) = 0;
+        virtual i_action& set_checked_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) = 0;
         virtual i_action& set_checked_image(const i_image& aImage) = 0;
         virtual i_action& set_checked_image(const i_texture& aTexture) = 0;
         virtual i_action& set_shortcut(const optional_key_sequence& aShortcut) = 0;
-        virtual i_action& set_shortcut(const std::string& aShortcut) = 0;
+        virtual i_action& set_shortcut(std::string const& aShortcut) = 0;
     public:
         i_action& enable(bool aEnabled = true)
         {

@@ -27,14 +27,14 @@ namespace neogfx
     class default_skin : public i_skin
     {
     public:
-        const std::string& name() const override;
+        std::string const& name() const override;
         bool has_fallback() const override;
         i_skin& fallback() override;
     public:
         void activate() override;
         void deactivate() override;
     public:
-        size preferred_size(skin_element aElement, const optional_size& aDesiredSize = {}) const override;
+        size preferred_size(skin_element aElement, optional_size const& aDesiredSize = {}) const override;
     public:
         void draw_scrollbar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const override;
         void draw_check_box(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const override;

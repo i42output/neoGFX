@@ -391,6 +391,7 @@ int main(int argc, char* argv[])
         auto workflowNote = workflowModel.insert_item(workflowModel.end(), ds::workflow_tool::StickyNote, "Note");
         class workflow_presentation_model : public ng::basic_item_presentation_model<decltype(workflowModel)>
         {
+            typedef ng::basic_item_presentation_model<decltype(workflowModel)> base_type;
         public:
             workflow_presentation_model() : 
                 cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
@@ -413,6 +414,17 @@ int main(int argc, char* argv[])
                 default:
                     return {};
                 }
+            }
+            ng::item_cell_flags cell_flags(const ng::item_presentation_model_index& aIndex) const override
+            {
+                auto result = base_type::cell_flags(aIndex);
+                switch (item_model().item(to_item_model_index(aIndex)))
+                {
+                case ds::workflow_tool::StickyNote:
+                    result |= ng::item_cell_flags::Draggable;
+                    break;
+                }
+                return result;
             }
         public:
             ng::texture cppIdeTexture;

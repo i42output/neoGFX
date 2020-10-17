@@ -30,7 +30,7 @@ namespace neogfx
         init();
     }
 
-    button::button(const std::string& aText, alignment aAlignment) :
+    button::button(std::string const& aText, alignment aAlignment) :
         widget{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
@@ -54,7 +54,7 @@ namespace neogfx
         init();
     }
 
-    button::button(i_widget& aParent, const std::string& aText, alignment aAlignment) :
+    button::button(i_widget& aParent, std::string const& aText, alignment aAlignment) :
         widget{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
@@ -78,7 +78,7 @@ namespace neogfx
         init();
     }
 
-    button::button(i_layout& aLayout, const std::string& aText, alignment aAlignment) :
+    button::button(i_layout& aLayout, std::string const& aText, alignment aAlignment) :
         widget{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
@@ -117,7 +117,7 @@ namespace neogfx
         label().set_size_policy(aSizePolicy, aUpdateLayout);
     }
 
-    size button::maximum_size(const optional_size&) const
+    size button::maximum_size(optional_size const&) const
     {
         if (has_maximum_size())
             return widget::maximum_size();
@@ -195,12 +195,12 @@ namespace neogfx
             set_checked(true);
     }
 
-    const std::string& button::text() const
+    std::string const& button::text() const
     {
         return label().text();
     }
 
-    void button::set_text(const std::string& aText)
+    void button::set_text(std::string const& aText)
     {
         label().set_text(aText);
     }
@@ -210,7 +210,7 @@ namespace neogfx
         return label().image();
     }
 
-    void button::set_image(const std::string& aImageUri)
+    void button::set_image(std::string const& aImageUri)
     {
         label().set_image(neogfx::image{ aImageUri });
     }

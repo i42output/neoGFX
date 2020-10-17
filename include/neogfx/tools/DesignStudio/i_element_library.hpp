@@ -52,13 +52,13 @@ namespace neogfx::DesignStudio
         virtual i_texture const& element_icon(const neolib::i_string& aElementType) const = 0;
         // helpers
     public:
-        neolib::ref_ptr<i_element> create_element(const std::string& aElementType, const std::string& aElementId)
+        neolib::ref_ptr<i_element> create_element(std::string const& aElementType, std::string const& aElementId)
         {
             neolib::ref_ptr<i_element> result;
             create_element(string{ aElementType }, string{ aElementId }, result);
             return result;
         }
-        neolib::ref_ptr<i_element> create_element(i_element& aParent, const std::string& aElementType, const std::string& aElementId)
+        neolib::ref_ptr<i_element> create_element(i_element& aParent, std::string const& aElementType, std::string const& aElementId)
         {
             neolib::ref_ptr<i_element> result;
             create_element(aParent, string{ aElementType }, string{ aElementId }, result);

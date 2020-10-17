@@ -41,8 +41,8 @@ namespace neogfx
         virtual i_tab_page& tab_page(tab_index aTabIndex) = 0;
         virtual const i_tab_page& selected_tab_page() const = 0;
         virtual i_tab_page& selected_tab_page() = 0;
-        virtual i_tab_page& add_tab_page(const std::string& aTabText) = 0;
-        virtual i_tab_page& insert_tab_page(tab_index aTabIndex, const std::string& aTabText) = 0;
+        virtual i_tab_page& add_tab_page(std::string const& aTabText) = 0;
+        virtual i_tab_page& insert_tab_page(tab_index aTabIndex, std::string const& aTabText) = 0;
         virtual i_tab_page& add_tab_page(i_tab& aTab) = 0;
         virtual i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) = 0;
         virtual i_tab_page& add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget) = 0;

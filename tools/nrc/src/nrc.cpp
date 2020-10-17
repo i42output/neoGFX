@@ -34,7 +34,7 @@ namespace neogfx::nrc
     struct invalid_file : std::runtime_error
     {
         invalid_file() : std::runtime_error("Not a valid neoGFX resource meta file (.nrc)!") {}
-        invalid_file(const std::string& aReason) : std::runtime_error("Not a valid neoGFX resource meta file (.nrc), " + aReason + "!") {}
+        invalid_file(std::string const& aReason) : std::runtime_error("Not a valid neoGFX resource meta file (.nrc), " + aReason + "!") {}
     };
     struct bad_usage : std::runtime_error { bad_usage() : std::runtime_error("Bad usage") {} };
 

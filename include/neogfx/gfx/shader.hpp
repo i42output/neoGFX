@@ -77,7 +77,7 @@ namespace neogfx
             mutable std::optional<shader_uniform_id> iId;
         };
     public:
-        shader(shader_type aType, const std::string& aName, bool aEnabled = true) : 
+        shader(shader_type aType, std::string const& aName, bool aEnabled = true) : 
             iType{ aType },
             iName{ aName },
             iEnabled{ aEnabled },

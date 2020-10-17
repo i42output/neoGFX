@@ -65,7 +65,7 @@ namespace neogfx
         return iSystemClipboard.text();
     }
 
-    void clipboard::set_text(const std::string& aText)
+    void clipboard::set_text(std::string const& aText)
     {
         iSystemClipboard.set_text(aText);
     }

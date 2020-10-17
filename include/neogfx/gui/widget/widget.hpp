@@ -114,8 +114,8 @@ namespace neogfx
         size extents() const override;
         void set_extents(const size& aSize) override;
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
-        size maximum_size(const optional_size& aAvailableSpace = {}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = {}) const override;
+        size maximum_size(optional_size const& aAvailableSpace = {}) const override;
         neogfx::padding padding() const override;
         // i_skinnable_item
     public:
@@ -192,7 +192,7 @@ namespace neogfx
         void set_font_role(const optional_font_role& aFontRole) override;
         bool has_font() const override;
         const neogfx::font& font() const override;
-        void set_font(const optional_font& aFont) override;
+        void set_font(optional_font const& aFont) override;
     public:
         bool visible() const override;
         bool effectively_visible() const override;
@@ -240,8 +240,8 @@ namespace neogfx
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(const std::string& aText) override;
-        bool sys_text_input(const std::string& aText) override;
+        bool text_input(std::string const& aText) override;
+        bool sys_text_input(std::string const& aText) override;
     public:
         const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;

@@ -138,7 +138,7 @@ namespace neogfx
         bool is_managing_layout() const override;
     protected:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace) const override;
+        size minimum_size(optional_size const& aAvailableSpace) const override;
     protected:
         bool transparent_background() const override;
     private:
@@ -163,7 +163,7 @@ namespace neogfx
         return iLayout.size_policy();
     }
 
-    size window::client::minimum_size(const optional_size& aAvailableSpace) const
+    size window::client::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size() || (root().style() & window_style::Resize) != window_style::Resize)
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
@@ -186,12 +186,12 @@ namespace neogfx
     {
     }
 
-    window::window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
@@ -206,12 +206,12 @@ namespace neogfx
     {
     }
 
-    window::window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
@@ -637,7 +637,7 @@ namespace neogfx
             return size_constraint::Manual;
     }
 
-    size window::minimum_size(const optional_size& aAvailableSpace) const
+    size window::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
@@ -899,12 +899,12 @@ namespace neogfx
         return base_type::scrolling_disposition(aChildWidget);
     }
 
-    const std::string& window::title_text() const
+    std::string const& window::title_text() const
     {
         return iTitleText;
     }
 
-    void window::set_title_text(const std::string& aTitleText)
+    void window::set_title_text(std::string const& aTitleText)
     {
         if (iTitleText != aTitleText)
         {

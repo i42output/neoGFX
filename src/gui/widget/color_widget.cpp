@@ -66,7 +66,7 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    size color_widget::minimum_size(const optional_size& aAvailableSpace) const
+    size color_widget::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);

@@ -1103,7 +1103,7 @@ int main(int argc, char* argv[])
             ng::color::White
         };
         ng::font renderToTextureFont{ "Exo 2", ng::font_style::Bold, 11.0 };
-        auto test_pattern = [renderToTextureFont](ng::i_graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::color& aColor, const std::string& aText)
+        auto test_pattern = [renderToTextureFont](ng::i_graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::color& aColor, std::string const& aText)
         {
             aGc.draw_circle(aOrigin + ng::point{ 32.0, 32.0 }, 32.0, ng::pen{ aColor, aDpiScale * 2.0 });
             aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ aColor, 1.0 });

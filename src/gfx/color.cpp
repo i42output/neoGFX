@@ -72,7 +72,7 @@ namespace neogfx
     {
     }
 
-    sRGB_color::sRGB_color(const std::string& aTextValue) : 
+    sRGB_color::sRGB_color(std::string const& aTextValue) : 
         base_type{}
     {
         if (aTextValue.empty())
@@ -827,7 +827,7 @@ namespace neogfx
     const sRGB_color sRGB_color::Yellow4 = sRGB_color{ 0x8B, 0x8B, 0x00 };
     const sRGB_color sRGB_color::YellowGreen = sRGB_color{ 0x9A, 0xCD, 0x32 };
 
-    optional_color sRGB_color::from_name(const std::string& aName)
+    optional_color sRGB_color::from_name(std::string const& aName)
     {
         struct named_colors : public std::map<neolib::ci_string, sRGB_color>
         {

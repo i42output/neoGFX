@@ -40,7 +40,7 @@ namespace neogfx
         neogfx::font selected_font() const;
         void select_font(const neogfx::font& aFont);
     protected:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     private:
         void init();
         void update_selected_font(const i_widget& aUpdatingWidget);

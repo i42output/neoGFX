@@ -32,7 +32,7 @@ namespace neogfx
     class i_properties
     {
         template <typename PropertyOwner>
-        friend i_property& get_property(PropertyOwner&, const std::string&);
+        friend i_property& get_property(PropertyOwner&, std::string const&);
     public:
         virtual void register_property(i_property& aProperty) = 0;
         virtual const neogfx::property_map& property_map() const = 0;

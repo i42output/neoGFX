@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-    resource::resource(i_resource_manager& aManager, const std::string& aUri) : 
+    resource::resource(i_resource_manager& aManager, std::string const& aUri) : 
         iManager{aManager}, iUri{aUri}, iSize{0}
     {
         neolib::uri uri{aUri};
@@ -81,7 +81,7 @@ namespace neogfx
         }
     }
 
-    resource::resource(i_resource_manager& aManager, const std::string& aUri, const void* aData, std::size_t aSize) : 
+    resource::resource(i_resource_manager& aManager, std::string const& aUri, const void* aData, std::size_t aSize) : 
         iManager{aManager}, iUri{aUri}, iSize{aSize}, iData{reinterpret_cast<const uint8_t*>(aData), reinterpret_cast<const uint8_t*>(aData) + aSize}
     {
     }
@@ -111,7 +111,7 @@ namespace neogfx
         return iError != std::nullopt;
     }
 
-    const std::string& resource::error_string() const
+    std::string const& resource::error_string() const
     {
         if (iError != std::nullopt)
             return *iError;
@@ -119,7 +119,7 @@ namespace neogfx
         return sNoError;
     }
 
-    const std::string& resource::uri() const
+    std::string const& resource::uri() const
     {
         return iUri;
     }

@@ -78,7 +78,7 @@ namespace neogfx
     private:
         virtual void display() = 0;
     private:
-        void debug_message(const std::string& aMessage);
+        void debug_message(std::string const& aMessage);
     private:
         i_surface_window& iSurfaceWindow;
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;

@@ -134,7 +134,7 @@ namespace neogfx::DesignStudio
         throw project_not_found();
     }
 
-    ref_ptr<i_element_library> project_manager::find_library(const std::string& aElementType) const
+    ref_ptr<i_element_library> project_manager::find_library(std::string const& aElementType) const
     {
         for (auto const& library : iElementLibraries)
         {

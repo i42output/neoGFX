@@ -33,14 +33,14 @@ namespace neogfx
         set_padding(neogfx::padding{});
     }
 
-    size color_dialog::color_box::minimum_size(const optional_size& aAvailableSpace) const
+    size color_dialog::color_box::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
         return ceil_rasterized(base_type::minimum_size(aAvailableSpace) + size{ 4_mm, 3.5_mm });
     }
 
-    size color_dialog::color_box::maximum_size(const optional_size& aAvailableSpace) const
+    size color_dialog::color_box::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (has_maximum_size())
             return base_type::maximum_size(aAvailableSpace);
@@ -250,14 +250,14 @@ namespace neogfx
         return iRightCursor.extents().cx;
     }
 
-    size color_dialog::x_picker::minimum_size(const optional_size& aAvailableSpace) const
+    size color_dialog::x_picker::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
         return base_type::minimum_size(aAvailableSpace) + size{ 32_dip, 256_dip };
     }
 
-    size color_dialog::x_picker::maximum_size(const optional_size& aAvailableSpace) const
+    size color_dialog::x_picker::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (has_maximum_size())
             return base_type::maximum_size(aAvailableSpace);
@@ -713,14 +713,14 @@ namespace neogfx
         });
     }
 
-    size color_dialog::color_selection::minimum_size(const optional_size& aAvailableSpace) const
+    size color_dialog::color_selection::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
         return base_type::minimum_size(aAvailableSpace) + size{ 60_dip, 80_dip };
     }
 
-    size color_dialog::color_selection::maximum_size(const optional_size& aAvailableSpace) const
+    size color_dialog::color_selection::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (has_maximum_size())
             return base_type::maximum_size(aAvailableSpace);

@@ -111,7 +111,7 @@ namespace neogfx::nrc
         {
             return iHeaders;
         }
-        void add_header(const std::string& aHeader)
+        void add_header(std::string const& aHeader)
         {
             iHeaders.push_back(neolib::string{ aHeader });
         }
@@ -506,7 +506,7 @@ namespace neogfx::nrc
                 "   %1%{ %2%%3%, \"%4%\"_t }", id(), parent().id(), layout(), *aText);
         }
         template <typename Enum>
-        std::enable_if_t<std::is_enum_v<Enum>, void> emit_generic_ctor(const std::string& aEnumName, Enum aEnum) const
+        std::enable_if_t<std::is_enum_v<Enum>, void> emit_generic_ctor(std::string const& aEnumName, Enum aEnum) const
         {
             if (is_member_element())
                 return;
@@ -522,12 +522,12 @@ namespace neogfx::nrc
                 "   %1%{ %2%%3%, %4% }", id(), parent().id(), layout(), aArgument);
         }
     protected:
-        void emit(const std::string& aArgument) const
+        void emit(std::string const& aArgument) const
         {
             parser().emit(aArgument);
         }
         template <typename... Args>
-        void emit(const std::string& aFormat, const Args&... aArguments) const
+        void emit(std::string const& aFormat, const Args&... aArguments) const
         {
             parser().emit(aFormat, base_type::convert_emit_argument(aArguments)...);
         }

@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-    message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
+    message_box::message_box(std::string const& aTitle, const image& aIcon, std::string const& aText, std::string const& aDetailedText, standard_button aButtons) :
         dialog{ aTitle, window_style::Dialog | window_style::Modal | window_style::TitleBar | (dialog_button_box::has_reject_role(aButtons) ? window_style::Close : window_style::Invalid)},
         iLayout1{ client_layout(), alignment::Left | alignment::Top },
         iLayout2{ iLayout1 },
@@ -35,7 +35,7 @@ namespace neogfx
         button_box().add_buttons(aButtons);
     }
 
-    message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
+    message_box::message_box(i_widget& aParent, std::string const& aTitle, const image& aIcon, std::string const& aText, std::string const& aDetailedText, standard_button aButtons) :
         dialog{ aParent, aTitle, window_style::Dialog | window_style::Modal | window_style::TitleBar | (dialog_button_box::has_reject_role(aButtons) ? window_style::Close : window_style::Invalid) },
         iLayout1{ client_layout(), alignment::Left | alignment::Top },
         iLayout2{ iLayout1 },
@@ -48,156 +48,156 @@ namespace neogfx
         button_box().add_buttons(aButtons);
     }
 
-    message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons) :
+    message_box::message_box(std::string const& aTitle, const image& aIcon, std::string const& aText, standard_button aButtons) :
         message_box{ aTitle, aIcon, aText, std::string{}, aButtons }
     {
     }
 
-    message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons) :
+    message_box::message_box(i_widget& aParent, std::string const& aTitle, const image& aIcon, std::string const& aText, standard_button aButtons) :
         message_box{ aParent, aTitle, aIcon, aText, std::string{}, aButtons }
     {
     }
 
-    standard_button message_box::information(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::information(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aTitle, image{ ":/neogfx/resources/icons/information.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::information(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::information(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons/information.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::question(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::question(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aTitle, image{ ":/neogfx/resources/icons/question.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::question(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::question(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons/question.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::warning(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::warning(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aTitle, image{ ":/neogfx/resources/icons/warning.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::warning(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons/warning.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::stop(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::stop(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aTitle, image{ ":/neogfx/resources/icons/stop.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::stop(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons/stop.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::error(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::error(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aTitle, image{ ":/neogfx/resources/icons/error.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::error(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::error(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons/error.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::critical(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::critical(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aTitle, image{ ":/neogfx/resources/icons/critical.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+    standard_button message_box::critical(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons)
     {
         message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons/critical.png" }, aText, aDetailedText, aButtons };
         mb.exec();
         return mb.response();
     }
 
-    standard_button message_box::information(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::information(std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return information(aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::information(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::information(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return information(aParent, aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::question(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::question(std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return question(aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::question(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::question(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return question(aParent, aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::warning(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::warning(std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return warning(aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::warning(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return warning(aParent, aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::stop(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::stop(std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return stop(aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::stop(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return stop(aParent, aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::error(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::error(std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return error(aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::error(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::error(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return error(aParent, aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::critical(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::critical(std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return critical(aTitle, aText, std::string{}, aButtons);
     }
 
-    standard_button message_box::critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
+    standard_button message_box::critical(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons)
     {
         return critical(aParent, aTitle, aText, std::string{}, aButtons);
     }
@@ -257,7 +257,7 @@ namespace neogfx
         return result;
     }
 
-    size message_box::maximum_size(const optional_size& aAvailableSpace) const
+    size message_box::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (dialog::has_maximum_size())
             return dialog::maximum_size(aAvailableSpace);

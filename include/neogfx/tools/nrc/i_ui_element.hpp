@@ -61,8 +61,8 @@ const neolib::enum_enumerators_t<neogfx::nrc::widget_type> neolib::enum_enumerat
 
 namespace neogfx::nrc 
 {
-    struct element_not_found : std::runtime_error { element_not_found(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
-    struct element_ill_formed : std::runtime_error { element_ill_formed(const std::string& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
+    struct element_not_found : std::runtime_error { element_not_found(std::string const& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
+    struct element_ill_formed : std::runtime_error { element_ill_formed(std::string const& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
     struct unsupported_member_element : std::runtime_error { unsupported_member_element() : std::runtime_error{ "Unsupported member element." } {} };
 
     class i_ui_element : public neolib::i_reference_counted
@@ -212,12 +212,12 @@ namespace neogfx::nrc
             return result;
         }
         template <typename T>
-        T get_scalar(const std::string& aKey) const
+        T get_scalar(std::string const& aKey) const
         {
             return get_scalar<T>(parser().get_data(aKey));
         }
         template <typename T>
-        std::vector<T> get_scalars(const std::string& aKey) const
+        std::vector<T> get_scalars(std::string const& aKey) const
         {
             return get_scalars<T>(parser().get_array_data(aKey));
         }
@@ -314,7 +314,7 @@ namespace neogfx::nrc
         }
     protected:
         template <typename Enum>
-        static std::string enum_to_string(const std::string& aEnumName, Enum aEnumValue) 
+        static std::string enum_to_string(std::string const& aEnumName, Enum aEnumValue) 
         {
             auto es = neolib::enum_to_string(aEnumValue);
             if (es[0] != '0')
@@ -367,7 +367,7 @@ namespace neogfx::nrc
         {
             return convert_emit_argument(static_cast<const neolib::i_string&>(aArgument));
         }
-        static std::string convert_emit_argument(const std::string& aArgument)
+        static std::string convert_emit_argument(std::string const& aArgument)
         {
             return convert_emit_argument(neolib::string{ aArgument });
         }

@@ -36,7 +36,7 @@ namespace neogfx::DesignStudio
     public:
         struct project_not_found : std::logic_error { project_not_found() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::project_not_found" } {} };
         struct no_active_project : std::logic_error { no_active_project() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::no_active_project" } {} };
-        struct element_type_not_found : std::runtime_error { element_type_not_found(const std::string& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project_manager::element_type_not_found: " + aReason } {} };
+        struct element_type_not_found : std::runtime_error { element_type_not_found(std::string const& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project_manager::element_type_not_found: " + aReason } {} };
     public:
         using project_list = neolib::i_vector<ng::i_ref_ptr<i_project>>;
     public:
@@ -55,11 +55,11 @@ namespace neogfx::DesignStudio
         virtual i_element_library& library(const ng::i_string& aElementType) const = 0;
         // helpers
     public:
-        i_project& open_project(const std::string& aProjectFile)
+        i_project& open_project(std::string const& aProjectFile)
         {
             return open_project(ng::string{ aProjectFile });
         }
-        i_project& create_project(const std::string& aProjectName, const std::string& aProjectNamespace)
+        i_project& create_project(std::string const& aProjectName, std::string const& aProjectNamespace)
         {
             return create_project(ng::string{ aProjectName }, ng::string{ aProjectNamespace });
         }

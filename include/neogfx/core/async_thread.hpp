@@ -28,6 +28,6 @@ namespace neogfx
     class async_thread : public neogfx::async_task, public neolib::async_thread
     {
     public:
-        async_thread(const std::string& aName = "", bool aAttachToCurrentThread = false);
+        async_thread(std::string const& aName = "", bool aAttachToCurrentThread = false);
     };
 }

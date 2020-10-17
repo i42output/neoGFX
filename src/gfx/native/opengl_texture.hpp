@@ -69,7 +69,7 @@ namespace neogfx
     public:
         void* handle() const override;
         bool is_resident() const override;
-        const std::string& uri() const override;
+        std::string const& uri() const override;
     public:
         dimension horizontal_dpi() const override;
         dimension vertical_dpi() const override;

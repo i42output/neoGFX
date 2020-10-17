@@ -200,7 +200,7 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    size popup_menu::minimum_size(const optional_size& aAvailableSpace) const
+    size popup_menu::minimum_size(optional_size const& aAvailableSpace) const
     {
         size result = window::minimum_size(aAvailableSpace);
         rect desktopRect = service<i_surface_manager>().desktop_rect(surface());
@@ -208,7 +208,7 @@ namespace neogfx
         return result;
     }
     
-    size popup_menu::maximum_size(const optional_size& aAvailableSpace) const
+    size popup_menu::maximum_size(optional_size const& aAvailableSpace) const
     {
         return minimum_size(aAvailableSpace);
     }
@@ -314,7 +314,7 @@ namespace neogfx
         return true;
     }
 
-    bool popup_menu::text_input(const std::string&)
+    bool popup_menu::text_input(std::string const&)
     {
         service<i_basic_services>().system_beep();
         return true;

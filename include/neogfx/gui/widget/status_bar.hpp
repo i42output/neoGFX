@@ -56,7 +56,7 @@ namespace neogfx
             separator();
         public:
             neogfx::size_policy size_policy() const override;
-            size minimum_size(const optional_size& aAvailableSpace) const override;
+            size minimum_size(optional_size const& aAvailableSpace) const override;
         public:
             void paint(i_graphics_context& aGc) const override;
         };
@@ -88,7 +88,7 @@ namespace neogfx
     public:
         bool have_message() const;
         std::string message() const;
-        void set_message(const std::string& aMessage);
+        void set_message(std::string const& aMessage);
         void clear_message();
         void add_normal_widget(i_widget& aWidget);
         void add_normal_widget_at(widget_index aPosition, i_widget& aWidget);

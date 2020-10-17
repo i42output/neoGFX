@@ -691,7 +691,7 @@ namespace neogfx
                     ease(e4, (t - (w1 + w2 + w3) / wTotal) / (w4 / wTotal));
     }
 
-    inline const std::string& to_string(easing e)
+    inline std::string const& to_string(easing e)
     {
         static const std::unordered_map<easing, std::string> STRING_MAP =
         { {

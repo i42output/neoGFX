@@ -44,8 +44,8 @@ namespace neogfx
         typedef std::unique_ptr<i_menu_item> item_pointer;
         typedef std::vector<item_pointer> item_list;
     public:
-        menu(i_menu& aParent, menu_type aType = menu_type::Popup, const std::string& aTitle = std::string());
-        menu(menu_type aType = menu_type::Popup, const std::string& aTitle = std::string());
+        menu(i_menu& aParent, menu_type aType = menu_type::Popup, std::string const& aTitle = std::string());
+        menu(menu_type aType = menu_type::Popup, std::string const& aTitle = std::string());
         ~menu();
     public:
         const i_widget& as_widget() const override;
@@ -54,22 +54,22 @@ namespace neogfx
         i_menu& parent() override;
         void set_parent(i_menu& aParent) override;
         menu_type type() const override;
-        const std::string& title() const override;
-        void set_title(const std::string& aTitle) override;
+        std::string const& title() const override;
+        void set_title(std::string const& aTitle) override;
         const i_texture& image() const override;
-        void set_image(const std::string& aUri) override;
+        void set_image(std::string const& aUri) override;
         void set_image(const i_image& aImage) override;
         void set_image(const i_texture& aTexture) override;
         uint32_t count() const override;
         const i_menu_item& item_at(item_index aItemIndex) const override;
         i_menu_item& item_at(item_index aItemIndex) override;
         void add_sub_menu(i_menu& aSubMenu) override;
-        i_menu& add_sub_menu(const std::string& aSubMenuTitle) override;
+        i_menu& add_sub_menu(std::string const& aSubMenuTitle) override;
         i_action& add_action(i_action& aAction) override;
         i_action& add_action(std::shared_ptr<i_action> aAction) override;
         void add_separator() override;
         void insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu) override;
-        i_menu& insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuText) override;
+        i_menu& insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuText) override;
         void insert_action_at(item_index aItemIndex, i_action& aAction) override;
         void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) override;
         void insert_separator_at(item_index aItemIndex) override;

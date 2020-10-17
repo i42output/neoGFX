@@ -41,7 +41,7 @@ namespace neogfx
         void selection_model_changed() override;
     protected:
         rect item_display_rect() const override;
-        size total_item_area(const i_units_context& aUnitsContext) const override;
+        size total_item_area(i_units_context const& aUnitsContext) const override;
         dimension column_width(uint32_t aColumn) const override;
     protected:
         neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;

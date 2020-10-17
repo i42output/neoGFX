@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    tab_page::tab_page(i_tab_page_container& aContainer, const std::string& aTabText) :
+    tab_page::tab_page(i_tab_page_container& aContainer, std::string const& aTabText) :
         tab_page{ aContainer, aContainer.add_tab(aTabText) }
     {
     }
@@ -55,7 +55,7 @@ namespace neogfx
             return size_constraint::Expanding;
     }
 
-    size tab_page::minimum_size(const optional_size& aAvailableSpace) const
+    size tab_page::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size() || (iTab.container().style() & tab_container_style::ResizeToTabs) == tab_container_style::ResizeToTabs)
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
@@ -63,7 +63,7 @@ namespace neogfx
             return size{};
     }
 
-    size tab_page::maximum_size(const optional_size& aAvailableSpace) const
+    size tab_page::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (has_maximum_size() || size_policy() != size_constraint::Expanding)
             return framed_scrollable_widget::maximum_size(aAvailableSpace);

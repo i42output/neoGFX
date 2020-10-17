@@ -38,43 +38,43 @@ namespace neogfx
             friend class renderer;
         public:
             struct failed_to_install_window_creation_hook : std::runtime_error {
-                failed_to_install_window_creation_hook(const std::string& aReason) :
+                failed_to_install_window_creation_hook(std::string const& aReason) :
                     std::runtime_error("neogfx::native::windows::window::failed_to_install_window_creation_hook, reason: " + aReason) {}
             };
             struct failed_to_create_window : std::runtime_error {
-                failed_to_create_window(const std::string& aReason) :
+                failed_to_create_window(std::string const& aReason) :
                     std::runtime_error("neogfx::native::windows::window::failed_to_create_window: Failed to create window, reason: " + aReason) {}
             };
             struct failed_to_create_opengl_context : std::runtime_error {
-                failed_to_create_opengl_context(const std::string& aReason) :
+                failed_to_create_opengl_context(std::string const& aReason) :
                     std::runtime_error("neogfx::native::windows::window::failed_to_create_opengl_context: Failed to create OpenGL context, reason: " + aReason) {}
             };
             struct failed_to_activate_opengl_context : std::runtime_error {
-                failed_to_activate_opengl_context(const std::string& aReason) :
+                failed_to_activate_opengl_context(std::string const& aReason) :
                     std::runtime_error("neogfx::native::windows::window::failed_to_activate_opengl_context: Failed to activate OpenGL context, reason: " + aReason) {}
             };
             struct failed_to_get_window_information : std::runtime_error {
-                failed_to_get_window_information(const std::string& aReason) :
+                failed_to_get_window_information(std::string const& aReason) :
                     std::runtime_error("neogfx::native::windows::window::failed_to_get_window_information: Failed to get window information, reason: " + aReason) {}
             };
             struct failed_to_set_window_attributes : std::runtime_error {
-                failed_to_set_window_attributes(const std::string& aReason) :
+                failed_to_set_window_attributes(std::string const& aReason) :
                     std::runtime_error("neogfx::native::windows::window::failed_to_set_window_attributes: Failed to set window attributes, reason: " + aReason) {}
             };
             struct failed_to_detach_from_windows_window : std::runtime_error {
-                failed_to_detach_from_windows_window(const std::string& aReason) :
+                failed_to_detach_from_windows_window(std::string const& aReason) :
                     std::runtime_error("neogfx::native::windows::window::failed_to_detach_from_windows_window: Failed to detach from SDL window, reason: " + aReason) {}
             };
         public:
             static DWORD convert_style(window_style aStyle);
             static DWORD convert_ex_style(window_style aStyle);
         public:
-            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
-            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
-            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
-            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
-            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
-            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
+            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
+            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
+            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
+            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
+            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
+            window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
             ~window();
         public:
             void* target_handle() const override;
@@ -127,7 +127,7 @@ namespace neogfx
             void release_capture() override;
             void non_client_set_capture() override;
             void non_client_release_capture() override;
-            void set_title_text(const std::string& aTitleText) override;
+            void set_title_text(std::string const& aTitleText) override;
             padding border_thickness() const override;
         protected:
             void set_destroying() override;

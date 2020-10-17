@@ -31,8 +31,8 @@ namespace neogfx
     public:
         define_declared_event(Changed, changed, style_aspect)
     public:
-        style(const std::string& aName);
-        style(const std::string& aName, const i_style& aOther);
+        style(std::string const& aName);
+        style(std::string const& aName, const i_style& aOther);
         style(const i_style& aOther);
         style(const style& aOther);
         virtual ~style();
@@ -42,7 +42,7 @@ namespace neogfx
         bool operator==(const i_style& aOther) const;
         bool operator!=(const i_style& aOther) const;
     public:
-        const std::string& name() const override;
+        std::string const& name() const override;
         const padding_list& all_padding() const override;
         const neogfx::padding& padding(padding_role aPaddingRole) const override;
         void set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding) override;

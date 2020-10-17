@@ -38,7 +38,7 @@ namespace neogfx
         return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
-    size status_bar::separator::minimum_size(const optional_size& aAvailableSpace) const
+    size status_bar::separator::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (widget::has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
@@ -158,7 +158,7 @@ namespace neogfx
         throw no_message();
     }
 
-    void status_bar::set_message(const std::string& aMessage)
+    void status_bar::set_message(std::string const& aMessage)
     {
         iMessage = aMessage;
         update_widgets();

@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    module_resource::module_resource(const std::string& aUri, const void* aData, std::size_t aSize) : 
+    module_resource::module_resource(std::string const& aUri, const void* aData, std::size_t aSize) : 
         iUri(aUri), iData(aData), iSize(aSize)
     {
     }
@@ -43,13 +43,13 @@ namespace neogfx
         return false;
     }
 
-    const std::string& module_resource::error_string() const
+    std::string const& module_resource::error_string() const
     {
         static const std::string sNoError;
         return sNoError;
     }
 
-    const std::string& module_resource::uri() const
+    std::string const& module_resource::uri() const
     {
         return iUri;
     }

@@ -28,7 +28,7 @@ namespace neogfx
 {
     namespace
     {
-        inline gradient convert_gimp_gradient(const gradient& aGradient, const std::string& aPath)
+        inline gradient convert_gimp_gradient(const gradient& aGradient, std::string const& aPath)
         {
             // todo: midpoint support
             std::ifstream gimpGradient{ aPath };

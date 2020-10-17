@@ -44,9 +44,9 @@ namespace neogfx
         virtual bool available() const = 0;
         virtual std::pair<bool, double> downloading() const = 0;
         virtual bool error() const = 0;
-        virtual const std::string& error_string() const = 0;
+        virtual std::string const& error_string() const = 0;
     public:
-        virtual const std::string& uri() const = 0;
+        virtual std::string const& uri() const = 0;
         virtual const void* cdata() const = 0;
         virtual const void* data() const = 0;
         virtual void* data() = 0;

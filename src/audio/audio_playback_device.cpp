@@ -28,7 +28,7 @@ namespace neogfx
     {
     }
 
-    i_audio_sample& audio_playback_device::load_sample(const std::string& aUri)
+    i_audio_sample& audio_playback_device::load_sample(std::string const& aUri)
     {
         // todo
         throw std::logic_error("audio_playback_device::load_sample: not yet implemented");

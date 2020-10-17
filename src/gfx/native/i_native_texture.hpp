@@ -31,7 +31,7 @@ namespace neogfx
     public:
         virtual void* handle() const = 0;
         virtual bool is_resident() const = 0;
-        virtual const std::string& uri() const = 0;
+        virtual std::string const& uri() const = 0;
     public:
         virtual size extents() const = 0;
     public:

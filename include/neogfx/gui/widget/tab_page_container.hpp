@@ -62,8 +62,8 @@ namespace neogfx
         i_tab& selected_tab() override;
         const i_tab_page& selected_tab_page() const override;
         i_tab_page& selected_tab_page() override;
-        i_tab& add_tab(const std::string& aTabText) override;
-        i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText) override;
+        i_tab& add_tab(std::string const& aTabText) override;
+        i_tab& insert_tab(tab_index aTabIndex, std::string const& aTabText) override;
         void remove_tab(tab_index aTabIndex) override;
         void show_tab(tab_index aTabIndex) override;
         void hide_tab(tab_index aTabIndex) override;
@@ -72,8 +72,8 @@ namespace neogfx
         void select_next_tab() override;
         void select_previous_tab() override;
     public:
-        i_tab_page& add_tab_page(const std::string& aTabText) override;
-        i_tab_page& insert_tab_page(tab_index aTabIndex, const std::string& aTabText) override;
+        i_tab_page& add_tab_page(std::string const& aTabText) override;
+        i_tab_page& insert_tab_page(tab_index aTabIndex, std::string const& aTabText) override;
         i_tab_page& add_tab_page(i_tab& aTab) override;
         i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) override;
         i_tab_page& add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget) override;

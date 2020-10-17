@@ -26,7 +26,7 @@ namespace neogfx
     class i_audio
     {
     public:
-        struct failed_to_initialize_audio : std::runtime_error { failed_to_initialize_audio(const std::string& aReason) : std::runtime_error{"neogfx::i_audio::failed_to_initialize_audio: " + aReason} {} };
+        struct failed_to_initialize_audio : std::runtime_error { failed_to_initialize_audio(std::string const& aReason) : std::runtime_error{"neogfx::i_audio::failed_to_initialize_audio: " + aReason} {} };
         struct bad_audio_device_index : std::logic_error { bad_audio_device_index() : std::logic_error{ "neogfx::i_audio::bad_audio_device_index" } {} };
     public:
         virtual void initialize(bool aOpenDefaultPlaybackDevice = true) = 0;

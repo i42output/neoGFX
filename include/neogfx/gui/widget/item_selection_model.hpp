@@ -93,7 +93,7 @@ namespace neogfx
                 iCurrentIndex = std::nullopt;
                 reindex();
             });
-            iSink += presentation_model().item_removed([this](const item_presentation_model_index&)
+            iSink += presentation_model().item_removed([this](item_presentation_model_index const&)
             {
                 if (has_current_index())
                 {
@@ -104,13 +104,13 @@ namespace neogfx
                 }
                 reindex();
             });
-            iSink += presentation_model().item_expanded([this](const item_presentation_model_index& aIndex)
+            iSink += presentation_model().item_expanded([this](item_presentation_model_index const& aIndex)
             {
                 if (has_current_index() && current_index().row() > aIndex.row())
                     iCurrentIndex = std::nullopt;
                 reindex();
             });
-            iSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aIndex)
+            iSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aIndex)
             {
                 if (has_current_index() && current_index().row() > aIndex.row())
                     iCurrentIndex = std::nullopt;
@@ -179,13 +179,13 @@ namespace neogfx
         {
             return iCurrentIndex != std::nullopt;
         }
-        const item_presentation_model_index& current_index() const override
+        item_presentation_model_index const& current_index() const override
         {
             if (iCurrentIndex == std::nullopt)
                 throw no_current_index();
             return *iCurrentIndex;
         }
-        void set_current_index(const item_presentation_model_index& aIndex) override
+        void set_current_index(item_presentation_model_index const& aIndex) override
         {
             do_set_current_index(aIndex);
         }
@@ -197,7 +197,7 @@ namespace neogfx
         {
             return relative_to_index(has_current_index() ? current_index() : item_presentation_model_index{ 0, 0 }, aRelativeLocation, aSelectable, aEditable);
         }
-        item_presentation_model_index relative_to_index(const item_presentation_model_index& aIndex, index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const override
+        item_presentation_model_index relative_to_index(item_presentation_model_index const& aIndex, index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const override
         {
             item_presentation_model_index result = aIndex;
             auto acceptable = [this, aSelectable, aEditable](item_presentation_model_index aIndex)
@@ -289,7 +289,7 @@ namespace neogfx
             else
                 return next_cell(current_index());
         }
-        item_presentation_model_index next_cell(const item_presentation_model_index& aIndex) const override
+        item_presentation_model_index next_cell(item_presentation_model_index const& aIndex) const override
         {
             if (aIndex.column() + 1u < presentation_model().columns())
                 return item_presentation_model_index{ aIndex.row(), aIndex.column() + 1u };
@@ -305,7 +305,7 @@ namespace neogfx
             else
                 return previous_cell(current_index());
         }
-        item_presentation_model_index previous_cell(const item_presentation_model_index& aIndex) const override
+        item_presentation_model_index previous_cell(item_presentation_model_index const& aIndex) const override
         {
             if (aIndex.column() > 0u)
                 return item_presentation_model_index{ aIndex.row(), aIndex.column() - 1u };
@@ -319,22 +319,22 @@ namespace neogfx
         {
             return iSelection;
         }
-        bool is_selected(const item_presentation_model_index& aIndex) const override
+        bool is_selected(item_presentation_model_index const& aIndex) const override
         {
             return (presentation_model().cell_meta(aIndex).selection & item_cell_selection_flags::Selected) == item_cell_selection_flags::Selected;
         }    
-        bool is_selectable(const item_presentation_model_index& aIndex) const override
+        bool is_selectable(item_presentation_model_index const& aIndex) const override
         {
             return (presentation_model().cell_flags(aIndex) & item_cell_flags::Selectable) == item_cell_flags::Selectable;
         }
-        void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation) override
+        void select(item_presentation_model_index const& aIndex, item_selection_operation aOperation) override
         {
             if (aOperation == item_selection_operation::None)
                 return;
             else if (mode() == item_selection_mode::NoSelection)
                 aOperation = item_selection_operation::Clear;
             // todo: cell and column
-            static auto find = [](const item_presentation_model_index& aIndex, concrete_item_selection& aSelection)
+            static auto find = [](item_presentation_model_index const& aIndex, concrete_item_selection& aSelection)
             {
                 if (aSelection.empty())
                     return aSelection.end();
@@ -346,7 +346,7 @@ namespace neogfx
                     return existing;
                 return aSelection.end();
             };
-            static auto find_adjacent = [](const item_presentation_model_index& aIndex, concrete_item_selection& aSelection)
+            static auto find_adjacent = [](item_presentation_model_index const& aIndex, concrete_item_selection& aSelection)
             {
                 if (aSelection.empty())
                     return aSelection.end();
@@ -443,7 +443,7 @@ namespace neogfx
             return iFiltering;
         }
     public:
-        bool is_editable(const item_presentation_model_index& aIndex) const override
+        bool is_editable(item_presentation_model_index const& aIndex) const override
         {
             return is_selectable(aIndex) && has_presentation_model() && presentation_model().cell_editable(aIndex);
         }

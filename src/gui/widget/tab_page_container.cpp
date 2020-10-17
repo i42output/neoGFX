@@ -158,14 +158,14 @@ namespace neogfx
         return const_cast<i_tab_page&>(to_const(*this).selected_tab_page());
     }
 
-    i_tab& tab_page_container::add_tab(const std::string& aTabText)
+    i_tab& tab_page_container::add_tab(std::string const& aTabText)
     {
         auto& newTab = iTabBar.add_tab(aTabText);
         iTabs.emplace(&newTab, tab_page_pointer());
         return newTab;
     }
 
-    i_tab& tab_page_container::insert_tab(tab_index aTabIndex, const std::string& aTabText)
+    i_tab& tab_page_container::insert_tab(tab_index aTabIndex, std::string const& aTabText)
     {
         auto& newTab = iTabBar.insert_tab(aTabIndex, aTabText);
         iTabs.emplace(&newTab, tab_page_pointer());
@@ -211,12 +211,12 @@ namespace neogfx
         iTabBar.select_previous_tab();
     }
 
-    i_tab_page& tab_page_container::add_tab_page(const std::string& aTabText)
+    i_tab_page& tab_page_container::add_tab_page(std::string const& aTabText)
     {
         return add_tab_page(add_tab(aTabText));
     }
 
-    i_tab_page& tab_page_container::insert_tab_page(tab_index aTabIndex, const std::string& aTabText)
+    i_tab_page& tab_page_container::insert_tab_page(tab_index aTabIndex, std::string const& aTabText)
     {
         return add_tab_page(insert_tab(aTabIndex, aTabText));
     }

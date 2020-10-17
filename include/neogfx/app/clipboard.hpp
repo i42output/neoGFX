@@ -42,7 +42,7 @@ namespace neogfx
     public:
         bool has_text() const override;
         std::string text() const override;
-        void set_text(const std::string& aText) override;
+        void set_text(std::string const& aText) override;
         bool has_image() const override;
         neogfx::image image() const override;
         void set_image(const neogfx::image& aImage) override;

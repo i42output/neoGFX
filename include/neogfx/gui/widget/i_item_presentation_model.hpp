@@ -24,6 +24,7 @@
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/app/i_palette.hpp>
+#include <neogfx/app/i_drag_drop.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
@@ -154,17 +155,17 @@ namespace neogfx
         declare_event(visual_appearance_changed)
         declare_event(column_info_changed, item_presentation_model_index::column_type)
         declare_event(item_model_changed, const i_item_model&)
-        declare_event(item_added, const item_presentation_model_index&)
-        declare_event(item_changed, const item_presentation_model_index&)
-        declare_event(item_removed, const item_presentation_model_index&)
-        declare_event(item_expanding, const item_presentation_model_index&)
-        declare_event(item_collapsing, const item_presentation_model_index&)
-        declare_event(item_expanded, const item_presentation_model_index&)
-        declare_event(item_collapsed, const item_presentation_model_index&)
-        declare_event(item_toggled, const item_presentation_model_index&)
-        declare_event(item_checked, const item_presentation_model_index&)
-        declare_event(item_unchecked, const item_presentation_model_index&)
-        declare_event(item_indeterminate, const item_presentation_model_index&)
+        declare_event(item_added, item_presentation_model_index const&)
+        declare_event(item_changed, item_presentation_model_index const&)
+        declare_event(item_removed, item_presentation_model_index const&)
+        declare_event(item_expanding, item_presentation_model_index const&)
+        declare_event(item_collapsing, item_presentation_model_index const&)
+        declare_event(item_expanded, item_presentation_model_index const&)
+        declare_event(item_collapsed, item_presentation_model_index const&)
+        declare_event(item_toggled, item_presentation_model_index const&)
+        declare_event(item_checked, item_presentation_model_index const&)
+        declare_event(item_unchecked, item_presentation_model_index const&)
+        declare_event(item_indeterminate, item_presentation_model_index const&)
         declare_event(items_sorting)
         declare_event(items_sorted)
         declare_event(items_filtering)
@@ -217,82 +218,85 @@ namespace neogfx
         virtual bool has_item_model() const = 0;
         virtual i_item_model& item_model() const = 0;
         virtual void set_item_model(i_item_model& aItemModel) = 0;
-        virtual item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const = 0;
-        virtual bool has_item_model_index(const item_model_index& aIndex) const = 0;
-        virtual item_presentation_model_index from_item_model_index(const item_model_index& aIndex, bool aIgnoreColumn = false) const = 0;
+        virtual item_model_index to_item_model_index(item_presentation_model_index const& aIndex) const = 0;
+        virtual bool has_item_model_index(item_model_index const& aIndex) const = 0;
+        virtual item_presentation_model_index from_item_model_index(item_model_index const& aIndex, bool aIgnoreColumn = false) const = 0;
     public:
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
-        virtual uint32_t columns(const item_presentation_model_index& aIndex) const = 0;
+        virtual uint32_t columns(item_presentation_model_index const& aIndex) const = 0;
     public:
         virtual void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) = 0;
     public:
-        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc, bool aIncludePadding = true) const = 0;
-        virtual const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
-        virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, const i_graphics_context& aGc) const = 0;
-        virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, const std::string& aHeadingText) = 0;
+        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_graphics_context const& aGc, bool aIncludePadding = true) const = 0;
+        virtual std::string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
+        virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_graphics_context const& aGc) const = 0;
+        virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) = 0;
         virtual item_cell_flags column_flags(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_flags(item_presentation_model_index::column_type aColumnIndex, item_cell_flags aFlags) = 0;
         virtual optional_size column_image_size(item_presentation_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, const optional_size& aImageSize) = 0;
+        virtual void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, optional_size const& aImageSize) = 0;
     public:
-        virtual bool toggle_expanded(const item_presentation_model_index& aIndex) = 0;
+        virtual bool toggle_expanded(item_presentation_model_index const& aIndex) = 0;
     public:
-        virtual const button_checked_state& checked_state(const item_presentation_model_index& aIndex) = 0;
-        virtual bool is_checked(const item_presentation_model_index& aIndex) const = 0;
-        virtual bool is_unchecked(const item_presentation_model_index& aIndex) const = 0;
-        virtual bool is_indeterminate(const item_presentation_model_index& aIndex) const = 0;
-        virtual void set_checked_state(const item_presentation_model_index& aIndex, const button_checked_state& aState) = 0;
-        virtual void check(const item_presentation_model_index& aIndex) = 0;
-        virtual void uncheck(const item_presentation_model_index& aIndex) = 0;
-        virtual void set_indeterminate(const item_presentation_model_index& aIndex) = 0;
-        virtual void set_checked(const item_presentation_model_index& aIndex, bool aChecked) = 0;
-        virtual void toggle_check(const item_presentation_model_index& aIndex) = 0;
+        virtual button_checked_state const& checked_state(item_presentation_model_index const& aIndex) = 0;
+        virtual bool is_checked(item_presentation_model_index const& aIndex) const = 0;
+        virtual bool is_unchecked(item_presentation_model_index const& aIndex) const = 0;
+        virtual bool is_indeterminate(item_presentation_model_index const& aIndex) const = 0;
+        virtual void set_checked_state(item_presentation_model_index const& aIndex, button_checked_state const& aState) = 0;
+        virtual void check(item_presentation_model_index const& aIndex) = 0;
+        virtual void uncheck(item_presentation_model_index const& aIndex) = 0;
+        virtual void set_indeterminate(item_presentation_model_index const& aIndex) = 0;
+        virtual void set_checked(item_presentation_model_index const& aIndex, bool aChecked) = 0;
+        virtual void toggle_check(item_presentation_model_index const& aIndex) = 0;
     public:
-        virtual const font& default_font() const = 0;
-        virtual void set_default_font(const optional_font& aDefaultFont) = 0;
-        virtual size cell_spacing(const i_units_context& aUnitsContext) const = 0;
-        virtual void set_cell_spacing(const optional_size& aSpacing, const i_units_context& aUnitsContext) = 0;
-        virtual neogfx::padding cell_padding(const i_units_context& aUnitsContext) const = 0;
-        virtual void set_cell_padding(const optional_padding& aPadding, const i_units_context& aUnitsContext) = 0;
+        virtual font const& default_font() const = 0;
+        virtual void set_default_font(optional_font const& aDefaultFont) = 0;
+        virtual size cell_spacing(i_units_context const& aUnitsContext) const = 0;
+        virtual void set_cell_spacing(optional_size const& aSpacing, i_units_context const& aUnitsContext) = 0;
+        virtual neogfx::padding cell_padding(i_units_context const& aUnitsContext) const = 0;
+        virtual void set_cell_padding(optional_padding const& aPadding, i_units_context const& aUnitsContext) = 0;
         virtual bool alternating_row_color() const = 0;
         virtual void set_alternating_row_color(bool aAlternatingColor) = 0;
     public:
-        virtual dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const = 0;
-        virtual double total_height(const i_units_context& aUnitsContext) const = 0;
-        virtual double item_position(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const = 0;
-        virtual std::pair<item_presentation_model_index::value_type, coordinate> item_at(double aPosition, const i_units_context& aUnitsContext) const = 0;
+        virtual dimension item_height(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
+        virtual double total_height(i_units_context const& aUnitsContext) const = 0;
+        virtual double item_position(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
+        virtual std::pair<item_presentation_model_index::value_type, coordinate> item_at(double aPosition, i_units_context const& aUnitsContext) const = 0;
     public:
-        virtual item_cell_flags cell_flags(const item_presentation_model_index& aIndex) const = 0;
-        virtual void set_cell_flags(const item_presentation_model_index& aIndex, item_cell_flags aFlags) = 0;
-        virtual cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const = 0;
+        virtual item_cell_flags cell_flags(item_presentation_model_index const& aIndex) const = 0;
+        virtual void set_cell_flags(item_presentation_model_index const& aIndex, item_cell_flags aFlags) = 0;
+        virtual cell_meta_type& cell_meta(item_presentation_model_index const& aIndex) const = 0;
     public:
-        virtual std::string cell_to_string(const item_presentation_model_index& aIndex) const = 0;
-        virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const = 0;
-        virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString, bool& aError) const = 0;
-        virtual boost::basic_format<char> cell_format(const item_presentation_model_index& aIndex) const = 0;
-        virtual optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const = 0;
-        virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
-        virtual optional_size cell_image_size(const item_presentation_model_index& aIndex) const = 0;
-        virtual optional_size cell_check_box_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
-        virtual optional_size cell_tree_expander_size(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
-        virtual optional_texture cell_image(const item_presentation_model_index& aIndex) const = 0;
-        virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
-        virtual size cell_extents(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
-        virtual dimension indent(const item_presentation_model_index& aIndex, const i_graphics_context& aGc) const = 0;
+        virtual std::string cell_to_string(item_presentation_model_index const& aIndex) const = 0;
+        virtual item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString) const = 0;
+        virtual item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString, bool& aError) const = 0;
+        virtual boost::basic_format<char> cell_format(item_presentation_model_index const& aIndex) const = 0;
+        virtual optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const = 0;
+        virtual optional_font cell_font(item_presentation_model_index const& aIndex) const = 0;
+        virtual optional_size cell_image_size(item_presentation_model_index const& aIndex) const = 0;
+        virtual optional_size cell_check_box_size(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
+        virtual optional_size cell_tree_expander_size(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
+        virtual optional_texture cell_image(item_presentation_model_index const& aIndex) const = 0;
+        virtual neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
+        virtual size cell_extents(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
+        virtual dimension indent(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
     public:
         virtual bool sortable() const = 0;
         virtual void set_sortable(bool aSortable) = 0;
         virtual optional_sort sorting_by() const = 0;
-        virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) = 0;
+        virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, optional_sort_direction const& aSortDirection = optional_sort_direction{}) = 0;
         virtual void reset_sort() = 0;
     public:
-        virtual optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const = 0;
+        virtual optional_item_presentation_model_index find_item(filter_search_key const& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const = 0;
     public:
         virtual bool filtering() const = 0;
         virtual optional_filter filtering_by() const = 0;
-        virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) = 0;
+        virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, filter_search_key const& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) = 0;
         virtual void reset_filter() = 0;
+    public:
+        virtual i_drag_drop_source const& drag_drop_source() const = 0;
+        virtual i_drag_drop_source& drag_drop_source() = 0;
         // helpers
     public:
         bool column_editable(item_presentation_model_index::column_type aColumnIndex) const
@@ -391,11 +395,11 @@ namespace neogfx
             else
                 set_column_flags(aColumnIndex, column_flags(aColumnIndex) & ~(item_cell_flags::Checkable | item_cell_flags::CheckableTriState));
         }
-        bool cell_editable(const item_presentation_model_index& aIndex) const
+        bool cell_editable(item_presentation_model_index const& aIndex) const
         {
             return (cell_flags(aIndex) & item_cell_flags::Editable) == item_cell_flags::Editable;
         }
-        void set_cell_editable(const item_presentation_model_index& aIndex, bool aEditable = true)
+        void set_cell_editable(item_presentation_model_index const& aIndex, bool aEditable = true)
         {
             if (aEditable)
             {
@@ -406,55 +410,55 @@ namespace neogfx
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~item_cell_flags::Editable);
         }
-        bool cell_editable_when_focused(const item_presentation_model_index& aIndex) const
+        bool cell_editable_when_focused(item_presentation_model_index const& aIndex) const
         {
             return cell_editable(aIndex) && (cell_flags(aIndex) & item_cell_flags::EditableWhenFocused) == item_cell_flags::EditableWhenFocused;
         }
-        void set_cell_editable_when_focused(const item_presentation_model_index& aIndex, bool aEditableWhenFocused = true)
+        void set_cell_editable_when_focused(item_presentation_model_index const& aIndex, bool aEditableWhenFocused = true)
         {
             if (aEditableWhenFocused)
                 set_cell_flags(aIndex, (cell_flags(aIndex) | item_cell_flags::Editable | item_cell_flags::EditableWhenFocused) & ~item_cell_flags::EditableOnInputEvent);
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~(item_cell_flags::Editable | item_cell_flags::EditableWhenFocused));
         }
-        bool cell_editable_on_input_event(const item_presentation_model_index& aIndex) const
+        bool cell_editable_on_input_event(item_presentation_model_index const& aIndex) const
         {
             return cell_editable(aIndex) && (cell_flags(aIndex) & item_cell_flags::EditableOnInputEvent) == item_cell_flags::EditableOnInputEvent;
         }
-        void set_cell_editable_on_input_event(const item_presentation_model_index& aIndex, bool aEditableOnInputEvent = true)
+        void set_cell_editable_on_input_event(item_presentation_model_index const& aIndex, bool aEditableOnInputEvent = true)
         {
             if (aEditableOnInputEvent)
                 set_cell_flags(aIndex, (cell_flags(aIndex) | item_cell_flags::Editable | item_cell_flags::EditableOnInputEvent) & ~item_cell_flags::EditableWhenFocused);
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~(item_cell_flags::Editable | item_cell_flags::EditableOnInputEvent));
         }
-        bool cell_selectable(const item_presentation_model_index& aIndex) const
+        bool cell_selectable(item_presentation_model_index const& aIndex) const
         {
             return (cell_flags(aIndex) & item_cell_flags::Selectable) == item_cell_flags::Selectable;
         }
-        void set_cell_selectable(const item_presentation_model_index& aIndex, bool aSelectable = true)
+        void set_cell_selectable(item_presentation_model_index const& aIndex, bool aSelectable = true)
         {
             if (aSelectable)
                 set_cell_flags(aIndex, cell_flags(aIndex) | item_cell_flags::Selectable);
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~item_cell_flags::Selectable);
         }
-        bool cell_read_only(const item_presentation_model_index& aIndex) const
+        bool cell_read_only(item_presentation_model_index const& aIndex) const
         {
             return (cell_flags(aIndex) & item_cell_flags::Editable) != item_cell_flags::Editable;
         }
-        void set_cell_read_only(const item_presentation_model_index& aIndex, bool aReadOnly = true)
+        void set_cell_read_only(item_presentation_model_index const& aIndex, bool aReadOnly = true)
         {
             if (aReadOnly)
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~item_cell_flags::Editable);
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) | item_cell_flags::Editable);
         }
-        bool cell_checkable(const item_presentation_model_index& aIndex) const
+        bool cell_checkable(item_presentation_model_index const& aIndex) const
         {
             return (cell_flags(aIndex) & item_cell_flags::Checkable) == item_cell_flags::Checkable;
         }
-        void set_cell_checkable(const item_presentation_model_index& aIndex, bool aCheckable = true)
+        void set_cell_checkable(item_presentation_model_index const& aIndex, bool aCheckable = true)
         {
             if (aCheckable)
             {
@@ -465,22 +469,22 @@ namespace neogfx
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~item_cell_flags::Checkable);
         }
-        bool cell_bi_state_checkable(const item_presentation_model_index& aIndex) const
+        bool cell_bi_state_checkable(item_presentation_model_index const& aIndex) const
         {
             return cell_checkable(aIndex) && (cell_flags(aIndex) & item_cell_flags::CheckableBiState) == item_cell_flags::CheckableBiState;
         }
-        void set_cell_bi_state_checkable(const item_presentation_model_index& aIndex, bool aCheckableBiState = true)
+        void set_cell_bi_state_checkable(item_presentation_model_index const& aIndex, bool aCheckableBiState = true)
         {
             if (aCheckableBiState)
                 set_cell_flags(aIndex, (cell_flags(aIndex) | item_cell_flags::Checkable | item_cell_flags::CheckableBiState) & ~item_cell_flags::CheckableTriState);
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~(item_cell_flags::Checkable | item_cell_flags::CheckableBiState));
         }
-        bool cell_tri_state_checkable(const item_presentation_model_index& aIndex) const
+        bool cell_tri_state_checkable(item_presentation_model_index const& aIndex) const
         {
             return cell_checkable(aIndex) && (cell_flags(aIndex) & item_cell_flags::CheckableTriState) == item_cell_flags::CheckableTriState;
         }
-        void set_cell_tri_state_checkable(const item_presentation_model_index& aIndex, bool aCheckableTriState = true)
+        void set_cell_tri_state_checkable(item_presentation_model_index const& aIndex, bool aCheckableTriState = true)
         {
             if (aCheckableTriState)
                 set_cell_flags(aIndex, (cell_flags(aIndex) | item_cell_flags::Checkable | item_cell_flags::CheckableTriState) & ~item_cell_flags::CheckableBiState);

@@ -32,7 +32,7 @@ namespace neogfx
         skin(const std::string aName);
         skin(const std::string aName, i_skin& aFallback);
     public:
-        const std::string& name() const override;
+        std::string const& name() const override;
         bool has_fallback() const override;
         i_skin& fallback() override;
     public:

@@ -34,16 +34,16 @@ namespace neogfx
         define_declared_event(FailedToDownload, failed_to_download)
     public:
         resource() = delete;
-        resource(i_resource_manager& aManager, const std::string& aUri);
-        resource(i_resource_manager& aManager, const std::string& aUri, const void* aData, std::size_t aSize);
+        resource(i_resource_manager& aManager, std::string const& aUri);
+        resource(i_resource_manager& aManager, std::string const& aUri, const void* aData, std::size_t aSize);
         ~resource();
     public:
         virtual bool available() const;
         virtual std::pair<bool, double> downloading() const;
         virtual bool error() const;
-        virtual const std::string& error_string() const;
+        virtual std::string const& error_string() const;
     public:
-        virtual const std::string& uri() const;
+        virtual std::string const& uri() const;
         virtual const void* cdata() const;
         virtual const void* data() const;
         virtual void* data();

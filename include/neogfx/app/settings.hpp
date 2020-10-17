@@ -49,6 +49,6 @@ namespace neogfx
     {
         typedef neolib::settings base_type;
     public:
-        settings(const std::string& aFileName = "settings.xml");
+        settings(std::string const& aFileName = "settings.xml");
     };
 }

@@ -28,7 +28,7 @@ namespace neogfx
     public:
         audio_playback_device();
     public:
-        i_audio_sample& load_sample(const std::string& aUri) override;
+        i_audio_sample& load_sample(std::string const& aUri) override;
         i_audio_sample& create_sample(double aDuration) override;
         void destroy_sample(i_audio_sample& aSample) override;
     public:

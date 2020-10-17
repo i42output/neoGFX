@@ -108,7 +108,7 @@ namespace neogfx
 
     struct not_yet_implemented : std::runtime_error
     {
-        not_yet_implemented(const std::string& aDetail = {}) :
+        not_yet_implemented(std::string const& aDetail = {}) :
             std::runtime_error{ "neoGFX: Functionality not yet implemented" + (aDetail.empty() ? "" : " (" + aDetail + ")") } {}
     };
 

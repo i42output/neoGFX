@@ -44,7 +44,7 @@ namespace neogfx
         virtual const i_native_window& parent() const = 0;
         virtual i_native_window& parent() = 0;
     public:
-        virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
+        virtual void display_error_message(std::string const& aTitle, std::string const& aMessage) const = 0;
         virtual bool events_queued() const = 0;
         virtual void push_event(const native_event& aEvent) = 0;
         virtual bool pump_event() = 0;
@@ -80,8 +80,8 @@ namespace neogfx
         virtual void non_client_set_capture() = 0;
         virtual void non_client_release_capture() = 0;
         virtual double rendering_priority() const = 0;
-        virtual const std::string& title_text() const = 0;
-        virtual void set_title_text(const std::string& aTitleText) = 0;
+        virtual std::string const& title_text() const = 0;
+        virtual void set_title_text(std::string const& aTitleText) = 0;
         virtual padding border_thickness() const = 0;
     };
 }

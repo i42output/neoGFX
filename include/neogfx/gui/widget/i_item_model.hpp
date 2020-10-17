@@ -255,9 +255,9 @@ namespace neogfx
         virtual bool is_tree() const = 0;
         virtual uint32_t rows() const = 0;
         virtual uint32_t columns() const = 0;
-        virtual uint32_t columns(const item_model_index& aIndex) const = 0;
-        virtual const std::string& column_name(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_name(item_model_index::column_type aColumnIndex, const std::string& aName) = 0;
+        virtual uint32_t columns(item_model_index const& aIndex) const = 0;
+        virtual std::string const& column_name(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_name(item_model_index::column_type aColumnIndex, std::string const& aName) = 0;
         virtual item_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) = 0;
         virtual const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const = 0;
@@ -267,8 +267,8 @@ namespace neogfx
         virtual const item_cell_data& column_step_value(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_step_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
     public:
-        virtual iterator index_to_iterator(const item_model_index& aIndex) = 0;
-        virtual const_iterator index_to_iterator(const item_model_index& aIndex) const = 0;
+        virtual iterator index_to_iterator(item_model_index const& aIndex) = 0;
+        virtual const_iterator index_to_iterator(item_model_index const& aIndex) const = 0;
         virtual item_model_index iterator_to_index(const_iterator aPosition) const = 0;
         virtual iterator begin() = 0;
         virtual const_iterator begin() const = 0;
@@ -294,16 +294,16 @@ namespace neogfx
         virtual void reserve(uint32_t aItemCount) = 0;
         virtual uint32_t capacity() const = 0;
         virtual iterator insert_item(const_iterator aPosition, const item_cell_data& aCellData) = 0;
-        virtual iterator insert_item(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
+        virtual iterator insert_item(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
         virtual iterator append_item(const_iterator aParent, const item_cell_data& aCellData) = 0;
-        virtual iterator append_item(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
+        virtual iterator append_item(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
         virtual void clear() = 0;
         virtual iterator erase(const_iterator aPosition) = 0;
         virtual void insert_cell_data(const_iterator aItem, item_model_index::column_type aColumnIndex, const item_cell_data& aCellData) = 0;
-        virtual void insert_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
-        virtual void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
+        virtual void insert_cell_data(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
+        virtual void update_cell_data(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
     public:
-        virtual const item_cell_info& cell_info(const item_model_index& aIndex) const = 0;
-        virtual const item_cell_data& cell_data(const item_model_index& aIndex) const = 0;
+        virtual const item_cell_info& cell_info(item_model_index const& aIndex) const = 0;
+        virtual const item_cell_data& cell_data(item_model_index const& aIndex) const = 0;
     };
 }

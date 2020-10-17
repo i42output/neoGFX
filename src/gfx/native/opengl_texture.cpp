@@ -435,7 +435,7 @@ namespace neogfx
     }
 
     template <typename T>
-    const std::string& opengl_texture<T>::uri() const
+    std::string const& opengl_texture<T>::uri() const
     {
         return iUri;
     }

@@ -78,14 +78,14 @@ namespace neogfx::DesignStudio
         typedef abstract_t<Base> abstract_type;
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
     public:
-        element(const i_element_library& aLibrary, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
+        element(const i_element_library& aLibrary, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent { nullptr }, 
             iGroup{ aGroup }, 
             iType{ aType }
         {
         }
-        element(const i_element_library& aLibrary, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
+        element(const i_element_library& aLibrary, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent{ nullptr }, 
             iGroup{ aGroup }, 
@@ -93,7 +93,7 @@ namespace neogfx::DesignStudio
             iId{ aId }
         {
         }
-        element(const i_element_library& aLibrary, i_element& aParent, const std::string& aType, element_group aGroup = default_element_group<Type>()) :
+        element(const i_element_library& aLibrary, i_element& aParent, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent{ &aParent },
             iGroup{ aGroup }, 
@@ -101,7 +101,7 @@ namespace neogfx::DesignStudio
         {
             parent().add_child(*this);
         }
-        element(const i_element_library& aLibrary, i_element& aParent, const std::string& aType, const std::string& aId, element_group aGroup = default_element_group<Type>()) :
+        element(const i_element_library& aLibrary, i_element& aParent, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent{ &aParent },
             iGroup{ aGroup },

@@ -33,13 +33,13 @@ namespace neogfx
         public:
             box(check_box& aParent);
         public:
-            size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-            size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+            size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+            size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         };
     public:
-        check_box(const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
-        check_box(i_widget& aParent, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
-        check_box(i_layout& aLayout, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+        check_box(std::string const& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+        check_box(i_widget& aParent, std::string const& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+        check_box(i_layout& aLayout, std::string const& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
     public:
         neogfx::size_policy size_policy() const override;
     public:

@@ -120,14 +120,14 @@ namespace neogfx
             return cr;
         }
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override
         {
             size result = base_type::minimum_size(aAvailableSpace);
             if (!base_type::has_minimum_size())
                 result += size{ effective_frame_width() * 2.0 };
             return result;
         }
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override
+        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override
         {
             size result = base_type::maximum_size(aAvailableSpace);
             if (!base_type::has_maximum_size())

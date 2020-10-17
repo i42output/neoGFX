@@ -91,15 +91,15 @@ namespace neogfx
         struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::label::no_buddy") {} };
     public:
         label(label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
-        label(const std::string& aText, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
+        label(std::string const& aText, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(const i_texture& aTexture, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(const i_image& aImage, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(i_widget& aParent, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
-        label(i_widget& aParent, const std::string& aText, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
+        label(i_widget& aParent, std::string const& aText, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(i_widget& aParent, const i_texture& aTexture, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(i_widget& aParent, const i_image& aImage, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(i_layout& aLayout, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
-        label(i_layout& aLayout, const std::string& aText, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
+        label(i_layout& aLayout, std::string const& aText, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(i_layout& aLayout, const i_texture& aTexture, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         label(i_layout& aLayout, const i_image& aImage, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         ~label();
@@ -114,10 +114,10 @@ namespace neogfx
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
     public:
-        const std::string& text() const;
-        void set_text(const std::string& aText);
+        std::string const& text() const;
+        void set_text(std::string const& aText);
         const texture& image() const;
-        void set_image(const std::string& aImageUri);
+        void set_image(std::string const& aImageUri);
         void set_image(const neogfx::image& aImage);
         void set_image(const texture& aImage);
         label_placement placement() const;

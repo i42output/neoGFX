@@ -45,7 +45,7 @@ namespace neogfx
         DefaultECS  = Vertices | UV | Color | Function | Persist
     };
 
-    inline const std::string& standard_vertex_attribute_name(vertex_buffer_type aType)
+    inline std::string const& standard_vertex_attribute_name(vertex_buffer_type aType)
     {
         switch (aType)
         {

@@ -35,15 +35,15 @@ namespace neogfx
     class tool_title_bar : public widget, public i_title_bar
     {
     public:
-        tool_title_bar(i_standard_layout_container& aContainer, const std::string& aTitle = std::string{});
+        tool_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle = std::string{});
     public:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     public:
-        const std::string& title() const override;
-        void set_title(const std::string& aTitle) override;
+        std::string const& title() const override;
+        void set_title(std::string const& aTitle) override;
     protected:
-        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = {}) const override;
     protected:
         neogfx::widget_type widget_type() const override;
     protected:

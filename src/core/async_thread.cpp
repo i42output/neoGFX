@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-    async_thread::async_thread(const std::string& aName, bool aAttachToCurrentThread) : 
+    async_thread::async_thread(std::string const& aName, bool aAttachToCurrentThread) : 
         neolib::async_thread{*this, aName, aAttachToCurrentThread}, async_task{ *this, aName }
     {
     }

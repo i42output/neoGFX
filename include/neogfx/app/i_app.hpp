@@ -50,7 +50,7 @@ namespace neogfx
     class i_program_options
     {
     public:
-        struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
+        struct invalid_options : std::runtime_error { invalid_options(std::string const& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
     public:
         virtual ~i_program_options() = default;
     public:
@@ -75,8 +75,8 @@ namespace neogfx
         struct unknown_standard_menu : std::logic_error { unknown_standard_menu() : std::logic_error("neogfx::i_app::unknown_standard_menu") {} };
     public:
         virtual const i_program_options& program_options() const = 0;
-        virtual const std::string& name() const = 0;
-        virtual void set_name(const std::string& aName) = 0;
+        virtual std::string const& name() const = 0;
+        virtual void set_name(std::string const& aName) = 0;
         virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
         virtual bool in_exec() const = 0;
         virtual void quit(int aResultCode) = 0;
@@ -88,10 +88,10 @@ namespace neogfx
         virtual void set_default_window_icon(const i_image& aIcon) = 0;
         virtual const i_style& current_style() const = 0;
         virtual i_style& current_style() = 0;
-        virtual i_style& change_style(const std::string& aStyleName) = 0;
+        virtual i_style& change_style(std::string const& aStyleName) = 0;
         virtual i_style& register_style(const i_style& aStyle) = 0;
     public:
-        virtual const std::string& translate(const std::string& aTranslatableString, const std::string& aContext = std::string{}) const = 0;
+        virtual std::string const& translate(std::string const& aTranslatableString, std::string const& aContext = std::string{}) const = 0;
     public:
         virtual i_action& action_file_new() = 0;
         virtual i_action& action_file_open() = 0;
@@ -108,12 +108,12 @@ namespace neogfx
         virtual i_action& action_delete() = 0;
         virtual i_action& action_select_all() = 0;
         using i_action_container::add_action;
-        virtual i_action& add_action(const std::string& aText) = 0;
-        virtual i_action& add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) = 0;
-        virtual i_action& add_action(const std::string& aText, const i_texture& aImage) = 0;
-        virtual i_action& add_action(const std::string& aText, const i_image& aImage) = 0;
+        virtual i_action& add_action(std::string const& aText) = 0;
+        virtual i_action& add_action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) = 0;
+        virtual i_action& add_action(std::string const& aText, const i_texture& aImage) = 0;
+        virtual i_action& add_action(std::string const& aText, const i_image& aImage) = 0;
         virtual void remove_action(i_action& aAction) = 0;
-        virtual i_action& find_action(const std::string& aText) = 0;
+        virtual i_action& find_action(std::string const& aText) = 0;
         virtual void add_mnemonic(i_mnemonic& aMnemonic) = 0;
         virtual void remove_mnemonic(i_mnemonic& aMnemonic) = 0;
     public:

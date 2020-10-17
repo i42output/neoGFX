@@ -38,21 +38,21 @@ namespace neogfx::nrc
     public:
         struct duplicate_element_id : std::runtime_error
         {
-            duplicate_element_id(const std::string& aId) : std::runtime_error{ "Duplicate element ID '" + aId + "'." } {}
+            duplicate_element_id(std::string const& aId) : std::runtime_error{ "Duplicate element ID '" + aId + "'." } {}
         };
         struct element_not_found : std::logic_error
         {
-            element_not_found(const std::string& aId) : std::logic_error{ "Element ID '" + aId + "' not found." } {}
+            element_not_found(std::string const& aId) : std::logic_error{ "Element ID '" + aId + "' not found." } {}
         };
         struct element_type_not_found : std::runtime_error
         { 
-            element_type_not_found(const std::string& aType) : std::runtime_error{ "Element type '" + aType + "' not found." } {} 
-            element_type_not_found(const std::string& aType, const std::string& aParentElement) : std::runtime_error{ "Element type '" + aType + "' not found for element '" + aParentElement + "'." } {}
+            element_type_not_found(std::string const& aType) : std::runtime_error{ "Element type '" + aType + "' not found." } {} 
+            element_type_not_found(std::string const& aType, std::string const& aParentElement) : std::runtime_error{ "Element type '" + aType + "' not found for element '" + aParentElement + "'." } {}
         };
         struct element_data_not_found : std::runtime_error 
         { 
-            element_data_not_found(const std::string& aData) : std::runtime_error{ "Element data '" + aData + "' not found." } {} 
-            element_data_not_found(const std::string& aData, const std::string& aParentElement) : std::runtime_error{ "Element data '" + aData + "' not found for element '" + aParentElement + "'." } {}
+            element_data_not_found(std::string const& aData) : std::runtime_error{ "Element data '" + aData + "' not found." } {} 
+            element_data_not_found(std::string const& aData, std::string const& aParentElement) : std::runtime_error{ "Element data '" + aData + "' not found for element '" + aParentElement + "'." } {}
         };
         // types
     public:
@@ -99,42 +99,42 @@ namespace neogfx::nrc
             do_source_location(location);
             return location.to_std_string();
         }
-        bool data_exists(const std::string& aKey) const
+        bool data_exists(std::string const& aKey) const
         {
             return do_data_exists(neolib::string{ aKey });
         }
-        bool array_data_exists(const std::string& aKey) const
+        bool array_data_exists(std::string const& aKey) const
         {
             return do_array_data_exists(neolib::string{ aKey });
         }
-        const data_t& get_data(const std::string& aKey) const
+        const data_t& get_data(std::string const& aKey) const
         {
             return do_get_data(neolib::string{ aKey });
         }
-        data_t& get_data(const std::string& aKey)
+        data_t& get_data(std::string const& aKey)
         {
             return do_get_data(neolib::string{ aKey });
         }
-        const array_data_t& get_array_data(const std::string& aKey) const
+        const array_data_t& get_array_data(std::string const& aKey) const
         {
             return do_get_array_data(neolib::string{ aKey });
         }
-        array_data_t& get_array_data(const std::string& aKey)
+        array_data_t& get_array_data(std::string const& aKey)
         {
             return do_get_array_data(neolib::string{ aKey });
         }
         template <typename T>
-        const abstract_t<T>& get(const std::string& aKey) const
+        const abstract_t<T>& get(std::string const& aKey) const
         {
             return get_data(aKey).get<abstract_t<T>>();
         }
         template <typename T>
-        abstract_t<T>& get(const std::string& aKey)
+        abstract_t<T>& get(std::string const& aKey)
         {
             return get_data(aKey).get<abstract_t<T>>();
         }
         template <typename T>
-        std::optional<T> get_optional(const std::string& aKey) const
+        std::optional<T> get_optional(std::string const& aKey) const
         {
             if (data_exists(aKey))
             {
@@ -147,7 +147,7 @@ namespace neogfx::nrc
                 return std::optional<T>{};
         }
         template <typename T>
-        std::optional<T> get_optional_enum(const std::string& aKey) const
+        std::optional<T> get_optional_enum(std::string const& aKey) const
         {
             if (data_exists(aKey))
                 return neolib::string_to_enum<T>(get_data(aKey).get<neolib::i_string>());
@@ -155,7 +155,7 @@ namespace neogfx::nrc
                 return std::optional<T>{};
         }
         template <typename T, typename U>
-        const abstract_t<T>& get(const std::string& aKey, const U& aDefault) const
+        const abstract_t<T>& get(std::string const& aKey, const U& aDefault) const
         {
             if (data_exists(aKey))
                 return get_data(aKey).get<abstract_t<T>>();
@@ -163,7 +163,7 @@ namespace neogfx::nrc
                 return aDefault;
         }
         template <typename T, typename U>
-        abstract_t<T>& get(const std::string& aKey, U& aDefault)
+        abstract_t<T>& get(std::string const& aKey, U& aDefault)
         {
             if (data_exists(aKey))
                 return get_data(aKey).get<abstract_t<T>>();
@@ -171,32 +171,32 @@ namespace neogfx::nrc
                 return aDefault;
         }
     public:
-        void emit(const std::string& aArgument) const
+        void emit(std::string const& aArgument) const
         {
             emit(neolib::string{ aArgument });
         }
         template <typename T>
-        void emit(const std::string& aFormat, const T& aArgument) const
+        void emit(std::string const& aFormat, const T& aArgument) const
         {
             emit(neolib::string{ (boost::format(aFormat) % aArgument).str() });
         }
         template <typename T1, typename T2>
-        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2) const
+        void emit(std::string const& aFormat, const T1& aArgument1, const T2& aArgument2) const
         {
             emit(neolib::string{ (boost::format(aFormat) % aArgument1 % aArgument2).str() });
         }
         template <typename T1, typename T2, typename T3>
-        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3) const
+        void emit(std::string const& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3) const
         {
             emit(neolib::string{ (boost::format(aFormat) % aArgument1 % aArgument2 % aArgument3).str() });
         }
         template <typename T1, typename T2, typename T3, typename T4>
-        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4) const
+        void emit(std::string const& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4) const
         {
             emit(neolib::string{ (boost::format(aFormat) % aArgument1 % aArgument2 % aArgument3 % aArgument4).str() });
         }
         template <typename T1, typename T2, typename T3, typename T4, typename T5>
-        void emit(const std::string& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4, const T5& aArgument5) const
+        void emit(std::string const& aFormat, const T1& aArgument1, const T2& aArgument2, const T3& aArgument3, const T4& aArgument4, const T5& aArgument5) const
         {
             emit(neolib::string{ (boost::format(aFormat) % aArgument1 % aArgument2 % aArgument3 % aArgument4 % aArgument5).str() });
         }

@@ -75,7 +75,7 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    size image_widget::minimum_size(const optional_size& aAvailableSpace) const
+    size image_widget::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size() || iTexture.is_empty())
             return widget::minimum_size(aAvailableSpace);
@@ -200,7 +200,7 @@ namespace neogfx
         return iTexture;
     }
 
-    void image_widget::set_image(const std::string& aImageUri)
+    void image_widget::set_image(std::string const& aImageUri)
     {
         set_image(neogfx::image{ aImageUri });
     }

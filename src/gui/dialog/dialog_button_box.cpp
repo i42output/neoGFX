@@ -104,7 +104,7 @@ namespace neogfx
         add_button(aStandardButton, bd.first, bd.second);
     }
 
-    void dialog_button_box::add_button(standard_button aStandardButton, button_role aButtonRole, const std::string& aButtonText)
+    void dialog_button_box::add_button(standard_button aStandardButton, button_role aButtonRole, std::string const& aButtonText)
     {
         auto newButton = iButtons.emplace(std::make_pair(aStandardButton, aButtonRole), std::make_unique<push_button>(*this, aButtonText, push_button_style::ButtonBox));
         switch (newButton->first.second)

@@ -59,7 +59,7 @@ namespace neogfx::DesignStudio
         }
     }
 
-    inline std::string to_symbol_name(const std::string& aString, naming_convention aNamingConvention, named_entity aNamedEntity)
+    inline std::string to_symbol_name(std::string const& aString, naming_convention aNamingConvention, named_entity aNamedEntity)
     {
         std::vector<std::string> tokens;
         neolib::tokens(aString, std::string{" "}, tokens);

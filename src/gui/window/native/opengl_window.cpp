@@ -399,7 +399,7 @@ namespace neogfx
         native_window::set_destroyed();
     }
 
-    void opengl_window::debug_message(const std::string& aMessage)
+    void opengl_window::debug_message(std::string const& aMessage)
     {
         // todo: create a proper logging framework
         if (iDebug)

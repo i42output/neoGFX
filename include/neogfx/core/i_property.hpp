@@ -223,7 +223,7 @@ namespace neogfx
     };
 
     template <typename PropertyOwner>
-    inline i_property& get_property(PropertyOwner& Owner, const std::string& aPropertyName)
+    inline i_property& get_property(PropertyOwner& Owner, std::string const& aPropertyName)
     {
         return *static_cast<i_property_owner&>(Owner).properties().property_map().find(string{ aPropertyName })->second();
     }

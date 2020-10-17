@@ -24,14 +24,14 @@
 
 namespace neogfx
 {
-    struct embedded_resource_not_found : std::runtime_error { embedded_resource_not_found(const std::string& aResource) : std::runtime_error{ "neogfx::embedded_resource_not_found: " + aResource } {} };
+    struct embedded_resource_not_found : std::runtime_error { embedded_resource_not_found(std::string const& aResource) : std::runtime_error{ "neogfx::embedded_resource_not_found: " + aResource } {} };
 
     class i_resource_manager
     {
     public:
-        virtual void add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
-        virtual void add_module_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
-        virtual i_resource::pointer load_resource(const std::string& aUri) = 0;
+        virtual void add_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
+        virtual void add_module_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
+        virtual i_resource::pointer load_resource(std::string const& aUri) = 0;
     public:
         virtual void cleanup() = 0;
         virtual void clean() = 0;

@@ -714,9 +714,9 @@ namespace neogfx
             as_widget().key_released(aScanCode, aKeyCode, aKeyModifiers);
     }
 
-    void surface_window_proxy::native_window_text_input(const std::string& aText)
+    void surface_window_proxy::native_window_text_input(std::string const& aText)
     {
-        auto send = [this](const std::string& aText)
+        auto send = [this](std::string const& aText)
         {
             auto can_consume = [&aText](i_widget& aWidget)
             {
@@ -750,7 +750,7 @@ namespace neogfx
             send(aText);
     }
 
-    void surface_window_proxy::native_window_sys_text_input(const std::string& aText)
+    void surface_window_proxy::native_window_sys_text_input(std::string const& aText)
     {
         if (as_window().has_focused_widget())
         {
@@ -770,7 +770,7 @@ namespace neogfx
         return widgetUnderMouse.mouse_cursor();
     }
 
-    void surface_window_proxy::native_window_title_text_changed(const std::string& aTitleText)
+    void surface_window_proxy::native_window_title_text_changed(std::string const& aTitleText)
     {
         as_window().set_title_text(aTitleText);
     }

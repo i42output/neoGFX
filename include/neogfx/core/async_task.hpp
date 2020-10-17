@@ -44,7 +44,7 @@ namespace neogfx
     {
         // construction
     public:
-        async_task(neolib::i_thread& aThread, const std::string& aName = std::string{});
+        async_task(neolib::i_thread& aThread, std::string const& aName = std::string{});
         // operations
     public:
         // implementation

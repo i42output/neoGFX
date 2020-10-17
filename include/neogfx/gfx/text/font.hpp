@@ -116,20 +116,20 @@ namespace neogfx
         class instance;
     public:
         font_info();
-        font_info(const std::string& aFamilyName, font_style aStyle, point_size aSize);
-        font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize);
-        font_info(const std::string& aFamilyName, font_style aStyle, const std::string& aStyleName, point_size aSize);
+        font_info(std::string const& aFamilyName, font_style aStyle, point_size aSize);
+        font_info(std::string const& aFamilyName, std::string const& aStyleName, point_size aSize);
+        font_info(std::string const& aFamilyName, font_style aStyle, std::string const& aStyleName, point_size aSize);
         font_info(const font_info& aOther);
         virtual ~font_info();
         font_info& operator=(const font_info& aOther);
     private:
-        font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
+        font_info(std::string const& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
     public:
-        virtual const std::string& family_name() const;
+        virtual std::string const& family_name() const;
         virtual bool style_available() const;
         virtual font_style style() const;
         virtual bool style_name_available() const;
-        virtual const std::string& style_name() const;
+        virtual std::string const& style_name() const;
         virtual bool underline() const;
         virtual void set_underline(bool aUnderline);
         virtual font_weight weight() const;
@@ -169,18 +169,18 @@ namespace neogfx
         // construction
     public:
         font();
-        font(const std::string& aFamilyName, font_style aStyle, point_size aSize);
-        font(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize);
+        font(std::string const& aFamilyName, font_style aStyle, point_size aSize);
+        font(std::string const& aFamilyName, std::string const& aStyleName, point_size aSize);
         font(const font_info& aFontInfo);
         font(const font& aOther);
         font(const font& aOther, font_style aStyle, point_size aSize);
-        font(const font& aOther, const std::string& aStyleName, point_size aSize);
-        static font load_from_file(const std::string& aFileName);
-        static font load_from_file(const std::string& aFileName, font_style aStyle, point_size aSize);
-        static font load_from_file(const std::string& aFileName, const std::string& aStyleName, point_size aSize);
+        font(const font& aOther, std::string const& aStyleName, point_size aSize);
+        static font load_from_file(std::string const& aFileName);
+        static font load_from_file(std::string const& aFileName, font_style aStyle, point_size aSize);
+        static font load_from_file(std::string const& aFileName, std::string const& aStyleName, point_size aSize);
         static font load_from_memory(const void* aData, std::size_t aSizeInBytes);
         static font load_from_memory(const void* aData, std::size_t aSizeInBytes, font_style aStyle, point_size aSize);
-        static font load_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, point_size aSize);
+        static font load_from_memory(const void* aData, std::size_t aSizeInBytes, std::string const& aStyleName, point_size aSize);
         ~font();
         font& operator=(const font& aOther);
     private:
@@ -193,9 +193,9 @@ namespace neogfx
         font fallback() const;
         // operations
     public:
-        const std::string& family_name() const override;
+        std::string const& family_name() const override;
         font_style style() const override;
-        const std::string& style_name() const override;
+        std::string const& style_name() const override;
         point_size size() const override;
         dimension height() const;
         dimension descender() const;

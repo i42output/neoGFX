@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    tool_title_bar::tool_title_bar(i_standard_layout_container& aContainer, const std::string& aTitle) :
+    tool_title_bar::tool_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iContainer{ aContainer },
         iUpdater{service<i_async_task>(), [this](neolib::callback_timer& aTimer)
@@ -77,17 +77,17 @@ namespace neogfx
         return *this;
     }
 
-    const std::string& tool_title_bar::title() const
+    std::string const& tool_title_bar::title() const
     {
         return iTitle.text();
     }
 
-    void tool_title_bar::set_title(const std::string& aTitle)
+    void tool_title_bar::set_title(std::string const& aTitle)
     {
         iTitle.set_text(aTitle);
     }
 
-    size tool_title_bar::minimum_size(const optional_size& aAvailableSpace) const
+    size tool_title_bar::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);

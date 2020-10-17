@@ -92,7 +92,7 @@ namespace neogfx
     #endif 
         }
 
-        void basic_services::display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle) const
+        void basic_services::display_error_dialog(std::string const& aTitle, std::string const& aMessage, void* aParentWindowHandle) const
         {
             tinyfd_messageBox(aParentWindowHandle, aTitle.c_str(), aMessage.c_str(), "ok", "error", 1);
         }
@@ -154,7 +154,7 @@ namespace neogfx
                 }
                 return result;
             }
-            void set_text(const std::string& aText) override
+            void set_text(std::string const& aText) override
             {
                 if (::OpenClipboard(NULL))
                 {

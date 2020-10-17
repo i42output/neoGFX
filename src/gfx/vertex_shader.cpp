@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-    standard_vertex_shader::standard_vertex_shader(const std::string& aName) :
+    standard_vertex_shader::standard_vertex_shader(std::string const& aName) :
         vertex_shader{ aName }
     {
         auto& coord = add_attribute<vec3f>("VertexPosition"_s, 0u);
@@ -123,7 +123,7 @@ namespace neogfx
             throw unsupported_shader_language();
     }
 
-    standard_texture_vertex_shader::standard_texture_vertex_shader(const std::string& aName) :
+    standard_texture_vertex_shader::standard_texture_vertex_shader(std::string const& aName) :
         standard_vertex_shader{ aName }
     {
         auto& texCoord = add_attribute("VertexTextureCoord"_s, 2u, shader_data_type::Vec2);

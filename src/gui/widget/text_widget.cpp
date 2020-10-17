@@ -25,19 +25,19 @@
 
 namespace neogfx
 {
-    text_widget::text_widget(const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
+    text_widget::text_widget(std::string const& aText, text_widget_type aType, text_widget_flags aFlags) :
         widget{}, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment { neogfx::alignment::Center | neogfx::alignment::VCenter }
     {
         init();
     }
 
-    text_widget::text_widget(i_widget& aParent, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
+    text_widget::text_widget(i_widget& aParent, std::string const& aText, text_widget_type aType, text_widget_flags aFlags) :
         widget{ aParent }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter }
     {
         init();
     }
 
-    text_widget::text_widget(i_layout& aLayout, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
+    text_widget::text_widget(i_layout& aLayout, std::string const& aText, text_widget_type aType, text_widget_flags aFlags) :
         widget{ aLayout }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter }
     {
         init();
@@ -57,7 +57,7 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    size text_widget::minimum_size(const optional_size& aAvailableSpace) const
+    size text_widget::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (widget::has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
@@ -132,7 +132,7 @@ namespace neogfx
             aGc.draw_glyph_text(textPosition, glyph_text(), appearance);
     }
 
-    void text_widget::set_font(const optional_font& aFont)
+    void text_widget::set_font(optional_font const& aFont)
     {
         widget::set_font(aFont);
         iTextExtent = std::nullopt;
@@ -147,12 +147,12 @@ namespace neogfx
         return widget::visible();
     }
 
-    const std::string& text_widget::text() const
+    std::string const& text_widget::text() const
     {
         return iText;
     }
 
-    void text_widget::set_text(const std::string& aText)
+    void text_widget::set_text(std::string const& aText)
     {
         if (iText != aText)
         {

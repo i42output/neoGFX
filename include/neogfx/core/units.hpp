@@ -108,11 +108,11 @@ namespace neogfx
     {
         // construction
     public:
-        scoped_units_context(const i_units_context& aNewContext);
+        scoped_units_context(i_units_context const& aNewContext);
         ~scoped_units_context();
         // operations
     public:
-        static const i_units_context& current_context();
+        static i_units_context const& current_context();
         // implementation
     private:
         void set_context(const i_units_context* aNewContext);
@@ -124,7 +124,7 @@ namespace neogfx
     };
 
     template<typename T>
-    inline T convert_units(const i_units_context& aUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue);
+    inline T convert_units(i_units_context const& aUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue);
 
     template <typename Units>
     class basic_scoped_units
@@ -141,7 +141,7 @@ namespace neogfx
         {
             set_units(aNewUnits);
         }
-        basic_scoped_units(const i_units_context& aNewContext, units aNewUnits) : iScopedContext{ aNewContext }, iSavedUnits { current_units() }
+        basic_scoped_units(i_units_context const& aNewContext, units aNewUnits) : iScopedContext{ aNewContext }, iSavedUnits { current_units() }
         {
             set_units(aNewUnits);
         }
@@ -195,7 +195,7 @@ namespace neogfx
     {
         typedef basic_length<T> self_type;
     public:
-        struct unknown_unit : std::runtime_error { unknown_unit(const std::string& aUnitName) : std::runtime_error{ "neoGFX: Error: Unknown unit '" + aUnitName + "'" } {} };
+        struct unknown_unit : std::runtime_error { unknown_unit(std::string const& aUnitName) : std::runtime_error{ "neoGFX: Error: Unknown unit '" + aUnitName + "'" } {} };
     public:
         typedef T value_type;
     public:
@@ -275,7 +275,7 @@ namespace neogfx
             }
             return oss.str();
         }
-        static self_type from_string(const std::string& aValue)
+        static self_type from_string(std::string const& aValue)
         {
             static const std::unordered_map<std::string, length_units::units> sUnitTypes
             {
@@ -316,8 +316,8 @@ namespace neogfx
         // construction
     public:
         length_units_converter() = delete;
-        length_units_converter(const i_units_context& aContext);
-        length_units_converter(const i_units_context& aContext, length_units::units aUnits);
+        length_units_converter(i_units_context const& aContext);
+        length_units_converter(i_units_context const& aContext, length_units::units aUnits);
         ~length_units_converter();
         // operations
     public:
@@ -385,12 +385,12 @@ namespace neogfx
         }
         // attributes
     private:
-        const i_units_context& iContext;
+        i_units_context const& iContext;
         length_units::units iUnits;
     };
 
     template<typename T>
-    inline T from_units(const i_units_context& aSourceUnitsContext, length_units::units aUnits, const T& aValue)
+    inline T from_units(i_units_context const& aSourceUnitsContext, length_units::units aUnits, const T& aValue)
     {
         if (basic_scoped_units<length_units::units>::current_units() == aUnits)
             return aValue;
@@ -408,7 +408,7 @@ namespace neogfx
     }
 
     template<typename T>
-    inline T to_units(const i_units_context& aSourceUnitsContext, length_units::units aNewUnits, const T& aValue)
+    inline T to_units(i_units_context const& aSourceUnitsContext, length_units::units aNewUnits, const T& aValue)
     {
         if (basic_scoped_units<length_units::units>::current_units() == aNewUnits)
             return aValue;
@@ -424,7 +424,7 @@ namespace neogfx
     }
 
     template<typename T>
-    inline T convert_units(const i_units_context& aSourceUnitsContext, const i_units_context& aDestinationUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue)
+    inline T convert_units(i_units_context const& aSourceUnitsContext, i_units_context const& aDestinationUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue)
     {
         if (aSourceUnits == aDestinationUnits)
         {
@@ -450,7 +450,7 @@ namespace neogfx
     }
 
     template<typename T>
-    inline T convert_units(const i_units_context& aUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue)
+    inline T convert_units(i_units_context const& aUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue)
     {
         return convert_units(aUnitsContext, aUnitsContext, aSourceUnits, aDestinationUnits, aValue);
     }

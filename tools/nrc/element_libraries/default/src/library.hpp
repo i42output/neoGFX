@@ -39,7 +39,7 @@ namespace neogfx::nrc
         typedef neolib::multimap<element_type_name_t, ui_element_type> child_elements_t;
         // construction
     public:
-        default_ui_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);
+        default_ui_element_library(neolib::i_application& aApplication, std::string const& aPluginPath);
         // meta
     public:
         bool handles_element(const neolib::i_string& aElementType) const override;
@@ -51,10 +51,10 @@ namespace neogfx::nrc
         // meta
     public:
         static const neolib::uuid& library_id() { static const neolib::uuid sId = neolib::make_uuid("6942704C-043E-43A2-9290-CD58E106E65E"); return sId; }
-        static const std::string& library_name() { static const std::string sName = "default"; return sName; }
-        static const std::string& library_description() { static const std::string sDescription = "Default widget library"; return sDescription; }
+        static std::string const& library_name() { static const std::string sName = "default"; return sName; }
+        static std::string const& library_description() { static const std::string sDescription = "Default widget library"; return sDescription; }
         static const neolib::version& library_version() { static const neolib::version sVersion = { 1, 0, 0, 0 }; return sVersion; }
-        static const std::string& library_copyright() { static const std::string sCopyright = "Copyright (C) 2019 Leigh Johnston"; return sCopyright; };
+        static std::string const& library_copyright() { static const std::string sCopyright = "Copyright (C) 2019 Leigh Johnston"; return sCopyright; };
         // state
     private:
         neolib::i_application& iApplication;

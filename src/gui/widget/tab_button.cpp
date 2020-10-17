@@ -52,7 +52,7 @@ namespace neogfx
             update_appearance();
         }
     protected:
-        size minimum_size(const optional_size& aAvailableSpace) const
+        size minimum_size(optional_size const& aAvailableSpace) const
         {
             auto result = push_button::minimum_size(aAvailableSpace);
             if (has_minimum_size())
@@ -61,7 +61,7 @@ namespace neogfx
             result = result.max(size{ std::ceil(radius * 2.0) }) + padding().size();
             return result;
         }
-        size maximum_size(const optional_size& aAvailableSpace) const
+        size maximum_size(optional_size const& aAvailableSpace) const
         {
             if (has_maximum_size())
                 return push_button::maximum_size(aAvailableSpace);
@@ -199,21 +199,21 @@ namespace neogfx
         neolib::callback_timer iUpdater;
     };
 
-    tab_button::tab_button(i_tab_container& aContainer, const std::string& aText, bool aClosable, bool aStandardImageSize) :
+    tab_button::tab_button(i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
         push_button{ aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
     {
         init();
         set_closable(aClosable);
     }
 
-    tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText, bool aClosable, bool aStandardImageSize) :
+    tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
         push_button{ aParent, aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
     {
         init();
         set_closable(aClosable);
     }
 
-    tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText, bool aClosable, bool aStandardImageSize) :
+    tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
         push_button{ aLayout, aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
     {
         init();
@@ -272,12 +272,12 @@ namespace neogfx
         set_selected_state(true);
     }
 
-    const std::string& tab_button::text() const
+    std::string const& tab_button::text() const
     {
         return push_button::text();
     }
 
-    void tab_button::set_text(const std::string& aText)
+    void tab_button::set_text(std::string const& aText)
     {
         push_button::set_text(aText);
     }

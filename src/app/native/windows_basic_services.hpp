@@ -37,7 +37,7 @@ namespace neogfx
             neogfx::platform platform() const override;
             i_async_task& app_task() override;
             void system_beep() override;
-            void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const override;
+            void display_error_dialog(std::string const& aTitle, std::string const& aMessage, void* aParentWindowHandle = 0) const override;
             uint32_t display_count() const override;
             i_display& display(uint32_t aDisplayIndex = 0) const override;
             bool has_system_clipboard() const override;

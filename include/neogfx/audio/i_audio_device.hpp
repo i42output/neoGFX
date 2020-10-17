@@ -31,7 +31,7 @@ namespace neogfx
     public:
         virtual ~i_audio_device() = default;
     public:
-        virtual const std::string& name() const = 0;
+        virtual std::string const& name() const = 0;
     public:
         virtual bool is_open() const = 0;
         virtual void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) = 0;

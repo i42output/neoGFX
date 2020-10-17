@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    menu::menu(menu_type aType, const std::string& aTitle) :
+    menu::menu(menu_type aType, std::string const& aTitle) :
         iParent{ nullptr }, 
         iType{ aType }, 
         iTitle{ aTitle }, 
@@ -33,7 +33,7 @@ namespace neogfx
     {
     }
 
-    menu::menu(i_menu& aParent, menu_type aType, const std::string& aTitle) :
+    menu::menu(i_menu& aParent, menu_type aType, std::string const& aTitle) :
         iParent{ &aParent }, 
         iType{ aType }, 
         iTitle{ aTitle }, 
@@ -79,12 +79,12 @@ namespace neogfx
         return iType;
     }
 
-    const std::string& menu::title() const
+    std::string const& menu::title() const
     {
         return iTitle;
     }
 
-    void menu::set_title(const std::string& aTitle)
+    void menu::set_title(std::string const& aTitle)
     {
         iTitle = aTitle;
         MenuChanged.trigger();
@@ -95,7 +95,7 @@ namespace neogfx
         return iImage;
     }
 
-    void menu::set_image(const std::string& aUri)
+    void menu::set_image(std::string const& aUri)
     {
         iImage = neogfx::image{aUri};
         MenuChanged.trigger();
@@ -135,7 +135,7 @@ namespace neogfx
         insert_sub_menu_at(count(), aSubMenu);
     }
 
-    i_menu& menu::add_sub_menu(const std::string& aSubMenuTitle)
+    i_menu& menu::add_sub_menu(std::string const& aSubMenuTitle)
     {
         return insert_sub_menu_at(count(), aSubMenuTitle);
     }
@@ -164,7 +164,7 @@ namespace neogfx
         ItemAdded.trigger(aItemIndex);
     }
 
-    i_menu& menu::insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle)
+    i_menu& menu::insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuTitle)
     {
         auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(menu_type::Popup, aSubMenuTitle)));
         (**newItem).sub_menu().set_parent(*this);

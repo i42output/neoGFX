@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-    settings::settings(const std::string& aFileName) :
+    settings::settings(std::string const& aFileName) :
         base_type{ service<i_app>(), string{ aFileName } }
     {
     }

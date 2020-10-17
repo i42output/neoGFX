@@ -47,8 +47,8 @@ namespace neogfx
         virtual void layout_surfaces() = 0;
         virtual void invalidate_surfaces() = 0;
         virtual void render_surfaces() = 0;
-        virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
-        virtual void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const = 0;
+        virtual void display_error_message(std::string const& aTitle, std::string const& aMessage) const = 0;
+        virtual void display_error_message(const i_native_surface& aParent, std::string const& aTitle, std::string const& aMessage) const = 0;
         virtual uint32_t display_count() const = 0;
         virtual i_display& display(uint32_t aDisplayIndex = 0) const = 0;
         virtual i_display& display(const i_surface& aSurface) const = 0;

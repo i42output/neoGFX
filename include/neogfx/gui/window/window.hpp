@@ -53,12 +53,12 @@ namespace neogfx
     public:
         window(window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         window(const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         window(i_widget& aParent, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(i_widget& aParent, const window_placement& aPlacement, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(i_widget& aParent, const std::string& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         ~window();
     private:
         window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle);
@@ -124,7 +124,7 @@ namespace neogfx
         widget_part hit_test(const point& aPosition) const override;
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = {}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = {}) const override;
     public:
         using widget::update;
         bool update(const rect& aUpdateRect) override;
@@ -138,8 +138,8 @@ namespace neogfx
     public:
         neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
     public:
-        const std::string& title_text() const override;
-        void set_title_text(const std::string& aTitleText) override;
+        std::string const& title_text() const override;
+        void set_title_text(std::string const& aTitleText) override;
     public:
         bool is_active() const override;
         void activate() override;

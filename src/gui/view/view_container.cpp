@@ -179,12 +179,12 @@ namespace neogfx
         return const_cast<i_tab&>(to_const(*this).selected_tab());
     }
 
-    i_tab& view_container::tab_container::add_tab(const std::string& aTabText)
+    i_tab& view_container::tab_container::add_tab(std::string const& aTabText)
     {
         return *iTabs.emplace(&iTabBar.add_tab(aTabText), nullptr).first->first;
     }
 
-    i_tab& view_container::tab_container::insert_tab(tab_index aTabIndex, const std::string& aTabText)
+    i_tab& view_container::tab_container::insert_tab(tab_index aTabIndex, std::string const& aTabText)
     {
         return *iTabs.emplace(&iTabBar.insert_tab(aTabIndex, aTabText), nullptr).first->first;
     }

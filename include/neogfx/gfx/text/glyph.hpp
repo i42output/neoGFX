@@ -284,7 +284,7 @@ namespace neogfx
             else
                 return extents(font(aFontCache));
         }
-        size extents(const optional_font& aFont = {}) const
+        size extents(optional_font const& aFont = {}) const
         {
             if (iExtents == basic_size<float>{})
             {

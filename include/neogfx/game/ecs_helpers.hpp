@@ -162,12 +162,12 @@ namespace neogfx
         };
     }
 
-    inline game::material image_to_material(game::i_ecs& aEcs, const std::string& aName, const neogfx::image& aImage)
+    inline game::material image_to_material(game::i_ecs& aEcs, std::string const& aName, const neogfx::image& aImage)
     {
         return game::material{ {}, {}, aEcs.shared_component<game::texture>().populate(aName, to_ecs_component(aImage)) };
     }
 
-    inline game::material image_to_material(game::i_ecs& aEcs, const std::string& aName, const std::string& aImageResource)
+    inline game::material image_to_material(game::i_ecs& aEcs, std::string const& aName, std::string const& aImageResource)
     {
         return image_to_material(aEcs, aName, neogfx::image{ aImageResource });
     }
@@ -226,7 +226,7 @@ namespace neogfx
         game::animation_filter filter;
     };
     
-    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, const std::string& aName, const neogfx::image& aSpriteSheet, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
+    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, std::string const& aName, const neogfx::image& aSpriteSheet, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
     {
         renderable_animation result;
         result.material = image_to_material(aEcs, aName, aSpriteSheet);
@@ -234,7 +234,7 @@ namespace neogfx
         return result;
     }
 
-    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, const std::string& aName, const std::string& aSpriteSheetResource, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
+    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, std::string const& aName, std::string const& aSpriteSheetResource, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
     {
         return regular_sprite_sheet_to_renderable_animation(aEcs, aName, neogfx::image{ aSpriteSheetResource }, aCells, aDefaultFrameDuration);
     }

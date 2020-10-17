@@ -280,14 +280,14 @@ namespace neogfx
     class opengl_vertex_attrib_array
     {
     public:
-        struct cannot_get_attrib_location : std::logic_error { cannot_get_attrib_location(const std::string& aName) : std::logic_error("neogfx::opengl_vertex_attrib_array::cannot_get_attrib_location: " + aName) {} };
+        struct cannot_get_attrib_location : std::logic_error { cannot_get_attrib_location(std::string const& aName) : std::logic_error("neogfx::opengl_vertex_attrib_array::cannot_get_attrib_location: " + aName) {} };
     public:
         typedef Vertex vertex_type;
         typedef Attrib attribute_type;
         typedef typename attribute_type::value_type value_type;
         static constexpr std::size_t arity = sizeof(attribute_type) / sizeof(value_type);
     public:
-        opengl_vertex_attrib_array(bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_shader_program& aShaderProgram, const std::string& aVariableName) :
+        opengl_vertex_attrib_array(bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_shader_program& aShaderProgram, std::string const& aVariableName) :
             iNormalized{ aNormalized }, iStride{ aStride }, iOffset{ aOffset }, iShaderProgram{ aShaderProgram }, iVariableName{ aVariableName }
         {
         }

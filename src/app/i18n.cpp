@@ -34,7 +34,7 @@ namespace neogfx
         return sLanguageCodes;
     }
 
-    translation_context::translation_context(const std::string& aContext)
+    translation_context::translation_context(std::string const& aContext)
     {
         context_stack().push_back(aContext);
     }
@@ -44,7 +44,7 @@ namespace neogfx
         context_stack().pop_back();
     }
 
-    const std::string& translation_context::context()
+    std::string const& translation_context::context()
     {
         if (!context_stack().empty())
             return context_stack().back();
@@ -68,12 +68,12 @@ namespace neogfx
         return translate(std::string{ reinterpret_cast<const char*>(aTranslatableString), aStringLength });
     }
 
-    const std::string& translate(const std::string& aTranslatableString)
+    std::string const& translate(std::string const& aTranslatableString)
     {
         return translate(aTranslatableString, translation_context::context());
     }
 
-    const std::string& translate(const std::string& aTranslatableString, const std::string& aContext)
+    std::string const& translate(std::string const& aTranslatableString, std::string const& aContext)
     {
         return service<i_app>().translate(aTranslatableString, aContext);
     }

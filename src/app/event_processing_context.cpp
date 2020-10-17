@@ -23,12 +23,12 @@
 
 namespace neogfx
 {
-    event_processing_context::event_processing_context(const std::string& aName) :
+    event_processing_context::event_processing_context(std::string const& aName) :
         event_processing_context{ service<i_async_task>(), aName }
     {
     }
 
-    event_processing_context::event_processing_context(i_async_task& aParent, const std::string& aName) :
+    event_processing_context::event_processing_context(i_async_task& aParent, std::string const& aName) :
         iName{ aName }
     {
         if (aParent.have_message_queue() && aParent.message_queue().in_idle())
@@ -37,7 +37,7 @@ namespace neogfx
             aParent.create_message_queue();
     }
 
-    const std::string& event_processing_context::name() const
+    std::string const& event_processing_context::name() const
     {
         return iName;
     }

@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-    dock::dock(i_widget& aParent, dock_area aArea, const optional_size& aInitialSize, const optional_size& aInitialWeight) :
+    dock::dock(i_widget& aParent, dock_area aArea, optional_size const& aInitialSize, optional_size const& aInitialWeight) :
         base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aParent, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal }, 
         iArea { aArea }
     {
@@ -38,7 +38,7 @@ namespace neogfx
         init();
     }
 
-    dock::dock(i_layout& aLayout, dock_area aArea, const optional_size& aInitialSize, const optional_size& aInitialWeight) :
+    dock::dock(i_layout& aLayout, dock_area aArea, optional_size const& aInitialSize, optional_size const& aInitialWeight) :
         base_type{ neogfx::decoration_style::Dock | neogfx::decoration_style::Resizable, aLayout, (aArea & dock_area::Vertical) != dock_area::None ? splitter_type::Vertical : splitter_type::Horizontal },
         iArea{ aArea }
     {

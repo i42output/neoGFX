@@ -62,10 +62,10 @@ namespace neogfx
         struct context_not_found : std::logic_error { context_not_found() : std::logic_error("neogfx::i_rendering_engine::context_not_found") {} };
         struct consumer_exists : std::logic_error { consumer_exists() : std::logic_error("neogfx::i_rendering_engine::consumer_exists") {} };
         struct consumer_not_found : std::logic_error { consumer_not_found() : std::logic_error("neogfx::i_rendering_engine::consumer_not_found") {} };
-        struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(const std::string& aReason) : std::runtime_error("neogfx::i_rendering_engine::failed_to_create_shader_program: " + aReason) {} };
+        struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(std::string const& aReason) : std::runtime_error("neogfx::i_rendering_engine::failed_to_create_shader_program: " + aReason) {} };
         struct no_shader_program_active : std::logic_error { no_shader_program_active() : std::logic_error("neogfx::i_rendering_engine::no_shader_program_active") {} };
         struct shader_program_not_found : std::logic_error { shader_program_not_found() : std::logic_error("neogfx::i_rendering_engine::shader_program_not_found") {} };
-        struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
+        struct shader_program_error : std::runtime_error { shader_program_error(std::string const& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
         // types
     public:
         typedef void* handle;
@@ -107,12 +107,12 @@ namespace neogfx
         virtual handle create_shader_object(shader_type aShaderType) = 0;
         virtual void destroy_shader_object(handle aShaderObject) = 0;
     public:
-        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
-        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
-        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
-        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
-        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
-        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
+        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle = window_style::Default) = 0;
+        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default) = 0;
+        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default) = 0;
+        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle = window_style::Default) = 0;
+        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default) = 0;
+        virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default) = 0;
         virtual bool creating_window() const = 0;
         virtual i_font_manager& font_manager() = 0;
         virtual i_texture_manager& texture_manager() = 0;

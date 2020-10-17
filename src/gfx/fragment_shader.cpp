@@ -22,7 +22,7 @@
 
 namespace neogfx
 { 
-    standard_gradient_shader::standard_gradient_shader(const std::string& aName) :
+    standard_gradient_shader::standard_gradient_shader(std::string const& aName) :
         standard_fragment_shader{ aName }
     {
         disable();
@@ -273,7 +273,7 @@ namespace neogfx
         set_gradient(aContext, g);
     }
 
-    standard_texture_shader::standard_texture_shader(const std::string& aName) :
+    standard_texture_shader::standard_texture_shader(std::string const& aName) :
         standard_fragment_shader<i_texture_shader>{ aName }
     {
         disable();
@@ -409,7 +409,7 @@ namespace neogfx
             uTextureEnabled = false;
     }
 
-    standard_filter_shader::standard_filter_shader(const std::string& aName) :
+    standard_filter_shader::standard_filter_shader(std::string const& aName) :
         standard_fragment_shader<i_filter_shader>{ aName }
     {
         disable();
@@ -491,7 +491,7 @@ namespace neogfx
         uFilterKernel = sampler2DRect{ 5 };
     }
 
-    standard_glyph_shader::standard_glyph_shader(const std::string& aName) :
+    standard_glyph_shader::standard_glyph_shader(std::string const& aName) :
         standard_fragment_shader<i_glyph_shader>{ aName }
     {
         disable();
@@ -582,7 +582,7 @@ namespace neogfx
         uGlyphEnabled = true;
     }
 
-    standard_stipple_shader::standard_stipple_shader(const std::string& aName) :
+    standard_stipple_shader::standard_stipple_shader(std::string const& aName) :
         standard_fragment_shader<i_stipple_shader>{ aName }, iPosition{ 0.0 }
     {
         disable();

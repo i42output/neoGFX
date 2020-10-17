@@ -35,13 +35,13 @@ namespace neogfx
         public:
             disc(radio_button& aParent);
         public:
-            size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-            size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+            size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+            size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         };
     public:
-        radio_button(const std::string& aText = std::string());
-        radio_button(i_widget& aParent, const std::string& aText = std::string());
-        radio_button(i_layout& aLayout, const std::string& aText = std::string());
+        radio_button(std::string const& aText = std::string());
+        radio_button(i_widget& aParent, std::string const& aText = std::string());
+        radio_button(i_layout& aLayout, std::string const& aText = std::string());
     public:
         bool is_on() const;
         bool is_off() const;

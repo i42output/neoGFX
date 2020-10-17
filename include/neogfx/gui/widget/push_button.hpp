@@ -31,21 +31,21 @@ namespace neogfx
         static const uint32_t kMaxAnimationFrame = 10;
     public:
         push_button(push_button_style aStyle = push_button_style::Normal);
-        push_button(const std::string& aText, push_button_style aStyle = push_button_style::Normal);
+        push_button(std::string const& aText, push_button_style aStyle = push_button_style::Normal);
         push_button(const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
         push_button(const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
         push_button(i_widget& aParent, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_widget& aParent, const std::string& aText, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_widget& aParent, std::string const& aText, push_button_style aStyle = push_button_style::Normal);
         push_button(i_widget& aParent, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
         push_button(i_widget& aParent, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
         push_button(i_layout& aLayout, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle = push_button_style::Normal);
+        push_button(i_layout& aLayout, std::string const& aText, push_button_style aStyle = push_button_style::Normal);
         push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
         push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
         // button
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         void paint_non_client(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;

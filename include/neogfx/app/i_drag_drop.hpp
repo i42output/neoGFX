@@ -73,8 +73,8 @@ namespace neogfx
         }
     };
 
-    struct failed_drag_drop_registration : std::logic_error { failed_drag_drop_registration(const std::string& aReason) : std::logic_error{ "neogfx::failed_drag_drop_registration: " + aReason } {} };
-    struct failed_drag_drop_unregistration : std::logic_error { failed_drag_drop_unregistration(const std::string& aReason) : std::logic_error{ "neogfx::failed_drag_drop_unregistration: " + aReason } {} };
+    struct failed_drag_drop_registration : std::logic_error { failed_drag_drop_registration(std::string const& aReason) : std::logic_error{ "neogfx::failed_drag_drop_registration: " + aReason } {} };
+    struct failed_drag_drop_unregistration : std::logic_error { failed_drag_drop_unregistration(std::string const& aReason) : std::logic_error{ "neogfx::failed_drag_drop_unregistration: " + aReason } {} };
     struct drag_drop_already_active : std::logic_error { drag_drop_already_active() : std::logic_error{ "neogfx::drag_drop_already_active" } {} };
     struct drag_drop_not_active : std::logic_error { drag_drop_not_active() : std::logic_error{ "neogfx::drag_drop_not_active" } {} };
 

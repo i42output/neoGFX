@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-    audio_device::audio_device(const std::string& aName) : 
+    audio_device::audio_device(std::string const& aName) : 
         iName{ aName }
     {
     }
@@ -31,7 +31,7 @@ namespace neogfx
     {
     }
 
-    const std::string& audio_device::name() const
+    std::string const& audio_device::name() const
     {
         return iName;
     }

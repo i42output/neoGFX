@@ -31,14 +31,14 @@ namespace neogfx
         define_declared_event(Downloaded, downloaded)
         define_declared_event(FailedToDownload, failed_to_download)
     public:
-        module_resource(const std::string& aUri, const void* aData, std::size_t aSize);
+        module_resource(std::string const& aUri, const void* aData, std::size_t aSize);
     public:
         virtual bool available() const;
         virtual std::pair<bool, double> downloading() const;
         virtual bool error() const;
-        virtual const std::string& error_string() const;
+        virtual std::string const& error_string() const;
     public:
-        virtual const std::string& uri() const;
+        virtual std::string const& uri() const;
         virtual const void* cdata() const;
         virtual const void* data() const;
         virtual void* data();

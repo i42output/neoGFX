@@ -62,12 +62,12 @@ namespace neogfx
         return *s;
     }
 
-    size horizontal_layout::minimum_size(const optional_size& aAvailableSpace) const
+    size horizontal_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
         return layout::do_minimum_size<layout::column_major<horizontal_layout>>(aAvailableSpace);
     }
 
-    size horizontal_layout::maximum_size(const optional_size& aAvailableSpace) const
+    size horizontal_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
         return layout::do_maximum_size<layout::column_major<horizontal_layout>>(aAvailableSpace);
     }

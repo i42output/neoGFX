@@ -45,18 +45,18 @@ namespace neogfx
     public:
         image(dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
         image(const neogfx::size& aSize, const color& aColor = color::Black, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
-        image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
-        image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
-        image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(std::string const& aUri, std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
         image(image&& aOther);
         ~image();
     public:
         bool available() const override;
         std::pair<bool, double> downloading() const override;
         bool error() const override;
-        const std::string& error_string() const override;
+        std::string const& error_string() const override;
     public:
-        const std::string& uri() const override;
+        std::string const& uri() const override;
         const void* cdata() const override;
         const void* data() const override;
         void* data() override;

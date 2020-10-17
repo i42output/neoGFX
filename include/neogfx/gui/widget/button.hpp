@@ -46,15 +46,15 @@ namespace neogfx
         // button
     public:
         button(alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_widget& aParent, const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_layout& aLayout, const std::string& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
         ~button();
@@ -63,7 +63,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
         using widget::set_size_policy;
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        size maximum_size(const optional_size&) const override;
+        size maximum_size(optional_size const&) const override;
         neogfx::padding padding() const override;
         // i_button
     public:
@@ -79,10 +79,10 @@ namespace neogfx
         void toggle() override;
         // button
     public:
-        const std::string& text() const;
-        void set_text(const std::string& aText);
+        std::string const& text() const;
+        void set_text(std::string const& aText);
         const texture& image() const;
-        void set_image(const std::string& aImageUri);
+        void set_image(std::string const& aImageUri);
         void set_image(const neogfx::image& aImage);
         void set_image(const texture& aImage);
         void set_image_extents(const size& aImageExtents);

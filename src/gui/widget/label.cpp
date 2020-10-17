@@ -36,7 +36,7 @@ namespace neogfx
         init();
     }
 
-    label::label(const std::string& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+    label::label(std::string const& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{}, 
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
@@ -84,7 +84,7 @@ namespace neogfx
         init();
     }
 
-    label::label(i_widget& aParent, const std::string& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+    label::label(i_widget& aParent, std::string const& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent }, 
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
@@ -132,7 +132,7 @@ namespace neogfx
         init();
     }
 
-    label::label(i_layout& aLayout, const std::string& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+    label::label(i_layout& aLayout, std::string const& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout }, 
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
@@ -215,12 +215,12 @@ namespace neogfx
         }
     }
 
-    const std::string& label::text() const
+    std::string const& label::text() const
     {
         return text_widget().text();
     }
 
-    void label::set_text(const std::string& aText)
+    void label::set_text(std::string const& aText)
     {
         text_widget().set_text(aText);
     }
@@ -230,7 +230,7 @@ namespace neogfx
         return image_widget().image();
     }
 
-    void label::set_image(const std::string& aImageUri)
+    void label::set_image(std::string const& aImageUri)
     {
         image_widget().set_image(aImageUri);
     }

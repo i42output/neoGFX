@@ -54,7 +54,7 @@ namespace neogfx::DesignStudio
         using i_project_manager::create_project;
     private:
         project_list::container_type::const_iterator find_project(const i_project& aProject) const;
-        ref_ptr<i_element_library> find_library(const std::string& aElementType) const;
+        ref_ptr<i_element_library> find_library(std::string const& aElementType) const;
     private:
         project_list iProjects;
         ng::ref_ptr<project> iActiveProject;

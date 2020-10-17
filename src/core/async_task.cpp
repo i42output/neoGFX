@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    async_task::async_task(neolib::i_thread& aThread, const std::string& aName) : 
+    async_task::async_task(neolib::i_thread& aThread, std::string const& aName) : 
         neolib::async_task{ aThread, aName }
     {
     }

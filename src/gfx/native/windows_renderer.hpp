@@ -43,14 +43,14 @@ namespace neogfx
         {
         public:
             struct unsupported_renderer : std::runtime_error { unsupported_renderer() : std::runtime_error("neogfx::native::windows::renderer::unsupported_renderer") {} };
-            struct failed_to_initialize_renderer : std::runtime_error { failed_to_initialize_renderer(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_initialize_renderer: " + aReason) {} };
-            struct failed_to_create_offscreen_window : std::runtime_error { failed_to_create_offscreen_window(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_create_offscreen_window: " + aReason) {} };
-            struct failed_to_create_opengl_context : std::runtime_error { failed_to_create_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_create_opengl_context: " + aReason) {} };
-            struct failed_to_activate_opengl_context : std::runtime_error { failed_to_activate_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_activate_opengl_context: " + aReason) {} };
-            struct failed_to_deactivate_opengl_context : std::runtime_error { failed_to_deactivate_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_deactivate_opengl_context: " + aReason) {} };
-            struct failed_to_destroy_opengl_context : std::runtime_error { failed_to_destroy_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_destroy_opengl_context: " + aReason) {} };
-            struct failed_to_get_opengl_function : std::runtime_error { failed_to_get_opengl_function(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_get_opengl_function: " + aReason) {} };
-            struct failed_to_set_pixel_format : std::runtime_error { failed_to_set_pixel_format(const std::string& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_set_pixel_format: " + aReason) {} };
+            struct failed_to_initialize_renderer : std::runtime_error { failed_to_initialize_renderer(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_initialize_renderer: " + aReason) {} };
+            struct failed_to_create_offscreen_window : std::runtime_error { failed_to_create_offscreen_window(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_create_offscreen_window: " + aReason) {} };
+            struct failed_to_create_opengl_context : std::runtime_error { failed_to_create_opengl_context(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_create_opengl_context: " + aReason) {} };
+            struct failed_to_activate_opengl_context : std::runtime_error { failed_to_activate_opengl_context(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_activate_opengl_context: " + aReason) {} };
+            struct failed_to_deactivate_opengl_context : std::runtime_error { failed_to_deactivate_opengl_context(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_deactivate_opengl_context: " + aReason) {} };
+            struct failed_to_destroy_opengl_context : std::runtime_error { failed_to_destroy_opengl_context(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_destroy_opengl_context: " + aReason) {} };
+            struct failed_to_get_opengl_function : std::runtime_error { failed_to_get_opengl_function(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_get_opengl_function: " + aReason) {} };
+            struct failed_to_set_pixel_format : std::runtime_error { failed_to_set_pixel_format(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_set_pixel_format: " + aReason) {} };
             struct no_target_active : std::logic_error { no_target_active() : std::logic_error("neogfx::native::windows::renderer::no_target_active") {} };
         public:
             renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows);
@@ -69,12 +69,12 @@ namespace neogfx
             void deactivate_context() override;
             handle create_context(const i_render_target& aTarget) override;
             void destroy_context(handle aContext) override;
-            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) override;
-            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle) override;
-            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle) override;
-            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) override;
-            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle) override;
-            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle) override;
+            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) override;
+            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle) override;
+            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle) override;
+            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) override;
+            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle) override;
+            std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle) override;
             bool creating_window() const override;
         public:
             void render_now() override;

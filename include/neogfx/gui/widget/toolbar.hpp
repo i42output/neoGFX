@@ -44,7 +44,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
     public:
         virtual size button_image_extents() const;
-        virtual void set_button_image_extents(const optional_size& aExtents);
+        virtual void set_button_image_extents(optional_size const& aExtents);
         virtual uint32_t button_count() const;
         virtual const toolbar_button& button(button_index aButtonIndex) const;
         virtual toolbar_button& button(button_index aButtonIndex);

@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const std::string& aTitle) :
+    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, service<i_app>().default_window_icon() },
@@ -38,7 +38,7 @@ namespace neogfx
         init();
     }
 
-    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, const std::string& aTitle) :
+    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, aIcon },
@@ -51,7 +51,7 @@ namespace neogfx
         init();
     }
 
-    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, const std::string& aTitle) :
+    normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iLayout{ *this },
         iIcon{ iLayout, aIcon },
@@ -74,12 +74,12 @@ namespace neogfx
         return *this;
     }
 
-    const std::string& normal_title_bar::title() const
+    std::string const& normal_title_bar::title() const
     {
         return iTitle.text();
     }
 
-    void normal_title_bar::set_title(const std::string& aTitle)
+    void normal_title_bar::set_title(std::string const& aTitle)
     {
         iTitle.set_text(aTitle);
     }

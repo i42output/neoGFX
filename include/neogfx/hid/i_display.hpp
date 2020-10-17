@@ -56,9 +56,9 @@ namespace neogfx
     public:
         struct failed_to_get_monitor_dpi : std::runtime_error { failed_to_get_monitor_dpi() : std::runtime_error("neogfx::i_display::failed_to_get_monitor_dpi") {} };
         struct fullscreen_not_active : std::logic_error { fullscreen_not_active() : std::logic_error("neogfx::i_display::fullscreen_not_active: Fullscreen not currently active") {} };
-        struct failed_to_enter_fullscreen : std::runtime_error { failed_to_enter_fullscreen(const std::string& aReason) : 
+        struct failed_to_enter_fullscreen : std::runtime_error { failed_to_enter_fullscreen(std::string const& aReason) : 
             std::runtime_error("neogfx::i_displayy::failed_to_enter_fullscreen: Failed to enter fullscreen, reason: " + aReason) {} };
-        struct failed_to_leave_fullscreen : std::runtime_error { failed_to_leave_fullscreen(const std::string& aReason) :
+        struct failed_to_leave_fullscreen : std::runtime_error { failed_to_leave_fullscreen(std::string const& aReason) :
             std::runtime_error("neogfx::i_displayy::failed_to_leave_fullscreen: Failed to leave fullscreen, reason: " + aReason) {} };
     public:
         virtual ~i_display() = default;

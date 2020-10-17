@@ -40,7 +40,7 @@ namespace neogfx::DesignStudio
         typedef neolib::vector<neolib::string> elements_ordered_t;
         // construction
     public:
-        default_element_library(neolib::i_application& aApplication, const std::string& aPluginPath);
+        default_element_library(neolib::i_application& aApplication, std::string const& aPluginPath);
         ~default_element_library();
         // meta
     public:
@@ -55,10 +55,10 @@ namespace neogfx::DesignStudio
         // meta
     public:
         static const neolib::uuid& library_id() { static const neolib::uuid sId = neolib::make_uuid("9B9E93DF-DC52-406D-BDBE-07EC7758BB66"); return sId; }
-        static const std::string& library_name() { static const std::string sName = "default"; return sName; }
-        static const std::string& library_description() { static const std::string sDescription = "Default element library"; return sDescription; }
+        static std::string const& library_name() { static const std::string sName = "default"; return sName; }
+        static std::string const& library_description() { static const std::string sDescription = "Default element library"; return sDescription; }
         static const neolib::version& library_version() { static const neolib::version sVersion = { 1, 0, 0, 0 }; return sVersion; }
-        static const std::string& library_copyright() { static const std::string sCopyright = "Copyright (C) 2020 Leigh Johnston"; return sCopyright; };
+        static std::string const& library_copyright() { static const std::string sCopyright = "Copyright (C) 2020 Leigh Johnston"; return sCopyright; };
         // state
     private:
         neolib::i_application& iApplication;

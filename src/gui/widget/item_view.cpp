@@ -143,12 +143,12 @@ namespace neogfx
         if (has_presentation_model())
         {
             iPresentationModelSink += presentation_model().item_model_changed([this](const i_item_model& aItemModel) { item_model_changed(aItemModel); });
-            iPresentationModelSink += presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_expanded([this](const item_presentation_model_index& aItemIndex) { invalidate_item(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_collapsed([this](const item_presentation_model_index& aItemIndex) { invalidate_item(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_toggled([this](const item_presentation_model_index& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
+            iPresentationModelSink += presentation_model().item_added([this](item_presentation_model_index const& aItemIndex) { item_added(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_changed([this](item_presentation_model_index const& aItemIndex) { item_changed(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_removed([this](item_presentation_model_index const& aItemIndex) { item_removed(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_toggled([this](item_presentation_model_index const& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
             iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
             iPresentationModelSink += presentation_model().items_filtering([this]() { items_filtering(); });
@@ -678,7 +678,7 @@ namespace neogfx
         return handled;
     }
 
-    bool item_view::text_input(const std::string& aText)
+    bool item_view::text_input(std::string const& aText)
     {
         bool handled = framed_scrollable_widget::text_input(aText);
         if (editing() == std::nullopt && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
@@ -777,17 +777,17 @@ namespace neogfx
         update();
     }
 
-    void item_view::item_added(const item_presentation_model_index& aItemIndex)
+    void item_view::item_added(item_presentation_model_index const& aItemIndex)
     {
         invalidate_item(aItemIndex);
     }
 
-    void item_view::item_changed(const item_presentation_model_index& aItemIndex)
+    void item_view::item_changed(item_presentation_model_index const& aItemIndex)
     {
         invalidate_item(aItemIndex);
     }
 
-    void item_view::item_removed(const item_presentation_model_index& aItemIndex)
+    void item_view::item_removed(item_presentation_model_index const& aItemIndex)
     {
         invalidate_item(aItemIndex);
     }
@@ -883,12 +883,12 @@ namespace neogfx
         iHotTracking = false;
     }
 
-    bool item_view::is_visible(const item_presentation_model_index& aItemIndex) const
+    bool item_view::is_visible(item_presentation_model_index const& aItemIndex) const
     {
         return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
     }
 
-    bool item_view::make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition, const std::optional<double>& aTransitionDuration)
+    bool item_view::make_visible(item_presentation_model_index const& aItemIndex, const optional_easing& aTransition, const std::optional<double>& aTransitionDuration)
     {
         bool changed = false;
         auto const& transition = (aTransition == std::nullopt ? default_transition() : aTransition);
@@ -919,7 +919,7 @@ namespace neogfx
         return iEditing;
     }
 
-    void item_view::edit(const item_presentation_model_index& aItemIndex)
+    void item_view::edit(item_presentation_model_index const& aItemIndex)
     {
         if (editing() == aItemIndex || beginning_edit() || ending_edit() || !presentation_model().cell_editable(aItemIndex) )
             return;
@@ -1109,7 +1109,7 @@ namespace neogfx
         }
     }
 
-    rect item_view::row_rect(const item_presentation_model_index& aItemIndex) const
+    rect item_view::row_rect(item_presentation_model_index const& aItemIndex) const
     {
         rect result = item_display_rect();
         result.y = presentation_model().item_position(aItemIndex, *this) - vertical_scrollbar().position();
@@ -1117,7 +1117,7 @@ namespace neogfx
         return result;
     }
 
-    rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart) const
+    rect item_view::cell_rect(item_presentation_model_index const& aItemIndex, cell_part aPart) const
     {
         graphics_context gc{ *this, graphics_context::type::Unattached };
         switch(aPart)
@@ -1169,7 +1169,7 @@ namespace neogfx
         }
     }
         
-    rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGc, cell_part aPart) const
+    rect item_view::cell_rect(item_presentation_model_index const& aItemIndex, i_graphics_context& aGc, cell_part aPart) const
     {
         switch (aPart)
         {
@@ -1296,7 +1296,7 @@ namespace neogfx
         });
     }
 
-    void item_view::invalidate_item(const item_presentation_model_index& aItemIndex)
+    void item_view::invalidate_item(item_presentation_model_index const& aItemIndex)
     {
         update_scrollbar_visibility();
         update();
@@ -1343,12 +1343,12 @@ namespace neogfx
         }
     }
 
-    void item_view::select(const item_presentation_model_index& aItemIndex, key_modifiers_e aKeyModifiers)
+    void item_view::select(item_presentation_model_index const& aItemIndex, key_modifiers_e aKeyModifiers)
     {
         select(aItemIndex, to_selection_operation(aKeyModifiers));
     }
 
-    void item_view::select(const item_presentation_model_index& aItemIndex, item_selection_operation aSelectionOperation)
+    void item_view::select(item_presentation_model_index const& aItemIndex, item_selection_operation aSelectionOperation)
     {
         selection_model().set_current_index(aItemIndex);
         selection_model().select(aItemIndex, aSelectionOperation);

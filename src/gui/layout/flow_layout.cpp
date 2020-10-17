@@ -26,12 +26,12 @@
 
 namespace neogfx
 {
-    template size layout::do_minimum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
-    template size layout::do_maximum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+    template size layout::do_minimum_size<layout::column_major<flow_layout>>(optional_size const& aAvailableSpace) const;
+    template size layout::do_maximum_size<layout::column_major<flow_layout>>(optional_size const& aAvailableSpace) const;
     template void layout::do_layout_items<layout::column_major<flow_layout>>(const point& aPosition, const size& aSize);
 
-    template size layout::do_minimum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
-    template size layout::do_maximum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+    template size layout::do_minimum_size<layout::row_major<flow_layout>>(optional_size const& aAvailableSpace) const;
+    template size layout::do_maximum_size<layout::row_major<flow_layout>>(optional_size const& aAvailableSpace) const;
     template void layout::do_layout_items<layout::row_major<flow_layout>>(const point& aPosition, const size& aSize);
 
     flow_layout::flow_layout(flow_direction_e aFlowDirection) :
@@ -70,7 +70,7 @@ namespace neogfx
         }
     }
 
-    size flow_layout::minimum_size(const optional_size& aAvailableSpace) const
+    size flow_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (iFlowDirection == FlowDirectionHorizontal)
             return do_minimum_size<layout::column_major<flow_layout>>(aAvailableSpace);
@@ -78,7 +78,7 @@ namespace neogfx
             return do_minimum_size<layout::row_major<flow_layout>>(aAvailableSpace);
     }
 
-    size flow_layout::maximum_size(const optional_size& aAvailableSpace) const
+    size flow_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (iFlowDirection == FlowDirectionHorizontal)
             return do_maximum_size<layout::column_major<flow_layout>>(aAvailableSpace);

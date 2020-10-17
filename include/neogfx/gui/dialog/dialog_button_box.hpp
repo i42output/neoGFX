@@ -151,7 +151,7 @@ namespace neogfx
         void disable_role(button_role aButtonRole);
         push_button& button(standard_button aStandardButton) const;
         void add_button(standard_button aStandardButton);
-        void add_button(standard_button aStandardButton, button_role aButtonRole, const std::string& aButtonText);
+        void add_button(standard_button aStandardButton, button_role aButtonRole, std::string const& aButtonText);
         void add_buttons(standard_button aStandardButtons);
         void set_default_button(standard_button aButton);
         void clear();

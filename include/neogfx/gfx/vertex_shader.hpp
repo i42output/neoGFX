@@ -33,7 +33,7 @@ namespace neogfx
     public:
         typedef neolib::map<string, abstract_t<shader_variable>*> attribute_map;
     public:
-        vertex_shader(const std::string& aName) :
+        vertex_shader(std::string const& aName) :
             base_type{ shader_type::Vertex, aName }
         {
         }
@@ -89,7 +89,7 @@ namespace neogfx
     class standard_vertex_shader : public vertex_shader, public i_standard_vertex_matrices
     {
     public:
-        standard_vertex_shader(const std::string& aName = "standard_vertex_shader");
+        standard_vertex_shader(std::string const& aName = "standard_vertex_shader");
     public:
         bool has_standard_vertex_matrices() const override;
         const i_standard_vertex_matrices& standard_vertex_matrices() const override;
@@ -113,7 +113,7 @@ namespace neogfx
     class standard_texture_vertex_shader : public standard_vertex_shader
     {
     public:
-        standard_texture_vertex_shader(const std::string& aName = "standard_texture_vertex_shader");
+        standard_texture_vertex_shader(std::string const& aName = "standard_texture_vertex_shader");
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     };

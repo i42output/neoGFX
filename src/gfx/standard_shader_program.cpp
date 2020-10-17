@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    standard_shader_program::standard_shader_program(const std::string& aName) :
+    standard_shader_program::standard_shader_program(std::string const& aName) :
         shader_program<i_standard_shader_program>{ aName }
     {
         if (aName == "standard_shader_program")

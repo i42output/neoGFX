@@ -118,11 +118,11 @@ namespace neogfx
     public:
         struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("neogfx::size_policy::no_aspect_ratio") {} };
     public:
-        size_policy(size_constraint aConstraint, const optional_size& aAspectRatio = {}) :
+        size_policy(size_constraint aConstraint, optional_size const& aAspectRatio = {}) :
             iHorizontalConstraint{ aConstraint }, iVerticalConstraint{ aConstraint }, iAspectRatio{ aAspectRatio }
         {
         }
-        size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, const optional_size& aAspectRatio = {}) :
+        size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, optional_size const& aAspectRatio = {}) :
             iHorizontalConstraint{ aHorizontalConstraint }, iVerticalConstraint{ aVerticalConstraint }, iAspectRatio{ aAspectRatio }
         {
         }
@@ -171,12 +171,12 @@ namespace neogfx
                 return *iAspectRatio;
             throw no_aspect_ratio();
         }
-        void set_aspect_ratio(const optional_size& aAspectRatio)
+        void set_aspect_ratio(optional_size const& aAspectRatio)
         {
             iAspectRatio = aAspectRatio;
         }
     public:
-        static size_policy from_string(const std::string& aHorizontalConstraint, const std::string& aVerticalConstraint)
+        static size_policy from_string(std::string const& aHorizontalConstraint, std::string const& aVerticalConstraint)
         {
             return size_policy{
                 neolib::string_to_enum<size_constraint>(aHorizontalConstraint),
@@ -222,20 +222,20 @@ namespace neogfx
         virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) = 0;
         virtual bool has_weight() const = 0;
         virtual size weight() const = 0;
-        virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) = 0;
+        virtual void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) = 0;
         virtual bool has_minimum_size() const = 0;
-        virtual size minimum_size(const optional_size& aAvailableSpace = {}) const = 0;
-        virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) = 0;
+        virtual size minimum_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) = 0;
         virtual bool has_maximum_size() const = 0;
-        virtual size maximum_size(const optional_size& aAvailableSpace = {}) const = 0;
-        virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) = 0;
+        virtual size maximum_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) = 0;
         virtual bool has_fixed_size() const = 0;
-        virtual size fixed_size(const optional_size& aAvailableSpace = {}) const = 0;
-        virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) = 0;
+        virtual size fixed_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) = 0;
     public:
         virtual bool has_padding() const = 0;
         virtual neogfx::padding padding() const = 0;
-        virtual void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) = 0;
+        virtual void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) = 0;
         // helpers
     public:
         size apply_fixed_size(size const& aResult) const

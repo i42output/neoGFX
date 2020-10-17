@@ -36,7 +36,7 @@ namespace neogfx
                 return item_presentation_model::column_flags(aColumn) & ~item_cell_flags::Editable;
             }
         public:
-            optional_color cell_color(const item_presentation_model_index& aIndex, color_role aColorRole) const override
+            optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const override
             {
                 if (aColorRole == color_role::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
                 {
@@ -53,7 +53,7 @@ namespace neogfx
         class family_picker_presentation_model : public picker_presentation_model
         {
         public:
-            optional_font cell_font(const item_presentation_model_index& aIndex) const override
+            optional_font cell_font(item_presentation_model_index const& aIndex) const override
             {
                 auto modelRow = to_item_model_index(aIndex).row();
                 if (iFonts.size() <= modelRow)
@@ -79,7 +79,7 @@ namespace neogfx
                 {
                     std::optional<std::string> existingStyle;
                     if (iOurSelectionModel.has_current_index())
-                        existingStyle = static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(iOurSelectionModel.current_index())));
+                        existingStyle = static_variant_cast<std::string const&>(item_model().cell_data(to_item_model_index(iOurSelectionModel.current_index())));
                     item_model().clear();
                     iFonts.clear();
                     if (aCurrentIndex != std::nullopt)
@@ -102,7 +102,7 @@ namespace neogfx
                 });
             }
         public:
-            optional_font cell_font(const item_presentation_model_index& aIndex) const override
+            optional_font cell_font(item_presentation_model_index const& aIndex) const override
             {
                 if (!iFamilyPickerSelectionModel.has_current_index())
                     return optional_font{};
@@ -115,7 +115,7 @@ namespace neogfx
                     auto& fm = service<i_font_manager>();
                     iFonts[modelRow] = font{ 
                         fm.font_family(familyModelRow), 
-                        static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), 
+                        static_variant_cast<std::string const&>(item_model().cell_data(to_item_model_index(aIndex))), 
                         std::max(service<i_app>().current_style().font_info().size(), 12.0) };
                 }
                 return iFonts[modelRow];
@@ -194,7 +194,7 @@ namespace neogfx
         update_selected_font(*this);
     }
 
-    size font_dialog::minimum_size(const optional_size& aAvailableSpace) const
+    size font_dialog::minimum_size(optional_size const& aAvailableSpace) const
     {
         auto result = dialog::minimum_size(aAvailableSpace);
         if (dialog::has_minimum_size())

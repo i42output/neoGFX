@@ -610,8 +610,8 @@ namespace neogfx
     public:
         virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
         virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
-        virtual bool text_input(const std::string& aText) = 0;
-        virtual bool sys_text_input(const std::string& aText) = 0;
+        virtual bool text_input(std::string const& aText) = 0;
+        virtual bool sys_text_input(std::string const& aText) = 0;
     };
 
     enum class keyboard_locks : uint32_t
@@ -640,8 +640,8 @@ namespace neogfx
     public:
         declare_event(key_pressed, scan_code_e, key_code_e, key_modifiers_e)
         declare_event(key_released, scan_code_e, key_code_e, key_modifiers_e)
-        declare_event(text_input, const std::string&)
-        declare_event(sys_text_input, const std::string&)
+        declare_event(text_input, std::string const&)
+        declare_event(sys_text_input, std::string const&)
     public:
         struct no_grab : std::logic_error { no_grab() : std::logic_error("neogfx::i_keyboard::no_grab") {} };
         struct already_grabbed : std::logic_error { already_grabbed() : std::logic_error("neogfx::i_keyboard::already_grabbed") {} };
@@ -677,7 +677,7 @@ namespace neogfx
         typedef std::pair<key_code_e, std::set<key_modifiers_e>> combo_type;
         typedef std::vector<combo_type> sequence_type;
     public:
-        explicit key_sequence(const std::string& aSequence) : iText{ aSequence }
+        explicit key_sequence(std::string const& aSequence) : iText{ aSequence }
         {
             std::vector<neolib::ci_string> sequenceBits;
             neolib::tokens(neolib::make_ci_string(aSequence), neolib::ci_string(", "), sequenceBits);

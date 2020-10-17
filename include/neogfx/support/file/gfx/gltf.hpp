@@ -64,7 +64,7 @@ namespace neogfx::file
         };
         typedef std::vector<scene> scenes;
     public:
-        gltf(const std::string& aUri) {}
+        gltf(std::string const& aUri) {}
     public:
         scenes scenes;
         std::shared_ptr<scene> displayScene;

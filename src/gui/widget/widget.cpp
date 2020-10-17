@@ -845,7 +845,7 @@ namespace neogfx
             return size_constraint::Expanding;
     }
 
-    size widget::minimum_size(const optional_size& aAvailableSpace) const
+    size widget::minimum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -871,7 +871,7 @@ namespace neogfx
         return result;
     }
 
-    size widget::maximum_size(const optional_size& aAvailableSpace) const
+    size widget::maximum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1258,7 +1258,7 @@ namespace neogfx
             return service<i_app>().current_style().font(font_role());
     }
 
-    void widget::set_font(const optional_font& aFont)
+    void widget::set_font(optional_font const& aFont)
     {
         if (Font != aFont)
         {
@@ -1620,12 +1620,12 @@ namespace neogfx
         return false;
     }
 
-    bool widget::text_input(const std::string&)
+    bool widget::text_input(std::string const&)
     {
         return false;
     }
 
-    bool widget::sys_text_input(const std::string&)
+    bool widget::sys_text_input(std::string const&)
     {
         return false;
     }

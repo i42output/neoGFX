@@ -80,19 +80,19 @@ namespace neogfx
             parent_type& iParent;
         };
     public:
-        property(i_property_owner& aOwner, const std::string& aName) : iOwner{ aOwner }, iName{ aName }, iValue{}
+        property(i_property_owner& aOwner, std::string const& aName) : iOwner{ aOwner }, iName{ aName }, iValue{}
         {
             aOwner.properties().register_property(*this);
         }
-        property(i_property_owner& aOwner, const std::string& aName, calculator_function_type aCalculator) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{}
+        property(i_property_owner& aOwner, std::string const& aName, calculator_function_type aCalculator) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{}
         {
             aOwner.properties().register_property(*this);
         }
-        property(i_property_owner& aOwner, const std::string& aName, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iValue { aValue }
+        property(i_property_owner& aOwner, std::string const& aName, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iValue { aValue }
         {
             aOwner.properties().register_property(*this);
         }
-        property(i_property_owner& aOwner, const std::string& aName, calculator_function_type aCalculator, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{ aValue }
+        property(i_property_owner& aOwner, std::string const& aName, calculator_function_type aCalculator, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iCalculator{ aCalculator }, iValue{ aValue }
         {
             aOwner.properties().register_property(*this);
         }

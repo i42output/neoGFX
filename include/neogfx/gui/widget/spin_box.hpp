@@ -50,7 +50,7 @@ namespace neogfx
         basic_spin_box(i_widget& aParent);
         basic_spin_box(i_layout& aLayout);
     public:
-        const std::string& text();
+        std::string const& text();
         const line_edit& text_box() const;
         line_edit& text_box();
     public:
@@ -62,12 +62,12 @@ namespace neogfx
         void set_step(value_type aStep);
         value_type value() const;
         void set_value(value_type aValue, bool aNotify = true);
-        const std::string& format() const;
-        void set_format(const std::string& aFormat);
+        std::string const& format() const;
+        void set_format(std::string const& aFormat);
         const std::optional<size_hint>& text_box_size_hint() const;
         void set_text_box_size_hint(const std::optional<size_hint>& aSizeHint);
     public:
-        const std::string& valid_text_characters() const;
+        std::string const& valid_text_characters() const;
         std::string value_to_string() const;
     protected:
         neogfx::size_policy size_policy() const override;
@@ -82,7 +82,7 @@ namespace neogfx
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     private:
         void do_step(step_direction aDirection, uint32_t aAmount = 1);
-        std::optional<value_type> string_to_value(const std::string& aString) const;
+        std::optional<value_type> string_to_value(std::string const& aString) const;
         void init();
         void update_size_hint();
         void update_arrows();

@@ -71,10 +71,10 @@ namespace neogfx
     public:
         void invalidate(bool aDeferLayout = true) override;
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-        size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
-        void set_spacing(const optional_size& aSpacing, bool aUpdateLayout = true) override;
+        void set_spacing(optional_size const& aSpacing, bool aUpdateLayout = true) override;
         grid_layout& add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
         grid_layout& add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
@@ -89,10 +89,10 @@ namespace neogfx
         bool is_row_visible(uint32_t aRow) const;
         uint32_t visible_columns() const;
         bool is_column_visible(uint32_t aColumn) const;
-        size::dimension_type row_minimum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size{}) const;
-        size::dimension_type column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size{}) const;
-        size::dimension_type row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size{}) const;
-        size::dimension_type column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size{}) const;
+        size::dimension_type row_minimum_size(cell_coordinate aRow, optional_size const& aAvailableSpace = optional_size{}) const;
+        size::dimension_type column_minimum_size(cell_coordinate aColumn, optional_size const& aAvailableSpace = optional_size{}) const;
+        size::dimension_type row_maximum_size(cell_coordinate aRow, optional_size const& aAvailableSpace = optional_size{}) const;
+        size::dimension_type column_maximum_size(cell_coordinate aColumn, optional_size const& aAvailableSpace = optional_size{}) const;
         void increment_cursor();
         horizontal_layout& row_layout(cell_coordinate aRow);
         span_list::const_iterator find_span(const cell_coordinates& aCell) const;

@@ -56,7 +56,7 @@ namespace neogfx
         void pause() override;
         void resume() override;
     public:
-        void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
+        void display_error_message(std::string const& aTitle, std::string const& aMessage) const override;
         bool events_queued() const override;
         void push_event(const native_event& aEvent) override;
         bool pump_event() override;
@@ -66,8 +66,8 @@ namespace neogfx
         void handle_event() override;
         bool processing_event() const override;
         double rendering_priority() const override;
-        const std::string& title_text() const override;
-        void set_title_text(const std::string& aTitleText) override;
+        std::string const& title_text() const override;
+        void set_title_text(std::string const& aTitleText) override;
     public:
         i_rendering_engine& rendering_engine() const;
         i_surface_manager& surface_manager() const;

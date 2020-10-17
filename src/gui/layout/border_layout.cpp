@@ -183,7 +183,7 @@ namespace neogfx
         invalidate(false);
     }
 
-    size border_layout::minimum_size(const optional_size& aAvailableSpace) const
+    size border_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
         size result = iRows.minimum_size(aAvailableSpace);
 #ifdef NEOGFX_DEBUG
@@ -193,7 +193,7 @@ namespace neogfx
         return result;
     }
 
-    size border_layout::maximum_size(const optional_size& aAvailableSpace) const
+    size border_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
         size result = iRows.maximum_size(aAvailableSpace);
 #ifdef NEOGFX_DEBUG

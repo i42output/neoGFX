@@ -177,7 +177,7 @@ namespace neogfx
 
         std::map<void*, window*> sHandleMap;
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) :
             opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle{ aStyle },
@@ -217,7 +217,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
             opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle{ aStyle },
@@ -255,7 +255,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
             opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle(aStyle),
@@ -293,7 +293,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) :
             opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
@@ -333,7 +333,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
             opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
@@ -371,7 +371,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
             opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
@@ -730,7 +730,7 @@ namespace neogfx
             }
         }
 
-        void window::set_title_text(const std::string& aTitleText)
+        void window::set_title_text(std::string const& aTitleText)
         {
             ::SetWindowText(iHandle, reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aTitleText).c_str()));
         }

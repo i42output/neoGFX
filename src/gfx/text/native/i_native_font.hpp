@@ -38,13 +38,13 @@ namespace neogfx
         virtual ~i_native_font() = default;
         // operations
     public:
-        virtual const std::string& family_name() const = 0;
+        virtual std::string const& family_name() const = 0;
         virtual bool has_style(font_style aStyle) const = 0;
         virtual uint32_t style_count() const = 0;
         virtual font_style style(uint32_t aStyleIndex) const = 0;
-        virtual const std::string& style_name(uint32_t aStyleIndex) const = 0;
+        virtual std::string const& style_name(uint32_t aStyleIndex) const = 0;
         virtual void create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
-        virtual void create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
+        virtual void create_face(std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
         // helpers
     public:
         font_style min_style() const
@@ -67,7 +67,7 @@ namespace neogfx
             create_face(aStyle, aSize, aDevice, result);
             return result;
         }
-        ref_ptr<i_native_font_face> create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+        ref_ptr<i_native_font_face> create_face(std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
         {
             ref_ptr<i_native_font_face> result;
             create_face(aStyleName, aSize, aDevice, result);

@@ -33,7 +33,7 @@ namespace neogfx::DesignStudio
     public:
         declare_event(element_added, i_element&);
     public:
-        struct invalid_project_file : std::runtime_error { invalid_project_file(const std::string& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project::invalid_project_file: " + aReason } {} };
+        struct invalid_project_file : std::runtime_error { invalid_project_file(std::string const& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project::invalid_project_file: " + aReason } {} };
     public:
         typedef i_project abstract_type;
     public:

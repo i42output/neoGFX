@@ -47,7 +47,7 @@ namespace neogfx
                 set_pixel(point{ x, y }, aColor);
     }
 
-    image::image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
+    image::image(std::string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iResource{ resource_manager::instance().load_resource(aUri) },
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
@@ -59,12 +59,12 @@ namespace neogfx
             load();
     }
 
-    image::image(const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
+    image::image(std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         image{ std::string{}, aImagePattern, aColorMap, aDpiScaleFactor, aSampling, aColorSpace }
     {
     }
 
-    image::image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
+    image::image(std::string const& aUri, std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
         iColorSpace{ aColorSpace },
@@ -157,7 +157,7 @@ namespace neogfx
             return iError != std::nullopt;
     }
 
-    const std::string& image::error_string() const
+    std::string const& image::error_string() const
     {
         if (has_resource())
             return resource().error_string();
@@ -167,7 +167,7 @@ namespace neogfx
         return sNoError;
     }
 
-    const std::string& image::uri() const
+    std::string const& image::uri() const
     {
         return iUri;
     }

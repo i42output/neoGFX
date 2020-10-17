@@ -355,25 +355,25 @@ namespace neogfx
                 iContext = nullptr;
         }
 
-        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle)
+        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             return std::unique_ptr<i_native_window>(new window{ *this, aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle });
         }
 
-        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
+        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             return std::unique_ptr<i_native_window>(new window{ *this, aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle });
         }
 
-        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
+        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             return std::unique_ptr<i_native_window>(new window{ *this, aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle });
         }
 
-        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle)
+        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             window* parent = dynamic_cast<window*>(&aParent);
@@ -383,7 +383,7 @@ namespace neogfx
                 return create_window(aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle);
         }
 
-        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
+        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             window* parent = dynamic_cast<window*>(&aParent);
@@ -393,7 +393,7 @@ namespace neogfx
                 return create_window(aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle);
         }
 
-        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle)
+        std::unique_ptr<i_native_window> renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             window* parent = dynamic_cast<window*>(&aParent);

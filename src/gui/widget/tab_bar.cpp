@@ -62,7 +62,7 @@ namespace neogfx
         }
     }
 
-    size tab_bar::minimum_size(const optional_size& aAvailableSpace) const
+    size tab_bar::minimum_size(optional_size const& aAvailableSpace) const
     {
         auto result = framed_scrollable_widget::minimum_size(aAvailableSpace);
         if (aAvailableSpace != std::nullopt)
@@ -128,13 +128,13 @@ namespace neogfx
         return const_cast<i_tab&>(to_const(*this).selected_tab());
     }
 
-    i_tab& tab_bar::add_tab(const std::string& aTabText)
+    i_tab& tab_bar::add_tab(std::string const& aTabText)
     {
         iTabs.push_back(std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
         return *iTabs.back();
     }
 
-    i_tab& tab_bar::insert_tab(tab_index aTabIndex, const std::string& aTabText)
+    i_tab& tab_bar::insert_tab(tab_index aTabIndex, std::string const& aTabText)
     {
         iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
         return *iTabs.back();

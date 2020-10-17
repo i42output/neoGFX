@@ -53,7 +53,7 @@ namespace neogfx
         };
     }
 
-    html::html(const std::string& aStyle) :
+    html::html(std::string const& aStyle) :
         iDocument{std::make_shared<std::istringstream>(aStyle)}
     {
         parse();

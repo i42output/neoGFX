@@ -34,7 +34,7 @@ namespace neogfx
         return result;
     }
 
-    const std::string& default_skin::name() const
+    std::string const& default_skin::name() const
     {
         static const std::string sName = "Default";
         return sName;
@@ -58,7 +58,7 @@ namespace neogfx
     {
     }
 
-    size default_skin::preferred_size(skin_element aElement, const optional_size& aDesiredSize) const
+    size default_skin::preferred_size(skin_element aElement, optional_size const& aDesiredSize) const
     {
         switch (aElement)
         {

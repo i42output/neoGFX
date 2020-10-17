@@ -27,7 +27,7 @@ namespace neogfx
     template <typename SpecializedPolicy>
     struct layout::common_axis_policy
     {
-        static uint32_t items_zero_sized(layout& aLayout, const optional_size& aAvailableSpace = optional_size{})
+        static uint32_t items_zero_sized(layout& aLayout, optional_size const& aAvailableSpace = optional_size{})
         {
             uint32_t result = 0;
             bool noSpace = (aAvailableSpace == std::nullopt || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer));
@@ -133,7 +133,7 @@ namespace neogfx
     }
 
     template <typename AxisPolicy>
-    size layout::do_minimum_size(const optional_size& aAvailableSpace) const
+    size layout::do_minimum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -177,7 +177,7 @@ namespace neogfx
     }
 
     template <typename AxisPolicy>
-    size layout::do_maximum_size(const optional_size& aAvailableSpace) const
+    size layout::do_maximum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)

@@ -94,14 +94,14 @@ namespace neogfx
             return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
-    size toolbar_button::minimum_size(const optional_size& aAvailableSpace) const
+    size toolbar_button::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (push_button::has_minimum_size() || !action().is_separator())
             return push_button::minimum_size(aAvailableSpace);
         return units_converter(*this).from_device_units(size{ 2.0, 2.0 });
     }    
 
-    size toolbar_button::maximum_size(const optional_size& aAvailableSpace) const
+    size toolbar_button::maximum_size(optional_size const& aAvailableSpace) const
     {
         if (push_button::has_maximum_size() || !action().is_separator())
             return push_button::maximum_size(aAvailableSpace);

@@ -37,7 +37,7 @@ namespace neogfx
 {
     namespace native::windows
     {
-        struct direct_input_error : std::runtime_error { direct_input_error(const std::string& aReason) : std::runtime_error{ "neogfx::native::windows::direct_input_error: " + aReason } {} };
+        struct direct_input_error : std::runtime_error { direct_input_error(std::string const& aReason) : std::runtime_error{ "neogfx::native::windows::direct_input_error: " + aReason } {} };
 
         class game_controllers : public neogfx::game_controllers
         {

@@ -297,19 +297,19 @@ namespace neogfx
         {
         }
     public:
-        optional_font cell_font(const item_presentation_model_index& aIndex) const override
+        optional_font cell_font(item_presentation_model_index const& aIndex) const override
         {
             if (!item_model().has_parent(to_item_model_index(aIndex)))
                 return default_font().with_style(font_style::Bold);
             return default_font().with_size(10);
         }
-        optional_texture cell_image(const item_presentation_model_index& aIndex) const override
+        optional_texture cell_image(item_presentation_model_index const& aIndex) const override
         {
             if (iIcons == nullptr)
                 return iDefaultIcon;
             return iIcons->default_icon();
         }
-        optional_size cell_image_size(const item_presentation_model_index& aIndex) const override
+        optional_size cell_image_size(item_presentation_model_index const& aIndex) const override
         {
             if (!item_model().has_parent(to_item_model_index(aIndex)))
                 return size{ 32.0_dip, 32.0_dip };
@@ -323,7 +323,7 @@ namespace neogfx
     class setting_group_widget : public widget
     {
     public:
-        setting_group_widget(const std::string& aTitle) :
+        setting_group_widget(std::string const& aTitle) :
             iLayout{ *this },
             iTitle{ iLayout, translate(aTitle) }
         {

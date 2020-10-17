@@ -43,7 +43,7 @@ namespace neogfx
 {
     class program_options : public i_program_options
     {
-        struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
+        struct invalid_options : std::runtime_error { invalid_options(std::string const& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
     public:
         program_options(int argc, char* argv[]);
     public:
@@ -92,8 +92,8 @@ namespace neogfx
         static app& instance();
     public:
         const i_program_options& program_options() const override;
-        const std::string& name() const override;
-        void set_name(const std::string& aName) override;
+        std::string const& name() const override;
+        void set_name(std::string const& aName) override;
         int exec(bool aQuitWhenLastWindowClosed = true) override;
         bool in_exec() const override;
         void quit(int aResultCode = 0) override;
@@ -105,10 +105,10 @@ namespace neogfx
         void set_default_window_icon(const i_image& aIcon) override;
         const i_style& current_style() const override;
         i_style& current_style() override;
-        i_style& change_style(const std::string& aStyleName) override;
+        i_style& change_style(std::string const& aStyleName) override;
         i_style& register_style(const i_style& aStyle) override;
     public:
-        const std::string& translate(const std::string& aTranslatableString, const std::string& aContext = std::string{}) const override;
+        std::string const& translate(std::string const& aTranslatableString, std::string const& aContext = std::string{}) const override;
     public:
         i_action& action_file_new() override;
         i_action& action_file_open() override;
@@ -126,12 +126,12 @@ namespace neogfx
         i_action& action_select_all() override;
         i_action& add_action(i_action& aAction) override;
         i_action& add_action(std::shared_ptr<i_action> aAction) override;
-        i_action& add_action(const std::string& aText) override;
-        i_action& add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
-        i_action& add_action(const std::string& aText, const i_texture& aImage) override;
-        i_action& add_action(const std::string& aText, const i_image& aImage) override;
+        i_action& add_action(std::string const& aText) override;
+        i_action& add_action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
+        i_action& add_action(std::string const& aText, const i_texture& aImage) override;
+        i_action& add_action(std::string const& aText, const i_image& aImage) override;
         void remove_action(i_action& aAction) override;
-        i_action& find_action(const std::string& aText) override;
+        i_action& find_action(std::string const& aText) override;
         void add_mnemonic(i_mnemonic& aMnemonic) override;
         void remove_mnemonic(i_mnemonic& aMnemonic) override;
     public:
@@ -149,8 +149,8 @@ namespace neogfx
     private:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(const std::string& aText) override;
-        bool sys_text_input(const std::string& aText) override;
+        bool text_input(std::string const& aText) override;
+        bool sys_text_input(std::string const& aText) override;
     private:
         neogfx::program_options iProgramOptions;
         loader iLoader;

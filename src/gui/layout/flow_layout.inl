@@ -23,7 +23,7 @@
 namespace neogfx
 {
     template <typename AxisPolicy>
-    size flow_layout::do_minimum_size(const optional_size& aAvailableSpace) const
+    size flow_layout::do_minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return layout::minimum_size(aAvailableSpace);
@@ -72,7 +72,7 @@ namespace neogfx
     }
 
     template <typename AxisPolicy>
-    size flow_layout::do_maximum_size(const optional_size& aAvailableSpace) const
+    size flow_layout::do_maximum_size(optional_size const& aAvailableSpace) const
     {
         if (has_maximum_size())
             return layout::maximum_size(aAvailableSpace);

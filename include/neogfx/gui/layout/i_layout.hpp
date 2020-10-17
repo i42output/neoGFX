@@ -245,7 +245,7 @@ namespace neogfx
     public:
         virtual bool has_spacing() const = 0;
         virtual size spacing() const = 0;
-        virtual void set_spacing(const optional_size& sSpacing, bool aUpdateLayout = true) = 0;
+        virtual void set_spacing(optional_size const& sSpacing, bool aUpdateLayout = true) = 0;
         virtual bool always_use_spacing() const = 0;
         virtual void set_always_use_spacing(bool aAlwaysUseSpacing) = 0;
         virtual neogfx::alignment alignment() const = 0;

@@ -146,7 +146,7 @@ namespace neogfx
         {
             return MinimumSize != std::nullopt;
         }
-        size minimum_size(const optional_size&) const override
+        size minimum_size(optional_size const&) const override
         {
             size result;
             if (has_minimum_size())
@@ -155,7 +155,7 @@ namespace neogfx
                 result = {};
             return result;
         }
-        void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override
+        void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override
         {
             optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size{});
             if (MinimumSize != newMinimumSize)
@@ -173,7 +173,7 @@ namespace neogfx
         {
             return MaximumSize != std::nullopt;
         }
-        size maximum_size(const optional_size&) const override
+        size maximum_size(optional_size const&) const override
         {
             size result;
             if (has_maximum_size())
@@ -182,7 +182,7 @@ namespace neogfx
                 result = size::max_size();
             return result;
         }
-        void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override
+        void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override
         {
             optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size{});
             if (MaximumSize != newMaximumSize)
@@ -200,13 +200,13 @@ namespace neogfx
         {
             return FixedSize != std::nullopt;
         }
-        size fixed_size(const optional_size& aAvailableSpace = {}) const override
+        size fixed_size(optional_size const& aAvailableSpace = {}) const override
         {
             if (has_fixed_size())
                 return units_converter(*this).from_device_units(*FixedSize);
             return minimum_size(aAvailableSpace);
         }
-        void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true)
+        void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true)
         {
             optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size{});
             if (FixedSize != newFixedSize)
@@ -225,7 +225,7 @@ namespace neogfx
         {
             return Padding != std::nullopt;
         }
-        void set_padding(const optional_padding& aPadding, bool aUpdateLayout = true) override
+        void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override
         {
             auto newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding{});
             if (Padding != newPadding)

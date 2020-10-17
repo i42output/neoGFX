@@ -38,10 +38,10 @@ namespace neogfx::DesignStudio
         element_library_plugin(
             neolib::i_application& aApplication,
             const neolib::uuid& aId = library_type::library_id(),
-            const std::string& aName = library_type::library_name(),
-            const std::string& aDescription = library_type::library_description(),
+            std::string const& aName = library_type::library_name(),
+            std::string const& aDescription = library_type::library_description(),
             const neolib::version& aVersion = library_type::library_version(),
-            const std::string& aCopyright = library_type::library_copyright()) :
+            std::string const& aCopyright = library_type::library_copyright()) :
             iApplication{ aApplication },
             iId{ aId },
             iName{ aName },

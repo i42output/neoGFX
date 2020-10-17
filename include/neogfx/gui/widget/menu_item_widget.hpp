@@ -45,7 +45,7 @@ namespace neogfx
         i_menu_item& menu_item() const;
     public:
         neogfx::size_policy size_policy() const override;
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         void paint_non_client(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;

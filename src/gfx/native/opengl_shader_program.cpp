@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    opengl_shader_program::opengl_shader_program(const std::string& aName) : 
+    opengl_shader_program::opengl_shader_program(std::string const& aName) : 
         standard_shader_program{ aName }
     {
     }
@@ -86,7 +86,7 @@ namespace neogfx
             glCheck(glCompileShader(shaderHandle));
             GLint result;
             glCheck(glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &result));
-            auto dump = [&](const std::string& why)
+            auto dump = [&](std::string const& why)
             {
                 std::cerr << why << std::endl;
                 int32_t lineNumber = 1;

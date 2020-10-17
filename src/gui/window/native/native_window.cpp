@@ -96,7 +96,7 @@ namespace neogfx
         --iPaused;
     }
 
-    void native_window::display_error_message(const std::string& aTitle, const std::string& aMessage) const
+    void native_window::display_error_message(std::string const& aTitle, std::string const& aMessage) const
     {
         iSurfaceManager.display_error_message(*this, aTitle, aMessage);
     }
@@ -345,12 +345,12 @@ namespace neogfx
         return surface_window().native_window_rendering_priority();
     }
 
-    const std::string& native_window::title_text() const
+    std::string const& native_window::title_text() const
     {
         return iTitleText;
     }
 
-    void native_window::set_title_text(const std::string& aTitleText)
+    void native_window::set_title_text(std::string const& aTitleText)
     {
         iTitleText = aTitleText;
     }

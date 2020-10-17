@@ -35,8 +35,8 @@ namespace neogfx
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(const std::string& aText) override;
-        bool sys_text_input(const std::string& aText) override;
+        bool text_input(std::string const& aText) override;
+        bool sys_text_input(std::string const& aText) override;
     private:
         keyboard& iKeyboard;
     };
@@ -46,8 +46,8 @@ namespace neogfx
     public:
         define_declared_event(KeyPressed, key_pressed, scan_code_e, key_code_e, key_modifiers_e)
         define_declared_event(KeyReleased, key_released, scan_code_e, key_code_e, key_modifiers_e)
-        define_declared_event(TextInput, text_input, const std::string&)
-        define_declared_event(SysTextInput, sys_text_input, const std::string&)
+        define_declared_event(TextInput, text_input, std::string const&)
+        define_declared_event(SysTextInput, sys_text_input, std::string const&)
     private:
         friend class keyboard_grabber;
     public:

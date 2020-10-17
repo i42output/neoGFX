@@ -44,8 +44,8 @@ namespace neogfx
     class item_view : public framed_scrollable_widget, protected i_header_view_owner
     {
     public:
-        define_event(CellEntered, cell_entered, const item_presentation_model_index&)
-        define_event(CellLeft, cell_left, const item_presentation_model_index&)
+        define_event(CellEntered, cell_entered, item_presentation_model_index const&)
+        define_event(CellLeft, cell_left, item_presentation_model_index const&)
     public:
         struct no_model : std::logic_error { no_model() : std::logic_error("neogfx::item_view::no_model") {} };
         struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::item_view::no_presentation_model") {} };
@@ -82,10 +82,10 @@ namespace neogfx
         void enable_hot_tracking();
         void disable_hot_tracking();
     public:
-        bool is_visible(const item_presentation_model_index& aItemIndex) const;
-        bool make_visible(const item_presentation_model_index& aItemIndex, const optional_easing& aTransition = {}, const std::optional<double>& aTransitionDuration = {});
+        bool is_visible(item_presentation_model_index const& aItemIndex) const;
+        bool make_visible(item_presentation_model_index const& aItemIndex, const optional_easing& aTransition = {}, const std::optional<double>& aTransitionDuration = {});
         const optional_item_presentation_model_index& editing() const;
-        void edit(const item_presentation_model_index& aItemIndex);
+        void edit(item_presentation_model_index const& aItemIndex);
         void begin_edit();
         void end_edit(bool aCommit);
         bool beginning_edit() const;
@@ -101,7 +101,7 @@ namespace neogfx
         virtual void selection_model_changed() = 0;
     protected:
         virtual rect item_display_rect() const = 0;
-        virtual size total_item_area(const i_units_context& aUnitsContext) const = 0;
+        virtual size total_item_area(i_units_context const& aUnitsContext) const = 0;
         virtual dimension column_width(uint32_t aColumn) const = 0;
         std::pair<item_model_index::value_type, coordinate> first_visible_item(i_graphics_context& aGc) const;
         std::pair<item_model_index::value_type, coordinate> last_visible_item(i_graphics_context& aGc) const;
@@ -128,7 +128,7 @@ namespace neogfx
         void mouse_left() override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(const std::string& aText) override;
+        bool text_input(std::string const& aText) override;
     protected:
         using framed_scrollable_widget::scrolling_disposition;
         neogfx::scrolling_disposition scrolling_disposition() const override;
@@ -141,9 +141,9 @@ namespace neogfx
         virtual void item_removed(const item_model_index& aItemIndex);
     protected:
         virtual void item_model_changed(const i_item_model& aItemModel);
-        virtual void item_added(const item_presentation_model_index& aItemIndex);
-        virtual void item_changed(const item_presentation_model_index& aItemIndex);
-        virtual void item_removed(const item_presentation_model_index& aItemIndex);
+        virtual void item_added(item_presentation_model_index const& aItemIndex);
+        virtual void item_changed(item_presentation_model_index const& aItemIndex);
+        virtual void item_removed(item_presentation_model_index const& aItemIndex);
         virtual void items_sorting();
         virtual void items_sorted();
         virtual void items_filtering();
@@ -156,17 +156,17 @@ namespace neogfx
         virtual void current_index_changed(const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex);
         virtual void selection_changed(const item_selection& aCurrentSelection, const item_selection& aPreviousSelection);
     public:
-        rect row_rect(const item_presentation_model_index& aItemIndex) const;
-        rect cell_rect(const item_presentation_model_index& aItemIndex, cell_part aPart = cell_part::Base) const;
-        rect cell_rect(const item_presentation_model_index& aItemIndex, i_graphics_context& aGc, cell_part aPart = cell_part::Base) const;
+        rect row_rect(item_presentation_model_index const& aItemIndex) const;
+        rect cell_rect(item_presentation_model_index const& aItemIndex, cell_part aPart = cell_part::Base) const;
+        rect cell_rect(item_presentation_model_index const& aItemIndex, i_graphics_context& aGc, cell_part aPart = cell_part::Base) const;
         optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
     private:
         void init();
-        void invalidate_item(const item_presentation_model_index& aItemIndex);
+        void invalidate_item(item_presentation_model_index const& aItemIndex);
         void update_hover(const optional_point& aPosition);
         item_selection_operation to_selection_operation(key_modifiers_e aKeyModifiers) const;
-        void select(const item_presentation_model_index& aItemIndex, key_modifiers_e aKeyModifiers);
-        void select(const item_presentation_model_index& aItemIndex, item_selection_operation aSelectionOperation = item_selection_operation::ClearAndSelect);
+        void select(item_presentation_model_index const& aItemIndex, key_modifiers_e aKeyModifiers);
+        void select(item_presentation_model_index const& aItemIndex, item_selection_operation aSelectionOperation = item_selection_operation::ClearAndSelect);
     private:
         sink iSink;
         sink iModelSink;

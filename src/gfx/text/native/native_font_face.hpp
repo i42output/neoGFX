@@ -46,7 +46,7 @@
 
 namespace neogfx
 {
-    struct freetype_error : std::runtime_error { freetype_error(const std::string& aError) : std::runtime_error(aError) {} };
+    struct freetype_error : std::runtime_error { freetype_error(std::string const& aError) : std::runtime_error(aError) {} };
     inline std::string getFreeTypeErrorMessage(FT_Error err)
     {
 #undef __FTERRORS_H__
@@ -95,18 +95,18 @@ namespace neogfx
             }
         };
     public:
-        struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(const std::string& aError) : freetype_error(aError) {} };
-        struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(const std::string& aError) : freetype_error(aError) {} };
+        struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(std::string const& aError) : freetype_error(aError) {} };
+        struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(std::string const& aError) : freetype_error(aError) {} };
     public:
         native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle);
         ~native_font_face();
     public:
         font_id id() const override;
         i_native_font& native_font() override;
-        const std::string& family_name() const override;
+        std::string const& family_name() const override;
         font_style style() const override;
         font::point_size size() const override;
-        const std::string& style_name() const override;
+        std::string const& style_name() const override;
         dimension horizontal_dpi() const override;
         dimension vertical_dpi() const override;
         dimension height() const override;

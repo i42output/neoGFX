@@ -44,8 +44,8 @@ namespace neogfx
         virtual bool is_deselected() const = 0;
         virtual void select() = 0;
     public:
-        virtual const std::string& text() const = 0;
-        virtual void set_text(const std::string& aText) = 0;
+        virtual std::string const& text() const = 0;
+        virtual void set_text(std::string const& aText) = 0;
         virtual void set_image(const i_texture& aTexture) = 0;
         virtual void set_image(const i_image& aImage) = 0;
     public:

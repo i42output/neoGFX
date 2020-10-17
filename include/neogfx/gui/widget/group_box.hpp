@@ -37,12 +37,12 @@ namespace neogfx
     public:
         struct not_checkable : std::logic_error { not_checkable() : std::logic_error("neogfx::group_box::not_checkable") {} };
     public:
-        group_box(const std::string& aText = std::string());
-        group_box(i_widget& aParent, const std::string& aText = std::string());
-        group_box(i_layout& aLayout, const std::string& aText = std::string());
+        group_box(std::string const& aText = std::string());
+        group_box(i_widget& aParent, std::string const& aText = std::string());
+        group_box(i_layout& aLayout, std::string const& aText = std::string());
     public:
-        const std::string& text() const;
-        void set_text(const std::string& aText);
+        std::string const& text() const;
+        void set_text(std::string const& aText);
         bool is_checkable() const;
         void set_checkable(bool aCheckable);
         const neogfx::label& label() const;

@@ -22,7 +22,7 @@
 
 namespace neogfx
 { 
-    scoped_units_context::scoped_units_context(const i_units_context& aNewContext) : iSavedContext{ current_context_for_this_thread() }
+    scoped_units_context::scoped_units_context(i_units_context const& aNewContext) : iSavedContext{ current_context_for_this_thread() }
     {
         set_context(&aNewContext);
     }
@@ -32,7 +32,7 @@ namespace neogfx
         restore_saved_context();
     }
    
-    const i_units_context& scoped_units_context::current_context()
+    i_units_context const& scoped_units_context::current_context()
     {
         auto currentContext = current_context_for_this_thread();
         if (currentContext != nullptr)
@@ -56,12 +56,12 @@ namespace neogfx
         return tCurrentContext;
     }
 
-    length_units_converter::length_units_converter(const i_units_context& aContext) :
+    length_units_converter::length_units_converter(i_units_context const& aContext) :
         iContext(aContext), iUnits{ basic_scoped_units<length_units::units>::current_units() }
     {
     }
 
-    length_units_converter::length_units_converter(const i_units_context& aContext, length_units::units aUnits) :
+    length_units_converter::length_units_converter(i_units_context const& aContext, length_units::units aUnits) :
         iContext(aContext), iUnits{ aUnits }
     {
     }

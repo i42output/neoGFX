@@ -156,7 +156,7 @@ namespace neogames
                 return std::tie(iValue, iSuit) < std::tie(aRhs.iValue, aRhs.iSuit);
             }
         public:
-            static const std::string& to_string(value aValue)
+            static std::string const& to_string(value aValue)
             {
                 static const std::unordered_map<value, std::string> sValueStrings
                 {
@@ -180,7 +180,7 @@ namespace neogames
                     return result->second;
                 throw bad_value();
             }
-            static const std::string& to_string(suit aSuit)
+            static std::string const& to_string(suit aSuit)
             {
                 static const std::unordered_map<suit, std::string> sSuitStrings
                 {

@@ -80,7 +80,7 @@ namespace neogfx
                 neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
-    size slider_impl::minimum_size(const optional_size& aAvailableSpace) const
+    size slider_impl::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);

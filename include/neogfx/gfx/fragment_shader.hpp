@@ -37,7 +37,7 @@ namespace neogfx
     {
         typedef shader<Base> base_type;
     public:
-        fragment_shader(const std::string& aName) :
+        fragment_shader(std::string const& aName) :
             base_type{ shader_type::Fragment, aName }
         {
         }
@@ -51,7 +51,7 @@ namespace neogfx
         using base_type::add_in_variable;
         using base_type::add_out_variable;
     public:
-        standard_fragment_shader(const std::string& aName = "standard_fragment_shader") :
+        standard_fragment_shader(std::string const& aName = "standard_fragment_shader") :
             fragment_shader<Base>{ aName }
         {
             add_in_variable<vec3f>("Coord"_s, 0u);
@@ -90,7 +90,7 @@ namespace neogfx
     class standard_gradient_shader : public standard_fragment_shader<i_gradient_shader>
     {
     public:
-        standard_gradient_shader(const std::string& aName = "standard_gradient_shader");
+        standard_gradient_shader(std::string const& aName = "standard_gradient_shader");
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
@@ -119,7 +119,7 @@ namespace neogfx
     class standard_texture_shader : public standard_fragment_shader<i_texture_shader>
     {
     public:
-        standard_texture_shader(const std::string& aName = "standard_texture_shader");
+        standard_texture_shader(std::string const& aName = "standard_texture_shader");
     public:
         bool supports(vertex_buffer_type aBufferType) const override;
     public:
@@ -139,7 +139,7 @@ namespace neogfx
     class standard_filter_shader : public standard_fragment_shader<i_filter_shader>
     {
     public:
-        standard_filter_shader(const std::string& aName = "standard_filter_shader");
+        standard_filter_shader(std::string const& aName = "standard_filter_shader");
     public:
         bool supports(vertex_buffer_type aBufferType) const override;
     public:
@@ -159,7 +159,7 @@ namespace neogfx
     class standard_glyph_shader : public standard_fragment_shader<i_glyph_shader>
     {
     public:
-        standard_glyph_shader(const std::string& aName = "standard_glyph_shader");
+        standard_glyph_shader(std::string const& aName = "standard_glyph_shader");
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
@@ -177,7 +177,7 @@ namespace neogfx
     class standard_stipple_shader : public standard_fragment_shader<i_stipple_shader>
     {
     public:
-        standard_stipple_shader(const std::string& aName = "standard_stipple_shader");
+        standard_stipple_shader(std::string const& aName = "standard_stipple_shader");
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:

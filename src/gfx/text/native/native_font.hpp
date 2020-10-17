@@ -47,13 +47,13 @@ namespace neogfx
         native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes);
         ~native_font();
     public:
-        const std::string& family_name() const override;
+        std::string const& family_name() const override;
         bool has_style(font_style aStyle) const override;
         uint32_t style_count() const override;
         font_style style(uint32_t aStyleIndex) const override;
-        const std::string& style_name(uint32_t aStyleIndex) const override;
+        std::string const& style_name(uint32_t aStyleIndex) const override;
         void create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
-        void create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
+        void create_face(std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
     private:
         void register_face(FT_Long aFaceIndex);
         FT_Face open_face(FT_Long aFaceIndex);

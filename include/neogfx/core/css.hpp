@@ -107,8 +107,8 @@ namespace neogfx
         class i_visitor
         {
         public:
-            virtual const std::string& element_name() = 0;
-            virtual const std::string& id() = 0;
+            virtual std::string const& element_name() = 0;
+            virtual std::string const& id() = 0;
             virtual bool has_parent() = 0;
             virtual i_visitor& parent() = 0;
         public:
@@ -117,7 +117,7 @@ namespace neogfx
     public:
         struct failed_to_open_style_sheet : std::runtime_error { failed_to_open_style_sheet() : std::runtime_error("neogfx::css::failed_to_open_style_sheet") {} };
     public:
-        css(const std::string& aStyle);
+        css(std::string const& aStyle);
         css(std::istream& aStyleSheet);
     public:
         void accept(i_visitor& aVisitor) const;

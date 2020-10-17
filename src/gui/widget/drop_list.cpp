@@ -183,7 +183,7 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    size drop_list_popup::minimum_size(const optional_size&) const
+    size drop_list_popup::minimum_size(optional_size const&) const
     {
         if (window::has_minimum_size())
             return window::minimum_size();
@@ -434,11 +434,11 @@ namespace neogfx
                 push_button::set_image(aImage);
                 push_button::image_widget().show(!aImage.is_empty());
             }
-            const std::string& text() const override
+            std::string const& text() const override
             {
                 return push_button::text();
             }
-            void set_text(const std::string& aText) override
+            void set_text(std::string const& aText) override
             {
                 return push_button::set_text(aText);
             }
@@ -513,11 +513,11 @@ namespace neogfx
                 iImage.set_image(aImage);
                 iImage.show(!aImage.is_empty());
             }
-            const std::string& text() const override
+            std::string const& text() const override
             {
                 return iEditor.text();
             }
-            void set_text(const std::string& aText) override
+            void set_text(std::string const& aText) override
             {
                 iEditor.set_text(aText);
             }
@@ -903,7 +903,7 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    size drop_list::minimum_size(const optional_size& aAvailableSpace) const
+    size drop_list::minimum_size(optional_size const& aAvailableSpace) const
     {
         auto minimumSize = widget::minimum_size(aAvailableSpace);
         if (widget::has_minimum_size())

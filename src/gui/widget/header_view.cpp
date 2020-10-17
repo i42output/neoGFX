@@ -40,7 +40,7 @@ namespace neogfx
         {
         }
     public:
-        size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override
         {
             if (has_minimum_size())
                 return push_button::minimum_size(aAvailableSpace);
@@ -204,9 +204,9 @@ namespace neogfx
         {
             presentation_model().column_info_changed([this](item_presentation_model_index::column_type aColumnIndex) { column_info_changed(aColumnIndex); });
             presentation_model().item_model_changed([this](const i_item_model& aItemModel) { item_model_changed(aItemModel); });
-            presentation_model().item_added([this](const item_presentation_model_index& aItemIndex) { item_added(aItemIndex); });
-            presentation_model().item_changed([this](const item_presentation_model_index& aItemIndex) { item_changed(aItemIndex); });
-            presentation_model().item_removed([this](const item_presentation_model_index& aItemIndex) { item_removed(aItemIndex); });
+            presentation_model().item_added([this](item_presentation_model_index const& aItemIndex) { item_added(aItemIndex); });
+            presentation_model().item_changed([this](item_presentation_model_index const& aItemIndex) { item_changed(aItemIndex); });
+            presentation_model().item_removed([this](item_presentation_model_index const& aItemIndex) { item_removed(aItemIndex); });
             presentation_model().items_sorting([this]() { items_sorting(); });
             presentation_model().items_sorted([this]() { items_sorted(); });
             presentation_model().items_filtering([this]() { items_filtering(); });
@@ -246,7 +246,7 @@ namespace neogfx
         iUpdater.reset(new updater(*this));
     }
 
-    void header_view::item_added(const item_presentation_model_index&)
+    void header_view::item_added(item_presentation_model_index const&)
     {
         iSectionWidths.resize(presentation_model().columns());
         /* todo : optimize (don't do full update) */
@@ -254,7 +254,7 @@ namespace neogfx
         iUpdater.reset(new updater(*this));
     }
 
-    void header_view::item_changed(const item_presentation_model_index&)
+    void header_view::item_changed(item_presentation_model_index const&)
     {
         iSectionWidths.resize(presentation_model().columns());
         /* todo : optimize (don't do full update) */
@@ -262,7 +262,7 @@ namespace neogfx
         iUpdater.reset(new updater(*this));
     }
 
-    void header_view::item_removed(const item_presentation_model_index&)
+    void header_view::item_removed(item_presentation_model_index const&)
     {
         iSectionWidths.resize(presentation_model().columns());
         /* todo : optimize (don't do full update) */

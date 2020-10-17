@@ -31,7 +31,7 @@ namespace neogfx
         set_ignore_mouse_events(true);
     }
 
-    size check_box::box::minimum_size(const optional_size& aAvailableSpace) const
+    size check_box::box::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
@@ -39,12 +39,12 @@ namespace neogfx
         return ceil_rasterized(service<i_skin_manager>().active_skin().preferred_size(skin_element::CheckBox, size{ length }));
     }
 
-    size check_box::box::maximum_size(const optional_size& aAvailableSpace) const
+    size check_box::box::maximum_size(optional_size const& aAvailableSpace) const
     {
         return minimum_size(aAvailableSpace);
     }
         
-    check_box::check_box(const std::string& aText, button_checkable aCheckable) :
+    check_box::check_box(std::string const& aText, button_checkable aCheckable) :
         button(aText), iBox(*this)
     {
         set_checkable(aCheckable);
@@ -54,7 +54,7 @@ namespace neogfx
         label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    check_box::check_box(i_widget& aParent, const std::string& aText, button_checkable aCheckable) :
+    check_box::check_box(i_widget& aParent, std::string const& aText, button_checkable aCheckable) :
         button(aParent, aText), iBox(*this)
     {
         set_checkable(aCheckable);
@@ -64,7 +64,7 @@ namespace neogfx
         label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    check_box::check_box(i_layout& aLayout, const std::string& aText, button_checkable aCheckable) :
+    check_box::check_box(i_layout& aLayout, std::string const& aText, button_checkable aCheckable) :
         button(aLayout, aText), iBox(*this)
     {
         set_checkable(aCheckable);

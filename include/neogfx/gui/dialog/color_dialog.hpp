@@ -61,8 +61,8 @@ namespace neogfx
         public:
             color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor = optional_custom_color_list_iterator());
         public:
-            virtual size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const;
-            virtual size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const;
+            virtual size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const;
+            virtual size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const;
         public:
             virtual void paint(i_graphics_context& aGc) const;
         public:
@@ -99,8 +99,8 @@ namespace neogfx
         public:
             scalar cursor_width() const;
         public:
-            size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-            size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+            size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+            size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         public:
             void moved() override;
             void resized() override;
@@ -160,8 +160,8 @@ namespace neogfx
         public:
             color_selection(color_dialog& aOwner);
         public:
-            size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
-            size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
+            size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+            size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         public:
             void paint(i_graphics_context& aGc) const override;
         private:

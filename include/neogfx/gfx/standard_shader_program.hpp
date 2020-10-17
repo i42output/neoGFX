@@ -28,7 +28,7 @@ namespace neogfx
     class standard_shader_program : public shader_program<i_standard_shader_program>
     {
     public:
-        standard_shader_program(const std::string& aName = "standard_shader_program");
+        standard_shader_program(std::string const& aName = "standard_shader_program");
     public:
         shader_program_type type() const override;
         const i_gradient_shader& gradient_shader() const override;

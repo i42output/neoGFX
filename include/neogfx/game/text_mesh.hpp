@@ -129,7 +129,7 @@ namespace neogfx::game
                 return sFieldNames[aFieldIndex];
             }
             static constexpr bool has_updater = true;
-            static void update(const text_mesh& aData, i_ecs& aEcs, const i_graphics_context& aGc, entity_id aEntity)
+            static void update(const text_mesh& aData, i_ecs& aEcs, i_graphics_context const& aGc, entity_id aEntity)
             {
                 auto& mf = aEcs.component<mesh_filter>().has_entity_record(aEntity) ?
                     aEcs.component<mesh_filter>().entity_record(aEntity) :
@@ -198,7 +198,7 @@ namespace neogfx::game
                 return sArchetype;
             }
         public:
-            text(i_ecs& aEcs, const i_graphics_context& aGc, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
+            text(i_ecs& aEcs, i_graphics_context const& aGc, std::string const& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
             text(const text& aOther);
         };
     }

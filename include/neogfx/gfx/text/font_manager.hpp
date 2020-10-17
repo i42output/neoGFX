@@ -39,8 +39,8 @@ namespace neogfx
     public:
         fallback_font_info(std::vector<std::string> aFallbackFontFamilies);
     public:
-        bool has_fallback_for(const std::string& aFontFamilyName) const override;
-        const std::string& fallback_for(const std::string& aFontFamilyName) const override;
+        bool has_fallback_for(std::string const& aFontFamilyName) const override;
+        std::string const& fallback_for(std::string const& aFontFamilyName) const override;
     private:
         std::vector<std::string> iFallbackFontFamilies;
     };
@@ -68,18 +68,18 @@ namespace neogfx
         i_native_font_face& create_default_font(const i_device_resolution& aDevice) override;
         bool has_fallback_font(const i_native_font_face& aExistingFont) const override;
         i_native_font_face& create_fallback_font(const i_native_font_face& aExistingFont) override;
-        i_native_font_face& create_font(const std::string& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
-        i_native_font_face& create_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
+        i_native_font_face& create_font(std::string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
+        i_native_font_face& create_font(std::string const& aFamilyName, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
         i_native_font_face& create_font(const font_info& aInfo, const i_device_resolution& aDevice) override;
         i_native_font_face& create_font(i_native_font& aFont, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
-        i_native_font_face& create_font(i_native_font& aFont, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
-        bool is_font_file(const std::string& aFileName) const override;
-        i_native_font_face& load_font_from_file(const std::string& aFileName, const i_device_resolution& aDevice) override;
-        i_native_font_face& load_font_from_file(const std::string& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
-        i_native_font_face& load_font_from_file(const std::string& aFileName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
+        i_native_font_face& create_font(i_native_font& aFont, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
+        bool is_font_file(std::string const& aFileName) const override;
+        i_native_font_face& load_font_from_file(std::string const& aFileName, const i_device_resolution& aDevice) override;
+        i_native_font_face& load_font_from_file(std::string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
+        i_native_font_face& load_font_from_file(std::string const& aFileName, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
         i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice) override;
         i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) override;
-        i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
+        i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) override;
     public:
         uint32_t font_family_count() const override;
         std::string font_family(uint32_t aFamilyIndex) const override;
@@ -99,8 +99,8 @@ namespace neogfx
         void release(font_id aId) override;
         long use_count(font_id aId) const override;
     private:
-        i_native_font& find_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize);
-        i_native_font& find_best_font(const std::string& aFamilyName, neogfx::font_style aStyle, font::point_size aSize);
+        i_native_font& find_font(std::string const& aFamilyName, std::string const& aStyleName, font::point_size aSize);
+        i_native_font& find_best_font(std::string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize);
     private:
         i_native_font_face& add_font(const ref_ptr<i_native_font_face>& aNewFont);
         void cleanup();

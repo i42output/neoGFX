@@ -1022,7 +1022,7 @@ namespace neogfx
         sRGB_color(const sRGB_color& aOther);
         explicit sRGB_color(const base_type& aOther);
         explicit sRGB_color(const linear_color& aLinear);
-        sRGB_color(const std::string& aTextValue);
+        sRGB_color(std::string const& aTextValue);
         // assignment
     public:
         sRGB_color& operator=(const sRGB_color& aOther);
@@ -1030,7 +1030,7 @@ namespace neogfx
         // operations
     public:
         static sRGB_color from_linear(const linear_color& aLinear);
-        static std::optional<sRGB_color> from_name(const std::string& aName);
+        static std::optional<sRGB_color> from_name(std::string const& aName);
         linear_color to_linear() const;
         scalar brightness() const;
         scalar luma() const;

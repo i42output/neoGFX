@@ -55,7 +55,7 @@ namespace video_poker
     class outcome : public neogfx::game::shape::text
     {
     public:
-        outcome(neogfx::game::canvas& aCanvas, const std::string& aOutcome, const neogfx::color& aColor) :
+        outcome(neogfx::game::canvas& aCanvas, std::string const& aOutcome, const neogfx::color& aColor) :
             neogfx::game::shape::text{
                 aCanvas.ecs(),
                 neogfx::graphics_context{ aCanvas },

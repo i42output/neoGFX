@@ -29,7 +29,7 @@ namespace neogfx
     class i_audio_playback_device : public i_audio_device
     {
     public:
-        virtual i_audio_sample& load_sample(const std::string& aUri) = 0;
+        virtual i_audio_sample& load_sample(std::string const& aUri) = 0;
         virtual i_audio_sample& create_sample(double aDuration) = 0;
         virtual void destroy_sample(i_audio_sample& aSample) = 0;
     public:

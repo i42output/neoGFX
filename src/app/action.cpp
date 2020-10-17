@@ -28,22 +28,22 @@ namespace neogfx
     {
     }
 
-    action::action(const std::string& aText) :
+    action::action(std::string const& aText) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }
     {
     }
 
-    action::action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    action::action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
     {
     }
 
-    action::action(const std::string& aText, const i_texture& aImage) :
+    action::action(std::string const& aText, const i_texture& aImage) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
 
-    action::action(const std::string& aText, const i_image& aImage) :
+    action::action(std::string const& aText, const i_image& aImage) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
@@ -54,25 +54,25 @@ namespace neogfx
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, const std::string& aText) :
+    action::action(i_action_container& aContainer, std::string const& aText) :
         action{ aText }
     {
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    action::action(i_action_container& aContainer, std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
         action{ aText, aImageUri, aDpiScaleFactor, aSampling }
     {
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, const std::string& aText, const i_texture& aImage) :
+    action::action(i_action_container& aContainer, std::string const& aText, const i_texture& aImage) :
         action{ aText, aImage }
     {
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, const std::string& aText, const i_image& aImage) :
+    action::action(i_action_container& aContainer, std::string const& aText, const i_image& aImage) :
         action{ aText, aImage }
     {
         aContainer.add_action(*this);
@@ -312,7 +312,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
+    action& action::set_image(std::string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
         set_image(neogfx::image{ aUri, aDpiScaleFactor, aSampling });
         return *this;
@@ -333,7 +333,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_checked_image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
+    action& action::set_checked_image(std::string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
         set_checked_image(neogfx::image{ aUri, aDpiScaleFactor, aSampling });
         return *this;
@@ -366,7 +366,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_shortcut(const std::string& aShortcut)
+    action& action::set_shortcut(std::string const& aShortcut)
     {
         return set_shortcut(key_sequence{ aShortcut });
     }
