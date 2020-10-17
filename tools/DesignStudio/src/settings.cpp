@@ -59,8 +59,8 @@ namespace neogfx::DesignStudio
         register_setting<bool>("environment.tabs_and_windows.autoscale_docks"_s, false, "Autoscale docks: %?%"_t);
         register_setting<ng::size>("environment.tabs_and_windows.workspace_size"_s, {});
         register_setting<ng::point>("environment.tabs_and_windows.workspace_position"_s, {});
-        register_setting<double>("environment.tabs_and_windows.left_dock_width"_s, 192.0);
-        register_setting<double>("environment.tabs_and_windows.right_dock_width"_s, 256.0);
+        register_setting<double>("environment.tabs_and_windows.left_dock_width"_s, 192.0_dip);
+        register_setting<double>("environment.tabs_and_windows.right_dock_width"_s, 256.0_dip);
         register_setting<double>("environment.tabs_and_windows.left_dock_weight"_s, 0.3);
         register_setting<double>("environment.tabs_and_windows.right_dock_weight"_s, 0.3);
         register_setting<color>("environment.fonts_and_colors.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);

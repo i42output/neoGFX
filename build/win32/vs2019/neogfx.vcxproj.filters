@@ -1597,6 +1597,12 @@
     <ClCompile Include="..\..\..\src\gui\widget\font_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
