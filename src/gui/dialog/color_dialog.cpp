@@ -475,6 +475,8 @@ namespace neogfx
         framed_scrollable_widget(aOwner.iRightTopLayout), iOwner(aOwner), iLayout{ *this }, iCanvas{ iLayout }, iTexture{ image{ size{256, 256}, color::Black } }, iTracking{ false }
     {
         iCanvas.set_image(iTexture);
+        iCanvas.set_fixed_size(size{ 256.0_dip, 256.0_dip });
+        iCanvas.set_aspect_ratio(aspect_ratio::Stretch);
         set_fixed_size(size{ 256.0_dip, 256.0_dip } + size{ effective_frame_width() * 2.0 });
         iLayout.set_padding(neogfx::padding{});
         set_padding(neogfx::padding{});
