@@ -29,6 +29,7 @@
 #include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/drag_drop.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
@@ -37,10 +38,10 @@
 namespace neogfx
 {
     template <typename ItemModel>
-    class basic_item_presentation_model : public object<i_item_presentation_model>
+    class basic_item_presentation_model : public drag_drop_source<object<i_item_presentation_model>>
     {
         typedef basic_item_presentation_model<ItemModel> self_type;
-        typedef object<i_item_presentation_model> base_type;
+        typedef drag_drop_source<object<i_item_presentation_model>> base_type;
     public:
         define_declared_event(VisualAppearanceChanged, visual_appearance_changed)
         define_declared_event(ColumnInfoChanged, column_info_changed, item_presentation_model_index::column_type)
@@ -901,15 +902,6 @@ namespace neogfx
                 iFilters.clear();
                 execute_filter();
             }
-        }
-    public:
-        i_drag_drop_source const& drag_drop_source() const override
-        {
-            throw std::logic_error("not yet implemented");
-        }
-        i_drag_drop_source& drag_drop_source() override
-        {
-            throw std::logic_error("not yet implemented");
         }
     private:
         void init()

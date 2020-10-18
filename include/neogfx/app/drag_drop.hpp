@@ -95,51 +95,149 @@ namespace neogfx
         game::entity_id iEntity;
     };
 
-    class drag_drop_source_impl : public i_drag_drop_source
+    template <typename Base = i_drag_drop_source>
+    class drag_drop_source : public Base
     {
+        typedef Base base_type;
     public:
         define_declared_event(DraggingObject, dragging_object, i_drag_drop_object const&)
         define_declared_event(DraggingCancelled, dragging_cancelled, i_drag_drop_object const&)
         define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
     public:
-        drag_drop_source_impl();
-        ~drag_drop_source_impl();
+        template <typename... Args>
+        drag_drop_source(Args&&... aArgs) :
+            base_type{ std::forward<Args>(aArgs)... }, iObject{ nullptr }
+        {
+            if constexpr (std::is_base_of_v<i_widget, base_type>)
+                base_type::monitor_drag_drop_events(*this);
+            service<i_drag_drop>().register_source(*this);
+        }
+        ~drag_drop_source()
+        {
+            service<i_drag_drop>().unregister_source(*this);
+        }
     public:
-        bool drag_drop_active() const override;
-        i_drag_drop_object const& object_being_dragged() const override;
-        void start_drag_drop(i_drag_drop_object const& aObject) override;
-        void cancel_drag_drop() override;
-        void end_drag_drop() override;
+        bool drag_drop_active() const override
+        {
+            return iObject != nullptr;
+        }
+        i_drag_drop_object const& object_being_dragged() const override
+        {
+            if (!drag_drop_active())
+                throw drag_drop_not_active();
+            return *iObject;
+        }
+        void start_drag_drop(i_drag_drop_object const& aObject) override
+        {
+            if (drag_drop_active())
+                throw drag_drop_already_active();
+            iObject = &aObject;
+            DraggingObject.trigger(*iObject);
+        }
+        void cancel_drag_drop() override
+        {
+            if (!drag_drop_active())
+                throw drag_drop_not_active();
+            auto object = iObject;
+            iObject = nullptr;
+            DraggingCancelled.trigger(*object);
+        }
+        void end_drag_drop() override
+        {
+            if (!drag_drop_active())
+                throw drag_drop_not_active();
+            auto object = iObject;
+            iObject = nullptr;
+            ObjectDropped.trigger(*object);
+        }
     public:
-        void monitor_drag_drop_events(i_widget& aWidget) override;
-        void stop_monitoring_drag_drop_events() override;
+        void monitor_drag_drop_events(i_widget& aWidget) override
+        {
+            iSink = aWidget.mouse_event([this, &aWidget](const neogfx::mouse_event& aEvent)
+            {
+                handle_drag_drop_event(aWidget, aEvent);
+            });
+        }
+        void stop_monitoring_drag_drop_events() override
+        {
+            iSink.clear();
+        }
     protected:
-        scalar drag_drop_trigger_distance() const;
-        void set_drag_drop_trigger_distance(scalar aDistance);
+        scalar drag_drop_trigger_distance() const
+        {
+            return iTriggerDistance;
+        }
+        void set_drag_drop_trigger_distance(scalar aDistance)
+        {
+            iTriggerDistance = aDistance;
+        }
     protected:
-        virtual bool is_drag_drop_object(point const& aPosition) const;
-        virtual i_drag_drop_object const* drag_drop_object(point const& aPosition);
+        virtual bool is_drag_drop_object(point const& aPosition) const
+        {
+            return false;
+        }
+        virtual i_drag_drop_object const* drag_drop_object(point const& aPosition)
+        {
+            return nullptr;
+        }
     private:
-        void handle_drag_drop_event(i_widget& aWidget, const neogfx::mouse_event& aEvent);
+        void handle_drag_drop_event(i_widget& aWidget, const neogfx::mouse_event& aEvent)
+        {
+            switch (aEvent.type())
+            {
+            case mouse_event_type::ButtonClicked:
+                if (aEvent.is_left_button() && is_drag_drop_object(aEvent.position()))
+                {
+                    aWidget.set_capture();
+                    iTrackStart = aEvent.position();
+                }
+                break;
+            case mouse_event_type::Moved:
+                if (iTrackStart)
+                {
+                    if ((*iTrackStart - aEvent.position()).to_vec2().magnitude() >= drag_drop_trigger_distance())
+                    {
+                        if (!drag_drop_active())
+                            start_drag_drop(*(iObject = drag_drop_object(*iTrackStart)));
+                    }
+                    else
+                    {
+                        if (drag_drop_active())
+                            cancel_drag_drop();
+                    }
+                    if (drag_drop_active() && !service<i_drag_drop>().is_target_for(object_being_dragged()))
+                        cancel_drag_drop();
+                    if (drag_drop_active() && object_being_dragged().can_render())
+                    {
+                        // todo
+                    }
+                }
+                break;
+            case mouse_event_type::ButtonReleased:
+                if (iTrackStart)
+                {
+                    if (aEvent.is_left_button())
+                    {
+                        iTrackStart = std::nullopt;
+                        if (drag_drop_active() && service<i_drag_drop>().is_target_at(
+                            object_being_dragged(), aWidget.to_window_coordinates(aEvent.position())))
+                        {
+                            auto& target = service<i_drag_drop>().target_at(object_being_dragged(), aWidget.to_window_coordinates(aEvent.position()));
+                            target.accept(object_being_dragged());
+                            end_drag_drop();
+                        }
+                        else
+                            cancel_drag_drop();
+                    }
+                }
+                break;
+            }
+        }
     private:
         i_drag_drop_object const* iObject;
         sink iSink;
         std::optional<point> iTrackStart;
         scalar iTriggerDistance = 8.0;
-    };
-
-    template <typename Base>
-    class drag_drop_source : public Base, public drag_drop_source_impl
-    {
-        typedef Base base_type;
-    public:
-        template <typename... Args>
-        drag_drop_source(Args&&... aArgs) :
-            base_type{ std::forward<Args>(aArgs)... }
-        {
-            if constexpr (std::is_base_of_v<i_widget, base_type>)
-                base_type::monitor_drag_drop_events(*this);
-        }
     };
 
     template <typename Base>

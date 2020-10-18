@@ -149,7 +149,7 @@ namespace neogfx
     };
     typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
-    class i_item_presentation_model : public i_property_owner
+    class i_item_presentation_model : public i_drag_drop_source, public i_property_owner
     {
     public:
         declare_event(visual_appearance_changed)
@@ -294,9 +294,6 @@ namespace neogfx
         virtual optional_filter filtering_by() const = 0;
         virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, filter_search_key const& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) = 0;
         virtual void reset_filter() = 0;
-    public:
-        virtual i_drag_drop_source const& drag_drop_source() const = 0;
-        virtual i_drag_drop_source& drag_drop_source() = 0;
         // helpers
     public:
         bool column_editable(item_presentation_model_index::column_type aColumnIndex) const
