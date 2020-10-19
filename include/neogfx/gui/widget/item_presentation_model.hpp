@@ -29,7 +29,6 @@
 #include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>
-#include <neogfx/app/drag_drop.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
@@ -38,10 +37,10 @@
 namespace neogfx
 {
     template <typename ItemModel>
-    class basic_item_presentation_model : public drag_drop_source<object<i_item_presentation_model>>
+    class basic_item_presentation_model : public object<i_item_presentation_model>
     {
         typedef basic_item_presentation_model<ItemModel> self_type;
-        typedef drag_drop_source<object<i_item_presentation_model>> base_type;
+        typedef object<i_item_presentation_model> base_type;
     public:
         define_declared_event(VisualAppearanceChanged, visual_appearance_changed)
         define_declared_event(ColumnInfoChanged, column_info_changed, item_presentation_model_index::column_type)
@@ -61,6 +60,9 @@ namespace neogfx
         define_declared_event(ItemsSorted, items_sorted)
         define_declared_event(ItemsFiltering, items_filtering)
         define_declared_event(ItemsFiltered, items_filtered)
+        define_declared_event(DraggingItem, dragging_item, item_presentation_model_index const&)
+        define_declared_event(DraggingItemCancelled, dragging_item_cancelled, item_presentation_model_index const&)
+        define_declared_event(ItemDropped, item_dropped, item_presentation_model_index const&)
     public:
         using typename base_type::sort_direction;
         using typename base_type::optional_sort_direction;

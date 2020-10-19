@@ -24,7 +24,6 @@
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/app/i_palette.hpp>
-#include <neogfx/app/i_drag_drop.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
@@ -149,7 +148,7 @@ namespace neogfx
     };
     typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
-    class i_item_presentation_model : public i_drag_drop_source, public i_property_owner
+    class i_item_presentation_model : public i_property_owner
     {
     public:
         declare_event(visual_appearance_changed)
@@ -170,6 +169,9 @@ namespace neogfx
         declare_event(items_sorted)
         declare_event(items_filtering)
         declare_event(items_filtered)
+        declare_event(dragging_item, item_presentation_model_index const&)
+        declare_event(dragging_item_cancelled, item_presentation_model_index const&)
+        declare_event(item_dropped, item_presentation_model_index const&)
     public:
         struct cell_meta_type
         {

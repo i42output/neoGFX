@@ -95,8 +95,8 @@ namespace neogfx
         game::entity_id iEntity;
     };
 
-    template <typename Base = i_drag_drop_source>
-    class drag_drop_source : public Base
+    template <typename Base>
+    class drag_drop_source : public Base, public i_drag_drop_source
     {
         typedef Base base_type;
     public:
@@ -106,17 +106,36 @@ namespace neogfx
     public:
         template <typename... Args>
         drag_drop_source(Args&&... aArgs) :
-            base_type{ std::forward<Args>(aArgs)... }, iObject{ nullptr }
+            base_type{ std::forward<Args>(aArgs)... }, iEnabled{ false }, iObject{ nullptr }, iMonitor{ nullptr }
         {
-            if constexpr (std::is_base_of_v<i_widget, base_type>)
-                base_type::monitor_drag_drop_events(*this);
-            service<i_drag_drop>().register_source(*this);
         }
         ~drag_drop_source()
         {
-            service<i_drag_drop>().unregister_source(*this);
+            enable_drag_drop(false);
         }
     public:
+        bool drag_drop_enabled() const override
+        {
+            return iEnabled;
+        }
+        void enable_drag_drop(bool aEnable) override
+        {
+            if (iEnabled != aEnable)
+            {
+                iEnabled = aEnable;
+                if (drag_drop_enabled())
+                {
+                    if constexpr (std::is_base_of_v<i_widget, base_type>)
+                        monitor_drag_drop_events(*this);
+                    service<i_drag_drop>().register_source(*this);
+                }
+                else
+                {
+                    service<i_drag_drop>().unregister_source(*this);
+                    stop_monitoring_drag_drop_events();
+                }
+            }
+        }
         bool drag_drop_active() const override
         {
             return iObject != nullptr;
@@ -129,6 +148,8 @@ namespace neogfx
         }
         void start_drag_drop(i_drag_drop_object const& aObject) override
         {
+            if (!drag_drop_enabled())
+                enable_drag_drop(true);
             if (drag_drop_active())
                 throw drag_drop_already_active();
             iObject = &aObject;
@@ -151,8 +172,15 @@ namespace neogfx
             ObjectDropped.trigger(*object);
         }
     public:
+        i_widget& drag_drop_event_monitor() const override
+        {
+            if (iMonitor != nullptr)
+                return *iMonitor;
+            throw no_drag_drop_event_monitor();
+        }
         void monitor_drag_drop_events(i_widget& aWidget) override
         {
+            iMonitor = &aWidget;
             iSink = aWidget.mouse_event([this, &aWidget](const neogfx::mouse_event& aEvent)
             {
                 handle_drag_drop_event(aWidget, aEvent);
@@ -160,6 +188,7 @@ namespace neogfx
         }
         void stop_monitoring_drag_drop_events() override
         {
+            iMonitor = nullptr;
             iSink.clear();
         }
     protected:
@@ -234,7 +263,9 @@ namespace neogfx
             }
         }
     private:
+        bool iEnabled;
         i_drag_drop_object const* iObject;
+        i_widget* iMonitor;
         sink iSink;
         std::optional<point> iTrackStart;
         scalar iTriggerDistance = 8.0;

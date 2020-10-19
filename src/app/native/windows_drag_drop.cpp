@@ -68,7 +68,7 @@ namespace neogfx
             base_type::unregister_target(aTarget);
         }
 
-        struct internal_drag_drop_source : i_drag_drop_source {};
+        struct internal_drag_drop_source {};
 
         HRESULT drag_drop::DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect)
         {

@@ -29,19 +29,19 @@
 namespace neogfx
 {
     item_view::item_view(frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        framed_scrollable_widget{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+        base_type{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
     {
         init();
     }
 
     item_view::item_view(i_widget& aParent, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        framed_scrollable_widget{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+        base_type{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
     {
         init();
     }
 
     item_view::item_view(i_layout& aLayout, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        framed_scrollable_widget{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+        base_type{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
     {
         init();
     }
@@ -236,7 +236,7 @@ namespace neogfx
 
     void item_view::layout_items_completed()
     {
-        framed_scrollable_widget::layout_items_completed();
+        base_type::layout_items_completed();
     }
 
     widget_part item_view::hit_test(const point& aPosition) const
@@ -245,7 +245,7 @@ namespace neogfx
             return widget_part{ *this, widget_part::Client };
         else
         {
-            auto result = framed_scrollable_widget::hit_test(aPosition);
+            auto result = base_type::hit_test(aPosition);
             if (result.part != widget_part::Client)
                 return result;
             else
@@ -256,7 +256,7 @@ namespace neogfx
     size_policy item_view::size_policy() const
     {
         if (has_size_policy())
-            return framed_scrollable_widget::size_policy();
+            return base_type::size_policy();
         else if (has_fixed_size())
             return size_constraint::Fixed;
         else
@@ -265,7 +265,7 @@ namespace neogfx
 
     void item_view::paint(i_graphics_context& aGc) const
     {
-        framed_scrollable_widget::paint(aGc);
+        base_type::paint(aGc);
         auto first = first_visible_item(aGc);
         bool finished = false;
         rect clipRect = default_clip_rect().intersection(item_display_rect());
@@ -389,10 +389,10 @@ namespace neogfx
     color item_view::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))
-            return framed_scrollable_widget::palette_color(aColorRole);
+            return base_type::palette_color(aColorRole);
         if (aColorRole == color_role::Background)
             return palette_color(color_role::Base);
-        return framed_scrollable_widget::palette_color(aColorRole);
+        return base_type::palette_color(aColorRole);
     }
 
     void item_view::capture_released()
@@ -402,7 +402,7 @@ namespace neogfx
 
     neogfx::focus_policy item_view::focus_policy() const
     {
-        auto result = framed_scrollable_widget::focus_policy();
+        auto result = base_type::focus_policy();
         if (editing() != std::nullopt)
             result |= (focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
         return result;
@@ -410,7 +410,7 @@ namespace neogfx
 
     void item_view::focus_gained(focus_reason aFocusReason)
     {
-        framed_scrollable_widget::focus_gained(aFocusReason);
+        base_type::focus_gained(aFocusReason);
         if (aFocusReason != focus_reason::ClickClient && aFocusReason != focus_reason::Other)
         {
             if (model().rows() > 0 && !selection_model().has_current_index())
@@ -420,8 +420,8 @@ namespace neogfx
 
     void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (capturing() && aButton == mouse_button::Left && item_display_rect().contains(aPosition))
+        base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        if (!drag_drop_active() && capturing() && aButton == mouse_button::Left && item_display_rect().contains(aPosition))
         {
             auto item = item_at(aPosition);
             if (item != std::nullopt)
@@ -469,7 +469,7 @@ namespace neogfx
 
     void item_view::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && item_display_rect().contains(aPosition))
         {
             auto item = item_at(aPosition);
@@ -507,7 +507,7 @@ namespace neogfx
 
     void item_view::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        framed_scrollable_widget::mouse_button_released(aButton, aPosition);
+        base_type::mouse_button_released(aButton, aPosition);
         if (iClickedItem != std::nullopt)
         {
             auto item = item_at(aPosition);
@@ -530,7 +530,7 @@ namespace neogfx
 
     void item_view::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
+        base_type::mouse_moved(aPosition, aKeyModifiers);
         if (!iIgnoreNextMouseMove)
         {
             if ((iMouseTracker || hot_tracking()) && client_rect().contains(aPosition))
@@ -552,13 +552,13 @@ namespace neogfx
 
     void item_view::mouse_entered(const point& aPosition)
     {
-        framed_scrollable_widget::mouse_entered(aPosition);
+        base_type::mouse_entered(aPosition);
         update_hover(aPosition);
     }
 
     void item_view::mouse_left()
     {
-        framed_scrollable_widget::mouse_left();
+        base_type::mouse_left();
         update_hover({});
     }
 
@@ -645,7 +645,7 @@ namespace neogfx
                     newIndex = selection_model().relative_to_current_index(index_location::LastCell);
                 break;
             default:
-                handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                 break;
             }
             if (aScanCode == ScanCode_SPACE)
@@ -671,7 +671,7 @@ namespace neogfx
                     handled = false;
                 break;
             default:
-                handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                 break;
             }
         }
@@ -680,7 +680,7 @@ namespace neogfx
 
     bool item_view::text_input(std::string const& aText)
     {
-        bool handled = framed_scrollable_widget::text_input(aText);
+        bool handled = base_type::text_input(aText);
         if (editing() == std::nullopt && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
         {
             edit(selection_model().current_index());
@@ -705,7 +705,7 @@ namespace neogfx
     {
         bool wasVisible = has_presentation_model() && has_selection_model() &&
             selection_model().has_current_index() && is_visible(selection_model().current_index());
-        framed_scrollable_widget::update_scrollbar_visibility();
+        base_type::update_scrollbar_visibility();
         if (wasVisible)
             make_visible(selection_model().current_index());
     }
@@ -1084,6 +1084,18 @@ namespace neogfx
     text_edit& item_view::editor_text_edit() const
     {
         return iEditor->text_edit();
+    }
+
+    bool item_view::is_drag_drop_object(point const& aPosition) const
+    {
+        // todo
+        return false;
+    }
+
+    i_drag_drop_object const* item_view::drag_drop_object(point const& aPosition)
+    {
+        // todo
+        return nullptr;
     }
 
     void item_view::header_view_updated(header_view&, header_view_update_reason aUpdateReason)

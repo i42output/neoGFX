@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/easing.hpp>
+#include <neogfx/app/drag_drop.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/widget/header_view.hpp>
 #include <neogfx/gui/widget/item_editor.hpp>
@@ -41,8 +42,9 @@ namespace neogfx
         Editor
     };
 
-    class item_view : public framed_scrollable_widget, protected i_header_view_owner
+    class item_view : public drag_drop_source<framed_scrollable_widget>, protected i_header_view_owner
     {
+        typedef drag_drop_source<framed_scrollable_widget> base_type;
     public:
         define_event(CellEntered, cell_entered, item_presentation_model_index const&)
         define_event(CellLeft, cell_left, item_presentation_model_index const&)
@@ -93,6 +95,9 @@ namespace neogfx
         i_widget& editor() const;
         bool editor_has_text_edit() const;
         text_edit& editor_text_edit() const;
+    protected:
+        bool is_drag_drop_object(point const& aPosition) const override;
+        i_drag_drop_object const* drag_drop_object(point const& aPosition) override;
     protected:
         void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) override;
     protected:

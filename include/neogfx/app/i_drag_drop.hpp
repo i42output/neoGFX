@@ -77,6 +77,7 @@ namespace neogfx
     struct failed_drag_drop_unregistration : std::logic_error { failed_drag_drop_unregistration(std::string const& aReason) : std::logic_error{ "neogfx::failed_drag_drop_unregistration: " + aReason } {} };
     struct drag_drop_already_active : std::logic_error { drag_drop_already_active() : std::logic_error{ "neogfx::drag_drop_already_active" } {} };
     struct drag_drop_not_active : std::logic_error { drag_drop_not_active() : std::logic_error{ "neogfx::drag_drop_not_active" } {} };
+    struct no_drag_drop_event_monitor : std::logic_error { no_drag_drop_event_monitor() : std::logic_error{ "neogfx::no_drag_drop_event_monitor" } {} };
 
     class i_drag_drop_source
     {
@@ -87,14 +88,23 @@ namespace neogfx
     public:
         virtual ~i_drag_drop_source() = default;
     public:
+        virtual bool drag_drop_enabled() const = 0;
+        virtual void enable_drag_drop(bool aEnable) = 0;
         virtual bool drag_drop_active() const = 0;
         virtual i_drag_drop_object const& object_being_dragged() const = 0;
         virtual void start_drag_drop(i_drag_drop_object const& aObject) = 0;
         virtual void cancel_drag_drop() = 0;
         virtual void end_drag_drop() = 0;
     public:
+        virtual i_widget& drag_drop_event_monitor() const = 0;
         virtual void monitor_drag_drop_events(i_widget& aWidget) = 0;
         virtual void stop_monitoring_drag_drop_events() = 0;
+    public:
+        void enable_drag_drop(i_widget& aWidget)
+        {
+            enable_drag_drop(true);
+            monitor_drag_drop_events(aWidget);
+        }
     };
 
     struct drag_drop_target_not_a_widget : std::logic_error { drag_drop_target_not_a_widget() : std::logic_error{ "neogfx::drag_drop_target_not_a_widget" } {} };
