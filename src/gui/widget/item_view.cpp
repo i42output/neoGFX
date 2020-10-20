@@ -1088,8 +1088,8 @@ namespace neogfx
 
     bool item_view::is_drag_drop_object(point const& aPosition) const
     {
-        // todo
-        return false;
+        auto i = item_at(aPosition);
+        return i && (presentation_model().cell_flags(*i) & item_cell_flags::Draggable) == item_cell_flags::Draggable;
     }
 
     i_drag_drop_object const* item_view::drag_drop_object(point const& aPosition)

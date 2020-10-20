@@ -118,7 +118,7 @@ namespace neogfx
         {
             return iEnabled;
         }
-        void enable_drag_drop(bool aEnable) override
+        void enable_drag_drop(bool aEnable = true) override
         {
             if (iEnabled != aEnable)
             {
@@ -212,19 +212,20 @@ namespace neogfx
     private:
         void handle_drag_drop_event(i_widget& aWidget, const neogfx::mouse_event& aEvent)
         {
+            auto const eventPos = aEvent.position() - aWidget.origin();
             switch (aEvent.type())
             {
             case mouse_event_type::ButtonClicked:
-                if (aEvent.is_left_button() && is_drag_drop_object(aEvent.position()))
+                if (aEvent.is_left_button() && is_drag_drop_object(eventPos))
                 {
                     aWidget.set_capture();
-                    iTrackStart = aEvent.position();
+                    iTrackStart = eventPos;
                 }
                 break;
             case mouse_event_type::Moved:
                 if (iTrackStart)
                 {
-                    if ((*iTrackStart - aEvent.position()).to_vec2().magnitude() >= drag_drop_trigger_distance())
+                    if ((*iTrackStart - eventPos).to_vec2().magnitude() >= drag_drop_trigger_distance())
                     {
                         if (!drag_drop_active())
                             start_drag_drop(*(iObject = drag_drop_object(*iTrackStart)));
@@ -248,15 +249,17 @@ namespace neogfx
                     if (aEvent.is_left_button())
                     {
                         iTrackStart = std::nullopt;
-                        if (drag_drop_active() && service<i_drag_drop>().is_target_at(
-                            object_being_dragged(), aWidget.to_window_coordinates(aEvent.position())))
+                        if (drag_drop_active())
                         {
-                            auto& target = service<i_drag_drop>().target_at(object_being_dragged(), aWidget.to_window_coordinates(aEvent.position()));
-                            target.accept(object_being_dragged());
-                            end_drag_drop();
+                            if (service<i_drag_drop>().is_target_at(object_being_dragged(), aWidget.to_window_coordinates(eventPos)))
+                            {
+                                auto& target = service<i_drag_drop>().target_at(object_being_dragged(), aWidget.to_window_coordinates(eventPos));
+                                target.accept(object_being_dragged());
+                                end_drag_drop();
+                            }
+                            else
+                                cancel_drag_drop();
                         }
-                        else
-                            cancel_drag_drop();
                     }
                 }
                 break;

@@ -89,7 +89,7 @@ namespace neogfx
         virtual ~i_drag_drop_source() = default;
     public:
         virtual bool drag_drop_enabled() const = 0;
-        virtual void enable_drag_drop(bool aEnable) = 0;
+        virtual void enable_drag_drop(bool aEnable = true) = 0;
         virtual bool drag_drop_active() const = 0;
         virtual i_drag_drop_object const& object_being_dragged() const = 0;
         virtual void start_drag_drop(i_drag_drop_object const& aObject) = 0;
