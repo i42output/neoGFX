@@ -78,7 +78,7 @@ namespace neogfx
             return;
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << "horizontal_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+            service<debug::logger>() << "horizontal_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
         if (has_layout_owner())
             layout_owner().layout_items_started();

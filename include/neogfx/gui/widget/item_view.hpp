@@ -95,6 +95,8 @@ namespace neogfx
         i_widget& editor() const;
         bool editor_has_text_edit() const;
         text_edit& editor_text_edit() const;
+    public:
+        void enable_drag_drop(bool aEnable = true) override;
     protected:
         bool is_drag_drop_object(point const& aPosition) const override;
         i_drag_drop_object const* drag_drop_object(point const& aPosition) override;
@@ -177,6 +179,7 @@ namespace neogfx
         sink iModelSink;
         sink iPresentationModelSink;
         sink iSelectionModelSink;
+        sink iDragDropSink;
         std::shared_ptr<i_item_model> iModel;
         std::shared_ptr<i_item_presentation_model> iPresentationModel;
         std::shared_ptr<i_item_selection_model> iSelectionModel;
@@ -194,5 +197,6 @@ namespace neogfx
         basic_size<i_scrollbar::value_type> iOldPositionForScrollbarVisibility;
         optional_easing iDefaultTransition;
         double iDefaultTransitionDuration;
+        std::optional<drag_drop_item> iDragDropItem;
     };
 }

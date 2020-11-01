@@ -720,7 +720,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << "widget::move(" << aPosition << ")" << std::endl;
+            service<debug::logger>() << "widget::move(" << aPosition << ")" << endl;
 #endif // NEOGFX_DEBUG
         if (Position != units_converter(*this).to_device_units(aPosition))
             Position.assign(units_converter(*this).to_device_units(aPosition), false);
@@ -760,7 +760,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << "widget::resize(" << aSize << ")" << std::endl;
+            service<debug::logger>() << "widget::resize(" << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
         if (Size != units_converter(*this).to_device_units(aSize))
         {
@@ -835,7 +835,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::size_policy()" << endl;
 #endif // NEOGFX_DEBUG
         if (has_size_policy())
             return base_type::size_policy();
@@ -849,7 +849,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << endl;
 #endif // NEOGFX_DEBUG
         size result;
         if (has_minimum_size())
@@ -866,7 +866,7 @@ namespace neogfx
             result = padding().size();
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -875,7 +875,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << endl;
 #endif // NEOGFX_DEBUG
         size result;
         if (has_maximum_size())
@@ -898,7 +898,7 @@ namespace neogfx
             result.cy = size::max_size().cy;
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -913,7 +913,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
         move(aPosition);
         if (extents() != aSize)
@@ -925,8 +925,8 @@ namespace neogfx
     bool widget::update(const rect& aUpdateRect)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::update(" << aUpdateRect << ")" << std::endl;
+        if (debug::renderItem == this)
+            service<debug::logger>() << typeid(*this).name() << "::update(" << aUpdateRect << ")" << endl;
 #endif // NEOGFX_DEBUG
         if (!can_update())
             return false;
@@ -984,8 +984,8 @@ namespace neogfx
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
+        if (debug::renderItem == this)
+            service<debug::logger>() << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << endl;
 #endif // NEOGFX_DEBUG
 
         aGc.set_extents(extents());
@@ -1016,8 +1016,8 @@ namespace neogfx
             aGc.set_origin(origin());
 
 #ifdef NEOGFX_DEBUG
-            if (debug::layoutItem == this)
-                std::cerr << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << std::endl;
+            if (debug::renderItem == this)
+                service<debug::logger>() << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << endl;
 #endif // NEOGFX_DEBUG
 
             scoped_scissor scissor(aGc, clipRect);

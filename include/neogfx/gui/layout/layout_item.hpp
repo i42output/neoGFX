@@ -96,7 +96,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                std::cerr << typeid(*this).name() << "::size_policy()" << std::endl;
+                service<debug::logger>() << typeid(*this).name() << "::size_policy()" << endl;
 #endif // NEOGFX_DEBUG
             if (SizePolicy != std::nullopt)
                 return *SizePolicy;
@@ -112,7 +112,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    std::cerr << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << std::endl;
+                    service<debug::logger>() << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 SizePolicy = aSizePolicy;
                 if (aUpdateLayout)
@@ -135,7 +135,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    std::cerr << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << std::endl;
+                    service<debug::logger>() << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 Weight.assign(aWeight, aUpdateLayout);
                 if (aUpdateLayout)
@@ -162,7 +162,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    std::cerr << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
+                    service<debug::logger>() << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 MinimumSize.assign(newMinimumSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -189,7 +189,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    std::cerr << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
+                    service<debug::logger>() << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 MaximumSize.assign(newMaximumSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -213,7 +213,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    std::cerr << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << std::endl;
+                    service<debug::logger>() << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 FixedSize.assign(newFixedSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -240,7 +240,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                std::cerr << typeid(*this).name() << "::fix_weightings(): " << std::endl;
+                service<debug::logger>() << typeid(*this).name() << "::fix_weightings(): " << endl;
 #endif // NEOGFX_DEBUG
             auto& self = as_layout_item();
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
@@ -255,7 +255,7 @@ namespace neogfx
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
             {
-                std::cerr << typeid(*this).name() << "::fix_weightings: weightings: ";
+                service<debug::logger>() << typeid(*this).name() << "::fix_weightings: weightings: ";
                 bool first = true;
                 for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
                 {
@@ -263,12 +263,12 @@ namespace neogfx
                     if (!item.visible())
                         continue;
                     if (!first)
-                        std::cerr << ", ";
+                        service<debug::logger>() << ", ";
                     first = false;
-                    std::cerr << item.weight();
+                    service<debug::logger>() << item.weight();
                 }
-                std::cerr << std::endl;
-                std::cerr << typeid(*this).name() << "::fix_weightings() done" << std::endl;
+                service<debug::logger>() << endl;
+                service<debug::logger>() << typeid(*this).name() << "::fix_weightings() done" << endl;
             }
 #endif // NEOGFX_DEBUG
         }

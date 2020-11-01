@@ -36,6 +36,7 @@ using namespace boost::multiprecision;
 #include <neolib/core/string_utils.hpp>
 #include <neolib/task/i_async_task.hpp>
 #include <neolib/app/services.hpp>
+#include <neolib/app/logger.hpp>
 #include <neogfx/app/i18n.hpp>
 
 namespace services = neolib::services;
@@ -90,6 +91,9 @@ namespace neogfx
     using neolib::operator<<;
     using neolib::operator>>;
 
+    using neolib::logger::endl;
+    using neolib::logger::flush;
+
     // convert strings with different traits and/or character types to std::string
     template <typename CharT, typename Traits, typename Allocator>
     inline const std::string to_string(const std::basic_string<CharT, Traits, Allocator>& aString)
@@ -114,10 +118,14 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
     class i_layout_item;
+    class i_widget;
     namespace debug
     {
+        extern void* item;
         extern i_layout_item* layoutItem;
-        extern bool renderGeometryText;
+        extern i_widget* renderItem;
+        extern bool renderGeometryText; // todo: make a debug logger category
+        typedef neolib::logger::logger<9999> logger;
     }
 #endif // NEOGFX_DEBUG
 }

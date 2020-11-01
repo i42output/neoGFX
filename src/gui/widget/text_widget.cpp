@@ -77,7 +77,7 @@ namespace neogfx
                 result.cx = 1.0;
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                std::cerr << "text_widget::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+                service<debug::logger>() << "text_widget::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
             return units_converter(*this).from_device_units(result);
         }
@@ -87,7 +87,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << "text_widget::paint(...)" << std::endl;
+            service<debug::logger>() << "text_widget::paint(...)" << endl;
 #endif // NEOGFX_DEBUG
         scoped_mnemonics sm(aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT));
         size textSize = text_extent();

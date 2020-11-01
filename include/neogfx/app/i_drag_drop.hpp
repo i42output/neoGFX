@@ -24,6 +24,7 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_item_presentation_model.hpp>
 #include <neogfx/game/i_ecs.hpp>
 
 namespace neogfx
@@ -56,6 +57,19 @@ namespace neogfx
         static const drag_drop_object_type_id otid()
         {
             static drag_drop_object_type_id sId{ 0xfaa77f8e, 0xfabc, 0x413c, 0xacdb, { 0x5b, 0xc1, 0x74, 0xc5, 0xd2, 0xbf } };
+            return sId;
+        }
+    };
+
+    class i_drag_drop_item : public i_drag_drop_object
+    {
+    public:
+        virtual i_item_presentation_model const& presentation_model() const = 0;
+        virtual item_presentation_model_index const& item() const = 0;
+    public:
+        static const drag_drop_object_type_id otid()
+        {
+            static drag_drop_object_type_id sId{ 0x53f26bc6, 0x1b0, 0x4c19, 0x955b, { 0x1c, 0x6d, 0xa, 0x3f, 0x3b, 0xaf } };
             return sId;
         }
     };

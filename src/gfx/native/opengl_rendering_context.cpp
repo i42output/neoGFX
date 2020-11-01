@@ -1175,10 +1175,10 @@ namespace neogfx
             auto const& cache = aEcs.component<game::mesh_render_cache>();
             for (auto entity : meshRenderers.entities())
             {
-#ifndef NDEBUG
+#ifdef NEOGFX_DEBUG
                 if (infos.entity_record(entity).debug::layoutItem)
-                    std::cerr << "Rendering debug::layoutItem entity..." << std::endl;
-#endif
+                    service<debug::logger>() << "Rendering debug::layoutItem entity..." << endl;
+#endif // NEOGFX_DEBUG
                 auto const& info = infos.entity_record_no_lock(entity);
                 if (info.destroyed)
                     continue;
@@ -1842,11 +1842,11 @@ namespace neogfx
                 }
                 patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
             };
-#ifndef NDEBUG
+#ifdef NEOGFX_DEBUG
             if (meshDrawable.entity != game::null_entity &&
                 dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug::layoutItem)
-                std::cerr << "Adding debug::layoutItem entity drawable..." << std::endl;
-#endif
+                service<debug::logger>() << "Adding debug::layoutItem entity drawable..." << endl;
+#endif // NEOGFX_DEBUG
             if (!faces.empty())
                 add_item(meshRenderCache.meshVertexArrayIndices, mesh, material, faces);
             auto const patchCount = meshRenderer.patches.size();
@@ -1962,12 +1962,12 @@ namespace neogfx
                 if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
                     vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
 
-#ifndef NDEBUG
+#ifdef NEOGFX_DEBUG
                 if (item->meshDrawable->entity != game::null_entity &&
                     dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
-                    std::cerr << "Drawing debug::layoutItem entity (texture)..." << std::endl;
+                    service<debug::logger>() << "Drawing debug::layoutItem entity (texture)..." << endl;
 
-#endif
+#endif // NEOGFX_DEBUG
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
             else
@@ -1977,12 +1977,12 @@ namespace neogfx
                 if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
                     vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
 
-#ifndef NDEBUG
+#ifdef NEOGFX_DEBUG
                 if (item->meshDrawable->entity != game::null_entity &&
                     dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
-                    std::cerr << "Drawing debug::layoutItem entity (non-texture)..." << std::endl;
+                    service<debug::logger>() << "Drawing debug::layoutItem entity (non-texture)..." << endl;
 
-#endif
+#endif // NEOGFX_DEBUG
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
 

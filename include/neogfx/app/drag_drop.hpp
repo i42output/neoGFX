@@ -74,6 +74,27 @@ namespace neogfx
         neolib::vector<string> iFilePaths;
     };
 
+    class drag_drop_item : public drag_drop_object<i_drag_drop_item>
+    {
+    public:
+        drag_drop_item(i_item_presentation_model const& aPresentationModel, item_presentation_model_index const& aItem) :
+            iPresentationModel{ aPresentationModel }, iItem{ aItem }
+        {
+        }
+    public:
+        i_item_presentation_model const& presentation_model() const override
+        {
+            return iPresentationModel;
+        }
+        item_presentation_model_index const& item() const override
+        {
+            return iItem;
+        }
+    private:
+        i_item_presentation_model const& iPresentationModel;
+        item_presentation_model_index iItem;
+    };
+
     class drag_drop_entity : public drag_drop_object<i_drag_drop_entity>
     {
     public:
@@ -228,7 +249,7 @@ namespace neogfx
                     if ((*iTrackStart - eventPos).to_vec2().magnitude() >= drag_drop_trigger_distance())
                     {
                         if (!drag_drop_active())
-                            start_drag_drop(*(iObject = drag_drop_object(*iTrackStart)));
+                            start_drag_drop(*drag_drop_object(*iTrackStart));
                     }
                     else
                     {

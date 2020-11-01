@@ -18,15 +18,26 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/app/ostream_logger.hpp>
 
 #ifdef NEOGFX_DEBUG
 namespace neogfx
 {
     namespace debug
     {
+        void* item;
         i_layout_item* layoutItem;
+        i_widget* renderItem;
         bool renderGeometryText;
     }
 }
+
+template<> neogfx::debug::logger& services::start_service<neogfx::debug::logger>()
+{
+    static neolib::logger::ostream_logger<9999> sLogger{ std::cerr };
+    sLogger.create_logging_thread();
+    return sLogger;
+}
+
 #endif // NEOGFX_DEBUG
 

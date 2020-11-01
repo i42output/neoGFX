@@ -88,7 +88,7 @@ namespace neogfx
             SDL_GetWMInfo(&info);
             XBell(info.info.x11.display, 100);
     #else 
-            std::cerr << '\a' << std::flush;
+            std::cout << '\a' << std::flush;
     #endif 
         }
 

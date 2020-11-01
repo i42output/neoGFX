@@ -623,7 +623,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                std::cerr << typeid(*this).name() << "::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << std::endl;
+                service<debug::logger>() << typeid(*this).name() << "::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
             MinimumSize = newMinimumSize;
             if (aUpdateLayout)
@@ -638,7 +638,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                std::cerr << typeid(*this).name() << "::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << std::endl;
+                service<debug::logger>() << typeid(*this).name() << "::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
             MaximumSize = newMaximumSize;
             if (aUpdateLayout)
@@ -747,7 +747,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::remove(" << std::distance(items().begin(), aItem) << ")" << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::remove(" << std::distance(items().begin(), aItem) << ")" << endl;
 #endif // NEOGFX_DEBUG
         {
             item_list toRemove;

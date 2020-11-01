@@ -1086,6 +1086,47 @@ namespace neogfx
         return iEditor->text_edit();
     }
 
+    void item_view::enable_drag_drop(bool aEnable)
+    {
+        if (drag_drop_enabled() != aEnable)
+        {
+            base_type::enable_drag_drop(aEnable);
+            if (drag_drop_enabled())
+            {
+                iDragDropSink = DraggingObject([&](i_drag_drop_object const&)
+                {
+#ifdef NEOGFX_DEBUG
+                    if (debug::item == this)
+                        service<debug::logger>() << typeid(*this).name() << ": dragging object." << endl;
+#endif
+                    presentation_model().dragging_item().trigger(iDragDropItem->item());
+                });
+                iDragDropSink += DraggingCancelled([&](i_drag_drop_object const&)
+                {
+#ifdef NEOGFX_DEBUG
+                    if (debug::item == this)
+                        service<debug::logger>() << typeid(*this).name() << ": dragging cancelled." << endl;
+#endif
+                    presentation_model().dragging_item_cancelled().trigger(iDragDropItem->item());
+                    iDragDropItem = std::nullopt;
+                });
+                iDragDropSink += ObjectDropped([&](i_drag_drop_object const&)
+                {
+#ifdef NEOGFX_DEBUG
+                    if (debug::item == this)
+                        service<debug::logger>() << typeid(*this).name() << ": object dropped." << endl;
+#endif
+                    presentation_model().item_dropped().trigger(iDragDropItem->item());
+                    iDragDropItem = std::nullopt;
+                });
+            }
+            else
+            {
+                iDragDropSink.clear();
+            }
+        }
+    }
+
     bool item_view::is_drag_drop_object(point const& aPosition) const
     {
         auto i = item_at(aPosition);
@@ -1094,7 +1135,12 @@ namespace neogfx
 
     i_drag_drop_object const* item_view::drag_drop_object(point const& aPosition)
     {
-        // todo
+        auto i = item_at(aPosition);
+        if (i && (presentation_model().cell_flags(*i) & item_cell_flags::Draggable) == item_cell_flags::Draggable)
+        {
+            iDragDropItem.emplace(presentation_model(), *i);
+            return &*iDragDropItem;
+        }
         return nullptr;
     }
 

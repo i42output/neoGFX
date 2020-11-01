@@ -298,7 +298,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                std::cerr << "decorated<>::part(...) --> ";
+                service<debug::logger>() << "decorated<>::part(...) --> ";
 #endif // NEOGFX_DEBUG
             auto result = widget_type::part(aPosition);
             if (result.part == widget_part::Client || result.part == widget_part::NonClient)
@@ -344,7 +344,7 @@ namespace neogfx
             }
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                std::cerr << result.part << std::endl;
+                service<debug::logger>() << result.part << endl;
 #endif // NEOGFX_DEBUG
             return result;
         }
@@ -558,7 +558,7 @@ namespace neogfx
                 {                
 #ifdef NEOGFX_DEBUG
                     if (debug::layoutItem == this)
-                        std::cerr << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
+                        service<debug::logger>() << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << endl;
 #endif // NEOGFX_DEBUG
                     resizingContext.set_fixed_size(newSize, false);
                     fix_weightings();

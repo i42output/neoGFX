@@ -137,7 +137,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << endl;
 #endif // NEOGFX_DEBUG
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
@@ -171,7 +171,7 @@ namespace neogfx
         }
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -181,7 +181,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << endl;
 #endif // NEOGFX_DEBUG
         size result;
         if (has_maximum_size())
@@ -241,7 +241,7 @@ namespace neogfx
         }
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -251,7 +251,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            std::cerr << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+            service<debug::logger>() << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
         set_position(aPosition);
         set_extents(aSize);
@@ -275,7 +275,7 @@ namespace neogfx
                 continue;
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == &item.subject())
-                std::cerr << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                service<debug::logger>() << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
             auto& disposition = item.proxy_for_layout().cached_disposition();
             disposition = layout_item_disposition::Unknown;
@@ -312,7 +312,7 @@ namespace neogfx
                     continue;
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == &item.subject())
-                    std::cerr << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                    service<debug::logger>() << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
                 auto const minSize = AxisPolicy::cx(item.minimum_size(availableSize));
                 auto const maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
@@ -367,7 +367,7 @@ namespace neogfx
             }
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == &item.subject())
-                std::cerr << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                service<debug::logger>() << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
             auto const itemMinSize = item.minimum_size(availableSize);
             auto const itemMaxSize = item.maximum_size(availableSize);
