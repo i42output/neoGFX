@@ -1325,9 +1325,9 @@ namespace neogfx
                 {
                     BOOL minimized = HIWORD(wparam);
                     if (!minimized && (LOWORD(wparam) != WA_INACTIVE))
-                        self.push_event(window_event{ window_event_type::FocusGained });
+                        self.handle_event(window_event{ window_event_type::FocusGained });
                     else
-                        self.push_event(window_event{ window_event_type::FocusLost });
+                        self.handle_event(window_event{ window_event_type::FocusLost });
                 }
                 break;
             case WM_MOUSEACTIVATE:

@@ -176,11 +176,10 @@ namespace neogfx
             layoutChanged = iRestoreButton.show(!isRestored && (root().style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid) || layoutChanged;
             layoutChanged = iCloseButton.show((root().style() & window_style::Close) != window_style::Invalid) || layoutChanged;
             if (layoutChanged)
-            {
                 update_layout();
-                update(true);
-            }
+            update(true);
         };
+
         iSink += service<i_app>().execution_started([this, update_widgets]()
         {
             update_widgets();
