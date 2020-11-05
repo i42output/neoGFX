@@ -23,12 +23,13 @@
 #include <boost/format.hpp>
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
-#include <neogfx/app/i_palette.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 #include <neogfx/gui/widget/i_item_model.hpp>
+#include <neogfx/app/i_palette.hpp>
 
 namespace neogfx
 {
@@ -170,6 +171,8 @@ namespace neogfx
         declare_event(items_filtering)
         declare_event(items_filtered)
         declare_event(dragging_item, item_presentation_model_index const&)
+        declare_event(dragging_item_render_info, item_presentation_model_index const&, bool&, size&)
+        declare_event(dragging_item_render, item_presentation_model_index const&, i_graphics_context&, point const&)
         declare_event(dragging_item_cancelled, item_presentation_model_index const&)
         declare_event(item_dropped, item_presentation_model_index const&)
     public:

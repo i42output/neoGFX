@@ -90,6 +90,25 @@ namespace neogfx
         {
             return iItem;
         }
+    public:
+        bool can_render() const override
+        {
+            bool canRender = false;
+            size renderExtents;
+            presentation_model().dragging_item_render_info().trigger(item(), canRender, renderExtents);
+            return canRender;
+        }
+        size render_extents() const override
+        {
+            bool canRender = false;
+            size renderExtents;
+            presentation_model().dragging_item_render_info().trigger(item(), canRender, renderExtents);
+            return renderExtents;
+        }
+        void render(i_graphics_context& aGc, point const& aPosition = {}) const override
+        {
+            presentation_model().dragging_item_render().trigger(item(), aGc, aPosition);
+        }
     private:
         i_item_presentation_model const& iPresentationModel;
         item_presentation_model_index iItem;
@@ -206,6 +225,11 @@ namespace neogfx
             {
                 handle_drag_drop_event(aWidget, aEvent);
             });
+            iSink += aWidget.root().paint_overlay([&](i_graphics_context& aGc)
+            {
+                if (drag_drop_active() && object_being_dragged().can_render() && iTrackCurrent)
+                    object_being_dragged().render(aGc, aWidget.to_window_coordinates(*iTrackCurrent));
+            });
         }
         void stop_monitoring_drag_drop_events() override
         {
@@ -241,27 +265,30 @@ namespace neogfx
                 {
                     aWidget.set_capture();
                     iTrackStart = eventPos;
+                    iTrackCurrent = eventPos;
                 }
                 break;
             case mouse_event_type::Moved:
                 if (iTrackStart)
                 {
-                    if ((*iTrackStart - eventPos).to_vec2().magnitude() >= drag_drop_trigger_distance())
+                    iTrackCurrent = eventPos;
+                    bool needUpdate = false;
+                    if ((*iTrackStart - *iTrackCurrent).to_vec2().magnitude() >= drag_drop_trigger_distance())
                     {
                         if (!drag_drop_active())
                             start_drag_drop(*drag_drop_object(*iTrackStart));
+                        needUpdate = object_being_dragged().can_render();
                     }
                     else
                     {
                         if (drag_drop_active())
+                        {
+                            needUpdate = object_being_dragged().can_render();
                             cancel_drag_drop();
+                        }
                     }
-                    if (drag_drop_active() && !service<i_drag_drop>().is_target_for(object_being_dragged()))
-                        cancel_drag_drop();
-                    if (drag_drop_active() && object_being_dragged().can_render())
-                    {
-                        // todo
-                    }
+                    if (needUpdate)
+                        aWidget.root().as_widget().update();
                 }
                 break;
             case mouse_event_type::ButtonReleased:
@@ -270,8 +297,11 @@ namespace neogfx
                     if (aEvent.is_left_button())
                     {
                         iTrackStart = std::nullopt;
+                        iTrackCurrent = std::nullopt;
                         if (drag_drop_active())
                         {
+                            if (object_being_dragged().can_render())
+                                aWidget.root().as_widget().update();
                             if (service<i_drag_drop>().is_target_at(object_being_dragged(), aWidget.to_window_coordinates(eventPos)))
                             {
                                 auto& target = service<i_drag_drop>().target_at(object_being_dragged(), aWidget.to_window_coordinates(eventPos));
@@ -292,6 +322,7 @@ namespace neogfx
         i_widget* iMonitor;
         sink iSink;
         std::optional<point> iTrackStart;
+        std::optional<point> iTrackCurrent;
         scalar iTriggerDistance = 8.0;
     };
 

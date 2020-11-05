@@ -66,11 +66,6 @@ namespace neogfx::DesignStudio
         else
             center(false);
 
-        iToolbox.docked_widget<ng::tree_view>().enable_drag_drop();
-        iWorkflow.docked_widget<ng::list_view>().enable_drag_drop();
-
-        debug::item = &iWorkflow.docked_widget<ng::list_view>();
-
         // todo: tidier way of doing this...
         dock_layout(ng::layout_position::Center).set_weight(ng::size{ 1.0 } - iLeftDock.parent_layout().weight() - iRightDock.parent_layout().weight());
         iLeftDock.hide();
@@ -119,6 +114,9 @@ namespace neogfx::DesignStudio
         iWorkflow.dock(iLeftDock);
         iObjects.dock(iRightDock);
         iProperties.dock(iRightDock);
+
+        iToolbox.docked_widget<ng::tree_view>().enable_drag_drop();
+        iWorkflow.docked_widget<ng::list_view>().enable_drag_drop();
 
         ng::i_layout& mainLayout = client_layout();
         mainLayout.set_padding(ng::padding{});

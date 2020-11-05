@@ -37,13 +37,38 @@ namespace neogfx::DesignStudio
             cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
             stickyNoteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
         {
+            DraggingItemRenderInfo([&](ng::item_presentation_model_index const& aIndex, bool& aCanRender, size& aRenderExtents)
+            {
+                switch (item_model().item(to_item_model_index(aIndex)))
+                {
+                case ds::workflow_tool::StickyNote:
+                    aCanRender = true;
+                    aRenderExtents = size{ 256.0_dip, 256.0_dip };
+                    break;
+                default:
+                    aCanRender = false;
+                    break;
+                }
+            });
+            DraggingItemRender([&](ng::item_presentation_model_index const& aIndex, i_graphics_context& aGc, point const& aPosition)
+            {
+                switch (item_model().item(to_item_model_index(aIndex)))
+                {
+                case ds::workflow_tool::StickyNote:
+                    // todo
+                    aGc.draw_rect(rect{ point{}, size{256.0_dip, 256.0_dip } }.with_centerd_origin() + aPosition, ng::color::Goldenrod);
+                    break;
+                default:
+                    break;
+                }
+            });
         }
     public:
-        ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
+        ng::optional_size cell_image_size(ng::item_presentation_model_index const& aIndex) const override
         {
             return ng::size{ 32.0_dip, 32.0_dip };
         }
-        ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
+        ng::optional_texture cell_image(ng::item_presentation_model_index const& aIndex) const override
         {
             switch (item_model().item(to_item_model_index(aIndex)))
             {
@@ -55,7 +80,7 @@ namespace neogfx::DesignStudio
                 return {};
             }
         }
-        ng::item_cell_flags cell_flags(const ng::item_presentation_model_index& aIndex) const override
+        ng::item_cell_flags cell_flags(ng::item_presentation_model_index const& aIndex) const override
         {
             auto result = base_type::cell_flags(aIndex);
             switch (item_model().item(to_item_model_index(aIndex)))

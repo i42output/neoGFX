@@ -447,19 +447,22 @@ namespace neogfx
             {
                 if (!iClickedCheckBox)
                 {
-                    iMouseTracker.emplace(service<i_async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
+                    if (!drag_drop_enabled())
                     {
-                        aTimer.again();
-                        auto const pos = root().mouse_position() - origin();
-                        auto const item = item_at(pos);
-                        if (item != std::nullopt)
+                        iMouseTracker.emplace(service<i_async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
                         {
-                            if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
-                                select(*item, item_selection_operation::None);
-                            else
-                                select(*item);
-                        }
-                    }, 20);
+                            aTimer.again();
+                            auto const pos = root().mouse_position() - origin();
+                            auto const item = item_at(pos);
+                            if (item != std::nullopt)
+                            {
+                                if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                                    select(*item, item_selection_operation::None);
+                                else
+                                    select(*item);
+                            }
+                        }, 20);
+                    }
                 }
                 else
                     update(cell_rect(*iClickedCheckBox, cell_part::Background));
@@ -533,7 +536,7 @@ namespace neogfx
         base_type::mouse_moved(aPosition, aKeyModifiers);
         if (!iIgnoreNextMouseMove)
         {
-            if ((iMouseTracker || hot_tracking()) && client_rect().contains(aPosition))
+            if (!drag_drop_enabled() && (iMouseTracker || hot_tracking()) && client_rect().contains(aPosition))
             {
                 auto item = item_at(aPosition);
                 if (item != std::nullopt)
