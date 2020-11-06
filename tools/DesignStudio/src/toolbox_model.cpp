@@ -26,6 +26,7 @@ namespace neogfx::DesignStudio
 {
     toolbox_presentation_model::toolbox_presentation_model()
     {
+        
     }
 
     ng::optional_size toolbox_presentation_model::cell_image_size(const ng::item_presentation_model_index& aIndex) const

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/app/i_app.hpp>
 
 namespace neogfx
 {

@@ -20,7 +20,6 @@
 #pragma once
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
-#include <neogfx/gfx/utility.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/tools/DesignStudio/workflow.hpp>
@@ -33,64 +32,11 @@ namespace neogfx::DesignStudio
     {
         typedef ng::basic_item_presentation_model<workflow_model> base_type;
     public:
-        workflow_presentation_model() :
-            cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
-            stickyNoteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
-        {
-            DraggingItemRenderInfo([&](ng::item_presentation_model_index const& aIndex, bool& aCanRender, size& aRenderExtents)
-            {
-                switch (item_model().item(to_item_model_index(aIndex)))
-                {
-                case ds::workflow_tool::StickyNote:
-                    aCanRender = true;
-                    aRenderExtents = size{ 256.0_dip, 256.0_dip };
-                    break;
-                default:
-                    aCanRender = false;
-                    break;
-                }
-            });
-            DraggingItemRender([&](ng::item_presentation_model_index const& aIndex, i_graphics_context& aGc, point const& aPosition)
-            {
-                switch (item_model().item(to_item_model_index(aIndex)))
-                {
-                case ds::workflow_tool::StickyNote:
-                    // todo
-                    aGc.fill_rect(rect{ point{}, size{256.0_dip, 256.0_dip } }.with_centerd_origin() + aPosition, ng::color::PapayaWhip);
-                    break;
-                default:
-                    break;
-                }
-            });
-        }
+        workflow_presentation_model();
     public:
-        ng::optional_size cell_image_size(ng::item_presentation_model_index const& aIndex) const override
-        {
-            return ng::size{ 32.0_dip, 32.0_dip };
-        }
-        ng::optional_texture cell_image(ng::item_presentation_model_index const& aIndex) const override
-        {
-            switch (item_model().item(to_item_model_index(aIndex)))
-            {
-            case ds::workflow_tool::CppIde:
-                return cppIdeTexture;
-            case ds::workflow_tool::StickyNote:
-                return stickyNoteTexture;
-            default:
-                return {};
-            }
-        }
-        ng::item_cell_flags cell_flags(ng::item_presentation_model_index const& aIndex) const override
-        {
-            auto result = base_type::cell_flags(aIndex);
-            switch (item_model().item(to_item_model_index(aIndex)))
-            {
-            case ds::workflow_tool::StickyNote:
-                result |= ng::item_cell_flags::Draggable;
-                break;
-            }
-            return result;
-        }
+        ng::optional_size cell_image_size(ng::item_presentation_model_index const& aIndex) const override;
+        ng::optional_texture cell_image(ng::item_presentation_model_index const& aIndex) const override;
+        ng::item_cell_flags cell_flags(ng::item_presentation_model_index const& aIndex) const override;
     public:
         ng::texture cppIdeTexture;
         ng::texture stickyNoteTexture;
