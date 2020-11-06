@@ -56,7 +56,7 @@ namespace neogfx::DesignStudio
                 {
                 case ds::workflow_tool::StickyNote:
                     // todo
-                    aGc.draw_rect(rect{ point{}, size{256.0_dip, 256.0_dip } }.with_centerd_origin() + aPosition, ng::color::Goldenrod);
+                    aGc.fill_rect(rect{ point{}, size{256.0_dip, 256.0_dip } }.with_centerd_origin() + aPosition, ng::color::PapayaWhip);
                     break;
                 default:
                     break;

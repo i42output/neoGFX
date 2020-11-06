@@ -31,11 +31,14 @@ namespace neogfx
 {
     typedef uuid drag_drop_object_type_id;
 
+    class i_drag_drop_source;
+
     class i_drag_drop_object
     {
     public:
         virtual ~i_drag_drop_object() = default;
     public:
+        virtual i_drag_drop_source& source() const = 0;
         virtual drag_drop_object_type_id ddo_type() const = 0;
     public:
         virtual bool can_render() const = 0;
@@ -109,6 +112,10 @@ namespace neogfx
         virtual void start_drag_drop(i_drag_drop_object const& aObject) = 0;
         virtual void cancel_drag_drop() = 0;
         virtual void end_drag_drop() = 0;
+    public:
+        virtual point const& drag_drop_tracking_position() const = 0;
+        virtual std::shared_ptr<i_widget> drag_drop_widget() const = 0;
+        virtual void set_drag_drop_widget(std::shared_ptr<i_widget> aWidget) = 0;
     public:
         virtual i_widget& drag_drop_event_monitor() const = 0;
         virtual void monitor_drag_drop_events(i_widget& aWidget) = 0;

@@ -1141,7 +1141,7 @@ namespace neogfx
         auto i = item_at(aPosition);
         if (i && (presentation_model().cell_flags(*i) & item_cell_flags::Draggable) == item_cell_flags::Draggable)
         {
-            iDragDropItem.emplace(presentation_model(), *i);
+            iDragDropItem.emplace(*this, presentation_model(), *i);
             return &*iDragDropItem;
         }
         return nullptr;

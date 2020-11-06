@@ -32,11 +32,16 @@ namespace neogfx
     public:
         typedef DragDropObjectInterface object_interface;
     public:
-        drag_drop_object(drag_drop_object_type_id aType = object_interface::otid()) :
+        drag_drop_object(i_drag_drop_source& aSource, drag_drop_object_type_id aType = object_interface::otid()) :
+            iSource{ aSource }, 
             iType{ aType }
         {
         }
     public:
+        i_drag_drop_source& source() const override
+        {
+            return iSource;
+        }
         drag_drop_object_type_id ddo_type() const override
         {
             return iType;
@@ -54,14 +59,17 @@ namespace neogfx
         {
         }
     private:
+        i_drag_drop_source& iSource;
         drag_drop_object_type_id iType;
     };
 
     class drag_drop_file_list : public drag_drop_object<i_drag_drop_file_list>
     {
+        typedef drag_drop_object<i_drag_drop_file_list> base_type;
     public:
         template <typename... Files>
-        drag_drop_file_list(Files&&... aFiles) :
+        drag_drop_file_list(i_drag_drop_source& aSource, Files&&... aFiles) :
+            base_type{ aSource },
             iFilePaths{ std::forward<Files>(aFiles)... }
         {
         }
@@ -76,9 +84,12 @@ namespace neogfx
 
     class drag_drop_item : public drag_drop_object<i_drag_drop_item>
     {
+        typedef drag_drop_object<i_drag_drop_item> base_type;
     public:
-        drag_drop_item(i_item_presentation_model const& aPresentationModel, item_presentation_model_index const& aItem) :
-            iPresentationModel{ aPresentationModel }, iItem{ aItem }
+        drag_drop_item(i_drag_drop_source& aSource, i_item_presentation_model const& aPresentationModel, item_presentation_model_index const& aItem) :
+            base_type{ aSource },
+            iPresentationModel{ aPresentationModel }, 
+            iItem{ aItem }
         {
         }
     public:
@@ -116,9 +127,12 @@ namespace neogfx
 
     class drag_drop_entity : public drag_drop_object<i_drag_drop_entity>
     {
+        typedef drag_drop_object<i_drag_drop_entity> base_type;
     public:
-        drag_drop_entity(game::i_ecs const& aEcs, game::entity_id aEntity) :
-            iEcs{ aEcs }, iEntity{ aEntity }
+        drag_drop_entity(i_drag_drop_source& aSource, game::i_ecs const& aEcs, game::entity_id aEntity) :
+            base_type{ aSource },
+            iEcs{ aEcs }, 
+            iEntity{ aEntity }
         {
         }
     public:
@@ -202,6 +216,8 @@ namespace neogfx
             auto object = iObject;
             iObject = nullptr;
             DraggingCancelled.trigger(*object);
+            iWidget = nullptr;
+            iWidgetOffset = std::nullopt;
         }
         void end_drag_drop() override
         {
@@ -210,6 +226,27 @@ namespace neogfx
             auto object = iObject;
             iObject = nullptr;
             ObjectDropped.trigger(*object);
+            iWidget = nullptr;
+            iWidgetOffset = std::nullopt;
+        }
+    public:
+        point const& drag_drop_tracking_position() const override
+        {
+            if (drag_drop_active())
+                return *iTrackCurrent;
+            throw drag_drop_not_active();
+        }
+        std::shared_ptr<i_widget> drag_drop_widget() const override
+        {
+            return iWidget;
+        }
+        void set_drag_drop_widget(std::shared_ptr<i_widget> aWidget) override
+        {
+            iWidget = aWidget;
+            if (iWidget)
+                iWidgetOffset = iWidget->position() - drag_drop_tracking_position();
+            else
+                iWidgetOffset = std::nullopt;
         }
     public:
         i_widget& drag_drop_event_monitor() const override
@@ -278,6 +315,8 @@ namespace neogfx
                         if (!drag_drop_active())
                             start_drag_drop(*drag_drop_object(*iTrackStart));
                         needUpdate = object_being_dragged().can_render();
+                        if (iWidget)
+                            iWidget->move(*iTrackCurrent + *iWidgetOffset);
                     }
                     else
                     {
@@ -324,6 +363,8 @@ namespace neogfx
         std::optional<point> iTrackStart;
         std::optional<point> iTrackCurrent;
         scalar iTriggerDistance = 8.0;
+        std::shared_ptr<i_widget> iWidget;
+        std::optional<point> iWidgetOffset;
     };
 
     template <typename Base>

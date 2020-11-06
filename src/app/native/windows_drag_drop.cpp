@@ -94,8 +94,8 @@ namespace neogfx
                     }
                     if (!files.empty())
                     {
-                        iActiveInternalDragDropObject = std::make_unique<drag_drop_file_list>(files);
                         iActiveInternalDragDropSource = std::make_unique<drag_drop_source<internal_drag_drop_source>>();
+                        iActiveInternalDragDropObject = std::make_unique<drag_drop_file_list>(*iActiveInternalDragDropSource, files);
                         iActiveInternalDragDropSource->start_drag_drop(*iActiveInternalDragDropObject);
                         auto target = find_target(*iActiveInternalDragDropObject, basic_point<LONG>{pt.x, pt.y});
                         if (target != nullptr)
