@@ -90,6 +90,12 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
+    basic_gradient<Sharing>::basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops) :
+        iObject{ service<i_gradient_manager>().create_gradient(aOther, aColorStops) }
+    {
+    }
+
+    template <gradient_sharing Sharing>
     basic_gradient<Sharing>::basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops) :
         iObject{ service<i_gradient_manager>().create_gradient(aOther, aColorStops, aAlphaStops) }
     {

@@ -68,7 +68,7 @@ namespace neogfx
     {
     public:
         virtual i_item_presentation_model const& presentation_model() const = 0;
-        virtual item_presentation_model_index const& item() const = 0;
+        virtual item_presentation_model_index const& index() const = 0;
     public:
         static const drag_drop_object_type_id otid()
         {

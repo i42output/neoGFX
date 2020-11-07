@@ -41,6 +41,8 @@ namespace neogfx
     class i_widget : public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
     {
     public:
+        declare_event(child_added, i_widget&)
+        declare_event(child_removed, i_widget&)
         declare_event(visibility_changed)
         declare_event(position_changed)
         declare_event(size_changed)
@@ -86,8 +88,8 @@ namespace neogfx
         virtual void parent_changed() = 0;
         virtual bool adding_child() const = 0;
         virtual i_widget& add(i_widget& aChild) = 0;
-        virtual i_widget& add(std::shared_ptr<i_widget> aChild) = 0;
-        virtual std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) = 0;
+        virtual i_widget& add(std::shared_ptr<i_widget> aChild) = 0; // todo: migrate from shared_ptr to i_ref_ptr
+        virtual std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) = 0; // todo: migrate from shared_ptr to i_ref_ptr
         virtual void remove_all() = 0;
         virtual bool has_children() const = 0;
         virtual const widget_list& children() const = 0;
@@ -106,7 +108,7 @@ namespace neogfx
     public:
         virtual bool has_layout() const = 0;
         virtual void set_layout(i_layout& aLayout, bool aMoveExistingItems = true) = 0;
-        virtual void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) = 0;
+        virtual void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) = 0; // todo: migrate from shared_ptr to i_ref_ptr
         virtual const i_layout& layout() const = 0;
         virtual i_layout& layout() = 0;
         virtual bool can_defer_layout() const = 0;

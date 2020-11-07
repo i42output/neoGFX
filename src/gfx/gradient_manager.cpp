@@ -109,6 +109,21 @@ namespace neogfx
         {
             fix();
         }
+        gradient_object(gradient_id aId, const i_gradient& aOther, const abstract_color_stop_list& aColorStops) :
+            iId{ aId },
+            iColorStops{ aColorStops },
+            iDirection{ aOther.direction() },
+            iOrientation{ aOther.orientation() },
+            iShape{ aOther.shape() },
+            iSize{ aOther.size() },
+            iExponents{ aOther.exponents() },
+            iCenter{ aOther.center() },
+            iTile{ aOther.tile() },
+            iSmoothness{ aOther.smoothness() },
+            iBoundingBox{ aOther.bounding_box() }
+        {
+            fix();
+        }
         gradient_object(gradient_id aId, const i_gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops) :
             iId{ aId },
             iColorStops{ aColorStops },
@@ -693,6 +708,11 @@ namespace neogfx
     void gradient_manager::do_create_gradient(i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColorStops, aAlphaStops, aDirection));
+    }
+
+    void gradient_manager::do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, neolib::i_ref_ptr<i_gradient>& aResult)
+    {
+        aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aOther, aColorStops));
     }
 
     void gradient_manager::do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult)

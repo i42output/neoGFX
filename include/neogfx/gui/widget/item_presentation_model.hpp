@@ -60,11 +60,11 @@ namespace neogfx
         define_declared_event(ItemsSorted, items_sorted)
         define_declared_event(ItemsFiltering, items_filtering)
         define_declared_event(ItemsFiltered, items_filtered)
-        define_declared_event(DraggingItem, dragging_item, item_presentation_model_index const&)
-        define_declared_event(DraggingItemRenderInfo, dragging_item_render_info, item_presentation_model_index const&, bool&, size&)
-        define_declared_event(DraggingItemRender, dragging_item_render, item_presentation_model_index const&, i_graphics_context&, point const&)
-        define_declared_event(DraggingItemCancelled, dragging_item_cancelled, item_presentation_model_index const&)
-        define_declared_event(ItemDropped, item_dropped, item_presentation_model_index const&)
+        define_declared_event(DraggingItem, dragging_item, i_drag_drop_item const&)
+        define_declared_event(DraggingItemRenderInfo, dragging_item_render_info, i_drag_drop_item const&, bool&, size&)
+        define_declared_event(DraggingItemRender, dragging_item_render, i_drag_drop_item const&, i_graphics_context&, point const&)
+        define_declared_event(DraggingItemCancelled, dragging_item_cancelled, i_drag_drop_item const&)
+        define_declared_event(ItemDropped, item_dropped, i_drag_drop_item const&)
     public:
         using typename base_type::sort_direction;
         using typename base_type::optional_sort_direction;

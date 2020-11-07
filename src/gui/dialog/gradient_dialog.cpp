@@ -28,14 +28,38 @@ namespace neogfx
 {
     namespace
     {
-        inline gradient convert_gimp_gradient(const gradient& aGradient, std::string const& aPath)
+        inline gradient convert_gpf_gradient(const gradient& aGradient, std::string const& aPath)
+        {
+            std::ifstream gpfGradient{ aPath };
+            std::string line;
+            gradient::color_stop_list colorStops;
+            while (std::getline(gpfGradient, line))
+            {
+                if (line[0] == '#')
+                    continue;
+                neolib::vecarray<std::string, 4> bits;
+                neolib::tokens(line, " "s, bits);
+                if (bits.size() != 4)
+                    continue;
+                colorStops.emplace_back(
+                    boost::lexical_cast<double>(bits[0]), 
+                    vec3{ 
+                        boost::lexical_cast<double>(bits[1]),
+                        boost::lexical_cast<double>(bits[2]),
+                        boost::lexical_cast<double>(bits[3]) });
+            }
+            return gradient{ aGradient, colorStops };
+        }
+
+        inline gradient convert_ggr_gradient(const gradient& aGradient, std::string const& aPath)
         {
             // todo: midpoint support
-            std::ifstream gimpGradient{ aPath };
+            // todo: some gradients don't work, e.g. Full_saturation_spectrum_CW
+            std::ifstream ggrGradient{ aPath };
             std::string line;
-            std::getline(gimpGradient, line);
-            std::getline(gimpGradient, line);
-            std::getline(gimpGradient, line);
+            std::getline(ggrGradient, line);
+            std::getline(ggrGradient, line);
+            std::getline(ggrGradient, line);
             struct segment
             {
                 double start;
@@ -47,7 +71,7 @@ namespace neogfx
             std::optional<segment> s;
             gradient::color_stop_list colorStops;
             gradient::alpha_stop_list alphaStops;
-            while (std::getline(gimpGradient, line))
+            while (std::getline(ggrGradient, line))
             {
                 neolib::vecarray<std::string, 13> bits;
                 neolib::tokens(line, " "s, bits);
@@ -425,13 +449,17 @@ namespace neogfx
 
         iImport.Clicked([this]()
         {
-            auto const imports = open_file_dialog(*this, file_dialog_spec{ "Import Gradients", {}, { "*.ggr" }, "Gradient Files (*.ggr)" }, true);
+            auto const imports = open_file_dialog(*this, file_dialog_spec{ "Import Gradients", {}, { "*.gpf", "*.ggr" }, "Gradient Files" }, true);
             if (imports)
             {
                 // todo: populate swatch library
                 try
                 {
-                    set_gradient(convert_gimp_gradient(gradient(), (*imports)[0]));
+                    auto const& path = (*imports)[0];
+                    if (path.rfind(".gpf") == path.size() - 4)
+                        set_gradient(convert_gpf_gradient(gradient(), path));
+                    else if (path.rfind(".ggr") == path.size() - 4)
+                        set_gradient(convert_ggr_gradient(gradient(), path));
                 }
                 catch (...)
                 {

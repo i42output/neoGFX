@@ -247,6 +247,7 @@ namespace neogfx
         aChild->set_singular(false);
         if (has_root())
             root().widget_added(*aChild);
+        ChildAdded.trigger(*aChild);
         return *aChild;
     }
 
@@ -263,6 +264,7 @@ namespace neogfx
             layout().remove(aChild);
         if (has_root())
             root().widget_removed(aChild);
+        ChildRemoved.trigger(*keep);
         return keep;
     }
 

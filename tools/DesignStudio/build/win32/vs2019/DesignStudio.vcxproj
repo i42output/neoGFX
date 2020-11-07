@@ -267,6 +267,7 @@
     <ClInclude Include="..\..\..\src\object_model.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
     <ClInclude Include="..\..\..\src\toolbox_model.hpp" />
+    <ClInclude Include="..\..\..\src\widget_caddy.hpp" />
     <ClInclude Include="..\..\..\src\workflow_model.hpp" />
     <ClInclude Include="x64\Debug\GeneratedFiles\DesignStudio.ui.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

@@ -20,6 +20,7 @@
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/utility.hpp>
+#include <neogfx/app/i_drag_drop.hpp>
 #include "workflow_model.hpp"
 
 namespace neogfx::DesignStudio
@@ -28,9 +29,9 @@ namespace neogfx::DesignStudio
         cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
         stickyNoteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
     {
-        DraggingItemRenderInfo([&](ng::item_presentation_model_index const& aIndex, bool& aCanRender, size& aRenderExtents)
+        DraggingItemRenderInfo([&](ng::i_drag_drop_item const& aItem, bool& aCanRender, size& aRenderExtents)
         {
-            switch (item_model().item(to_item_model_index(aIndex)))
+            switch (item_model().item(to_item_model_index(aItem.index())))
             {
             case ds::workflow_tool::StickyNote:
                 aCanRender = true;
@@ -41,9 +42,9 @@ namespace neogfx::DesignStudio
                 break;
             }
         });
-        DraggingItemRender([&](ng::item_presentation_model_index const& aIndex, i_graphics_context& aGc, point const& aPosition)
+        DraggingItemRender([&](ng::i_drag_drop_item const& aItem, i_graphics_context& aGc, point const& aPosition)
         {
-            switch (item_model().item(to_item_model_index(aIndex)))
+            switch (item_model().item(to_item_model_index(aItem.index())))
             {
             case ds::workflow_tool::StickyNote:
                 // todo

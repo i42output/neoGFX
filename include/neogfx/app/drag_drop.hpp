@@ -97,7 +97,7 @@ namespace neogfx
         {
             return iPresentationModel;
         }
-        item_presentation_model_index const& item() const override
+        item_presentation_model_index const& index() const override
         {
             return iItem;
         }
@@ -106,19 +106,19 @@ namespace neogfx
         {
             bool canRender = false;
             size renderExtents;
-            presentation_model().dragging_item_render_info().trigger(item(), canRender, renderExtents);
+            presentation_model().dragging_item_render_info().trigger(*this, canRender, renderExtents);
             return canRender;
         }
         size render_extents() const override
         {
             bool canRender = false;
             size renderExtents;
-            presentation_model().dragging_item_render_info().trigger(item(), canRender, renderExtents);
+            presentation_model().dragging_item_render_info().trigger(*this, canRender, renderExtents);
             return renderExtents;
         }
         void render(i_graphics_context& aGc, point const& aPosition = {}) const override
         {
-            presentation_model().dragging_item_render().trigger(item(), aGc, aPosition);
+            presentation_model().dragging_item_render().trigger(*this, aGc, aPosition);
         }
     private:
         i_item_presentation_model const& iPresentationModel;

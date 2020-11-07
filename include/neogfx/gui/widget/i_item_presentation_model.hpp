@@ -33,6 +33,8 @@
 
 namespace neogfx
 {
+    class i_drag_drop_item;
+
     enum class item_cell_flags : uint32_t
     {
         Invalid                 = 0x00000000,
@@ -170,11 +172,11 @@ namespace neogfx
         declare_event(items_sorted)
         declare_event(items_filtering)
         declare_event(items_filtered)
-        declare_event(dragging_item, item_presentation_model_index const&)
-        declare_event(dragging_item_render_info, item_presentation_model_index const&, bool&, size&)
-        declare_event(dragging_item_render, item_presentation_model_index const&, i_graphics_context&, point const&)
-        declare_event(dragging_item_cancelled, item_presentation_model_index const&)
-        declare_event(item_dropped, item_presentation_model_index const&)
+        declare_event(dragging_item, i_drag_drop_item const&)
+        declare_event(dragging_item_render_info, i_drag_drop_item const&, bool&, size&)
+        declare_event(dragging_item_render, i_drag_drop_item const&, i_graphics_context&, point const&)
+        declare_event(dragging_item_cancelled, i_drag_drop_item const&)
+        declare_event(item_dropped, i_drag_drop_item const&)
     public:
         struct cell_meta_type
         {

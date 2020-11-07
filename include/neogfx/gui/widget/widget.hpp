@@ -34,6 +34,8 @@ namespace neogfx
     {
         typedef layout_item<object<i_widget>> base_type;
     public:
+        define_declared_event(ChildAdded, child_added, i_widget&)
+        define_declared_event(ChildRemoved, child_removed, i_widget&)
         define_declared_event(VisibilityChanged, visibility_changed)
         define_declared_event(PositionChanged, position_changed)
         define_declared_event(SizeChanged, size_changed)

@@ -1102,7 +1102,7 @@ namespace neogfx
                     if (debug::item == this)
                         service<debug::logger>() << typeid(*this).name() << ": dragging object." << endl;
 #endif
-                    presentation_model().dragging_item().trigger(iDragDropItem->item());
+                    presentation_model().dragging_item().trigger(*iDragDropItem);
                 });
                 iDragDropSink += DraggingCancelled([&](i_drag_drop_object const&)
                 {
@@ -1110,7 +1110,7 @@ namespace neogfx
                     if (debug::item == this)
                         service<debug::logger>() << typeid(*this).name() << ": dragging cancelled." << endl;
 #endif
-                    presentation_model().dragging_item_cancelled().trigger(iDragDropItem->item());
+                    presentation_model().dragging_item_cancelled().trigger(*iDragDropItem);
                     iDragDropItem = std::nullopt;
                 });
                 iDragDropSink += ObjectDropped([&](i_drag_drop_object const&)
@@ -1119,7 +1119,7 @@ namespace neogfx
                     if (debug::item == this)
                         service<debug::logger>() << typeid(*this).name() << ": object dropped." << endl;
 #endif
-                    presentation_model().item_dropped().trigger(iDragDropItem->item());
+                    presentation_model().item_dropped().trigger(*iDragDropItem);
                     iDragDropItem = std::nullopt;
                 });
             }

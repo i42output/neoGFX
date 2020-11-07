@@ -26,7 +26,10 @@ namespace neogfx::DesignStudio
 {
     toolbox_presentation_model::toolbox_presentation_model()
     {
-        
+        iSink = DraggingItem([&](i_drag_drop_item const& aItem)
+        {
+
+        });
     }
 
     ng::optional_size toolbox_presentation_model::cell_image_size(const ng::item_presentation_model_index& aIndex) const
@@ -87,6 +90,15 @@ namespace neogfx::DesignStudio
             auto const& t = std::get<tool_t>(item_model().item(to_item_model_index(aIndex)));
             return t.first->element_icon(t.second);
         }
+    }
+
+    ng::item_cell_flags toolbox_presentation_model::cell_flags(ng::item_presentation_model_index const& aIndex) const
+    {
+        auto result = base_type::cell_flags(aIndex);
+        auto const& tool = item_model().item(to_item_model_index(aIndex));
+        if (std::holds_alternative<ds::tool_t>(tool))
+            result |= ng::item_cell_flags::Draggable;
+        return result;
     }
 
     void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel)

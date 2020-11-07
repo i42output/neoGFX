@@ -22,6 +22,7 @@
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/app/i_drag_drop.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 
@@ -32,15 +33,19 @@ namespace neogfx::DesignStudio
 
     class toolbox_presentation_model : public ng::basic_item_presentation_model<toolbox_model>
     {
+        typedef ng::basic_item_presentation_model<toolbox_model> base_type;
     public:
         toolbox_presentation_model();
     public:
         ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override;
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
+        ng::item_cell_flags cell_flags(ng::item_presentation_model_index const& aIndex) const override;
     public:
         ng::texture projectTexture;
         ng::texture codeTexture;
         ng::texture userInterfaceTexture;
+    private:
+        sink iSink;
     };
 
     void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel);
