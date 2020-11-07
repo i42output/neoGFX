@@ -28,7 +28,7 @@ namespace neogfx
 {
     namespace
     {
-        inline gradient convert_gpf_gradient(const gradient& aGradient, std::string const& aPath)
+        gradient convert_gpf_gradient(const gradient& aGradient, std::string const& aPath)
         {
             std::ifstream gpfGradient{ aPath };
             std::string line;
@@ -51,7 +51,7 @@ namespace neogfx
             return gradient{ aGradient, colorStops };
         }
 
-        inline gradient convert_ggr_gradient(const gradient& aGradient, std::string const& aPath)
+        gradient convert_ggr_gradient(const gradient& aGradient, std::string const& aPath)
         {
             // todo: midpoint support
             // todo: some gradients don't work, e.g. Full_saturation_spectrum_CW
