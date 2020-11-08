@@ -174,17 +174,17 @@ namespace neogfx
         }
         void set_client(i_widget& aClient) override
         {
-            set_client(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, & aClient });
+            set_client(ref_ptr<i_widget>{ ref_ptr<i_widget>{}, &aClient });
         }
-        void set_client(std::shared_ptr<i_widget> aClient) override
+        void set_client(i_ref_ptr<i_widget> const& aClient) override
         {
             if (!iClientLayout)
             {
                 if ((decoration() & neogfx::decoration::DockAreas) == neogfx::decoration::DockAreas)
-                    iClientLayout = std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &dock_layout(layout_position::Center) };
+                    iClientLayout = ref_ptr<i_layout>{ ref_ptr<i_layout>{}, &dock_layout(layout_position::Center) };
                 else
                 {
-                    iClientLayout = std::make_shared<vertical_layout>();
+                    iClientLayout = make_ref<vertical_layout>();
                     iClientLayout->set_padding(neogfx::padding{});
                     layout_item_index clientLayoutIndex = non_client_layout().count();
                     if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
@@ -212,9 +212,9 @@ namespace neogfx
         }
         void set_title_bar(i_title_bar& aTitleBar) override
         {
-            set_title_bar(std::shared_ptr<i_title_bar>{ std::shared_ptr<i_status_bar>{}, & aTitleBar });
+            set_title_bar(ref_ptr<i_title_bar>{ ref_ptr<i_title_bar>{}, &aTitleBar });
         }
-        void set_title_bar(std::shared_ptr<i_title_bar> aTitleBar)
+        void set_title_bar(i_ref_ptr<i_title_bar> const& aTitleBar)
         {
             iTitleBar = aTitleBar;
             if (iTitleBarLayout->find(iTitleBar->as_widget()) == std::nullopt)
@@ -232,16 +232,16 @@ namespace neogfx
         }
         void set_status_bar(i_status_bar& aStatusBar) override
         {
-            set_status_bar(std::shared_ptr<i_status_bar>{ std::shared_ptr<i_status_bar>{}, & aStatusBar });
+            set_status_bar(ref_ptr<i_status_bar>{ ref_ptr<i_status_bar>{}, & aStatusBar });
         }
-        void set_status_bar(std::shared_ptr<i_status_bar> aStatusBar)
+        void set_status_bar(i_ref_ptr<i_status_bar> const& aStatusBar)
         {
             iStatusBar = aStatusBar;
             if (iStatusBarLayout->find(iStatusBar->as_widget()) == std::nullopt)
                 iStatusBarLayout->add(iStatusBar->as_widget());
         }
         template <typename... Args>
-        std::shared_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
+        ref_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
         {
             if ((decoration_style() & neogfx::decoration_style::Tool) == neogfx::decoration_style::None)
                 return create_title_bar<normal_title_bar>(std::forward<Args>(aArgs)...);
@@ -249,15 +249,15 @@ namespace neogfx
                 return create_title_bar<tool_title_bar>(std::forward<Args>(aArgs)...);
         }
         template <typename TitleBar, typename... Args>
-        std::shared_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
+        ref_ptr<i_title_bar> create_title_bar(Args&&... aArgs)
         {
-            set_title_bar(std::make_shared<TitleBar>(*this, std::forward<Args>(aArgs)...));
+            set_title_bar(to_abstract(make_ref<TitleBar>(*this, std::forward<Args>(aArgs)...)));
             return iTitleBar;
         }
         template <typename StatusBar, typename... Args>
-        std::shared_ptr<i_status_bar> create_status_bar(Args&&... aArgs)
+        ref_ptr<i_status_bar> create_status_bar(Args&&... aArgs)
         {
-            set_status_bar(std::make_shared<StatusBar>(*this, std::forward<Args>(aArgs)...));
+            set_status_bar(to_abstract(make_ref<StatusBar>(*this, std::forward<Args>(aArgs)...)));
             return iStatusBar;
         }
     public:
@@ -594,10 +594,10 @@ namespace neogfx
         std::optional<layout_manager<scrollable_widget<>>> iDockLayoutContainer;
         std::optional<border_layout> iDockLayout;
         std::optional<vertical_layout> iStatusBarLayout;
-        std::shared_ptr<i_title_bar> iTitleBar;
-        std::shared_ptr<i_status_bar> iStatusBar;
-        std::shared_ptr<i_layout> iClientLayout;
-        std::shared_ptr<i_widget> iClient;
+        ref_ptr<i_title_bar> iTitleBar;
+        ref_ptr<i_status_bar> iStatusBar;
+        ref_ptr<i_layout> iClientLayout;
+        ref_ptr<i_widget> iClient;
         std::optional<tracking> iTracking;
     };
 }

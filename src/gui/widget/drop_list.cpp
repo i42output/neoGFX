@@ -335,7 +335,7 @@ namespace neogfx
             {
                 iViewContainer.emplace(iDropList.iLayout0);
                 iViewContainer->set_padding(neogfx::padding{});
-                iViewContainer->set_layout(std::make_shared<vertical_layout>());
+                iViewContainer->set_layout(make_ref<vertical_layout>());
                 iViewContainer->layout().set_padding(neogfx::padding{});
                 iView.emplace(iViewContainer->layout(), iDropList);
             }
@@ -614,10 +614,10 @@ namespace neogfx
 
     void drop_list::set_model(i_item_model& aModel)
     {
-        set_model(std::shared_ptr<i_item_model>{std::shared_ptr<i_item_model>{}, &aModel});
+        set_model(ref_ptr<i_item_model>{ref_ptr<i_item_model>{}, &aModel});
     }
 
-    void drop_list::set_model(std::shared_ptr<i_item_model> aModel)
+    void drop_list::set_model(i_ref_ptr<i_item_model> const& aModel)
     {
         if (iModel == aModel)
             return;
@@ -653,10 +653,10 @@ namespace neogfx
 
     void drop_list::set_presentation_model(i_item_presentation_model& aPresentationModel)
     {
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>{std::shared_ptr<i_item_presentation_model>{}, &aPresentationModel});
+        set_presentation_model(ref_ptr<i_item_presentation_model>{ref_ptr<i_item_presentation_model>{}, &aPresentationModel});
     }
 
-    void drop_list::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
+    void drop_list::set_presentation_model(i_ref_ptr<i_item_presentation_model> const& aPresentationModel)
     {
         if (iPresentationModel == aPresentationModel)
             return;
@@ -712,10 +712,10 @@ namespace neogfx
 
     void drop_list::set_selection_model(i_item_selection_model& aSelectionModel)
     {
-        set_selection_model(std::shared_ptr<i_item_selection_model>{std::shared_ptr<i_item_selection_model>{}, &aSelectionModel});
+        set_selection_model(ref_ptr<i_item_selection_model>{ref_ptr<i_item_selection_model>{}, &aSelectionModel});
     }
 
-    void drop_list::set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel)
+    void drop_list::set_selection_model(i_ref_ptr<i_item_selection_model> const& aSelectionModel)
     {
         if (iSelectionModel == aSelectionModel)
             return;
@@ -969,9 +969,9 @@ namespace neogfx
 
     void drop_list::init()
     {
-        set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model{ item_selection_mode::NoSelection }));
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>(new default_drop_list_presentation_model<>{ *this }));
-        set_model(std::shared_ptr<i_item_model>(new item_model{}));
+        set_selection_model(ref_ptr<i_item_selection_model>(new item_selection_model{ item_selection_mode::NoSelection }));
+        set_presentation_model(ref_ptr<i_item_presentation_model>(new default_drop_list_presentation_model<>{ *this }));
+        set_model(ref_ptr<i_item_model>(new item_model{}));
 
         set_padding(neogfx::padding{});
         iLayout0.set_padding(neogfx::padding{});

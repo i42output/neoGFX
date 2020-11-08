@@ -58,13 +58,13 @@ namespace neogfx
     {
         if (iFlowDirection == FlowDirectionHorizontal)
         {
-            auto s = std::make_shared<horizontal_spacer>();
+            auto s = make_ref<horizontal_spacer>();
             add_at(aPosition, s);
             return *s;
         }
         else
         {
-            auto s = std::make_shared<vertical_spacer>();
+            auto s = make_ref<vertical_spacer>();
             add_at(aPosition, s);
             return *s;
         }

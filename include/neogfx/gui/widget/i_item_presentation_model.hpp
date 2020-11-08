@@ -151,7 +151,7 @@ namespace neogfx
     };
     typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
-    class i_item_presentation_model : public i_property_owner
+    class i_item_presentation_model : public i_reference_counted, public i_property_owner
     {
     public:
         declare_event(visual_appearance_changed)
@@ -178,6 +178,7 @@ namespace neogfx
         declare_event(dragging_item_cancelled, i_drag_drop_item const&)
         declare_event(item_dropped, i_drag_drop_item const&)
     public:
+        typedef i_item_presentation_model abstract_type;
         struct cell_meta_type
         {
             optional_item_cell_flags flags;

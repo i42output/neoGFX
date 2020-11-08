@@ -741,11 +741,11 @@ int main(int argc, char* argv[])
             else
                 app.change_style("Light");
         });
-        for (uint32_t row = 0; row < 3; ++row)
-            for (uint32_t col = 0; col < 3; ++col)
-                window.keypad.add_item_at_position(row, col, std::make_shared<keypad_button>(window.textEdit, row * 3 + col + 1));
-        window.keypad.add_item_at_position(3, 1, std::make_shared<keypad_button>(window.textEdit, 0));
-        window.keypad.add_span(3, 1, 1, 2);
+        for (uint32_t row = 0u; row < 3u; ++row)
+            for (uint32_t col = 0u; col < 3u; ++col)
+                window.keypad.add_item_at_position(row, col, ng::make_ref<keypad_button>(window.textEdit, row * 3u + col + 1u));
+        window.keypad.add_item_at_position(3u, 1u, ng::make_ref<keypad_button>(window.textEdit, 0u));
+        window.keypad.add_span(3u, 1u, 1u, 2u);
 
         neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
         {
@@ -1027,7 +1027,7 @@ int main(int argc, char* argv[])
         ng::image hash(":/test/resources/channel_32.png");
         for (uint32_t i = 0; i < 9; ++i)
         {
-            auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal>(i));
+            auto hashWidget = ng::make_ref<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal>(i));
             hashWidget->set_size_policy(ng::size_constraint::Expanding);
             hashWidget->set_background_color(i % 2 == 0 ? ng::color::Black : ng::color::White);
             window.gridLayoutImages.add_item_at_position(i / 3, i % 3, hashWidget);

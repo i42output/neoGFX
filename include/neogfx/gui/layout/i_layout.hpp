@@ -77,15 +77,15 @@ namespace neogfx
         virtual const i_widget& client_widget() const = 0;
         virtual i_widget& client_widget() = 0;
         virtual void set_client(i_widget& aClient) = 0;
-        virtual void set_client(std::shared_ptr<i_widget> aClient) = 0;
+        virtual void set_client(i_ref_ptr<i_widget> const& aClient) = 0;
         virtual const i_title_bar& title_bar() const = 0;
         virtual i_title_bar& title_bar() = 0;
         virtual void set_title_bar(i_title_bar& aTitleBar) = 0;
-        virtual void set_title_bar(std::shared_ptr<i_title_bar> aTitleBar) = 0;
+        virtual void set_title_bar(i_ref_ptr<i_title_bar> const& aTitleBar) = 0;
         virtual const i_status_bar& status_bar() const = 0;
         virtual i_status_bar& status_bar() = 0;
         virtual void set_status_bar(i_status_bar& aStatusBar) = 0;
-        virtual void set_status_bar(std::shared_ptr<i_status_bar> aStatusBar) = 0;
+        virtual void set_status_bar(i_ref_ptr<i_status_bar> const& aStatusBar) = 0;
     public:
         virtual bool has_layout(standard_layout aStandardLayout) const = 0;
         virtual const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const = 0;
@@ -222,8 +222,8 @@ namespace neogfx
     public:    
         virtual i_layout_item& add(i_layout_item& aItem) = 0;
         virtual i_layout_item& add_at(layout_item_index aPosition, i_layout_item& aItem) = 0;
-        virtual i_layout_item& add(std::shared_ptr<i_layout_item> aItem) = 0;
-        virtual i_layout_item& add_at(layout_item_index aPosition, std::shared_ptr<i_layout_item> aItem) = 0;
+        virtual i_layout_item& add(i_ref_ptr<i_layout_item> const& aItem) = 0;
+        virtual i_layout_item& add_at(layout_item_index aPosition, i_ref_ptr<i_layout_item> const& aItem) = 0;
         virtual i_spacer& add_spacer() = 0;
         virtual i_spacer& add_spacer_at(layout_item_index aPosition) = 0;
         virtual void remove_at(layout_item_index aIndex) = 0;
@@ -267,40 +267,40 @@ namespace neogfx
         template <typename ItemType>
         ItemType& add()
         {
-            auto item = std::make_shared<ItemType>();
+            auto item = make_ref<ItemType>();
             return static_cast<ItemType&>(add(item));
         }
         template <typename ItemType>
-        ItemType& add(ItemType&& aItem)
+        ItemType& add(i_ref_ptr<ItemType> const& aItem)
         {
-            return static_cast<ItemType&>(add(static_cast<i_layout_item&>(aItem)));
+            return static_cast<ItemType&>(add(to_abstract(static_pointer_cast<i_layout_item>(aItem))));
         }
         template <typename ItemType>
-        ItemType& add_at(layout_item_index aPosition, ItemType&& aItem)
+        ItemType& add_at(layout_item_index aPosition, i_ref_ptr<ItemType> const& aItem)
         {
-            return static_cast<ItemType&>(add_at(aPosition, static_cast<i_layout_item&>(aItem)));
+            return static_cast<ItemType&>(add_at(aPosition, to_abstract(static_pointer_cast<i_layout_item>(aItem))));
         }
         template <typename ItemType>
-        ItemType& add(std::shared_ptr<ItemType> aItem)
+        ItemType& add(ref_ptr<ItemType> const& aItem)
         {
-            return static_cast<ItemType&>(add(std::static_pointer_cast<i_layout_item>(aItem)));
+            return static_cast<ItemType&>(add(to_abstract(static_pointer_cast<i_layout_item>(aItem))));
         }
         template <typename ItemType>
-        ItemType& add_at(layout_item_index aPosition, std::shared_ptr<ItemType> aItem)
+        ItemType& add_at(layout_item_index aPosition, ref_ptr<ItemType> const& aItem)
         {
-            return static_cast<ItemType&>(add_at(aPosition, std::static_pointer_cast<i_layout_item>(aItem)));
+            return static_cast<ItemType&>(add_at(aPosition, to_abstract(static_pointer_cast<i_layout_item>(aItem))));
         }
         template <typename ItemType, typename... Args>
         ItemType& emplace(Args&&... args)
         {
-            auto newItem = std::make_shared<ItemType>(std::forward<Args>(args)...);
+            auto newItem = make_ref<ItemType>(std::forward<Args>(args)...);
             add(newItem);
             return *newItem;
         }
         template <typename ItemType, typename... Args>
         ItemType& emplace_at(layout_item_index aPosition, Args&&... args)
         {
-            auto newItem = std::make_shared<ItemType>(std::forward<Args>(args)...);
+            auto newItem = make_ref<ItemType>(std::forward<Args>(args)...);
             add(newItem);
             if (aPosition < count())
                 remove_at(aPosition);
@@ -315,11 +315,11 @@ namespace neogfx
             return static_cast<ItemType&>(add_at(aPosition, aItem));
         }
         template <typename ItemType>
-        ItemType& replace_item_at(layout_item_index aPosition, std::shared_ptr<ItemType> aItem)
+        ItemType& replace_item_at(layout_item_index aPosition, i_ref_ptr<ItemType> const& aItem)
         {
             if (aPosition < count())
                 remove_at(aPosition);
-            return static_cast<ItemType&>(add_at(aPosition, std::static_pointer_cast<i_layout_item>(aItem)));
+            return static_cast<ItemType&>(add_at(aPosition, static_pointer_cast<i_layout_item>(aItem)));
         }
         template <typename WidgetT>
         const WidgetT& get_widget_at(layout_item_index aIndex) const

@@ -28,10 +28,10 @@
 namespace neogfx
 {
     template <typename Base>
-    class layout_item : public anchorable<Base>
+    class layout_item : public anchorable<reference_counted<Base>>
     {
         typedef layout_item<Base> self_type;
-        typedef anchorable<Base> base_type;
+        typedef anchorable<reference_counted<Base>> base_type;
         // types
     public:
         typedef i_layout_item abstract_type;

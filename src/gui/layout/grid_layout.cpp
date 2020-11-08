@@ -99,7 +99,7 @@ namespace neogfx
         return aItem;
     }
 
-    i_layout_item& grid_layout::add(std::shared_ptr<i_layout_item> aItem)
+    i_layout_item& grid_layout::add(i_ref_ptr<i_layout_item> const& aItem)
     {
         add_item_at_position(iCursor.y, iCursor.x, aItem);
         return *aItem;
@@ -107,10 +107,10 @@ namespace neogfx
 
     i_layout_item& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout_item& aItem)
     {
-        return add_item_at_position(aRow, aColumn, std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, &aItem});
+        return add_item_at_position(aRow, aColumn, ref_ptr<i_layout_item>{ref_ptr<i_layout_item>{}, &aItem});
     }
 
-    i_layout_item& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout_item> aItem)
+    i_layout_item& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_ref_ptr<i_layout_item> const& aItem)
     {
         if (&*aItem == &iRowLayout)
         {
@@ -138,7 +138,7 @@ namespace neogfx
 
     i_spacer& grid_layout::add_spacer()
     {
-        auto s = std::make_shared<spacer>(expansion_policy::ExpandHorizontally | expansion_policy::ExpandVertically);
+        auto s = make_ref<spacer>(expansion_policy::ExpandHorizontally | expansion_policy::ExpandVertically);
         add_item_at_position(iCursor.y, iCursor.x, s);
         increment_cursor();
         return *s;
@@ -146,7 +146,7 @@ namespace neogfx
 
     i_spacer& grid_layout::add_spacer_at(layout_item_index aPosition)
     {
-        auto s = std::make_shared<spacer>(expansion_policy::ExpandHorizontally | expansion_policy::ExpandVertically);
+        auto s = make_ref<spacer>(expansion_policy::ExpandHorizontally | expansion_policy::ExpandVertically);
         cell_coordinates oldCursor = iCursor;
         iCursor.y = 0;
         iCursor.x = 0;
@@ -161,7 +161,7 @@ namespace neogfx
     {
         if (iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end())
             remove_item_at_position(aRow, aColumn);
-        auto s = std::make_shared<spacer>(expansion_policy::ExpandHorizontally | expansion_policy::ExpandVertically);
+        auto s = make_ref<spacer>(expansion_policy::ExpandHorizontally | expansion_policy::ExpandVertically);
         add_item_at_position(aRow, aColumn, s);
         return *s;
     }
@@ -568,7 +568,7 @@ namespace neogfx
     {
         while (aRow >= iRows.size())
         {
-            iRows.push_back(std::make_shared<horizontal_layout>(iRowLayout));
+            iRows.push_back(make_ref<horizontal_layout>(iRowLayout));
             iRows.back()->set_always_use_spacing(true);
             iRows.back()->set_padding(neogfx::padding{});
             iRows.back()->set_spacing(spacing());

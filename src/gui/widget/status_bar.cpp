@@ -61,23 +61,23 @@ namespace neogfx
         widget{ aLayout },
         iLayout{ *this }
     {
-        iLayout.add(std::make_shared<separator>());
-        auto insertLock = std::make_shared<label>();
+        iLayout.add(make_ref<separator>());
+        auto insertLock = make_ref<label>();
         insertLock->text_widget().set_size_hint(size_hint{ "Insert" });
         insertLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(insertLock);
-        iLayout.add(std::make_shared<separator>());
-        auto capsLock = std::make_shared<label>();
+        iLayout.add(make_ref<separator>());
+        auto capsLock = make_ref<label>();
         capsLock->text_widget().set_size_hint(size_hint{ "CAP" });
         capsLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(capsLock);
-        iLayout.add(std::make_shared<separator>());
-        auto numLock = std::make_shared<label>();
+        iLayout.add(make_ref<separator>());
+        auto numLock = make_ref<label>();
         numLock->text_widget().set_size_hint(size_hint{ "NUM" });
         numLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(numLock);
-        iLayout.add(std::make_shared<separator>());
-        auto scrlLock = std::make_shared<label>();
+        iLayout.add(make_ref<separator>());
+        auto scrlLock = make_ref<label>();
         scrlLock->text_widget().set_size_hint(size_hint{ "SCRL" });
         scrlLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(scrlLock);
@@ -182,13 +182,13 @@ namespace neogfx
         aWidget.set_font_role(font_role::StatusBar);
     }
 
-    void status_bar::add_normal_widget(std::shared_ptr<i_widget> aWidget)
+    void status_bar::add_normal_widget(i_ref_ptr<i_widget> const& aWidget)
     {
         iNormalWidgetLayout.add(aWidget);
         aWidget->set_font_role(font_role::StatusBar);
     }
 
-    void status_bar::add_normal_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget)
+    void status_bar::add_normal_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget)
     {
         iNormalWidgetLayout.add_at(aPosition, aWidget);
         aWidget->set_font_role(font_role::StatusBar);
@@ -206,13 +206,13 @@ namespace neogfx
         aWidget.set_font_role(font_role::StatusBar);
     }
 
-    void status_bar::add_permanent_widget(std::shared_ptr<i_widget> aWidget)
+    void status_bar::add_permanent_widget(i_ref_ptr<i_widget> const& aWidget)
     {
         iPermanentWidgetLayout.add(aWidget);
         aWidget->set_font_role(font_role::StatusBar);
     }
 
-    void status_bar::add_permanent_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget)
+    void status_bar::add_permanent_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget)
     {
         iPermanentWidgetLayout.add_at(aPosition, aWidget);
         aWidget->set_font_role(font_role::StatusBar);

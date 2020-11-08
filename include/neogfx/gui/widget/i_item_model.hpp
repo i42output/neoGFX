@@ -232,7 +232,7 @@ namespace neogfx
 
     typedef std::optional<item_cell_info> optional_item_cell_info;
 
-    class i_item_model : public i_property_owner
+    class i_item_model : public i_reference_counted, public i_property_owner
     {
     public:
         declare_event(column_info_changed, item_model_index::column_type)
@@ -243,6 +243,7 @@ namespace neogfx
         declare_event(updated)
         declare_event(cleared)
     public:
+        typedef i_item_model abstract_type;
         typedef neolib::generic_iterator iterator;
         typedef neolib::generic_iterator const_iterator;
     public:

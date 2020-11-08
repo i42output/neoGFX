@@ -181,7 +181,7 @@ namespace neogfx
         const i_widget& client_widget() const override;
         i_widget& client_widget() override;
         void set_client(i_widget& aClient) override;
-        void set_client(std::shared_ptr<i_widget> aClient) override;
+        void set_client(i_ref_ptr<i_widget> const& aClient) override;
     public:
         using base_type::has_layout;
         using base_type::layout;

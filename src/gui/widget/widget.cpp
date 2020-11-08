@@ -231,32 +231,33 @@ namespace neogfx
 
     i_widget& widget::add(i_widget& aChild)
     {
-        return add(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, &aChild });
+        return add(ref_ptr<i_widget>{ ref_ptr<i_widget>{}, &aChild });
     }
 
-    i_widget& widget::add(std::shared_ptr<i_widget> aChild)
+    i_widget& widget::add(const i_ref_ptr<i_widget>& aChild)
     {
         neolib::scoped_flag sf{ iAddingChild };
         if (aChild->has_parent() && &aChild->parent() == this)
             return *aChild;
         i_widget* oldParent = aChild->has_parent() ? &aChild->parent() : nullptr;
+        ref_ptr<i_widget> child = aChild;
         if (oldParent != nullptr)
-            aChild = oldParent->remove(*aChild, true);
-        iChildren.push_back(aChild);
-        aChild->set_parent(*this);
-        aChild->set_singular(false);
+            oldParent->remove(*child, true);
+        iChildren.push_back(child);
+        child->set_parent(*this);
+        child->set_singular(false);
         if (has_root())
-            root().widget_added(*aChild);
-        ChildAdded.trigger(*aChild);
-        return *aChild;
+            root().widget_added(*child);
+        ChildAdded.trigger(*child);
+        return *child;
     }
 
-    std::shared_ptr<i_widget> widget::remove(i_widget& aChild, bool aSingular)
+    void widget::remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef)
     {
         auto existing = find(aChild, false);
         if (existing == iChildren.end())
-            return std::shared_ptr<i_widget>{};
-        auto keep = *existing;
+            return;
+        ref_ptr<i_widget> keep = *existing;
         iChildren.erase(existing);
         if (aSingular)
             keep->set_singular(true);
@@ -265,7 +266,7 @@ namespace neogfx
         if (has_root())
             root().widget_removed(aChild);
         ChildRemoved.trigger(*keep);
-        return keep;
+        aChildRef = keep;
     }
 
     void widget::remove_all()
@@ -418,10 +419,10 @@ namespace neogfx
 
     void widget::set_layout(i_layout& aLayout, bool aMoveExistingItems)
     {
-        set_layout(std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &aLayout }, aMoveExistingItems);
+        set_layout(ref_ptr<i_layout>{ ref_ptr<i_layout>{}, &aLayout }, aMoveExistingItems);
     }
 
-    void widget::set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems)
+    void widget::set_layout(const i_ref_ptr<i_layout>& aLayout, bool aMoveExistingItems)
     {
         if (iLayout == aLayout)
             throw layout_already_set();
@@ -437,7 +438,7 @@ namespace neogfx
                 if (oldLayout == nullptr)
                 {
                     for (auto& child : iChildren)
-                        if (child->has_parent_layout() && &child->parent_layout() == oldLayout.get())
+                        if (child->has_parent_layout() && &child->parent_layout() == nullptr)
                             iLayout->add(child);
                 }
                 else
@@ -553,7 +554,7 @@ namespace neogfx
             auto itemIndex = parent_layout().find(*this);
             if (itemIndex == std::nullopt)
                 throw i_layout::item_not_found();
-            aOwner->add(std::dynamic_pointer_cast<i_widget>(proxy_for_layout().subject_ptr()));
+            aOwner->add(dynamic_pointer_cast<i_widget>(proxy_for_layout().subject_ptr()));
         }
     }
 
@@ -735,7 +736,7 @@ namespace neogfx
             update(true);
             iOrigin = std::nullopt;
             update(true);
-            for (auto child : iChildren)
+            for (auto& child : iChildren)
                 child->parent_moved();
         }
         PositionChanged.trigger();
@@ -744,7 +745,7 @@ namespace neogfx
     void widget::parent_moved()
     {
         iOrigin = std::nullopt;
-        for (auto child : iChildren)
+        for (auto& child : iChildren)
             child->parent_moved();
     }
     

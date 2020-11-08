@@ -91,8 +91,8 @@ namespace neogfx
     public:
         i_layout_item& add(i_layout_item& aItem) override;
         i_layout_item& add_at(layout_item_index aPosition, i_layout_item& aItem) override;
-        i_layout_item& add(std::shared_ptr<i_layout_item> aItem) override;
-        i_layout_item& add_at(layout_item_index aPosition, std::shared_ptr<i_layout_item> aItem) override;
+        i_layout_item& add(i_ref_ptr<i_layout_item> const& aItem) override;
+        i_layout_item& add_at(layout_item_index aPosition, i_ref_ptr<i_layout_item> const& aItem) override;
         void remove_at(layout_item_index aIndex) override;
         bool remove(i_layout_item& aItem) override;
         void remove_all() override;
@@ -178,6 +178,10 @@ namespace neogfx
         size do_maximum_size(optional_size const& aAvailableSpace) const;
         template <typename AxisPolicy>
         void do_layout_items(const point& aPosition, const size& aSize);
+        // helpers
+    public:
+        using i_layout::add;
+        using i_layout::add_at;
     private:
         i_layout* iParent;
         mutable i_widget* iOwner;

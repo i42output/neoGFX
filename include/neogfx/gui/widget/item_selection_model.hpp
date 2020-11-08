@@ -29,7 +29,7 @@
 namespace neogfx
 {
     template <typename Alloc = std::allocator<std::pair<const item_presentation_model_index, selection_area>>>
-    class basic_item_selection_model : public object<i_item_selection_model>
+    class basic_item_selection_model : public object<reference_counted<i_item_selection_model>>
     {
     public:
         define_declared_event(CurrentIndexChanged, current_index_changed, const optional_item_presentation_model_index& /* aCurrentIndex */, const optional_item_presentation_model_index& /* aPreviousIndex */)

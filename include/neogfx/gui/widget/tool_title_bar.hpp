@@ -35,6 +35,8 @@ namespace neogfx
     class tool_title_bar : public widget, public i_title_bar
     {
     public:
+        typedef i_title_bar abstract_type;
+    public:
         tool_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle = std::string{});
     public:
         const i_widget& as_widget() const override;

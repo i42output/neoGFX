@@ -35,9 +35,9 @@ namespace neogfx
         layout().set_padding(neogfx::padding{});
         if (aCreateDefaultModels)
         {
-            set_selection_model(std::make_shared<item_selection_model>());
-            set_presentation_model(std::make_shared<item_presentation_model>());
-            set_model(std::make_shared<item_model>());
+            set_selection_model(make_ref<item_selection_model>());
+            set_presentation_model(make_ref<item_presentation_model>());
+            set_model(make_ref<item_model>());
         }
     }
 
@@ -50,9 +50,9 @@ namespace neogfx
         layout().set_padding(neogfx::padding{});
         if (aCreateDefaultModels)
         {
-            set_selection_model(std::make_shared<item_selection_model>());
-            set_presentation_model(std::make_shared<item_presentation_model>());
-            set_model(std::make_shared<item_model>());
+            set_selection_model(make_ref<item_selection_model>());
+            set_presentation_model(make_ref<item_presentation_model>());
+            set_model(make_ref<item_model>());
         }
     }
 
@@ -65,9 +65,9 @@ namespace neogfx
         layout().set_padding(neogfx::padding{});
         if (aCreateDefaultModels)
         {
-            set_selection_model(std::make_shared<item_selection_model>());
-            set_presentation_model(std::make_shared<item_presentation_model>());
-            set_model(std::make_shared<item_model>());
+            set_selection_model(make_ref<item_selection_model>());
+            set_presentation_model(make_ref<item_presentation_model>());
+            set_model(make_ref<item_model>());
         }
     }
 

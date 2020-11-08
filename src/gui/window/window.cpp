@@ -1072,7 +1072,7 @@ namespace neogfx
             }
         }
 
-        set_client(std::make_shared<client>(*this, scrollbar_style()));
+        set_client(make_ref<client>(*this, scrollbar_style()));
 
         if (has_native_window())
             native_window().initialisation_complete();
@@ -1162,7 +1162,7 @@ namespace neogfx
         base_type::set_client(aClient);
     }
 
-    void window::set_client(std::shared_ptr<i_widget> aClient)
+    void window::set_client(i_ref_ptr<i_widget> const& aClient)
     {
         base_type::set_client(aClient);
     }

@@ -28,11 +28,11 @@
 
 namespace neogfx
 {
-    class layout_item_proxy : public object<i_layout_item_proxy>
+    class layout_item_proxy : public object<reference_counted<i_layout_item_proxy>>
     {
     public:
         layout_item_proxy(i_layout_item& aItem);
-        layout_item_proxy(std::shared_ptr<i_layout_item> aItem);
+        layout_item_proxy(i_ref_ptr<i_layout_item> const& aItem);
         layout_item_proxy(const layout_item_proxy& aOther);
         ~layout_item_proxy();
     public:
@@ -106,7 +106,7 @@ namespace neogfx
     public:
         const i_layout_item& subject() const override;
         i_layout_item& subject() override;
-        std::shared_ptr<i_layout_item> subject_ptr() override;
+        i_ref_ptr<i_layout_item>& subject_ptr() override;
     public:
         layout_item_disposition& cached_disposition() const override;
     public:
@@ -114,7 +114,7 @@ namespace neogfx
     private:
         bool subject_is_proxy() const;
     private:
-        std::shared_ptr<i_layout_item> iSubject;
+        ref_ptr<i_layout_item> iSubject;
         bool iSubjectIsProxy;
         mutable layout_item_disposition iCachedDisposition = layout_item_disposition::Unknown;
         mutable std::pair<uint32_t, bool> iVisible;

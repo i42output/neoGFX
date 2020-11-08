@@ -129,6 +129,7 @@ namespace neogfx
     public:
         declare_event(text_changed)
     public:
+        typedef i_drop_list_input_widget abstract_type;
         class i_visitor
         {
         public:
@@ -225,17 +226,17 @@ namespace neogfx
         const i_item_model& model() const;
         i_item_model& model();
         void set_model(i_item_model& aModel);
-        void set_model(std::shared_ptr<i_item_model> aModel);
+        void set_model(i_ref_ptr<i_item_model> const& aModel);
         bool has_presentation_model() const;
         const i_item_presentation_model& presentation_model() const;
         i_item_presentation_model& presentation_model();
         void set_presentation_model(i_item_presentation_model& aPresentationModel);
-        void set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel);
+        void set_presentation_model(i_ref_ptr<i_item_presentation_model> const& aPresentationModel);
         bool has_selection_model() const;
         const i_item_selection_model& selection_model() const;
         i_item_selection_model& selection_model();
         void set_selection_model(i_item_selection_model& aSelectionModel);
-        void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
+        void set_selection_model(i_ref_ptr<i_item_selection_model> const& aSelectionModel);
     public:
         bool has_selection() const;
         const item_model_index& selection() const;
@@ -279,9 +280,9 @@ namespace neogfx
         vertical_layout iLayout0;
         horizontal_layout iLayout1;
         std::unique_ptr<i_drop_list_input_widget> iInputWidget;
-        std::shared_ptr<i_item_model> iModel;
-        std::shared_ptr<i_item_presentation_model> iPresentationModel;
-        std::shared_ptr<i_item_selection_model> iSelectionModel;
+        ref_ptr<i_item_model> iModel;
+        ref_ptr<i_item_presentation_model> iPresentationModel;
+        ref_ptr<i_item_selection_model> iSelectionModel;
         sink iSink;
         sink iSelectionSink;
         mutable std::optional<std::pair<color, texture>> iDownArrowTexture;

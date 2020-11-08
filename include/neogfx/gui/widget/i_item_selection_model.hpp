@@ -200,7 +200,7 @@ namespace neogfx
         mutable std::optional<item_presentation_model_index> iIndex;
     };
 
-    class i_item_selection_model : public i_property_owner
+    class i_item_selection_model : public i_reference_counted, public i_property_owner
     {
     public:
         declare_event(current_index_changed, const optional_item_presentation_model_index& /* aCurrentIndex */, const optional_item_presentation_model_index& /* aPreviousIndex */)
@@ -212,6 +212,8 @@ namespace neogfx
     public:
         struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::i_item_selection_model::no_presentation_model") {} };
         struct no_current_index : std::logic_error { no_current_index() : std::logic_error("neogfx::i_item_selection_model::no_current_index") {} };
+    public:
+        typedef i_item_selection_model abstract_type;
     public:
         virtual ~i_item_selection_model() = default;
     public:

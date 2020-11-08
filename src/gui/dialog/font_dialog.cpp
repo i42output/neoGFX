@@ -206,7 +206,7 @@ namespace neogfx
 
     void font_dialog::init()
     {
-        button_box().option_layout().add(std::make_shared<push_button>("Subpixel Rendering..."_t)).clicked([this]()
+        button_box().option_layout().add(make_ref<push_button>("Subpixel Rendering..."_t)).clicked([this]()
         {
             message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
         });
@@ -226,9 +226,9 @@ namespace neogfx
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
 
-        iFamilyPicker.set_presentation_model(std::make_shared<family_picker_presentation_model>());
-        iStylePicker.set_presentation_model(std::make_shared<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
-        iSizePicker.set_presentation_model(std::make_shared<picker_presentation_model>());
+        iFamilyPicker.set_presentation_model(make_ref<family_picker_presentation_model>());
+        iStylePicker.set_presentation_model(make_ref<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
+        iSizePicker.set_presentation_model(make_ref<picker_presentation_model>());
 
         iFamilyPicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
         {

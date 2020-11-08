@@ -978,10 +978,10 @@ namespace neogfx
         iChannelLayout.add(iA.first); iChannelLayout.add(iA.second);
         iBasicColorsGrid.set_dimensions(12, 12);
         for (auto const& basicColor : sBasicColors)
-            iBasicColorsGrid.add(std::make_shared<color_box>(*this, basicColor));
+            iBasicColorsGrid.add(make_ref<color_box>(*this, basicColor));
         iCustomColorsGrid.set_dimensions(2, 12);
         for (auto customColor = iCustomColors.begin(); customColor != iCustomColors.end(); ++customColor)
-            iCustomColorsGrid.add(std::make_shared<color_box>(*this, *customColor, customColor));
+            iCustomColorsGrid.add(make_ref<color_box>(*this, *customColor, customColor));
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
         iSink += iH.first.checked([this]() { set_current_channel(ChannelHue); });

@@ -159,7 +159,7 @@ namespace neogfx
         });
         iSink += ItemAdded([this](item_index aItemIndex)
         {
-            layout().add_at(aItemIndex, std::make_shared<menu_item_widget>(*this, item_at(aItemIndex)));
+            layout().add_at(aItemIndex, make_ref<menu_item_widget>(*this, item_at(aItemIndex)));
         });
         iSink += ItemRemoved([this](item_index aItemIndex)
         {

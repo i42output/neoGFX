@@ -25,8 +25,10 @@ namespace neogfx
 {
     class i_widget;
 
-    class i_status_bar
+    class i_status_bar : public virtual i_reference_counted
     {
+    public:
+        typedef i_status_bar abstract_type;
     public:
         virtual ~i_status_bar() = default;
     public:

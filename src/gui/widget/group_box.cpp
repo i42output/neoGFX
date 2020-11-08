@@ -111,10 +111,10 @@ namespace neogfx
 
     void group_box::set_item_layout(i_layout& aItemLayout)
     {
-        set_item_layout(std::shared_ptr<i_layout>{std::shared_ptr<i_layout>{}, &aItemLayout});
+        set_item_layout(ref_ptr<i_layout>{ref_ptr<i_layout>{}, &aItemLayout});
     }
 
-    void group_box::set_item_layout(std::shared_ptr<i_layout> aItemLayout)
+    void group_box::set_item_layout(i_ref_ptr<i_layout> const& aItemLayout)
     {
         if (iItemLayout != nullptr)
             iLayout.remove(*iItemLayout);
@@ -223,6 +223,6 @@ namespace neogfx
         set_padding(neogfx::padding{});
         iLayout.set_padding(neogfx::padding{ 5.0 });
         iLayout.set_spacing(neogfx::size{ 5.0 });
-        set_item_layout(std::make_shared<group_box_item_layout>());
+        set_item_layout(make_ref<group_box_item_layout>());
     }
 }

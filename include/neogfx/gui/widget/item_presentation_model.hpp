@@ -37,10 +37,10 @@
 namespace neogfx
 {
     template <typename ItemModel>
-    class basic_item_presentation_model : public object<i_item_presentation_model>
+    class basic_item_presentation_model : public object<reference_counted<i_item_presentation_model>>
     {
         typedef basic_item_presentation_model<ItemModel> self_type;
-        typedef object<i_item_presentation_model> base_type;
+        typedef object<reference_counted<i_item_presentation_model>> base_type;
     public:
         define_declared_event(VisualAppearanceChanged, visual_appearance_changed)
         define_declared_event(ColumnInfoChanged, column_info_changed, item_presentation_model_index::column_type)

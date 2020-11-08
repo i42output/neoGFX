@@ -199,9 +199,9 @@ namespace neogfx
         iStylePicker.set_fixed_size(size{ 96.0_dip });
         iSizePicker.set_fixed_size(size{ 48.0_dip });
 
-        iFamilyPicker.set_presentation_model(std::make_shared<family_picker_presentation_model>());
-        iStylePicker.set_presentation_model(std::make_shared<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
-        iSizePicker.set_presentation_model(std::make_shared<picker_presentation_model>());
+        iFamilyPicker.set_presentation_model(make_ref<family_picker_presentation_model>());
+        iStylePicker.set_presentation_model(make_ref<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
+        iSizePicker.set_presentation_model(make_ref<picker_presentation_model>());
 
         iFamilyPicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
         {

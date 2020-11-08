@@ -31,6 +31,8 @@ namespace neogfx
 {
     class normal_title_bar : public widget, public i_title_bar
     {
+    public:
+        typedef i_title_bar abstract_type;
     private:
         template <typename WidgetType, widget_part_e WidgetPart>
         class non_client_item : public WidgetType

@@ -24,8 +24,10 @@ namespace neogfx
 {
     class i_widget;
 
-    class i_title_bar
+    class i_title_bar : public virtual i_reference_counted
     {
+    public:
+        typedef i_title_bar abstract_type;
     public:
         virtual ~i_title_bar() = default;
     public:

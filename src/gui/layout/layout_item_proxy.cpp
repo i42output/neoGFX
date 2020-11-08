@@ -26,12 +26,12 @@
 namespace neogfx
 {
     layout_item_proxy::layout_item_proxy(i_layout_item& aItem) :
-        layout_item_proxy{ std::shared_ptr<i_layout_item>{ std::shared_ptr<i_layout_item>{}, &aItem } } 
+        layout_item_proxy{ ref_ptr<i_layout_item>{ ref_ptr<i_layout_item>{}, &aItem } } 
     {
         set_alive();
     }
 
-    layout_item_proxy::layout_item_proxy(std::shared_ptr<i_layout_item> aItem) :
+    layout_item_proxy::layout_item_proxy(i_ref_ptr<i_layout_item> const& aItem) :
         iSubject{ aItem }, 
         iSubjectIsProxy{ aItem->is_proxy() }, 
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
@@ -71,7 +71,7 @@ namespace neogfx
         return *iSubject;
     }
 
-    std::shared_ptr<i_layout_item> layout_item_proxy::subject_ptr()
+    i_ref_ptr<i_layout_item>& layout_item_proxy::subject_ptr()
     {
         return iSubject;
     }

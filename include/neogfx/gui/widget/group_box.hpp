@@ -51,13 +51,13 @@ namespace neogfx
         const neogfx::check_box& check_box() const;
         neogfx::check_box& check_box();
         void set_item_layout(i_layout& aItemLayout);
-        void set_item_layout(std::shared_ptr<i_layout> aItemLayout);
+        void set_item_layout(i_ref_ptr<i_layout> const& aItemLayout);
         const i_layout& item_layout() const;
         i_layout& item_layout();
         template <typename LayoutT, typename... Args>
         LayoutT& with_item_layout(Args&&... args)
         {
-            set_item_layout(std::make_shared<LayoutT>(std::forward<Args>(args)...));
+            set_item_layout(to_abstract(make_ref<LayoutT>(std::forward<Args>(args)...)));
             return static_cast<LayoutT&>(item_layout());
         }
     public:
@@ -80,7 +80,7 @@ namespace neogfx
     private:
         vertical_layout iLayout;
         neolib::variant<label_ptr, check_box_ptr> iTitle;
-        std::shared_ptr<i_layout> iItemLayout;
+        ref_ptr<i_layout> iItemLayout;
         define_property(property_category::color, optional_color, BorderColor, border_color)
         define_property(property_category::color, optional_color, FillColor, fill_color)
         define_property(property_category::other_appearance, double, FillOpacity, fill_opacity, 1.0)

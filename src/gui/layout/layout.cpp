@@ -87,7 +87,7 @@ namespace neogfx
         if (has_parent_layout())
             parent_layout().remove(*this);
         if (has_layout_owner() && layout_owner().has_layout() && &layout_owner().layout() == this)
-            layout_owner().set_layout(nullptr);
+            layout_owner().set_layout(ref_ptr<i_layout>{});
     }
 
     bool layout::is_layout() const
@@ -186,20 +186,20 @@ namespace neogfx
 
     i_layout_item& layout::add(i_layout_item& aItem)
     {
-        return add(std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, & aItem});
+        return add(ref_ptr<i_layout_item>{ref_ptr<i_layout_item>{}, & aItem});
     }
 
     i_layout_item& layout::add_at(layout_item_index aPosition, i_layout_item& aItem)
     {
-        return add_at(aPosition, std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, & aItem});
+        return add_at(aPosition, ref_ptr<i_layout_item>{ref_ptr<i_layout_item>{}, & aItem});
     }
 
-    i_layout_item& layout::add(std::shared_ptr<i_layout_item> aItem)
+    i_layout_item& layout::add(i_ref_ptr<i_layout_item> const& aItem)
     {
         return add_at(static_cast<layout_item_index>(items().size()), aItem);
     }
 
-    i_layout_item& layout::add_at(layout_item_index aPosition, std::shared_ptr<i_layout_item> aItem)
+    i_layout_item& layout::add_at(layout_item_index aPosition, i_ref_ptr<i_layout_item> const& aItem)
     {
         if (aItem->has_parent_layout() && !aItem->is_proxy())
         {

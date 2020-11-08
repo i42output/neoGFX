@@ -403,7 +403,7 @@ namespace neogfx
         while (layout().count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
             layout().remove_at(layout().count() - 1);
         while (layout().count() < presentation_model().columns() + (expand_last_column() ? 0 : 1))
-            layout().add(std::make_shared<header_button>(*this));
+            layout().add(make_ref<header_button>(*this));
         if (iButtonSinks.size() < layout().count())
             iButtonSinks.resize(layout().count());
         for (uint32_t i = 0u; i < layout().count(); ++i)

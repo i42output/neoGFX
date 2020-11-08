@@ -205,9 +205,9 @@ namespace neogfx
     };
 
     template <typename T, uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_flat_container_traits<T, CellType, Columns>>
-    class basic_item_model : public object<i_basic_item_model<T>>
+    class basic_item_model : public object<reference_counted<i_basic_item_model<T>>>
     {
-        typedef object<i_basic_item_model<T>> base_type;
+        typedef object<reference_counted<i_basic_item_model<T>>> base_type;
     public:
         define_declared_event(ColumnInfoChanged, column_info_changed, item_model_index::column_type)
         define_declared_event(ItemAdded, item_added, const item_model_index&)

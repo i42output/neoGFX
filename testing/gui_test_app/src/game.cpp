@@ -43,7 +43,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 {
     // Create an ECS and canvas to render game world on...
     auto& canvas = aLayout.add(
-        std::make_shared<ng::game::canvas>(
+        ng::make_ref<ng::game::canvas>(
             ng::game::make_ecs<ng::game::simple_physics>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused)));
     canvas.set_font(ng::font{ canvas.font(), ng::font_style::Bold, 16 });
     canvas.set_background_color(ng::color::Black);

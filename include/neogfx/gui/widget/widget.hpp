@@ -49,6 +49,7 @@ namespace neogfx
         define_declared_event(Focus, focus_event, neogfx::focus_event)
     public:
         typedef i_widget abstract_type;
+        typedef neolib::vector<ref_ptr<i_widget>> widget_list;
     private:
         typedef widget property_context_type;
     public:
@@ -75,8 +76,8 @@ namespace neogfx
         void parent_changed() override;
         bool adding_child() const override;
         i_widget& add(i_widget& aChild) override;
-        i_widget& add(std::shared_ptr<i_widget> aChild) override;
-        std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) override;
+        i_widget& add(const i_ref_ptr<i_widget>& aChild) override;
+        void remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef) override;
         void remove_all() override;
         bool has_children() const override;
         const widget_list& children() const override;
@@ -93,7 +94,7 @@ namespace neogfx
         void unlink() override;
         bool has_layout() const override;
         void set_layout(i_layout& aLayout, bool aMoveExistingItems = true) override;
-        void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) override;
+        void set_layout(const i_ref_ptr<i_layout>& aLayout, bool aMoveExistingItems = true) override;
         const i_layout& layout() const override;
         i_layout& layout() override;
         bool can_defer_layout() const override;
@@ -249,6 +250,7 @@ namespace neogfx
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
         // helpers
     public:
+        using base_type::remove;
         using base_type::set_size_policy;
         using base_type::show;
         using base_type::hide;
@@ -266,7 +268,7 @@ namespace neogfx
         i_widget* iLinkAfter;
         i_layout* iParentLayout;
         uint32_t iLayoutInProgress;
-        std::shared_ptr<i_layout> iLayout;
+        ref_ptr<i_layout> iLayout;
         class layout_timer;
         std::unique_ptr<layout_timer> iLayoutTimer;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;

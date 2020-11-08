@@ -56,10 +56,9 @@ namespace neogfx
         grid_layout& set_dimensions(cell_coordinate aRows, cell_coordinate aColumns);
         bool is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
         i_layout_item& add(i_layout_item& aItem) override;
-        i_layout_item& add(std::shared_ptr<i_layout_item> aItem) override;
+        i_layout_item& add(i_ref_ptr<i_layout_item> const& aItem) override;
         virtual i_layout_item& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout_item& aItem);
-        virtual i_layout_item& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout_item> aItem);
-        using layout::add_at;
+        virtual i_layout_item& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_ref_ptr<i_layout_item> const& aItem);
         i_spacer& add_spacer() override;
         i_spacer& add_spacer_at(layout_item_index aPosition) override;
         virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
@@ -99,6 +98,19 @@ namespace neogfx
         void init();
         // helpers
     public:
+        using layout::add;
+        using layout::add_at;
+        template <typename ItemType>
+        ItemType& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_ref_ptr<ItemType> const& aItem)
+        {
+            return static_cast<ItemType&>(add_item_at_position(aRow, aColumn, to_abstract(static_pointer_cast<i_layout_item>(aItem))));
+        }
+        template <typename ItemType>
+        ItemType& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, ref_ptr<ItemType> const& aItem)
+        {
+            return static_cast<ItemType&>(add_item_at_position(aRow, aColumn, to_abstract(static_pointer_cast<i_layout_item>(aItem))));
+        }
+
         template <typename WidgetT>
         WidgetT& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
         {
@@ -110,6 +122,6 @@ namespace neogfx
         cell_coordinates iCursor;
         span_list iSpans;
         vertical_layout iRowLayout;
-        std::vector<std::shared_ptr<horizontal_layout>> iRows;
+        std::vector<ref_ptr<horizontal_layout>> iRows;
     };
 }

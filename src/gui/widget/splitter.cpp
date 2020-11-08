@@ -191,9 +191,9 @@ namespace neogfx
     {
         set_padding(neogfx::padding(0.0));
         if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
-            set_layout(std::make_shared<horizontal_layout>());
+            set_layout(make_ref<horizontal_layout>());
         else
-            set_layout(std::make_shared<vertical_layout>());
+            set_layout(make_ref<vertical_layout>());
         layout().set_padding(neogfx::padding(0.0));
     }
 

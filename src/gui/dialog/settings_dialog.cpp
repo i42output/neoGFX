@@ -45,9 +45,9 @@ namespace neogfx
     template <typename T>
     struct create_slider_box
     {
-        std::shared_ptr<i_widget> operator()(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink)
+        ref_ptr<i_widget> operator()(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink)
         {
-            auto settingWidget = std::make_shared<setting_widget<basic_slider_box<T>>>(aLayout);
+            auto settingWidget = make_ref<setting_widget<basic_slider_box<T>>>(aLayout);
             settingWidget->set_minimum(aSetting.constraints().minimum_value<T>());
             settingWidget->set_maximum(aSetting.constraints().maximum_value<T>());
             settingWidget->set_step(aSetting.constraints().step_value<T>());
@@ -82,9 +82,9 @@ namespace neogfx
         {
         }
     public:
-        std::shared_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink) const
+        void create_widget(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink, i_ref_ptr<i_widget>& aResult) const override
         {
-            std::shared_ptr<i_widget> result;
+            ref_ptr<i_widget> result;
             if (iUserFactory)
                 result = iUserFactory->create_widget(aSetting, aLayout, aSink);
             if (!result)
@@ -93,7 +93,7 @@ namespace neogfx
                 {
                 case neolib::setting_type::Boolean:
                     {
-                        auto settingWidget = std::make_shared<setting_widget<check_box>>(aLayout);
+                        auto settingWidget = make_ref<setting_widget<check_box>>(aLayout);
                         settingWidget->set_checked(aSetting.value().get<bool>());
                         aSink += settingWidget->Checked([&, settingWidget]()
                         {
@@ -153,9 +153,9 @@ namespace neogfx
                     break;
                 case neolib::setting_type::Enum:
                     {
-                        auto settingWidget = std::make_shared<setting_widget<drop_list>>(aLayout);
+                        auto settingWidget = make_ref<setting_widget<drop_list>>(aLayout);
                         auto const& e = aSetting.value().get<neolib::i_enum>();
-                        auto enumModel = std::make_shared<basic_item_model<neolib::i_enum::underlying_type>>();
+                        auto enumModel = make_ref<basic_item_model<neolib::i_enum::underlying_type>>();
                         for (auto& ee : e.enumerators())
                             enumModel->insert_item(enumModel->end(), ee.first(), iSettings.friendly_text(aSetting, ee.second()).to_std_string());
                         settingWidget->set_model(enumModel);
@@ -180,7 +180,7 @@ namespace neogfx
                 case neolib::setting_type::Custom:
                     if (aSetting.value().type_name() == "neogfx::color")
                     {
-                        auto settingWidget = std::make_shared<setting_widget<color_widget>>(aLayout, aSetting.value().get<color>());
+                        auto settingWidget = make_ref<setting_widget<color_widget>>(aLayout, aSetting.value().get<color>());
                         aSink += settingWidget->ColorChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
@@ -200,7 +200,7 @@ namespace neogfx
                     }
                     else if (aSetting.value().type_name() == "neogfx::gradient")
                     {
-                        auto settingWidget = std::make_shared<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<unique_gradient>());
+                        auto settingWidget = make_ref<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<unique_gradient>());
                         settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
                         aSink += settingWidget->GradientChanged([&, settingWidget]()
                         {
@@ -221,7 +221,7 @@ namespace neogfx
                     }
                     else if (aSetting.value().type_name() == "neogfx::font")
                     {
-                        auto settingWidget = std::make_shared<setting_widget<font_widget>>(aLayout, font{ aSetting.value().get<font_info>() });
+                        auto settingWidget = make_ref<setting_widget<font_widget>>(aLayout, font{ aSetting.value().get<font_info>() });
                         settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
                         aSink += settingWidget->SelectionChanged([&, settingWidget]()
                         {
@@ -247,7 +247,7 @@ namespace neogfx
             }
             if (!result)
                 throw unsupported_setting_type();
-            return result;
+            aResult = result;
         }
     private:
         neolib::i_settings const& iSettings;
@@ -286,7 +286,7 @@ namespace neogfx
     {
     }
 
-    typedef std::shared_ptr<std::vector<std::shared_ptr<i_widget>>> setting_group_widget_list;
+    typedef ref_ptr<neolib::vector<ref_ptr<i_widget>>> setting_group_widget_list;
     typedef basic_item_tree_model<setting_group_widget_list> settings_tree_item_model;
     class settings_tree_presentation_model : public basic_item_presentation_model<settings_tree_item_model>
     {
@@ -357,21 +357,21 @@ namespace neogfx
         iDetails.set_weight(size{ 2.0, 1.0 });
         iDetailLayout.set_size_policy(size_constraint::Expanding);
 
-        auto treeModel = std::make_shared<settings_tree_item_model>();
-        auto treePresentationModel = std::make_shared<settings_tree_presentation_model>(iIcons);
+        auto treeModel = make_ref<settings_tree_item_model>();
+        auto treePresentationModel = make_ref<settings_tree_presentation_model>(iIcons);
         iTree.set_model(treeModel);
         iTree.set_presentation_model(treePresentationModel);
 
-        std::map<std::string, std::shared_ptr<setting_group_widget>> groupWidgets;
+        std::map<std::string, ref_ptr<setting_group_widget>> groupWidgets;
         for (auto const& category : iSettings.all_categories())
         {
-            auto c = treeModel->insert_item(treeModel->send(), std::make_shared<setting_group_widget_list::element_type>(), category.second().to_std_string());
+            auto c = treeModel->insert_item(treeModel->send(), make_ref<setting_group_widget_list::element_type>(), category.second().to_std_string());
             auto existingGroups = iSettings.all_groups().find(category.first());
             if (existingGroups != iSettings.all_groups().end())
                 for (auto const& group : existingGroups->second())
                 {
-                    auto g = treeModel->append_item(c, std::make_shared<setting_group_widget_list::element_type>(), group.second().to_std_string());
-                    auto settingGroupWidget = std::make_shared<setting_group_widget>(group.second().to_std_string());
+                    auto g = treeModel->append_item(c, make_ref<setting_group_widget_list::element_type>(), group.second().to_std_string());
+                    auto settingGroupWidget = make_ref<setting_group_widget>(group.second().to_std_string());
                     iDetailLayout.add(settingGroupWidget);
                     treeModel->item(c)->push_back(settingGroupWidget);
                     treeModel->item(g)->push_back(settingGroupWidget);
@@ -409,7 +409,7 @@ namespace neogfx
             {
                 if (!nextLabel.empty())
                 {
-                    itemLayout->add(std::make_shared<label>(translate(nextLabel)));
+                    itemLayout->add(make_ref<label>(translate(nextLabel)));
                     nextLabel.clear();
                 }
             };
@@ -418,7 +418,7 @@ namespace neogfx
             {
                 if (!nextLabel.empty())
                 {
-                    auto& optionalCheckBox = itemLayout->add(std::make_shared<check_box>(translate(nextLabel)));
+                    auto& optionalCheckBox = itemLayout->add(make_ref<check_box>(translate(nextLabel)));
                     iSink += optionalCheckBox.Checked([&]()
                     { 
                         if (setting->is_default(true))

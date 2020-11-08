@@ -109,12 +109,12 @@ namespace neogfx
         if (!service<i_keyboard>().is_keyboard_grabbed_by(*this))
             service<i_keyboard>().grab_keyboard(*this);
         for (i_menu::item_index i = 0; i < menu().count(); ++i)
-            menu_layout().add(std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(i)));
+            menu_layout().add(make_ref<menu_item_widget>(*this, menu(), menu().item_at(i)));
         layout_items();
         menu().open();
         iSink += menu().item_added([this](i_menu::item_index aIndex)
         {
-            menu_layout().add_at(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(aIndex)));
+            menu_layout().add_at(aIndex, make_ref<menu_item_widget>(*this, menu(), menu().item_at(aIndex)));
             layout_items();
         });
         iSink += menu().item_removed([this](i_menu::item_index aIndex)

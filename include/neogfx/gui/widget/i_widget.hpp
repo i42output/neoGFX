@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <unordered_set>
+#include <neolib/core/i_vector.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
@@ -56,9 +56,7 @@ namespace neogfx
         declare_event(focus_event, neogfx::focus_event)
     public:
         typedef i_widget abstract_type;
-        typedef std::vector<std::shared_ptr<i_widget>> widget_list;
-    protected:
-        typedef std::unordered_set<rect> update_rect_list;
+        typedef neolib::i_vector<i_ref_ptr<i_widget>> widget_list;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_widget::no_parent") {} };
         struct no_root : std::logic_error { no_root() : std::logic_error("neogfx::i_widget::no_root") {} };
@@ -88,8 +86,8 @@ namespace neogfx
         virtual void parent_changed() = 0;
         virtual bool adding_child() const = 0;
         virtual i_widget& add(i_widget& aChild) = 0;
-        virtual i_widget& add(std::shared_ptr<i_widget> aChild) = 0; // todo: migrate from shared_ptr to i_ref_ptr
-        virtual std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) = 0; // todo: migrate from shared_ptr to i_ref_ptr
+        virtual i_widget& add(const i_ref_ptr<i_widget>& aChild) = 0;
+        virtual void remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef) = 0;
         virtual void remove_all() = 0;
         virtual bool has_children() const = 0;
         virtual const widget_list& children() const = 0;
@@ -108,7 +106,7 @@ namespace neogfx
     public:
         virtual bool has_layout() const = 0;
         virtual void set_layout(i_layout& aLayout, bool aMoveExistingItems = true) = 0;
-        virtual void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) = 0; // todo: migrate from shared_ptr to i_ref_ptr
+        virtual void set_layout(const i_ref_ptr<i_layout>& aLayout, bool aMoveExistingItems = true) = 0;
         virtual const i_layout& layout() const = 0;
         virtual i_layout& layout() = 0;
         virtual bool can_defer_layout() const = 0;
@@ -273,6 +271,12 @@ namespace neogfx
         bool is_sibling_of(const i_widget& aWidget) const
         {
             return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
+        }
+        ref_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false)
+        {
+            ref_ptr<i_widget> ref;
+            remove(aChild, aSingular, ref);
+            return ref;
         }
     public:
         void layout_root(bool aDefer = false)

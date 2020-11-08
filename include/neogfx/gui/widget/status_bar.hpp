@@ -33,6 +33,7 @@ namespace neogfx
     class status_bar : public widget, public i_status_bar
     {
     public:
+        typedef i_status_bar abstract_type;
         enum class style : uint32_t
         {
             DisplayNone             = 0x0000,
@@ -92,12 +93,12 @@ namespace neogfx
         void clear_message();
         void add_normal_widget(i_widget& aWidget);
         void add_normal_widget_at(widget_index aPosition, i_widget& aWidget);
-        void add_normal_widget(std::shared_ptr<i_widget> aWidget);
-        void add_normal_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget);
+        void add_normal_widget(i_ref_ptr<i_widget> const &aWidget);
+        void add_normal_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget);
         void add_permanent_widget(i_widget& aWidget);
         void add_permanent_widget_at(widget_index aPosition, i_widget& aWidget);
-        void add_permanent_widget(std::shared_ptr<i_widget> aWidget);
-        void add_permanent_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget);
+        void add_permanent_widget(i_ref_ptr<i_widget> const& aWidget);
+        void add_permanent_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget);
     public:
         i_layout& normal_layout();
         i_layout& permanent_layout();

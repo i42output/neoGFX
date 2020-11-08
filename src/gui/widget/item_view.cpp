@@ -74,10 +74,10 @@ namespace neogfx
 
     void item_view::set_model(i_item_model& aModel)
     {
-        set_model(std::shared_ptr<i_item_model>{std::shared_ptr<i_item_model>{}, &aModel});
+        set_model(ref_ptr<i_item_model>{ref_ptr<i_item_model>{}, &aModel});
     }
 
-    void item_view::set_model(std::shared_ptr<i_item_model> aModel)
+    void item_view::set_model(i_ref_ptr<i_item_model> const& aModel)
     {
         if (iModel == aModel)
             return;
@@ -122,10 +122,10 @@ namespace neogfx
 
     void item_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
     {
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>{std::shared_ptr<i_item_presentation_model>{}, &aPresentationModel});
+        set_presentation_model(ref_ptr<i_item_presentation_model>{ref_ptr<i_item_presentation_model>{}, &aPresentationModel});
     }
 
-    void item_view::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
+    void item_view::set_presentation_model(i_ref_ptr<i_item_presentation_model> const& aPresentationModel)
     {
         if (iPresentationModel == aPresentationModel)
             return;
@@ -182,10 +182,10 @@ namespace neogfx
 
     void item_view::set_selection_model(i_item_selection_model& aSelectionModel)
     {
-        set_selection_model(std::shared_ptr<i_item_selection_model>{std::shared_ptr<i_item_selection_model>{}, &aSelectionModel});
+        set_selection_model(ref_ptr<i_item_selection_model>{ref_ptr<i_item_selection_model>{}, &aSelectionModel});
     }
 
-    void item_view::set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel)
+    void item_view::set_selection_model(i_ref_ptr<i_item_selection_model> const& aSelectionModel)
     {
         if (iSelectionModel == aSelectionModel)
             return;
