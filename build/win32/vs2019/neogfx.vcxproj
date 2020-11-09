@@ -711,7 +711,6 @@
     <ClCompile Include="..\..\..\src\gui\view\view_container.cpp" />
     <ClCompile Include="..\..\..\src\gui\view\controller.cpp" />
     <ClCompile Include="..\..\..\src\gui\view\view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\color_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp" />
@@ -832,6 +831,7 @@
     <None Include="..\..\..\include\neogfx\gfx\color.inl" />
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
+    <None Include="..\..\..\include\neogfx\gui\widget\button.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl" />

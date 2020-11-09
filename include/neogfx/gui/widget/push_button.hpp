@@ -20,12 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "button.hpp"
+#include <neogfx/gui/widget/button.hpp>
 #include <neogfx/gui/widget/i_push_button.hpp>
 
 namespace neogfx
 {
-    class push_button : public button, public i_push_button
+    class push_button : public button<i_push_button>
     {
     public:
         static const uint32_t kMaxAnimationFrame = 10;

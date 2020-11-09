@@ -1198,9 +1198,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\widget\button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1627,6 +1624,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\gfx\color.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\button.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

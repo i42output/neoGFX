@@ -36,7 +36,7 @@ namespace neogfx
         Toolbar
     };
 
-    class i_push_button : public virtual i_button
+    class i_push_button : public i_button
     {
     public:
         virtual push_button_style style() const = 0;

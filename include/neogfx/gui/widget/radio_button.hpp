@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class radio_button : public button
+    class radio_button : public button<>
     {
     public:
         define_event(On, on)

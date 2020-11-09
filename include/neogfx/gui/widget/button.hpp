@@ -29,8 +29,10 @@
 
 namespace neogfx
 {
-    class button : public widget, public virtual i_button, protected i_mnemonic
+    template <typename ButtonInterface = i_button>
+    class button : public widget, public ButtonInterface, protected i_mnemonic
     {
+        // events
     public:
         define_declared_event(Pressed, pressed)
         define_declared_event(Clicked, clicked)
@@ -42,7 +44,10 @@ namespace neogfx
         define_declared_event(Checked, checked)
         define_declared_event(Unchecked, unchecked)
         define_declared_event(Indeterminate, indeterminate)
+        // types
     public:
+        typedef ButtonInterface button_interface;
+        typedef button_interface abstract_type;
         // button
     public:
         button(alignment aAlignment = alignment::Left | alignment::VCenter);
@@ -120,3 +125,5 @@ namespace neogfx
         neogfx::label iLabel;
     };
 }
+
+#include "button.inl"
