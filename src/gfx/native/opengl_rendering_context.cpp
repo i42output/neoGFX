@@ -254,6 +254,10 @@ namespace neogfx
             flush(); 
             glCheck(glDisable(GL_SCISSOR_TEST));
         });
+        iSink += render_target().target_activating([&]()
+        {
+            apply_scissor();
+        });
     }
 
     opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, neogfx::blending_mode aBlendingMode) :
@@ -274,6 +278,10 @@ namespace neogfx
         {
             flush();
             glCheck(glDisable(GL_SCISSOR_TEST));
+        });
+        iSink += render_target().target_activating([&]()
+        {
+            apply_scissor();
         });
     }
 
@@ -296,6 +304,10 @@ namespace neogfx
         {
             flush();
             glCheck(glDisable(GL_SCISSOR_TEST));
+        });
+        iSink += render_target().target_activating([&]()
+        {
+            apply_scissor();
         });
     }
 
