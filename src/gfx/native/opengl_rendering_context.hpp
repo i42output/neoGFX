@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/i_rendering_context.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/entity_info.hpp>
@@ -37,6 +37,15 @@
 namespace neogfx
 {
     class i_widget;
+
+    struct blur_filter
+    {
+        rect region;
+        dimension radius;
+        blurring_algorithm algorithm = blurring_algorithm::Gaussian;
+        scalar parameter1 = 5.0;
+        scalar parameter2 = 1.0;
+    };
 
     class opengl_rendering_context : public i_rendering_context
     {
@@ -105,6 +114,66 @@ namespace neogfx
             disable_multisample(opengl_rendering_context& aParent) : scoped_multisample{ aParent, false }
             {
             }
+        };
+        class scoped_blending_mode
+        {
+        public:
+            scoped_blending_mode(opengl_rendering_context& aParent, neogfx::blending_mode aBlendigMode) :
+                iParent{ aParent }, iPreviousBlendingMode{ aParent.blending_mode() }
+            {
+                iParent.set_blending_mode(aBlendigMode);
+            }
+            ~scoped_blending_mode()
+            {
+                iParent.set_blending_mode(iPreviousBlendingMode);
+            }
+        private:
+            opengl_rendering_context& iParent;
+            neogfx::blending_mode iPreviousBlendingMode;
+        };
+        typedef std::variant<blur_filter> filter; // todo: more filters to follow
+        template <typename Filter>
+        class scoped_filter
+        {
+        public:
+            scoped_filter(opengl_rendering_context& aParent, Filter const& aFilter) :
+                iParent{ aParent },
+                iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
+                iBuffers{ std::move(create_ping_pong_buffers(aParent, iBufferRect.extents())) },
+                iRenderTarget{ front_buffer() }
+            {
+                front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
+                iParent.iFilters.push_back(aFilter);
+            }
+            ~scoped_filter()
+            {
+                front_buffer().set_origin({});
+                Filter const& filter = std::get<Filter>(iParent.iFilters.back());
+                {
+                    iRenderTarget.emplace(back_buffer());
+                    if constexpr (std::is_same_v<Filter, blur_filter>)
+                        back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, filter.radius, filter.algorithm, filter.parameter1, filter.parameter2);
+                }
+                iRenderTarget = {};
+                scoped_blending_mode sbm{ iParent, neogfx::blending_mode::Blit };
+                rect const drawRect { filter.region.top_left() - point{ filter.radius, filter.radius }, iBufferRect.extents() };
+                iParent.draw_texture(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
+                iParent.iFilters.pop_back();
+            }
+        public: 
+            i_graphics_context const& front_buffer() const
+            {
+                return *iBuffers.buffer1;
+            }
+            i_graphics_context const& back_buffer() const
+            {
+                return *iBuffers.buffer2;
+            }
+        private:
+            opengl_rendering_context& iParent;
+            rect iBufferRect;
+            ping_pong_buffers iBuffers;
+            std::optional<scoped_render_target> iRenderTarget;
         };
         struct mesh_drawable
         {
@@ -191,7 +260,7 @@ namespace neogfx
     public:
         std::unique_ptr<i_rendering_context> clone() const override;
     public:
-        i_rendering_engine& rendering_engine() override;
+        i_rendering_engine& rendering_engine() const override;
         const i_render_target& render_target() const override;
         rect rendering_area(bool aConsiderScissor = true) const override;
     public:
@@ -200,10 +269,12 @@ namespace neogfx
         void enqueue(const graphics_operation::operation& aOperation) override;
         void flush() override;
     public:
-        neogfx::logical_coordinate_system logical_coordinate_system() const;
+        neogfx::logical_coordinate_system logical_coordinate_system() const override;
         void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
         neogfx::logical_coordinates logical_coordinates() const override;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates);
+        point origin() const;
+        void set_origin(const point& aOrigin);
         vec2 offset() const override;
         void set_offset(const optional_vec2& aOffset) override;
         bool gradient_set() const override;
@@ -257,6 +328,7 @@ namespace neogfx
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
         void draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);
+        void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None);
     public:
         neogfx::subpixel_format subpixel_format() const override;
     private:
@@ -266,8 +338,11 @@ namespace neogfx
         i_rendering_engine& iRenderingEngine;
         const i_render_target& iTarget;
         const i_widget* iWidget;
+        graphics_operation::queue iQueue;
+        bool iInFlush;
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
+        point iOrigin;
         bool iMultisample;
         std::optional<double> iSampleShadingRate;
         double iOpacity;
@@ -285,6 +360,7 @@ namespace neogfx
         optional_vec2 iOffset;
         bool iSnapToPixel;
         std::optional<gradient> iGradient;
+        std::vector<filter> iFilters;
         use_shader_program iUseDefaultShaderProgram; // must be last
     private:
         static standard_batching& as_vertex_provider()

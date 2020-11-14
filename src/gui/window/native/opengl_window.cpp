@@ -216,7 +216,7 @@ namespace neogfx
             if (!has_invalidated_area())
                 iInvalidatedArea = aInvalidatedRect.ceil();
             else
-                iInvalidatedArea = invalidated_area().combine(aInvalidatedRect).ceil();
+                iInvalidatedArea = invalidated_area().combined(aInvalidatedRect).ceil();
         }
     }
 

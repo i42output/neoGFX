@@ -57,6 +57,16 @@ namespace neogfx
         return native_texture()->is_render_target();
     }
 
+    const i_render_target& sub_texture::as_render_target() const
+    {
+        return *native_texture();
+    }
+
+    i_render_target& sub_texture::as_render_target()
+    {
+        return *native_texture();
+    }
+
     const i_sub_texture& sub_texture::as_sub_texture() const
     {
         return *this;

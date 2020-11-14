@@ -40,6 +40,11 @@ namespace neogfx
             logical_coordinate_system system;
         };
 
+        struct set_origin
+        {
+            point origin;
+        };
+
         struct set_logical_coordinates
         {
             logical_coordinates coordinates;
@@ -254,9 +259,10 @@ namespace neogfx
             std::optional<game::filter> filter;
         };
 
-        typedef neolib::variant <
+        typedef neolib::variant<
             set_logical_coordinate_system,
             set_logical_coordinates,
+            set_origin,
             scissor_on,
             scissor_off,
             snap_to_pixel_on,
@@ -300,6 +306,7 @@ namespace neogfx
             Invalid = 0,
             SetLogicalCoordinateSystem,
             SetLogicalCoordinates,
+            SetOrigin,
             ScissorOn,
             ScissorOff,
             SnapToPixelOn,

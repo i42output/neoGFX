@@ -808,7 +808,12 @@ namespace neogfx
                     return basic_rect{};
             }
         }
-        self_type combine(const self_type& other) const
+        self_type& combine(const self_type& other)
+        {
+            *this = combined(other);
+            return *this;
+        }
+        self_type combined(const self_type& other) const
         {
             if constexpr (gui)
                 return self_type{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };

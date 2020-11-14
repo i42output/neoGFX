@@ -37,7 +37,7 @@ namespace neogfx
             // draw a black outline for a non-text color icon...
             // todo: provide an easier way to blur any drawing primitive
             rect const r{ point{}, size{aSource.extents()} };
-            auto pingPongBuffers = gc.ping_pong_buffers(aSource.extents(), texture_sampling::Multisample);
+            auto pingPongBuffers = create_ping_pong_buffers(gc, aSource.extents(), texture_sampling::Multisample);
             {
                 scoped_render_target srt{ *pingPongBuffers.buffer1 };
                 pingPongBuffers.buffer1->draw_texture(targetRect, aSource, color::Black);

@@ -68,6 +68,38 @@ namespace neogfx
         mutable glyph_text iGlyphTextResult2;
     };
 
+    ping_pong_buffers create_ping_pong_buffers(const i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor)
+    {
+        size previousExtents;
+        auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
+        buffer1.as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
+        auto gcBuffer1 = std::make_unique<graphics_context>(buffer1);
+        {
+            if (aClearColor != std::nullopt)
+            {
+                scoped_render_target srt{ *gcBuffer1 };
+                scoped_scissor ss{ *gcBuffer1, rect{ point{}, previousExtents }.inflate(1.0) };
+                gcBuffer1->clear(*aClearColor);
+                gcBuffer1->clear_depth_buffer();
+                gcBuffer1->clear_stencil_buffer();
+            }
+        }
+        auto& buffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
+        buffer2.as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
+        auto gcBuffer2 = std::make_unique<graphics_context>(buffer2);
+        {
+            if (aClearColor != std::nullopt)
+            {
+                scoped_render_target srt{ *gcBuffer2 };
+                scoped_scissor ss{ *gcBuffer2, rect{ point{}, previousExtents }.inflate(1.0) };
+                gcBuffer2->clear(*aClearColor);
+                gcBuffer2->clear_depth_buffer();
+                gcBuffer2->clear_stencil_buffer();
+            }
+        }
+        return ping_pong_buffers{ {}, std::move(gcBuffer1), std::move(gcBuffer2) };
+    }
+
     graphics_context::graphics_context(const i_surface& aSurface, type aType) :
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
@@ -167,7 +199,7 @@ namespace neogfx
         return std::make_unique<graphics_context>(*this);
     }
 
-    i_rendering_engine& graphics_context::rendering_engine()
+    i_rendering_engine& graphics_context::rendering_engine() const
     {
         return native_context().rendering_engine();
     }
@@ -203,36 +235,6 @@ namespace neogfx
             native_context().flush();
     }
 
-    ping_pong_buffers graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor) const
-    {
-        size previousExtents;
-        auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
-        auto gcBuffer1 = std::make_unique<graphics_context>(buffer1);
-        {
-            if (aClearColor != std::nullopt)
-            {
-                scoped_render_target srt{ *gcBuffer1 };
-                scoped_scissor ss{ *gcBuffer1, rect{ point{}, previousExtents }.inflate(1.0) };
-                gcBuffer1->clear(*aClearColor);
-                gcBuffer1->clear_depth_buffer();
-                gcBuffer1->clear_stencil_buffer();
-            }
-        }
-        auto& buffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
-        auto gcBuffer2 = std::make_unique<graphics_context>(buffer2);
-        {
-            if (aClearColor != std::nullopt)
-            {
-                scoped_render_target srt{ *gcBuffer2 };
-                scoped_scissor ss{ *gcBuffer2, rect{ point{}, previousExtents }.inflate(1.0) };
-                gcBuffer2->clear(*aClearColor);
-                gcBuffer2->clear_depth_buffer();
-                gcBuffer2->clear_stencil_buffer();
-            }
-        }
-        return neogfx::ping_pong_buffers{ {}, std::move(gcBuffer1), std::move(gcBuffer2) };
-    }
-    
     delta graphics_context::to_device_units(const delta& aValue) const
     {
         return units_converter(*this).to_device_units(aValue);
@@ -381,6 +383,7 @@ namespace neogfx
     void graphics_context::set_origin(const point& aOrigin) const
     {
         iOrigin = to_device_units(aOrigin);
+        native_context().enqueue(graphics_operation::set_origin{ iOrigin });
     }
 
     point graphics_context::origin() const
@@ -908,7 +911,7 @@ namespace neogfx
     void blur(const i_graphics_context& aDestination, const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
         scoped_render_target srt{ aDestination };
-        auto mesh = aDestination.logical_coordinates().is_gui_orientation() ?
+        auto mesh = aDestination.logical_coordinate_system() == logical_coordinate_system::AutomaticGui ?
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
         auto const& source = aSource.render_target();
         for (auto& uv : mesh.uv)

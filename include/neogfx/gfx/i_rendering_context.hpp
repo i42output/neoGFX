@@ -39,7 +39,7 @@ namespace neogfx
         virtual ~i_rendering_context() = default;
         virtual std::unique_ptr<i_rendering_context> clone() const = 0;
     public:
-        virtual i_rendering_engine& rendering_engine() = 0;
+        virtual i_rendering_engine& rendering_engine() const = 0;
         virtual const i_render_target& render_target() const = 0;
         virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
         virtual const graphics_operation::queue& queue() const = 0;
@@ -47,6 +47,7 @@ namespace neogfx
         virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
         virtual void flush() = 0;
     public:
+        virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
         virtual vec2 offset() const = 0;
         virtual void set_offset(const optional_vec2& aOffset) = 0;

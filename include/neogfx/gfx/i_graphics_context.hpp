@@ -57,6 +57,8 @@ namespace neogfx
         std::unique_ptr<i_graphics_context> buffer2;
     };
         
+    ping_pong_buffers create_ping_pong_buffers(const i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} });
+        
     // todo: move to i_string
 
     class i_graphics_context : public i_rendering_context, public i_device_metrics, public i_units_context
@@ -89,8 +91,6 @@ namespace neogfx
     public:
         virtual ~i_graphics_context() = default;
         // operations
-    public:
-        virtual neogfx::ping_pong_buffers ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} }) const = 0;
     public:
         virtual delta to_device_units(const delta& aValue) const = 0;
         virtual size to_device_units(const size& aValue) const = 0;
@@ -215,7 +215,7 @@ namespace neogfx
     };
 
     template <typename Iter>
-    inline void draw_glyph_text_normal(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
+    inline void draw_glyph_text(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
     {
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
@@ -223,60 +223,6 @@ namespace neogfx
             aGc.draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aAppearance);
             pos.x += iterGlyph->advance().cx;
         }
-    }
-
-    template <typename Iter>
-    inline void draw_glyph_text_glow_pass_1(const neogfx::ping_pong_buffers& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
-    {
-        scoped_render_target srt{ *aPingPongBuffers.buffer1 };
-        point const effectOffset{ aGlowSize, aGlowSize };
-        vec3 pos{ effectOffset.x, effectOffset.y, 0.0 };
-        for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
-        {
-            aPingPongBuffers.buffer1->draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aGlowColor);
-            pos.x += iterGlyph->advance().cx;
-        }
-    }
-
-    template <typename Iter>
-    inline void draw_glyph_text_glow_pass_2(const neogfx::ping_pong_buffers& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
-    {
-        scoped_render_target srt{ *aPingPongBuffers.buffer2 };
-        point const effectOffset{ aGlowSize, aGlowSize };
-        auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
-        rect const effectRect{ point{}, effectExtents };
-        aPingPongBuffers.buffer2->blur(effectRect, *aPingPongBuffers.buffer1, effectRect, aGlowSize, blurring_algorithm::Gaussian, 5.0, 1.0);
-    }
-
-    template <typename Iter>
-    inline void draw_glyph_text_glow_pass_3(i_graphics_context const& aGc, const neogfx::ping_pong_buffers& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
-    {
-        point const effectOffset{ aGlowSize, aGlowSize };
-        auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
-        rect const effectRect{ point{}, effectExtents };
-        rect const outputRect{ point{ aPoint } -effectOffset, effectExtents };
-        aGc.blit(outputRect, *aPingPongBuffers.buffer2, effectRect);
-    }
-
-    template <typename Iter>
-    inline void draw_glyph_text_glow(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_color& aGlowColor, dimension aGlowSize)
-    {
-        point const effectOffset{ aGlowSize, aGlowSize };
-        auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
-        auto pingPongBuffers = aGc.ping_pong_buffers(effectExtents);
-        draw_glyph_text_glow_pass_1(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowColor, aGlowSize);
-        draw_glyph_text_glow_pass_2(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
-        draw_glyph_text_glow_pass_3(aGc, pingPongBuffers, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
-    }
-
-    template <typename Iter>
-    inline void draw_glyph_text(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
-    {
-        if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Glow)
-            draw_glyph_text_glow(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
-        else if (aAppearance.effect() && aAppearance.effect()->type() == text_effect_type::Shadow)
-            draw_glyph_text_glow(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance.effect()->color(), aAppearance.effect()->width());
-        draw_glyph_text_normal(aGc, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aAppearance);
     }
 
     class scoped_mnemonics
@@ -299,17 +245,31 @@ namespace neogfx
     {
     public:
         scoped_coordinate_system(i_graphics_context const& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
-            iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
             apply_origin(aOrigin, aExtents);
         }
         scoped_coordinate_system(i_graphics_context const& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
-            iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
             iGc.set_logical_coordinates(aCoordinates);
             apply_origin(aOrigin, aExtents);
+        }
+        scoped_coordinate_system(i_graphics_context const& aGc, i_graphics_context const& aSource) :
+            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+        {
+            iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
+            iGc.set_logical_coordinates(aSource.logical_coordinates());
+            iGc.set_origin(aSource.origin());
+        }
+        scoped_coordinate_system(i_graphics_context const& aGc, i_rendering_context const& aSource) :
+            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+        {
+            iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
+            iGc.set_logical_coordinates(aSource.logical_coordinates());
+            iGc.set_origin({});
         }
         ~scoped_coordinate_system()
         {
@@ -317,6 +277,8 @@ namespace neogfx
                 iGc.set_logical_coordinate_system(iPreviousCoordinateSystem);
             if (iGc.logical_coordinates() != iPreviousCoordinates)
                 iGc.set_logical_coordinates(iPreviousCoordinates);
+            if (iGc.origin() != iPreviousOrigin)
+                iGc.set_origin(iPreviousOrigin);
         }
     private:
         void apply_origin(const point& aOrigin, const size& aExtents)
@@ -328,6 +290,7 @@ namespace neogfx
         }
     private:
         const i_graphics_context& iGc;
+        point iPreviousOrigin;
         logical_coordinate_system iPreviousCoordinateSystem;
         neogfx::logical_coordinates iPreviousCoordinates;
     };

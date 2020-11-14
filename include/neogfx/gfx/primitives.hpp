@@ -237,7 +237,7 @@ namespace neogfx
             default:
                 return {};
             case text_effect_type::Outline:
-                return {};
+                return { -width(), -width() };
             case text_effect_type::Glow:
                 return {};
             case text_effect_type::Shadow:

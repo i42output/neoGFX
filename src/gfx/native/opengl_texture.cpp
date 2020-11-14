@@ -293,6 +293,18 @@ namespace neogfx
     }
 
     template <typename T>
+    const i_render_target& opengl_texture<T>::as_render_target() const
+    {
+        return *this;
+    }
+
+    template <typename T>
+    i_render_target& opengl_texture<T>::as_render_target()
+    {
+        return *this;
+    }
+
+    template <typename T>
     const i_sub_texture& opengl_texture<T>::as_sub_texture() const
     {
         throw not_sub_texture();

@@ -28,6 +28,7 @@ namespace neogfx
 {
     typedef game::id_t texture_id;
 
+    class i_render_target;
     class i_native_texture;
 
     enum class texture_type : uint32_t
@@ -79,6 +80,8 @@ namespace neogfx
         virtual texture_id id() const = 0;
         virtual texture_type type() const = 0;
         virtual bool is_render_target() const = 0;
+        virtual const i_render_target& as_render_target() const = 0;
+        virtual i_render_target& as_render_target() = 0;
         virtual const i_sub_texture& as_sub_texture() const = 0;
         virtual dimension dpi_scale_factor() const = 0;
         virtual neogfx::color_space color_space() const = 0;
