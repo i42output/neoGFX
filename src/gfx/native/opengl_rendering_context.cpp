@@ -1531,7 +1531,8 @@ namespace neogfx
                     if (!drawOp.glyph.is_whitespace() && !drawOp.glyph.is_emoji())
                         ++normalGlyphCount;
 
-                    if (drawOp.appearance.effect()->type() == text_effect_type::Glow || drawOp.appearance.effect()->type() == text_effect_type::Shadow)
+                    if (drawOp.appearance.effect() != std::nullopt &&
+                        (drawOp.appearance.effect()->type() == text_effect_type::Glow || drawOp.appearance.effect()->type() == text_effect_type::Shadow))
                     {
                         font const& glyphFont = drawOp.glyph.font();
                         rect const glyphRect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } };
