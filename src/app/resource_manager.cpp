@@ -35,39 +35,45 @@ namespace neogfx
         return sInstance;
     }
 
-    void resource_manager::add_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize)
+    void resource_manager::add_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
     {
-        iResources[aUri] = i_resource::pointer(std::make_shared<resource>(*this, aUri, aResourceData, aResourceSize));
+        iResources[aUri] = ref_ptr<i_resource>{ make_ref<resource>(*this, aUri, aResourceData, aResourceSize) };
     }
 
-    void resource_manager::add_module_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize)
+    void resource_manager::add_module_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
     {
-        iResources[aUri] = i_resource::pointer(std::make_shared<module_resource>(aUri, aResourceData, aResourceSize));
+        iResources[aUri] = ref_ptr<i_resource>{ make_ref<module_resource>(aUri, aResourceData, aResourceSize) };
     }
 
-    i_resource::pointer resource_manager::load_resource(std::string const& aUri)
+    void resource_manager::load_resource(i_string const& aUri, i_ref_ptr<i_resource>& aResult)
     {
         auto existing = iResources.find(aUri);
         if (existing != iResources.end())
         {
-            if (std::holds_alternative<i_resource::pointer>(existing->second))
-                return std::get<i_resource::pointer>(existing->second);
-            i_resource::weak_pointer ptr = static_variant_cast<i_resource::weak_pointer>(existing->second);
+            if (std::holds_alternative<ref_ptr<i_resource>>(existing->second))
+            {
+                aResult = std::get<ref_ptr<i_resource>>(existing->second);
+                return;
+            }
+            weak_ref_ptr<i_resource> ptr = std::get<weak_ref_ptr<i_resource>>(existing->second);
             if (!ptr.expired())
-                return ptr.lock();
+            {
+                aResult = ptr;
+                return;
+            }
         }
-        if (neolib::uri{ aUri }.scheme().empty() && iResources.find(aUri.substr(0, aUri.rfind('#'))) == iResources.end())
+        if (neolib::uri{ aUri }.scheme().empty() && iResources.find(aUri.to_std_string_view().substr(0, aUri.to_std_string_view().rfind('#'))) == iResources.end())
             throw embedded_resource_not_found(aUri);
-        i_resource::pointer newResource = std::make_shared<resource>(*this, aUri);
-        iResources[aUri] = i_resource::weak_pointer(newResource);
-        return newResource;
+        auto newResource = make_ref<resource>(*this, aUri);
+        iResources[aUri] = weak_ref_ptr<i_resource>{ newResource };
+        aResult = newResource;
     }
 
     void resource_manager::cleanup()
     {
         for (auto i = iResources.begin(); i != iResources.end();)
         {
-            if (std::holds_alternative<i_resource::weak_pointer>(i->second) && std::get<i_resource::weak_pointer>(i->second).expired())
+            if (std::holds_alternative<weak_ref_ptr<i_resource>>(i->second) && std::get<weak_ref_ptr<i_resource>>(i->second).expired())
                 i = iResources.erase(i);
             else
                 ++i;

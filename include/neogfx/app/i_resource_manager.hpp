@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_resource.hpp"
+#include <neogfx/app/i_resource.hpp>
 
 namespace neogfx
 {
@@ -29,11 +29,26 @@ namespace neogfx
     class i_resource_manager
     {
     public:
-        virtual void add_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
-        virtual void add_module_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
-        virtual i_resource::pointer load_resource(std::string const& aUri) = 0;
+        virtual void add_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
+        virtual void add_module_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
+        virtual void load_resource(i_string const& aUri, i_ref_ptr<i_resource>& aResult) = 0;
     public:
         virtual void cleanup() = 0;
         virtual void clean() = 0;
+    public:
+        void add_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize)
+        {
+            add_resource(string{ aUri }, aResourceData, aResourceSize);
+        }
+        void add_module_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize)
+        {
+            add_module_resource(string{ aUri }, aResourceData, aResourceSize);
+        }
+        ref_ptr<i_resource> load_resource(std::string const& aUri)
+        {
+            ref_ptr<i_resource> result;
+            load_resource(string{ aUri }, result);
+            return result;
+        }
     };
 }

@@ -25,28 +25,33 @@
 
 namespace neogfx
 {
-    class module_resource : public i_resource
+    class module_resource : public reference_counted<i_resource>
     {
     public:
         define_declared_event(Downloaded, downloaded)
         define_declared_event(FailedToDownload, failed_to_download)
     public:
+        typedef neolib::vector<uint8_t> data_type;
+        typedef data_type hash_digest_type;
+    public:
         module_resource(std::string const& aUri, const void* aData, std::size_t aSize);
     public:
-        virtual bool available() const;
-        virtual std::pair<bool, double> downloading() const;
-        virtual bool error() const;
-        virtual std::string const& error_string() const;
+        bool available() const override;
+        bool downloading() const override;
+        double downloading_progress() const override;
+        bool error() const override;
+        i_string const& error_string() const override;
     public:
-        virtual std::string const& uri() const;
-        virtual const void* cdata() const;
-        virtual const void* data() const;
-        virtual void* data();
-        virtual std::size_t size() const;
-        virtual hash_digest_type hash() const;
+        i_string const& uri() const override;
+        const void* cdata() const override;
+        const void* data() const override;
+        void* data() override;
+        std::size_t size() const override;
+        hash_digest_type const& hash() const override;
     private:
-        std::string iUri;
+        string iUri;
         const void* iData;
         std::size_t iSize;
+        mutable std::optional<data_type> iHash;
     };
 }

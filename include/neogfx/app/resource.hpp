@@ -27,33 +27,38 @@
 
 namespace neogfx
 {
-    class resource : public i_resource
+    class resource : public reference_counted<i_resource>
     {
     public:
         define_declared_event(Downloaded, downloaded)
         define_declared_event(FailedToDownload, failed_to_download)
+    public:
+        typedef neolib::vector<uint8_t> data_type;
+        typedef data_type hash_digest_type;
     public:
         resource() = delete;
         resource(i_resource_manager& aManager, std::string const& aUri);
         resource(i_resource_manager& aManager, std::string const& aUri, const void* aData, std::size_t aSize);
         ~resource();
     public:
-        virtual bool available() const;
-        virtual std::pair<bool, double> downloading() const;
-        virtual bool error() const;
-        virtual std::string const& error_string() const;
+        bool available() const override;
+        bool downloading() const override;
+        double downloading_progress() const override;
+        bool error() const override;
+        i_string const& error_string() const override;
     public:
-        virtual std::string const& uri() const;
-        virtual const void* cdata() const;
-        virtual const void* data() const;
-        virtual void* data();
-        virtual std::size_t size() const;
-        virtual hash_digest_type hash() const;
+        i_string const& uri() const override;
+        const void* cdata() const override;
+        const void* data() const override;
+        void* data() override;
+        std::size_t size() const override;
+        hash_digest_type const& hash() const override;
     private:
         i_resource_manager& iManager;
-        std::string iUri;
-        std::optional<std::string> iError;
+        string iUri;
+        std::optional<string> iError;
         std::size_t iSize;
-        std::vector<uint8_t> iData;
+        data_type iData;
+        mutable std::optional<data_type> iHash;
     };
 }

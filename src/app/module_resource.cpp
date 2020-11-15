@@ -33,9 +33,14 @@ namespace neogfx
         return true;
     }
 
-    std::pair<bool, double> module_resource::downloading() const
+    bool module_resource::downloading() const
     {
-        return std::make_pair(false, 100.0);
+        return false;
+    }
+
+    double module_resource::downloading_progress() const
+    {
+        return 100.0;
     }
 
     bool module_resource::error() const
@@ -43,13 +48,13 @@ namespace neogfx
         return false;
     }
 
-    std::string const& module_resource::error_string() const
+    i_string const& module_resource::error_string() const
     {
-        static const std::string sNoError;
+        static const string sNoError;
         return sNoError;
     }
 
-    std::string const& module_resource::uri() const
+    i_string const& module_resource::uri() const
     {
         return iUri;
     }
@@ -74,10 +79,14 @@ namespace neogfx
         return iSize;
     }
 
-    module_resource::hash_digest_type module_resource::hash() const
+    module_resource::hash_digest_type const& module_resource::hash() const
     {
-        hash_digest_type result{ SHA256_DIGEST_LENGTH };
-        SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
-        return result;
+        if (!iHash)
+        {
+            hash_digest_type::container_type result{ SHA256_DIGEST_LENGTH };
+            SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+            iHash = result;
+        }
+        return *iHash;
     }
 }

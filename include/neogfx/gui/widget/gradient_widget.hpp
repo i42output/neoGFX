@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
-#include <neogfx/app/i_resource.hpp>
+#include <neogfx/app/resource.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
@@ -95,7 +95,7 @@ namespace neogfx
         std::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
         bool iTracking;
         std::unique_ptr<context_menu> iMenu;
-        mutable std::map<i_resource::hash_digest_type, texture> iStopTextures;
+        mutable std::map<resource::hash_digest_type, texture> iStopTextures;
         std::optional<color_dialog::custom_color_list> iCustomColors;
     };
 }

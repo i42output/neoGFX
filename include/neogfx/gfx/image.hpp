@@ -28,7 +28,7 @@
 
 namespace neogfx
 {
-    class image : public i_image
+    class image : public reference_counted<i_image>
     {
     public:
         define_declared_event(Downloaded, downloaded)
@@ -39,6 +39,9 @@ namespace neogfx
             UnknownImage,
             PngImage
         };
+    public:
+        typedef neolib::vector<uint8_t> data_type;
+        typedef data_type hash_digest_type;
     private:
         struct error_parsing_image_pattern : std::logic_error { error_parsing_image_pattern() : std::logic_error("neogfx::image::error_parsing_image_pattern") {} };
         struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
@@ -52,16 +55,17 @@ namespace neogfx
         ~image();
     public:
         bool available() const override;
-        std::pair<bool, double> downloading() const override;
+        bool downloading() const override;
+        double downloading_progress() const override;
         bool error() const override;
-        std::string const& error_string() const override;
+        i_string const& error_string() const override;
     public:
-        std::string const& uri() const override;
+        i_string const& uri() const override;
         const void* cdata() const override;
         const void* data() const override;
         void* data() override;
         std::size_t size() const override;
-        hash_digest_type hash() const override;
+        hash_digest_type const& hash() const override;
     public:
         dimension dpi_scale_factor() const override;
         neogfx::color_space color_space() const override;
@@ -82,13 +86,14 @@ namespace neogfx
         bool load();
         bool load_png();
     private:
-        i_resource::pointer iResource;
-        std::string iUri;
-        std::optional<std::string> iError;
+        ref_ptr<i_resource> iResource;
+        string iUri;
+        std::optional<string> iError;
         dimension iDpiScaleFactor;
         neogfx::color_space iColorSpace;
         neogfx::color_format iColorFormat;
         data_type iData;
+        mutable std::optional<data_type> iHash;
         texture_sampling iSampling;
         neogfx::size iSize;
     };

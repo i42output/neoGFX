@@ -47,7 +47,7 @@ namespace neogfx
                 {
                     if (archive.file_path(i) == uri.fragment())
                     {
-                        archive.extract_to(i, iData);
+                        archive.extract_to(i, iData.container());
                         iSize = iData.size();
                     }
                 }
@@ -57,13 +57,13 @@ namespace neogfx
         {
             if (!uri.fragment().empty()) // asset archive
             {
-                auto assetArchive = aManager.load_resource(":/" + uri.path());
+                auto assetArchive = aManager.load_resource(string{ ":/" + uri.path() });
                 neolib::zip archive{assetArchive->cdata(), assetArchive->size()};
                 for (std::size_t i = 0; i < archive.file_count(); ++i)
                 {
                     if (archive.file_path(i) == uri.fragment())
                     {
-                        archive.extract_to(i, iData);
+                        archive.extract_to(i, iData.container());
                         iSize = iData.size();
                     }
                     else
@@ -74,7 +74,7 @@ namespace neogfx
                         oss << otherResource;
                         neolib::zip::buffer_type buffer;
                         archive.extract_to(i, buffer);
-                        aManager.add_resource(oss.str(), &buffer[0], buffer.size());
+                        aManager.add_resource(string{ oss.str() }, & buffer[0], buffer.size());
                     }
                 }
             }
@@ -96,14 +96,24 @@ namespace neogfx
         return iSize != 0 && iData.size() == iSize;
     }
 
-    std::pair<bool, double> resource::downloading() const
+    bool resource::downloading() const
     {
         if (iSize == 0)
-            return std::make_pair(false, 0.0);
+            return false;
         else if (iData.size() != iSize)
-            return std::make_pair(true, 100.0 * iData.size() / iSize);
+            return true;
         else
-            return std::make_pair(false, 100.0);
+            return false;
+    }
+
+    double resource::downloading_progress() const
+    {
+        if (iSize == 0)
+            return 0.0;
+        else if (iData.size() != iSize)
+            return 100.0 * iData.size() / iSize;
+        else
+            return 100.0;
     }
 
     bool resource::error() const
@@ -111,15 +121,15 @@ namespace neogfx
         return iError != std::nullopt;
     }
 
-    std::string const& resource::error_string() const
+    i_string const& resource::error_string() const
     {
         if (iError != std::nullopt)
             return *iError;
-        static const std::string sNoError;
+        static const string sNoError;
         return sNoError;
     }
 
-    std::string const& resource::uri() const
+    i_string const& resource::uri() const
     {
         return iUri;
     }
@@ -146,10 +156,14 @@ namespace neogfx
         return iData.size();
     }
 
-    resource::hash_digest_type resource::hash() const
+    resource::hash_digest_type const& resource::hash() const
     {
-        hash_digest_type result{ SHA256_DIGEST_LENGTH };
-        SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
-        return result;
+        if (!iHash)
+        {
+            hash_digest_type::container_type result{ SHA256_DIGEST_LENGTH };
+            SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+            iHash = result;
+        }
+        return *iHash;
     }
 }

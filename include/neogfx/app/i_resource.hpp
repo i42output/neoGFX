@@ -24,16 +24,16 @@
 
 namespace neogfx
 {
-    class i_resource
+    class i_resource : public i_reference_counted
     {
     public:
         declare_event(downloaded)
         declare_event(failed_to_download)
     public:
-        typedef std::vector<uint8_t> data_type;
+        typedef i_resource abstract_type;
+    public:
+        typedef neolib::i_vector<uint8_t> data_type;
         typedef data_type hash_digest_type;
-        typedef std::shared_ptr<i_resource> pointer;
-        typedef std::weak_ptr<i_resource> weak_pointer;
     public:
         struct not_available : std::logic_error { not_available() : std::logic_error("neogfx::i_resource::not_available") {} };
         struct no_data : std::logic_error { no_data() : std::logic_error("neogfx::i_resource::no_data") {} };
@@ -42,15 +42,16 @@ namespace neogfx
         virtual ~i_resource() = default;
     public:
         virtual bool available() const = 0;
-        virtual std::pair<bool, double> downloading() const = 0;
+        virtual bool downloading() const = 0;
+        virtual double downloading_progress() const = 0;
         virtual bool error() const = 0;
-        virtual std::string const& error_string() const = 0;
+        virtual i_string const& error_string() const = 0;
     public:
-        virtual std::string const& uri() const = 0;
+        virtual i_string const& uri() const = 0;
         virtual const void* cdata() const = 0;
         virtual const void* data() const = 0;
         virtual void* data() = 0;
         virtual std::size_t size() const = 0;
-        virtual hash_digest_type hash() const = 0;
+        virtual hash_digest_type const& hash() const = 0;
     };
 }

@@ -31,14 +31,17 @@ namespace neogfx
         resource_manager();
         static resource_manager& instance();
     public:
-        virtual void add_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize);
-        virtual void add_module_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize);
-        virtual i_resource::pointer load_resource(std::string const& aUri);
+        using i_resource_manager::add_resource;
+        using i_resource_manager::add_module_resource;
+        using i_resource_manager::load_resource;
+        void add_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize) override;
+        void add_module_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize) override;
+        void load_resource(i_string const& aUri, i_ref_ptr<i_resource>& aResult) override;
     public:
-        virtual void cleanup();
-        virtual void clean();
+        void cleanup() override;
+        void clean() override;
     private:
-        std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
-        std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResourceArchives;
+        std::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResources;
+        std::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResourceArchives;
     };
 }

@@ -141,12 +141,20 @@ namespace neogfx
             return true;
     }
 
-    std::pair<bool, double> image::downloading() const
+    bool image::downloading() const
     {
         if (has_resource())
             return resource().downloading();
         else
-            return std::make_pair(false, 100.0);
+            return false;
+    }
+
+    double image::downloading_progress() const
+    {
+        if (has_resource())
+            return resource().downloading_progress();
+        else
+            return 100.0;
     }
 
     bool image::error() const
@@ -157,17 +165,17 @@ namespace neogfx
             return iError != std::nullopt;
     }
 
-    std::string const& image::error_string() const
+    i_string const& image::error_string() const
     {
         if (has_resource())
             return resource().error_string();
         else if (iError != std::nullopt)
             return *iError;
-        static const std::string sNoError;
+        static const string sNoError;
         return sNoError;
     }
 
-    std::string const& image::uri() const
+    i_string const& image::uri() const
     {
         return iUri;
     }
@@ -194,11 +202,15 @@ namespace neogfx
         return iData.size();
     }
 
-    image::hash_digest_type image::hash() const
+    image::hash_digest_type const& image::hash() const
     {
-        hash_digest_type result(SHA256_DIGEST_LENGTH);
-        SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
-        return result;
+        if (!iHash)
+        {
+            hash_digest_type::container_type result(SHA256_DIGEST_LENGTH);
+            SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+            iHash = result;
+        }
+        return *iHash;
     }
 
     dimension image::dpi_scale_factor() const
