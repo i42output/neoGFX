@@ -63,22 +63,20 @@ namespace neogfx
     }
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::label_placement> neolib::enum_enumerators_v<neogfx::label_placement>
-{
-    declare_enum_string(neogfx::label_placement, TextHorizontal)
-    declare_enum_string(neogfx::label_placement, TextVertical)
-    declare_enum_string(neogfx::label_placement, ImageHorizontal)
-    declare_enum_string(neogfx::label_placement, ImageVertical)
-    declare_enum_string(neogfx::label_placement, TextImageHorizontal)
-    declare_enum_string(neogfx::label_placement, TextImageVertical)
-    declare_enum_string(neogfx::label_placement, ImageTextHorizontal)
-    declare_enum_string(neogfx::label_placement, ImageTextVertical)
-    declare_enum_string(neogfx::label_placement, TextSpacerImageHorizontal)
-    declare_enum_string(neogfx::label_placement, TextSpacerImageVertical)
-    declare_enum_string(neogfx::label_placement, ImageSpacerTextHorizontal)
-    declare_enum_string(neogfx::label_placement, ImageSpacerTextVertical)
-};
+begin_declare_enum(neogfx::label_placement)
+declare_enum_string(neogfx::label_placement, TextHorizontal)
+declare_enum_string(neogfx::label_placement, TextVertical)
+declare_enum_string(neogfx::label_placement, ImageHorizontal)
+declare_enum_string(neogfx::label_placement, ImageVertical)
+declare_enum_string(neogfx::label_placement, TextImageHorizontal)
+declare_enum_string(neogfx::label_placement, TextImageVertical)
+declare_enum_string(neogfx::label_placement, ImageTextHorizontal)
+declare_enum_string(neogfx::label_placement, ImageTextVertical)
+declare_enum_string(neogfx::label_placement, TextSpacerImageHorizontal)
+declare_enum_string(neogfx::label_placement, TextSpacerImageVertical)
+declare_enum_string(neogfx::label_placement, ImageSpacerTextHorizontal)
+declare_enum_string(neogfx::label_placement, ImageSpacerTextVertical)
+end_declare_enum(neogfx::label_placement)
 
 namespace neogfx
 {

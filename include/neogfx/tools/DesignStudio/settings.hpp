@@ -43,23 +43,19 @@ namespace neogfx::DesignStudio
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::DesignStudio::workspace_grid> neolib::enum_enumerators_v<neogfx::DesignStudio::workspace_grid>
-{
-    declare_enum_string(neogfx::DesignStudio::workspace_grid, Lines)
-    declare_enum_string(neogfx::DesignStudio::workspace_grid, Quads)
-    declare_enum_string(neogfx::DesignStudio::workspace_grid, Points)
-};
+begin_declare_enum(neogfx::DesignStudio::workspace_grid)
+declare_enum_string(neogfx::DesignStudio::workspace_grid, Lines)
+declare_enum_string(neogfx::DesignStudio::workspace_grid, Quads)
+declare_enum_string(neogfx::DesignStudio::workspace_grid, Points)
+end_declare_enum(neogfx::DesignStudio::workspace_grid)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::DesignStudio::toolbar_icon_size> neolib::enum_enumerators_v<neogfx::DesignStudio::toolbar_icon_size>
-{
-    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size16x16)
-    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size24x24)
-    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size32x32)
-    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size48x48)
-    declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size64x64)
-};
+begin_declare_enum(neogfx::DesignStudio::toolbar_icon_size)
+declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size16x16)
+declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size24x24)
+declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size32x32)
+declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size48x48)
+declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size64x64)
+end_declare_enum(neogfx::DesignStudio::toolbar_icon_size)
 
 namespace neogfx::DesignStudio
 {

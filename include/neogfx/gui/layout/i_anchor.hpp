@@ -37,15 +37,13 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::anchor_constraint_function> neolib::enum_enumerators_v<neogfx::anchor_constraint_function>
-{
-    declare_enum_string(neogfx::anchor_constraint_function, Identity)
-    declare_enum_string(neogfx::anchor_constraint_function, Equal)
-    declare_enum_string(neogfx::anchor_constraint_function, Min)
-    declare_enum_string(neogfx::anchor_constraint_function, Max)
-    declare_enum_string(neogfx::anchor_constraint_function, Custom)
-};
+begin_declare_enum(neogfx::anchor_constraint_function)
+declare_enum_string(neogfx::anchor_constraint_function, Identity)
+declare_enum_string(neogfx::anchor_constraint_function, Equal)
+declare_enum_string(neogfx::anchor_constraint_function, Min)
+declare_enum_string(neogfx::anchor_constraint_function, Max)
+declare_enum_string(neogfx::anchor_constraint_function, Custom)
+end_declare_enum(neogfx::anchor_constraint_function)
 
 namespace neogfx
 {

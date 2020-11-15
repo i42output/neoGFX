@@ -65,19 +65,17 @@ namespace neogfx
     }
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::font_style> neolib::enum_enumerators_v<neogfx::font_style>
-{
-    declare_enum_string(neogfx::font_style, Invalid)
-    declare_enum_string(neogfx::font_style, Normal)
-    declare_enum_string(neogfx::font_style, Italic)
-    declare_enum_string(neogfx::font_style, Bold)
-    declare_enum_string(neogfx::font_style, Underline)
-    declare_enum_string(neogfx::font_style, BoldItalic)
-    declare_enum_string(neogfx::font_style, BoldItalicUnderline)
-    declare_enum_string(neogfx::font_style, BoldUnderline)
-    declare_enum_string(neogfx::font_style, ItalicUnderline)
-};
+begin_declare_enum(neogfx::font_style)
+declare_enum_string(neogfx::font_style, Invalid)
+declare_enum_string(neogfx::font_style, Normal)
+declare_enum_string(neogfx::font_style, Italic)
+declare_enum_string(neogfx::font_style, Bold)
+declare_enum_string(neogfx::font_style, Underline)
+declare_enum_string(neogfx::font_style, BoldItalic)
+declare_enum_string(neogfx::font_style, BoldItalicUnderline)
+declare_enum_string(neogfx::font_style, BoldUnderline)
+declare_enum_string(neogfx::font_style, ItalicUnderline)
+end_declare_enum(neogfx::font_style)
 
 namespace neogfx 
 {

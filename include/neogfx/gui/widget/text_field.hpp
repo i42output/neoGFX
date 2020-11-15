@@ -32,12 +32,10 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::text_field_placement> neolib::enum_enumerators_v<neogfx::text_field_placement>
-{
-    declare_enum_string(neogfx::text_field_placement, LabelLeft)
-    declare_enum_string(neogfx::text_field_placement, LabelAbove)
-};
+begin_declare_enum(neogfx::text_field_placement)
+declare_enum_string(neogfx::text_field_placement, LabelLeft)
+declare_enum_string(neogfx::text_field_placement, LabelAbove)
+end_declare_enum(neogfx::text_field_placement)
 
 namespace neogfx
 {

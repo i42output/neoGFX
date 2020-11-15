@@ -45,12 +45,10 @@ namespace neogfx
     }
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::expansion_policy> neolib::enum_enumerators_v<neogfx::expansion_policy>
-{
-    declare_enum_string(neogfx::expansion_policy, ExpandHorizontally)
-    declare_enum_string(neogfx::expansion_policy, ExpandVertically)
-};
+begin_declare_enum(neogfx::expansion_policy)
+declare_enum_string(neogfx::expansion_policy, ExpandHorizontally)
+declare_enum_string(neogfx::expansion_policy, ExpandVertically)
+end_declare_enum(neogfx::expansion_policy)
 
 namespace neogfx
 {

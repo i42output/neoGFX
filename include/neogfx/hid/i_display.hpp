@@ -39,15 +39,13 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::subpixel_format> neolib::enum_enumerators_v<neogfx::subpixel_format>
-{
-    declare_enum_string(neogfx::subpixel_format, None)
-    declare_enum_string(neogfx::subpixel_format, RGBHorizontal)
-    declare_enum_string(neogfx::subpixel_format, BGRHorizontal)
-    declare_enum_string(neogfx::subpixel_format, RGBVertical)
-    declare_enum_string(neogfx::subpixel_format, BGRVertical)
-};
+begin_declare_enum(neogfx::subpixel_format)
+declare_enum_string(neogfx::subpixel_format, None)
+declare_enum_string(neogfx::subpixel_format, RGBHorizontal)
+declare_enum_string(neogfx::subpixel_format, BGRHorizontal)
+declare_enum_string(neogfx::subpixel_format, RGBVertical)
+declare_enum_string(neogfx::subpixel_format, BGRVertical)
+end_declare_enum(neogfx::subpixel_format)
 
 namespace neogfx
 {

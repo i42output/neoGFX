@@ -112,6 +112,10 @@ namespace neogfx::nrc
     {
     }
 
+    default_ui_element_library::~default_ui_element_library()
+    {
+    }
+
     bool default_ui_element_library::handles_element(const neolib::i_string& aElementType) const
     {
         return iRootElements.find(aElementType) != iRootElements.end();

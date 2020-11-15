@@ -31,12 +31,10 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::slider_orientation> neolib::enum_enumerators_v<neogfx::slider_orientation>
-{
-    declare_enum_string(neogfx::slider_orientation, Horizontal)
-    declare_enum_string(neogfx::slider_orientation, Vertical)
-};
+begin_declare_enum(neogfx::slider_orientation)
+declare_enum_string(neogfx::slider_orientation, Horizontal)
+declare_enum_string(neogfx::slider_orientation, Vertical)
+end_declare_enum(neogfx::slider_orientation)
 
 namespace neogfx
 {

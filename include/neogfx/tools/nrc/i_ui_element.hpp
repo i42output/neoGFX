@@ -52,12 +52,10 @@ namespace neogfx::nrc
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::nrc::widget_type> neolib::enum_enumerators_v<neogfx::nrc::widget_type>
-{
-    declare_enum_string(neogfx::nrc::widget_type, TopLevel)
-    declare_enum_string(neogfx::nrc::widget_type, Child)
-};
+begin_declare_enum(neogfx::nrc::widget_type)
+declare_enum_string(neogfx::nrc::widget_type, TopLevel)
+declare_enum_string(neogfx::nrc::widget_type, Child)
+end_declare_enum(neogfx::nrc::widget_type)
 
 namespace neogfx::nrc 
 {

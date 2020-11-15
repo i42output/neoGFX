@@ -54,21 +54,19 @@ namespace neogfx
     }
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::dock_area> neolib::enum_enumerators_v<neogfx::dock_area>
-{
-    declare_enum_string(neogfx::dock_area, Top)
-    declare_enum_string(neogfx::dock_area, Bottom)
-    declare_enum_string(neogfx::dock_area, Left)
-    declare_enum_string(neogfx::dock_area, Right)
-    declare_enum_string(neogfx::dock_area, North)
-    declare_enum_string(neogfx::dock_area, South)
-    declare_enum_string(neogfx::dock_area, East)
-    declare_enum_string(neogfx::dock_area, West)
-    declare_enum_string(neogfx::dock_area, Horizontal)
-    declare_enum_string(neogfx::dock_area, Vertical)
-    declare_enum_string(neogfx::dock_area, Any)
-};
+begin_declare_enum(neogfx::dock_area)
+declare_enum_string(neogfx::dock_area, Top)
+declare_enum_string(neogfx::dock_area, Bottom)
+declare_enum_string(neogfx::dock_area, Left)
+declare_enum_string(neogfx::dock_area, Right)
+declare_enum_string(neogfx::dock_area, North)
+declare_enum_string(neogfx::dock_area, South)
+declare_enum_string(neogfx::dock_area, East)
+declare_enum_string(neogfx::dock_area, West)
+declare_enum_string(neogfx::dock_area, Horizontal)
+declare_enum_string(neogfx::dock_area, Vertical)
+declare_enum_string(neogfx::dock_area, Any)
+end_declare_enum(neogfx::dock_area)
 
 namespace neogfx
 {

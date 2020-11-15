@@ -95,47 +95,43 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::window_style> neolib::enum_enumerators_v<neogfx::window_style>
-{
-    declare_enum_string(neogfx::window_style, Invalid)
-    declare_enum_string(neogfx::window_style, NoDecoration)
-    declare_enum_string(neogfx::window_style, TitleBar)
-    declare_enum_string(neogfx::window_style, NativeTitleBar)
-    declare_enum_string(neogfx::window_style, SystemMenu)
-    declare_enum_string(neogfx::window_style, MinimizeBox)
-    declare_enum_string(neogfx::window_style, MaximizeBox)
-    declare_enum_string(neogfx::window_style, Resize)
-    declare_enum_string(neogfx::window_style, Close)
-    declare_enum_string(neogfx::window_style, Nested)
-    declare_enum_string(neogfx::window_style, Fullscreen)
-    declare_enum_string(neogfx::window_style, Main)
-    declare_enum_string(neogfx::window_style, Dialog)
-    declare_enum_string(neogfx::window_style, Popup)
-    declare_enum_string(neogfx::window_style, Tool)
-    declare_enum_string(neogfx::window_style, Modal)
-    declare_enum_string(neogfx::window_style, ApplicationModal)
-    declare_enum_string(neogfx::window_style, NoActivate)
-    declare_enum_string(neogfx::window_style, RequiresOwnerFocus)
-    declare_enum_string(neogfx::window_style, DismissOnOwnerClick)
-    declare_enum_string(neogfx::window_style, DismissOnParentClick)
-    declare_enum_string(neogfx::window_style, HideOnOwnerClick)
-    declare_enum_string(neogfx::window_style, HideOnParentClick)
-    declare_enum_string(neogfx::window_style, InitiallyHidden)
-    declare_enum_string(neogfx::window_style, InitiallyCentered)
-    declare_enum_string(neogfx::window_style, DropShadow)
-    declare_enum_string(neogfx::window_style, Weak)
-    declare_enum_string(neogfx::window_style, Default)
-    declare_enum_string(neogfx::window_style, DefaultDialog)
-};
+begin_declare_enum(neogfx::window_style)
+declare_enum_string(neogfx::window_style, Invalid)
+declare_enum_string(neogfx::window_style, NoDecoration)
+declare_enum_string(neogfx::window_style, TitleBar)
+declare_enum_string(neogfx::window_style, NativeTitleBar)
+declare_enum_string(neogfx::window_style, SystemMenu)
+declare_enum_string(neogfx::window_style, MinimizeBox)
+declare_enum_string(neogfx::window_style, MaximizeBox)
+declare_enum_string(neogfx::window_style, Resize)
+declare_enum_string(neogfx::window_style, Close)
+declare_enum_string(neogfx::window_style, Nested)
+declare_enum_string(neogfx::window_style, Fullscreen)
+declare_enum_string(neogfx::window_style, Main)
+declare_enum_string(neogfx::window_style, Dialog)
+declare_enum_string(neogfx::window_style, Popup)
+declare_enum_string(neogfx::window_style, Tool)
+declare_enum_string(neogfx::window_style, Modal)
+declare_enum_string(neogfx::window_style, ApplicationModal)
+declare_enum_string(neogfx::window_style, NoActivate)
+declare_enum_string(neogfx::window_style, RequiresOwnerFocus)
+declare_enum_string(neogfx::window_style, DismissOnOwnerClick)
+declare_enum_string(neogfx::window_style, DismissOnParentClick)
+declare_enum_string(neogfx::window_style, HideOnOwnerClick)
+declare_enum_string(neogfx::window_style, HideOnParentClick)
+declare_enum_string(neogfx::window_style, InitiallyHidden)
+declare_enum_string(neogfx::window_style, InitiallyCentered)
+declare_enum_string(neogfx::window_style, DropShadow)
+declare_enum_string(neogfx::window_style, Weak)
+declare_enum_string(neogfx::window_style, Default)
+declare_enum_string(neogfx::window_style, DefaultDialog)
+end_declare_enum(neogfx::window_style)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::window_state> neolib::enum_enumerators_v<neogfx::window_state>
-{
-    declare_enum_string(neogfx::window_state, Normal)
-    declare_enum_string(neogfx::window_state, Iconized)
-    declare_enum_string(neogfx::window_state, Maximized)
-};
+begin_declare_enum(neogfx::window_state)
+declare_enum_string(neogfx::window_state, Normal)
+declare_enum_string(neogfx::window_state, Iconized)
+declare_enum_string(neogfx::window_state, Maximized)
+end_declare_enum(neogfx::window_state)
 
 namespace neogfx
 {

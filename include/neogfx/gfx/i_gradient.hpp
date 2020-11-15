@@ -63,31 +63,25 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::gradient_direction> neolib::enum_enumerators_v<neogfx::gradient_direction>
-{
-    declare_enum_string(neogfx::gradient_direction, Vertical)
-    declare_enum_string(neogfx::gradient_direction, Horizontal)
-    declare_enum_string(neogfx::gradient_direction, Diagonal)
-    declare_enum_string(neogfx::gradient_direction, Rectangular)
-    declare_enum_string(neogfx::gradient_direction, Radial)
-};
+begin_declare_enum(neogfx::gradient_direction)
+declare_enum_string(neogfx::gradient_direction, Vertical)
+declare_enum_string(neogfx::gradient_direction, Horizontal)
+declare_enum_string(neogfx::gradient_direction, Diagonal)
+declare_enum_string(neogfx::gradient_direction, Rectangular)
+declare_enum_string(neogfx::gradient_direction, Radial)
+end_declare_enum(neogfx::gradient_direction)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::gradient_shape> neolib::enum_enumerators_v<neogfx::gradient_shape>
-{
-    declare_enum_string(neogfx::gradient_shape, Ellipse)
-    declare_enum_string(neogfx::gradient_shape, Circle)
-};
+begin_declare_enum(neogfx::gradient_shape)
+declare_enum_string(neogfx::gradient_shape, Ellipse)
+declare_enum_string(neogfx::gradient_shape, Circle)
+end_declare_enum(neogfx::gradient_shape)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::gradient_size> neolib::enum_enumerators_v<neogfx::gradient_size>
-{
-    declare_enum_string(neogfx::gradient_size, ClosestSide)
-    declare_enum_string(neogfx::gradient_size, FarthestSide)
-    declare_enum_string(neogfx::gradient_size, ClosestCorner)
-    declare_enum_string(neogfx::gradient_size, FarthestCorner)
-};
+begin_declare_enum(neogfx::gradient_size)
+declare_enum_string(neogfx::gradient_size, ClosestSide)
+declare_enum_string(neogfx::gradient_size, FarthestSide)
+declare_enum_string(neogfx::gradient_size, ClosestCorner)
+declare_enum_string(neogfx::gradient_size, FarthestCorner)
+end_declare_enum(neogfx::gradient_size)
 
 namespace neogfx
 {

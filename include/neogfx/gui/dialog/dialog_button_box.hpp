@@ -78,47 +78,43 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::standard_button> neolib::enum_enumerators_v<neogfx::standard_button>
-{
-    declare_enum_string(neogfx::standard_button, Ok)
-    declare_enum_string(neogfx::standard_button, Cancel)
-    declare_enum_string(neogfx::standard_button, Close)
-    declare_enum_string(neogfx::standard_button, Discard)
-    declare_enum_string(neogfx::standard_button, Apply)
-    declare_enum_string(neogfx::standard_button, Reset)
-    declare_enum_string(neogfx::standard_button, RestoreDefaults)
-    declare_enum_string(neogfx::standard_button, Yes)
-    declare_enum_string(neogfx::standard_button, No)
-    declare_enum_string(neogfx::standard_button, YesToAll)
-    declare_enum_string(neogfx::standard_button, NoToAll)
-    declare_enum_string(neogfx::standard_button, Abort)
-    declare_enum_string(neogfx::standard_button, Retry)
-    declare_enum_string(neogfx::standard_button, Ignore)
-    declare_enum_string(neogfx::standard_button, Open)
-    declare_enum_string(neogfx::standard_button, Save)
-    declare_enum_string(neogfx::standard_button, SaveAll)
-    declare_enum_string(neogfx::standard_button, Help)
-    declare_enum_string(neogfx::standard_button, Custom1)
-    declare_enum_string(neogfx::standard_button, Custom2)
-    declare_enum_string(neogfx::standard_button, Custom3)
-    declare_enum_string(neogfx::standard_button, Custom4)
-};
+begin_declare_enum(neogfx::standard_button)
+declare_enum_string(neogfx::standard_button, Ok)
+declare_enum_string(neogfx::standard_button, Cancel)
+declare_enum_string(neogfx::standard_button, Close)
+declare_enum_string(neogfx::standard_button, Discard)
+declare_enum_string(neogfx::standard_button, Apply)
+declare_enum_string(neogfx::standard_button, Reset)
+declare_enum_string(neogfx::standard_button, RestoreDefaults)
+declare_enum_string(neogfx::standard_button, Yes)
+declare_enum_string(neogfx::standard_button, No)
+declare_enum_string(neogfx::standard_button, YesToAll)
+declare_enum_string(neogfx::standard_button, NoToAll)
+declare_enum_string(neogfx::standard_button, Abort)
+declare_enum_string(neogfx::standard_button, Retry)
+declare_enum_string(neogfx::standard_button, Ignore)
+declare_enum_string(neogfx::standard_button, Open)
+declare_enum_string(neogfx::standard_button, Save)
+declare_enum_string(neogfx::standard_button, SaveAll)
+declare_enum_string(neogfx::standard_button, Help)
+declare_enum_string(neogfx::standard_button, Custom1)
+declare_enum_string(neogfx::standard_button, Custom2)
+declare_enum_string(neogfx::standard_button, Custom3)
+declare_enum_string(neogfx::standard_button, Custom4)
+end_declare_enum(neogfx::standard_button)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::button_role> neolib::enum_enumerators_v<neogfx::button_role>
-{
-    declare_enum_string(neogfx::button_role, Invalid)
-    declare_enum_string(neogfx::button_role, Accept)
-    declare_enum_string(neogfx::button_role, Reject)
-    declare_enum_string(neogfx::button_role, Destructive)
-    declare_enum_string(neogfx::button_role, Action)
-    declare_enum_string(neogfx::button_role, Apply)
-    declare_enum_string(neogfx::button_role, Reset)
-    declare_enum_string(neogfx::button_role, Yes)
-    declare_enum_string(neogfx::button_role, No)
-    declare_enum_string(neogfx::button_role, Help)
-};
+begin_declare_enum(neogfx::button_role)
+declare_enum_string(neogfx::button_role, Invalid)
+declare_enum_string(neogfx::button_role, Accept)
+declare_enum_string(neogfx::button_role, Reject)
+declare_enum_string(neogfx::button_role, Destructive)
+declare_enum_string(neogfx::button_role, Action)
+declare_enum_string(neogfx::button_role, Apply)
+declare_enum_string(neogfx::button_role, Reset)
+declare_enum_string(neogfx::button_role, Yes)
+declare_enum_string(neogfx::button_role, No)
+declare_enum_string(neogfx::button_role, Help)
+end_declare_enum(neogfx::button_role)
 
 namespace neogfx
 {

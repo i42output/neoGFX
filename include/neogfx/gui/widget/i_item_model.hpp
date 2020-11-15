@@ -70,43 +70,39 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::item_data_type> neolib::enum_enumerators_v<neogfx::item_data_type>
-{
-    declare_enum_string(neogfx::item_data_type, Unknown)
-    declare_enum_string(neogfx::item_data_type, Bool)
-    declare_enum_string(neogfx::item_data_type, Int32)
-    declare_enum_string(neogfx::item_data_type, UInt32)
-    declare_enum_string(neogfx::item_data_type, Int64)
-    declare_enum_string(neogfx::item_data_type, UInt64)
-    declare_enum_string(neogfx::item_data_type, Float)
-    declare_enum_string(neogfx::item_data_type, Double)
-    declare_enum_string(neogfx::item_data_type, String)
-    declare_enum_string(neogfx::item_data_type, Pointer)
-    declare_enum_string(neogfx::item_data_type, CustomType)
-    declare_enum_string(neogfx::item_data_type, ChoiceBool)
-    declare_enum_string(neogfx::item_data_type, ChoiceInt32)
-    declare_enum_string(neogfx::item_data_type, ChoiceUInt32)
-    declare_enum_string(neogfx::item_data_type, ChoiceInt64)
-    declare_enum_string(neogfx::item_data_type, ChoiceUInt16)
-    declare_enum_string(neogfx::item_data_type, ChoiceFloat)
-    declare_enum_string(neogfx::item_data_type, ChoiceDouble)
-    declare_enum_string(neogfx::item_data_type, ChoiceString)
-    declare_enum_string(neogfx::item_data_type, ChoicePointer)
-    declare_enum_string(neogfx::item_data_type, ChoiceCustomType)
-};
+begin_declare_enum(neogfx::item_data_type)
+declare_enum_string(neogfx::item_data_type, Unknown)
+declare_enum_string(neogfx::item_data_type, Bool)
+declare_enum_string(neogfx::item_data_type, Int32)
+declare_enum_string(neogfx::item_data_type, UInt32)
+declare_enum_string(neogfx::item_data_type, Int64)
+declare_enum_string(neogfx::item_data_type, UInt64)
+declare_enum_string(neogfx::item_data_type, Float)
+declare_enum_string(neogfx::item_data_type, Double)
+declare_enum_string(neogfx::item_data_type, String)
+declare_enum_string(neogfx::item_data_type, Pointer)
+declare_enum_string(neogfx::item_data_type, CustomType)
+declare_enum_string(neogfx::item_data_type, ChoiceBool)
+declare_enum_string(neogfx::item_data_type, ChoiceInt32)
+declare_enum_string(neogfx::item_data_type, ChoiceUInt32)
+declare_enum_string(neogfx::item_data_type, ChoiceInt64)
+declare_enum_string(neogfx::item_data_type, ChoiceUInt16)
+declare_enum_string(neogfx::item_data_type, ChoiceFloat)
+declare_enum_string(neogfx::item_data_type, ChoiceDouble)
+declare_enum_string(neogfx::item_data_type, ChoiceString)
+declare_enum_string(neogfx::item_data_type, ChoicePointer)
+declare_enum_string(neogfx::item_data_type, ChoiceCustomType)
+end_declare_enum(neogfx::item_data_type)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::item_cell_data_category> neolib::enum_enumerators_v<neogfx::item_cell_data_category>
-{
-    declare_enum_string(neogfx::item_cell_data_category, Invalid)
-    declare_enum_string(neogfx::item_cell_data_category, Value)
-    declare_enum_string(neogfx::item_cell_data_category, Pointer)
-    declare_enum_string(neogfx::item_cell_data_category, CustomType)
-    declare_enum_string(neogfx::item_cell_data_category, ChooseValue)
-    declare_enum_string(neogfx::item_cell_data_category, ChoosePointer)
-    declare_enum_string(neogfx::item_cell_data_category, ChooseCustomType)
-};
+begin_declare_enum(neogfx::item_cell_data_category)
+declare_enum_string(neogfx::item_cell_data_category, Invalid)
+declare_enum_string(neogfx::item_cell_data_category, Value)
+declare_enum_string(neogfx::item_cell_data_category, Pointer)
+declare_enum_string(neogfx::item_cell_data_category, CustomType)
+declare_enum_string(neogfx::item_cell_data_category, ChooseValue)
+declare_enum_string(neogfx::item_cell_data_category, ChoosePointer)
+declare_enum_string(neogfx::item_cell_data_category, ChooseCustomType)
+end_declare_enum(neogfx::item_cell_data_category)
 
 namespace neogfx
 {

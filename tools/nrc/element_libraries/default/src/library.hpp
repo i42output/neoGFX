@@ -40,6 +40,7 @@ namespace neogfx::nrc
         // construction
     public:
         default_ui_element_library(neolib::i_application& aApplication, std::string const& aPluginPath);
+        ~default_ui_element_library();
         // meta
     public:
         bool handles_element(const neolib::i_string& aElementType) const override;

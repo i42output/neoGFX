@@ -41,20 +41,18 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::alignment> neolib::enum_enumerators_v<neogfx::alignment>
-{
-    declare_enum_string(neogfx::alignment, None)
-    declare_enum_string(neogfx::alignment, Left)
-    declare_enum_string(neogfx::alignment, Right)
-    declare_enum_string(neogfx::alignment, Center)
-    declare_enum_string(neogfx::alignment, Justify)
-    declare_enum_string(neogfx::alignment, Top)
-    declare_enum_string(neogfx::alignment, VCenter)
-    declare_enum_string(neogfx::alignment, Bottom)
-    declare_enum_string(neogfx::alignment, Horizontal) 
-    declare_enum_string(neogfx::alignment, Vertical)
-};
+begin_declare_enum(neogfx::alignment)
+declare_enum_string(neogfx::alignment, None)
+declare_enum_string(neogfx::alignment, Left)
+declare_enum_string(neogfx::alignment, Right)
+declare_enum_string(neogfx::alignment, Center)
+declare_enum_string(neogfx::alignment, Justify)
+declare_enum_string(neogfx::alignment, Top)
+declare_enum_string(neogfx::alignment, VCenter)
+declare_enum_string(neogfx::alignment, Bottom)
+declare_enum_string(neogfx::alignment, Horizontal) 
+declare_enum_string(neogfx::alignment, Vertical)
+end_declare_enum(neogfx::alignment)
 
 namespace neogfx
 {

@@ -67,49 +67,41 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::size_constraint> neolib::enum_enumerators_v<neogfx::size_constraint>
-{
-    declare_enum_string(neogfx::size_constraint, Fixed)
-    declare_enum_string(neogfx::size_constraint, Minimum)
-    declare_enum_string(neogfx::size_constraint, Maximum)
-    declare_enum_string(neogfx::size_constraint, Expanding)
-    declare_enum_string(neogfx::size_constraint, MinimumExpanding)
-    declare_enum_string(neogfx::size_constraint, ExpandingUniform)
-    declare_enum_string(neogfx::size_constraint, Manual)
-};
+begin_declare_enum(neogfx::size_constraint)
+declare_enum_string(neogfx::size_constraint, Fixed)
+declare_enum_string(neogfx::size_constraint, Minimum)
+declare_enum_string(neogfx::size_constraint, Maximum)
+declare_enum_string(neogfx::size_constraint, Expanding)
+declare_enum_string(neogfx::size_constraint, MinimumExpanding)
+declare_enum_string(neogfx::size_constraint, ExpandingUniform)
+declare_enum_string(neogfx::size_constraint, Manual)
+end_declare_enum(neogfx::size_constraint)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::aspect_ratio> neolib::enum_enumerators_v<neogfx::aspect_ratio>
-{
-    declare_enum_string(neogfx::aspect_ratio, Ignore)
-    declare_enum_string(neogfx::aspect_ratio, Stretch)
-    declare_enum_string(neogfx::aspect_ratio, Keep)
-    declare_enum_string(neogfx::aspect_ratio, KeepExpanding)
-};
+begin_declare_enum(neogfx::aspect_ratio)
+declare_enum_string(neogfx::aspect_ratio, Ignore)
+declare_enum_string(neogfx::aspect_ratio, Stretch)
+declare_enum_string(neogfx::aspect_ratio, Keep)
+declare_enum_string(neogfx::aspect_ratio, KeepExpanding)
+end_declare_enum(neogfx::aspect_ratio)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::cardinal> neolib::enum_enumerators_v<neogfx::cardinal>
-{
-    declare_enum_string(neogfx::cardinal, NorthWest)
-    declare_enum_string(neogfx::cardinal, North)
-    declare_enum_string(neogfx::cardinal, NorthEast)
-    declare_enum_string(neogfx::cardinal, West)
-    declare_enum_string(neogfx::cardinal, Center)
-    declare_enum_string(neogfx::cardinal, East)
-    declare_enum_string(neogfx::cardinal, SouthWest)
-    declare_enum_string(neogfx::cardinal, South)
-    declare_enum_string(neogfx::cardinal, SouthEast)
-};
+begin_declare_enum(neogfx::cardinal)
+declare_enum_string(neogfx::cardinal, NorthWest)
+declare_enum_string(neogfx::cardinal, North)
+declare_enum_string(neogfx::cardinal, NorthEast)
+declare_enum_string(neogfx::cardinal, West)
+declare_enum_string(neogfx::cardinal, Center)
+declare_enum_string(neogfx::cardinal, East)
+declare_enum_string(neogfx::cardinal, SouthWest)
+declare_enum_string(neogfx::cardinal, South)
+declare_enum_string(neogfx::cardinal, SouthEast)
+end_declare_enum(neogfx::cardinal)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::corner> neolib::enum_enumerators_v<neogfx::corner>
-{
-    declare_enum_string(neogfx::corner, TopLeft)
-    declare_enum_string(neogfx::corner, TopRight)
-    declare_enum_string(neogfx::corner, BottomRight)
-    declare_enum_string(neogfx::corner, BottomLeft)
-};
+begin_declare_enum(neogfx::corner)
+declare_enum_string(neogfx::corner, TopLeft)
+declare_enum_string(neogfx::corner, TopRight)
+declare_enum_string(neogfx::corner, BottomRight)
+declare_enum_string(neogfx::corner, BottomLeft)
+end_declare_enum(neogfx::corner)
 
 namespace neogfx
 {

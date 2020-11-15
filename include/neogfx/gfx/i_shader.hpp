@@ -83,47 +83,41 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::shader_variable_qualifier> neolib::enum_enumerators_v<neogfx::shader_variable_qualifier>
-{
-    declare_enum_string_explicit(neogfx::shader_variable_qualifier, In, in)
-    declare_enum_string_explicit(neogfx::shader_variable_qualifier, Out, out)
-};
+begin_declare_enum(neogfx::shader_variable_qualifier)
+declare_enum_string_explicit(neogfx::shader_variable_qualifier, In, in)
+declare_enum_string_explicit(neogfx::shader_variable_qualifier, Out, out)
+end_declare_enum(neogfx::shader_variable_qualifier)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::shader_language> neolib::enum_enumerators_v<neogfx::shader_language>
-{
-    declare_enum_string(neogfx::shader_language, Glsl)
-};
+begin_declare_enum(neogfx::shader_language)
+declare_enum_string(neogfx::shader_language, Glsl)
+end_declare_enum(neogfx::shader_language)
 
-template <>
-const neolib::enum_enumerators_t<neogfx::shader_data_type> neolib::enum_enumerators_v<neogfx::shader_data_type>
-{
-    declare_enum_string_explicit(neogfx::shader_data_type, Boolean, bool)
-    declare_enum_string_explicit(neogfx::shader_data_type, Float, float)
-    declare_enum_string_explicit(neogfx::shader_data_type, Double, double)
-    declare_enum_string_explicit(neogfx::shader_data_type, Int, int)
-    declare_enum_string_explicit(neogfx::shader_data_type, Uint, uint)
-    declare_enum_string_explicit(neogfx::shader_data_type, Vec2, vec2)
-    declare_enum_string_explicit(neogfx::shader_data_type, DVec2, dvec2)
-    declare_enum_string_explicit(neogfx::shader_data_type, IVec2, ivec2)
-    declare_enum_string_explicit(neogfx::shader_data_type, UVec2, uvec2)
-    declare_enum_string_explicit(neogfx::shader_data_type, Vec3, vec3)
-    declare_enum_string_explicit(neogfx::shader_data_type, DVec3, dvec3)
-    declare_enum_string_explicit(neogfx::shader_data_type, IVec3, ivec3)
-    declare_enum_string_explicit(neogfx::shader_data_type, UVec3, uvec3)
-    declare_enum_string_explicit(neogfx::shader_data_type, Vec4, vec4)
-    declare_enum_string_explicit(neogfx::shader_data_type, DVec4, dvec4)
-    declare_enum_string_explicit(neogfx::shader_data_type, IVec4, ivec4)
-    declare_enum_string_explicit(neogfx::shader_data_type, UVec4, uvec4)
-    declare_enum_string_explicit(neogfx::shader_data_type, Mat4, mat4)
-    declare_enum_string_explicit(neogfx::shader_data_type, DMat4, dmat4)
-    declare_enum_string(neogfx::shader_data_type, FloatArray)
-    declare_enum_string(neogfx::shader_data_type, DoubleArray)
-    declare_enum_string_explicit(neogfx::shader_data_type, Sampler2D, sampler2D)
-    declare_enum_string_explicit(neogfx::shader_data_type, Sampler2DMS, sampler2DMS)
-    declare_enum_string_explicit(neogfx::shader_data_type, Sampler2DRect, sampler2DRect)
-};
+begin_declare_enum(neogfx::shader_data_type)
+declare_enum_string_explicit(neogfx::shader_data_type, Boolean, bool)
+declare_enum_string_explicit(neogfx::shader_data_type, Float, float)
+declare_enum_string_explicit(neogfx::shader_data_type, Double, double)
+declare_enum_string_explicit(neogfx::shader_data_type, Int, int)
+declare_enum_string_explicit(neogfx::shader_data_type, Uint, uint)
+declare_enum_string_explicit(neogfx::shader_data_type, Vec2, vec2)
+declare_enum_string_explicit(neogfx::shader_data_type, DVec2, dvec2)
+declare_enum_string_explicit(neogfx::shader_data_type, IVec2, ivec2)
+declare_enum_string_explicit(neogfx::shader_data_type, UVec2, uvec2)
+declare_enum_string_explicit(neogfx::shader_data_type, Vec3, vec3)
+declare_enum_string_explicit(neogfx::shader_data_type, DVec3, dvec3)
+declare_enum_string_explicit(neogfx::shader_data_type, IVec3, ivec3)
+declare_enum_string_explicit(neogfx::shader_data_type, UVec3, uvec3)
+declare_enum_string_explicit(neogfx::shader_data_type, Vec4, vec4)
+declare_enum_string_explicit(neogfx::shader_data_type, DVec4, dvec4)
+declare_enum_string_explicit(neogfx::shader_data_type, IVec4, ivec4)
+declare_enum_string_explicit(neogfx::shader_data_type, UVec4, uvec4)
+declare_enum_string_explicit(neogfx::shader_data_type, Mat4, mat4)
+declare_enum_string_explicit(neogfx::shader_data_type, DMat4, dmat4)
+declare_enum_string(neogfx::shader_data_type, FloatArray)
+declare_enum_string(neogfx::shader_data_type, DoubleArray)
+declare_enum_string_explicit(neogfx::shader_data_type, Sampler2D, sampler2D)
+declare_enum_string_explicit(neogfx::shader_data_type, Sampler2DMS, sampler2DMS)
+declare_enum_string_explicit(neogfx::shader_data_type, Sampler2DRect, sampler2DRect)
+end_declare_enum(neogfx::shader_data_type)
 
 namespace neogfx 
 {

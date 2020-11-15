@@ -33,13 +33,11 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::button_checkable> neolib::enum_enumerators_v<neogfx::button_checkable>
-{
-    declare_enum_string(neogfx::button_checkable, NotCheckable)
-    declare_enum_string(neogfx::button_checkable, BiState)
-    declare_enum_string(neogfx::button_checkable, TriState)
-};
+begin_declare_enum(neogfx::button_checkable)
+declare_enum_string(neogfx::button_checkable, NotCheckable)
+declare_enum_string(neogfx::button_checkable, BiState)
+declare_enum_string(neogfx::button_checkable, TriState)
+end_declare_enum(neogfx::button_checkable)
 
 namespace neogfx
 {

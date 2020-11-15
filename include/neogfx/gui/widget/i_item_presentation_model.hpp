@@ -62,20 +62,18 @@ namespace neogfx
     };
 }
 
-template <>
-const neolib::enum_enumerators_t<neogfx::item_cell_flags> neolib::enum_enumerators_v<neogfx::item_cell_flags>
-{
-    declare_enum_string(neogfx::item_cell_flags, Enabled)
-    declare_enum_string(neogfx::item_cell_flags, Selectable)
-    declare_enum_string(neogfx::item_cell_flags, Editable)
-    declare_enum_string(neogfx::item_cell_flags, EditableWhenFocused)
-    declare_enum_string(neogfx::item_cell_flags, EditableOnInputEvent)
-    declare_enum_string(neogfx::item_cell_flags, Checkable)
-    declare_enum_string(neogfx::item_cell_flags, CheckableBiState)
-    declare_enum_string(neogfx::item_cell_flags, CheckableTriState)
-    declare_enum_string(neogfx::item_cell_flags, Draggable)
-    declare_enum_string(neogfx::item_cell_flags, Droppable)
-};
+begin_declare_enum(neogfx::item_cell_flags)
+declare_enum_string(neogfx::item_cell_flags, Enabled)
+declare_enum_string(neogfx::item_cell_flags, Selectable)
+declare_enum_string(neogfx::item_cell_flags, Editable)
+declare_enum_string(neogfx::item_cell_flags, EditableWhenFocused)
+declare_enum_string(neogfx::item_cell_flags, EditableOnInputEvent)
+declare_enum_string(neogfx::item_cell_flags, Checkable)
+declare_enum_string(neogfx::item_cell_flags, CheckableBiState)
+declare_enum_string(neogfx::item_cell_flags, CheckableTriState)
+declare_enum_string(neogfx::item_cell_flags, Draggable)
+declare_enum_string(neogfx::item_cell_flags, Droppable)
+end_declare_enum(neogfx::item_cell_flags)
 
 namespace neogfx
 {
