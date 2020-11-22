@@ -51,6 +51,9 @@
     <ClCompile Include="..\..\..\src\workflow_model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\object_model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\resources\win32\DesignStudio.rc">

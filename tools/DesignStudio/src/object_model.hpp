@@ -24,6 +24,7 @@
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
+#include <neogfx/tools/DesignStudio/i_project_manager.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -32,26 +33,11 @@ namespace neogfx::DesignStudio
     class object_presentation_model : public ng::basic_item_presentation_model<object_model>
     {
     public:
-        object_presentation_model()
-        {
-        }
+        object_presentation_model(i_project_manager& aProjectManager);
     public:
-        ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override
-        {
-            if (aIndex.column() == 0)
-                return ng::size{ 16.0_dip, 16.0_dip };
-            else
-                return {};
-        }
-        ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
-        {
-            if (aIndex.column() == 0)
-            {
-                auto const& e = *item_model().item(to_item_model_index(aIndex));
-                return e.library().element_icon(e.type());
-            }
-            else
-                return {};
-        }
+        ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override;
+        ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
+    private:
+        sink iSink;
     };
 }

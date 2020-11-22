@@ -27,22 +27,36 @@
 
 namespace neogfx::DesignStudio
 {
-    toolbox_presentation_model::toolbox_presentation_model()
+    toolbox_presentation_model::toolbox_presentation_model(i_project_manager& aProjectManager)
     {
         iSink = DraggingItem([&](i_drag_drop_item const& aItem)
         {
-            auto widgetCaddy = make_ref<widget_caddy>(aItem.source().drag_drop_event_monitor().root().as_widget(), aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin());
-            auto widget = make_ref<push_button>("PushButton1");
-            widgetCaddy->add(widget);
-            widgetCaddy->resize(widgetCaddy->minimum_size());
-            aItem.source().set_drag_drop_widget(widgetCaddy);
+            auto const& item = item_model().item(to_item_model_index(aItem.index()));
+            ref_ptr<i_widget> selectedWidget;
+            if (std::holds_alternative<ds::tool_t>(item))
+            {
+                auto const& tool = std::get<ds::tool_t>(item);
+                auto& project = aProjectManager.active_project();
+                auto& newElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
+            }
+            if (selectedWidget)
+            {
+                auto widgetCaddy = make_ref<widget_caddy>(aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
+                widgetCaddy->add(selectedWidget);
+                widgetCaddy->resize(widgetCaddy->minimum_size());
+                widgetCaddy->move(aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0);
+                aItem.source().set_drag_drop_widget(widgetCaddy);
+            }
         });
         iSink += ItemDropped([&](i_drag_drop_item const& aItem, i_drag_drop_target& aTarget)
         {
             ref_ptr<i_widget> widgetCaddy = aItem.source().drag_drop_widget();
-            auto windowPosition = widgetCaddy->to_window_coordinates(widgetCaddy->position());
-            aTarget.as_widget().add(widgetCaddy);
-            widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
+            if (widgetCaddy)
+            {
+                auto windowPosition = widgetCaddy->to_window_coordinates(widgetCaddy->position());
+                aTarget.as_widget().add(widgetCaddy);
+                widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
+            }
         });
     }
 
@@ -113,6 +127,11 @@ namespace neogfx::DesignStudio
         if (std::holds_alternative<ds::tool_t>(tool))
             result |= ng::item_cell_flags::Draggable;
         return result;
+    }
+
+    string toolbox_presentation_model::generate_id(const string& aToolName)
+    {
+        return aToolName + std::to_string(++iIdCounters[aToolName]);
     }
 
     void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel)

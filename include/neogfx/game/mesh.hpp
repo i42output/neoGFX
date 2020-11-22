@@ -30,9 +30,9 @@ namespace neogfx::game
 {
     struct mesh
     {
-        vertices vertices;
-        vertices_2d uv;
-        faces faces;
+        vertices vertices; // todo: neolib::vector not std::vector (modify neolib::vector copy ctor to make plugin compatible; use ref_ptr<i_vector> here?)
+        vertices_2d uv; // todo: neolib::vector not std::vector (modify neolib::vector copy ctor to make plugin compatible; use ref_ptr<i_vector> here?)
+        faces faces; // todo: neolib::vector not std::vector (modify neolib::vector copy ctor to make plugin compatible; use ref_ptr<i_vector> here?)
 
         struct meta : i_component_data::meta
         {

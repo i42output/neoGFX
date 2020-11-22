@@ -25,6 +25,7 @@
 #include <neogfx/app/i_drag_drop.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
+#include <neogfx/tools/DesignStudio/i_project_manager.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -35,7 +36,7 @@ namespace neogfx::DesignStudio
     {
         typedef ng::basic_item_presentation_model<toolbox_model> base_type;
     public:
-        toolbox_presentation_model();
+        toolbox_presentation_model(i_project_manager& aProjectManager);
     public:
         ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override;
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
@@ -45,7 +46,10 @@ namespace neogfx::DesignStudio
         ng::texture codeTexture;
         ng::texture userInterfaceTexture;
     private:
+        string generate_id(const string& aToolName);
+    private:
         sink iSink;
+        std::map<std::string, uint32_t> iIdCounters;
     };
 
     void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel);

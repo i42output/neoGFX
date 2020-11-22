@@ -48,7 +48,9 @@ namespace neogfx::DesignStudio
         iWorkspaceLayout{ client_layout() },
         iWorkspace{ iWorkspaceLayout },
         iBackgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } },
-        iBackgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } }
+        iBackgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } },
+        iToolboxPresentationModel{ aProjectManager },
+        iObjectPresentationModel{ aProjectManager }
     {
         // todo: decompose this ctor body into smaller member initialization functions...
 
@@ -233,51 +235,10 @@ namespace neogfx::DesignStudio
 
         update_ui();
 
-        auto project_updated = [&, update_ui](i_project&)
-        {
-            if (aProjectManager.project_active())
-            {
-                if (iObjectModel.empty() || iObjectModel.item(iObjectModel.sbegin()) != &aProjectManager.active_project().root())
-                {
-                    iObjectModel.clear();
-                    iObjectModel.updating().trigger();
-                    std::function<void(ng::i_item_model::iterator, i_element&)> addNode = [&](ng::i_item_model::iterator aPosition, i_element& aElement)
-                    {
-                        switch (aElement.group())
-                        {
-                        case element_group::Unknown:
-                            break;
-                        case element_group::Project:
-                        case element_group::UserInterface:
-                        case element_group::App:
-                        case element_group::Menu:
-                        case element_group::Widget:
-                        case element_group::Layout:
-                        {
-                            auto node = aElement.group() != element_group::Project ?
-                                iObjectModel.append_item(aPosition, &aElement, aElement.id().to_std_string()) :
-                                iObjectModel.insert_item(aPosition, &aElement, aElement.id().to_std_string());
-                            iObjectModel.insert_cell_data(node, 1u, aElement.type().to_std_string());
-                            for (auto& child : aElement)
-                                addNode(node, *child);
-                        }
-                        break;
-                        case element_group::Action:
-                            break;
-                        }
-                    };
-                    addNode(iObjectModel.send(), aProjectManager.active_project().root());
-                    iObjectModel.updated().trigger();
-                }
-            }
-            else
-                iObjectModel.clear();
-            update_ui();
-        };
+        iSink += aProjectManager.ProjectAdded([update_ui](i_project&) { update_ui(); });
+        iSink += aProjectManager.ProjectRemoved([update_ui](i_project&) { update_ui(); });
+        iSink += aProjectManager.ProjectActivated([update_ui](i_project&) { update_ui(); });
 
-        iSink += aProjectManager.ProjectAdded(project_updated);
-        iSink += aProjectManager.ProjectRemoved(project_updated);
-        iSink += aProjectManager.ProjectActivated(project_updated);
         iSink += aApp.actionFileClose.triggered([&]() { if (aProjectManager.project_active()) aProjectManager.close_project(aProjectManager.active_project()); });
 
         aApp.action_file_open().triggered([&]()
