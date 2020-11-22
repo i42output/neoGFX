@@ -69,7 +69,7 @@ namespace neogfx::DesignStudio
         ng::dockable iObjects;
         ng::dockable iProperties;
         ng::horizontal_layout iWorkspaceLayout;
-        ng::view_container iWorkspace;
+        ng::scrollable_widget<view_container> iWorkspace;
         ng::texture iBackgroundTexture1;
         ng::texture iBackgroundTexture2;
         toolbox_model iToolboxModel;

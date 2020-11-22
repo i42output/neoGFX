@@ -644,6 +644,10 @@ namespace neogfx
 
     void widget::layout_items_started()
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << "widget:layout_items_started()" << endl;
+#endif // NEOGFX_DEBUG
         ++iLayoutInProgress;
     }
 
@@ -654,6 +658,10 @@ namespace neogfx
 
     void widget::layout_items_completed()
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << "widget:layout_items_completed()" << endl;
+#endif // NEOGFX_DEBUG
         if (--iLayoutInProgress == 0)
         {
             LayoutCompleted.trigger();
@@ -1035,14 +1043,14 @@ namespace neogfx
 
             PaintingChildren.trigger(aGc);
 
-            for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
+            for (auto const& child : iChildren)
             {
-                auto const& child = *i;
-                if (child->widget_type() == neogfx::widget_type::NonClient)
+                auto const& childWidget = *child;
+                if (childWidget.widget_type() == neogfx::widget_type::NonClient)
                     continue;
-                rect intersection = clipRect.intersection(to_client_coordinates(child->non_client_rect()));
+                rect intersection = clipRect.intersection(to_client_coordinates(childWidget.non_client_rect()));
                 if (!intersection.empty())
-                    child->render(aGc);
+                    childWidget.render(aGc);
             }
 
             aGc.set_extents(client_rect().extents());

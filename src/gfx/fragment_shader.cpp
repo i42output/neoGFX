@@ -239,38 +239,39 @@ namespace neogfx
         uGradientEnabled = false;
     }
 
-    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient)
+    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient, double aOpacity)
     {
         enable();
+        gradient const adjustedGradient = (aOpacity == 1.0 ? aGradient : aGradient.with_combined_alpha(aOpacity));
         uGradientGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
-        uGradientDirection = aGradient.direction();
-        uGradientAngle = std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f;
-        uGradientStartFrom = std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1;
-        uGradientSize = aGradient.size();
-        uGradientShape = aGradient.shape();
-        basic_vector<float, 2> gradientExponents = (aGradient.exponents() != std::nullopt ? *aGradient.exponents() : vec2{ 2.0, 2.0 });
+        uGradientDirection = adjustedGradient.direction();
+        uGradientAngle = std::holds_alternative<double>(adjustedGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(adjustedGradient.orientation())) : 0.0f;
+        uGradientStartFrom = std::holds_alternative<corner>(adjustedGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(adjustedGradient.orientation())) : -1;
+        uGradientSize = adjustedGradient.size();
+        uGradientShape = adjustedGradient.shape();
+        basic_vector<float, 2> gradientExponents = (adjustedGradient.exponents() != std::nullopt ? *adjustedGradient.exponents() : vec2{ 2.0, 2.0 });
         uGradientExponents = vec2f{ gradientExponents.x, gradientExponents.y };
-        basic_point<float> gradientCenter = (aGradient.center() != std::nullopt ? *aGradient.center() : point{});
+        basic_point<float> gradientCenter = (adjustedGradient.center() != std::nullopt ? *adjustedGradient.center() : point{});
         uGradientCenter = vec2f{ gradientCenter.x, gradientCenter.y };
-        uGradientTile = (aGradient.tile() != std::nullopt);
-        if (aGradient.tile() != std::nullopt)
-            uGradientTileParams = vec3{ aGradient.tile()->extents.cx, aGradient.tile()->extents.cy, aGradient.tile()->aligned ? 1.0 : 0.0 }.as<int32_t>();
+        uGradientTile = (adjustedGradient.tile() != std::nullopt);
+        if (adjustedGradient.tile() != std::nullopt)
+            uGradientTileParams = vec3{ adjustedGradient.tile()->extents.cx, adjustedGradient.tile()->extents.cy, adjustedGradient.tile()->aligned ? 1.0 : 0.0 }.as<int32_t>();
         else
             uGradientTileParams = vec3i32{};
-        uGradientColorCount = static_cast<int>(aGradient.colors().sampler().data().extents().cx);
-        uGradientColorRow = static_cast<int>(aGradient.colors().sampler_row());
-        uGradientFilterSize = static_cast<int>(aGradient.filter().sampler().data().extents().cx);
-        aGradient.colors().sampler().data().bind(3);
-        aGradient.filter().sampler().data().bind(4);
+        uGradientColorCount = static_cast<int>(adjustedGradient.colors().sampler().data().extents().cx);
+        uGradientColorRow = static_cast<int>(adjustedGradient.colors().sampler_row());
+        uGradientFilterSize = static_cast<int>(adjustedGradient.filter().sampler().data().extents().cx);
+        adjustedGradient.colors().sampler().data().bind(3);
+        adjustedGradient.filter().sampler().data().bind(4);
         uGradientColors = sampler2DRect{ 3 };
         uGradientFilter = sampler2DRect{ 4 };
         uGradientEnabled = true;
     }
 
-    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient)
+    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, double aOpacity)
     {
         gradient g = service<i_gradient_manager>().find_gradient(aGradient.id.cookie());
-        set_gradient(aContext, g);
+        set_gradient(aContext, g, aOpacity);
     }
 
     standard_texture_shader::standard_texture_shader(std::string const& aName) :

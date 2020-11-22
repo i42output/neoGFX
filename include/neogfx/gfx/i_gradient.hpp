@@ -256,7 +256,7 @@ namespace neogfx
             return result;
         }
         template <typename T>
-        neolib::ref_ptr<i_gradient> with_combined_alpha(T aAlpha, std::enable_if_t<!std::is_same_v<T, sRGB_color::view_component>, sfinae> = {})
+        neolib::ref_ptr<i_gradient> with_combined_alpha(T aAlpha, std::enable_if_t<!std::is_same_v<T, sRGB_color::view_component>, sfinae> = {}) const
         {
             return with_combined_alpha(sRGB_color::convert<sRGB_color::view_component>(aAlpha));
         }

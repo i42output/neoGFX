@@ -46,8 +46,8 @@ namespace neogfx
         typedef i_gradient_shader abstract_type;
     public:
         virtual void clear_gradient() = 0;
-        virtual void set_gradient(i_rendering_context& aContext, const gradient& aGradient) = 0;
-        virtual void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient) = 0;
+        virtual void set_gradient(i_rendering_context& aContext, const gradient& aGradient, double aOpacity) = 0;
+        virtual void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, double aOpacity) = 0;
     };
 
     class i_texture_shader : public i_fragment_shader

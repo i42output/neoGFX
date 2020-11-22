@@ -1113,13 +1113,13 @@ namespace neogfx
                     presentation_model().dragging_item_cancelled().trigger(*iDragDropItem);
                     iDragDropItem = std::nullopt;
                 });
-                iDragDropSink += ObjectDropped([&](i_drag_drop_object const&)
+                iDragDropSink += ObjectDropped([&](i_drag_drop_object const&, i_drag_drop_target& aTarget)
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
                         service<debug::logger>() << typeid(*this).name() << ": object dropped." << endl;
 #endif
-                    presentation_model().item_dropped().trigger(*iDragDropItem);
+                    presentation_model().item_dropped().trigger(*iDragDropItem, aTarget);
                     iDragDropItem = std::nullopt;
                 });
             }

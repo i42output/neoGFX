@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/drag_drop.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/layout/stack_layout.hpp>
@@ -31,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class view_stack : public framed_scrollable_widget
+    class view_stack : public drag_drop_target<framed_scrollable_widget>
     {
     public:
         view_stack(i_layout& aLayout, i_view_container& aParent);

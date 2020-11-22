@@ -40,8 +40,7 @@ namespace neogfx
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
         iIgnoreScrollbarUpdates{ 0 }
     {
-        if (as_widget().has_surface())
-            init_scrollbars();
+        init();
     }
 
     template <typename Base>
@@ -60,8 +59,7 @@ namespace neogfx
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
         iIgnoreScrollbarUpdates{ 0 }
     {
-        if (as_widget().has_surface())
-            init_scrollbars();
+        init();
     }
 
     template <typename Base>
@@ -80,8 +78,7 @@ namespace neogfx
         iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
         iIgnoreScrollbarUpdates{ 0 }
     {
-        if (as_widget().has_surface())
-            init_scrollbars();
+        init();
     }
     
     template <typename Base>
@@ -394,9 +391,29 @@ namespace neogfx
     template <typename Base>
     inline void scrollable_widget<Base>::init_scrollbars()
     {
-        vertical_scrollbar().set_step(std::ceil(1.0_cm));
-        horizontal_scrollbar().set_step(std::ceil(1.0_cm));
+        if (base_type::device_metrics_available())
+        {
+            vertical_scrollbar().set_step(std::ceil(1.0_cm));
+            horizontal_scrollbar().set_step(std::ceil(1.0_cm));
+        }
     }
+
+    template <typename Base>
+    inline void scrollable_widget<Base>::init()
+    {
+        iSink = base_type::ChildAdded([&](i_widget& aWidget)
+        {
+            if (!iScrollbarUpdater)
+                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) { update_scrollbar_visibility(); }, 0);
+        });
+        iSink += base_type::ChildRemoved([&](i_widget& aWidget)
+        {
+            if (!iScrollbarUpdater)
+                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) { update_scrollbar_visibility(); }, 0);
+        });
+        init_scrollbars();
+    }
+
 
     template <typename Base>
     inline scrolling_disposition scrollable_widget<Base>::scrolling_disposition() const
@@ -408,6 +425,23 @@ namespace neogfx
     inline scrolling_disposition scrollable_widget<Base>::scrolling_disposition(const i_widget&) const
     {
         return neogfx::scrolling_disposition::ScrollChildWidgetVertically | neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
+    }
+
+    template <typename Base>
+    rect scrollable_widget<Base>::scroll_area() const
+    {
+        rect result = client_rect();
+        if (horizontal_scrollbar().visible())
+        {
+            result.x = horizontal_scrollbar().minimum();
+            result.cx = horizontal_scrollbar().maximum() - result.x;
+        }
+        if (vertical_scrollbar().visible())
+        {
+            result.y = vertical_scrollbar().minimum();
+            result.cy = vertical_scrollbar().maximum() - result.y;
+        }
+        return result;
     }
 
     template <typename Base>
@@ -486,6 +520,9 @@ namespace neogfx
     template <typename Base>
     inline void scrollable_widget<Base>::update_scrollbar_visibility()
     {
+        if (!base_type::device_metrics_available())
+            return;
+        iScrollbarUpdater = {};
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
             vertical_scrollbar().lock(0.0);
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)

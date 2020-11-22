@@ -187,6 +187,11 @@ namespace neogfx::DesignStudio
         workspaceGridSize.changing(workspaceGridChanged);
         workspaceGridSize.changed(workspaceGridChanged);
 
+        iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::drop_operation& aOperation)
+        {
+            aOperation = ng::drop_operation::Move;
+        });
+
         populate_toolbox_model(iToolboxModel, iToolboxPresentationModel);
         auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();
         toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
@@ -309,42 +314,42 @@ namespace neogfx::DesignStudio
 
     void main_window_ex::paint_workspace(ng::i_graphics_context& aGc)
     {
-        auto const& cr = iWorkspace.view_stack().client_rect();
+        auto const& scrollArea = iWorkspace.view_stack().scroll_area();
         if (iProjectManager.projects().empty())
         {
             aGc.draw_texture(
-                ng::point{ (cr.extents() - iBackgroundTexture1.extents()) / 2.0 },
+                ng::point{ (scrollArea.extents() - iBackgroundTexture1.extents()) / 2.0 },
                 iBackgroundTexture1,
                 ng::color::White.with_alpha(0.25));
             aGc.draw_texture(
-                ng::rect{ ng::point{ cr.bottom_right() - iBackgroundTexture2.extents() / 2.0 }, iBackgroundTexture2.extents() / 2.0 },
+                ng::rect{ ng::point{ scrollArea.bottom_right() - iBackgroundTexture2.extents() / 2.0 }, iBackgroundTexture2.extents() / 2.0 },
                 iBackgroundTexture2,
                 ng::color::White.with_alpha(0.25));
         }
         else
         {
-            aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), iWorkspace.view_stack().client_rect());
+            aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), scrollArea);
             ng::size const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{ workspaceGridSize.value<uint32_t>(true), workspaceGridSize.value<uint32_t>(true) });
-            ng::basic_size<int32_t> const cells = ng::size{ cr.cx / gridSize.cx, cr.cy / gridSize.cy };
+            ng::basic_size<int32_t> const cells = ng::size{ scrollArea.cx / gridSize.cx, scrollArea.cy / gridSize.cy };
             if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Lines)
             {
                 for (int32_t x = 0; x <= cells.cx; ++x)
-                    aGc.draw_line(ng::point{ x * gridSize.cx, 0.0 }, ng::point{ x * gridSize.cx, cr.bottom() }, ng::color::White);
+                    aGc.draw_line(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() }, ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.bottom() }, ng::color::White);
                 for (int32_t y = 0; y <= cells.cy; ++y)
-                    aGc.draw_line(ng::point{ 0.0, y * gridSize.cy }, ng::point{ cr.right(), y * gridSize.cy }, ng::color::White);
+                    aGc.draw_line(ng::point{ scrollArea.left(), scrollArea.top() + y * gridSize.cy }, ng::point{ scrollArea.right(), scrollArea.top() + y * gridSize.cy }, ng::color::White);
             }
             else if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Quads)
             {
                 for (int32_t x = 0; x <= cells.cx; ++x)
                     for (int32_t y = 0; y <= cells.cy; ++y)
                         if ((x + y) % 2 == 0)
-                            aGc.fill_rect(ng::rect{ ng::point{ x * gridSize.cx, y * gridSize.cy }, gridSize }, ng::color::White);
+                            aGc.fill_rect(ng::rect{ ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, gridSize }, ng::color::White);
             }
             else // Points
             {
                 for (int32_t x = 0; x <= cells.cx; ++x)
                     for (int32_t y = 0; y <= cells.cy; ++y)
-                        aGc.draw_pixel(ng::point{ x * gridSize.cx, y * gridSize.cy }, ng::color::White);
+                        aGc.draw_pixel(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, ng::color::White);
             }
             aGc.clear_gradient();
         }

@@ -64,7 +64,7 @@ namespace neogfx
         define_declared_event(DraggingItemRenderInfo, dragging_item_render_info, i_drag_drop_item const&, bool&, size&)
         define_declared_event(DraggingItemRender, dragging_item_render, i_drag_drop_item const&, i_graphics_context&, point const&)
         define_declared_event(DraggingItemCancelled, dragging_item_cancelled, i_drag_drop_item const&)
-        define_declared_event(ItemDropped, item_dropped, i_drag_drop_item const&)
+        define_declared_event(ItemDropped, item_dropped, i_drag_drop_item const&, i_drag_drop_target&)
     public:
         using typename base_type::sort_direction;
         using typename base_type::optional_sort_direction;

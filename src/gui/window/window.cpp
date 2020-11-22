@@ -130,7 +130,7 @@ namespace neogfx
         i_window& iSurrogate;
     };
 
-    class window::client : public drag_drop_target<framed_scrollable_widget>
+    class window::client : public framed_scrollable_widget
     {
     public:
         client(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle);
@@ -146,7 +146,7 @@ namespace neogfx
     };
 
     window::client::client(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle) :
-        drag_drop_target<framed_scrollable_widget>{ aParent, aScrollbarStyle, frame_style::NoFrame },
+        framed_scrollable_widget{ aParent, aScrollbarStyle, frame_style::NoFrame },
         iLayout{ *this }
     {
         set_padding(neogfx::padding{});

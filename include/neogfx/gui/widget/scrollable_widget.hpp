@@ -102,10 +102,13 @@ namespace neogfx
         virtual i_scrollbar& horizontal_scrollbar();
         virtual neogfx::scrolling_disposition scrolling_disposition() const;
         virtual neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const;
+    public:
+        rect scroll_area() const override;
     protected:
         rect scrollbar_geometry(const i_scrollbar& aScrollbar) const override;
         void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) override;
         color scrollbar_color(const i_scrollbar& aScrollbar) const override;
+    protected:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     protected:
@@ -114,6 +117,10 @@ namespace neogfx
     protected:
         void init_scrollbars();
     private:
+        void init();
+    private:
+        sink iSink;
+        std::optional<neolib::callback_timer> iScrollbarUpdater;
         neogfx::scrollbar_style iScrollbarStyle;
         scrollbar iVerticalScrollbar;
         scrollbar iHorizontalScrollbar;

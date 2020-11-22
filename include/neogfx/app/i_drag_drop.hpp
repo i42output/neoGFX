@@ -101,7 +101,7 @@ namespace neogfx
     public:
         declare_event(dragging_object, i_drag_drop_object const&)
         declare_event(dragging_cancelled, i_drag_drop_object const&)
-        declare_event(object_dropped, i_drag_drop_object const&)
+        declare_event(object_dropped, i_drag_drop_object const&, i_drag_drop_target&)
     public:
         virtual ~i_drag_drop_source() = default;
     public:
@@ -111,11 +111,11 @@ namespace neogfx
         virtual i_drag_drop_object const& object_being_dragged() const = 0;
         virtual void start_drag_drop(i_drag_drop_object const& aObject) = 0;
         virtual void cancel_drag_drop() = 0;
-        virtual void end_drag_drop() = 0;
+        virtual void end_drag_drop(i_drag_drop_target& aTarget) = 0;
     public:
         virtual point const& drag_drop_tracking_position() const = 0;
-        virtual std::shared_ptr<i_widget> drag_drop_widget() const = 0;
-        virtual void set_drag_drop_widget(std::shared_ptr<i_widget> aWidget) = 0;
+        virtual i_ref_ptr<i_widget> const& drag_drop_widget() const = 0;
+        virtual void set_drag_drop_widget(i_ref_ptr<i_widget> const& aWidget) = 0;
     public:
         virtual i_widget& drag_drop_event_monitor() const = 0;
         virtual void monitor_drag_drop_events(i_widget& aWidget) = 0;

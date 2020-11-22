@@ -160,7 +160,7 @@ namespace neogfx
                 auto target = find_target(*iActiveInternalDragDropObject, basic_point<LONG>{pt.x, pt.y});
                 if (target != nullptr)
                     target->accept(*iActiveInternalDragDropObject);
-                iActiveInternalDragDropSource->end_drag_drop();
+                iActiveInternalDragDropSource->end_drag_drop(*target);
                 iActiveInternalDragDropSource = nullptr;
                 iActiveInternalDragDropObject = nullptr;
             }

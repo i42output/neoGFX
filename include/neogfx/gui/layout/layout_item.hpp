@@ -80,6 +80,10 @@ namespace neogfx
     public:
         void update_layout(bool aDeferLayout = true) override
         {
+#ifdef NEOGFX_DEBUG
+            if (debug::layoutItem == this)
+                service<debug::logger>() << "widget:update_layout(" << aDeferLayout << ")" << endl;
+#endif // NEOGFX_DEBUG
             if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
                 as_layout_item().layout_manager().layout_items(aDeferLayout);
             else if (as_layout_item().is_layout())

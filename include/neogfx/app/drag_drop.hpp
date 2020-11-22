@@ -156,7 +156,7 @@ namespace neogfx
     public:
         define_declared_event(DraggingObject, dragging_object, i_drag_drop_object const&)
         define_declared_event(DraggingCancelled, dragging_cancelled, i_drag_drop_object const&)
-        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
+        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&, i_drag_drop_target&)
     public:
         template <typename... Args>
         drag_drop_source(Args&&... aArgs) :
@@ -219,13 +219,13 @@ namespace neogfx
             iWidget = nullptr;
             iWidgetOffset = std::nullopt;
         }
-        void end_drag_drop() override
+        void end_drag_drop(i_drag_drop_target& aTarget) override
         {
             if (!drag_drop_active())
                 throw drag_drop_not_active();
             auto object = iObject;
             iObject = nullptr;
-            ObjectDropped.trigger(*object);
+            ObjectDropped.trigger(*object, aTarget);
             iWidget = nullptr;
             iWidgetOffset = std::nullopt;
         }
@@ -236,11 +236,11 @@ namespace neogfx
                 return *iTrackCurrent;
             throw drag_drop_not_active();
         }
-        std::shared_ptr<i_widget> drag_drop_widget() const override
+        i_ref_ptr<i_widget> const& drag_drop_widget() const override
         {
             return iWidget;
         }
-        void set_drag_drop_widget(std::shared_ptr<i_widget> aWidget) override
+        void set_drag_drop_widget(i_ref_ptr<i_widget> const& aWidget) override
         {
             iWidget = aWidget;
             if (iWidget)
@@ -316,7 +316,11 @@ namespace neogfx
                             start_drag_drop(*drag_drop_object(*iTrackStart));
                         needUpdate = object_being_dragged().can_render();
                         if (iWidget)
+                        {
                             iWidget->move(*iTrackCurrent + *iWidgetOffset);
+                            auto const windowPosition = aWidget.to_window_coordinates(eventPos) + aWidget.root().window_position();
+                            iWidget->set_opacity(service<i_drag_drop>().is_target_at(object_being_dragged(), windowPosition) ? 1.0 : 0.25);
+                        }
                     }
                     else
                     {
@@ -341,11 +345,14 @@ namespace neogfx
                         {
                             if (object_being_dragged().can_render())
                                 aWidget.root().as_widget().update();
-                            if (service<i_drag_drop>().is_target_at(object_being_dragged(), aWidget.to_window_coordinates(eventPos)))
+                            auto const windowPosition = aWidget.to_window_coordinates(eventPos) + aWidget.root().window_position();
+                            if (service<i_drag_drop>().is_target_at(object_being_dragged(), windowPosition))
                             {
-                                auto& target = service<i_drag_drop>().target_at(object_being_dragged(), aWidget.to_window_coordinates(eventPos));
+                                if (iWidget)
+                                    iWidget->set_opacity(1.0);
+                                auto& target = service<i_drag_drop>().target_at(object_being_dragged(), windowPosition);
                                 target.accept(object_being_dragged());
-                                end_drag_drop();
+                                end_drag_drop(target);
                             }
                             else
                                 cancel_drag_drop();
@@ -363,7 +370,7 @@ namespace neogfx
         std::optional<point> iTrackStart;
         std::optional<point> iTrackCurrent;
         scalar iTriggerDistance = 8.0;
-        std::shared_ptr<i_widget> iWidget;
+        ref_ptr<i_widget> iWidget;
         std::optional<point> iWidgetOffset;
     };
 

@@ -95,8 +95,8 @@ namespace neogfx
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_gradient() override;
-        void set_gradient(i_rendering_context& aContext, const gradient& aGradient) override;
-        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient) override;
+        void set_gradient(i_rendering_context& aContext, const gradient& aGradient, double aOpacity) override;
+        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, double aOpacity) override;
     private:
         cache_uniform(uGradientGuiCoordinates)
         cache_uniform(uGradientDirection)

@@ -125,9 +125,12 @@ namespace neogfx
     class i_scrollbar_container
     {
     public:
+        virtual rect scroll_area() const = 0;
+    public:
         virtual rect scrollbar_geometry(const i_scrollbar& aScrollbar) const = 0;
         virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) = 0;
         virtual color scrollbar_color(const i_scrollbar& aScrollbar) const = 0;
+    public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
     };

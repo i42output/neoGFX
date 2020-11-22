@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 
 namespace neogfx::DesignStudio
@@ -27,16 +28,20 @@ namespace neogfx::DesignStudio
     class widget_caddy : public widget
     {
     public:
-        widget_caddy(i_widget& aParent) :
-            widget{ aParent }
+        widget_caddy(i_widget& aParent, const point& aPosition) :
+            widget{ aParent },
+            iLayout{ *this }
         {
+            move(aPosition);
             iSink = ChildAdded([&](i_widget& aChild)
             {
+                iLayout.add(aChild);
                 aChild.set_ignore_mouse_events(true);
                 aChild.set_ignore_non_client_mouse_events(true);
             });
         }
     private:
         sink iSink;
+        vertical_layout iLayout;
     };
 }

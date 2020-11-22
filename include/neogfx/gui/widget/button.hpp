@@ -47,7 +47,6 @@ namespace neogfx
         // types
     public:
         typedef ButtonInterface button_interface;
-        typedef button_interface abstract_type;
         // button
     public:
         button(alignment aAlignment = alignment::Left | alignment::VCenter);

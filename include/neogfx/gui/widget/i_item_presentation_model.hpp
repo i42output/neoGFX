@@ -174,7 +174,7 @@ namespace neogfx
         declare_event(dragging_item_render_info, i_drag_drop_item const&, bool&, size&)
         declare_event(dragging_item_render, i_drag_drop_item const&, i_graphics_context&, point const&)
         declare_event(dragging_item_cancelled, i_drag_drop_item const&)
-        declare_event(item_dropped, i_drag_drop_item const&)
+        declare_event(item_dropped, i_drag_drop_item const&, i_drag_drop_target&)
     public:
         typedef i_item_presentation_model abstract_type;
         struct cell_meta_type

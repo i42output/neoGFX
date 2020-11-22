@@ -20,7 +20,10 @@
 #pragma once
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include "widget_caddy.hpp"
 #include "toolbox_model.hpp"
+
+#include <neogfx/gui/widget/push_button.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -28,7 +31,18 @@ namespace neogfx::DesignStudio
     {
         iSink = DraggingItem([&](i_drag_drop_item const& aItem)
         {
-
+            auto widgetCaddy = make_ref<widget_caddy>(aItem.source().drag_drop_event_monitor().root().as_widget(), aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin());
+            auto widget = make_ref<push_button>("PushButton1");
+            widgetCaddy->add(widget);
+            widgetCaddy->resize(widgetCaddy->minimum_size());
+            aItem.source().set_drag_drop_widget(widgetCaddy);
+        });
+        iSink += ItemDropped([&](i_drag_drop_item const& aItem, i_drag_drop_target& aTarget)
+        {
+            ref_ptr<i_widget> widgetCaddy = aItem.source().drag_drop_widget();
+            auto windowPosition = widgetCaddy->to_window_coordinates(widgetCaddy->position());
+            aTarget.as_widget().add(widgetCaddy);
+            widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
         });
     }
 
