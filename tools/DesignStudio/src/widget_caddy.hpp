@@ -28,7 +28,7 @@ namespace neogfx::DesignStudio
     class widget_caddy : public widget
     {
     public:
-        enum class border_style
+        enum class mode
         {
             None,
             Drag,
@@ -38,14 +38,15 @@ namespace neogfx::DesignStudio
         widget_caddy(i_widget& aParent, const point& aPosition) :
             widget{ aParent },
             iLayout{ *this },
-            iBorderStyle{ border_style::None },
+            iMode{ mode::None },
             iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
             {    
                 aAnimator.again();
-                if (iBorderStyle != border_style::None)
+                if (iMode != mode::None)
                     update(); 
             }, 20 }
         {
+            iLayout.set_padding(neogfx::padding{});
             move(aPosition);
             iSink = ChildAdded([&](i_widget& aChild)
             {
@@ -55,40 +56,104 @@ namespace neogfx::DesignStudio
             });
         }
     public:
-        void set_border_style(border_style aStyle)
+        void set_mode(mode aMode)
         {
-            iBorderStyle = aStyle;
+            iMode = aMode;
             update();
         }
     protected:
-        void paint(i_graphics_context& aGc) const override
+        neogfx::padding padding() const override
         {
-            widget::paint(aGc);
+            return neogfx::padding{ 4.0_dip };
+        }
+    protected:
+        void paint_non_client_after(i_graphics_context& aGc) const override
+        {
+            widget::paint_non_client_after(aGc);
             if (opacity() == 1.0)
             {
-                switch (iBorderStyle)
+                switch (iMode)
                 {
-                case border_style::None:
+                case mode::None:
                 default:
                     break;
-                case border_style::Drag:
+                case mode::Drag:
                     {
-                        auto const cr = client_rect().deflated(size{ 1.0 });
+                        auto const cr = client_rect(false);
                         aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
                         aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
                         aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
                         aGc.line_stipple_off();
                     }
                     break;
-                case border_style::Edit:
+                case mode::Edit:
+                    {
+                        auto const cr = client_rect(false);
+                        aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
+                        aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
+                        aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
+                        aGc.line_stipple_off();
+                        aGc.draw_rect(part_rect(cardinal::NorthWest), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(part_rect(cardinal::North), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(part_rect(cardinal::NorthEast), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(part_rect(cardinal::East), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(part_rect(cardinal::SouthEast), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(part_rect(cardinal::South), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(part_rect(cardinal::SouthWest), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(part_rect(cardinal::West), color::NavyBlue, color::White.with_alpha(0.75));
+                    }
                     break;
                 }
+            }
+        }
+    protected:
+        neogfx::focus_policy focus_policy() const override
+        {
+            return neogfx::focus_policy::StrongFocus;
+        }
+        void focus_gained(focus_reason aFocusReason) override
+        {
+            widget::focus_gained(aFocusReason);
+            set_mode(mode::Edit);
+        }
+        void focus_lost(focus_reason aFocusReason) override
+        {
+            widget::focus_lost(aFocusReason);
+            set_mode(mode::None);
+        }
+    private:
+        rect part_rect(cardinal aPart) const
+        {
+            auto const pw = padding().left * 2.0;
+            auto const cr = client_rect(false).inflated(pw / 2.0);
+            switch (aPart)
+            {
+            case cardinal::NorthWest:
+                return rect{ cr.top_left(), size{ pw } };
+            case cardinal::North:
+                return rect{ point{ cr.center().x - pw / 2.0, cr.top() }, size{ pw } };
+            case cardinal::NorthEast:
+                return rect{ point{ cr.right() - pw, cr.top() }, size{ pw } };
+            case cardinal::West:
+                return rect{ point{ cr.left(), cr.center().y - pw / 2.0 }, size{ pw } };
+            case cardinal::Center:
+                return cr.deflated(size{ pw });
+            case cardinal::East:
+                return rect{ point{ cr.right() - pw, cr.center().y - pw / 2.0 }, size{ pw } };
+            case cardinal::SouthWest:
+                return rect{ point{ cr.left(), cr.bottom() - pw }, size{ pw } };
+            case cardinal::South:
+                return rect{ point{ cr.center().x - pw / 2.0, cr.bottom() - pw }, size{ pw } };
+            case cardinal::SouthEast:
+                return rect{ point{ cr.right() - pw, cr.bottom() - pw }, size{ pw } };
+            default:
+                return cr;
             }
         }
     private:
         sink iSink;
         vertical_layout iLayout;
-        border_style iBorderStyle;
+        mode iMode;
         neolib::callback_timer iAnimator;
     };
 }
