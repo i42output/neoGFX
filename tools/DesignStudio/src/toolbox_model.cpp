@@ -49,16 +49,18 @@ namespace neogfx::DesignStudio
                 widgetCaddy->resize(idealSize);
                 widgetCaddy->move(aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0);
                 aItem.source().set_drag_drop_widget(widgetCaddy);
+                widgetCaddy->set_border_style(widget_caddy::border_style::Drag);
             }
         });
         iSink += ItemDropped([&](i_drag_drop_item const& aItem, i_drag_drop_target& aTarget)
         {
-            ref_ptr<i_widget> widgetCaddy = aItem.source().drag_drop_widget();
+            ref_ptr<widget_caddy> widgetCaddy = aItem.source().drag_drop_widget();
             if (widgetCaddy)
             {
                 auto windowPosition = widgetCaddy->to_window_coordinates(widgetCaddy->position());
                 aTarget.as_widget().add(widgetCaddy);
                 widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
+                widgetCaddy->set_border_style(widget_caddy::border_style::None);
             }
             iSelectedElement = {};
         });

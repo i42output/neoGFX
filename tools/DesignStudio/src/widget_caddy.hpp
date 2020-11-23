@@ -28,9 +28,23 @@ namespace neogfx::DesignStudio
     class widget_caddy : public widget
     {
     public:
+        enum class border_style
+        {
+            None,
+            Drag,
+            Edit
+        };
+    public:
         widget_caddy(i_widget& aParent, const point& aPosition) :
             widget{ aParent },
-            iLayout{ *this }
+            iLayout{ *this },
+            iBorderStyle{ border_style::None },
+            iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
+            {    
+                aAnimator.again();
+                if (iBorderStyle != border_style::None)
+                    update(); 
+            }, 20 }
         {
             move(aPosition);
             iSink = ChildAdded([&](i_widget& aChild)
@@ -40,8 +54,41 @@ namespace neogfx::DesignStudio
                 aChild.set_ignore_non_client_mouse_events(true);
             });
         }
+    public:
+        void set_border_style(border_style aStyle)
+        {
+            iBorderStyle = aStyle;
+            update();
+        }
+    protected:
+        void paint(i_graphics_context& aGc) const override
+        {
+            widget::paint(aGc);
+            if (opacity() == 1.0)
+            {
+                switch (iBorderStyle)
+                {
+                case border_style::None:
+                default:
+                    break;
+                case border_style::Drag:
+                    {
+                        auto const cr = client_rect(false);
+                        aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
+                        aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
+                        aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
+                        aGc.line_stipple_off();
+                    }
+                    break;
+                case border_style::Edit:
+                    break;
+                }
+            }
+        }
     private:
         sink iSink;
         vertical_layout iLayout;
+        border_style iBorderStyle;
+        neolib::callback_timer iAnimator;
     };
 }
