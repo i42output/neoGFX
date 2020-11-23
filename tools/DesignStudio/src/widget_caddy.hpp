@@ -93,14 +93,14 @@ namespace neogfx::DesignStudio
                         aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
                         aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
                         aGc.line_stipple_off();
-                        aGc.draw_rect(part_rect(cardinal::NorthWest), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(part_rect(cardinal::North), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(part_rect(cardinal::NorthEast), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(part_rect(cardinal::East), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(part_rect(cardinal::SouthEast), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(part_rect(cardinal::South), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(part_rect(cardinal::SouthWest), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(part_rect(cardinal::West), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::NorthWest), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::North), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::NorthEast), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::East), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::SouthEast), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::South), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::SouthWest), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::West), color::NavyBlue, color::White.with_alpha(0.75));
                     }
                     break;
                 }
@@ -121,8 +121,24 @@ namespace neogfx::DesignStudio
             widget::focus_lost(aFocusReason);
             set_mode(mode::None);
         }
+    protected:
+        neogfx::mouse_cursor mouse_cursor() const override
+        {
+            point mousePos = root().mouse_position() - origin();
+            if (resizer_part_rect(cardinal::NorthWest).contains(mousePos) || resizer_part_rect(cardinal::SouthEast).contains(mousePos))
+                return mouse_system_cursor::SizeNWSE;
+            else if (resizer_part_rect(cardinal::NorthEast).contains(mousePos) || resizer_part_rect(cardinal::SouthWest).contains(mousePos))
+                return mouse_system_cursor::SizeNESW;
+            else if (resizer_part_rect(cardinal::North).contains(mousePos) || resizer_part_rect(cardinal::South).contains(mousePos))
+                return mouse_system_cursor::SizeNS;
+            else if (resizer_part_rect(cardinal::West).contains(mousePos) || resizer_part_rect(cardinal::East).contains(mousePos))
+                return mouse_system_cursor::SizeWE;
+            else if (resizer_part_rect(cardinal::Center).contains(mousePos))
+                return mouse_system_cursor::SizeAll;
+            return widget::mouse_cursor();
+        }
     private:
-        rect part_rect(cardinal aPart) const
+        rect resizer_part_rect(cardinal aPart) const
         {
             auto const pw = padding().left * 2.0;
             auto const cr = client_rect(false).inflated(pw / 2.0);
