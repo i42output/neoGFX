@@ -47,7 +47,7 @@ namespace neogfx::DesignStudio
                 widgetCaddy->add(selectedWidget);
                 auto const idealSize = widgetCaddy->minimum_size();
                 widgetCaddy->resize(idealSize);
-                widgetCaddy->move(aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0);
+                widgetCaddy->move((aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
                 aItem.source().set_drag_drop_widget(widgetCaddy);
                 widgetCaddy->set_border_style(widget_caddy::border_style::Drag);
             }

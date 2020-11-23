@@ -73,7 +73,7 @@ namespace neogfx::DesignStudio
                     break;
                 case border_style::Drag:
                     {
-                        auto const cr = client_rect().deflated(2.0);
+                        auto const cr = client_rect().deflated(1.0);
                         aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
                         aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
                         aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
