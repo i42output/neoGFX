@@ -966,9 +966,13 @@ namespace neogfx
         if (snap_to_pixel())
         {
             disableMultisample.emplace(*this);
-            adjustedRect.position() -= size{ static_cast<int32_t>(aPen.width()) % 2 == 1 ? 0.0 : 0.5 };
-            adjustedRect = adjustedRect.with_epsilon(size{ 1.0, 1.0 });
+            bool const oddWidth = static_cast<int32_t>(aPen.width()) % 2 == 1;
+            adjustedRect.position() -= size{ oddWidth ? 0.0 : 0.5 };
+            if (oddWidth)
+                adjustedRect = adjustedRect.with_epsilon(size{ 1.0 });
         }
+        else
+            adjustedRect.inflate(size{ aPen.width() / 2.0 }.floor());
 
         vec3_array<8> lines = rect_vertices(adjustedRect, mesh_type::Outline, 0.0);
         lines[1].x -= (aPen.width() + rect::default_epsilon);
@@ -1008,9 +1012,13 @@ namespace neogfx
         auto adjustedRect = aRect;
         if (snap_to_pixel())
         {
-            adjustedRect.position() -= size{ static_cast<int32_t>(aPen.width()) % 2 == 1 ? 0.0 : 0.5 };
-            adjustedRect = adjustedRect.with_epsilon(size{ 1.0, 1.0 });
+            bool const oddWidth = static_cast<int32_t>(aPen.width()) % 2 == 1;
+            adjustedRect.position() -= size{ oddWidth ? 0.0 : 0.5 };
+            if (oddWidth)
+                adjustedRect = adjustedRect.with_epsilon(size{ 1.0 });
         }
+        else
+            adjustedRect.inflate(size{ aPen.width() / 2.0 }.floor());
 
         auto vertices = rounded_rect_vertices(adjustedRect, aRadius, mesh_type::Outline);
 
