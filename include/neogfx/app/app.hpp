@@ -60,6 +60,7 @@ namespace neogfx
 
     class app : public async_thread, public neolib::application<i_app>, private i_keyboard_handler
     {
+        typedef neolib::application<i_app> base_type;
     public:
         define_declared_event(ExecutionStarted, execution_started)
         define_declared_event(NameChanged, name_changed)
@@ -144,6 +145,8 @@ namespace neogfx
         i_event_processing_context& event_processing_context() override;
     protected:
         void idle() override;
+    protected:
+        bool discover(const uuid& aId, void*& aObject) override;
     private:
         bool do_process_events();
     private:

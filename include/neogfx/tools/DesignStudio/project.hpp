@@ -32,6 +32,7 @@ namespace neogfx::DesignStudio
     {
     public:
         define_declared_event(ElementAdded, element_added, i_element&)
+        define_declared_event(ElementRemoved, element_removed, i_element&)
     public:
         typedef i_project abstract_type;
     public:
@@ -49,6 +50,7 @@ namespace neogfx::DesignStudio
         i_element& root() override;
     public:
         i_element& create_element(i_element& aParent, const i_string& aType, const i_string& aElementId = string{}) override;
+        void remove_element(i_element& aElement) override;
     private:
         i_project_manager& iManager;
         ref_ptr<i_element> iRoot;

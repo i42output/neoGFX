@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/symbol.hpp>
 #include "widget_caddy.hpp"
 #include "toolbox_model.hpp"
 
@@ -37,13 +38,15 @@ namespace neogfx::DesignStudio
             {
                 auto const& tool = std::get<ds::tool_t>(item);
                 auto& project = aProjectManager.active_project();
-                auto& newElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
+                iSelectedElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
+                selectedWidget = iSelectedElement->create_widget();
             }
             if (selectedWidget)
             {
                 auto widgetCaddy = make_ref<widget_caddy>(aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
                 widgetCaddy->add(selectedWidget);
-                widgetCaddy->resize(widgetCaddy->minimum_size());
+                auto const idealSize = widgetCaddy->minimum_size();
+                widgetCaddy->resize(idealSize);
                 widgetCaddy->move(aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0);
                 aItem.source().set_drag_drop_widget(widgetCaddy);
             }
@@ -57,7 +60,18 @@ namespace neogfx::DesignStudio
                 aTarget.as_widget().add(widgetCaddy);
                 widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
             }
+            iSelectedElement = {};
         });
+        iSink += DraggingItemCancelled([&](i_drag_drop_item const& aItem)
+        {
+            if (iSelectedElement)
+            {
+                auto& project = aProjectManager.active_project();
+                project.remove_element(*iSelectedElement);
+                iSelectedElement = {};
+            }
+        });
+
     }
 
     ng::optional_size toolbox_presentation_model::cell_image_size(const ng::item_presentation_model_index& aIndex) const
@@ -131,7 +145,8 @@ namespace neogfx::DesignStudio
 
     string toolbox_presentation_model::generate_id(const string& aToolName)
     {
-        return aToolName + std::to_string(++iIdCounters[aToolName]);
+        // todo: use configured naming convention
+        return to_symbol_name(aToolName + std::to_string(++iIdCounters[aToolName]), naming_convention::LowerCamelCase, named_entity::LocalVariable);
     }
 
     void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel)

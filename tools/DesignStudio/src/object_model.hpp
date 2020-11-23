@@ -39,5 +39,6 @@ namespace neogfx::DesignStudio
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
     private:
         sink iSink;
+        sink iSink2;
     };
 }

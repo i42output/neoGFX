@@ -24,45 +24,56 @@ namespace neogfx::DesignStudio
 {
     object_presentation_model::object_presentation_model(i_project_manager& aProjectManager)
     {
-        auto project_updated = [&](i_project&)
+        auto update_model = [&]()
         {
             if (aProjectManager.project_active())
             {
-                if (item_model().empty() || item_model().item(item_model().sbegin()) != &aProjectManager.active_project().root())
+                item_model().clear();
+                item_model().updating().trigger();
+                std::function<void(ng::i_item_model::iterator, i_element&)> addNode = [&](ng::i_item_model::iterator aPosition, i_element& aElement)
                 {
-                    item_model().clear();
-                    item_model().updating().trigger();
-                    std::function<void(ng::i_item_model::iterator, i_element&)> addNode = [&](ng::i_item_model::iterator aPosition, i_element& aElement)
+                    switch (aElement.group())
                     {
-                        switch (aElement.group())
-                        {
-                        case element_group::Unknown:
-                            break;
-                        case element_group::Project:
-                        case element_group::UserInterface:
-                        case element_group::App:
-                        case element_group::Menu:
-                        case element_group::Widget:
-                        case element_group::Layout:
-                        {
-                            auto node = aElement.group() != element_group::Project ?
-                                item_model().append_item(aPosition, &aElement, aElement.id().to_std_string()) :
-                                item_model().insert_item(aPosition, &aElement, aElement.id().to_std_string());
-                            item_model().insert_cell_data(node, 1u, aElement.type().to_std_string());
-                            for (auto& child : aElement)
-                                addNode(node, *child);
-                        }
+                    case element_group::Unknown:
                         break;
-                        case element_group::Action:
-                            break;
-                        }
-                    };
-                    addNode(item_model().send(), aProjectManager.active_project().root());
-                    item_model().updated().trigger();
-                }
+                    case element_group::Project:
+                    case element_group::UserInterface:
+                    case element_group::App:
+                    case element_group::Menu:
+                    case element_group::Widget:
+                    case element_group::Layout:
+                    {
+                        auto node = aElement.group() != element_group::Project ?
+                            item_model().append_item(aPosition, &aElement, aElement.id().to_std_string()) :
+                            item_model().insert_item(aPosition, &aElement, aElement.id().to_std_string());
+                        item_model().insert_cell_data(node, 1u, aElement.type().to_std_string());
+                        for (auto& child : aElement)
+                            addNode(node, *child);
+                    }
+                    break;
+                    case element_group::Action:
+                        break;
+                    }
+                };
+                addNode(item_model().send(), aProjectManager.active_project().root());
+                item_model().updated().trigger();
             }
             else
                 item_model().clear();
+        };
+        auto project_updated = [&, update_model](i_project& aProject)
+        {
+            update_model();
+            iSink2 = aProject.element_added([update_model](i_element&) 
+            { 
+                // todo: something more granular
+                update_model(); 
+            }); 
+            iSink2 += aProject.element_removed([update_model](i_element&) 
+            { 
+                // todo: something more granular
+                update_model(); 
+            }); 
         };
 
         iSink += aProjectManager.project_added(project_updated);

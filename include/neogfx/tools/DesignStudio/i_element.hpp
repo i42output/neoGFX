@@ -26,6 +26,7 @@
 #include <neolib/core/i_string.hpp>
 #include <neolib/core/i_vector.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/tools/DesignStudio/i_element_component.hpp>
 
 namespace neogfx::DesignStudio
@@ -68,12 +69,20 @@ namespace neogfx::DesignStudio
         virtual const children_t& children() const = 0;
         virtual children_t& children() = 0;
         virtual void add_child(i_element& aChild) = 0;
+        virtual void remove_child(i_element& aChild) = 0;
+    public:
+        virtual void create_widget(i_ref_ptr<i_widget>& aResult) = 0;
     public:
         children_t::const_iterator begin() const { return children().begin(); }
         children_t::iterator begin() { return children().begin(); }
         children_t::const_iterator end() const { return children().end(); }
         children_t::iterator end() { return children().end(); }
     public:
-
+        ref_ptr<i_widget> create_widget()
+        {
+            ref_ptr<i_widget> result;
+            create_widget(result);
+            return result;
+        }
     };
 }

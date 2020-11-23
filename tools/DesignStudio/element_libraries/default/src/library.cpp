@@ -65,56 +65,56 @@ namespace neogfx::DesignStudio
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
         iElementsOrdered
-        {
-            { "project" },
-            { "code" },
-            { "script" },
-            { "node" },
-            { "user_interface" },
-            { "app" },
-            { "MVC_app" },
-            { "dialog_app" },
-            { "2D_game" },
-            { "2.5D_game" },
-            { "3D_game" },
-            { "action" },
-            { "menu" },
-            { "window" },
-            { "widget" },
-            { "text_widget" },
-            { "image_widget" },
-            { "menu_bar" },
-            { "toolbar" },
-            { "status_bar" },
-            { "tab_page_container" },
-            { "tab_page" },
-            { "canvas" },
-            { "push_button" },
-            { "check_box" },
-            { "radio_button" },
-            { "label" },
-            { "text_edit" },
-            { "line_edit" },
-            { "text_field" },
-            { "drop_list" },
-            { "table_view" },
-            { "tree_view" },
-            { "group_box" },
-            { "slider" },
-            { "double_slider" },
-            { "spin_box" },
-            { "double_spin_box" },
-            { "gradient_widget" },
-            { "vertical_layout" },
-            { "horizontal_layout" },
-            { "grid_layout" },
-            { "flow_layout" },
-            { "stack_layout" },
-            { "border_layout" },
-            { "spacer" },
-            { "vertical_spacer" },
-            { "horizontal_spacer" }
-        },
+    {
+        { "project" },
+        { "code" },
+        { "script" },
+        { "node" },
+        { "user_interface" },
+        { "app" },
+        { "MVC_app" },
+        { "dialog_app" },
+        { "2D_game" },
+        { "2.5D_game" },
+        { "3D_game" },
+        { "action" },
+        { "menu" },
+        { "window" },
+        { "widget" },
+        { "text_widget" },
+        { "image_widget" },
+        { "menu_bar" },
+        { "toolbar" },
+        { "status_bar" },
+        { "tab_page_container" },
+        { "tab_page" },
+        { "canvas" },
+        { "push_button" },
+        { "check_box" },
+        { "radio_button" },
+        { "label" },
+        { "text_edit" },
+        { "line_edit" },
+        { "text_field" },
+        { "drop_list" },
+        { "table_view" },
+        { "tree_view" },
+        { "group_box" },
+        { "slider" },
+        { "double_slider" },
+        { "spin_box" },
+        { "double_spin_box" },
+        { "gradient_widget" },
+        { "vertical_layout" },
+        { "horizontal_layout" },
+        { "grid_layout" },
+        { "flow_layout" },
+        { "stack_layout" },
+        { "border_layout" },
+        { "spacer" },
+        { "vertical_spacer" },
+        { "horizontal_spacer" }
+    },
         iElements{ elements_ordered().begin(), elements_ordered().end() }
     {
     }
@@ -150,6 +150,9 @@ namespace neogfx::DesignStudio
         throw unknown_element_type();
     }
 
+    struct script {}; // todo
+    struct node {}; // todo
+
     void default_element_library::create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
         static const std::map<std::string, std::function<i_element*(i_element&, const neolib::i_string&)>> sFactoryMethods =
@@ -163,6 +166,8 @@ namespace neogfx::DesignStudio
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2D_game, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2.5D_game, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(3D_game, app)
+            MAKE_ELEMENT_FACTORY_FUNCTION(script)
+            MAKE_ELEMENT_FACTORY_FUNCTION(node)
             MAKE_ELEMENT_FACTORY_FUNCTION(action)
             MAKE_ELEMENT_FACTORY_FUNCTION(window)
             MAKE_ELEMENT_FACTORY_FUNCTION(widget)

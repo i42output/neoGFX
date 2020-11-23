@@ -235,6 +235,9 @@ namespace neogfx
         actionDelete{ "Delete"_t },
         actionSelectAll{ "Select All"_t }
     {
+        base_type::add_ref();
+        async_thread::add_ref();
+            
         neolib::event_mutex().set_multi_threaded_spinlock();
 
         actionFileNew.set_shortcut("Ctrl+Shift+N");
@@ -727,6 +730,16 @@ namespace neogfx
     void app::idle()
     {
         async_thread::idle();
+    }
+
+    bool app::discover(const uuid& aId, void*& aObject)
+    {
+        aObject = nullptr;
+        if (aId == i_async_task::iid())
+            aObject = static_cast<i_async_task*>(this);
+        if (aObject)
+            return true;
+        return base_type::discover(aId, aObject);
     }
 
     bool app::do_process_events()

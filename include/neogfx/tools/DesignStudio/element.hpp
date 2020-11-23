@@ -167,6 +167,27 @@ namespace neogfx::DesignStudio
                 parent().children().insert(std::prev(parent().children().end()), neolib::ref_ptr<i_element>{ &aChild });
             }
         }
+        void remove_child(i_element& aChild) override
+        {
+            auto existing = std::find_if(children().begin(), children().end(), [&](auto&& e) { return &*e == &aChild; });
+            if (existing != children().end())
+                children().erase(existing);
+        }
+    public:
+        void create_widget(i_ref_ptr<i_widget>& aResult) override
+        {
+            if constexpr (std::is_base_of_v<i_widget, Type>)
+            {
+                if constexpr (std::is_constructible_v<Type, neolib::i_string&>)
+                    aResult = make_ref<Type>(iId);
+                else if constexpr (std::is_default_constructible_v<Type>)
+                    aResult = make_ref<Type>();
+                else
+                {
+                    // todo: widget creation for the other widget types
+                }
+            }
+        }
     public:
         const i_element_library& iLibrary;
         i_element* iParent;

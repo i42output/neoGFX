@@ -144,4 +144,11 @@ namespace neogfx::DesignStudio
         ElementAdded.trigger(*result);
         return *result;
     }
+
+    void project::remove_element(i_element& aElement)
+    {
+        ref_ptr<i_element> temp = aElement;
+        aElement.parent().remove_child(aElement);
+        ElementRemoved.trigger(*temp);
+    }
 }

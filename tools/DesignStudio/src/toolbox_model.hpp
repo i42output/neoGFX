@@ -49,6 +49,7 @@ namespace neogfx::DesignStudio
         string generate_id(const string& aToolName);
     private:
         sink iSink;
+        ref_ptr<i_element> iSelectedElement;
         std::map<std::string, uint32_t> iIdCounters;
     };
 

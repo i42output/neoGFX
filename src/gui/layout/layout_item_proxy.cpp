@@ -34,10 +34,12 @@ namespace neogfx
     layout_item_proxy::layout_item_proxy(i_ref_ptr<i_layout_item> const& aItem) :
         iSubject{ aItem }, 
         iSubjectIsProxy{ aItem->is_proxy() }, 
+        iVisible{ static_cast<uint32_t>(-1), {} },
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
         iWeight{ static_cast<uint32_t>(-1), {} },
         iMinimumSize{ static_cast<uint32_t>(-1), {} },
-        iMaximumSize{ static_cast<uint32_t>(-1), {} }
+        iMaximumSize{ static_cast<uint32_t>(-1), {} },
+        iFixedSize{ static_cast<uint32_t>(-1), {} }
     {
         set_alive();
     }
@@ -45,10 +47,12 @@ namespace neogfx
     layout_item_proxy::layout_item_proxy(const layout_item_proxy& aOther) :
         iSubject{ aOther.iSubject }, 
         iSubjectIsProxy{ aOther.iSubject->is_proxy() }, 
-        iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
+        iVisible{ static_cast<uint32_t>(-1), {} },
+        iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } },
         iWeight{ static_cast<uint32_t>(-1), {} },
         iMinimumSize{ static_cast<uint32_t>(-1), {} },
-        iMaximumSize{ static_cast<uint32_t>(-1), {} }
+        iMaximumSize{ static_cast<uint32_t>(-1), {} },
+        iFixedSize{ static_cast<uint32_t>(-1), {} }
     {
         set_alive();
     }
