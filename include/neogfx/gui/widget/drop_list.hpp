@@ -157,7 +157,7 @@ namespace neogfx
         virtual void set_text(std::string const& aText) = 0;
     };
 
-    class drop_list : public widget, private i_drop_list_input_widget::i_visitor
+    class drop_list : public widget<>, private i_drop_list_input_widget::i_visitor
     {
         friend class drop_list_view;
     public:

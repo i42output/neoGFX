@@ -36,7 +36,7 @@ namespace video_poker
 {
     using namespace neogames::card_games;
 
-    class card_widget : public neogfx::widget
+    class card_widget : public neogfx::widget<>
     {
     public:
         card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures);
@@ -61,7 +61,7 @@ namespace video_poker
         neogfx::game::entity_id iCardSprite;
     };
 
-    class card_space : neogfx::widget
+    class card_space : neogfx::widget<>
     {
     public:
         struct no_card : std::runtime_error { no_card() : std::runtime_error("video_poker::card_space::no_card") {} };

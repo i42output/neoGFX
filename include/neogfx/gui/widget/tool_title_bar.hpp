@@ -32,7 +32,7 @@
 
 namespace neogfx
 {
-    class tool_title_bar : public widget, public i_title_bar
+    class tool_title_bar : public widget<i_title_bar>
     {
     public:
         typedef i_title_bar abstract_type;

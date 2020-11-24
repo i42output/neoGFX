@@ -30,7 +30,7 @@ namespace neogfx
         define_event(On, on)
         define_event(Off, off)
     private:
-        class disc : public widget
+        class disc : public widget<>
         {
         public:
             disc(radio_button& aParent);

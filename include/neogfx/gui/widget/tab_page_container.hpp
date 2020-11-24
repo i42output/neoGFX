@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class tab_page_container : public widget, public i_tab_page_container
+    class tab_page_container : public widget<>, public i_tab_page_container
     {
     public:
         define_declared_event(StyleChanged, style_changed)
@@ -85,8 +85,8 @@ namespace neogfx
         bool has_parent_container() const override;
         const i_tab_container& parent_container() const override;
         i_tab_container& parent_container() override;
-        const widget& as_widget() const override;
-        widget& as_widget() override;
+        const widget<>& as_widget() const override;
+        widget<>& as_widget() override;
     protected:
         bool is_managing_layout() const override;
     private:

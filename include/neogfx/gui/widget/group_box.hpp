@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-    class group_box : public widget
+    class group_box : public widget<>
     {
     private:
         typedef group_box property_context_type;

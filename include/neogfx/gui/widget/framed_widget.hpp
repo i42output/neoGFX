@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "widget.hpp"
+#include <neogfx/gui/widget/widget.hpp>
 
 namespace neogfx
 {
@@ -40,7 +40,7 @@ namespace neogfx
         WindowFrame
     };
 
-    template <typename Base = widget>
+    template <typename Base = widget<>>
     class framed_widget : public Base
     {
         typedef framed_widget<Base> self_type;

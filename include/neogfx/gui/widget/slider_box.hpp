@@ -26,7 +26,7 @@
 namespace neogfx
 {
     template <typename T>
-    class basic_slider_box : public widget
+    class basic_slider_box : public widget<>
     {
     public:
         typedef T value_type;

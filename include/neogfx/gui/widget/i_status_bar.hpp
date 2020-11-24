@@ -19,13 +19,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometrical.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
-    class i_widget;
-
-    class i_status_bar : public virtual i_reference_counted
+    class i_status_bar : public i_widget
     {
     public:
         typedef i_status_bar abstract_type;

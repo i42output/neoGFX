@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace video_poker
 {
     card_widget::card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures) :
-        widget{ aLayout },
+        widget<>{ aLayout },
         iCanvas{ aCanvas },
         iCardTextures{ aCardTextures },
         iCard{ nullptr },
@@ -123,7 +123,7 @@ namespace video_poker
     }
 
     card_space::card_space(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, i_table& aTable) :
-        widget{ aLayout },
+        widget<>{ aLayout },
         iCanvas{ aCanvas },
         iTable{ aTable },
         iVerticalLayout{ *this, neogfx::alignment::Center | neogfx::alignment::VCenter },

@@ -39,7 +39,7 @@ end_declare_enum(neogfx::text_field_placement)
 
 namespace neogfx
 {
-    class text_field : public widget
+    class text_field : public widget<>
     {
     private:
         class input_box_container : public framed_widget<>

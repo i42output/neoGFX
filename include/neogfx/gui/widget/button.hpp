@@ -30,7 +30,7 @@
 namespace neogfx
 {
     template <typename ButtonInterface = i_button>
-    class button : public widget, public ButtonInterface, protected i_mnemonic
+    class button : public widget<>, public ButtonInterface, protected i_mnemonic
     {
         // events
     public:

@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class toolbar : public widget, public i_action_container
+    class toolbar : public widget<>, public i_action_container
     {
     private:
         typedef std::unique_ptr<toolbar_button> button_pointer;

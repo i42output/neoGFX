@@ -118,7 +118,7 @@ end_declare_enum(neogfx::button_role)
 
 namespace neogfx
 {
-    class dialog_button_box : public widget
+    class dialog_button_box : public widget<>
     {
     public:
         define_event(Accepted, accepted)

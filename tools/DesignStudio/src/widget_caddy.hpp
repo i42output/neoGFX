@@ -25,7 +25,7 @@
 
 namespace neogfx::DesignStudio
 {
-    class widget_caddy : public widget
+    class widget_caddy : public widget<>
     {
     public:
         enum class mode
@@ -37,7 +37,6 @@ namespace neogfx::DesignStudio
     public:
         widget_caddy(i_widget& aParent, const point& aPosition) :
             widget{ aParent },
-            iLayout{ *this },
             iMode{ mode::None },
             iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
             {    
@@ -46,25 +45,53 @@ namespace neogfx::DesignStudio
                     update(); 
             }, 20 }
         {
-            iLayout.set_padding(neogfx::padding{});
             move(aPosition);
             iSink = ChildAdded([&](i_widget& aChild)
             {
-                iLayout.add(aChild);
                 aChild.set_ignore_mouse_events(true);
                 aChild.set_ignore_non_client_mouse_events(true);
             });
         }
     public:
+        void set_widget(i_ref_ptr<i_widget> const& aWidget)
+        {
+            add(aWidget);
+            iWidget = aWidget;
+            layout_items();
+        }
         void set_mode(mode aMode)
         {
             iMode = aMode;
             update();
         }
+    public:
+        size minimum_size(optional_size const& aAvailableSpace = {}) const override
+        {
+            size result = widget::minimum_size(aAvailableSpace);
+            if (iWidget)
+            {
+                result = iWidget->minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
+                if (result.cx != 0.0)
+                    result.cx += padding().size().cx;
+                if (result.cy != 0.0)
+                    result.cy += padding().size().cy;
+            }
+            return result;
+        }
     protected:
         neogfx::padding padding() const override
         {
             return neogfx::padding{ 4.0_dip };
+        }
+    protected:
+        void layout_items(bool aDefer = false) override
+        {
+            widget::layout_items(aDefer);
+            if (iWidget)
+            {
+                iWidget->move(client_rect(false).top_left());
+                iWidget->resize(client_rect(false).extents());
+            }
         }
     protected:
         void paint_non_client_after(i_graphics_context& aGc) const override
@@ -122,6 +149,75 @@ namespace neogfx::DesignStudio
             set_mode(mode::None);
         }
     protected:
+        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override
+        {
+            widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+            if (aButton == mouse_button::Left)
+            {
+                auto update_resizer = [&](cardinal aCardinal) -> bool
+                {
+                    if (resizer_part_rect(aCardinal).contains(aPosition))
+                    {
+                        iResizerDrag.emplace(std::make_pair(aCardinal, aPosition - resizer_part_rect(aCardinal).center()));
+                        return true;
+                    }
+                    return false;
+                };
+                if (!update_resizer(cardinal::NorthWest))
+                    if (!update_resizer(cardinal::North))
+                        if (!update_resizer(cardinal::NorthEast))
+                            if (!update_resizer(cardinal::West))
+                                if (!update_resizer(cardinal::Center))
+                                    if (!update_resizer(cardinal::East))
+                                        if (!update_resizer(cardinal::SouthWest))
+                                            if (!update_resizer(cardinal::South))
+                                                update_resizer(cardinal::SouthEast);
+            }
+        }
+        void mouse_button_released(mouse_button aButton, const point& aPosition) override
+        {
+            widget::mouse_button_released(aButton, aPosition);
+            iResizerDrag = {};
+        }
+        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override
+        {
+            widget::mouse_moved(aPosition, aKeyModifiers);
+            if (capturing() && iResizerDrag)
+            {
+                auto delta = point{ aPosition - resizer_part_rect(iResizerDrag->first).center() } - iResizerDrag->second;
+                switch (iResizerDrag->first)
+                {
+                case cardinal::NorthWest:
+                    delta = delta.min(non_client_rect().bottom_right().to_delta());
+                    move(position() + delta);
+                    resize((extents() - size{ delta }).max(size{}));
+                    break;
+                case cardinal::North:
+                    delta.dx = 0.0;
+                    delta.dy = std::min(delta.dy, non_client_rect().bottom());
+                    move(position() + delta);
+                    resize((extents() - size{ delta }).max(size{}));
+                    break;
+                case cardinal::NorthEast:
+                    move(position() + size{ 0.0, delta.dy });
+                    resize((extents() - size{ delta }).max(size{}));
+                    break;
+                case cardinal::West:
+                    break;
+                case cardinal::Center:
+                    move(position() + delta);
+                    break;
+                case cardinal::East:
+                    break;
+                case cardinal::SouthWest:
+                    break;
+                case cardinal::South:
+                    break;
+                case cardinal::SouthEast:
+                    break;
+                }
+            }
+        }
         neogfx::mouse_cursor mouse_cursor() const override
         {
             point mousePos = root().mouse_position() - origin();
@@ -168,8 +264,9 @@ namespace neogfx::DesignStudio
         }
     private:
         sink iSink;
-        vertical_layout iLayout;
         mode iMode;
+        weak_ref_ptr<i_widget> iWidget;
         neolib::callback_timer iAnimator;
+        std::optional<std::pair<cardinal, point>> iResizerDrag;
     };
 }

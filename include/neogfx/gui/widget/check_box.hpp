@@ -28,7 +28,7 @@ namespace neogfx
     class check_box : public button<>
     {
     private:
-        class box : public widget
+        class box : public widget<>
         {
         public:
             box(check_box& aParent);

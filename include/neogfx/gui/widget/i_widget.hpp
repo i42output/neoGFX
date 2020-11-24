@@ -73,6 +73,8 @@ namespace neogfx
     public:
         virtual ~i_widget() = default;
     public:
+        using i_layout_item::as_widget;
+    public:
         virtual bool is_singular() const = 0;
         virtual void set_singular(bool aSingular) = 0;
         virtual bool has_root() const = 0;

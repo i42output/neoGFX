@@ -38,7 +38,7 @@ end_declare_enum(neogfx::slider_orientation)
 
 namespace neogfx
 {
-    class slider_impl : public widget
+    class slider_impl : public widget<>
     {
     public:
         define_event(ValueChanged, value_changed)

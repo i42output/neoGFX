@@ -33,7 +33,7 @@ namespace neogfx
 {
     class popup_menu;
 
-    class menu_item_widget : public widget, protected i_mnemonic, private i_help_source
+    class menu_item_widget : public widget<>, protected i_mnemonic, private i_help_source
     {
     public:
         menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);

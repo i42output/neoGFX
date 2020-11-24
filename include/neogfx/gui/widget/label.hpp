@@ -82,7 +82,7 @@ namespace neogfx
 {
     typedef text_widget_type label_type;
 
-    class label : public widget
+    class label : public widget<>
     {
     public:
         struct no_center_spacer : std::logic_error { no_center_spacer() : std::logic_error("neogfx::label::no_center_spacer") {} };

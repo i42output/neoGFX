@@ -28,7 +28,7 @@ namespace neogfx
 {
     class popup_menu;
 
-    class menu_bar : public widget, public menu
+    class menu_bar : public widget<>, public menu
     {
     public:
         menu_bar();

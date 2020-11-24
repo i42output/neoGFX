@@ -143,12 +143,12 @@ namespace neogfx
         return iTab;
     }
 
-    const widget& tab_page::as_widget() const
+    const widget<>& tab_page::as_widget() const
     {
         return *this;
     }
 
-    widget& tab_page::as_widget()
+    widget<>& tab_page::as_widget()
     {
         return *this;
     }

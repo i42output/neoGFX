@@ -54,8 +54,8 @@ namespace neogfx
     public:
         const i_tab& tab() const override;
         i_tab& tab() override;
-        const widget& as_widget() const override;
-        widget& as_widget() override;
+        const widget<>& as_widget() const override;
+        widget<>& as_widget() override;
     private:
         i_tab& iTab;
         sink iSink;

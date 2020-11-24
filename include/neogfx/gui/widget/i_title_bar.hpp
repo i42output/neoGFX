@@ -19,20 +19,16 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
-    class i_widget;
-
-    class i_title_bar : public virtual i_reference_counted
+    class i_title_bar : public i_widget
     {
     public:
         typedef i_title_bar abstract_type;
     public:
         virtual ~i_title_bar() = default;
-    public:
-        virtual const i_widget& as_widget() const = 0;
-        virtual i_widget& as_widget() = 0;
     public:
         virtual std::string const& title() const = 0;
         virtual void set_title(std::string const& aTitle) = 0;

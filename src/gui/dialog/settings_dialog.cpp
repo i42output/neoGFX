@@ -320,7 +320,7 @@ namespace neogfx
         texture iDefaultIcon;
     };
 
-    class setting_group_widget : public widget
+    class setting_group_widget : public widget<>
     {
     public:
         setting_group_widget(std::string const& aTitle) :

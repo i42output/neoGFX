@@ -30,7 +30,7 @@ namespace neogfx
 {
     class gradient_dialog;
 
-    class gradient_widget : public widget
+    class gradient_widget : public widget<>
     {
     public:
         define_event(GradientChanged, gradient_changed)

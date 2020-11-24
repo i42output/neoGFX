@@ -24,7 +24,7 @@
 
 namespace neogfx::game
 {
-    class canvas : public widget
+    class canvas : public widget<>
     {
     public:
         define_event(RenderingEntities, rendering_entities, i_graphics_context&, int32_t)

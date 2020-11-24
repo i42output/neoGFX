@@ -48,7 +48,7 @@ namespace neogfx
         return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    class text_widget : public widget
+    class text_widget : public widget<>
     {
     public:
         define_event(TextChanged, text_changed)

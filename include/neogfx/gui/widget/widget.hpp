@@ -30,9 +30,10 @@
 
 namespace neogfx
 {
-    class widget : public layout_item<object<i_widget>>
+    template <typename Interface = i_widget>
+    class widget : public layout_item<object<Interface>>
     {
-        typedef layout_item<object<i_widget>> base_type;
+        typedef layout_item<object<Interface>> base_type;
     public:
         define_declared_event(ChildAdded, child_added, i_widget&)
         define_declared_event(ChildRemoved, child_removed, i_widget&)
@@ -47,6 +48,20 @@ namespace neogfx
         define_declared_event(NonClientMouse, non_client_mouse_event, const neogfx::non_client_mouse_event&)
         define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
         define_declared_event(Focus, focus_event, neogfx::focus_event)
+    public:
+        using typename base_type::no_device_metrics;
+        using typename base_type::no_parent;
+        using typename base_type::no_root;
+        using typename base_type::no_surface;
+        using typename base_type::no_children;
+        using typename base_type::not_child;
+        using typename base_type::no_update_rect;
+        using typename base_type::widget_not_entered;
+        using typename base_type::widget_cannot_capture;
+        using typename base_type::widget_not_focused;
+        using typename base_type::widget_cannot_defer_layout;
+        using typename base_type::layout_already_set;
+        using typename base_type::no_layout;
     public:
         typedef i_widget abstract_type;
         typedef neolib::vector<ref_ptr<i_widget>> widget_list;
@@ -167,7 +182,6 @@ namespace neogfx
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget
     public:
-        using i_widget::update;
         bool update(const rect& aUpdateRect) override;
         bool requires_update() const override;
         rect update_rect() const override;
@@ -250,12 +264,44 @@ namespace neogfx
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
         // helpers
     public:
-        using base_type::remove;
         using base_type::set_size_policy;
+    public:
+        using base_type::is_surface;
+        using base_type::has_surface;
+        using base_type::surface;
+        using base_type::same_surface;
+    public:
+        using base_type::is_parent_of;
+        using base_type::is_ancestor_of;
+        using base_type::is_descendent_of;
+        using base_type::is_sibling_of;
+        using base_type::remove;
+    public:
+        using base_type::layout_root;
+    public:
+        using base_type::to_window_coordinates;
+        using base_type::to_client_coordinates;
+    public:
+        using base_type::can_update;
+        using base_type::update;
+    public:
         using base_type::show;
         using base_type::hide;
         using base_type::enable;
         using base_type::disable;
+    public:
+        using base_type::has_background_color;
+        using base_type::background_color;
+        using base_type::set_background_color;
+        using base_type::has_foreground_color;
+        using base_type::foreground_color;
+        using base_type::set_foreground_color;
+        using base_type::has_base_color;
+        using base_type::base_color;
+        using base_type::set_base_color;
+        using base_type::has_alternate_base_color;
+        using base_type::alternate_base_color;
+        using base_type::set_alternate_base_color;
         // state
     private:
         bool iSingular;
@@ -288,3 +334,5 @@ namespace neogfx
         define_property(property_category::other, bool, IgnoreNonClientMouseEvents, ignore_non_client_mouse_events, true)
    };
 }
+
+#include "widget.inl"

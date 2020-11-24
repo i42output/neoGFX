@@ -44,7 +44,7 @@ namespace neogfx
         i_view_container& iParent;
     };
 
-    class view_container : public i_view_container, public widget
+    class view_container : public i_view_container, public widget<>
     {
     public:
         define_declared_event(ViewAdded, view_added, i_view&)

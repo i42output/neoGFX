@@ -337,6 +337,8 @@ namespace neogfx
         constexpr basic_point(const basic_size<CoordinateType>& other) : x{ other.cx }, y{ other.cy } {}
         // operations
     public:
+        basic_delta<coordinate_type> to_delta() const { return basic_delta<CoordinateType>{ x, y }; }
+        basic_size<coordinate_type> to_size() const { return basic_size<CoordinateType>{ x, y }; }
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ x, y }; }
         basic_vector<coordinate_type, 3> to_vec3(coordinate_type z = 0.0) const { return basic_vector<coordinate_type, 3>{ x, y, z }; }
         auto operator<=>(const basic_point&) const = default;

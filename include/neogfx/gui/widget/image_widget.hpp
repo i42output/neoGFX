@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    class image_widget : public widget
+    class image_widget : public widget<>
     {
     public:
         define_event(ImageChanged, image_changed)

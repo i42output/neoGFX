@@ -170,7 +170,7 @@ namespace neogfx::DesignStudio
             MAKE_ELEMENT_FACTORY_FUNCTION(node)
             MAKE_ELEMENT_FACTORY_FUNCTION(action)
             MAKE_ELEMENT_FACTORY_FUNCTION(window)
-            MAKE_ELEMENT_FACTORY_FUNCTION(widget)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(widget, widget<>)
             MAKE_ELEMENT_FACTORY_FUNCTION(text_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(image_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(status_bar)

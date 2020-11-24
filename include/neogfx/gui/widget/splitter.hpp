@@ -42,7 +42,7 @@ namespace neogfx
         return static_cast<splitter_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    class splitter : public widget
+    class splitter : public widget<>
     {
     private:
         typedef std::pair<uint32_t, uint32_t> separator_type;

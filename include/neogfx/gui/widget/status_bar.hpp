@@ -30,7 +30,7 @@
 
 namespace neogfx
 {
-    class status_bar : public widget, public i_status_bar
+    class status_bar : public widget<i_status_bar>
     {
     public:
         typedef i_status_bar abstract_type;
@@ -51,7 +51,7 @@ namespace neogfx
         }
         typedef uint32_t widget_index;
     private:
-        class separator : public widget
+        class separator : public widget<>
         {
         public:
             separator();
@@ -61,7 +61,7 @@ namespace neogfx
         public:
             void paint(i_graphics_context& aGc) const override;
         };
-        class keyboard_lock_status : public widget
+        class keyboard_lock_status : public widget<>
         {
         public:
             keyboard_lock_status(i_layout& aLayout);
@@ -128,7 +128,7 @@ namespace neogfx
         label iMessageWidget;
         horizontal_layout iIdleLayout;
         label iIdleWidget;
-        widget iNormalWidgetContainer;
+        widget<> iNormalWidgetContainer;
         horizontal_layout iNormalWidgetLayout;
         horizontal_layout iPermanentWidgetLayout;
         keyboard_lock_status iKeyboardLockStatus;

@@ -1114,9 +1114,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\widget\widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\window\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1627,6 +1624,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\gui\widget\button.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\widget.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

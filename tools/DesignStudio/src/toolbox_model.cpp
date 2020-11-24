@@ -44,7 +44,7 @@ namespace neogfx::DesignStudio
             if (selectedWidget)
             {
                 auto widgetCaddy = make_ref<widget_caddy>(aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
-                widgetCaddy->add(selectedWidget);
+                widgetCaddy->set_widget(selectedWidget);
                 auto const idealSize = widgetCaddy->minimum_size();
                 widgetCaddy->resize(idealSize);
                 widgetCaddy->move((aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
