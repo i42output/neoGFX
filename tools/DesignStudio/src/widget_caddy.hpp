@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <neogfx/app/action.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/window/context_menu.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -205,6 +207,23 @@ namespace neogfx::DesignStudio
                                         if (!update_resizer(cardinal::SouthWest))
                                             if (!update_resizer(cardinal::South))
                                                 update_resizer(cardinal::SouthEast);
+            }
+            else if (aButton == mouse_button::Right)
+            {
+                context_menu menu{ *this, root().mouse_position() + root().window_position() };
+                action sendToBack{ "Send To Back"_t };
+                action bringToFont{ "Bring To Front"_t };
+                sendToBack.triggered([&]()
+                {
+                    send_to_back();
+                });
+                bringToFont.triggered([&]()
+                {
+                    bring_to_front();
+                });
+                menu.menu().add_action(sendToBack);
+                menu.menu().add_action(bringToFont);
+                menu.exec();
             }
         }
         void mouse_button_released(mouse_button aButton, const point& aPosition) override

@@ -131,12 +131,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::device_metrics_available() const
     {
-        if (iDeviceMetricsAvailable == std::nullopt && has_surface())
-            iDeviceMetricsAvailable = true;
-        if (iDeviceMetricsAvailable != std::nullopt)
-            return *iDeviceMetricsAvailable;
-        else
-            return false;
+        return has_root() && root().has_native_window();
     }
 
     template <typename Interface>
@@ -240,7 +235,6 @@ namespace neogfx
     {
         if (!is_root())
         {
-            iDeviceMetricsAvailable = std::nullopt;
             iOrigin = std::nullopt;
             as_widget().update_layout();
         }

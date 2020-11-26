@@ -315,7 +315,6 @@ namespace neogfx
         bool iSingular;
         i_widget* iParent;
         mutable std::optional<const i_window*> iRoot;
-        mutable std::optional<bool> iDeviceMetricsAvailable;
         widget_list iChildren;
         bool iAddingChild;
         i_widget* iLinkBefore;

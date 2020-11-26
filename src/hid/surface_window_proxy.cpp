@@ -75,7 +75,7 @@ namespace neogfx
 
     bool surface_window_proxy::metrics_available() const
     {
-        return native_window().metrics_available();
+        return has_native_window() && native_window().metrics_available();
     }
 
     size surface_window_proxy::extents() const

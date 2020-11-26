@@ -409,7 +409,7 @@ namespace neogfx
             menu().clear_selection();
             if (destroyed)
                 return;
-            menu_item().action().triggered().async_trigger();
+            menu_item().action().triggered().trigger();
             if (destroyed)
                 return;
             if (menu_item().action().is_checkable())
