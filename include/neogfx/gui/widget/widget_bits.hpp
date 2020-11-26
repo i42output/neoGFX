@@ -25,8 +25,9 @@ namespace neogfx
 {
     enum class widget_type : uint32_t
     {
-        Client,
-        NonClient
+        Client      = 0x00000001,
+        NonClient   = 0x00000002,
+        Floating    = 0x00010000
     };
 
     inline constexpr widget_type operator|(widget_type aLhs, widget_type aRhs)

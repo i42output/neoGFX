@@ -459,7 +459,7 @@ namespace neogfx
         {
             auto clipRect = widget_type::default_clip_rect(aIncludeNonClient);
             if (!aIncludeNonClient && has_layout(standard_layout::TitleBar) && 
-                iTitleBar && iTitleBar->as_widget().widget_type() == neogfx::widget_type::NonClient)
+                iTitleBar && (iTitleBar->as_widget().widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient)
                 clipRect.y += layout(standard_layout::TitleBar).extents().cy;
             return clipRect;
         }

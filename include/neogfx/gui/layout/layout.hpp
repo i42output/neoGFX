@@ -44,6 +44,7 @@ namespace neogfx
         define_declared_event(AlignmentChanged, alignment_changed)
     public:
         struct item_already_added : std::logic_error { item_already_added() : std::logic_error("neogfx::layout::item_already_added") {} };
+        struct widget_is_floating : std::logic_error { widget_is_floating() : std::logic_error("neogfx::layout::widget_is_floating") {} };
     public:
         typedef i_layout abstract_type;
     protected:

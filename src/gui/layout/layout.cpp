@@ -201,6 +201,8 @@ namespace neogfx
 
     i_layout_item& layout::add_at(layout_item_index aPosition, i_ref_ptr<i_layout_item> const& aItem)
     {
+        if (aItem->is_widget() && (aItem->as_widget().widget_type() & widget_type::Floating) == widget_type::Floating)
+            throw widget_is_floating();
         if (aItem->has_parent_layout() && !aItem->is_proxy())
         {
             if (&aItem->parent_layout() != this) // move

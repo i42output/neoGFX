@@ -82,6 +82,10 @@ namespace neogfx::DesignStudio
             return result;
         }
     protected:
+        neogfx::widget_type widget_type() const override
+        {
+            return widget::widget_type() | neogfx::widget_type::Floating;
+        }
         neogfx::padding padding() const override
         {
             return neogfx::padding{ 4.0_dip };

@@ -859,6 +859,11 @@ namespace neogfx
             update(true);
             for (auto& child : iChildren)
                 child->parent_moved();
+            if ((widget_type() & neogfx::widget_type::Floating) == neogfx::widget_type::Floating)
+            {
+                parent().layout_items_started();
+                parent().layout_items_completed();
+            }
         }
         PositionChanged.trigger();
     }
@@ -904,6 +909,11 @@ namespace neogfx
     {
         SizeChanged.trigger();
         layout_items();
+        if ((widget_type() & neogfx::widget_type::Floating) == neogfx::widget_type::Floating)
+        {
+            parent().layout_items_started();
+            parent().layout_items_completed();
+        }
     }
 
     template <typename Interface>
@@ -1127,11 +1137,11 @@ namespace neogfx
         if (!aIncludeNonClient)
             clipRect = clipRect.intersection(client_rect());
         if (!is_root())
-            clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect(widget_type() == neogfx::widget_type::NonClient))));
+            clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
         else if (root().is_nested())
         {
             auto& parent = root().parent_window().as_widget();
-            clipRect = clipRect.intersection(to_client_coordinates(parent.to_window_coordinates(parent.default_clip_rect(widget_type() == neogfx::widget_type::NonClient))));
+            clipRect = clipRect.intersection(to_client_coordinates(parent.to_window_coordinates(parent.default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
         }
         return *(cachedRect = clipRect);
     }
@@ -1173,7 +1183,7 @@ namespace neogfx
             for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
             {
                 auto const& child = *i;
-                if (child->widget_type() == neogfx::widget_type::Client)
+                if ((child->widget_type() & neogfx::widget_type::Client) == neogfx::widget_type::Client)
                     continue;
                 rect intersection = nonClientClipRect.intersection(child->non_client_rect() - origin());
                 if (!intersection.empty())
@@ -1220,7 +1230,7 @@ namespace neogfx
             for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
             {
                 auto const& childWidget = **iterChild;
-                if (childWidget.widget_type() == neogfx::widget_type::NonClient)
+                if ((childWidget.widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient)
                     continue;
                 rect intersection = clipRect.intersection(to_client_coordinates(childWidget.non_client_rect()));
                 if (intersection.empty())
