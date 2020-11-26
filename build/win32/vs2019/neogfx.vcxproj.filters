@@ -1597,14 +1597,20 @@
     <ClCompile Include="x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\slider.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="..\..\..\src\gui\layout\flow_layout.inl">
       <Filter>Source Files</Filter>
     </None>
@@ -1617,16 +1623,22 @@
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="..\..\..\include\neogfx\gfx\color.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\button.inl">
+    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.tpp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\widget.inl">
+    <None Include="..\..\..\include\neogfx\gui\widget\spin_box.tpp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\slider.tpp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\widget.tpp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\button.tpp">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

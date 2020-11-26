@@ -100,6 +100,12 @@ namespace neogfx
         widget_list::iterator last() override;
         widget_list::const_iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) const override;
         widget_list::iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) override;
+    public:
+        void bring_child_to_front(const i_widget& aChild) override;
+        void send_child_to_back(const i_widget& aChild) override;
+        int32_t layer() const override;
+        void set_layer(int32_t aLayer) override;
+    public:
         const i_widget& before() const override;
         i_widget& before() override;
         const i_widget& after() const override;
@@ -182,6 +188,8 @@ namespace neogfx
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget
     public:
+        int32_t render_layer() const override;
+        void set_render_layer(const std::optional<int32_t>& aLayer) override;
         bool update(const rect& aUpdateRect) override;
         bool requires_update() const override;
         rect update_rect() const override;
@@ -320,6 +328,8 @@ namespace neogfx
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         mutable optional_point iOrigin;
         optional_point iCapturePosition;
+        int32_t iLayer;
+        std::optional<int32_t> iRenderLayer;
         // properties / anchors
     public:
         define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem, logical_coordinate_system)
@@ -334,5 +344,3 @@ namespace neogfx
         define_property(property_category::other, bool, IgnoreNonClientMouseEvents, ignore_non_client_mouse_events, true)
    };
 }
-
-#include "widget.inl"

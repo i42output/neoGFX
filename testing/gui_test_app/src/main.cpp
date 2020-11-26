@@ -8,6 +8,7 @@
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/hid/i_surface.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/item_model.hpp>

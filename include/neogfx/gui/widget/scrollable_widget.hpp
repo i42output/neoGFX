@@ -58,17 +58,50 @@ namespace neogfx
         };
     public:
         template <typename... Args>
-        scrollable_widget(Args&&... aArgs);
+        scrollable_widget(Args&&... aArgs) :
+            scrollable_widget{ neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... }
+        {
+        }
         template <typename... Args>
-        scrollable_widget(neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs);
+        scrollable_widget(neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs) :
+            base_type{ std::forward<Args>(aArgs)... },
+            iScrollbarStyle{ aScrollbarStyle },
+            iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
+            iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+            iIgnoreScrollbarUpdates{ 0 }
+        {
+            init();
+        }
         template <typename... Args>
-        scrollable_widget(i_widget& aParent, Args&&... aArgs);
+        scrollable_widget(i_widget& aParent, Args&&... aArgs) :
+            scrollable_widget{ aParent, neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... }
+        {
+        }
         template <typename... Args>
-        scrollable_widget(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs);
+        scrollable_widget(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs) :
+            base_type{ aParent, std::forward<Args>(aArgs)... },
+            iScrollbarStyle{ aScrollbarStyle },
+            iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
+            iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+            iIgnoreScrollbarUpdates{ 0 }
+        {
+            init();
+        }
         template <typename... Args>
-        scrollable_widget(i_layout& aLayout, Args&&... aArgs);
+        scrollable_widget(i_layout& aLayout, Args&&... aArgs) :
+            scrollable_widget{ aLayout, neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... }
+        {
+        }
         template <typename... Args>
-        scrollable_widget(i_layout& aLayout, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs);
+        scrollable_widget(i_layout& aLayout, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs) :
+            base_type{ aLayout, std::forward<Args>(aArgs)... },
+            iScrollbarStyle{ aScrollbarStyle },
+            iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
+            iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+            iIgnoreScrollbarUpdates{ 0 }
+        {
+            init();
+        }
         ~scrollable_widget();
         scrollable_widget(const scrollable_widget&) = delete;
     public:
@@ -128,7 +161,7 @@ namespace neogfx
         uint32_t iIgnoreScrollbarUpdates;
     };
 
+    extern template class scrollable_widget<framed_widget<widget<>>>;
     typedef scrollable_widget<framed_widget<widget<>>> framed_scrollable_widget;
-}
 
-#include "scrollable_widget.inl"
+}

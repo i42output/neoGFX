@@ -25,6 +25,9 @@
 
 namespace neogfx
 {
+    extern template class widget<i_push_button>;
+    extern template class button<i_push_button>;
+
     class push_button : public button<i_push_button>
     {
     public:

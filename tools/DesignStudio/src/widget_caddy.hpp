@@ -45,6 +45,7 @@ namespace neogfx::DesignStudio
                     update(); 
             }, 20 }
         {
+            bring_to_front();
             move(aPosition);
             iSink = ChildAdded([&](i_widget& aChild)
             {
@@ -94,6 +95,32 @@ namespace neogfx::DesignStudio
             }
         }
     protected:
+        int32_t layer() const override
+        {
+            switch (iMode)
+            {
+            case mode::None:
+            default:
+                return 0;
+            case mode::Drag:
+                return -1;
+            case mode::Edit:
+                return 1;
+            }
+        }
+    protected:
+        int32_t render_layer() const override
+        {
+            switch (iMode)
+            {
+            case mode::None:
+            default:
+                return 0;
+            case mode::Drag:
+            case mode::Edit:
+                return 1;
+            }
+        }
         void paint_non_client_after(i_graphics_context& aGc) const override
         {
             widget::paint_non_client_after(aGc);
@@ -149,6 +176,12 @@ namespace neogfx::DesignStudio
             set_mode(mode::None);
         }
     protected:
+        bool ignore_mouse_events() const override
+        {
+            if (iMode == mode::Drag)
+                return true;
+            return widget::ignore_mouse_events();
+        }
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override
         {
             widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);

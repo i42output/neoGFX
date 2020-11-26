@@ -25,11 +25,10 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
-#include "spin_box.hpp"
+#include <neogfx/gui/widget/spin_box.hpp>
 
 namespace neogfx
 {
-
     template <typename T>
     basic_spin_box<T>::basic_spin_box() :
         iPrimaryLayout{ *this },

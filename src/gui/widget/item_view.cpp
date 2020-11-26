@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/item_view.hpp>

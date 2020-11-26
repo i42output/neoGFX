@@ -111,12 +111,18 @@ namespace neogfx
         value_type iValue;
         bool iSettingNormalizedValue;
     };
-}
 
-#include "slider.inl"
+    extern template basic_slider<int8_t>;
+    extern template basic_slider<uint8_t>;
+    extern template basic_slider<int16_t>;
+    extern template basic_slider<uint16_t>;
+    extern template basic_slider<int32_t>;
+    extern template basic_slider<uint32_t>;
+    extern template basic_slider<int64_t>;
+    extern template basic_slider<uint64_t>;
+    extern template basic_slider<float>;
+    extern template basic_slider<double>;
 
-namespace neogfx
-{
     typedef basic_slider<int32_t> slider;
     typedef basic_slider<double> double_slider;
 }

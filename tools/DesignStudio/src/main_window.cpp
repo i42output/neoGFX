@@ -193,6 +193,7 @@ namespace neogfx::DesignStudio
         {
             aOperation = ng::drop_operation::Move;
         });
+        iWorkspace.view_stack().set_focus_policy(ng::focus_policy::ClickFocus);
 
         populate_toolbox_model(iToolboxModel, iToolboxPresentationModel);
         auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();

@@ -29,9 +29,12 @@
 
 namespace neogfx
 {
+    extern template class widget<i_button>;
+
     template <typename ButtonInterface = i_button>
-    class button : public widget<>, public ButtonInterface, protected i_mnemonic
+    class button : public widget<ButtonInterface>, protected i_mnemonic
     {
+        typedef widget<ButtonInterface> base_type;
         // events
     public:
         define_declared_event(Pressed, pressed)
@@ -64,8 +67,9 @@ namespace neogfx
         ~button();
         // widget
     public:
+        using base_type::as_widget;
         neogfx::size_policy size_policy() const override;
-        using widget::set_size_policy;
+        using base_type::set_size_policy;
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
         size maximum_size(optional_size const&) const override;
         neogfx::padding padding() const override;
@@ -124,5 +128,3 @@ namespace neogfx
         neogfx::label iLabel;
     };
 }
-
-#include "button.inl"

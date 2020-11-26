@@ -18,11 +18,23 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/slider.hpp>
+#include <neogfx/gui/widget/slider.tpp>
 
 namespace neogfx
 {
+    template class basic_slider<int8_t>;
+    template class basic_slider<uint8_t>;
+    template class basic_slider<int16_t>;
+    template class basic_slider<uint16_t>;
+    template class basic_slider<int32_t>;
+    template class basic_slider<uint32_t>;
+    template class basic_slider<int64_t>;
+    template class basic_slider<uint64_t>;
+    template class basic_slider<float>;
+    template class basic_slider<double>;
+
     slider_impl::slider_impl(slider_orientation aOrientation) :
         iOrientation(aOrientation),
         iNormalizedValue{ 0.0 }, 

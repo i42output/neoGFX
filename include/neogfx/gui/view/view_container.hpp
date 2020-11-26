@@ -123,4 +123,7 @@ namespace neogfx
         neogfx::view_stack iViewStack;
         std::vector<std::shared_ptr<i_controller>> iControllers;
     };
+
+    extern template class scrollable_widget<view_container>;
+    typedef scrollable_widget<view_container> scrollable_view_container;
 }

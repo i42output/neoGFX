@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/i_enum.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 
 namespace neogfx
@@ -45,7 +46,7 @@ namespace neogfx
 
     struct not_tri_state_checkable : public std::logic_error { not_tri_state_checkable() : std::logic_error("neogfx::not_tri_state_checkable") {} };
 
-    class i_button : public virtual i_skinnable_item
+    class i_button : public i_widget, public virtual i_skinnable_item
     {
     public:
         declare_event(pressed)

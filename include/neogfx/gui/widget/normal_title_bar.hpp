@@ -29,6 +29,8 @@
 
 namespace neogfx
 {
+    extern template class widget<i_title_bar>;
+
     class normal_title_bar : public widget<i_title_bar>
     {
     public:

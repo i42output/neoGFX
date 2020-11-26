@@ -30,6 +30,8 @@
 
 namespace neogfx
 {
+    extern template class widget<i_status_bar>;
+
     class status_bar : public widget<i_status_bar>
     {
     public:

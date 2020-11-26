@@ -98,6 +98,11 @@ namespace neogfx
         virtual widget_list::const_iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) const = 0;
         virtual widget_list::iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) = 0;
     public:
+        virtual void bring_child_to_front(const i_widget& aChild) = 0;
+        virtual void send_child_to_back(const i_widget& aChild) = 0;
+        virtual int32_t layer() const = 0;
+        virtual void set_layer(int32_t aLayer) = 0;
+    public:
         virtual const i_widget& before() const = 0;
         virtual i_widget& before() = 0;
         virtual const i_widget& after() const = 0;
@@ -144,6 +149,8 @@ namespace neogfx
         virtual widget_part part(const point& aPosition) const = 0;
         virtual widget_part hit_test(const point& aPosition) const = 0;
     public:
+        virtual int32_t render_layer() const = 0;
+        virtual void set_render_layer(const std::optional<int32_t>& aLayer) = 0;
         virtual bool update(const rect& aUpdateRect) = 0;
         virtual bool requires_update() const = 0;
         virtual rect update_rect() const = 0;
@@ -279,6 +286,17 @@ namespace neogfx
             ref_ptr<i_widget> ref;
             remove(aChild, aSingular, ref);
             return ref;
+        }
+    public:
+        void bring_to_front()
+        {
+            if (has_parent())
+                parent().bring_child_to_front(*this);
+        }
+        void send_to_back()
+        {
+            if (has_parent())
+                parent().send_child_to_back(*this);
         }
     public:
         void layout_root(bool aDefer = false)

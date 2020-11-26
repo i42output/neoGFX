@@ -1,7 +1,7 @@
-// i_push_button.hpp
+// button.cpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -17,29 +17,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/gui/widget/i_button.hpp>
+#include <neogfx/gui/widget/button.tpp>
+#include <neogfx/gui/widget/i_push_button.hpp>
 
 namespace neogfx
 {
-    enum class push_button_style
-    {
-        Normal,
-        ButtonBox,
-        ItemViewHeader,
-        Tab,
-        DropList,
-        SpinBox,
-        TitleBar,
-        Toolbar
-    };
-
-    class i_push_button : public i_button
-    {
-    public:
-        virtual push_button_style style() const = 0;
-    };
+    template class button<>;
+    template class button<i_push_button>;
 }
+
