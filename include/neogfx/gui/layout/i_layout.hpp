@@ -418,7 +418,7 @@ namespace neogfx
         scoped_layout_items() : 
             neolib::scoped_flag{ global_layout_state::instance().in_progress() }
         {
-            if (!iSaved)
+            if (!saved())
                 global_layout_state::instance().increment_id();
         }
         ~scoped_layout_items()

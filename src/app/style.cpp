@@ -153,6 +153,15 @@ namespace neogfx
         }
     }
 
+    void style::set_palette_color(color_role aRole, const optional_color& aColor)
+    {
+        if (iPalette.maybe_color(aRole) != aColor)
+        {
+            iPalette.set_color(aRole, aColor);
+            handle_change(style_aspect::Color);
+        }
+    }
+
     const font_info& style::font_info(font_role aRole) const
     {
         if (iFontInfo[aRole] == std::nullopt)

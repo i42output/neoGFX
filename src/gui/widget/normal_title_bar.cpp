@@ -155,7 +155,8 @@ namespace neogfx
         });
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
         { 
-            if ((aAspect & style_aspect::Color) == style_aspect::Color) update_textures(); 
+            if ((aAspect & style_aspect::Color) == style_aspect::Color) 
+                update_textures(); 
         });
         auto update_widgets = [this]()
         {

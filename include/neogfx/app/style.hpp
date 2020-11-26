@@ -51,6 +51,7 @@ namespace neogfx
         const i_palette& palette() const override;
         i_palette& palette() override;
         void set_palette(const i_palette& aPalette) override;
+        void set_palette_color(color_role aRole, const optional_color& aColor) override;
         const neogfx::font_info& font_info(font_role aRole) const override;
         void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) override;
         const neogfx::font& font(font_role aRole) const override;

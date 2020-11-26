@@ -23,7 +23,7 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include "i_palette.hpp"
+#include <neogfx/app/i_palette.hpp>
 
 namespace neogfx
 {
@@ -86,6 +86,7 @@ namespace neogfx
         virtual const i_palette& palette() const = 0;
         virtual i_palette& palette() = 0;
         virtual void set_palette(const i_palette& aPalette) = 0;
+        virtual void set_palette_color(color_role aRole, const optional_color& aColor) = 0;
         virtual const neogfx::font_info& font_info(font_role aRole) const = 0;
         virtual void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) = 0;
         virtual const neogfx::font& font(font_role aRole) const = 0;
