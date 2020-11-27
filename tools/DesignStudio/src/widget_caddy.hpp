@@ -244,7 +244,8 @@ namespace neogfx::DesignStudio
             widget::mouse_moved(aPosition, aKeyModifiers);
             if (capturing() && iResizerDrag)
             {
-                auto delta = point{ aPosition - resizer_part_rect(iResizerDrag->first).center() } - iResizerDrag->second;
+                bool const ignoreConstraints = ((aKeyModifiers & key_modifiers_e::KeyModifier_SHIFT) != key_modifiers_e::KeyModifier_NONE);
+                auto const delta = point{ aPosition - resizer_part_rect(iResizerDrag->first).center() } - iResizerDrag->second;
                 auto r = non_client_rect();
                 switch (iResizerDrag->first)
                 {
@@ -287,15 +288,16 @@ namespace neogfx::DesignStudio
                     r.cy += delta.dy;
                     break;
                 }
-                if (r.cx < padding().size().cx)
+                auto const minSize = ignoreConstraints ? padding().size() : minimum_size();
+                if (r.cx < minSize.cx)
                 {
-                    r.cx = padding().size().cx;
+                    r.cx = minSize.cx;
                     if (non_client_rect().x < r.x)
                         r.x = non_client_rect().right() - r.cx;
                 }
-                if (r.cy < padding().size().cy)
+                if (r.cy < minSize.cy)
                 {
-                    r.cy = padding().size().cy;
+                    r.cy = minSize.cy;
                     if (non_client_rect().y < r.y)
                         r.y = non_client_rect().bottom() - r.cy;
                 }
