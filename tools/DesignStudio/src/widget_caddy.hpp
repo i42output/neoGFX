@@ -217,6 +217,10 @@ namespace neogfx::DesignStudio
                 context_menu menu{ *this, root().mouse_position() + root().window_position() };
                 action sendToBack{ "Send To Back"_t };
                 action bringToFont{ "Bring To Front"_t };
+                if (&*parent().children().back() == this)
+                    sendToBack.disable();
+                if (&*parent().children().front() == this)
+                    bringToFont.disable();
                 sendToBack.triggered([&]()
                 {
                     send_to_back();
@@ -241,37 +245,62 @@ namespace neogfx::DesignStudio
             if (capturing() && iResizerDrag)
             {
                 auto delta = point{ aPosition - resizer_part_rect(iResizerDrag->first).center() } - iResizerDrag->second;
+                auto r = non_client_rect();
                 switch (iResizerDrag->first)
                 {
                 case cardinal::NorthWest:
-                    delta = delta.min(non_client_rect().bottom_right().to_delta());
-                    move(position() + delta);
-                    resize((extents() - size{ delta }).max(size{}));
-                    break;
-                case cardinal::North:
-                    delta.dx = 0.0;
-                    delta.dy = std::min(delta.dy, non_client_rect().bottom());
-                    move(position() + delta);
-                    resize((extents() - size{ delta }).max(size{}));
+                    r.x += delta.dx;
+                    r.y += delta.dy;
+                    r.cx -= delta.dx;
+                    r.cy -= delta.dy;
                     break;
                 case cardinal::NorthEast:
-                    move(position() + size{ 0.0, delta.dy });
-                    resize((extents() - size{ delta }).max(size{}));
+                    r.y += delta.dy;
+                    r.cx += delta.dx;
+                    r.cy -= delta.dy;
+                    break;
+                case cardinal::North:
+                    r.y += delta.dy;
+                    r.cy -= delta.dy;
                     break;
                 case cardinal::West:
+                    r.x += delta.dx;
+                    r.cx -= delta.dx;
                     break;
                 case cardinal::Center:
-                    move(position() + delta);
+                    r.x += delta.dx;
+                    r.y += delta.dy;
                     break;
                 case cardinal::East:
+                    r.cx += delta.dx;
                     break;
                 case cardinal::SouthWest:
-                    break;
-                case cardinal::South:
+                    r.x += delta.dx;
+                    r.cx -= delta.dx;
+                    r.cy += delta.dy;
                     break;
                 case cardinal::SouthEast:
+                    r.cx += delta.dx;
+                    r.cy += delta.dy;
+                    break;
+                case cardinal::South:
+                    r.cy += delta.dy;
                     break;
                 }
+                if (r.cx < padding().size().cx)
+                {
+                    r.cx = padding().size().cx;
+                    if (non_client_rect().x < r.x)
+                        r.x = non_client_rect().right() - r.cx;
+                }
+                if (r.cy < padding().size().cy)
+                {
+                    r.cy = padding().size().cy;
+                    if (non_client_rect().y < r.y)
+                        r.y = non_client_rect().bottom() - r.cy;
+                }
+                move(r.top_left() - parent().origin());
+                resize(r.extents());
             }
         }
         neogfx::mouse_cursor mouse_cursor() const override

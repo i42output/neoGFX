@@ -360,6 +360,8 @@ namespace neogfx
         basic_point round() const { return basic_point(std::round(x), std::round(y)); }
         basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y) }; }
         basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y) }; }
+        basic_point min_max(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::max(y, other.y) }; }
+        basic_point max_min(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::min(y, other.y) }; }
         basic_point with_x(coordinate_type x) const { return basic_point{ x, y }; }
         basic_point with_y(coordinate_type y) const { return basic_point{ x, y }; }
         // attributes
@@ -572,6 +574,7 @@ namespace neogfx
         self_type& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
     public:
         point_type top_left() const { return point_type{ left, top }; }
+        point_type bottom_right() const { return point_type{ right, bottom }; }
         size_type size() const { return size_type{ left + right, top + bottom }; }
     public:
         self_type ceil() const { return self_type{ std::ceil(left), std::ceil(top), std::ceil(right), std::ceil(bottom) }; }
