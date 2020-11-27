@@ -953,6 +953,8 @@ namespace neogfx
                         service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
                         service<i_keyboard>().modifiers()
                     });
+                if (!self.iNonClientCapturing)
+                    service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                 break;
             case WM_SYSKEYUP:
             case WM_KEYUP:
@@ -963,6 +965,8 @@ namespace neogfx
                         service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
                         service<i_keyboard>().modifiers()
                     });
+                if (!self.iNonClientCapturing)
+                    service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                 break;
             case WM_SETCURSOR:
                 if (!self.iNonClientCapturing && LOWORD(lparam) == HTCLIENT)

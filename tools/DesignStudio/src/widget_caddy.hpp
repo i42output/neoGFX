@@ -210,15 +210,7 @@ namespace neogfx::DesignStudio
             widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
-                auto update_resizer = [&](cardinal aCardinal) -> bool
-                {
-                    if (resizer_part_rect(aCardinal).contains(aPosition))
-                    {
-                        return true;
-                    }
-                    return false;
-                };
-                auto part = resize_part_at(aPosition);
+                auto part = (aKeyModifiers & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_CTRL ? resize_part_at(aPosition) : cardinal::Center;
                 if (!part)
                     part = cardinal::Center;
                 iResizerDrag.emplace(std::make_pair(*part, aPosition - resizer_part_rect(*part).center()));
@@ -319,7 +311,8 @@ namespace neogfx::DesignStudio
         }
         neogfx::mouse_cursor mouse_cursor() const override
         {
-            auto part = resize_part_at(root().mouse_position() - origin());
+            auto part = !service<i_keyboard>().is_key_pressed(scan_code_e::ScanCode_LCTRL) && !service<i_keyboard>().is_key_pressed(scan_code_e::ScanCode_LCTRL) ?
+                resize_part_at(root().mouse_position() - origin()) : cardinal::Center;
             if (part)
                 switch (*part)
                 {
