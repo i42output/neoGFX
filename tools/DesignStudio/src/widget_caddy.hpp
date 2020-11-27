@@ -153,14 +153,14 @@ namespace neogfx::DesignStudio
                         aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
                         aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
                         aGc.line_stipple_off();
-                        aGc.draw_rect(resizer_part_rect(cardinal::NorthWest), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::North), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::NorthEast), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::East), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::SouthEast), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::South), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::SouthWest), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::West), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::NorthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::North, false), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::NorthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::East, false), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::SouthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::South, false), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::SouthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
+                        aGc.draw_rect(resizer_part_rect(cardinal::West, false), color::NavyBlue, color::White.with_alpha(0.75));
                     }
                     break;
                 }
@@ -197,20 +197,14 @@ namespace neogfx::DesignStudio
                 {
                     if (resizer_part_rect(aCardinal).contains(aPosition))
                     {
-                        iResizerDrag.emplace(std::make_pair(aCardinal, aPosition - resizer_part_rect(aCardinal).center()));
                         return true;
                     }
                     return false;
                 };
-                if (!update_resizer(cardinal::NorthWest))
-                    if (!update_resizer(cardinal::North))
-                        if (!update_resizer(cardinal::NorthEast))
-                            if (!update_resizer(cardinal::West))
-                                if (!update_resizer(cardinal::Center))
-                                    if (!update_resizer(cardinal::East))
-                                        if (!update_resizer(cardinal::SouthWest))
-                                            if (!update_resizer(cardinal::South))
-                                                update_resizer(cardinal::SouthEast);
+                auto part = resize_part_at(aPosition);
+                if (!part)
+                    part = cardinal::Center;
+                iResizerDrag.emplace(std::make_pair(*part, aPosition - resizer_part_rect(*part).center()));
             }
             else if (aButton == mouse_button::Right)
             {
@@ -307,47 +301,92 @@ namespace neogfx::DesignStudio
         }
         neogfx::mouse_cursor mouse_cursor() const override
         {
-            point mousePos = root().mouse_position() - origin();
-            if (resizer_part_rect(cardinal::NorthWest).contains(mousePos) || resizer_part_rect(cardinal::SouthEast).contains(mousePos))
-                return mouse_system_cursor::SizeNWSE;
-            else if (resizer_part_rect(cardinal::NorthEast).contains(mousePos) || resizer_part_rect(cardinal::SouthWest).contains(mousePos))
-                return mouse_system_cursor::SizeNESW;
-            else if (resizer_part_rect(cardinal::North).contains(mousePos) || resizer_part_rect(cardinal::South).contains(mousePos))
-                return mouse_system_cursor::SizeNS;
-            else if (resizer_part_rect(cardinal::West).contains(mousePos) || resizer_part_rect(cardinal::East).contains(mousePos))
-                return mouse_system_cursor::SizeWE;
-            else if (resizer_part_rect(cardinal::Center).contains(mousePos))
-                return mouse_system_cursor::SizeAll;
+            auto part = resize_part_at(root().mouse_position() - origin());
+            if (part)
+                switch (*part)
+                {
+                case cardinal::NorthWest:
+                case cardinal::SouthEast:
+                    return mouse_system_cursor::SizeNWSE;
+                case cardinal::NorthEast:
+                case cardinal::SouthWest:
+                    return mouse_system_cursor::SizeNESW;
+                case cardinal::North:
+                case cardinal::South:
+                    return mouse_system_cursor::SizeNS;
+                case cardinal::West:
+                case cardinal::East:
+                    return mouse_system_cursor::SizeWE;
+                case cardinal::Center:
+                    return mouse_system_cursor::SizeAll;
+                };
             return widget::mouse_cursor();
         }
     private:
-        rect resizer_part_rect(cardinal aPart) const
+        std::optional<cardinal> resize_part_at(point const& aPosition) const
+        {
+            if (resizer_part_rect(cardinal::NorthWest).contains(aPosition))
+                return cardinal::NorthWest;
+            else if (resizer_part_rect(cardinal::SouthEast).contains(aPosition))
+                return cardinal::SouthEast;
+            else if (resizer_part_rect(cardinal::NorthEast).contains(aPosition))
+                return cardinal::NorthEast;
+            else if (resizer_part_rect(cardinal::SouthWest).contains(aPosition))
+                return cardinal::SouthWest;
+            else if (resizer_part_rect(cardinal::North).contains(aPosition))
+                return cardinal::North;
+            else if (resizer_part_rect(cardinal::South).contains(aPosition))
+                return cardinal::South;
+            else if (resizer_part_rect(cardinal::West).contains(aPosition))
+                return cardinal::West;
+            else if (resizer_part_rect(cardinal::East).contains(aPosition))
+                return cardinal::East;
+            else if (resizer_part_rect(cardinal::Center).contains(aPosition))
+                return cardinal::Center;
+            else
+                return {};
+        }
+        rect resizer_part_rect(cardinal aPart, bool aForHitTest = true) const
         {
             auto const pw = padding().left * 2.0;
             auto const cr = client_rect(false).inflated(pw / 2.0);
+            rect result;
             switch (aPart)
             {
             case cardinal::NorthWest:
-                return rect{ cr.top_left(), size{ pw } };
+                result = rect{ cr.top_left(), size{ pw } };
+                break;
             case cardinal::North:
-                return rect{ point{ cr.center().x - pw / 2.0, cr.top() }, size{ pw } };
+                result = rect{ point{ cr.center().x - pw / 2.0, cr.top() }, size{ pw } };
+                break;
             case cardinal::NorthEast:
-                return rect{ point{ cr.right() - pw, cr.top() }, size{ pw } };
+                result = rect{ point{ cr.right() - pw, cr.top() }, size{ pw } };
+                break;
             case cardinal::West:
-                return rect{ point{ cr.left(), cr.center().y - pw / 2.0 }, size{ pw } };
+                result = rect{ point{ cr.left(), cr.center().y - pw / 2.0 }, size{ pw } };
+                break;
             case cardinal::Center:
-                return cr.deflated(size{ pw });
+                result = cr.deflated(size{ pw });
+                break;
             case cardinal::East:
-                return rect{ point{ cr.right() - pw, cr.center().y - pw / 2.0 }, size{ pw } };
+                result = rect{ point{ cr.right() - pw, cr.center().y - pw / 2.0 }, size{ pw } };
+                break;
             case cardinal::SouthWest:
-                return rect{ point{ cr.left(), cr.bottom() - pw }, size{ pw } };
+                result = rect{ point{ cr.left(), cr.bottom() - pw }, size{ pw } };
+                break;
             case cardinal::South:
-                return rect{ point{ cr.center().x - pw / 2.0, cr.bottom() - pw }, size{ pw } };
+                result = rect{ point{ cr.center().x - pw / 2.0, cr.bottom() - pw }, size{ pw } };
+                break;
             case cardinal::SouthEast:
-                return rect{ point{ cr.right() - pw, cr.bottom() - pw }, size{ pw } };
+                result = rect{ point{ cr.right() - pw, cr.bottom() - pw }, size{ pw } };
+                break;
             default:
-                return cr;
+                result = cr;
+                break;
             }
+            if (aForHitTest && aPart != cardinal::Center)
+                result.inflate(result.extents() / 2.0);
+            return result;
         }
     private:
         sink iSink;
