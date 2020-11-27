@@ -333,7 +333,7 @@ namespace neogfx
                 return;
             if ((aOperation & item_selection_operation::CurrentIndex) == item_selection_operation::CurrentIndex)
             {
-                if ((aOperation & (item_selection_operation::Select | item_selection_operation::Clear)) == item_selection_operation::Select)
+                if ((aOperation & item_selection_operation::Select) == item_selection_operation::Select)
                     set_current_index(aIndex);
                 else
                     clear_current_index();
