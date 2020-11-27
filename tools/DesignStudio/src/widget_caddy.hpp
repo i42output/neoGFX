@@ -206,7 +206,12 @@ namespace neogfx::DesignStudio
                     part = cardinal::Center;
                 iResizerDrag.emplace(std::make_pair(*part, aPosition - resizer_part_rect(*part).center()));
             }
-            else if (aButton == mouse_button::Right)
+        }
+        void mouse_button_released(mouse_button aButton, const point& aPosition) override
+        {
+            widget::mouse_button_released(aButton, aPosition);
+            iResizerDrag = {};
+            if (aButton == mouse_button::Right)
             {
                 context_menu menu{ *this, root().mouse_position() + root().window_position() };
                 action sendToBack{ "Send To Back"_t };
@@ -218,6 +223,7 @@ namespace neogfx::DesignStudio
                 sendToBack.triggered([&]()
                 {
                     send_to_back();
+                    parent().children().front()->set_focus();
                 });
                 bringToFont.triggered([&]()
                 {
@@ -227,11 +233,6 @@ namespace neogfx::DesignStudio
                 menu.menu().add_action(bringToFont);
                 menu.exec();
             }
-        }
-        void mouse_button_released(mouse_button aButton, const point& aPosition) override
-        {
-            widget::mouse_button_released(aButton, aPosition);
-            iResizerDrag = {};
         }
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override
         {
