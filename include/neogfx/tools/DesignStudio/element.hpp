@@ -26,12 +26,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/optional.hpp>
 #include <neolib/core/vector.hpp>
 #include <neolib/core/string.hpp>
+#include <neolib/task/event.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/tools/DesignStudio/symbol.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
@@ -73,19 +75,21 @@ namespace neogfx::DesignStudio
         typedef element<Base> self_type;
         typedef neolib::reference_counted<Base> base_type;
     public:
+        define_declared_event(SelectionChanged, selection_changed)
+    public:
         using i_element::no_parent;
     public:
         typedef abstract_t<Base> abstract_type;
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
     public:
-        element(const i_element_library& aLibrary, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent { nullptr }, 
             iGroup{ aGroup }, 
             iType{ aType }
         {
         }
-        element(const i_element_library& aLibrary, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent{ nullptr }, 
             iGroup{ aGroup }, 
@@ -93,7 +97,7 @@ namespace neogfx::DesignStudio
             iId{ aId }
         {
         }
-        element(const i_element_library& aLibrary, i_element& aParent, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_element& aParent, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent{ &aParent },
             iGroup{ aGroup }, 
@@ -101,7 +105,7 @@ namespace neogfx::DesignStudio
         {
             parent().add_child(*this);
         }
-        element(const i_element_library& aLibrary, i_element& aParent, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_element& aParent, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iParent{ &aParent },
             iGroup{ aGroup },
@@ -114,7 +118,7 @@ namespace neogfx::DesignStudio
         {
         }
     public:
-        const i_element_library& library() const override
+        i_element_library const& library() const override
         {
             return iLibrary;
         }
@@ -122,20 +126,31 @@ namespace neogfx::DesignStudio
         {
             return iGroup;
         }
-        const neolib::i_string& type() const override
+        neolib::i_string const& type() const override
         {
             return iType;
         }
-        const neolib::i_string& id() const override
+        neolib::i_string const& id() const override
         {
             return iId;
         }
     public:
+        i_element const& root() const override
+        {
+            i_element const* e = this;
+            while (e->has_parent())
+                e = &e->parent();
+            return *e;
+        }
+        i_element& root() override
+        {
+            return const_cast<i_element&>(to_const(*this).root());
+        }
         bool has_parent() const override
         {
             return iParent != nullptr;
         }
-        const i_element& parent() const override
+        i_element const& parent() const override
         {
             if (has_parent())
                 return *iParent;
@@ -149,7 +164,7 @@ namespace neogfx::DesignStudio
         {
             iParent = &aParent;
         }
-        const children_t& children() const override
+        children_t const& children() const override
         {
             return iChildren;
         }
@@ -174,20 +189,47 @@ namespace neogfx::DesignStudio
                 children().erase(existing);
         }
     public:
-        void create_widget(i_ref_ptr<i_widget>& aResult) override
+        void layout_item(i_ref_ptr<i_layout_item>& aItem) const override
         {
-            if constexpr (std::is_base_of_v<i_widget, Type>)
+            if (!iLayoutItem)
             {
-                if constexpr (std::is_constructible_v<Type, neolib::i_string&>)
-                    aResult = make_ref<Type>(iId);
-                else if constexpr (std::is_default_constructible_v<Type>)
-                    aResult = make_ref<Type>();
-                else
+                if constexpr (std::is_base_of_v<i_widget, Type>)
                 {
-                    // todo: widget creation for the other widget types
+                    if constexpr (std::is_constructible_v<Type, neolib::i_string&>)
+                        iLayoutItem = make_ref<Type>(to_symbol_name(iType.to_std_string(), naming_convention::UpperCamelCase, named_entity::LocalVariable));
+                    else if constexpr (std::is_default_constructible_v<Type>)
+                        iLayoutItem = make_ref<Type>();
+                    else
+                    {
+                        // todo: widget creation for the other widget types
+                    }
                 }
             }
+            aItem = iLayoutItem;
         }
+    public:
+        bool is_selected() const override
+        {
+            return iSelected;
+        }
+        void select(bool aSelected = true) override
+        {
+            if (iSelected != aSelected)
+            {
+                iSelected = aSelected;
+                if (is_selected() && has_parent())
+                {
+                    root().visit([&](i_element& aElement)
+                    {
+                        if (&aElement != this && aElement.is_selected())
+                            aElement.select(false);
+                    });
+                }
+                SelectionChanged.trigger();
+            }
+        }
+    public:
+
     public:
         const i_element_library& iLibrary;
         i_element* iParent;
@@ -195,5 +237,7 @@ namespace neogfx::DesignStudio
         neolib::string iType;
         neolib::string iId;
         children_t iChildren;
+        mutable ref_ptr<i_layout_item> iLayoutItem;
+        bool iSelected = false;
     };
 }

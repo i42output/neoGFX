@@ -77,6 +77,7 @@ namespace neogfx::DesignStudio
         workflow_model iWorkflowModel;
         workflow_presentation_model iWorkflowPresentationModel;
         object_model iObjectModel;
+        ng::item_selection_model iObjectSelectionModel;
         object_presentation_model iObjectPresentationModel;
         ng::sink iSink;
     };

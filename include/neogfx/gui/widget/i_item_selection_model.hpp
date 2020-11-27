@@ -39,25 +39,29 @@ namespace neogfx
 
     enum class item_selection_operation
     {
-        None                 = 0x0000,
-        Select               = 0x0001,
-        Deselect             = 0x0002,
-        Toggle               = 0x0004,
-        Clear                = 0x0008,
-        Row                  = 0x0100,
-        Column               = 0x0200,
-        Internal             = 0x1000,
+        None                        = 0x0000,
+        Select                      = 0x0001,
+        Deselect                    = 0x0002,
+        Toggle                      = 0x0004,
+        Clear                       = 0x0008,
+        Row                         = 0x0100,
+        Column                      = 0x0200,
+        CurrentIndex                = 0x1000,
+        Internal                    = 0x8000,
 
-        SelectRow            = Select | Row,
-        SelectColumn         = Select | Column,
-        DeselectRow          = Deselect | Row,
-        DeselectColumn       = Deselect | Column,
-        ToggleRow            = Toggle | Row,
-        ToggleColumn         = Toggle | Column,
-        ClearAndSelect       = Clear | Select,
-        ClearAndSelectRow    = Clear | Select | Row,
-        ClearAndSelectColumn = Clear | Select | Column,
-        ClearAndToggle       = Clear | Toggle
+        SelectRow                   = Select | Row,
+        SelectRowAsCurrent          = Select | Row | CurrentIndex,
+        SelectColumn                = Select | Column,
+        DeselectRow                 = Deselect | Row,
+        DeselectColumn              = Deselect | Column,
+        ToggleRow                   = Toggle | Row,
+        ToggleColumn                = Toggle | Column,
+        ClearAsCurrent              = Clear | CurrentIndex,
+        ClearAndSelect              = Clear | Select,
+        ClearAndSelectRow           = Clear | Select | Row,
+        ClearAndSelectRowAsCurrent  = Clear | Select | Row | CurrentIndex,
+        ClearAndSelectColumn        = Clear | Select | Column,
+        ClearAndToggle              = Clear | Toggle
     };
 
     enum class index_location
@@ -227,7 +231,7 @@ namespace neogfx
         virtual bool has_current_index() const = 0;
         virtual item_presentation_model_index const& current_index() const = 0;
         virtual void set_current_index(item_presentation_model_index const& aIndex) = 0;
-        virtual void unset_current_index() = 0;
+        virtual void clear_current_index() = 0;
         virtual item_presentation_model_index relative_to_current_index(index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const = 0;
         virtual item_presentation_model_index relative_to_index(item_presentation_model_index const& aIndex, index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const = 0;
         virtual item_presentation_model_index next_cell() const = 0;

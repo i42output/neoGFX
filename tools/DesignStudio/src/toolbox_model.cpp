@@ -33,18 +33,18 @@ namespace neogfx::DesignStudio
         iSink = DraggingItem([&](i_drag_drop_item const& aItem)
         {
             auto const& item = item_model().item(to_item_model_index(aItem.index()));
-            ref_ptr<i_widget> selectedWidget;
+            ref_ptr<i_layout_item> selectedItem;
             if (std::holds_alternative<ds::tool_t>(item))
             {
                 auto const& tool = std::get<ds::tool_t>(item);
                 auto& project = aProjectManager.active_project();
                 iSelectedElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
-                selectedWidget = iSelectedElement->create_widget();
+                selectedItem = iSelectedElement->layout_item();
             }
-            if (selectedWidget)
+            if (selectedItem && selectedItem->is_widget())
             {
                 auto widgetCaddy = make_ref<widget_caddy>(aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
-                widgetCaddy->set_widget(selectedWidget);
+                widgetCaddy->set_element(*iSelectedElement);
                 auto const idealSize = widgetCaddy->minimum_size();
                 widgetCaddy->resize(idealSize);
                 widgetCaddy->move((aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
@@ -73,7 +73,6 @@ namespace neogfx::DesignStudio
                 iSelectedElement = {};
             }
         });
-
     }
 
     ng::optional_size toolbox_presentation_model::cell_image_size(const ng::item_presentation_model_index& aIndex) const

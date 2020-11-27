@@ -22,8 +22,10 @@
 
 namespace neogfx::DesignStudio
 {
-    object_presentation_model::object_presentation_model(i_project_manager& aProjectManager)
+    object_presentation_model::object_presentation_model(i_project_manager& aProjectManager, item_selection_model& aSelectionModel) :
+        iSelectionModel{ aSelectionModel }
     {
+        aSelectionModel.set_presentation_model(*this);
         auto update_model = [&]()
         {
             if (aProjectManager.project_active())
@@ -61,13 +63,21 @@ namespace neogfx::DesignStudio
             else
                 item_model().clear();
         };
-        auto project_updated = [&, update_model](i_project& aProject)
+        auto project_updated = [this, update_model](i_project& aProject)
         {
             update_model();
-            iSink2 = aProject.element_added([update_model](i_element&) 
+            iSink2 = aProject.element_added([this, update_model](i_element& aElement) 
             { 
                 // todo: something more granular
                 update_model(); 
+                iSink2 += aElement.selection_changed([&]()
+                {
+                    auto const index = from_item_model_index(item_model().find_item(&aElement));
+                    if (aElement.is_selected())
+                        iSelectionModel.select(index, ng::item_selection_operation::ClearAndSelectRowAsCurrent);
+                    else if (iSelectionModel.has_current_index() && iSelectionModel.current_index().row() == index.row())
+                        iSelectionModel.select(index, ng::item_selection_operation::ClearAsCurrent);
+                });
             }); 
             iSink2 += aProject.element_removed([update_model](i_element&) 
             { 

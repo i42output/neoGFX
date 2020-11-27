@@ -24,6 +24,7 @@
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
+#include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -56,11 +57,23 @@ namespace neogfx::DesignStudio
             });
         }
     public:
-        void set_widget(i_ref_ptr<i_widget> const& aWidget)
+        void set_item(i_ref_ptr<i_layout_item> const& aItem)
         {
-            add(aWidget);
-            iWidget = aWidget;
+            if (aItem->is_widget())
+            {
+                add(aItem->as_widget());
+                iItem = aItem;
+            }
             layout_items();
+        }
+        void set_element(i_element& aElement)
+        {
+            iElement = aElement;
+            set_item(aElement.layout_item());
+            iSink += aElement.selection_changed([&]()
+            {
+                set_mode(aElement.is_selected() ? mode::Edit : mode::None);
+            });
         }
         void set_mode(mode aMode)
         {
@@ -71,9 +84,9 @@ namespace neogfx::DesignStudio
         size minimum_size(optional_size const& aAvailableSpace = {}) const override
         {
             size result = widget::minimum_size(aAvailableSpace);
-            if (iWidget)
+            if (iItem)
             {
-                result = iWidget->minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
+                result = iItem->minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
                 if (result.cx != 0.0)
                     result.cx += padding().size().cx;
                 if (result.cy != 0.0)
@@ -94,10 +107,10 @@ namespace neogfx::DesignStudio
         void layout_items(bool aDefer = false) override
         {
             widget::layout_items(aDefer);
-            if (iWidget)
+            if (iItem->is_widget())
             {
-                iWidget->move(client_rect(false).top_left());
-                iWidget->resize(client_rect(false).extents());
+                iItem->as_widget().move(client_rect(false).top_left());
+                iItem->as_widget().resize(client_rect(false).extents());
             }
         }
     protected:
@@ -175,11 +188,15 @@ namespace neogfx::DesignStudio
         {
             widget::focus_gained(aFocusReason);
             set_mode(mode::Edit);
+            if (iElement)
+                iElement->select();
         }
         void focus_lost(focus_reason aFocusReason) override
         {
             widget::focus_lost(aFocusReason);
             set_mode(mode::None);
+            if (iElement)
+                iElement->select(false);
         }
     protected:
         bool ignore_mouse_events() const override
@@ -392,7 +409,8 @@ namespace neogfx::DesignStudio
     private:
         sink iSink;
         mode iMode;
-        weak_ref_ptr<i_widget> iWidget;
+        weak_ref_ptr<i_element> iElement;
+        weak_ref_ptr<i_layout_item> iItem;
         neolib::callback_timer iAnimator;
         std::optional<std::pair<cardinal, point>> iResizerDrag;
     };

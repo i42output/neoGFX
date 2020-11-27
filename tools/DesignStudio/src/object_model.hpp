@@ -22,6 +22,7 @@
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/gui/widget/item_selection_model.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/i_project_manager.hpp>
@@ -33,11 +34,12 @@ namespace neogfx::DesignStudio
     class object_presentation_model : public ng::basic_item_presentation_model<object_model>
     {
     public:
-        object_presentation_model(i_project_manager& aProjectManager);
+        object_presentation_model(i_project_manager& aProjectManager, item_selection_model& aSelectionModel);
     public:
         ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override;
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
     private:
+        item_selection_model& iSelectionModel;
         sink iSink;
         sink iSink2;
     };

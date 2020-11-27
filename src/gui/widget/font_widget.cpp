@@ -281,7 +281,7 @@ namespace neogfx
         if (fontSizeIndex != std::nullopt)
             iSizePicker.selection_model().set_current_index(*fontSizeIndex);
         else
-            iSizePicker.selection_model().unset_current_index();
+            iSizePicker.selection_model().clear_current_index();
         if (iSelectedFont != oldFont)
             SelectionChanged.trigger();
     }

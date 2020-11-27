@@ -758,7 +758,7 @@ namespace neogfx
                 if (findResult != std::nullopt)
                     selection_model().set_current_index(*findResult);
                 else
-                    selection_model().unset_current_index();
+                    selection_model().clear_current_index();
             }
         }
     }
@@ -787,7 +787,7 @@ namespace neogfx
         if (newSelection != std::nullopt)
             selection_model().set_current_index(presentation_model().from_item_model_index(*newSelection));
         else
-            selection_model().unset_current_index();
+            selection_model().clear_current_index();
 
         if (iSavedSelection != newSelection)
         {
@@ -1146,11 +1146,11 @@ namespace neogfx
             if (iSavedSelection != std::nullopt)
                 selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
             else
-                selection_model().unset_current_index();
+                selection_model().clear_current_index();
         }
         else
         {
-            selection_model().unset_current_index();
+            selection_model().clear_current_index();
             if (iSelection != std::nullopt)
             {
                 iSelection = std::nullopt;

@@ -83,7 +83,7 @@ namespace neogfx
 
             iSink.clear();
             
-            unset_current_index();
+            clear_current_index();
             i_item_presentation_model* oldModel = iModel;
 
             iModel = &aModel;
@@ -120,7 +120,7 @@ namespace neogfx
             {
                 neolib::scoped_flag sf{ iSorting };
                 iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
-                unset_current_index();
+                clear_current_index();
             });
             iSink += presentation_model().items_sorted([this]()
             {
@@ -134,7 +134,7 @@ namespace neogfx
             {
                 neolib::scoped_flag sf{ iFiltering };
                 iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
-                unset_current_index();
+                clear_current_index();
             });
             iSink += presentation_model().items_filtered([this]()
             {
@@ -189,7 +189,7 @@ namespace neogfx
         {
             do_set_current_index(aIndex);
         }
-        void unset_current_index() override
+        void clear_current_index() override
         {
             do_set_current_index(optional_item_presentation_model_index{});
         }
@@ -331,7 +331,14 @@ namespace neogfx
         {
             if (aOperation == item_selection_operation::None)
                 return;
-            else if (mode() == item_selection_mode::NoSelection)
+            if ((aOperation & item_selection_operation::CurrentIndex) == item_selection_operation::CurrentIndex)
+            {
+                if ((aOperation & (item_selection_operation::Select | item_selection_operation::Clear)) == item_selection_operation::Select)
+                    set_current_index(aIndex);
+                else
+                    clear_current_index();
+            }
+            if (mode() == item_selection_mode::NoSelection)
                 aOperation = item_selection_operation::Clear;
             // todo: cell and column
             static auto find = [](item_presentation_model_index const& aIndex, concrete_item_selection& aSelection)

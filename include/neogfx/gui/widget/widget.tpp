@@ -1803,7 +1803,7 @@ namespace neogfx
     {
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_pressed(aButton, aPosition + position(), aKeyModifiers);
-        else if (capture_ok(hit_test(aPosition)) && can_capture())
+        else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
 
@@ -1812,7 +1812,7 @@ namespace neogfx
     {
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_double_clicked(aButton, aPosition + position(), aKeyModifiers);
-        else if (capture_ok(hit_test(aPosition)) && can_capture())
+        else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
 

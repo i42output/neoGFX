@@ -50,7 +50,7 @@ namespace neogfx::DesignStudio
         iBackgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } },
         iBackgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } },
         iToolboxPresentationModel{ aProjectManager },
-        iObjectPresentationModel{ aProjectManager }
+        iObjectPresentationModel{ aProjectManager, iObjectSelectionModel }
     {
         // todo: decompose this ctor body into smaller member initialization functions...
 
@@ -221,8 +221,18 @@ namespace neogfx::DesignStudio
         iObjectPresentationModel.set_alternating_row_color(true);
         auto& objectTree = iObjects.docked_widget<ng::table_view>();
         objectTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
+        objectTree.set_selection_model(iObjectSelectionModel);
         objectTree.set_presentation_model(iObjectPresentationModel);
         objectTree.column_header().set_expand_last_column(true);
+        objectTree.selection_model().current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index&)
+        {
+            if (aCurrentIndex)
+            {
+                auto const modelIndex = iObjectPresentationModel.to_item_model_index(*aCurrentIndex);
+                auto& element = *iObjectModel.item(modelIndex);
+                element.select();
+            }
+        });
 
         iWorkspace.view_stack().Painting([&](ng::i_graphics_context& aGc) { paint_workspace(aGc); });
 
