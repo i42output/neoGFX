@@ -43,7 +43,8 @@ namespace neogfx::DesignStudio
             }
             if (selectedItem && selectedItem->is_widget())
             {
-                auto widgetCaddy = make_ref<widget_caddy>(aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
+                auto& project = aProjectManager.active_project();
+                auto widgetCaddy = make_ref<widget_caddy>(project, aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
                 widgetCaddy->set_element(*iSelectedElement);
                 auto const idealSize = widgetCaddy->minimum_size();
                 widgetCaddy->resize(idealSize);

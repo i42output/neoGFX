@@ -25,6 +25,7 @@
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
+#include <neogfx/tools/DesignStudio/i_project.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -38,8 +39,9 @@ namespace neogfx::DesignStudio
             Edit
         };
     public:
-        widget_caddy(i_widget& aParent, const point& aPosition) :
+        widget_caddy(i_project& aProject, i_widget& aParent, const point& aPosition) :
             widget{ aParent },
+            iProject{ aProject },
             iMode{ mode::None },
             iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
             {    
@@ -223,23 +225,46 @@ namespace neogfx::DesignStudio
             if (aButton == mouse_button::Right)
             {
                 context_menu menu{ *this, root().mouse_position() + root().window_position() };
-                action sendToBack{ "Send To Back"_t };
-                action bringToFont{ "Bring To Front"_t };
+                action actionSendToBack{ "Send To Back"_t };
+                action actionBringToFont{ "Bring To Front"_t };
+                action actionCut{ "Cut"_t, ":/neogfx/resources/icons/cut.png" };
+                action actionCopy{ "Copy"_t, ":/neogfx/resources/icons/copy.png" };
+                action actionPaste{ "Paste"_t, ":/neogfx/resources/icons/paste.png" };
+                action actionDelete{ "Delete"_t };
+                action actionSelectAll{ "Select All"_t };
+                actionCut.set_shortcut("Ctrl+X");
+                actionCopy.set_shortcut("Ctrl+C");
+                actionPaste.set_shortcut("Ctrl+V");
+                actionDelete.set_shortcut("Del");
+                actionSelectAll.set_shortcut("Ctrl+A");
                 if (&*parent().children().back() == this)
-                    sendToBack.disable();
+                    actionSendToBack.disable();
                 if (&*parent().children().front() == this)
-                    bringToFont.disable();
-                sendToBack.triggered([&]()
+                    actionBringToFont.disable();
+                actionSendToBack.triggered([&]()
                 {
                     send_to_back();
                     parent().children().front()->set_focus();
                 });
-                bringToFont.triggered([&]()
+                actionBringToFont.triggered([&]()
                 {
                     bring_to_front();
                 });
-                menu.menu().add_action(sendToBack);
-                menu.menu().add_action(bringToFont);
+                actionDelete.triggered([&]()
+                {
+                    if (iElement)
+                        iProject.remove_element(*iElement);
+                    parent().remove(*this);
+                });
+                menu.menu().add_action(actionSendToBack);
+                menu.menu().add_action(actionBringToFont);
+                menu.menu().add_separator();
+                menu.menu().add_action(actionCut);
+                menu.menu().add_action(actionCopy);
+                menu.menu().add_action(actionPaste);
+                menu.menu().add_action(actionDelete);
+                menu.menu().add_separator();
+                menu.menu().add_action(actionSelectAll);
                 menu.exec();
             }
         }
@@ -401,6 +426,7 @@ namespace neogfx::DesignStudio
         }
     private:
         sink iSink;
+        i_project& iProject;
         mode iMode;
         weak_ref_ptr<i_element> iElement;
         weak_ref_ptr<i_layout_item> iItem;
