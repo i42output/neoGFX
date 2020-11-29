@@ -68,7 +68,9 @@ namespace neogfx
             iScrollbarStyle{ aScrollbarStyle },
             iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
             iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
-            iIgnoreScrollbarUpdates{ 0 }
+            iIgnoreScrollbarUpdates{ 0 },
+            iUpdatingScrollbarVisibility{ false },
+            iMovingWidgets{ false }
         {
             init();
         }
@@ -83,7 +85,9 @@ namespace neogfx
             iScrollbarStyle{ aScrollbarStyle },
             iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
             iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
-            iIgnoreScrollbarUpdates{ 0 }
+            iIgnoreScrollbarUpdates{ 0 },
+            iUpdatingScrollbarVisibility{ false },
+            iMovingWidgets{ false }
         {
             init();
         }
@@ -98,7 +102,9 @@ namespace neogfx
             iScrollbarStyle{ aScrollbarStyle },
             iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
             iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
-            iIgnoreScrollbarUpdates{ 0 }
+            iIgnoreScrollbarUpdates{ 0 },
+            iUpdatingScrollbarVisibility{ false },
+            iMovingWidgets{ false }
         {
             init();
         }
@@ -159,6 +165,8 @@ namespace neogfx
         scrollbar iHorizontalScrollbar;
         point iOldScrollPosition;
         uint32_t iIgnoreScrollbarUpdates;
+        bool iUpdatingScrollbarVisibility;
+        bool iMovingWidgets;
     };
 
     extern template class scrollable_widget<framed_widget<widget<>>>;

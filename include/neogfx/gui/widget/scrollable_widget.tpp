@@ -58,7 +58,7 @@ namespace neogfx
     void scrollable_widget<Base>::layout_items_completed()
     {
         base_type::layout_items_completed();
-        if (!as_widget().layout_items_in_progress() && !iIgnoreScrollbarUpdates)
+        if (!as_widget().layout_items_in_progress() && !iIgnoreScrollbarUpdates && !iMovingWidgets)
             update_scrollbar_visibility();
     }
 
@@ -420,6 +420,7 @@ namespace neogfx
             point scrollPosition = scroll_position();
             if (iOldScrollPosition != scrollPosition)
             {
+                neolib::scoped_flag sf{ iMovingWidgets };
                 for (auto& c : as_widget().children())
                 {
                     point delta = -(scrollPosition - iOldScrollPosition);
@@ -465,6 +466,9 @@ namespace neogfx
     {
         if (!base_type::device_metrics_available())
             return;
+        if (iUpdatingScrollbarVisibility)
+            return;
+        neolib::scoped_flag sf{ iUpdatingScrollbarVisibility };
         iScrollbarUpdater = {};
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
             vertical_scrollbar().lock(0.0);

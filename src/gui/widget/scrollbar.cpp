@@ -326,7 +326,7 @@ namespace neogfx
                         available -= (minimumThumbHeight - g.cy);
                         g.cy = minimumThumbHeight;
                     }
-                    g.y += static_cast<dimension>(position() / (maximum() - minimum())) * available;
+                    g.y += static_cast<dimension>(position() / (maximum() - minimum()) - minimum()) * available;
                 }
                 else
                 {
@@ -349,7 +349,7 @@ namespace neogfx
                         available -= (minimumThumbWidth - g.cx);
                         g.cx = minimumThumbWidth;
                     }
-                    g.x += static_cast<dimension>(position() / (maximum() - minimum())) * available;
+                    g.x += static_cast<dimension>(position() / (maximum() - minimum()) - minimum()) * available;
                 }
                 else
                 {
