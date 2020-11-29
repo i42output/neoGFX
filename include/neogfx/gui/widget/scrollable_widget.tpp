@@ -551,32 +551,48 @@ namespace neogfx
             break;
         case UsvStageDone:
             {
-                point max;
+                point min{ std::numeric_limits<scalar>::max(), std::numeric_limits<scalar>::max() };
+                point max{ std::numeric_limits<scalar>::min(), std::numeric_limits<scalar>::min() };
                 for (auto& c : as_widget().children())
                 {
                     if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
                         continue;
+                    point const childTopLeftPos{ point{ units_converter{ *c }.to_device_units(c->position()) } };
+                    point const childBottomRightPos{ point{ units_converter{ *c }.to_device_units(c->position() + c->extents()) - point{ 1.0, 1.0 } } };
                     if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                        max.x = std::max(max.x, units_converter{ *c }.to_device_units(c->position().x + c->extents().cx) - 1.0);
+                    {
+                        min.x = std::min(min.x, childTopLeftPos.x);
+                        max.x = std::max(max.x, childBottomRightPos.x);
+                    }
                     if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                        max.y = std::max(max.y, units_converter{ *c }.to_device_units(c->position().y + c->extents().cy) - 1.0);
+                    {
+                        min.y = std::min(min.y, childTopLeftPos.y);
+                        max.y = std::max(max.y, childBottomRightPos.y);
+                    }
                 }
+                min = min.min({});
                 if (as_widget().has_layout())
                 {
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
+                    {
+                        min.x += as_widget().layout().padding().right;
                         max.x += as_widget().layout().padding().right;
+                    }
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
+                    {
+                        min.y += as_widget().layout().padding().bottom;
                         max.y += as_widget().layout().padding().bottom;
+                    }
                 }
                 if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
                 {
-                    vertical_scrollbar().set_minimum(0.0);
+                    vertical_scrollbar().set_minimum(min.y);
                     vertical_scrollbar().set_maximum(max.y);
                     vertical_scrollbar().set_page(units_converter{ *this }.to_device_units(as_widget().client_rect()).height());
                 }
                 if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
                 {
-                    horizontal_scrollbar().set_minimum(0.0);
+                    horizontal_scrollbar().set_minimum(min.x);
                     horizontal_scrollbar().set_maximum(max.x);
                     horizontal_scrollbar().set_page(units_converter{ *this }.to_device_units(as_widget().client_rect()).width());
                 }
