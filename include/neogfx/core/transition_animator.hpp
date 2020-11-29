@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    class transition : public i_transition
+    class transition : public reference_counted<i_transition>
     {
     public:
         transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled = true);
@@ -108,7 +108,7 @@ namespace neogfx
         void next_frame();
     private:
         neolib::callback_timer iTimer;
-        neolib::jar<std::unique_ptr<i_transition>> iTransitions;
+        neolib::jar<ref_ptr<i_transition>> iTransitions;
         std::chrono::time_point<std::chrono::high_resolution_clock> iZeroHour;
         double iAnimationTime;
     };

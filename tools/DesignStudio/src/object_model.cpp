@@ -63,10 +63,10 @@ namespace neogfx::DesignStudio
             else
                 item_model().clear();
         };
-        auto project_updated = [this, update_model](i_project& aProject)
+        auto project_updated = [&, update_model](i_project& aProject)
         {
             update_model();
-            iSink2 = aProject.element_added([this, update_model](i_element& aElement) 
+            iSink2 = aProject.element_added([&, update_model](i_element& aElement) 
             { 
                 // todo: something more granular
                 update_model(); 

@@ -442,7 +442,7 @@ namespace neogfx
             return const_cast<i_gradient&>(to_const(*this).object());
         if constexpr (Sharing == gradient_sharing::Shared)
         {
-            if (iObject->reference_count() > 2)
+            if (iObject->use_count() > 2)
                 iObject = iObject->clone();
         }
         return *iObject;

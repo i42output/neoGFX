@@ -63,6 +63,11 @@ namespace neogfx
                 destroyed_flag surfaceDestroyed{ aParent.surface() };
                 if (destroyed || surfaceDestroyed)
                     return;
+                if (!aParent.has_presentation_model())
+                {
+                    again();
+                    return;
+                }
                 for (auto& sw : aParent.iSectionWidths)
                 {
                     sw.calculated = 0.0;
@@ -156,13 +161,14 @@ namespace neogfx
 
     void header_view::set_model(i_item_model& aModel)
     {
-        set_model(std::shared_ptr<i_item_model>{std::shared_ptr<i_item_model>{}, &aModel});
+        set_model(ref_ptr<i_item_model>{ aModel });
     }
 
-    void header_view::set_model(std::shared_ptr<i_item_model> aModel)
+    void header_view::set_model(ref_ptr<i_item_model> aModel)
     {
+        if (iModel == aModel)
+            return;
         iModel = aModel;
-        neolib::destroying(model(), [this]() { iModel = nullptr; });
         if (has_presentation_model())
         {
             iSectionWidths.resize(presentation_model().columns());
@@ -193,11 +199,13 @@ namespace neogfx
 
     void header_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
     {
-        set_presentation_model(std::shared_ptr<i_item_presentation_model>{std::shared_ptr<i_item_presentation_model>{}, &aPresentationModel});
+        set_presentation_model(ref_ptr<i_item_presentation_model>{ aPresentationModel });
     }
 
-    void header_view::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
+    void header_view::set_presentation_model(ref_ptr<i_item_presentation_model> aPresentationModel)
     {
+        if (iPresentationModel == aPresentationModel)
+            return;
         iPresentationModelSink.clear();
         iPresentationModel = aPresentationModel;
         if (has_presentation_model())
@@ -211,7 +219,6 @@ namespace neogfx
             presentation_model().items_sorted([this]() { items_sorted(); });
             presentation_model().items_filtering([this]() { items_filtering(); });
             presentation_model().items_filtered([this]() { items_filtered(); });
-            neolib::destroying(presentation_model(), [this]() { iPresentationModel = nullptr; });
             if (has_model())
                 presentation_model().set_item_model(model());
         }
@@ -396,6 +403,8 @@ namespace neogfx
 
     void header_view::update_buttons()
     {
+        if (!has_presentation_model())
+            return;
         for (auto& sw : iSectionWidths)
             sw.calculated = 0.0;
         layout().set_spacing(size{ separator_width() }, false);

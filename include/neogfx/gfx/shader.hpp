@@ -39,7 +39,7 @@ namespace neogfx
         typedef i_shader::value_type abstract_value_type;
         typedef shader_value_type value_type;
     protected:
-        typedef neolib::polymorphic_jar<shader_uniform> uniform_list;
+        typedef neolib::jar<shader_uniform> uniform_list;
         typedef neolib::set<shader_variable> variable_list;
         class cached_uniform
         {

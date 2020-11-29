@@ -31,8 +31,9 @@ namespace neogfx
     class i_texture_manager;
 
     template <typename T>
-    class opengl_texture : public i_native_texture
+    class opengl_texture : public reference_counted<i_native_texture>
     {
+        typedef opengl_texture<T> self_type;
     public:
         define_declared_event(TargetActivating, target_activating)
         define_declared_event(TargetActivated, target_activated)
@@ -51,6 +52,7 @@ namespace neogfx
         ~opengl_texture();
     public:
         texture_id id() const override;
+        string const& uri() const override;
         texture_type type() const override;
         bool is_render_target() const override;
         const i_render_target& as_render_target() const override;
@@ -71,7 +73,6 @@ namespace neogfx
     public:
         void* handle() const override;
         bool is_resident() const override;
-        std::string const& uri() const override;
     public:
         dimension horizontal_dpi() const override;
         dimension vertical_dpi() const override;
@@ -84,7 +85,7 @@ namespace neogfx
         int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
     public:
         intptr_t native_handle() const override;
-        std::shared_ptr<i_native_texture> native_texture() const override;
+        i_texture& native_texture() const override;
     public:
         render_target_type target_type() const override;
         void* target_handle() const override;
@@ -107,6 +108,7 @@ namespace neogfx
     private:
         i_texture_manager& iManager;
         texture_id iId;
+        string iUri;
         dimension iDpiScaleFactor;
         neogfx::color_space iColorSpace;
         texture_sampling iSampling;
@@ -114,7 +116,6 @@ namespace neogfx
         size_u32 iSize;
         size_u32 iStorageSize;
         GLuint iHandle;
-        std::string iUri;
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         mutable GLuint iFrameBuffer;

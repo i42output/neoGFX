@@ -154,7 +154,7 @@ namespace neogfx
 
     graphics_context::graphics_context(const i_texture& aTexture, type aType) :
         iType{ aType },
-        iRenderTarget{ *aTexture.native_texture() },
+        iRenderTarget{ static_cast<i_native_texture&>(aTexture.native_texture()) },
         iNativeGraphicsContext{ nullptr },
         iDefaultFont{ font() },
         iOrigin{},

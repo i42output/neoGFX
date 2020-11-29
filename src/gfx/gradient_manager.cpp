@@ -546,7 +546,7 @@ namespace neogfx
 
     neolib::cookie item_cookie(gradient_manager::gradient_list_entry const& aEntry)
     {
-        return aEntry.first->id();
+        return aEntry.first()->id();
     }
 
     gradient_manager::gradient_manager()
@@ -624,23 +624,23 @@ namespace neogfx
 
     void gradient_manager::add_ref(gradient_id aId)
     {
-        ++gradients()[aId].second;
+        ++gradients()[aId].second();
     }
 
     void gradient_manager::release(gradient_id aId)
     {
-        if (gradients()[aId].second == 0u)
+        if (gradients()[aId].second() == 0u)
             throw invalid_release();
-        if (--gradients()[aId].second == 0u)
+        if (--gradients()[aId].second() == 0u)
         {
-            if (gradients()[aId].first.reference_count() <= 1)
+            if (gradients()[aId].first().use_count() <= 1)
                 gradients().remove(aId);
         }
     }
 
     long gradient_manager::use_count(gradient_id aId) const
     {
-        return gradients()[aId].second;
+        return gradients()[aId].second();
     }
 
     gradient_id gradient_manager::allocate_gradient_id()
@@ -662,12 +662,12 @@ namespace neogfx
     {
         // cleanup opportunity
         cleanup();
-        return gradients().add(aGradient->id(), gradient_list_entry{ aGradient, 0u })->first;
+        return gradients().add(aGradient->id(), gradient_list_entry{ aGradient, 0u })->first();
     }
 
     void gradient_manager::do_find_gradient(gradient_id aId, neolib::i_ref_ptr<i_gradient>& aResult) const
     {
-        aResult = gradients()[aId].first;
+        aResult = gradients()[aId].first();
     }
 
     void gradient_manager::do_create_gradient(neolib::i_ref_ptr<i_gradient>& aResult)
@@ -759,7 +759,7 @@ namespace neogfx
         for (auto i = gradients().begin(); i != gradients().end();)
         {
             auto& gradient = *i;
-            if (gradient.first.reference_count() <= 1 && gradient.second == 0u)
+            if (gradient.first().use_count() <= 1 && gradient.second() == 0u)
                 i = gradients().erase(i);
             else
                 ++i;

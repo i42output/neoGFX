@@ -405,7 +405,7 @@ namespace neogfx
             textureData = &glyphTextureData[0];
         }
         
-        glyphTexture.texture().native_texture()->set_pixels(glyphRect, &textureData[0], 1u);
+        static_cast<i_native_texture&>(glyphTexture.texture().native_texture()).set_pixels(glyphRect, &textureData[0], 1u);
 
         return glyphTexture;
     }

@@ -34,7 +34,7 @@ namespace neogfx
     }
 
     texture::texture(const i_texture& aTexture) :
-        iNativeTexture{ !aTexture.is_empty() ? aTexture.native_texture() : std::shared_ptr<i_native_texture>() }
+        iNativeTexture{ !aTexture.is_empty() ? aTexture.native_texture() : ref_ptr<i_texture>{} }
     {
     }
 
@@ -44,7 +44,7 @@ namespace neogfx
     }
 
     texture::texture(const i_sub_texture& aSubTexture) :
-        iNativeTexture{ !aSubTexture.atlas_texture().is_empty() ? aSubTexture.atlas_texture().native_texture() : std::shared_ptr<i_native_texture>() },
+        iNativeTexture{ !aSubTexture.atlas_texture().is_empty() ? aSubTexture.atlas_texture().native_texture() : ref_ptr<i_texture>{} },
         iSubTexture{ aSubTexture }
     {
     }
@@ -55,7 +55,12 @@ namespace neogfx
 
     texture_id texture::id() const
     {
-        return native_texture()->id();
+        return native_texture().id();
+    }
+
+    i_string const& texture::uri() const
+    {
+        return native_texture().uri();
     }
 
     texture_type texture::type() const
@@ -65,17 +70,17 @@ namespace neogfx
 
     bool texture::is_render_target() const
     {
-        return native_texture()->is_render_target();
+        return native_texture().is_render_target();
     }
 
     const i_render_target& texture::as_render_target() const
     {
-        return *native_texture();
+        return static_cast<i_native_texture&>(native_texture());
     }
 
     i_render_target& texture::as_render_target()
     {
-        return *native_texture();
+        return static_cast<i_native_texture&>(native_texture());
     }
 
     const i_sub_texture& texture::as_sub_texture() const
@@ -89,42 +94,42 @@ namespace neogfx
     {
         if (is_empty())
             return 1.0;
-        return native_texture()->dpi_scale_factor();
+        return native_texture().dpi_scale_factor();
     }
 
     color_space texture::color_space() const
     {
         if (is_empty())
             return neogfx::color_space::sRGB;
-        return native_texture()->color_space();
+        return native_texture().color_space();
     }
 
     texture_sampling texture::sampling() const
     {
         if (is_empty())
             return texture_sampling::NormalMipmap;
-        return native_texture()->sampling();
+        return native_texture().sampling();
     }
 
     uint32_t texture::samples() const
     {
         if (is_empty())
             return 1;
-        return native_texture()->samples();
+        return native_texture().samples();
     }
 
     texture_data_format texture::data_format() const
     {
         if (is_empty())
             return texture_data_format::RGBA;
-        return native_texture()->data_format();
+        return native_texture().data_format();
     }
 
     texture_data_type texture::data_type() const
     {
         if (is_empty())
             return texture_data_type::UnsignedByte;
-        return native_texture()->data_type();
+        return native_texture().data_type();
     }
 
     bool texture::is_empty() const
@@ -136,19 +141,19 @@ namespace neogfx
     {
         if (is_empty())
             return size{};
-        return native_texture()->extents();
+        return native_texture().extents();
     }
 
     size texture::storage_extents() const
     {
         if (is_empty())
             return size{};
-        return native_texture()->storage_extents();
+        return native_texture().storage_extents();
     }
 
     void texture::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
     {
-        native_texture()->set_pixels(aRect, aPixelData, aPackAlignment);
+        native_texture().set_pixels(aRect, aPixelData, aPackAlignment);
     }
 
     void texture::set_pixels(const i_image& aImage)
@@ -160,32 +165,32 @@ namespace neogfx
     {
         if (is_empty())
             throw texture_empty();
-        return iNativeTexture->set_pixel(aPosition, aColor);
+        return native_texture().set_pixel(aPosition, aColor);
     }
 
     color texture::get_pixel(const point& aPosition) const
     {
         if (is_empty())
             throw texture_empty();
-        return iNativeTexture->get_pixel(aPosition);
+        return native_texture().get_pixel(aPosition);
     }
 
     int32_t texture::bind(const std::optional<uint32_t>& aTextureUnit) const
     {
         if (is_empty())
             throw texture_empty();
-        return iNativeTexture->bind(aTextureUnit);
+        return native_texture().bind(aTextureUnit);
     }
 
     intptr_t texture::native_handle() const
     {
-        return native_texture()->native_handle();
+        return native_texture().native_handle();
     }
 
-    std::shared_ptr<i_native_texture> texture::native_texture() const
+    i_texture& texture::native_texture() const
     {
         if (is_empty())
             throw texture_empty();
-        return iNativeTexture->native_texture();
+        return *iNativeTexture;
     }
 }

@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, color_space aColorSpace, const optional_color& aColor)
+    void opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, color_space aColorSpace, const optional_color& aColor, i_ref_ptr<i_texture>& aResult)
     {
         switch (aDataFormat)
         {
@@ -34,9 +34,11 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                return add_texture(std::make_shared<opengl_texture<std::array<uint8_t,4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                aResult = add_texture(make_ref<opengl_texture<std::array<uint8_t,4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                break;
             case texture_data_type::Float:
-                return add_texture(std::make_shared<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                aResult = add_texture(make_ref<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                break;
             }
             break;
         case texture_data_format::Red:
@@ -44,19 +46,21 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                return add_texture(std::make_shared<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                aResult = add_texture(make_ref<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                break;
             case texture_data_type::Float:
-                return add_texture(std::make_shared<opengl_texture<float>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                aResult = add_texture(make_ref<opengl_texture<float>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                break;
             }
             break;
         }
     }
 
-    std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType)
+    void opengl_texture_manager::create_texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult)
     {
         auto existing = find_texture(aImage);
         if (existing != textures().end())
-            return existing->first;
+            aResult = existing->first();
         switch (aDataFormat)
         {
         case texture_data_format::RGBA:
@@ -66,9 +70,11 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                return add_texture(std::make_shared<opengl_texture<avec4u8>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<avec4u8>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                break;
             case texture_data_type::Float:
-                return add_texture(std::make_shared<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                break;
             }
             break;
         case texture_data_format::Red:
@@ -76,9 +82,11 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                return add_texture(std::make_shared<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                break;
             case texture_data_type::Float:
-                return add_texture(std::make_shared<opengl_texture<float>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<float>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                break;
             }
             break;
         }

@@ -90,6 +90,7 @@ namespace neogfx
     opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, neogfx::color_space aColorSpace, const optional_color& aColor) :
         iManager{ aManager },
         iId{ aId },
+        iUri{ "neogfx::opengl_texture::internal" },
         iDpiScaleFactor{ aDpiScaleFactor },
         iColorSpace{ aColorSpace },
         iSampling{ aSampling },
@@ -99,7 +100,6 @@ namespace neogfx
             (aSampling != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
             decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
         iHandle{ 0 },
-        iUri{ "neogfx::opengl_texture::internal" },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
         iFrameBuffer{ 0 },
         iDepthStencilBuffer{ 0 }
@@ -181,6 +181,7 @@ namespace neogfx
     opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat) :
         iManager{ aManager },
         iId{ aId },
+        iUri{ aImage.uri() },
         iDpiScaleFactor{ aImage.dpi_scale_factor() },
         iColorSpace{ aImage.color_space() },
         iSampling{ aImage.sampling() },
@@ -190,7 +191,6 @@ namespace neogfx
             (aImage.sampling() != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
             decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
         iHandle{ 0 },
-        iUri{ aImage.uri() },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
         iFrameBuffer{ 0 },
         iDepthStencilBuffer{ 0 }
@@ -278,6 +278,12 @@ namespace neogfx
     texture_id opengl_texture<T>::id() const
     {
         return iId;
+    }
+
+    template <typename T>
+    string const& opengl_texture<T>::uri() const
+    {
+        return iUri;
     }
 
     template <typename T>
@@ -447,12 +453,6 @@ namespace neogfx
     }
 
     template <typename T>
-    std::string const& opengl_texture<T>::uri() const
-    {
-        return iUri;
-    }
-
-    template <typename T>
     dimension opengl_texture<T>::horizontal_dpi() const
     {
         return dpi_scale_factor() * 96.0;
@@ -506,9 +506,9 @@ namespace neogfx
     }
 
     template <typename T>
-    std::shared_ptr<i_native_texture> opengl_texture<T>::native_texture() const
+    i_texture& opengl_texture<T>::native_texture() const
     {
-        return std::dynamic_pointer_cast<i_native_texture>(iManager.find_texture(id()));
+        return const_cast<opengl_texture<T>&>(*this); // todo: not happy with this cast
     }
 
     template <typename T>
@@ -520,7 +520,7 @@ namespace neogfx
     template <typename T>
     void* opengl_texture<T>::target_handle() const
     {
-        return native_texture()->handle();
+        return handle();
     }
 
     template <typename T>
@@ -606,7 +606,7 @@ namespace neogfx
             glCheck(glDepthFunc(GL_LEQUAL));
             glCheck(glGenFramebuffers(1, &iFrameBuffer));
             glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
-            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(native_texture()->handle())), 0));
+            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())), 0));
             glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
             if (sampling() != texture_sampling::Multisample)
@@ -637,9 +637,9 @@ namespace neogfx
             }
             else
                 queryResult = 0;
-            if (queryResult != static_cast<GLint>(reinterpret_cast<std::intptr_t>(native_texture()->handle())))
+            if (queryResult != static_cast<GLint>(reinterpret_cast<std::intptr_t>(handle())))
             {
-                glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(native_texture()->handle())), 0));
+                glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())), 0));
             }
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
         }

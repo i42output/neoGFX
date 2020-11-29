@@ -69,12 +69,12 @@ namespace neogfx
         const i_item_model& model() const;
         i_item_model& model();
         void set_model(i_item_model& aModel);
-        void set_model(std::shared_ptr<i_item_model> aModel);
+        void set_model(ref_ptr<i_item_model> aModel);
         bool has_presentation_model() const;
         const i_item_presentation_model& presentation_model() const;
         i_item_presentation_model& presentation_model();
         void set_presentation_model(i_item_presentation_model& aPresentationModel);
-        void set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel);
+        void set_presentation_model(ref_ptr<i_item_presentation_model> aPresentationModel);
         bool expand_last_column() const;
         void set_expand_last_column(bool aExpandLastColumn);
     public:
@@ -108,8 +108,8 @@ namespace neogfx
         sink iSink;
         std::vector<std::array<sink, 2>> iButtonSinks;
         header_view_type iType;
-        std::shared_ptr<i_item_model> iModel;
-        std::shared_ptr<i_item_presentation_model> iPresentationModel;
+        ref_ptr<i_item_model> iModel;
+        ref_ptr<i_item_presentation_model> iPresentationModel;
         sink iPresentationModelSink;
         bool iExpandLastColumn;
         optional_dimension iSeparatorWidth;

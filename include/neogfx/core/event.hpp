@@ -24,5 +24,6 @@
 
 namespace neogfx
 {
+    using neolib::sink;
     using namespace neolib::plugin_events;
 }

@@ -69,15 +69,18 @@ namespace neogfx
     class i_sub_texture;
     class i_image;
 
-    class i_texture
+    class i_texture : public i_reference_counted
     {
     public:
         struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
         struct not_sub_texture : std::logic_error { not_sub_texture() : std::logic_error("neogfx::i_texture::not_sub_texture") {} };
     public:
+        typedef i_texture abstract_type;
+    public:
         virtual ~i_texture() = default;
     public:
         virtual texture_id id() const = 0;
+        virtual i_string const& uri() const = 0;
         virtual texture_type type() const = 0;
         virtual bool is_render_target() const = 0;
         virtual const i_render_target& as_render_target() const = 0;
@@ -100,6 +103,6 @@ namespace neogfx
         virtual int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const = 0;
     public:
         virtual intptr_t native_handle() const = 0;
-        virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
+        virtual i_texture& native_texture() const = 0;
     };
 }

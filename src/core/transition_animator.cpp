@@ -260,7 +260,7 @@ namespace neogfx
 
     transition_id animator::add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled)
     {
-        auto result = iTransitions.emplace(std::make_unique<property_transition>(*this, aProperty, aEasingFunction, aDuration, aEnabled));
+        auto result = iTransitions.emplace(make_ref<property_transition>(*this, aProperty, aEasingFunction, aDuration, aEnabled));
         if (iTransitions[result]->can_apply())
             iTransitions[result]->apply();
         return result;

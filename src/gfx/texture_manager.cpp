@@ -33,7 +33,7 @@ namespace neogfx
 {
     neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry)
     {
-        return aEntry.first->id();
+        return aEntry.first()->id();
     }
 
     texture_id texture_manager::allocate_texture_id()
@@ -41,9 +41,9 @@ namespace neogfx
         return textures().next_cookie();
     }
 
-    std::shared_ptr<i_texture> texture_manager::find_texture(texture_id aId) const
+    void texture_manager::find_texture(texture_id aId, i_ref_ptr<i_texture>& aResult) const
     {
-        return textures()[aId].first;
+        aResult = textures()[aId].first();
     }
 
     void texture_manager::clear_textures()
@@ -53,26 +53,26 @@ namespace neogfx
 
     void texture_manager::add_ref(texture_id aId)
     {
-        ++textures()[aId].second;
+        ++textures()[aId].second();
     }
 
     void texture_manager::release(texture_id aId)
     {
-        if (textures()[aId].second == 0u)
+        if (textures()[aId].second() == 0u)
             throw invalid_release();
-        if (--textures()[aId].second == 0u)
+        if (--textures()[aId].second() == 0u)
         {
-            if (textures()[aId].first.use_count() == 1)
+            if (textures()[aId].first().use_count() == 1)
                 textures().remove(aId);
         }
     }
 
     long texture_manager::use_count(texture_id aId) const
     {
-        return textures()[aId].second;
+        return textures()[aId].second();
     }
 
-    std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
+    std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(size const& aSize)
     {
         return std::make_unique<texture_atlas>(aSize);
     }
@@ -97,37 +97,37 @@ namespace neogfx
         return iTextures;
     }
 
-    texture_manager::texture_list::const_iterator texture_manager::find_texture(const i_image& aImage) const
+    texture_manager::texture_list::const_iterator texture_manager::find_texture(i_image const& aImage) const
     {
         for (auto i = textures().begin(); i != textures().end(); ++i)
         {
             auto& texture = *i;
-            if (texture.first->type() != texture_type::Texture)
+            if (texture.first()->type() != texture_type::Texture)
                 continue;
-            if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
+            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri())
                 return i;
         }
         return textures().end();
     }
 
-    texture_manager::texture_list::iterator texture_manager::find_texture(const i_image& aImage)
+    texture_manager::texture_list::iterator texture_manager::find_texture(i_image const& aImage)
     {
         for (auto i = textures().begin(); i != textures().end(); ++i)
         {
             auto& texture = *i;
-            if (texture.first->type() != texture_type::Texture)
+            if (texture.first()->type() != texture_type::Texture)
                 continue;
-            if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
+            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri())
                 return i;
         }
         return textures().end();
     }
 
-    std::shared_ptr<i_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
+    ref_ptr<i_texture> texture_manager::add_texture(i_ref_ptr<i_native_texture> const& aTexture)
     {
         // cleanup opportunity
         cleanup();
-        return textures().add(aTexture->id(), texture_list_entry{ aTexture, 0u })->first;
+        return textures().add(aTexture->id(), texture_list_entry{ aTexture, 0u })->first();
     }
 
     void texture_manager::cleanup()
@@ -135,7 +135,7 @@ namespace neogfx
         for (auto i = textures().begin(); i != textures().end();)
         {
             auto& texture = *i;
-            if (texture.first->type() == texture_type::Texture && texture.first.use_count() == 1 && texture.second == 0u)
+            if (texture.first()->type() == texture_type::Texture && texture.first().use_count() == 1 && texture.second() == 0u)
                 i = textures().erase(i);
             else
                 ++i;

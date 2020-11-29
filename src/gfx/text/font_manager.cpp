@@ -405,7 +405,7 @@ namespace neogfx
 
     long font_manager::use_count(font_id aId) const
     {
-        return font_from_id(aId).native_font_face().reference_count();
+        return font_from_id(aId).native_font_face().use_count();
     }
 
     i_native_font& font_manager::find_font(std::string const& aFamilyName, std::string const& aStyleName, font::point_size aSize)
@@ -514,7 +514,7 @@ namespace neogfx
         for (auto i = iIdCache.begin(); i != iIdCache.end();)
         {
             auto& cacheEntry = *i;
-            if (cacheEntry.native_font_face().reference_count() == 1)
+            if (cacheEntry.native_font_face().use_count() == 1)
                 i = iIdCache.erase(i);
             else
                 ++i;

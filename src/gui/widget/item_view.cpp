@@ -75,7 +75,7 @@ namespace neogfx
 
     void item_view::set_model(i_item_model& aModel)
     {
-        set_model(ref_ptr<i_item_model>{ref_ptr<i_item_model>{}, &aModel});
+        set_model(ref_ptr<i_item_model>{ aModel });
     }
 
     void item_view::set_model(i_ref_ptr<i_item_model> const& aModel)
@@ -123,7 +123,7 @@ namespace neogfx
 
     void item_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
     {
-        set_presentation_model(ref_ptr<i_item_presentation_model>{ref_ptr<i_item_presentation_model>{}, &aPresentationModel});
+        set_presentation_model(ref_ptr<i_item_presentation_model>{ aPresentationModel });
     }
 
     void item_view::set_presentation_model(i_ref_ptr<i_item_presentation_model> const& aPresentationModel)

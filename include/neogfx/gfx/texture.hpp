@@ -31,7 +31,7 @@ namespace neogfx
     class i_image;
     class i_native_texture;
 
-    class texture : public i_texture
+    class texture : public reference_counted<i_texture>
     {
         // construction
     public:
@@ -44,6 +44,7 @@ namespace neogfx
         // operations
     public:
         texture_id id() const override;
+        i_string const& uri() const override;
         texture_type type() const override;
         bool is_render_target() const override;
         const i_render_target& as_render_target() const override;
@@ -66,10 +67,10 @@ namespace neogfx
         int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
     public:
         intptr_t native_handle() const override;
-        std::shared_ptr<i_native_texture> native_texture() const override;
+        i_texture& native_texture() const override;
         // attributes
     private:
-        std::shared_ptr<i_texture> iNativeTexture;
+        ref_ptr<i_texture> iNativeTexture;
         optional_sub_texture iSubTexture;
     };
 

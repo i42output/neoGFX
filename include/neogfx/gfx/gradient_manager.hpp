@@ -99,7 +99,7 @@ namespace neogfx
         // types
     protected:
         typedef ref_ptr<i_gradient> gradient_pointer;
-        typedef std::pair<gradient_pointer, uint32_t> gradient_list_entry;
+        typedef neolib::pair<gradient_pointer, uint32_t> gradient_list_entry;
         typedef neolib::jar<gradient_list_entry> gradient_list;
         typedef std::pair<gradient::color_stop_list, gradient::alpha_stop_list> sampler_key_t;
         typedef std::map<sampler_key_t, gradient_sampler> sampler_map_t;

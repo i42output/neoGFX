@@ -162,6 +162,8 @@ namespace neogfx
     public:
         struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::font::no_fallback_font") {} };
         // types
+    public:
+        typedef font abstract_type; // todo
     private:
         class instance;
         // construction

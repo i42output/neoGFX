@@ -29,9 +29,10 @@ namespace neogfx
     class i_native_texture : public i_texture, public i_render_target
     {
     public:
+        typedef i_native_texture abstract_type;
+    public:
         virtual void* handle() const = 0;
         virtual bool is_resident() const = 0;
-        virtual std::string const& uri() const = 0;
     public:
         virtual size extents() const = 0;
     public:

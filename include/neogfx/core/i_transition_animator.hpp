@@ -30,10 +30,12 @@ namespace neogfx
 
     class i_animator;
 
-    class i_transition
+    class i_transition : public i_reference_counted
     {
     public:
         struct cannot_apply : std::logic_error { cannot_apply() : std::logic_error{ "neogfx::i_transition::cannot_apply" } {} };
+    public:
+        typedef i_transition abstract_type;
     public:
         virtual ~i_transition() = default;
     public:

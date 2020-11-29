@@ -47,6 +47,11 @@ namespace neogfx
         return atlas_id();
     }
 
+    i_string const& sub_texture::uri() const
+    {
+        return native_texture().uri();
+    }
+
     texture_type sub_texture::type() const
     {
         return texture_type::SubTexture;
@@ -54,17 +59,17 @@ namespace neogfx
 
     bool sub_texture::is_render_target() const
     {
-        return native_texture()->is_render_target();
+        return native_texture().is_render_target();
     }
 
     const i_render_target& sub_texture::as_render_target() const
     {
-        return *native_texture();
+        return static_cast<i_native_texture const&>(native_texture());
     }
 
     i_render_target& sub_texture::as_render_target()
     {
-        return *native_texture();
+        return static_cast<i_native_texture&>(native_texture());
     }
 
     const i_sub_texture& sub_texture::as_sub_texture() const
@@ -74,32 +79,32 @@ namespace neogfx
 
     dimension sub_texture::dpi_scale_factor() const
     {
-        return native_texture()->dpi_scale_factor();
+        return native_texture().dpi_scale_factor();
     }
 
     neogfx::color_space sub_texture::color_space() const
     {
-        return native_texture()->color_space();
+        return native_texture().color_space();
     }
 
     texture_sampling sub_texture::sampling() const
     {
-        return native_texture()->sampling();
+        return native_texture().sampling();
     }
 
     uint32_t sub_texture::samples() const
     {
-        return native_texture()->samples();
+        return native_texture().samples();
     }
 
     texture_data_format sub_texture::data_format() const
     {
-        return native_texture()->data_format();
+        return native_texture().data_format();
     }
 
     texture_data_type sub_texture::data_type() const
     {
-        return native_texture()->data_type();
+        return native_texture().data_type();
     }
 
     bool sub_texture::is_empty() const
@@ -128,7 +133,7 @@ namespace neogfx
         r = r.intersection(atlas_location());
         if (r.cx != aRect.cx || r.cy != aRect.cy)
             throw bad_rectangle();
-        native_texture()->set_pixels(r, aPixelData, aPackAlignment);
+        native_texture().set_pixels(r, aPixelData, aPackAlignment);
     }
 
     void sub_texture::set_pixels(const i_image& aImage)
@@ -151,25 +156,25 @@ namespace neogfx
 
     void sub_texture::set_pixel(const point& aPosition, const color& aColor)
     {
-        native_texture()->set_pixel(aPosition + atlas_location().position(), aColor);
+        native_texture().set_pixel(aPosition + atlas_location().position(), aColor);
     }
 
     color sub_texture::get_pixel(const point& aPosition) const
     {
-        return native_texture()->get_pixel(aPosition + atlas_location().position());
+        return native_texture().get_pixel(aPosition + atlas_location().position());
     }
 
     int32_t sub_texture::bind(const std::optional<uint32_t>& aTextureUnit) const
     {
-        return native_texture()->bind(aTextureUnit);
+        return native_texture().bind(aTextureUnit);
     }
 
     intptr_t sub_texture::native_handle() const
     {
-        return native_texture()->native_handle();
+        return native_texture().native_handle();
     }
 
-    std::shared_ptr<i_native_texture> sub_texture::native_texture() const
+    i_texture& sub_texture::native_texture() const
     {
         return atlas_texture().native_texture();
     }
