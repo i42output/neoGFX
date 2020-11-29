@@ -146,7 +146,7 @@ namespace neogfx
 
     scrollbar::value_type scrollbar::maximum() const
     {
-        return iMaximum;
+        return iMinimum >= 0.0 ? iMaximum : std::max(iMaximum, page());
     }
 
     void scrollbar::set_maximum(value_type aMaximum)
