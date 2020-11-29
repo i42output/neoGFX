@@ -32,6 +32,7 @@ namespace neogfx
         define_declared_event(DpiChanged, dpi_changed)
         define_declared_event(Rendering, rendering)
         define_declared_event(RenderingFinished, rendering_finished)
+        define_declared_event(Closing, closing)
         define_declared_event(Closed, closed)
     public:
         surface_window_proxy(i_window& aWindow, std::function<std::unique_ptr<i_native_window>(i_surface_window&)> aNativeWindowCreator);
@@ -155,6 +156,7 @@ namespace neogfx
         i_rendering_engine& iRenderingEngine;
         std::unique_ptr<i_native_window> iNativeWindow;
         bool iNativeWindowClosing;
+        bool iClosing;
         bool iClosed;
         std::optional<char32_t> iSurrogatePairPart;
         i_widget* iCapturingWidget;

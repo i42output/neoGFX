@@ -284,6 +284,13 @@ namespace neogfx::DesignStudio
         activate();
     }
 
+    void main_window_ex::close()
+    {
+        if (iProjectManager.project_active())
+            iProjectManager.close_project(iProjectManager.active_project());
+        main_window::close();
+    }
+
     void main_window_ex::paint_workspace(ng::i_graphics_context& aGc)
     {
         auto const& scrollArea = iWorkspace.view_stack().scroll_area();

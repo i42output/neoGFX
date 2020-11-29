@@ -34,6 +34,8 @@ namespace neogfx
         iWindow{ aWindow }, 
         iRenderingEngine{ service<i_rendering_engine>() },
         iNativeWindow{ aNativeWindowCreator(*this) },
+        iNativeWindowClosing{ false },
+        iClosing{ false },
         iClosed{ false },
         iCapturingWidget{ nullptr },
         iClickedWidget{ nullptr }
@@ -115,9 +117,16 @@ namespace neogfx
 
     void surface_window_proxy::close()
     {
-        if (iClosed)
+        if (iClosing || iClosed)
             return;
         destroyed_flag destroyed{ *this };
+        iClosing = true;
+        Closing.trigger();
+        if (destroyed)
+            return;
+        as_window().close();
+        if (destroyed)
+            return;
         if (has_native_surface() && !iNativeWindowClosing)
         {
             native_surface().close();
@@ -420,13 +429,14 @@ namespace neogfx
     void surface_window_proxy::native_window_closing()
     {
         iNativeWindowClosing = true;
+        close();
         service<i_surface_manager>().remove_surface(*this);
     }
 
     void surface_window_proxy::native_window_closed()
     {
-        iNativeWindowClosing = true;
-        close();
+        if (!iNativeWindowClosing)
+            native_window_closing();
     }
 
     void surface_window_proxy::native_window_focus_gained()

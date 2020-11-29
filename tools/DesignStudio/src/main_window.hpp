@@ -58,6 +58,8 @@ namespace neogfx::DesignStudio
         neolib::i_setting& workspaceGridColor;
     public:
         main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager);
+    protected:
+        void close() override;
     private:
         void paint_workspace(ng::i_graphics_context& aGc);
     private:
