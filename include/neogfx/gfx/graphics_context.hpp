@@ -30,7 +30,6 @@ namespace neogfx
         struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::graphics_context::not_implemented") {} };
     private:
         friend class generic_surface;
-        class glyph_shapes;
         // exceptions
         // construction
     public:
@@ -122,28 +121,28 @@ namespace neogfx
         void fill_path(const path& aPath, const brush& aFill) const override;
         void fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const override;
         size text_extent(std::string const& aText, const font& aFont) const override;
-        size text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const override;
+        size text_extent(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const override;
         size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const override;
-        size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const override;
+        size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const override;
         size multiline_text_extent(std::string const& aText, const font& aFont) const override;
-        size multiline_text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const override;
+        size multiline_text_extent(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const override;
         size multiline_text_extent(std::string const& aText, const font& aFont, dimension aMaxWidth) const override;
-        size multiline_text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const override;
+        size multiline_text_extent(std::string const& aText, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth) const override;
         size glyph_text_extent(const glyph_text& aText) const override;
         size glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const override;
         size multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const override;
         glyph_text to_glyph_text(std::string const& aText, const font& aFont) const override;
         glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const override;
-        glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const override;
+        glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const override;
         glyph_text to_glyph_text(const std::u32string& aText, const font& aFont) const override;
         glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const override;
-        glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const override;
+        glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const override;
         multiline_glyph_text to_multiline_glyph_text(std::string const& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
-        multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
+        multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(const std::u32string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
-        multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
+        multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         multiline_glyph_text to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const override;
         bool is_text_left_to_right(std::string const& aText, const font& aFont) const override;
         bool is_text_right_to_left(std::string const& aText, const font& aFont) const override;
@@ -165,6 +164,7 @@ namespace neogfx
         void draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
         void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
         void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
+        char mnemonic() const override;
         void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const override;
         void unset_mnemonic() const override;
         bool mnemonics_shown() const override;
@@ -203,10 +203,6 @@ namespace neogfx
         bool active() const;
         i_rendering_context& native_context() const;
         // helpers
-        // own
-    private:
-        glyph_text to_glyph_text_impl(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
-        glyph_text to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
         // attributes
     private:
         type iType;
@@ -226,8 +222,6 @@ namespace neogfx
         mutable bool iSubpixelRendering;
         mutable std::optional<std::pair<bool, char>> iMnemonic;
         mutable std::optional<std::string> iPassword;
-        struct glyph_text_data;
-        std::unique_ptr<glyph_text_data> iGlyphTextData;
         mutable std::optional<size> iPreviousPingPongBufferSize;
     };
 }

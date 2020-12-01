@@ -154,6 +154,7 @@ namespace neogfx
 
     app::loader::~loader()
     {
+        iApp.plugin_manager().unload_plugins();
         teardown_service<i_animator>();
         teardown_service<i_gradient_manager>();
         teardown_service<i_rendering_engine>();
@@ -167,7 +168,7 @@ namespace neogfx
         async_thread{ "neogfx::app", true },
         neolib::application<i_app>{ aAppInfo },
         iProgramOptions{ aAppInfo.arguments().argc(), aAppInfo.arguments().argv() },
-        iLoader{ iProgramOptions, *this },
+        iLoader{ std::make_unique<loader>(iProgramOptions, *this) },
         iName{ aAppInfo.name() },
         iQuitWhenLastWindowClosed{ true },
         iInExec{ false },
@@ -309,7 +310,6 @@ namespace neogfx
 
     app::~app()
     {
-        plugin_manager().unload_plugins();
         service<i_keyboard>().ungrab_keyboard(*this);
         resource_manager::instance().clean();
     }

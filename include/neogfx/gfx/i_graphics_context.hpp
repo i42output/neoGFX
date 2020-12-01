@@ -199,6 +199,7 @@ namespace neogfx
         virtual void draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
         virtual void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
         virtual void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual char mnemonic() const = 0;
         virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const = 0;
         virtual void unset_mnemonic() const = 0;
         virtual bool mnemonics_shown() const = 0;

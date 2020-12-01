@@ -22,13 +22,13 @@
 #include <neogfx/neogfx.hpp>
 #include <unordered_map>
 #include <set>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 #include <neolib/core/jar.hpp>
 #include <neolib/core/string_ci.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 #include <neogfx/gfx/text/emoji_atlas.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
+
+typedef struct FT_LibraryRec_* FT_Library;
 
 namespace neogfx
 {
@@ -90,6 +90,8 @@ namespace neogfx
     public:
         const font& font_from_id(font_id aId) const override;
     public:
+        i_glyph_text_factory& glyph_text_factory() const override;
+    public:
         const i_texture_atlas& glyph_atlas() const override;
         i_texture_atlas& glyph_atlas() override;
         const i_emoji_atlas& emoji_atlas() const override;
@@ -112,6 +114,7 @@ namespace neogfx
         font_family_list iFontFamilies;
     private:
         id_cache iIdCache;
+        std::unique_ptr<i_glyph_text_factory> iGlyphTextFactory;
         texture_atlas iGlyphAtlas;
         neogfx::emoji_atlas iEmojiAtlas;
     };

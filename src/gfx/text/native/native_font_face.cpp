@@ -70,7 +70,7 @@ namespace neogfx
 
         extern "C"
         {
-            FT_EXPORT_DEF(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
+            FT_EXPORT(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
             {
                 return neogfx_FT_Get_Advance(face, gindex, load_flags, padvance);
             }
@@ -88,6 +88,7 @@ namespace neogfx
     {
         if (iHandle != nullptr)
             sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle));
+        iAuxHandle = nullptr;
         FT_Done_Face(iHandle);
         if (iFallbackFont != nullptr)
             iFallbackFont->release();

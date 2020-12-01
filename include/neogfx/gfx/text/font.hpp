@@ -154,6 +154,7 @@ namespace neogfx
 
     typedef neolib::small_cookie font_id;
 
+    // todo: abstract font
     class font : public font_info
     {
         friend class font_manager;

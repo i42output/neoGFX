@@ -19,17 +19,33 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/string_utils.hpp>
+#include <neolib/core/string_utf.hpp>
 #include <boost/filesystem.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_LCD_FILTER_H
+#include FT_GLYPH_H
+#include FT_OUTLINE_H
+#include FT_BITMAP_H
+#ifdef u8
+#undef u8
+#include <hb.h>
+#include <hb-ft.h>
+#include <hb-ucdn\ucdn.h>
+#define u8
+#else
+#include <hb.h>
+#include <hb-ft.h>
+#endif
 #ifdef _WIN32
 #include <Shlobj.h>
 #endif
 #include <neolib/file/file.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
+#include <neogfx/gfx/text/text_category_map.hpp>
 #include "../../gfx/text/native/native_font_face.hpp"
 #include "../../gfx/text/native/native_font.hpp"
 
@@ -139,7 +155,623 @@ namespace neogfx
         return *f;
     }
 
+    class glyph_text_factory : public i_glyph_text_factory
+    {
+    public:
+        struct cluster
+        {
+            std::string::size_type from;
+            glyph::flags_e flags;
+        };
+        typedef std::vector<cluster> cluster_map_t;
+        typedef std::tuple<const char32_t*, const char32_t*, text_direction, bool, hb_script_t> glyph_run;
+        typedef std::vector<glyph_run> run_list;
+    public:
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) override;
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) override;
+    private:
+        cluster_map_t iClusterMap;
+        std::vector<character_type> iTextDirections;
+        std::u32string iCodePointsBuffer;
+        run_list iRuns;
+        glyph_text iGlyphTextResult;
+        glyph_text iGlyphTextResult2;
+    };
+
+    class glyph_shapes
+    {
+    public:
+        struct not_using_fallback : std::logic_error { not_using_fallback() : std::logic_error("neogfx::graphics_context::glyph_shapes::not_using_fallback") {} };
+    public:
+        class glyphs
+        {
+        public:
+            glyphs(const i_graphics_context& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun) :
+                iParent{ aParent },
+                iFont{ static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->font },
+                iGlyphRun{ aGlyphRun },
+                iBuf{ static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->buf },
+                iGlyphCount{ 0u },
+                iGlyphInfo{ nullptr },
+                iGlyphPos{ nullptr }
+            {
+                hb_ft_font_set_load_flags(iFont, aParent.is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
+                hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
+                hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
+                std::vector<uint32_t> reversed;
+                if (std::get<2>(aGlyphRun) != text_direction::None_RTL)
+                    hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)), 0, static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)));
+                else
+                {
+                    reversed.reserve(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
+                    for (auto ch = std::get<1>(aGlyphRun); ch != std::get<0>(aGlyphRun); --ch)
+                    {
+                        switch (*(ch - 1))
+                        {
+                        case U'(':
+                            reversed.push_back(U')');
+                            break;
+                        case U')':
+                            reversed.push_back(U'(');
+                            break;
+                        case U'[':
+                            reversed.push_back(U']');
+                            break;
+                        case U']':
+                            reversed.push_back(U'[');
+                            break;
+                        case U'{':
+                            reversed.push_back(U'}');
+                            break;
+                        case U'}':
+                            reversed.push_back(U'{');
+                            break;
+                        default:
+                            reversed.push_back(*(ch - 1));
+                        }
+                    }
+                    hb_buffer_add_utf32(iBuf, &*reversed.begin(), static_cast<int>(reversed.size()), 0u, static_cast<int>(reversed.size()));
+                }
+                hb_shape(iFont, iBuf, NULL, 0);
+                unsigned int glyphCount = 0;
+                iGlyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
+                iGlyphPos = hb_buffer_get_glyph_positions(iBuf, &glyphCount);
+                iGlyphCount = glyphCount;
+                if (std::get<2>(aGlyphRun) == text_direction::None_RTL)
+                    for (uint32_t i = 0; i < iGlyphCount; ++i)
+                        iGlyphInfo[i].cluster = static_cast<uint32_t>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun) - 1 - iGlyphInfo[i].cluster);
+            }
+            ~glyphs()
+            {
+                hb_buffer_clear_contents(iBuf);
+            }
+        public:
+            uint32_t glyph_count() const
+            {
+                return iGlyphCount;
+            }
+            const hb_glyph_info_t& glyph_info(uint32_t aIndex) const
+            {
+                return iGlyphInfo[aIndex];
+            }
+            const hb_glyph_position_t& glyph_position(uint32_t aIndex) const
+            {
+                return iGlyphPos[aIndex];
+            }
+            bool needs_fallback_font() const
+            {
+                for (uint32_t i = 0; i < glyph_count(); ++i)
+                {
+                    auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
+                    if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
+                        return true;
+                }
+                return false;
+            }
+        private:
+            const i_graphics_context& iParent;
+            hb_font_t* iFont;
+            const glyph_text_factory::glyph_run& iGlyphRun;
+            hb_buffer_t* iBuf;
+            uint32_t iGlyphCount;
+            hb_glyph_info_t* iGlyphInfo;
+            hb_glyph_position_t* iGlyphPos;
+        };
+        typedef std::list<glyphs> glyphs_list;
+        typedef std::vector<std::pair<glyphs_list::const_iterator, uint32_t>> result_type;
+    public:
+        glyph_shapes(const i_graphics_context& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun)
+        {
+            font tryFont = aFont;
+            iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
+            while (iGlyphsList.back().needs_fallback_font())
+            {
+                if (tryFont.has_fallback() && tryFont.fallback() != tryFont)
+                {
+                    tryFont = tryFont.fallback();
+                    iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
+                }
+                else
+                {
+                    std::u32string lastResort{ std::get<0>(aGlyphRun), std::get<1>(aGlyphRun) };
+                    for (uint32_t i = 0; i < iGlyphsList.back().glyph_count(); ++i)
+                        if (iGlyphsList.back().glyph_info(i).codepoint == 0)
+                            lastResort[iGlyphsList.back().glyph_info(i).cluster] = neolib::INVALID_CHAR32; // replacement character
+                    iGlyphsList.emplace_back(glyphs{ aParent, aFont, glyph_text_factory::glyph_run{&lastResort[0], &lastResort[0] + lastResort.size(), std::get<2>(aGlyphRun), std::get<3>(aGlyphRun), std::get<4>(aGlyphRun) } });
+                    break;
+                }
+            }
+            auto const g = iGlyphsList.begin();
+            iResults.reserve(g->glyph_count());
+            for (uint32_t i = 0; i < g->glyph_count();)
+            {
+                auto const& gi = g->glyph_info(i);
+                auto tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
+                if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
+                    iResults.push_back(std::make_pair(g, i++));
+                else
+                {
+                    std::vector<uint32_t> clusters;
+                    while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
+                    {
+                        clusters.push_back(g->glyph_info(i).cluster);
+                        ++i;
+                    }
+                    std::sort(clusters.begin(), clusters.end());
+                    auto nextFallback = std::next(g);
+                    while (nextFallback != iGlyphsList.end() && !clusters.empty())
+                    {
+                        auto currentFallback = nextFallback++;
+                        auto const& fallbackGlyphs = *currentFallback;
+                        for (uint32_t j = 0; j < fallbackGlyphs.glyph_count(); ++j)
+                        {
+                            if (fallbackGlyphs.glyph_info(j).codepoint != 0)
+                            {
+                                auto const c = std::find(clusters.begin(), clusters.end(), fallbackGlyphs.glyph_info(j).cluster);
+                                if (c != clusters.end())
+                                {
+                                    iResults.push_back(std::make_pair(currentFallback, j));
+                                    clusters.erase(c);
+                                }
+                            }
+                            else
+                            {
+                                tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + fallbackGlyphs.glyph_info(j).cluster, std::get<1>(aGlyphRun));
+                                if (tc != text_category::Whitespace && tc != text_category::Emoji)
+                                    break;
+                                else
+                                    goto whitespace_break;
+                            }
+                        }
+                    }
+                }
+            whitespace_break:
+                ;
+            }
+        }
+    public:
+        uint32_t glyph_count() const
+        {
+            return static_cast<uint32_t>(iResults.size());
+        }
+        const hb_glyph_info_t& glyph_info(uint32_t aIndex) const
+        {
+            return iResults[aIndex].first->glyph_info(iResults[aIndex].second);
+        }
+        const hb_glyph_position_t& glyph_position(uint32_t aIndex) const
+        {
+            return iResults[aIndex].first->glyph_position(iResults[aIndex].second);
+        }
+        bool using_fallback(uint32_t aIndex) const
+        {
+            return iResults[aIndex].first != iGlyphsList.begin();
+        }
+        uint32_t fallback_index(uint32_t aIndex) const
+        {
+            if (!using_fallback(aIndex))
+                throw not_using_fallback();
+            return static_cast<uint32_t>(std::distance(iGlyphsList.begin(), iResults[aIndex].first) - 1);
+        }
+    private:
+        glyphs_list iGlyphsList;
+        result_type iResults;
+    };
+
+    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector)
+    {
+        auto& clusterMap = iClusterMap;
+        clusterMap.clear();
+        iCodePointsBuffer.clear();
+        std::u32string& codePoints = iCodePointsBuffer;
+
+        codePoints = neolib::utf8_to_utf32(std::string_view{ aUtf8Begin, aUtf8End }, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
+        {
+            clusterMap.push_back(glyph_text_factory::cluster{ aFrom });
+        });
+
+        if (codePoints.empty())
+            return {};
+
+        return to_glyph_text(aContext, codePoints.data(), codePoints.data() + codePoints.size(), font_selector{ [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
+        {
+            return aFontSelector.select_font(clusterMap[aIndex].from);
+        } });
+    }
+
+    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char32_t const*  aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector)
+    {
+        auto& result = iGlyphTextResult;
+        result.clear();
+
+        if (aUtf32End == aUtf32Begin)
+            return result;
+
+        bool hasEmojis = false;
+
+        auto& textDirections = iTextDirections;
+        textDirections.clear();
+
+        std::u32string::size_type codePointCount = aUtf32End - aUtf32Begin;
+
+        std::u32string adjustedCodepoints;
+        if (aContext.password())
+            adjustedCodepoints.assign(codePointCount, neolib::utf8_to_utf32(aContext.password_mask())[0]);
+        auto codePoints = adjustedCodepoints.empty() ? &*aUtf32Begin : &adjustedCodepoints[0];
+
+        auto& runs = iRuns;
+        runs.clear();
+        auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
+        text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
+        if (aContext.mnemonics_shown() && codePoints[0] == static_cast<char32_t>(aContext.mnemonic()))
+            previousCategory = text_category::Mnemonic;
+        text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
+        const char32_t* runStart = &codePoints[0];
+        std::u32string::size_type lastCodePointIndex = codePointCount - 1;
+        font previousFont = aFontSelector.select_font(0);
+        hb_script_t previousScript = hb_unicode_script(static_cast<native_font_face::hb_handle*>(previousFont.native_font_face().aux_handle())->unicodeFuncs, codePoints[0]);
+
+        std::deque<std::pair<text_direction, bool>> directionStack;
+        const char32_t LRE = U'\u202A';
+        const char32_t RLE = U'\u202B';
+        const char32_t LRO = U'\u202D';
+        const char32_t RLO = U'\u202E';
+        const char32_t PDF = U'\u202C';
+
+        bool currentLineHasLTR = false;
+
+        for (std::size_t codePointIndex = 0; codePointIndex <= lastCodePointIndex; ++codePointIndex)
+        {
+            font const currentFont = aFontSelector.select_font(codePointIndex);
+            switch (codePoints[codePointIndex])
+            {
+            case PDF:
+                if (!directionStack.empty())
+                    directionStack.pop_back();
+                break;
+            case LRE:
+                directionStack.push_back(std::make_pair(text_direction::LTR, false));
+                break;
+            case RLE:
+                directionStack.push_back(std::make_pair(text_direction::RTL, false));
+                break;
+            case LRO:
+                directionStack.push_back(std::make_pair(text_direction::LTR, true));
+                break;
+            case RLO:
+                directionStack.push_back(std::make_pair(text_direction::RTL, true));
+                break;
+            default:
+                break;
+            }
+
+            hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
+            text_category currentCategory = get_text_category(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount);
+            if (aContext.mnemonics_shown() && codePoints[codePointIndex] == static_cast<char32_t>(aContext.mnemonic()))
+                currentCategory = text_category::Mnemonic;
+            text_direction currentDirection = previousDirection;
+            if (currentCategory == text_category::LTR)
+                currentDirection = text_direction::LTR;
+            else if (currentCategory == text_category::RTL)
+                currentDirection = text_direction::RTL;
+
+            bool newLine = (codePoints[codePointIndex] == '\r' || codePoints[codePointIndex] == '\n');
+            if (newLine)
+            {
+                currentLineHasLTR = false;
+                currentDirection = text_direction::LTR;
+            }
+            auto bidi_check = [&directionStack](text_category aCategory, text_direction aDirection)
+            {
+                if (!directionStack.empty())
+                {
+                    switch (aCategory)
+                    {
+                    case text_category::LTR:
+                    case text_category::RTL:
+                    case text_category::Digit:
+                    case text_category::Emoji:
+                        if (directionStack.back().second == true)
+                            return directionStack.back().first;
+                        break;
+                    case text_category::Mark:
+                    case text_category::None:
+                    case text_category::Whitespace:
+                    case text_category::Mnemonic:
+                        return directionStack.back().first;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                return aDirection;
+            };
+            currentDirection = bidi_check(currentCategory, currentDirection);
+            switch (currentCategory)
+            {
+            case text_category::LTR:
+                currentLineHasLTR = true;
+                if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
+                    currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
+                    currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
+                    currentDirection = text_direction::LTR;
+                break;
+            case text_category::RTL:
+                if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
+                    currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
+                    currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
+                    currentDirection = text_direction::RTL;
+                break;
+            case text_category::None:
+                if (currentDirection == text_direction::LTR)
+                    currentDirection = text_direction::None_LTR;
+                else if (currentDirection == text_direction::RTL)
+                    currentDirection = text_direction::None_RTL;
+                break;
+            case text_category::Digit:
+                if (currentDirection == text_direction::LTR)
+                    currentDirection = text_direction::Digit_LTR;
+                else if (currentDirection == text_direction::RTL)
+                    currentDirection = text_direction::Digit_RTL;
+                break;
+            case text_category::Emoji:
+                if (currentDirection == text_direction::LTR)
+                    currentDirection = text_direction::Emoji_LTR;
+                else if (currentDirection == text_direction::RTL)
+                    currentDirection = text_direction::Emoji_RTL;
+                break;
+            }
+            if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::Digit_LTR) // optimization (less runs for LTR text)
+                currentDirection = text_direction::LTR;
+            hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[codePointIndex]);
+            if (currentScript == HB_SCRIPT_COMMON || currentScript == HB_SCRIPT_INHERITED)
+                currentScript = previousScript;
+            bool newRun =
+                previousFont != currentFont ||
+                (newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::None_RTL || previousDirection == text_direction::Digit_RTL || previousDirection == text_direction::Emoji_RTL)) ||
+                currentCategory == text_category::Mnemonic ||
+                previousCategory == text_category::Mnemonic ||
+                previousDirection != currentDirection ||
+                previousScript != currentScript;
+            if (!newRun)
+            {
+                if ((currentCategory == text_category::Whitespace || currentCategory == text_category::None || currentCategory == text_category::Mnemonic) &&
+                    (currentDirection == text_direction::RTL || currentDirection == text_direction::None_RTL || currentDirection == text_direction::Digit_RTL || currentDirection == text_direction::Emoji_RTL))
+                {
+                    for (std::size_t j = codePointIndex + 1; j <= lastCodePointIndex; ++j)
+                    {
+                        text_direction nextDirection = bidi_check(get_text_category(emojiAtlas, codePoints + j, codePoints + codePointCount), get_text_direction(emojiAtlas, codePoints + j, codePoints + codePointCount, currentDirection));
+                        if (nextDirection == text_direction::RTL)
+                            break;
+                        else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex && currentLineHasLTR))
+                        {
+                            newRun = true;
+                            currentDirection = text_direction::LTR;
+                            break;
+                        }
+                    }
+                }
+            }
+            textDirections.push_back(character_type{ currentCategory, currentDirection });
+            if (currentCategory == text_category::Emoji)
+                hasEmojis = true;
+            if (newRun && codePointIndex > 0)
+            {
+                runs.push_back(std::make_tuple(runStart, &codePoints[codePointIndex], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
+                runStart = &codePoints[codePointIndex];
+            }
+            previousDirection = currentDirection;
+            previousCategory = currentCategory;
+            previousScript = currentScript;
+            if (codePointIndex == lastCodePointIndex)
+                runs.push_back(std::make_tuple(runStart, &codePoints[codePointIndex + 1], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
+            if (newLine && (newRun || codePointIndex == lastCodePointIndex))
+            {
+                for (auto i = runs.rbegin(); i != runs.rend(); ++i)
+                {
+                    if (std::get<2>(*i) == text_direction::RTL)
+                        break;
+                    else
+                    {
+                        switch (std::get<2>(*i))
+                        {
+                        case text_direction::None_RTL:
+                            std::get<2>(*i) = text_direction::None_LTR;
+                            break;
+                        case text_direction::Digit_RTL:
+                            std::get<2>(*i) = text_direction::LTR;
+                            break;
+                        case text_direction::Emoji_RTL:
+                            std::get<2>(*i) = text_direction::Emoji_LTR;
+                            break;
+                        }
+                    }
+                }
+            }
+            previousFont = currentFont;
+        }
+
+        for (std::size_t i = 1; i < runs.size(); ++i)
+        {
+            std::size_t j = i - 1;
+            auto startDirection = std::get<2>(runs[j]);
+            do
+            {
+                auto direction = std::get<2>(runs[i]);
+                if ((startDirection == text_direction::RTL || startDirection == text_direction::None_RTL || startDirection == text_direction::Digit_RTL || startDirection == text_direction::Emoji_RTL) &&
+                    (direction == text_direction::RTL || direction == text_direction::None_RTL || direction == text_direction::Digit_RTL || direction == text_direction::Emoji_RTL))
+                {
+                    auto m = runs[i];
+                    runs.erase(runs.begin() + i);
+                    runs.insert(runs.begin() + j, m);
+                    ++i;
+                }
+                else
+                {
+                    break;
+                }
+            } while (i < runs.size());
+        }
+
+        for (std::size_t i = 0; i < runs.size(); ++i)
+        {
+            if (std::get<3>(runs[i]))
+                continue;
+            bool drawMnemonic = (i > 0 && std::get<3>(runs[i - 1]));
+            std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
+            glyph_shapes shapes{ aContext, aFontSelector.select_font(sourceClusterRunStart), runs[i] };
+            for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
+            {
+                std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;
+                std::u32string::size_type endCluster;
+                if (std::get<2>(runs[i]) != text_direction::RTL)
+                {
+                    uint32_t k = j + 1;
+                    while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == startCluster)
+                        ++k;
+                    endCluster = (k < shapes.glyph_count() ? shapes.glyph_info(k).cluster : startCluster + 1);
+                }
+                else
+                {
+                    uint32_t k = j;
+                    while (k > 0 && shapes.glyph_info(k).cluster == startCluster)
+                        --k;
+                    endCluster = (shapes.glyph_info(k).cluster != startCluster ? shapes.glyph_info(k).cluster : startCluster + 1);
+                }
+                startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
+                endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
+                neogfx::font selectedFont = aFontSelector.select_font(startCluster);
+                neogfx::font font = selectedFont;
+                if (shapes.using_fallback(j))
+                {
+                    font = font.has_fallback() ? font.fallback() : selectedFont;
+                    for (auto fi = shapes.fallback_index(j); font != selectedFont && fi > 0; --fi)
+                        font = font.has_fallback() ? font.fallback() : selectedFont;
+                }
+                if (j > 0 && !result.empty())
+                    result.back().kerning_adjust(static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
+                size advance = textDirections[startCluster].category != text_category::Emoji ?
+                    size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
+                    size{ font.height(), 0.0 };
+                result.emplace_back(textDirections[startCluster],
+                    shapes.glyph_info(j).codepoint,
+                    glyph::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
+                    result,
+                    font,
+                    advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0));
+                if (result.back().category() == text_category::Whitespace)
+                    result.back().set_value(aUtf32Begin[startCluster]);
+                else if (result.back().category() == text_category::Emoji)
+                    result.back().set_value(emojiAtlas.emoji(aUtf32Begin[startCluster], font.height()));
+                if ((aFontSelector.select_font(startCluster).style() & font_style::Underline) == font_style::Underline)
+                    result.back().set_underline(true);
+                if (aContext.is_subpixel_rendering_on() && !font.is_bitmap_font())
+                    result.back().set_subpixel(true);
+                if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
+                    result.back().set_mnemonic(true);
+                if (result.back().category() != text_category::Whitespace && result.back().category() != text_category::Emoji)
+                {
+                    auto& glyph = result.back();
+                    if (glyph.advance() != advance.ceil())
+                    {
+                        const i_glyph_texture& glyphTexture = aFontSelector.select_font(startCluster).native_font_face().glyph_texture(glyph);
+                        auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
+                        if (visibleAdvance > advance.cx)
+                        {
+                            advance.cx = visibleAdvance;
+                            glyph.set_advance(advance);
+                        }
+                    }
+                }
+            }
+        }
+        if (hasEmojis)
+        {
+            auto& emojiResult = iGlyphTextResult2;
+            emojiResult.clear();
+            for (auto i = result.begin(); i != result.end(); ++i)
+            {
+                auto cluster = i->source().first;
+                auto chStart = aUtf32Begin[cluster];
+                if (i->category() == text_category::Emoji)
+                {
+                    if (!emojiResult.empty() && emojiResult.back().is_emoji() && emojiResult.back().source() == i->source())
+                    {
+                        // probable variant selector fubar'd by harfbuzz
+                        auto s = emojiResult.back().source();
+                        if (s.second < codePointCount && get_text_category(service<i_font_manager>().emoji_atlas(), aUtf32Begin[s.second]) == text_category::Control)
+                        {
+                            ++s.first;
+                            ++s.second;
+                            i->set_source(s);
+                            i->set_category(text_category::Control);
+                            i->set_advance(size{});
+                        }
+                    }
+                    std::u32string sequence;
+                    sequence += chStart;
+                    auto j = i + 1;
+                    bool absorbNext = false;
+                    for (; j != result.end(); ++j)
+                    {
+                        auto ch = aUtf32Begin[cluster + (j - i)];
+                        if (ch == 0x200D)
+                            continue;
+                        else if (ch == 0xFE0F)
+                        {
+                            absorbNext = true;
+                            break;
+                        }
+                        else if (service<i_font_manager>().emoji_atlas().is_emoji(sequence + ch))
+                            sequence += ch;
+                        else
+                            break;
+                    }
+                    if (sequence.size() > 1 && service<i_font_manager>().emoji_atlas().is_emoji(sequence))
+                    {
+                        auto g = *i;
+                        g.set_value(service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height()));
+                        g.set_source(glyph::source_type{ g.source().first, g.source().first + static_cast<uint32_t>(sequence.size()) });
+                        emojiResult.push_back(g);
+                        i = j - 1;
+                    }
+                    else
+                        emojiResult.push_back(*i);
+                    if (absorbNext)
+                    {
+                        emojiResult.back().set_source(glyph::source_type{ emojiResult.back().source().first, emojiResult.back().source().first + static_cast<uint32_t>(sequence.size()) + 1u });
+                        ++i;
+                    }
+                }
+                else
+                    emojiResult.push_back(*i);
+            }
+            return std::move(emojiResult);
+        }
+        return std::move(result);
+    }
+
     font_manager::font_manager() :
+        iGlyphTextFactory{ std::make_unique<neogfx::glyph_text_factory>() },
         iGlyphAtlas{ size{1024.0, 1024.0} },
         iEmojiAtlas{}
     {
@@ -371,6 +1003,11 @@ namespace neogfx
     const font& font_manager::font_from_id(font_id aId) const
     {
         return iIdCache[aId];
+    }
+
+    i_glyph_text_factory& font_manager::glyph_text_factory() const
+    {
+        return *iGlyphTextFactory;
     }
 
     const i_texture_atlas& font_manager::glyph_atlas() const

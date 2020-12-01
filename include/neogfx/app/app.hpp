@@ -156,7 +156,7 @@ namespace neogfx
         bool sys_text_input(std::string const& aText) override;
     private:
         neogfx::program_options iProgramOptions;
-        loader iLoader;
+        std::unique_ptr<loader> iLoader;
         std::string iName;
         bool iQuitWhenLastWindowClosed;
         bool iInExec;

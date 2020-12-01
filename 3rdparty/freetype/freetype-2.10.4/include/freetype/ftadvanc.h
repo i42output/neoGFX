@@ -32,6 +32,10 @@
 FT_BEGIN_HEADER
 
 
+#ifdef FT2_BUILD_LIBRARY
+#define FT_Get_Advance orig_FT_Get_Advance
+#endif
+
   /**************************************************************************
    *
    * @section:

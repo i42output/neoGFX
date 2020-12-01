@@ -33,6 +33,33 @@ namespace neogfx
     class i_texture_atlas;
     class i_emoji_atlas;
 
+    class i_glyph_text_factory;
+
+    class i_font_selector
+    {
+    public:
+        virtual ~i_font_selector() = default;
+    public:
+        virtual font select_font(std::size_t CharacterPos) const = 0;
+    };
+
+    class font_selector : public i_font_selector
+    {
+        typedef std::function<font(std::size_t)> function_type;
+    public:
+        explicit font_selector(function_type const& aSelectorFunction) :
+            iSelectorFunction{ aSelectorFunction }
+        {
+        }
+    public:
+        font select_font(std::size_t CharacterPos) const override
+        {
+            return iSelectorFunction(CharacterPos);
+        }
+    private:
+        function_type iSelectorFunction;
+    };
+
     enum class system_font_role : uint32_t
     {
         Caption,
@@ -88,6 +115,8 @@ namespace neogfx
         virtual font_id allocate_font_id() = 0;
     public:
         virtual const font& font_from_id(font_id aId) const = 0;
+    public:
+        virtual i_glyph_text_factory& glyph_text_factory() const = 0;
     public:
         virtual const i_texture_atlas& glyph_atlas() const = 0;
         virtual i_texture_atlas& glyph_atlas() = 0;

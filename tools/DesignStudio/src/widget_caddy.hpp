@@ -58,6 +58,9 @@ namespace neogfx::DesignStudio
                 aChild.set_ignore_non_client_mouse_events(true);
             });
         }
+        ~widget_caddy()
+        {
+        }
     public:
         void set_item(i_ref_ptr<i_layout_item> const& aItem)
         {

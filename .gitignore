@@ -313,3 +313,5 @@ Debug
 /tools/DesignStudio/element_libraries/default/build/win32/default/default.vcxproj.user
 /tools/DesignStudio/element_libraries/default/build/win32/default/x64/Tools
 /tools/DesignStudio/element_libraries/default/build/win32/default/x64/Tools_Debug
+/3rdparty/harfbuzz/harfbuzz-2.7.2/stage
+/3rdparty/freetype/freetype-2.10.4/stage

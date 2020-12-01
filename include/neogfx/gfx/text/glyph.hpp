@@ -95,6 +95,7 @@ namespace neogfx
         virtual void cache_glyph_font(const font& aFont) const = 0;
     };
 
+    // todo: abstract glyph (maybe -- are all members trivial?)
     class glyph
     {
     public:
@@ -381,6 +382,7 @@ namespace neogfx
         mutable font_cache iCache;
     };
 
+    // todo: abstract glyph_text
     class glyph_text : public glyph_font_cache, private neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>
     {
     private:
@@ -460,4 +462,37 @@ namespace neogfx
     }
 
     typedef std::optional<glyph_text> optional_glyph_text;
+
+    class i_graphics_context;
+
+    class i_glyph_text_factory
+    {
+    public:
+        virtual ~i_glyph_text_factory() = default;
+    public:
+        // todo: use abstract glyph_text
+        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) = 0;
+        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) = 0;
+    public:
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, std::function<font(std::size_t)> aFontSelector)
+        {
+            return to_glyph_text(aContext, aUtf32Begin, aUtf32End, font_selector{ aFontSelector });
+        }
+        glyph_text to_glyph_text(i_graphics_context const& aContext, std::u32string_view const& aString, std::function<font(std::size_t)> aFontSelector)
+        {
+            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector });
+        }
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, std::function<font(std::size_t)> aFontSelector)
+        {
+            return to_glyph_text(aContext, aUtf8Begin, aUtf8End, font_selector{ aFontSelector });
+        }
+        glyph_text to_glyph_text(i_graphics_context const& aContext, std::string_view const& aString, std::function<font(std::size_t)> aFontSelector)
+        {
+            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector });
+        }
+        glyph_text to_glyph_text(i_graphics_context const& aContext, i_string const& aString, std::function<font(std::size_t)> aFontSelector)
+        {
+            return to_glyph_text(aContext, aString.c_str(), aString.c_str() + aString.size(), font_selector{ aFontSelector });
+        }
+    };
 }
